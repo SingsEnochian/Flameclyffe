@@ -4,6 +4,7 @@ export const WONDER_POSSIBILITY_SCHEMA = 'arcsweep.wonder-possibility-set/v1';
 export const WONDER_THOUGHT_FIELD_SCHEMA = 'arcsweep.wonder-thought-field/v1';
 export const WONDER_CUE_SCHEMA = 'arcsweep.wonder-cue-constellation/v1';
 export const WONDER_TEMPORAL_REPLAY_SCHEMA = 'arcsweep.wonder-temporal-replay/v1';
+export const WONDER_FIELD_DETECTION_SCHEMA = 'arcsweep.wonder-field-detection/v1';
 
 export const WONDER_FIELD_GUIDE_LAWS = Object.freeze([
   'WONDER FIRST. Preserve the live question before reducing it to the nearest familiar explanation.',
@@ -218,5 +219,36 @@ export function createTemporalReplay(samples = [], {
     temporal_order_preserved: true,
     replayable: normalized.length > 0,
     rule: 'state at one instant is not the whole process',
+  });
+}
+
+
+export function createFieldDetectionTrace({
+  source,
+  field,
+  predictedBehavior = [],
+  detector,
+  observations = [],
+  inference = null,
+  claimLane = 'hypothesis',
+  provenance = null,
+} = {}) {
+  const sourceText = clean(source, 1200);
+  const detectorText = clean(detector, 1200);
+  if (!sourceText) throw new Error('Field detection trace requires a source.');
+  if (!detectorText) throw new Error('Field detection trace requires a detector or detection method.');
+  const lane = wonderClaimLane(claimLane);
+  return Object.freeze({
+    schema: WONDER_FIELD_DETECTION_SCHEMA,
+    source: sourceText,
+    field: field == null ? null : clone(field),
+    predicted_behavior: Object.freeze(unique(predictedBehavior, 32)),
+    detector: detectorText,
+    observations: Object.freeze(unique(observations, 64)),
+    inference: inference == null ? null : clean(inference, 1600),
+    claim_lane: lane.id,
+    provenance: provenance && typeof provenance === 'object' ? Object.freeze(clone(provenance)) : null,
+    direct_visibility_required: false,
+    rule: 'hidden != imaginary; detection rests on repeatable effects, measurements, predictions, and provenance',
   });
 }
