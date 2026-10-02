@@ -57,6 +57,10 @@ test('Ox Alpha prefers Vercel AI Gateway OIDC over stale Hugging Face credential
   assert.equal(status.fallback_chain[0].provider, 'vercel-ai-gateway');
   assert.equal(status.fallback_chain[1].provider, 'huggingface-inference-providers');
 
+  const apiKeyStatus = hostedFlameFallbackStatus('oxalpha', env({ AI_GATEWAY_API_KEY: 'gateway-key' }));
+  assert.equal(apiKeyStatus.credential_type, 'ai-gateway-api-key');
+  assert.equal(apiKeyStatus.execution_path, 'vercel-ai-gateway-api-key');
+
   const calls = [];
   const result = await invokeHostedFlameFallback(
     'oxalpha',
