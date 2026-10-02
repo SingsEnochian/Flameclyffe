@@ -1,12 +1,84 @@
 /* House Workspace refractive glass v0.1 */
 #house-glass-three{position:fixed;inset:0;width:100vw;height:100dvh;z-index:0;pointer-events:none;opacity:.54;filter:saturate(1.16) contrast(1.03)}
 #app,#house-chat-root,#return-engine-root,#crew-connection-doctor{position:relative;z-index:1}
-[data-glass-optic="true"]{--glass-x:50%;--glass-y:42%;--glass-rx:0deg;--glass-ry:0deg;--glass-shift-x:0px;--glass-shift-y:0px;--glass-edge-light:color-mix(in srgb,white 30%,var(--rim-strong));--glass-edge-dark:rgba(0,0,0,.34);--glass-inner-depth:rgba(1,9,7,.20);position:relative;transform-style:preserve-3d;box-shadow:inset 1px 1px 0 var(--glass-edge-light),inset -2px -2px 0 var(--glass-edge-dark),inset 0 -10px 18px var(--glass-inner-depth),0 18px 52px rgba(0,0,0,.27);backdrop-filter:blur(calc(var(--blur,22px)*.82)) saturate(138%) contrast(1.045);-webkit-backdrop-filter:blur(calc(var(--blur,22px)*.82)) saturate(138%) contrast(1.045)}
-body[data-glass-optics="three"] [data-glass-optic="true"]{background-image:radial-gradient(circle at var(--glass-x) var(--glass-y),color-mix(in srgb,white 9%,transparent) 0%,transparent 24%),linear-gradient(112deg,color-mix(in srgb,white 8%,transparent),transparent 18% 65%,color-mix(in srgb,var(--accent-2) 8%,transparent)),linear-gradient(145deg,color-mix(in srgb,var(--surface-raised) 62%,transparent),color-mix(in srgb,var(--surface) 48%,transparent))}
-[data-glass-optic="true"]::before{content:"";position:absolute;inset:1px;z-index:0;border-radius:inherit;pointer-events:none;background:radial-gradient(circle at var(--glass-x) var(--glass-y),rgba(255,255,255,.18),rgba(255,255,255,.045) 12%,transparent 31%),linear-gradient(118deg,rgba(255,255,255,.08),transparent 22% 76%,color-mix(in srgb,var(--accent-2) 7%,transparent));transform:translate3d(var(--glass-shift-x),var(--glass-shift-y),1px);opacity:.62;mix-blend-mode:screen}
+[data-glass-optic="true"]{--glass-x:50%;--glass-y:42%;--glass-rx:0deg;--glass-ry:0deg;--glass-shift-x:0px;--glass-shift-y:0px;--glass-depth-shift:0px;--glass-caustic-alpha:.34;--glass-velocity:0;--glass-specular:.24;--glass-velocity-blur:0px;--glass-shadow-y:18px;--glass-shadow-size:52px;--glass-inner-depth-size:24px;--glass-edge-light:color-mix(in srgb,white 34%,var(--rim-strong));--glass-edge-dark:rgba(0,0,0,.42);--glass-inner-depth:rgba(1,9,7,.24);position:relative;transform-style:preserve-3d;isolation:isolate;box-shadow:inset 1px 1px 0 var(--glass-edge-light),inset -2px -3px 0 var(--glass-edge-dark),inset 0 -14px 24px var(--glass-inner-depth),inset 0 3px 9px rgba(255,255,255,.035),0 18px 52px rgba(0,0,0,.27);backdrop-filter:blur(calc(var(--blur,22px)*.78)) saturate(144%) contrast(1.055);-webkit-backdrop-filter:blur(calc(var(--blur,22px)*.78)) saturate(144%) contrast(1.055)}
+body[data-glass-optics="three"] [data-glass-optic="true"]{background-image:radial-gradient(circle at var(--glass-x) var(--glass-y),rgba(255,255,255,var(--glass-specular)) 0%,transparent 23%),linear-gradient(112deg,color-mix(in srgb,white 8%,transparent),transparent 18% 65%,color-mix(in srgb,var(--accent-2) 8%,transparent)),linear-gradient(145deg,color-mix(in srgb,var(--surface-raised) 62%,transparent),color-mix(in srgb,var(--surface) 48%,transparent));background-blend-mode:screen,normal,normal}
+[data-glass-optic="true"]::before{content:"";position:absolute;inset:1px;z-index:0;border-radius:inherit;pointer-events:none;background:radial-gradient(circle at var(--glass-x) var(--glass-y),rgba(255,255,255,.22),rgba(255,255,255,.055) 11%,transparent 29%),radial-gradient(ellipse at calc(var(--glass-x) + 7%) calc(var(--glass-y) + 5%),color-mix(in srgb,var(--accent-2) 11%,transparent),transparent 26%),linear-gradient(118deg,rgba(255,255,255,.10),transparent 22% 72%,color-mix(in srgb,var(--accent-2) 9%,transparent));transform:translate3d(var(--glass-shift-x),var(--glass-shift-y),calc(1px + var(--glass-depth-shift)));opacity:var(--glass-caustic-alpha);mix-blend-mode:screen;filter:blur(var(--glass-velocity-blur));transition:opacity 180ms ease,transform 220ms cubic-bezier(.2,.75,.2,1),filter 120ms linear}
 [data-glass-optic="true"]>*{position:relative;z-index:1}
 @media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){[data-glass-optic="true"]:hover{transform:perspective(1100px) rotateX(var(--glass-rx)) rotateY(var(--glass-ry)) translateZ(0);box-shadow:inset 1px 1px 0 color-mix(in srgb,white 42%,var(--rim-strong)),inset -2px -2px 0 rgba(0,0,0,.36),inset 0 -14px 22px rgba(1,9,7,.23),0 22px 58px rgba(0,0,0,.31)}}
 .agent-card[data-glass-optic="true"],.stat-card[data-glass-optic="true"],.work-item[data-glass-optic="true"],.capability[data-glass-optic="true"]{border-width:1px;border-bottom-width:2px}
 .house-chat-drawer[data-glass-optic="true"],.return-engine-drawer[data-glass-optic="true"],.crew-link-panel[data-glass-optic="true"]{box-shadow:inset 1px 1px 0 color-mix(in srgb,white 36%,var(--rim-strong)),inset -2px -2px 0 rgba(0,0,0,.42),inset 0 -22px 34px rgba(0,0,0,.14),0 32px 90px rgba(0,0,0,.50)}
-@media (prefers-reduced-motion:reduce){[data-glass-optic="true"]{transform:none!important}[data-glass-optic="true"]::before{transform:none!important}}
-@media (prefers-reduced-transparency:reduce){#house-glass-three{display:none!important}[data-glass-optic="true"]{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background-image:none!important;background-color:var(--surface-raised)!important}[data-glass-optic="true"]::before{display:none}}
+@media (prefers-reduced-motion:reduce){[data-glass-optic="true"]{transform:none!important}[data-glass-optic="true"]::before,[data-glass-optic="true"]::after{transform:none!important;transition:none!important}}
+@media (prefers-reduced-transparency:reduce){#house-glass-three{display:none!important}[data-glass-optic="true"]{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background-image:none!important;background-color:var(--surface-raised)!important}[data-glass-optic="true"]::before,[data-glass-optic="true"]::after{display:none}}
+
+/* Optical body: a visible slab edge, not just frosted paint. */
+[data-glass-optic="true"]::after{
+  content:"";
+  position:absolute;
+  z-index:0;
+  pointer-events:none;
+  left:clamp(7px,1.2%,14px);
+  right:clamp(7px,1.2%,14px);
+  bottom:-3px;
+  height:clamp(7px,1vw,12px);
+  border-radius:0 0 calc(var(--radius,1rem) * .78) calc(var(--radius,1rem) * .78);
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.025) 28%,rgba(0,0,0,.26) 76%,rgba(0,0,0,.38)),
+    linear-gradient(90deg,color-mix(in srgb,var(--accent) 8%,transparent),transparent 34% 68%,color-mix(in srgb,var(--accent-2) 10%,transparent));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.12),
+    inset 0 -1px 0 rgba(0,0,0,.34),
+    0 5px 12px rgba(0,0,0,.14);
+  transform:translate3d(calc(var(--glass-shift-x) * -.18),calc(var(--glass-depth-shift) * .38),-1px) skewX(calc(var(--glass-ry) * -.42)) scaleY(1.02);
+  opacity:.82;
+  transition:transform 220ms cubic-bezier(.2,.75,.2,1),opacity 180ms ease;
+}
+[data-glass-optic="true"][data-glass-moving="true"]::after{opacity:.96}
+.agent-card[data-glass-optic="true"]::after,
+.stat-card[data-glass-optic="true"]::after,
+.work-item[data-glass-optic="true"]::after,
+.capability[data-glass-optic="true"]::after{height:8px;bottom:-2px}
+.house-chat-drawer[data-glass-optic="true"]::after,
+.return-engine-drawer[data-glass-optic="true"]::after,
+.crew-link-panel[data-glass-optic="true"]::after{height:13px;bottom:-4px}
+
+@media (pointer:coarse) and (prefers-reduced-motion:no-preference){
+  [data-glass-optic="true"][data-glass-moving="true"]{
+    box-shadow:
+      inset 1px 1px 0 color-mix(in srgb,white 42%,var(--rim-strong)),
+      inset -2px -3px 0 rgba(0,0,0,.42),
+      inset 0 -17px 26px rgba(1,9,7,.26),
+      0 21px 54px rgba(0,0,0,.29);
+  }
+}
+
+/* UI realism pass: velocity changes light response, not layout hierarchy. */
+[data-glass-optic="true"]{
+  border-color:color-mix(in srgb,var(--rim) 84%,white 16%);
+  transition:border-color 140ms linear,box-shadow 180ms ease;
+}
+[data-glass-optic="true"][data-glass-moving="true"]{
+  box-shadow:
+    inset 1px 1px 0 color-mix(in srgb,white 48%,var(--rim-strong)),
+    inset -2px -3px 0 rgba(0,0,0,.44),
+    inset 0 -16px var(--glass-inner-depth-size) rgba(1,9,7,.24),
+    inset 0 3px 10px rgba(255,255,255,.045),
+    0 var(--glass-shadow-y) var(--glass-shadow-size) rgba(0,0,0,.29);
+}
+[data-glass-optic="true"][data-glass-moving="true"]::before{
+  background:
+    radial-gradient(circle at var(--glass-x) var(--glass-y),rgba(255,255,255,var(--glass-specular)),rgba(255,255,255,.045) 10%,transparent 27%),
+    linear-gradient(112deg,rgba(255,255,255,.10),transparent 19% 73%,color-mix(in srgb,var(--accent-2) 10%,transparent));
+}
+.house-chat-drawer[data-glass-optic="true"],
+.return-engine-drawer[data-glass-optic="true"],
+.crew-link-panel[data-glass-optic="true"]{
+  --glass-specular:.18;
+  --glass-caustic-alpha:.28;
+}
+.agent-card[data-glass-optic="true"],
+.stat-card[data-glass-optic="true"],
+.work-item[data-glass-optic="true"],
+.capability[data-glass-optic="true"]{
+  --glass-specular:.30;
+}

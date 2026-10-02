@@ -1,0 +1,91 @@
+name: Netlify Bypass Preview
+
+on:
+  push:
+    branches:
+      - rarity/test-flight-glass-connections-v0-1
+    paths:
+      - apps/agent-workspace/**
+      - apps/arcsweep/**
+      - netlify/functions/**
+      - netlify.toml
+      - package.json
+      - package-lock.json
+      - scripts/**
+      - .github/workflows/netlify-bypass-preview.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: netlify-bypass-preview-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      NETLIFY_SITE_ID: 88c736ea-1874-435f-a0e0-6c8c4374144a
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify exact branch and deploy credential
+        id: auth
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF_NAME}" = "rarity/test-flight-glass-connections-v0-1"
+          printf 'branch=%s\nsha=%s\nsite=%s\n' "${GITHUB_REF_NAME}" "${GITHUB_SHA}" "${NETLIFY_SITE_ID}" > netlify-preview-source.txt
+          if [ -z "${NETLIFY_AUTH_TOKEN:-}" ]; then
+            echo "available=false" >> "${GITHUB_OUTPUT}"
+            printf 'status=held\nreason=NETLIFY_AUTH_TOKEN_not_configured\n' >> netlify-preview-source.txt
+            echo "::notice::Netlify bypass held: NETLIFY_AUTH_TOKEN is not configured in GitHub Actions."
+          else
+            echo "available=true" >> "${GITHUB_OUTPUT}"
+            printf 'status=credential-present\n' >> netlify-preview-source.txt
+          fi
+
+      - name: Deploy exact branch to secondary Netlify preview
+        if: steps.auth.outputs.available == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes netlify-cli@27.10.2 deploy \
+            --build \
+            --site "${NETLIFY_SITE_ID}" \
+            --auth "${NETLIFY_AUTH_TOKEN}" \
+            --message "Flameclyffe test flight ${GITHUB_SHA}" \
+            --json | tee netlify-preview-receipt.json
+
+      - name: Verify preview receipt is not production
+        if: steps.auth.outputs.available == 'true'
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const receipt = JSON.parse(fs.readFileSync('netlify-preview-receipt.json', 'utf8'));
+          if (!receipt.deploy_url && !receipt.deploy_url_ssl && !receipt.url) {
+            throw new Error('Netlify CLI did not return a preview URL.');
+          }
+          if (receipt.is_site_on_netlify === false) {
+            throw new Error('Netlify did not recognise the target site.');
+          }
+          console.log(JSON.stringify({
+            deploy_url: receipt.deploy_url || receipt.deploy_url_ssl || receipt.url,
+            logs: receipt.logs || null,
+          }, null, 2));
+          NODE
+
+      - name: Upload deploy receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: netlify-bypass-preview-${{ github.sha }}
+          path: |
+            netlify-preview-source.txt
+            netlify-preview-receipt.json
+          if-no-files-found: warn
+          retention-days: 3

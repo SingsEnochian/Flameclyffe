@@ -64,8 +64,9 @@ function render() {
     <section class="crew-link-hermes">
       <span>Hermes / Crow Trainer</span>
       <p>Hermes is a local/external runtime, so the browser cannot truthfully call it live. Run the bundled local doctor for CLI, provider/tool, computer-use, and recent connection-log checks.</p>
-      <code>python profiles/crow-trainer/scripts/connection_doctor.py</code>
-      <p class="crew-link-note">A connection failure is kept separate from identity, training state, and continuity. No healthy-looking badge is inferred from configuration alone.</p>
+      <code>python profiles/crow-trainer/scripts/connection_doctor.py
+python profiles/crow-trainer/scripts/connection_doctor.py --probe</code>
+      <p class="crew-link-note">First command is read-only local diagnosis. <code>--probe</code> adds one tiny live Hermes query to separate provider/stream trouble from local configuration trouble. A connection failure stays separate from identity, training state, and continuity.</p>
     </section>
     ${failures.length ? `<section class="crew-link-failures"><span>Faults to repair</span>${failures.map((item) => `<p><strong>${esc(item.name)}</strong> · ${esc(item.reason || item.state)}</p>`).join('')}</section>` : ''}
     ${lastCheck ? `<footer>Last checked ${esc(lastCheck)}</footer>` : ''}

@@ -1,0 +1,49 @@
+name: Test Flight Glass + Connections
+
+on:
+  push:
+    branches:
+      - rarity/test-flight-glass-connections-v0-1
+      - main
+    paths:
+      - apps/agent-workspace/refractive-glass-three.js
+      - apps/agent-workspace/refractive-glass-three.css
+      - apps/agent-workspace/connection-doctor.js
+      - profiles/crow-trainer/scripts/connection_doctor.py
+      - profiles/crow-trainer/README.md
+      - apps/arcsweep/test/test-flight-glass-connections.test.js
+      - .github/workflows/test-flight-glass-connections.yml
+  pull_request:
+    paths:
+      - apps/agent-workspace/refractive-glass-three.js
+      - apps/agent-workspace/refractive-glass-three.css
+      - apps/agent-workspace/connection-doctor.js
+      - profiles/crow-trainer/scripts/connection_doctor.py
+      - profiles/crow-trainer/README.md
+      - apps/arcsweep/test/test-flight-glass-connections.test.js
+      - .github/workflows/test-flight-glass-connections.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-flight-glass-connections-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-flight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Parse runtime modules
+        run: |
+          node --check apps/agent-workspace/refractive-glass-three.js
+          node --check apps/agent-workspace/connection-doctor.js
+          python3 -m py_compile profiles/crow-trainer/scripts/connection_doctor.py
+      - name: Verify glass and connection contracts
+        run: node --test apps/arcsweep/test/test-flight-glass-connections.test.js

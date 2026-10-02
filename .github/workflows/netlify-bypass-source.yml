@@ -1,0 +1,48 @@
+name: Netlify Bypass Source Bundle
+
+on:
+  push:
+    branches:
+      - rarity/test-flight-glass-connections-v0-1
+    paths:
+      - apps/agent-workspace/**
+      - apps/arcsweep/**
+      - netlify/functions/**
+      - netlify.toml
+      - package.json
+      - package-lock.json
+      - scripts/**
+      - .github/workflows/netlify-bypass-source.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: netlify-bypass-source-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify deploy source identity
+        run: |
+          printf 'branch=%s\nsha=%s\n' "${GITHUB_REF_NAME}" "${GITHUB_SHA}" > NETLIFY-BYPASS-RECEIPT.txt
+          test "${GITHUB_REF_NAME}" = "rarity/test-flight-glass-connections-v0-1"
+
+      - name: Upload exact branch source
+        uses: actions/upload-artifact@v4
+        with:
+          name: netlify-bypass-source-${{ github.sha }}
+          path: |
+            .
+            !.git/**
+            !node_modules/**
+            !dist/**
+          include-hidden-files: false
+          compression-level: 6
+          retention-days: 1
