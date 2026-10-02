@@ -1,3 +1,5 @@
+import { artAgentPromptPacket } from './art-agent-prompt.js';
+
 export const GENERATOR_BRIDGE_SCHEMA = 'arcsweep.generator-bridge/v0.1';
 export const GENERATOR_REQUEST_SCHEMA = 'arcsweep.generator-request/v0.1';
 export const GENERATOR_RESULT_SCHEMA = 'arcsweep.generator-result/v0.1';
@@ -63,8 +65,9 @@ export function normaliseGeneratorEndpoint(value = DEFAULT_COMFYUI_ENDPOINT) {
 }
 
 export function normaliseGeneratorRequest(input = {}) {
-  const prompt = text(input.prompt, 4000);
-  if (!prompt) throw new Error('A prompt is required before the page can render a vision.');
+  const artPacket = input.art_spec ? artAgentPromptPacket(input.art_spec) : null;
+  const prompt = text(input.prompt || artPacket?.prompt, 4000);
+  if (!prompt) throw new Error('A prompt or structured art_spec is required before the page can render a vision.');
   const mode = text(input.mode, 20).toLowerCase() === 'i2i' ? 'i2i' : 't2i';
   const sourceImage = sourceImageReference(input.source_image ?? input.sourceImage);
   if (mode === 'i2i' && !sourceImage) {
@@ -76,7 +79,8 @@ export function normaliseGeneratorRequest(input = {}) {
     mode,
     source_image: mode === 'i2i' ? sourceImage : '',
     prompt,
-    negative_prompt: text(input.negative_prompt ?? input.negativePrompt, 2000),
+    negative_prompt: text(input.negative_prompt ?? input.negativePrompt ?? artPacket?.negative_prompt, 2000),
+    prompt_schema: artPacket?.schema || null,
     width: integer(input.width, 1024, 256, 2048),
     height: integer(input.height, 1024, 256, 2048),
     steps: integer(input.steps, 8, 1, 100),
