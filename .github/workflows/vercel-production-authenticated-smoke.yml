@@ -138,6 +138,70 @@ jobs:
           } > runtime-receipt-proof.md
           gh pr comment 184 --repo SingsEnochian/Flameclyffe --body-file runtime-receipt-proof.md
 
+  oxalpha-production-smoke:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BASE_URL: https://flameclyffe.vercel.app
+      OIDC_AUDIENCE: flameclyffe-house-smoke/v1
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Prove Ox Alpha answers in production
+        shell: bash
+        run: |
+          node <<'NODE' | tee oxalpha-production-smoke.json
+          const requestUrl = new URL(process.env.ACTIONS_ID_TOKEN_REQUEST_URL);
+          requestUrl.searchParams.set('audience', process.env.OIDC_AUDIENCE);
+          const tokenResponse = await fetch(requestUrl, {
+            headers: { authorization: `bearer ${process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN}` },
+          });
+          if (!tokenResponse.ok) throw new Error(`GitHub OIDC token request failed: ${tokenResponse.status}`);
+          const { value: token } = await tokenResponse.json();
+          if (!token) throw new Error('GitHub OIDC token response was empty.');
+
+          const response = await fetch(`${process.env.BASE_URL.replace(/\/$/, '')}/api/v1/house/smoke?target=oxalpha`, {
+            method: 'POST',
+            headers: { authorization: `Bearer ${token}` },
+            redirect: 'manual',
+          });
+          const text = await response.text();
+          let body;
+          try { body = JSON.parse(text); } catch { body = { error: text.slice(0, 500) || 'non-json response' }; }
+          const oa = body?.model_presence?.oxalpha;
+          const receipt = body?.runtime_receipt;
+          const passed = response.ok
+            && body?.ok === true
+            && body?.schema === 'hearthgate.oxalpha-production-probe/v1'
+            && oa?.route === 'oxalpha'
+            && oa?.runtime_verified === true
+            && Boolean(oa?.provider)
+            && Boolean(oa?.model)
+            && receipt?.persisted === true
+            && receipt?.readback_verified === true
+            && receipt?.voice_id === 'oxalpha';
+          console.log(JSON.stringify({ http_status: response.status, ...body }, null, 2));
+          if (!passed) process.exitCode = 1;
+          NODE
+
+      - name: Publish Ox Alpha runtime receipt
+        if: always()
+        shell: bash
+        run: |
+          STATUS='PASSED'
+          if [[ '${{ job.status }}' != 'success' ]]; then STATUS='FAILED'; fi
+          {
+            echo "### Ox Alpha production runtime probe: ${STATUS}"
+            echo
+            echo 'Production: `https://flameclyffe.vercel.app`'
+            echo "Workflow commit: `${GITHUB_SHA}`"
+            echo
+            echo '```json'
+            cat oxalpha-production-smoke.json 2>/dev/null || echo '{"ok":false,"error":"Ox Alpha production probe failed before receipt"}'
+            echo '```'
+          } > oxalpha-production-smoke.md
+          gh pr comment 184 --repo SingsEnochian/Flameclyffe --body-file oxalpha-production-smoke.md
+
   authenticated-production-circulation:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
