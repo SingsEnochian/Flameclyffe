@@ -157,6 +157,7 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 .presence-dot[data-state="runtime-unreachable"],
 .presence-dot[data-state="runtime-mismatch"],
 .presence-dot[data-state="route-error"],
+.presence-dot[data-state="provider-error"],
 .presence-dot[data-state="degraded"],
 .presence-dot[data-state="error"] { background: var(--danger); }
 .presence-dot[data-state="offline"],
@@ -214,6 +215,7 @@ textarea { min-height: 7rem; resize: vertical; }
 .badge.state[data-state="runtime-unreachable"],
 .badge.state[data-state="runtime-mismatch"],
 .badge.state[data-state="route-error"],
+.badge.state[data-state="provider-error"],
 .badge.state[data-state="degraded"],
 .badge.state[data-state="error"] { border-color: color-mix(in srgb, var(--danger) 58%, transparent); }
 
