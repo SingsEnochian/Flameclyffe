@@ -1,5 +1,6 @@
 import { createInteractionState } from '../interaction-state.js';
 import { emitInteractionCue } from '../interaction-cues.js';
+import { emitMaterialSignal } from '../material-state.js';
 import { invokeWayglassRoute, listWayglassRoutes } from '../route-client.js';
 
 function escapeHtml(value = '') {
@@ -150,8 +151,17 @@ export async function mountArcSweepWritingSurface(root) {
     }
   }
 
-  function wakeMaterial(strength = 0.7, mode = 'wake') {
-    globalThis.dispatchEvent?.(new CustomEvent('wayglass:material-wake', { detail: { strength, mode } }));
+  function wakeMaterial(strength = 0.7, mode = 'wake', semantic = {}) {
+    const state = interaction.snapshot();
+    emitMaterialSignal({
+      strength,
+      mode,
+      channel: state.channel,
+      ownership: state.character_ownership.length ? 1 : 0,
+      intent: semantic.intent ?? (mode === 'route' ? 0.9 : mode === 'handoff' ? 1 : 0.45),
+      handoff_progress: semantic.handoff_progress ?? (mode === 'handoff' ? 0.82 : 0),
+      canon_state: semantic.canon_state || 'candidate',
+    });
     root.dataset.materialState = mode;
     globalThis.setTimeout?.(() => { if (root.dataset.materialState === mode) root.dataset.materialState = 'rest'; }, 760);
   }
@@ -215,7 +225,7 @@ export async function mountArcSweepWritingSurface(root) {
   channelButtons.forEach((button) => {
     button.addEventListener('click', async () => {
       interaction.setChannel(button.dataset.channel);
-      wakeMaterial(0.58, 'channel');
+      wakeMaterial(0.58, 'channel', { intent: 0.52 });
       await emitInteractionCue(button.dataset.channel === 'OOC' ? 'ooc' : 'switch');
       refreshState();
     });
@@ -236,7 +246,7 @@ export async function mountArcSweepWritingSurface(root) {
       permission: data.get('permission'),
     });
     ownershipForm.reset();
-    wakeMaterial(0.68, 'bind');
+    wakeMaterial(0.68, 'bind', { intent: 0.62 });
     await emitInteractionCue('switch');
     refreshState();
   });
