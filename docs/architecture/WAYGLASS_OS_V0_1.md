@@ -1,12 +1,21 @@
-# Wayglass OS v0.1 · wrapper architecture
+# Wayglass v0.1 · kernel emergence architecture
 
-**Status:** executable vertical slice / not production-promoted  
+**Status:** executable embryonic kernel + embodiment shell / native Wayglass LLM not yet trained / not production-promoted  
 **Date:** 2026-10-02
 
 ## Topology
 
 ```text
-Wayglass OS
+Wayglass
+  ├─ Kernel boot contract
+  │    ├─ persistent system identity
+  │    ├─ world binding
+  │    ├─ embodiment binding
+  │    └─ cognitive substrate attestation
+  ├─ Cognitive substrate
+  │    ├─ Wayglass-native model lineage (TO BUILD)
+  │    ├─ local Ollama seed route
+  │    └─ external routes
   ├─ Route registry
   │    ├─ GPT / OpenAI
   │    ├─ Crow (future registered route)
@@ -23,7 +32,7 @@ Wayglass OS
   └─ Return Engine continuity seam
 ```
 
-ArcSweep does not wrap GPT. Wayglass hosts the route; ArcSweep attaches as a surface.
+ArcSweep does not wrap GPT and GPT is not Wayglass. Wayglass is the larger system and is intended to include its own learned cognitive substrate. Until that native model exists, local/open seed models and external models are explicitly attested as routes. ArcSweep attaches as a surface.
 
 ## Existing Flameclyffe material reused
 
@@ -42,9 +51,17 @@ The old ASTRA-named gesture documents remain historical source material. This pa
 
 ## v0.1 execution boundary
 
-The current route catalogue has one live implementation seam: `openai:gpt`.
+The current route catalogue has two implementation seams: `local:ollama` and `openai:gpt`. The local route is selected first by the kernel when no preferred route is supplied.
 
 The catalogue is intentionally shaped so additional trained/approved routes can be registered later without changing ArcSweep's surface contract.
+
+Current local route:
+
+- Ollama-compatible local HTTP inference;
+- defaults to `ornith-1.5` unless `WAYGLASS_LOCAL_MODEL` selects another seed;
+- no cloud credential required;
+- explicitly marked `external-seed`, never `native_wayglass`;
+- intended as a development body for the kernel while the Wayglass-native model lineage is trained.
 
 Current GPT route:
 
@@ -132,3 +149,28 @@ One animated field per view is the default restraint rule. Dense writing surface
 ### Provenance rule
 
 Any copied or adapted implementation must retain upstream provenance and comply with its recorded licence. Reference-card entries are not vendored code and must be followed to their upstream source before adoption. Training completion, visual inspiration, or presence in the library does not imply automatic promotion into Wayglass runtime.
+
+
+## Non-negotiable architecture truth
+
+Wayglass is not merely an application that calls an LLM. The target system includes both:
+
+1. a learned cognitive substrate whose weights/experts/state belong to the Wayglass lineage; and
+2. the operating environment that carries worlds, continuity, authority, tools, routes, and embodiments.
+
+The body is replaceable. Windows, Android, Linux, browser, headset, and future dedicated hardware are embodiments. The kernel must not let embodiment identity become system identity.
+
+The cognitive substrate is also replaceable/versioned. A substrate transition must be attestable and recoverable through Return Engine rather than silently treated as identity continuity.
+
+The current local and GPT routes are scaffolding and seed cognition. They are useful now, but neither is the finished Wayglass-native LLM.
+
+## Immediate build order
+
+1. Kernel boot + embodiment contract.
+2. Keyboard-first desktop interaction and WebXR/AR capability seam.
+3. Local inference that survives loss of external APIs.
+4. World/Waygate manifest and Return Engine boot packet.
+5. Hugging Face foundry for Wayglass-native seed lineage.
+6. Evaluation receipts: continuity, collaboration, world reasoning, coding, tool use, long-context behaviour.
+7. Train/adapt/merge candidate descendants without collapsing lineage.
+8. Promote a model to `native_wayglass: true` only after explicit evaluation and approval.
