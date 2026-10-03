@@ -7,6 +7,9 @@ import { pointerMaterialState } from '../src/motion-choreography.js';
 import { commandForKeyboardEvent } from '../src/keyboard-controls.js';
 import { detectEmbodimentCapabilities, detectARSupport } from '../src/embodiment.js';
 import { publicWayglassRoutes, resolveWayglassRoute } from '../../../lib/wayglass-route-registry.js';
+import kernelModule from '../../../lib/wayglass-kernel.cjs';
+
+const { bootWayglassKernel } = kernelModule;
 
 test('Wayglass interaction state keeps IC/OOC, turn owner, and ownership separate', () => {
   const state = createInteractionState({ channel: 'IC', turn_owner: 'Rowan' });
@@ -147,4 +150,39 @@ test('Wayglass embodiment contract describes host capabilities without redefinin
     supported: true,
     reason: 'immersive-ar-supported',
   });
+});
+
+
+test('Wayglass kernel boots local-first without claiming the seed model is native Wayglass', () => {
+  const boot = bootWayglassKernel({
+    world_id: 'epra:test',
+    embodiment: {
+      body_id: 'android:test',
+      body_class: 'android',
+      platform_hint: 'Android',
+      keyboard: true,
+      touch: true,
+      ar: true,
+      haptics: true,
+    },
+  });
+
+  assert.equal(boot.schema, 'wayglass.kernel/v0.1');
+  assert.equal(boot.system_id, 'wayglass');
+  assert.equal(boot.world.world_id, 'epra:test');
+  assert.equal(boot.cognition.route_id, 'local:ollama');
+  assert.equal(boot.cognition.provider, 'ollama');
+  assert.equal(boot.cognition.native_wayglass_model, false);
+  assert.equal(boot.continuity.identity_is_not_body, true);
+  assert.equal(boot.continuity.continuity_is_not_substrate, true);
+  assert.equal(boot.embodiment.body_class, 'android');
+  assert.equal(boot.embodiment.ar, true);
+});
+
+test('local Ollama route is explicit seed substrate, not a promoted Wayglass-native model', () => {
+  const route = resolveWayglassRoute('local:ollama');
+  assert.equal(route.provider, 'ollama');
+  assert.equal(route.lineage.kind, 'external-seed');
+  assert.equal(route.lineage.native_wayglass, false);
+  assert.equal(route.capabilities.local, true);
 });
