@@ -1,0 +1,29 @@
+{
+  "schema": "arcsweep.mythience-evidence-boundary/v1",
+  "contract_id": "mythience-evidence-boundary",
+  "version": "1.0.0",
+  "principle": "Formalism, measurement, myth, and magic: none may impersonate another.",
+  "domains": [
+    { "id": "formalism", "description": "Definitions, models, proofs, and derived structures." },
+    { "id": "measurement", "description": "Observed or instrument-measured quantities with methods and provenance." },
+    { "id": "myth", "description": "Narrative, symbol, inherited story, and interpretive meaning." },
+    { "id": "magic", "description": "Ritual, spiritual, experiential, and metaphysical practice or interpretation." }
+  ],
+  "rules": [
+    { "id": "no-silent-domain-promotion", "requirement": "A claim cannot silently change evidence domain." },
+    { "id": "explicit-translation", "requirement": "Cross-domain interpretation must name its translation, source, and claim status." },
+    { "id": "metaphor-is-not-measurement", "requirement": "Metaphor may suggest a question or hypothesis; it does not constitute empirical evidence." },
+    { "id": "qualia-is-firsthand", "requirement": "First-person experience is not inferred from behaviour, model output, measurement, or metaphor." },
+    { "id": "measurement-is-bounded", "requirement": "A measurement supports only the quantity, method, and conditions it records." }
+  ],
+  "receipt_reference": {
+    "field": "contract_refs",
+    "id": "mythience-evidence-boundary",
+    "version": "1.0.0"
+  },
+  "authority": {
+    "canon_promotion": false,
+    "production_authority": false,
+    "external_write": false
+  }
+}
