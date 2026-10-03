@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 import { createInteractionState } from '../src/interaction-state.js';
 import { normaliseMaterialSignal } from '../src/material-state.js';
+import { pointerMaterialState } from '../src/motion-choreography.js';
 import { publicWayglassRoutes, resolveWayglassRoute } from '../../../lib/wayglass-route-registry.js';
 
 test('Wayglass interaction state keeps IC/OOC, turn owner, and ownership separate', () => {
@@ -70,5 +71,32 @@ test('Wayglass material signals preserve semantics without letting visual state 
     handoff_progress: 0,
     canon_state: 'candidate',
     mode: 'wake',
+  });
+});
+
+
+test('Wayglass pointer choreography clamps optical motion inputs', () => {
+  assert.deepEqual(pointerMaterialState({
+    x: 500,
+    y: 250,
+    width: 1000,
+    height: 500,
+    velocity: 0.8,
+  }), {
+    x: 0.5,
+    y: 0.5,
+    velocity: 0.5,
+  });
+
+  assert.deepEqual(pointerMaterialState({
+    x: -10,
+    y: 900,
+    width: 0,
+    height: 100,
+    velocity: 99,
+  }), {
+    x: 0,
+    y: 1,
+    velocity: 1,
   });
 });
