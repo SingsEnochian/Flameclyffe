@@ -12,6 +12,8 @@ ArcSweep is now a substantial functional House, not a prototype. The current pro
 
 The next milestone is to make the currently empty durable ledgers breathe through one legitimate end-to-end House circulation before adding another grand subsystem.
 
+Implementation law for all stages: design from the complete end-state downward. Each stage is an integrated subsystem responsibility with explicit module ownership, interfaces, persistence, failure behaviour, and verification. Do not reduce stages into smallest-slice or MVP-first work plans.
+
 Canonical dependency path:
 
 `source / observation → measurement → explicit review → DEEPTime → PREMAQC / Math Spine → selected model and/or Runa → runtime receipt → feedback/review → replay`
@@ -115,7 +117,7 @@ Acceptance:
 
 **Outcome:** create the first legitimate durable `house_runtime_events` lineage.
 
-Vertical slice:
+Integrated subsystem path:
 
 1. human message;
 2. one real Flame route;
@@ -207,7 +209,7 @@ Acceptance:
 
 **Outcome:** prove the original ArcSweep artistic promise end to end.
 
-Vertical slice:
+Integrated creative subsystem path:
 
 `Glyph Forge → material brush → Living Glyph transformation → Runa preview → receipt → close/reload → replay`
 
