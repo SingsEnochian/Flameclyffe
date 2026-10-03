@@ -185,6 +185,7 @@ test('local Ollama route is explicit seed substrate, not a promoted Wayglass-nat
   assert.equal(route.lineage.kind, 'external-seed');
   assert.equal(route.lineage.native_wayglass, false);
   assert.equal(route.capabilities.local, true);
+  assert.equal(route.capabilities.thinking, true);
 });
 
 
