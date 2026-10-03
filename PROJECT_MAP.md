@@ -115,7 +115,7 @@ Enduring systems attached to the trunk with a clear purpose.
 - Pointer, touch, keyboard, voice, reduced-motion, seated, and one-handed paths remain first-class.
 - The visual field stays quiet until interaction gives motion a semantic reason.
 
-**First implementation slice:** MediaPipe camera adapter → filtered landmarks → approach → pinch begin/hold/release → target capture → drag → settle → synthetic Three.js artefact → local receipt.
+**First complete module sequence:** define the full spatial-interaction subsystem and its provider-neutral contracts, then implement the camera/hand-tracking adapter, filtered landmark pipeline, approach/target/capture state machine, manipulate/release/settle behaviour, Three.js target adapter, accessibility fallbacks, capability checks, receipts, recovery/error handling, and integrated verification as one coherent system.
 
 ## Leaves
 
@@ -137,6 +137,10 @@ Experiments that may be archived or removed after verification.
 - One-off visual experiments with no canon or accessibility path.
 
 Nothing is deleted merely because it is old. Confirm that it has no active route, data dependency, or archival value first.
+
+## Design rule
+
+Permanent branches are designed top-down as complete systems before implementation is decomposed. Modules must have explicit ownership and interfaces; domain objects own their state and invariants; partial prototypes do not become trunk architecture merely because they run.
 
 ## Change rule
 
