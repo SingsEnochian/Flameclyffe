@@ -196,7 +196,7 @@ button { font: inherit; cursor: pointer; }
   content: "";
   position: absolute;
   inset: 4px;
-  border-radius: calc(inherit - 4px);
+  border-radius: inherit;
   pointer-events: none;
   border: 1px solid rgba(217, 246, 247, .055);
   background:
