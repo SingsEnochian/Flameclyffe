@@ -115,6 +115,14 @@ const FRAGMENT = `
     float mote = smoothstep(0.075, 0.0, length(local - vec2(moteSeed - 0.5, hash(cell + 4.1) - 0.5) * 0.44));
     mote *= step(0.91, moteSeed) * (0.03 + uEnergy * 0.18);
 
+    // Active information can loosen into a particulate ink-current.
+    // The current is deliberately dormant at rest.
+    float ribbonY = sin(p.x * 2.15 + uTime * 0.055) * 0.075;
+    ribbonY += sin(p.x * 5.4 - uTime * 0.032) * 0.026;
+    float ribbonBand = smoothstep(0.16, 0.0, abs(p.y - ribbonY));
+    float ribbonSeed = hash(cell + vec2(37.0, 19.0));
+    float ribbonParticle = mote * ribbonBand * step(0.72, ribbonSeed) * uEnergy * 0.82;
+
     // A broad refractive well follows the hand/pointer. It reads as optical mass,
     // not a cursor halo.
     float well = smoothstep(0.58, 0.0, pointerDistance);
@@ -125,6 +133,7 @@ const FRAGMENT = `
     colour += fire * 0.42;
     colour += inkLight;
     colour += vec3(0.22, 0.78, 0.80) * mote;
+    colour += labradorite(strata * 1.7 + angle, ribbonParticle * 1.35);
     colour += labradorite(angle + strata, caustic);
 
     // Stone-black falloff gives the field architectural weight.
