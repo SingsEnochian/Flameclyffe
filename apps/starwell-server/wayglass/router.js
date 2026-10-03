@@ -127,7 +127,6 @@ async function callHumainNode(route, payload) {
     headers: {
       'Content-Type': 'application/json',
       Authorization: 'Bearer ' + key,
-      'x-api-key': key,
     },
     body: JSON.stringify({
       model: route.model(),
@@ -229,7 +228,6 @@ async function humainCatalogueResponse(route, res) {
     const response = await fetch(route.catalogue_endpoint(), {
       headers: {
         Authorization: 'Bearer ' + key,
-        'x-api-key': key,
       },
       signal: AbortSignal.timeout(30000),
     });
