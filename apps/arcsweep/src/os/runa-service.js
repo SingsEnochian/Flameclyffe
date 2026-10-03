@@ -1,6 +1,7 @@
 import { RUNA_PREVIEW_PLAN_SCHEMA, createRunaPreviewRenderReceipt } from '../runa-preview-render.js';
 import { launchRunaPreviewPlan, previewIsActive, stopRunaPreview } from '../runa-preview-player.js';
 import { RUNA_MANIFESTATION_RECEIPT_SCHEMA, createRunaManifestationAdapter } from './runa-manifestation.js';
+import { KELYRAN_AUDIBLE_GLYPH_CUE_SCHEMA, buildAudibleGlyphPlaybackCue, playAudibleGlyphCue } from '../kelyran-pronunciation-contour.js';
 
 function clone(value) {
   if (value === undefined) return undefined;
@@ -89,6 +90,8 @@ export function registerRunaService(registry, {
   isPreviewActive = previewIsActive,
   renderReceipt = createRunaPreviewRenderReceipt,
   audioContextProvider = () => globalThis.AudioContext || globalThis.webkitAudioContext || null,
+  speechSynthesisProvider = () => globalThis.speechSynthesis || null,
+  utteranceProvider = () => globalThis.SpeechSynthesisUtterance || null,
   now = () => new Date(),
 } = {}) {
   if (!registry?.registerService || !registry?.registerCapability) throw new Error('Runa service requires the ArcSweep capability registry.');
@@ -110,6 +113,7 @@ export function registerRunaService(registry, {
       world_hum_output: 'explicit-human-launch',
       safe_gateway_output: 'explicit-human-launch',
       glyph_sonification: 'explicit-human-arm-then-observed-strokes',
+      audible_glyph_playback: 'explicit-human-launch',
       haptic_preview: false,
       midi_preview: false,
       soundfont_preview: false,
@@ -132,6 +136,8 @@ export function registerRunaService(registry, {
         schema: 'arcsweep.runa-status/v1',
         preview_active: Boolean(isPreviewActive()),
         web_audio_available: typeof audioContextProvider() === 'function',
+        browser_speech_available: typeof speechSynthesisProvider()?.speak === 'function' && typeof utteranceProvider() === 'function',
+        audible_glyph_playback: true,
         explicit_user_launch_required: true,
         temporary_audio_only: false,
         haptic_preview_authorized: false,
@@ -255,6 +261,32 @@ export function registerRunaService(registry, {
   });
 
   registry.registerCapability({
+    capability_id: 'runa.audible-glyph.prepare',
+    service_id: 'runa-sensory',
+    description: 'Compile Kelyran pronunciation, stress timing, and contour into playback-only metadata without changing canonical strokes or lexemes.',
+    authority: 'read',
+    input_schema: { required: ['lexeme'] },
+    validate: (input) => Boolean(input?.lexeme && typeof input.lexeme === 'object' && !Array.isArray(input.lexeme)),
+    execute: (input) => buildAudibleGlyphPlaybackCue(input.lexeme, input.contour || 'level'),
+  });
+
+  registry.registerCapability({
+    capability_id: 'runa.audible-glyph.play',
+    service_id: 'runa-sensory',
+    description: 'Play one compiled Kelyran Audible Glyph pronunciation-plus-contour cue through browser speech synthesis after explicit human confirmation.',
+    authority: 'operate',
+    requires_confirmation: true,
+    input_schema: { required: ['cue'] },
+    validate: (input) => input?.cue?.schema === KELYRAN_AUDIBLE_GLYPH_CUE_SCHEMA,
+    execute: (input) => playAudibleGlyphCue(input.cue, {
+      speechSynthesis: speechSynthesisProvider(),
+      UtteranceClass: utteranceProvider(),
+      language: input.language || 'en-US',
+      now,
+    }),
+  });
+
+  registry.registerCapability({
     capability_id: 'runa.haptic.start',
     service_id: 'runa-sensory',
     description: 'Present a semantic haptic-start cue for Somatic Cartography without activating hardware output.',
@@ -310,6 +342,8 @@ export function registerRunaService(registry, {
     'runa.safe-gateway.stop',
     'runa.glyph-sonification.set',
     'runa.haptic.pulse',
+    'runa.audible-glyph.prepare',
+    'runa.audible-glyph.play',
     'runa.feather',
     'runa.haptic.start',
     'runa.audio.play',
