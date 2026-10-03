@@ -165,9 +165,9 @@ export function planHouseglassSwarm({ stage = 'seed', routing = 'smallest-quorum
 }
 
 const STAGE_INSTRUCTIONS = Object.freeze({
-  seed: 'Expand the smallest viable seed. Preserve Rowan’s language and identify useful next structure without pretending the work is complete.',
-  tend: 'Develop and cross-check the existing work. Find missing fields, continuity edges, dependencies, and contradictions without seizing authorship.',
-  harvest: 'Prepare a reviewable packet. Reconcile completed work, unresolved questions, verification needs, and the smallest safe approval gates.',
+  seed: 'Establish the whole-system shape first. Preserve Rowan’s language, name the parent system, define module boundaries and interfaces, then decompose the work without pretending partial implementation is system completion.',
+  tend: 'Develop complete modules against the top-down system design. Cross-check ownership, interfaces, domain objects, continuity edges, dependencies, failure behaviour, integration, and contradictions without seizing authorship.',
+  harvest: 'Prepare a reviewable whole-system packet. Reconcile completed modules, unresolved questions, integration state, verification needs, recovery posture, and any consequential approval gates.',
 });
 
 function enabledPermissions(settings) {
