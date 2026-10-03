@@ -33,6 +33,7 @@ export async function mountArcSweepWritingSurface(root) {
           '<p class="lede">Round-robin co-writing through Wayglass. The route may change; the room stays itself.</p>',
         '</div>',
         '<div class="wg-route-block">',
+          '<div class="route-mineral" aria-hidden="true"><i></i><b></b><span></span></div>',
           '<label for="wg-route">Route</label>',
           '<select id="wg-route" aria-label="Wayglass route"></select>',
           '<span id="wg-route-state" class="tiny">Loading route catalogue…</span>',
@@ -222,6 +223,7 @@ export async function mountArcSweepWritingSurface(root) {
 
   routeSelect.addEventListener('change', () => {
     selectedRoute = routeSelect.value;
+    wakeMaterial(0.88, 'route');
     routeState.textContent = 'Active · ' + selectedRouteLabel();
   });
 
