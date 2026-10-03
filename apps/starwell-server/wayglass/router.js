@@ -105,6 +105,51 @@ async function callOllama(route, payload) {
   };
 }
 
+async function callHumainNode(route, payload) {
+  const key = route.api_key();
+  if (!key) {
+    const error = new Error('HUMAIN Node is not configured for Wayglass.');
+    error.status = 503;
+    throw error;
+  }
+
+  const messages = [
+    { role: 'system', content: buildInstructions(payload.interaction) },
+    ...cleanHistory(payload.history),
+    { role: 'user', content: cleanText(payload.input) },
+  ];
+
+  const response = await fetch(route.endpoint(), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + key,
+      'x-api-key': key,
+    },
+    body: JSON.stringify({
+      model: route.model(),
+      messages,
+      max_tokens: Math.max(64, Math.min(4000, Number(payload.max_output_tokens) || 1400)),
+      stream: false,
+    }),
+    signal: AbortSignal.timeout(120000),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(data?.error?.message || data?.error || data?.message || 'Wayglass HUMAIN Node route failed.');
+    error.status = response.status || 502;
+    throw error;
+  }
+
+  const content = data?.choices?.[0]?.message?.content;
+  return {
+    output: cleanText(content || '', MAX_TEXT),
+    response_id: data.id || null,
+    usage: data.usage || null,
+  };
+}
+
 async function callOpenAI(route, payload) {
   const key = route.api_key();
   if (!key) {
@@ -189,6 +234,7 @@ router.post('/respond', async (req, res) => {
     let result;
     if (route.provider === 'openai') result = await callOpenAI(route, payload);
     else if (route.provider === 'ollama') result = await callOllama(route, payload);
+    else if (route.provider === 'humain-node') result = await callHumainNode(route, payload);
     else return res.status(501).json({ error: 'Provider adapter not implemented yet.' });
     return res.json({
       schema: 'wayglass.route-turn/v0.1',
