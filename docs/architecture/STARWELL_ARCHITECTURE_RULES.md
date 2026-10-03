@@ -23,7 +23,7 @@ STARWELL is a living interface, but it must be built as a stable system first.
 
 ## Whole-System Design Law
 
-STARWELL and Wayglass-aligned work follow a whole-system-first engineering standard.
+STARWELL and Wayglass-aligned work follow a whole-system-first engineering standard: **design the whole system first, then decompose it deliberately.**
 
 **Top-down design is mandatory for substantial new systems and refactors.** Define the desired end state, system boundary, major subsystems, module responsibilities, public interfaces, domain objects, data/control flow, persistence, authority, failure behaviour, integration, recovery, and system-level verification before decomposing implementation work.
 
