@@ -212,3 +212,24 @@ test('public HUMAIN route metadata never exposes the Node key', () => {
   assert.doesNotMatch(json, /HUMAIN_NODE_KEY/);
   assert.doesNotMatch(json, /api_key/i);
 });
+
+
+test('HUMAIN sandbox route is isolated from preview credentials and marked non-native', () => {
+  const route = resolveWayglassRoute('humain:m3-sandbox');
+  assert.equal(route.provider, 'humain-node');
+  assert.equal(route.environment, 'sandbox');
+  assert.equal(route.lineage.kind, 'external-sandbox-route');
+  assert.equal(route.lineage.native_wayglass, false);
+  assert.equal(route.capabilities.sandbox, true);
+  assert.equal(typeof route.api_key, 'function');
+  assert.equal(typeof route.catalogue_endpoint, 'function');
+});
+
+test('public HUMAIN sandbox metadata never exposes sandbox credential names or values', () => {
+  const routes = publicWayglassRoutes();
+  const sandbox = routes.find((route) => route.route_id === 'humain:m3-sandbox');
+  assert.ok(sandbox);
+  const json = JSON.stringify(sandbox);
+  assert.doesNotMatch(json, /HUMAIN_NODE_SANDBOX_KEY/);
+  assert.doesNotMatch(json, /api_key/i);
+});
