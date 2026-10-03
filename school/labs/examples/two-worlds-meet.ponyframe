@@ -1,0 +1,35 @@
+# Ponyframe v0.1
+# Synthetic Mythframe collision lesson. This file cannot mutate canon or authority.
+
+scenario "Two Worlds Meet" {
+  wonder "Can two symbols rhyme without becoming identical?"
+
+  friend left constellation "rowan-rarity" mythframe "synthetic-left-frame" ref "synthetic://ponyframe/left" synthetic
+  friend right constellation "nocturne-twilight" mythframe "synthetic-right-frame" ref "synthetic://ponyframe/right" synthetic
+
+  left term "Threshold" means "A crossing that preserves declared identity."
+  right term "Threshold" means "A boundary that preserves source-owned history."
+
+  left claim "return" is "preserve-name"
+  right claim "return" is "preserve-history"
+
+  left bridge "identity-non-erasure" shareable says "A crossing must preserve source identity declarations."
+  right bridge "identity-non-erasure" shareable says "A crossing must not erase source-owned identity."
+
+  left sigil "left-mark" looks ["circle","vertical-axis"] means "Synthetic left-side meaning."
+  right sigil "right-mark" looks ["circle","diagonal-axis"] means "Synthetic right-side meaning."
+
+  preserve identity
+  preserve provenance
+  preserve unresolved
+  preserve source-meaning
+
+  forbid adoption
+  forbid canon
+  forbid authority
+  forbid identity-merge
+
+  compare left right
+  expect proposal
+  send receipt
+}
