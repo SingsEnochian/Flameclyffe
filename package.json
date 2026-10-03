@@ -51,7 +51,9 @@
     "wayglass:dev": "vite --config apps/wayglass/vite.config.js",
     "wayglass:build": "vite build --config apps/wayglass/vite.config.js",
     "wayglass:preview": "vite preview --config apps/wayglass/vite.config.js",
-    "wayglass:test": "node --test apps/wayglass/test/*.test.js"
+    "wayglass:test": "node --test apps/wayglass/test/*.test.js",
+    "wayglass:stage:server": "node apps/wayglass/server-stage.cjs",
+    "wayglass:deploy:server": "npm run wayglass:build && npm run wayglass:stage:server"
   },
   "dependencies": {
     "@netlify/blobs": "^10.7.13",
