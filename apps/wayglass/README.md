@@ -32,3 +32,18 @@ Wayglass is not ArcSweep renamed.
 Wayglass owns route hosting, route registration, and attached-surface orchestration. ArcSweep remains an attached cognitive/spatial workspace. Return Engine remains the continuity substrate. Models and trained agents remain registered routes.
 
 Training completion does not imply promotion to a live route.
+
+
+## Hosting boundary
+
+Wayglass does not use Vercel.
+
+The browser surface is built with Vite, staged into `apps/starwell-server/public/wayglass`, and served by the existing Hearthgate/Flameclyffe Express server. Secret-bearing model calls live in `apps/starwell-server/wayglass/router.js`.
+
+```bash
+npm run wayglass:deploy:server
+cd apps/starwell-server
+npm start
+```
+
+GitHub remains the source-of-truth for code and review. The runtime may be local/desktop or another explicitly chosen host later, but Wayglass does not depend on Vercel serverless functions.
