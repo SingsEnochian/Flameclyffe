@@ -91,3 +91,44 @@ No trained model is promoted merely because training completed.
 Wayglass's executable web surface is a Vite build served by the existing Flameclyffe/Hearthgate Express host. Provider credentials and route invocation remain server-side in `apps/starwell-server/wayglass/router.js`. The browser never receives provider secrets.
 
 The initial serverless experiment under `api/v1/wayglass` was removed before promotion.
+
+
+## GitHub motion and interface quarry
+
+Wayglass should not re-invent every animation primitive. The SingsEnochian GitHub library already contains reusable implementation references that can be adapted behind Wayglass semantics while preserving source provenance and licence boundaries.
+
+### motion-anything
+
+`SingsEnochian/motion-anything` is the primary motion quarry. Its library contains hundreds of curated recipes with explicit intent, `avoid_when`, restraint budgets, reduced-motion behaviour, export metadata, provenance, and licensing.
+
+Initial Wayglass mappings:
+
+- `strands` -> living-ink filaments / low-energy information flow.
+- `silk` -> refractive material flow and slow glass/ink deformation studies.
+- `waves` -> pointer/gesture wake and spatial field response.
+- `magnet-lines` -> local proximity/orientation response for spatial controls.
+- `elastic-slider` -> tactile overshoot model for bounded drag, haptic-feeling controls, and temporary handoff gestures.
+- `aurora` / `dark-veil` -> atmospheric shader references, not default permanent backgrounds.
+- `dot-field` -> sparse particulate information-current experiments.
+- border/beam recipes -> focus, route activity, and state transition cues rather than decorative always-on glow.
+
+Wayglass imports the **behavioural primitive**, not the source project's visual identity. Material semantics remain:
+
+- stone = structure;
+- metal = mechanism;
+- glass = state;
+- living ink = life / information.
+
+One animated field per view is the default restraint rule. Dense writing surfaces receive a stable scrim. Reduced-motion always has a static or plain semantic equivalent.
+
+### ARWES
+
+`SingsEnochian/arwes` is a useful sci-fi UI architecture reference for animation and audiovisual feedback. Wayglass may study its separation of animation/UI concerns and sound-linked interface behaviour without adopting ARWES visual identity wholesale.
+
+### Desktop interaction references
+
+`SingsEnochian/cc-switch` is a useful reference for a mature desktop UI stack: Tauri, Vite, React, Framer Motion, dnd-kit, Radix primitives, CodeMirror, virtualisation, and accessible component patterns. It is a reference seam for future Wayglass desktop packaging and editor interactions, not a requirement for the current dependency-light browser slice.
+
+### Provenance rule
+
+Any copied or adapted implementation must retain upstream provenance and comply with its recorded licence. Reference-card entries are not vendored code and must be followed to their upstream source before adoption. Training completion, visual inspiration, or presence in the library does not imply automatic promotion into Wayglass runtime.
