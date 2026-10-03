@@ -7,6 +7,7 @@ import { pointerMaterialState } from '../src/motion-choreography.js';
 import { commandForKeyboardEvent } from '../src/keyboard-controls.js';
 import { detectEmbodimentCapabilities, detectARSupport } from '../src/embodiment.js';
 import { publicWayglassRoutes, resolveWayglassRoute } from '../../../lib/wayglass-route-registry.js';
+import { createModelObservation } from '../../../lib/wayglass-model-observation.js';
 import kernelModule from '../../../lib/wayglass-kernel.cjs';
 
 const { bootWayglassKernel } = kernelModule;
@@ -233,4 +234,49 @@ test('public HUMAIN sandbox metadata never exposes sandbox credential names or v
   const json = JSON.stringify(sandbox);
   assert.doesNotMatch(json, /HUMAIN_NODE_SANDBOX_KEY/);
   assert.doesNotMatch(json, /api_key/i);
+});
+
+
+test('Wayglass model observations are external observations and cannot silently commit canon', () => {
+  const route = resolveWayglassRoute('humain:m3-sandbox');
+  const observation = createModelObservation({
+    route,
+    result: {
+      output: 'A synthetic sandbox observation.',
+      thinking: 'Exploratory reasoning trace.',
+      response_id: 'synthetic-response',
+      usage: { prompt_tokens: 12, completion_tokens: 8 },
+    },
+    payload: {
+      session_id: 'session-test',
+      surface_id: 'arcsweep:writing-room',
+      interaction: { channel: 'OOC' },
+    },
+    completedAt: '2026-10-03T04:00:00.000Z',
+    observationId: 'wg-observation-test',
+  });
+
+  assert.equal(observation.schema, 'wayglass.model-observation/v0.1');
+  assert.equal(observation.epistemic_register, 'external-observation');
+  assert.equal(observation.source.route_id, 'humain:m3-sandbox');
+  assert.equal(observation.authority.scope, 'observation-only');
+  assert.equal(observation.authority.canon_commit, false);
+  assert.equal(observation.authority.relationship_commit, false);
+  assert.equal(observation.authority.continuity_commit, false);
+  assert.equal(observation.authority.identity_commit, false);
+  assert.equal(observation.authority.requires_explicit_promotion, true);
+  assert.equal(observation.review.state, 'unreviewed');
+  assert.equal(observation.review.promoted, false);
+  assert.equal(observation.content.deliberation_is_canon, false);
+});
+
+test('HUMAIN route metadata surfaces provider recording policy without exposing a key', () => {
+  const route = publicWayglassRoutes().find((item) => item.route_id === 'humain:m3-sandbox');
+  assert.ok(route);
+  assert.equal(route.data_policy.provider_recording, 'all-preview-inputs-and-outputs-recorded');
+  assert.equal(route.data_policy.training_use, 'separate-affirmative-consent');
+  assert.equal(route.data_policy.verified_on, '2026-10-03');
+  const json = JSON.stringify(route);
+  assert.doesNotMatch(json, /api_key/i);
+  assert.doesNotMatch(json, /HUMAIN_NODE_SANDBOX_KEY/);
 });
