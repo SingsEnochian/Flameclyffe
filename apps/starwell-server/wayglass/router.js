@@ -214,11 +214,11 @@ router.get('/kernel', (req, res) => {
   }));
 });
 
-router.get('/providers/humain/catalogue', async (_req, res) => {
-  res.setHeader('Cache-Control', 'no-store');
-  const route = resolveWayglassRoute('humain:m3-preview');
+async function humainCatalogueResponse(route, res) {
   const key = route?.api_key?.();
-  if (!route || !key) return res.status(503).json({ error: 'HUMAIN Node is not configured for Wayglass.' });
+  if (!route || !key) return res.status(503).json({
+    error: 'HUMAIN Node ' + (route?.environment || 'route') + ' is not configured for Wayglass.',
+  });
 
   try {
     const response = await fetch(route.catalogue_endpoint(), {
@@ -237,12 +237,36 @@ router.get('/providers/humain/catalogue', async (_req, res) => {
     return res.json({
       schema: 'wayglass.provider-catalogue/v0.1',
       provider: 'humain-node',
+      environment: route.environment || null,
+      route_id: route.route_id,
       retrieved_at: new Date().toISOString(),
       upstream: data,
     });
   } catch (error) {
     return res.status(502).json({ error: error.message || 'HUMAIN Node catalogue request failed.' });
   }
+}
+
+router.get('/providers/humain/status', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  const sandbox = resolveWayglassRoute('humain:m3-sandbox');
+  const preview = resolveWayglassRoute('humain:m3-preview');
+  return res.json({
+    schema: 'wayglass.provider-status/v0.1',
+    provider: 'humain-node',
+    sandbox_configured: Boolean(sandbox?.api_key?.()),
+    preview_configured: Boolean(preview?.api_key?.()),
+  });
+});
+
+router.get('/providers/humain/catalogue', async (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  return humainCatalogueResponse(resolveWayglassRoute('humain:m3-preview'), res);
+});
+
+router.get('/providers/humain/sandbox/catalogue', async (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  return humainCatalogueResponse(resolveWayglassRoute('humain:m3-sandbox'), res);
 });
 
 router.get('/routes', (_req, res) => {
