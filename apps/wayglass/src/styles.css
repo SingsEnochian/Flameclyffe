@@ -312,3 +312,111 @@ button { font: inherit; cursor: pointer; }
     transform: none !important;
   }
 }
+
+
+/* Route reliquary
+   A route is shown as a contained luminous core, not a flat status badge. */
+.wg-route-block {
+  grid-template-columns: 58px minmax(0, 1fr);
+  column-gap: 12px;
+  align-items: center;
+}
+
+.wg-route-block > label,
+.wg-route-block > select,
+.wg-route-block > .tiny {
+  grid-column: 2;
+}
+
+.route-mineral {
+  grid-column: 1;
+  grid-row: 1 / span 3;
+  position: relative;
+  width: 52px;
+  height: 52px;
+  place-self: center;
+  border: 1px solid rgba(174, 205, 211, .24);
+  border-radius: 16px;
+  background:
+    linear-gradient(145deg, rgba(230,250,251,.07), transparent 23%),
+    linear-gradient(315deg, rgba(48,214,211,.05), rgba(103,62,199,.035) 52%, transparent),
+    rgba(1,5,8,.88);
+  box-shadow:
+    inset 0 2px rgba(241,255,255,.12),
+    inset 0 -4px 12px rgba(0,0,0,.78),
+    0 7px 0 rgba(0,0,0,.24),
+    0 15px 36px rgba(0,0,0,.34);
+  transform: rotate(45deg);
+  overflow: visible;
+}
+
+.route-mineral::before,
+.route-mineral::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgba(94, 220, 218, .18);
+  border-radius: 50%;
+  transform: rotateX(64deg) rotateZ(18deg);
+  box-shadow: 0 0 12px rgba(64,213,211,.055);
+  transition: transform 620ms cubic-bezier(.18,.78,.18,1), opacity 420ms ease;
+}
+
+.route-mineral::after {
+  inset: 12px 4px;
+  border-color: rgba(145, 92, 228, .16);
+  transform: rotateX(67deg) rotateY(52deg) rotateZ(-28deg);
+}
+
+.route-mineral i,
+.route-mineral b,
+.route-mineral span {
+  position: absolute;
+  inset: 16px;
+  display: block;
+  border-radius: 45% 55% 52% 48%;
+  pointer-events: none;
+}
+
+.route-mineral i {
+  background:
+    radial-gradient(circle at 31% 25%, rgba(236,255,255,.94), rgba(71,228,222,.72) 16%, rgba(46,108,237,.38) 43%, rgba(111,53,190,.18) 65%, transparent 72%);
+  filter: blur(.2px) drop-shadow(0 0 8px rgba(73,221,218,.34));
+  transform: rotate(-45deg);
+}
+
+.route-mineral b,
+.route-mineral span {
+  inset: 10px 20px;
+  border: 1px solid rgba(192,224,227,.18);
+  border-radius: 3px;
+  background: linear-gradient(180deg, rgba(13,24,29,.76), rgba(1,5,8,.86));
+  transform-origin: center;
+}
+
+.route-mineral b { transform: rotate(-8deg); }
+.route-mineral span { transform: rotate(82deg); }
+
+#app[data-material-state="route"] .route-mineral::before {
+  transform: rotateX(64deg) rotateZ(148deg) scale(1.16);
+}
+#app[data-material-state="route"] .route-mineral::after {
+  transform: rotateX(67deg) rotateY(52deg) rotateZ(-164deg) scale(1.22);
+}
+#app[data-material-state="route"] .route-mineral b {
+  transform: rotate(-42deg) translateX(-5px);
+}
+#app[data-material-state="route"] .route-mineral span {
+  transform: rotate(118deg) translateY(-5px);
+}
+
+.route-mineral b,
+.route-mineral span {
+  transition: transform 620ms cubic-bezier(.18,.78,.18,1);
+}
+
+@media (max-width: 760px) {
+  .wg-route-block { grid-template-columns: 48px minmax(0, 1fr); }
+  .route-mineral { width: 42px; height: 42px; border-radius: 13px; }
+  .route-mineral i { inset: 13px; }
+}
