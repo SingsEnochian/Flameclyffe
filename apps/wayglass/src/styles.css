@@ -523,3 +523,60 @@ button { font: inherit; cursor: pointer; }
   .wg-thread,
   .wg-composer { transform: none !important; }
 }
+
+
+/* Thinking trace
+   Local reasoning routes may expose their own deliberation channel.
+   Keep it inspectable but visually subordinate to the final answer. */
+.turn-thinking {
+  margin: 0 0 10px;
+  border: 1px solid rgba(151, 183, 190, .14);
+  border-radius: 14px;
+  background:
+    linear-gradient(145deg, rgba(113, 82, 188, .045), rgba(39, 177, 177, .025)),
+    rgba(0, 4, 7, .30);
+  overflow: hidden;
+}
+
+.turn-thinking summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  user-select: none;
+  padding: 8px 10px;
+  color: rgba(214, 232, 235, .66);
+  font-size: .72rem;
+  font-weight: 760;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.turn-thinking summary::-webkit-details-marker { display: none; }
+
+.thinking-chevron {
+  display: inline-block;
+  color: var(--glass-teal);
+  transform-origin: 50% 50%;
+  transition: transform 150ms ease;
+}
+
+.turn-thinking[open] .thinking-chevron { transform: rotate(90deg); }
+
+.thinking-trace {
+  max-height: 34vh;
+  overflow: auto;
+  padding: 10px 12px 12px;
+  border-top: 1px solid rgba(151, 183, 190, .10);
+  color: rgba(219, 231, 232, .72);
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: .78rem;
+  line-height: 1.55;
+  background: rgba(1, 5, 8, .24);
+  scrollbar-width: thin;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thinking-chevron { transition: none; }
+}
