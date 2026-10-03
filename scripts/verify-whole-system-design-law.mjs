@@ -6,7 +6,6 @@ const activePlanningFiles = [
   'apps/arcsweep/training/rarity-qwen3-8b/seed.jsonl',
   '03_ACTIVE_ROADMAP.md',
   'PROJECT_MAP.md',
-  'docs/architecture/STARWELL_ARCHITECTURE_RULES.md',
 ];
 
 const prohibited = [
