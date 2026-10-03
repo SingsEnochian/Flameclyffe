@@ -6,6 +6,7 @@ const {
   resolveWayglassRoute,
 } = require('../../../lib/wayglass-route-registry.cjs');
 const { bootWayglassKernel } = require('../../../lib/wayglass-kernel.cjs');
+const { createModelObservation } = require('../../../lib/wayglass-model-observation.cjs');
 
 const router = express.Router();
 const MAX_HISTORY = 16;
@@ -295,6 +296,13 @@ router.post('/respond', async (req, res) => {
     else if (route.provider === 'ollama') result = await callOllama(route, payload);
     else if (route.provider === 'humain-node') result = await callHumainNode(route, payload);
     else return res.status(501).json({ error: 'Provider adapter not implemented yet.' });
+    const completedAt = new Date().toISOString();
+    const observation = createModelObservation({
+      route,
+      result,
+      payload,
+      completedAt,
+    });
     return res.json({
       schema: 'wayglass.route-turn/v0.1',
       route_id: route.route_id,
@@ -302,12 +310,16 @@ router.post('/respond', async (req, res) => {
       model: route.model(),
       output: result.output,
       thinking: result.thinking || null,
+      observation,
       receipt: {
         response_id: result.response_id,
+        observation_id: observation.observation_id,
+        epistemic_register: observation.epistemic_register,
+        canon_commit: false,
         session_id: cleanText(payload.session_id, 160) || null,
         surface_id: cleanText(payload.surface_id, 160) || null,
         channel: payload?.interaction?.channel === 'OOC' ? 'OOC' : 'IC',
-        completed_at: new Date().toISOString(),
+        completed_at: completedAt,
         stored_by_provider_request: false,
         provider_recording: route.data_policy?.provider_recording || 'unspecified',
         provider_training_use: route.data_policy?.training_use || 'unspecified',
