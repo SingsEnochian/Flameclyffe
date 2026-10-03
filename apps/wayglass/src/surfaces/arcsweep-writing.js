@@ -216,7 +216,7 @@ export async function mountArcSweepWritingSurface(root) {
       });
       lastReceipt = result.receipt || null;
       receipt.textContent = lastReceipt
-        ? 'Receipt · ' + (result.provider || 'route') + ' / ' + (result.model || 'model') + ' · ' + (lastReceipt.channel || current.channel) + ' · ' + (lastReceipt.completed_at || '')
+        ? 'Observation · not canon · ' + (result.provider || 'route') + ' / ' + (result.model || 'model') + ' · ' + (lastReceipt.epistemic_register || 'external-observation') + ' · ' + (lastReceipt.completed_at || '')
         : 'Turn completed without a receipt payload.';
     } catch (error) {
       messages.push({
