@@ -149,6 +149,12 @@ export async function mountArcSweepWritingSurface(root) {
     }
   }
 
+  function wakeMaterial(strength = 0.7, mode = 'wake') {
+    globalThis.dispatchEvent?.(new CustomEvent('wayglass:material-wake', { detail: { strength, mode } }));
+    root.dataset.materialState = mode;
+    globalThis.setTimeout?.(() => { if (root.dataset.materialState === mode) root.dataset.materialState = 'rest'; }, 760);
+  }
+
   async function passTurn() {
     const text = input.value.trim();
     if (!text || busy) return;
@@ -164,6 +170,7 @@ export async function mountArcSweepWritingSurface(root) {
 
     const routeLabel = selectedRouteLabel();
     interaction.setTurnOwner(routeLabel);
+    wakeMaterial(0.96, 'handoff');
     await emitInteractionCue('handoff');
     refreshState();
 
@@ -207,6 +214,7 @@ export async function mountArcSweepWritingSurface(root) {
   channelButtons.forEach((button) => {
     button.addEventListener('click', async () => {
       interaction.setChannel(button.dataset.channel);
+      wakeMaterial(0.58, 'channel');
       await emitInteractionCue(button.dataset.channel === 'OOC' ? 'ooc' : 'switch');
       refreshState();
     });
@@ -226,6 +234,7 @@ export async function mountArcSweepWritingSurface(root) {
       permission: data.get('permission'),
     });
     ownershipForm.reset();
+    wakeMaterial(0.68, 'bind');
     await emitInteractionCue('switch');
     refreshState();
   });
