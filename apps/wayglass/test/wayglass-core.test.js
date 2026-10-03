@@ -4,6 +4,8 @@ import assert from 'node:assert/strict';
 import { createInteractionState } from '../src/interaction-state.js';
 import { normaliseMaterialSignal } from '../src/material-state.js';
 import { pointerMaterialState } from '../src/motion-choreography.js';
+import { commandForKeyboardEvent } from '../src/keyboard-controls.js';
+import { detectEmbodimentCapabilities, detectARSupport } from '../src/embodiment.js';
 import { publicWayglassRoutes, resolveWayglassRoute } from '../../../lib/wayglass-route-registry.js';
 
 test('Wayglass interaction state keeps IC/OOC, turn owner, and ownership separate', () => {
@@ -98,5 +100,51 @@ test('Wayglass pointer choreography clamps optical motion inputs', () => {
     x: 0,
     y: 1,
     velocity: 1,
+  });
+});
+
+
+test('Wayglass keyboard commands remain deterministic and text-entry safe', () => {
+  assert.equal(commandForKeyboardEvent({ altKey: true, code: 'KeyI' }), 'channel:ic');
+  assert.equal(commandForKeyboardEvent({ altKey: true, code: 'KeyO' }), 'channel:ooc');
+  assert.equal(commandForKeyboardEvent({ altKey: true, code: 'KeyR' }), 'focus:route');
+  assert.equal(commandForKeyboardEvent({ altKey: true, code: 'KeyW' }), 'focus:composer');
+  assert.equal(commandForKeyboardEvent({ altKey: true, ctrlKey: true, code: 'KeyW' }), null);
+  assert.equal(commandForKeyboardEvent({ code: 'KeyW' }), null);
+});
+
+test('Wayglass embodiment contract describes host capabilities without redefining identity', async () => {
+  const fake = {
+    addEventListener() {},
+    isSecureContext: true,
+    navigator: {
+      maxTouchPoints: 5,
+      vibrate() {},
+      platform: 'TestBody',
+      xr: {
+        async isSessionSupported(mode) {
+          return mode === 'immersive-ar';
+        },
+      },
+    },
+    matchMedia(query) {
+      return { matches: query === '(pointer: fine)' };
+    },
+  };
+
+  assert.deepEqual(detectEmbodimentCapabilities(fake), {
+    schema: 'wayglass.embodiment/v0.1',
+    keyboard: true,
+    touch: true,
+    fine_pointer: true,
+    hover: false,
+    vibration: true,
+    webxr: true,
+    secure_context: true,
+    platform_hint: 'TestBody',
+  });
+  assert.deepEqual(await detectARSupport(fake), {
+    supported: true,
+    reason: 'immersive-ar-supported',
   });
 });
