@@ -155,7 +155,7 @@ test('Wayglass embodiment contract describes host capabilities without redefinin
 
 test('Wayglass kernel boots local-first without claiming the seed model is native Wayglass', () => {
   const boot = bootWayglassKernel({
-    world_id: 'epra:test',
+    world_id: 'wayglass:test-world',
     embodiment: {
       body_id: 'android:test',
       body_class: 'android',
@@ -169,7 +169,7 @@ test('Wayglass kernel boots local-first without claiming the seed model is nativ
 
   assert.equal(boot.schema, 'wayglass.kernel/v0.1');
   assert.equal(boot.system_id, 'wayglass');
-  assert.equal(boot.world.world_id, 'epra:test');
+  assert.equal(boot.world.world_id, 'wayglass:test-world');
   assert.equal(boot.cognition.route_id, 'local:ollama');
   assert.equal(boot.cognition.provider, 'ollama');
   assert.equal(boot.cognition.native_wayglass_model, false);
