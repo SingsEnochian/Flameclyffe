@@ -15,6 +15,7 @@ const Anthropic = require('@anthropic-ai/sdk');
 const OpenAI = require('openai');
 const multer = require('multer');
 const flameRouter = require('./flames/router');
+const wayglassRouter = require('./wayglass/router');
 const { FLAMES } = require('./flames/manifests');
 
 // Load .env from this directory if present
@@ -587,6 +588,7 @@ app.use('/api/v1/chat', groveChatRouter);
 
 // ── Flame router (v1) ───────────────────────────────────────────────────────
 app.use('/api/v1', flameRouter);
+app.use('/api/v1/wayglass', wayglassRouter);
 
 // ── Boxfire global status ────────────────────────────────────────────────────
 app.get('/api/boxfire/status', async (req, res) => {
