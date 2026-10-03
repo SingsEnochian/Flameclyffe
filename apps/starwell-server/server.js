@@ -587,8 +587,8 @@ const groveChatRouter = require('./routes/grove-chat.routes');
 app.use('/api/v1/chat', groveChatRouter);
 
 // ── Flame router (v1) ───────────────────────────────────────────────────────
-app.use('/api/v1', flameRouter);
 app.use('/api/v1/wayglass', wayglassRouter);
+app.use('/api/v1', flameRouter);
 
 // ── Boxfire global status ────────────────────────────────────────────────────
 app.get('/api/boxfire/status', async (req, res) => {
