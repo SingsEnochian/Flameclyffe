@@ -51,7 +51,6 @@ if (!route || !key) {
 const headers = {
   'Content-Type': 'application/json',
   Authorization: 'Bearer ' + key,
-  'x-api-key': key,
 };
 
 const catalogueResponse = await fetch(route.catalogue_endpoint(), {
