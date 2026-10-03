@@ -274,7 +274,9 @@ test('HUMAIN route metadata surfaces provider recording policy without exposing 
   const route = publicWayglassRoutes().find((item) => item.route_id === 'humain:m3-sandbox');
   assert.ok(route);
   assert.equal(route.data_policy.provider_recording, 'all-preview-inputs-and-outputs-recorded');
-  assert.equal(route.data_policy.training_use, 'separate-affirmative-consent');
+  assert.equal(route.data_policy.training_use, 'separate-affirmative-consent-required-for-preview-interactions');
+  assert.equal(route.data_policy.raw_user_linked_retention, 'ordinarily-12-months');
+  assert.equal(route.data_policy.research_access_zero_retention, false);
   assert.equal(route.data_policy.verified_on, '2026-10-03');
   const json = JSON.stringify(route);
   assert.doesNotMatch(json, /api_key/i);
