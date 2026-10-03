@@ -186,3 +186,29 @@ test('local Ollama route is explicit seed substrate, not a promoted Wayglass-nat
   assert.equal(route.lineage.native_wayglass, false);
   assert.equal(route.capabilities.local, true);
 });
+
+
+test('HUMAIN Node route is registered as external preview infrastructure', () => {
+  const route = resolveWayglassRoute('humain:m3-preview');
+  assert.equal(route.provider, 'humain-node');
+  assert.equal(route.lineage.kind, 'external-preview-route');
+  assert.equal(route.lineage.native_wayglass, false);
+  assert.equal(route.capabilities.text, true);
+  assert.equal(route.capabilities.image, false);
+  assert.equal(route.capabilities.video, false);
+  assert.equal(route.capabilities.preview, true);
+  assert.equal(route.upstream_capabilities.image, true);
+  assert.equal(route.upstream_capabilities.video, true);
+  assert.equal(route.upstream_capabilities.tools, true);
+  assert.equal(typeof route.api_key, 'function');
+  assert.equal(typeof route.catalogue_endpoint, 'function');
+});
+
+test('public HUMAIN route metadata never exposes the Node key', () => {
+  const routes = publicWayglassRoutes();
+  const humain = routes.find((route) => route.route_id === 'humain:m3-preview');
+  assert.ok(humain);
+  const json = JSON.stringify(humain);
+  assert.doesNotMatch(json, /HUMAIN_NODE_KEY/);
+  assert.doesNotMatch(json, /api_key/i);
+});
