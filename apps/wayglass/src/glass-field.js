@@ -13,6 +13,11 @@ const FRAGMENT = `
 
   uniform float uTime;
   uniform float uEnergy;
+  uniform float uIntent;
+  uniform float uChannel;
+  uniform float uOwnership;
+  uniform float uHandoff;
+  uniform float uCanonState;
   uniform vec2 uPointer;
   uniform vec2 uResolution;
   varying vec2 vUv;
@@ -94,7 +99,10 @@ const FRAGMENT = `
     float strata = mineral * 5.4 + mineralFine * 2.1 + dot(p, vec2(2.7, -1.9));
     float fireMask = smoothstep(0.54, 0.82, mineralFine + lens * (0.20 + uEnergy * 0.24));
     fireMask *= 0.20 + uEnergy * 0.80;
-    vec3 fire = labradorite(angle * 2.2 + strata + uTime * 0.025, fireMask);
+    // IC gathers colour inward; OOC opens it into a thinner violet/cyan branch.
+    float channelPhase = mix(-0.42, 0.78, uChannel);
+    float semanticFire = fireMask * (0.82 + uIntent * 0.18);
+    vec3 fire = labradorite(angle * 2.2 + strata + channelPhase + uTime * 0.025, semanticFire);
 
     // Living ink migrates through channels. It gathers near interaction,
     // then recedes instead of constantly animating every surface.
@@ -105,7 +113,8 @@ const FRAGMENT = `
     float inkB = filament(inkP * vec2(0.83, 1.28) - vec2(0.4, 0.26), 0.71, 0.014);
     float inkC = filament(inkP * vec2(1.17, 0.92) + vec2(0.2, 0.34), 0.12, 0.010);
     float livingInk = max(inkA, max(inkB, inkC));
-    livingInk *= (0.08 + uEnergy * 0.58) * (0.36 + lens * 0.64);
+    float ownershipGather = 0.84 + uOwnership * 0.30;
+    livingInk *= (0.08 + uEnergy * 0.58) * (0.36 + lens * 0.64) * ownershipGather;
     vec3 inkLight = labradorite(strata * 1.3 + uTime * 0.05, livingInk * 0.78);
 
     // Sparse suspended motes echo the relic/orbit references without becoming HUD noise.
@@ -122,6 +131,10 @@ const FRAGMENT = `
     float ribbonBand = smoothstep(0.16, 0.0, abs(p.y - ribbonY));
     float ribbonSeed = hash(cell + vec2(37.0, 19.0));
     float ribbonParticle = mote * ribbonBand * step(0.72, ribbonSeed) * uEnergy * 0.82;
+    // Handoff becomes a travelling filament rather than a generic glow.
+    float handoffHead = fract(p.x * 0.34 + 0.5 + uTime * 0.075);
+    float handoffFilament = smoothstep(0.085, 0.0, abs(handoffHead - uHandoff));
+    handoffFilament *= ribbonBand * uHandoff;
 
     // A broad refractive well follows the hand/pointer. It reads as optical mass,
     // not a cursor halo.
@@ -134,7 +147,14 @@ const FRAGMENT = `
     colour += inkLight;
     colour += vec3(0.22, 0.78, 0.80) * mote;
     colour += labradorite(strata * 1.7 + angle, ribbonParticle * 1.35);
+    colour += labradorite(strata + uTime * 0.08, handoffFilament * 0.88);
     colour += labradorite(angle + strata, caustic);
+
+    // Canon state is deliberately subtle: verified settles; unresolved/conflicted
+    // produces optical doubling instead of a louder colour wash.
+    float semanticEdge = smoothstep(0.42, 0.0, abs(mineralFine - 0.56));
+    float doubleFire = semanticEdge * max(0.0, -uCanonState) * (0.04 + uEnergy * 0.12);
+    colour += labradorite(strata + 1.6, doubleFire);
 
     // Stone-black falloff gives the field architectural weight.
     float vignette = smoothstep(1.12, 0.12, length(p * vec2(0.78, 1.0)));
@@ -170,6 +190,11 @@ export function installWayglassField({ host = document.body } = {}) {
   const uniforms = {
     uTime: { value: 0 },
     uEnergy: { value: 0 },
+    uIntent: { value: 0 },
+    uChannel: { value: 0 },
+    uOwnership: { value: 0 },
+    uHandoff: { value: 0 },
+    uCanonState: { value: 0 },
     uPointer: { value: new THREE.Vector2(0.68, 0.3) },
     uResolution: { value: new THREE.Vector2(1, 1) },
   };
@@ -230,8 +255,20 @@ export function installWayglassField({ host = document.body } = {}) {
   }
 
   function wake(event) {
-    if (reduceMotion) return;
-    const strength = Number(event?.detail?.strength);
+    const detail = event?.detail || {};
+    const strength = Number(detail.strength);
+    const intent = Number(detail.intent);
+    const ownership = Number(detail.ownership);
+    const handoff = Number(detail.handoff_progress);
+    uniforms.uIntent.value = Number.isFinite(intent) ? Math.min(1, Math.max(0, intent)) : uniforms.uIntent.value;
+    uniforms.uChannel.value = detail.channel === 'OOC' ? 1 : 0;
+    uniforms.uOwnership.value = Number.isFinite(ownership) ? Math.min(1, Math.max(0, ownership)) : uniforms.uOwnership.value;
+    uniforms.uHandoff.value = Number.isFinite(handoff) ? Math.min(1, Math.max(0, handoff)) : 0;
+    uniforms.uCanonState.value = detail.canon_state === 'conflicted' ? -1 : detail.canon_state === 'unresolved' ? -0.55 : detail.canon_state === 'verified' ? 1 : 0;
+    if (reduceMotion) {
+      render();
+      return;
+    }
     energyTarget = Math.max(energyTarget, Number.isFinite(strength) ? Math.min(1, Math.max(0, strength)) : 0.72);
   }
 
