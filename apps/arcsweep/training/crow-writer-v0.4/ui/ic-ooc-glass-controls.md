@@ -134,16 +134,16 @@ Never rely on sound alone to convey critical state.
 Haptics may reinforce mute, focus, handoff, and spatial lock events.
 
 
-## Host relationship: Astra Route OS
+## Host relationship: Wayglass OS
 
 ArcSweep does **not** own or wrap the model runtime.
 
-Astra Route OS is the host environment and route layer. ArcSweep attaches to it as an interaction/UI surface.
+Wayglass OS is the host environment and route layer. ArcSweep attaches to it as an interaction/UI surface.
 
 Conceptually:
 
 ```text
-Astra Route OS
+Wayglass OS
   ├─ model/runtime route: GPT | Crow | Ornith | local | other
   ├─ continuity/runtime services
   └─ attached UI surfaces
@@ -157,14 +157,14 @@ Astra Route OS
             └─ provenance/continuity views
 ```
 
-ArcSweep must consume the active Astra route rather than hard-coding a provider or model. Changing the active model route must not require replacing the ArcSweep interaction surface.
+ArcSweep must consume the active Wayglass route rather than hard-coding a provider or model. Changing the active model route must not require replacing the ArcSweep interaction surface.
 
 The existing ArcSweep constellation runtime adapter already points in this direction: ArcSweep resolves a route and invokes the runtime through the route seam while keeping provider/model attestation outside the UI surface.
 
 
 ## Trainable and extensible route roster
 
-Astra Route OS must support adding newly trained models and agents as first-class routes. The route catalogue is not a fixed vendor/model list.
+Wayglass OS must support adding newly trained models and agents as first-class routes. The route catalogue is not a fixed vendor/model list.
 
 Recommended lifecycle:
 
@@ -191,4 +191,4 @@ Registration should preserve at minimum:
 
 Training completion alone MUST NOT imply runtime promotion.
 
-ArcSweep should discover registered Astra routes dynamically and remain agnostic to whether a route is backed by GPT, Crow, Ornith, a locally trained model, an adapter, or a future runtime.
+ArcSweep should discover registered Wayglass routes dynamically and remain agnostic to whether a route is backed by GPT, Crow, Ornith, a locally trained model, an adapter, or a future runtime.
