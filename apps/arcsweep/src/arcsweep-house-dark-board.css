@@ -1,0 +1,240 @@
+/* ArcSweep dark-board projection for House Commons v5.
+   Social grammar stays social: depth clarifies authorship and hierarchy without turning chat into a cockpit. */
+
+.app-shell .commons-layout {
+  position: relative;
+  isolation: isolate;
+}
+
+.app-shell .commons-log {
+  position: relative;
+  padding: .45rem .55rem 1.15rem !important;
+  border: 1px solid var(--board-line);
+  border-radius: .92rem .92rem .92rem .24rem;
+  background:
+    radial-gradient(circle at 75% 0%,rgba(107,225,221,.025),transparent 22rem),
+    linear-gradient(180deg,rgba(255,255,255,.012),transparent 18%),
+    rgba(3,5,8,.52);
+  box-shadow:
+    inset 0 2px 18px rgba(0,0,0,.42),
+    inset 0 1px rgba(255,255,255,.018),
+    0 12px 32px rgba(0,0,0,.16);
+}
+
+.app-shell .commons-chat-log-head {
+  margin: -.1rem -.1rem .55rem;
+  padding: .66rem .72rem .7rem !important;
+  border: 1px solid rgba(107,225,221,.1);
+  border-radius: .7rem .7rem .7rem .18rem;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.025),transparent 46%),
+    rgba(9,12,16,.94) !important;
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.025),
+    0 10px 24px rgba(0,0,0,.18);
+  backdrop-filter: blur(16px);
+}
+
+.app-shell .commons-chat-log-head h2 {
+  font-family: Georgia,"Times New Roman",serif;
+  font-weight: 600;
+  letter-spacing: .012em;
+}
+
+.app-shell .commons-log-tools {
+  align-items: center;
+}
+
+.app-shell .commons-log-tools select,
+.app-shell .commons-log-tools input[type="search"] {
+  min-height: 2.25rem;
+  border-color: rgba(107,225,221,.13);
+  background: rgba(2,4,7,.72);
+  box-shadow: inset 0 2px 8px rgba(0,0,0,.34), inset 0 1px rgba(255,255,255,.014);
+}
+
+.app-shell .commons-chat-entry {
+  position: relative !important;
+  width: min(88%,54rem) !important;
+  margin: .72rem 0 !important;
+  padding: .82rem .92rem .9rem !important;
+  border: 1px solid rgba(107,225,221,.12) !important;
+  border-radius: .84rem .84rem .84rem .2rem !important;
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.022),transparent 32%),
+    linear-gradient(180deg,rgba(17,20,27,.94),rgba(7,9,13,.96)) !important;
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.032),
+    inset 0 -1px rgba(0,0,0,.42),
+    0 12px 28px rgba(0,0,0,.2) !important;
+  transition: transform 145ms ease,border-color 145ms ease,box-shadow 145ms ease !important;
+}
+
+.app-shell .commons-chat-entry::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: .72rem;
+  bottom: .72rem;
+  width: 2px;
+  border-radius: 2px;
+  background: rgba(214,180,111,.42);
+  pointer-events: none;
+}
+
+.app-shell .commons-chat-entry[data-kind="voice"]::before {
+  background: rgba(107,225,221,.68);
+}
+
+.app-shell .commons-chat-entry[data-kind="steward"]::before {
+  background: rgba(214,180,111,.82);
+}
+
+.app-shell .commons-chat-entry[data-kind="system"]::before {
+  background: rgba(154,120,199,.52);
+}
+
+.app-shell .commons-chat-entry[data-kind="steward"] {
+  margin-left: auto !important;
+  border-color: rgba(214,180,111,.17) !important;
+  background:
+    linear-gradient(145deg,rgba(214,180,111,.035),transparent 34%),
+    linear-gradient(180deg,rgba(19,20,25,.95),rgba(8,9,12,.97)) !important;
+}
+
+.app-shell .commons-chat-entry[data-kind="voice"] {
+  margin-right: auto !important;
+}
+
+.app-shell .commons-chat-entry:hover,
+.app-shell .commons-chat-entry:focus-within {
+  transform: translateY(-2px) !important;
+  border-color: rgba(107,225,221,.23) !important;
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.04),
+    inset 0 -1px rgba(0,0,0,.42),
+    0 20px 42px rgba(0,0,0,.28) !important;
+}
+
+.app-shell .commons-chat-entry header {
+  padding-bottom: .5rem;
+  margin-bottom: .48rem;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+}
+
+.app-shell .commons-chat-entry header strong {
+  font-family: Georgia,"Times New Roman",serif;
+  font-weight: 600;
+  color: var(--board-text);
+}
+
+.app-shell .commons-chat-entry header > span {
+  color: var(--board-muted);
+  font-size: .66rem;
+}
+
+.app-shell .commons-chat-body {
+  color: #dce5e1;
+  line-height: 1.62;
+}
+
+.app-shell .commons-chat-body p:first-child { margin-top: 0; }
+.app-shell .commons-chat-body p:last-child { margin-bottom: 0; }
+
+.app-shell .commons-reply-context {
+  width: 100%;
+  margin: 0 0 .55rem;
+  padding: .46rem .58rem;
+  text-align: left;
+  border-color: rgba(185,119,79,.2);
+  background: rgba(185,119,79,.035);
+  color: var(--board-muted);
+  box-shadow: inset 2px 0 rgba(185,119,79,.45), inset 0 1px rgba(255,255,255,.015);
+}
+
+.app-shell .commons-streaming {
+  border-style: solid !important;
+  border-color: rgba(107,225,221,.21) !important;
+}
+
+.app-shell .commons-stream-cursor {
+  color: var(--board-teal);
+}
+
+.app-shell #commons-form {
+  border: 1px solid rgba(214,180,111,.16) !important;
+  border-radius: .92rem .92rem .92rem .24rem !important;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.022),transparent 38%),
+    rgba(9,11,15,.94) !important;
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.035),
+    inset 0 -1px rgba(0,0,0,.44),
+    0 24px 58px rgba(0,0,0,.3) !important;
+  backdrop-filter: blur(18px);
+}
+
+.app-shell .commons-native-composer {
+  display: grid;
+  gap: .4rem;
+  padding: .5rem;
+  border: 1px solid rgba(107,225,221,.1);
+  border-radius: .72rem .72rem .72rem .18rem;
+  background: rgba(2,4,7,.56);
+  box-shadow: inset 0 3px 16px rgba(0,0,0,.42), inset 0 1px rgba(255,255,255,.014);
+}
+
+.app-shell .commons-native-toolbar {
+  padding: .08rem .08rem .4rem !important;
+  border-bottom: 1px solid rgba(255,255,255,.035) !important;
+  background: transparent !important;
+}
+
+.app-shell .commons-native-editor {
+  min-height: 6.5rem !important;
+  padding: .72rem .78rem !important;
+  border: 1px solid rgba(107,225,221,.14) !important;
+  border-radius: .62rem .62rem .62rem .16rem !important;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.009),transparent 24%),
+    rgba(1,3,5,.78) !important;
+  color: var(--board-text) !important;
+  box-shadow: inset 0 3px 13px rgba(0,0,0,.48), inset 0 1px rgba(255,255,255,.012) !important;
+}
+
+.app-shell .commons-native-editor:focus {
+  outline: 2px solid rgba(107,225,221,.5);
+  outline-offset: 2px;
+  border-color: rgba(107,225,221,.3) !important;
+}
+
+.app-shell .commons-pending-attachment,
+.app-shell .commons-link-chip {
+  border-color: rgba(107,225,221,.14);
+  background: rgba(107,225,221,.025);
+  box-shadow: inset 0 1px rgba(255,255,255,.018);
+}
+
+.app-shell .commons-drop-active {
+  border-color: rgba(107,225,221,.42) !important;
+  background: rgba(107,225,221,.045);
+}
+
+@media (max-width: 820px) {
+  .app-shell .commons-chat-entry {
+    width: 96% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .app-shell #commons-form {
+    backdrop-filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-shell .commons-chat-entry:hover,
+  .app-shell .commons-chat-entry:focus-within {
+    transform: none !important;
+  }
+}

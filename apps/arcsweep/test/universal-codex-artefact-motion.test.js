@@ -54,6 +54,15 @@ test('render loop sleeps when no ink, effect, or active gesture remains', () => 
   assert.equal(shouldRunArtefactFrame({ pointerActive: true }), true);
 });
 
+test('physical Codex entry mounts both animation layers for full and touch-first book boots', async () => {
+  const entry = await readFile(new URL('../src/magic-book-physical-acceptance-entry.js', import.meta.url), 'utf8');
+  const scheduler = await readFile(new URL('../src/sidecar-bootstrap.js', import.meta.url), 'utf8');
+  assert.match(entry, /universal-codex-animation-sidecar\.js/);
+  assert.match(entry, /universal-codex-artefact-motion-sidecar\.js/);
+  assert.match(scheduler, /GLOBAL_SIDECARS[\s\S]*magic-book-physical-acceptance-entry\.js/);
+  assert.match(scheduler, /CODEX_BOOT_SIDECARS[\s\S]*magic-book-physical-acceptance-entry\.js/);
+});
+
 test('runtime mounts one artefact sidecar and motion source contains no perpetual CSS animation contract', async () => {
   const bootstrap = await readFile(new URL('../src/runtime-integration-bootstrap.js', import.meta.url), 'utf8');
   const sidecar = await readFile(new URL('../src/universal-codex-artefact-motion-sidecar.js', import.meta.url), 'utf8');

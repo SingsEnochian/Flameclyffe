@@ -5,9 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#090b12" />
     <title>STARWELL Glyph Studio</title>
+    <style>
+      .interface-foundry-doorway {
+        position: fixed;
+        right: 1rem;
+        bottom: 1rem;
+        z-index: 60;
+        display: inline-flex;
+        align-items: center;
+        gap: .45rem;
+        padding: .62rem .8rem;
+        border: 1px solid rgba(230, 198, 122, .34);
+        border-radius: .65rem;
+        background: rgba(9, 11, 18, .9);
+        color: #f1e7cb;
+        font: 650 .72rem/1 Inter, ui-sans-serif, system-ui, sans-serif;
+        letter-spacing: .08em;
+        text-decoration: none;
+        text-transform: uppercase;
+        backdrop-filter: blur(14px);
+        box-shadow: 0 8px 28px rgba(0, 0, 0, .28);
+      }
+      .interface-foundry-doorway:hover,
+      .interface-foundry-doorway:focus-visible {
+        border-color: #e6c67a;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(230, 198, 122, .12), 0 8px 28px rgba(0, 0, 0, .28);
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
+    <a class="interface-foundry-doorway" href="../interface-foundry/" title="Open reusable JCINK and ArcSweep interface components">⌇ Interface Lab</a>
     <script type="module" src="./deep-link.js"></script>
     <script type="module" src="../src/glyph-studio-main.jsx"></script>
   </body>
