@@ -214,6 +214,37 @@ router.get('/kernel', (req, res) => {
   }));
 });
 
+router.get('/providers/humain/catalogue', async (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  const route = resolveWayglassRoute('humain:m3-preview');
+  const key = route?.api_key?.();
+  if (!route || !key) return res.status(503).json({ error: 'HUMAIN Node is not configured for Wayglass.' });
+
+  try {
+    const response = await fetch(route.catalogue_endpoint(), {
+      headers: {
+        Authorization: 'Bearer ' + key,
+        'x-api-key': key,
+      },
+      signal: AbortSignal.timeout(30000),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      return res.status(response.status || 502).json({
+        error: data?.error?.message || data?.error || data?.message || 'HUMAIN Node catalogue request failed.',
+      });
+    }
+    return res.json({
+      schema: 'wayglass.provider-catalogue/v0.1',
+      provider: 'humain-node',
+      retrieved_at: new Date().toISOString(),
+      upstream: data,
+    });
+  } catch (error) {
+    return res.status(502).json({ error: error.message || 'HUMAIN Node catalogue request failed.' });
+  }
+});
+
 router.get('/routes', (_req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   return res.json({
