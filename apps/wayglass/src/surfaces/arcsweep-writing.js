@@ -16,6 +16,14 @@ function sessionId() {
   return globalThis.crypto?.randomUUID?.() || 'wayglass-' + Date.now();
 }
 
+function renderThinking(message) {
+  if (!message?.thinking) return '';
+  return '<details class="turn-thinking">' +
+    '<summary><span class="thinking-chevron" aria-hidden="true">&gt;</span> Thinking</summary>' +
+    '<div class="thinking-trace">' + escapeHtml(message.thinking).replaceAll('\n', '<br>') + '</div>' +
+    '</details>';
+}
+
 export async function mountArcSweepWritingSurface(root) {
   const interaction = createInteractionState({ channel: 'IC', turn_owner: 'Rowan' });
   const session = sessionId();
@@ -131,6 +139,7 @@ export async function mountArcSweepWritingSurface(root) {
       const who = message.role === 'assistant' ? message.route_label : 'Rowan';
       return '<article class="turn-card ' + message.role + '">' +
         '<header><strong>' + escapeHtml(who) + '</strong><span>' + escapeHtml(message.channel || 'IC') + '</span></header>' +
+        renderThinking(message) +
         '<div class="turn-text">' + escapeHtml(message.content).replaceAll('\n', '<br>') + '</div>' +
         '</article>';
     }).join('');
@@ -201,6 +210,7 @@ export async function mountArcSweepWritingSurface(root) {
       messages.push({
         role: 'assistant',
         content: result.output || '[quiet]',
+        thinking: result.thinking || '',
         channel: current.channel,
         route_label: routeLabel,
       });
