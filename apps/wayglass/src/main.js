@@ -1,11 +1,13 @@
 import './styles.css';
 import { installWayglassField } from './glass-field.js';
+import { installMotionChoreography } from './motion-choreography.js';
 import { mountWayglassSurface, registerWayglassSurface, listWayglassSurfaces } from './surface-registry.js';
 import { mountArcSweepWritingSurface } from './surfaces/arcsweep-writing.js';
 
 const root = document.querySelector('#app');
 
 installWayglassField({ host: document.body });
+installMotionChoreography({ root: document.documentElement });
 
 registerWayglassSurface({
   surface_id: 'arcsweep:writing-room',
