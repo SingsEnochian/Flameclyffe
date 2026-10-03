@@ -1,10 +1,13 @@
-# Wayglass OS v0.1
+# Wayglass v0.1 · embryonic kernel + embodiment shell
 
-Wayglass is the host route OS. ArcSweep attaches to it as an interaction surface.
+Wayglass is intended to become both a native learned cognitive substrate and the operating environment that carries worlds, continuity, routes, tools, and embodiments. ArcSweep attaches as one spatial/cognitive surface.
+
+**Current truth:** this repository does not yet contain a Wayglass-native trained LLM. The executable slice now contains the first kernel boot contract, a local-first Ollama seed route, an external GPT route, embodiment capability detection, and an attached ArcSweep surface. External/seed models are explicitly marked non-native so scaffolding cannot be mistaken for the finished Wayglass mind.
 
 This first vertical slice proves:
 
 - a server-side, extensible route catalogue;
+- a local-first Ollama route for seed/local cognition;
 - a GPT route through the OpenAI Responses API;
 - no provider key in the browser;
 - an attached ArcSweep writing surface;
@@ -13,7 +16,9 @@ This first vertical slice proves:
 - explicit character ownership and temporary-handoff vocabulary;
 - route receipts;
 - a refractive Three.js background field;
-- glass controls with restrained audio/haptic feedback.
+- glass controls with restrained audio/haptic feedback;
+- keyboard command bridge and AR capability detection;
+- first `wayglass.kernel/v0.1` boot contract separating persistent system identity from body and cognitive substrate.
 
 ## Run
 
@@ -29,7 +34,7 @@ The GPT route requires `OPENAI_API_KEY` (or the existing compatible server-side 
 
 Wayglass is not ArcSweep renamed.
 
-Wayglass owns route hosting, route registration, and attached-surface orchestration. ArcSweep remains an attached cognitive/spatial workspace. Return Engine remains the continuity substrate. Models and trained agents remain registered routes.
+Wayglass owns its kernel, route ecology, world/continuity orchestration, embodiment contracts, and eventually its own learned model lineage. ArcSweep remains an attached cognitive/spatial workspace. Return Engine remains the continuity organ across model/body changes. External models and trained agents can remain registered routes without being mistaken for Wayglass itself.
 
 Training completion does not imply promotion to a live route.
 
