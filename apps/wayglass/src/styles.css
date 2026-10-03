@@ -420,3 +420,106 @@ button { font: inherit; cursor: pointer; }
   .route-mineral { width: 42px; height: 42px; border-radius: 13px; }
   .route-mineral i { inset: 13px; }
 }
+
+
+/* Spatial material choreography
+   Pointer movement changes apparent viewing angle, not layout. The interface
+   settles when the hand settles. Semantic events still own the larger motion. */
+:root {
+  --wg-pointer-x: 68%;
+  --wg-pointer-y: 30%;
+  --wg-velocity: 0;
+  --wg-tilt-x: 0deg;
+  --wg-tilt-y: 0deg;
+}
+
+.wg-surface {
+  perspective: 1500px;
+  perspective-origin: var(--wg-pointer-x) var(--wg-pointer-y);
+}
+
+.glass-panel {
+  background:
+    radial-gradient(
+      520px circle at var(--wg-pointer-x) var(--wg-pointer-y),
+      rgba(115, 237, 231, calc(.018 + var(--wg-velocity) * .055)),
+      rgba(92, 103, 231, calc(.010 + var(--wg-velocity) * .025)) 24%,
+      transparent 58%
+    ),
+    linear-gradient(116deg, rgba(255,255,255,.045), transparent 19%, rgba(64,210,211,.028) 39%, rgba(104,72,201,.025) 63%, transparent 82%),
+    linear-gradient(180deg, rgba(13,22,27,.68), rgba(2,6,9,.79)),
+    var(--black-glass);
+}
+
+.wg-surface-head,
+.wg-thread,
+.wg-composer {
+  transform: rotateX(var(--wg-tilt-x)) rotateY(var(--wg-tilt-y));
+  transform-origin: 50% 50%;
+}
+
+/* A thin mineral flash moves locally under the hand instead of lighting the
+   whole panel. This keeps the labradorite rare and angle-dependent. */
+.glass-panel::before {
+  background:
+    radial-gradient(
+      280px circle at var(--wg-pointer-x) var(--wg-pointer-y),
+      rgba(205, 255, 251, calc(.035 + var(--wg-velocity) * .075)),
+      rgba(50, 220, 217, calc(.026 + var(--wg-velocity) * .055)) 18%,
+      rgba(83, 91, 231, calc(.018 + var(--wg-velocity) * .035)) 34%,
+      rgba(159, 75, 226, calc(.012 + var(--wg-velocity) * .025)) 46%,
+      transparent 68%
+    );
+  opacity: .78;
+}
+
+/* The route reliquary exposes contained mechanism on route activity. */
+#app[data-material-state="route"] .route-mineral {
+  box-shadow:
+    inset 0 2px rgba(241,255,255,.15),
+    inset 0 -4px 12px rgba(0,0,0,.78),
+    0 7px 0 rgba(0,0,0,.24),
+    0 16px 42px rgba(0,0,0,.38),
+    0 0 34px rgba(62, 214, 211, .12);
+}
+
+#app[data-material-state="handoff"] .turn-jewel {
+  border-color: rgba(102, 226, 221, .36);
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.10),
+    0 0 0 1px rgba(83, 91, 231, .07),
+    0 0 28px rgba(63, 214, 211, .09);
+}
+
+#app[data-material-state="channel"] .glass-chip.active::after,
+#app[data-material-state="bind"] .ownership-chip::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 22%, rgba(102,231,226,.10), rgba(135,80,225,.08), transparent 76%);
+}
+
+/* Touch devices keep optical depth without relying on hover/pointer travel. */
+@media (hover: none) {
+  .wg-surface-head,
+  .wg-thread,
+  .wg-composer { transform: none; }
+
+  .glass-panel::before {
+    background: radial-gradient(circle at 18% 0%, rgba(255,255,255,.07), transparent 24rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --wg-velocity: 0;
+    --wg-tilt-x: 0deg;
+    --wg-tilt-y: 0deg;
+  }
+
+  .wg-surface-head,
+  .wg-thread,
+  .wg-composer { transform: none !important; }
+}
