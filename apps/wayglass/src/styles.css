@@ -157,3 +157,158 @@ button { font: inherit; cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .001ms !important; animation-duration: .001ms !important; animation-iteration-count: 1 !important; }
 }
+
+
+/* Wayglass mineral material pass
+   Reference behaviour: black glass optical mass, labradorite angle-fire,
+   dark stone structure, metal edgework, living ink that wakes on interaction. */
+
+:root {
+  --obsidian: rgba(2, 5, 8, .86);
+  --black-glass: rgba(4, 9, 13, .68);
+  --stone-face: rgba(10, 14, 17, .88);
+  --metal-edge: rgba(162, 182, 190, .22);
+  --lab-cyan: rgba(58, 226, 224, .64);
+  --lab-blue: rgba(62, 111, 241, .50);
+  --lab-violet: rgba(154, 75, 230, .44);
+  --lab-green: rgba(69, 194, 151, .34);
+}
+
+.glass-panel {
+  border-color: rgba(176, 211, 216, .18);
+  background:
+    linear-gradient(116deg, rgba(255,255,255,.045), transparent 19%, rgba(64,210,211,.028) 39%, rgba(104,72,201,.025) 63%, transparent 82%),
+    linear-gradient(180deg, rgba(13,22,27,.68), rgba(2,6,9,.79)),
+    var(--black-glass);
+  box-shadow:
+    0 34px 110px rgba(0,0,0,.48),
+    0 9px 20px rgba(0,0,0,.31),
+    inset 0 1px rgba(230,252,255,.13),
+    inset 0 -2px rgba(0,0,0,.62),
+    inset 10px 0 38px rgba(24,99,106,.035),
+    inset -12px 0 42px rgba(83,41,121,.025);
+  backdrop-filter: blur(28px) saturate(1.38) contrast(1.05);
+  -webkit-backdrop-filter: blur(28px) saturate(1.38) contrast(1.05);
+  transform-style: preserve-3d;
+}
+
+.glass-panel::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: calc(inherit - 4px);
+  pointer-events: none;
+  border: 1px solid rgba(217, 246, 247, .055);
+  background:
+    radial-gradient(80% 140% at 4% 12%, rgba(61,221,221,.065), transparent 42%),
+    radial-gradient(65% 130% at 92% 78%, rgba(125,68,221,.05), transparent 47%);
+  mix-blend-mode: screen;
+  opacity: .72;
+}
+
+.wg-surface-head,
+.wg-thread,
+.wg-composer {
+  outline: 1px solid rgba(111, 130, 137, .16);
+  outline-offset: 5px;
+}
+
+.wg-surface-head::before {
+  background:
+    linear-gradient(90deg, transparent, rgba(63,224,221,.10), rgba(78,93,226,.07), rgba(155,72,226,.07), transparent);
+  background-size: 240% 100%;
+  opacity: .34;
+}
+
+.glass-chip,
+.send-jewel,
+.ownership-chip {
+  position: relative;
+  overflow: hidden;
+  border-color: var(--metal-edge);
+  background:
+    linear-gradient(145deg, rgba(225,249,250,.08), transparent 28%),
+    linear-gradient(180deg, rgba(13,23,29,.86), rgba(1,5,8,.88));
+  box-shadow:
+    inset 0 2px rgba(238,255,255,.12),
+    inset 0 -3px 8px rgba(0,0,0,.58),
+    0 5px 0 rgba(1,4,6,.42),
+    0 12px 28px rgba(0,0,0,.28);
+}
+
+.glass-chip.active {
+  border-color: rgba(115, 232, 228, .52);
+  background:
+    radial-gradient(circle at 28% 10%, rgba(89,235,229,.15), transparent 35%),
+    radial-gradient(circle at 78% 88%, rgba(125,69,228,.11), transparent 42%),
+    linear-gradient(180deg, rgba(12,26,31,.92), rgba(1,5,8,.93));
+  box-shadow:
+    inset 0 2px rgba(232,255,255,.16),
+    inset 0 -4px 10px rgba(0,0,0,.66),
+    0 5px 0 rgba(1,4,6,.48),
+    0 0 30px rgba(55,209,207,.10);
+}
+
+.turn-card {
+  border-color: rgba(176, 211, 216, .15);
+  background:
+    linear-gradient(120deg, rgba(255,255,255,.035), transparent 28%),
+    linear-gradient(180deg, rgba(7,14,18,.76), rgba(2,6,9,.72));
+  box-shadow:
+    inset 0 1px rgba(240,255,255,.07),
+    inset 0 -8px 24px rgba(0,0,0,.18),
+    0 11px 28px rgba(0,0,0,.18);
+}
+
+.turn-card.user {
+  background:
+    linear-gradient(115deg, rgba(40,185,183,.055), transparent 30%, rgba(108,67,205,.04)),
+    linear-gradient(180deg, rgba(8,19,23,.78), rgba(2,7,10,.74));
+}
+
+/* Layer separation: a semantic action briefly reveals the wrapper's
+   laminated construction, inspired by levitating/assembling reference forms. */
+#app[data-material-state="handoff"] .wg-surface-head {
+  transform: translate3d(0, -2px, 0) scale(.998);
+}
+#app[data-material-state="handoff"] .wg-control-ribbon {
+  transform: translate3d(0, 3px, 0);
+}
+#app[data-material-state="handoff"] .wg-thread {
+  transform: translate3d(0, 7px, 0) scale(.996);
+}
+#app[data-material-state="handoff"] .wg-composer {
+  transform: translate3d(0, 11px, 0) scale(.992);
+}
+
+.wg-surface-head,
+.wg-control-ribbon,
+.wg-thread,
+.wg-composer {
+  transition:
+    transform 520ms cubic-bezier(.18,.78,.18,1),
+    border-color 420ms ease,
+    box-shadow 520ms ease,
+    background 520ms ease;
+}
+
+#app[data-material-state="channel"] .glass-segment,
+#app[data-material-state="bind"] .ownership-drawer {
+  filter: drop-shadow(0 0 14px rgba(63,221,219,.11));
+}
+
+/* The surface should become quiet again. Motion is an event, not wallpaper. */
+@media (prefers-reduced-motion: no-preference) {
+  #app[data-material-state="handoff"] .glass-panel::before {
+    background-position: 100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #app[data-material-state] .wg-surface-head,
+  #app[data-material-state] .wg-control-ribbon,
+  #app[data-material-state] .wg-thread,
+  #app[data-material-state] .wg-composer {
+    transform: none !important;
+  }
+}
