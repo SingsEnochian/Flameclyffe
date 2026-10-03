@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { createInteractionState } from '../src/interaction-state.js';
+import { normaliseMaterialSignal } from '../src/material-state.js';
 import { publicWayglassRoutes, resolveWayglassRoute } from '../../../lib/wayglass-route-registry.js';
 
 test('Wayglass interaction state keeps IC/OOC, turn owner, and ownership separate', () => {
@@ -35,4 +36,39 @@ test('registered GPT route is server resolved and extensible', () => {
   assert.equal(route.provider, 'openai');
   assert.equal(route.capabilities.text, true);
   assert.equal(typeof route.model, 'function');
+});
+
+
+test('Wayglass material signals preserve semantics without letting visual state become canon', () => {
+  assert.deepEqual(normaliseMaterialSignal({
+    strength: 1.4,
+    intent: 0.83,
+    channel: 'OOC',
+    ownership: 1,
+    handoff_progress: 0.64,
+    canon_state: 'unresolved',
+    mode: 'handoff',
+  }), {
+    strength: 1,
+    intent: 0.83,
+    channel: 'OOC',
+    ownership: 1,
+    handoff_progress: 0.64,
+    canon_state: 'unresolved',
+    mode: 'handoff',
+  });
+
+  assert.deepEqual(normaliseMaterialSignal({
+    channel: 'invented-channel',
+    canon_state: 'definitely-canon',
+    handoff_progress: -4,
+  }), {
+    strength: 0.72,
+    intent: 0,
+    channel: 'IC',
+    ownership: 0,
+    handoff_progress: 0,
+    canon_state: 'candidate',
+    mode: 'wake',
+  });
 });
