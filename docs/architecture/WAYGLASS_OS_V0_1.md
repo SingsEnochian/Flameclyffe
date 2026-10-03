@@ -82,3 +82,12 @@ OOC:
 7. Replace the simple background field with the thicker refractive material/shader stack as that renderer stabilises.
 
 No trained model is promoted merely because training completed.
+
+
+## Hosting boundary
+
+**No Vercel dependency.**
+
+Wayglass's executable web surface is a Vite build served by the existing Flameclyffe/Hearthgate Express host. Provider credentials and route invocation remain server-side in `apps/starwell-server/wayglass/router.js`. The browser never receives provider secrets.
+
+The initial serverless experiment under `api/v1/wayglass` was removed before promotion.
