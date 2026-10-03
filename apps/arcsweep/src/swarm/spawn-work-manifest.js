@@ -2,7 +2,7 @@ export const SPAWN_WORK_MANIFEST_SCHEMA = 'hearthweave.spawn-work-manifest/v0.1'
 
 const DEFAULT_LANES = Object.freeze([
   Object.freeze({ id: 'systems', label: 'Systems', aspects: ['mapper', 'critic'], purpose: 'Architecture, interfaces, dependencies, and failure modes.' }),
-  Object.freeze({ id: 'implementation', label: 'Implementation', aspects: ['maker', 'mapper'], purpose: 'Smallest reversible implementation path and concrete artefacts.' }),
+  Object.freeze({ id: 'implementation', label: 'Implementation', aspects: ['maker', 'mapper'], purpose: 'Whole-system implementation plan, complete module boundaries, explicit interfaces, integration order, and concrete artefacts.' }),
   Object.freeze({ id: 'verification', label: 'Verification', aspects: ['critic', 'witness'], purpose: 'Tests, edge cases, evidence, and regression checks.' }),
   Object.freeze({ id: 'narrative', label: 'Narrative', aspects: ['narrative', 'continuity'], purpose: 'Human-facing explanation, continuity, and Codex presentation.' }),
 ]);
@@ -91,8 +91,8 @@ export function earthGateFiveDaySpawnManifest(overrides = {}) {
     ],
     lanes: [
       { id: 'protocol', label: 'Protocol', aspects: ['mapper', 'critic'], purpose: 'Session schema, hidden-target commitment, evidence ledger, controls, and state machine.', expectedReturn: 'Contract schemas, invariants, edge cases, and implementation-ready interfaces.' },
-      { id: 'runa', label: 'Runa', aspects: ['maker', 'mapper'], purpose: 'Crossing Packet compiler, deterministic playback timeline, receipt format, and configuration seam.', expectedReturn: 'Transmission config and timing contract plus smallest implementation route.' },
-      { id: 'codex', label: 'Codex', aspects: ['narrative', 'maker'], purpose: 'Living two-page transmission/reception UI, fast raw capture, artefact motion semantics, and reveal presentation.', expectedReturn: 'UI component map, interaction states, and reversible implementation patch plan.' },
+      { id: 'runa', label: 'Runa', aspects: ['maker', 'mapper'], purpose: 'Crossing Packet compiler, deterministic playback timeline, receipt format, and configuration seam.', expectedReturn: 'Transmission config and timing contract plus complete module/interface implementation route and integration plan.' },
+      { id: 'codex', label: 'Codex', aspects: ['narrative', 'maker'], purpose: 'Living two-page transmission/reception UI, fast raw capture, artefact motion semantics, and reveal presentation.', expectedReturn: 'UI module map, interaction states, ownership boundaries, interface contracts, integration plan, and complete implementation path.' },
       { id: 'scoring', label: 'Scoring', aspects: ['critic', 'witness'], purpose: 'Deterministic correspondence scorer, provenance categories, reveal discipline, and control comparison.', expectedReturn: 'Scoring rules, fixtures, tests, and explicit separation of exact, synonym, semantic candidate, and human interpretation.' },
       { id: 'verification', label: 'Verification', aspects: ['witness', 'continuity'], purpose: 'End-to-end receipts, replay, failure injection, persistence, and five-day definition-of-done checks.', expectedReturn: 'Acceptance suite, failure matrix, evidence checklist, and handoff-ready verification plan.' },
     ],

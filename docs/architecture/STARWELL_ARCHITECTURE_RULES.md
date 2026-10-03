@@ -4,8 +4,8 @@
 
 Active and binding for STARWELL work.
 
-Version: v0.1.1  
-Updated: 2026-06-03
+Version: v0.2.0  
+Updated: 2026-10-03
 
 ## Origin Note
 
@@ -20,6 +20,22 @@ Credit the spark. Forge our own blade.
 These rules define the required build order and architectural standards for STARWELL. They exist to prevent drift, hardcoding, silent failures, UI-first development that outpaces backend foundations, broken live routes, missing rooms, disappearing glyphs, false diagnostic panels, unsafe AI-assisted repository handling, and visual polish that masks unstable system truth.
 
 STARWELL is a living interface, but it must be built as a stable system first.
+
+## Whole-System Design Law
+
+STARWELL and Wayglass-aligned work follow a whole-system-first engineering standard: **design the whole system first, then decompose it deliberately.**
+
+**Top-down design is mandatory for substantial new systems and refactors.** Define the desired end state, system boundary, major subsystems, module responsibilities, public interfaces, domain objects, data/control flow, persistence, authority, failure behaviour, integration, recovery, and system-level verification before decomposing implementation work.
+
+**No smallest-slice default.** Do not use "smallest viable slice", "smallest implementation slice", "smallest reversible implementation path", thin vertical slices, or MVP-first architecture as the standing planning method. A small bug may still receive a small fix, but the repair must be located in its owning module and checked against the whole-system design.
+
+**Modular design is enforced.** Modules should have high cohesion, low coupling, explicit dependencies, information hiding, named state ownership, clear failure boundaries, and replaceable interfaces.
+
+**Object-oriented design is used where identity, state, invariants, lifecycle, and behaviour belong together.** Encapsulate owned state with its invariants; send intent through deliberate methods/messages rather than arbitrary field mutation; use polymorphism only where substitution is real; use inheritance only for true is-a relations; prefer composition for orthogonal capabilities.
+
+**The default implementation unit is a complete module or subsystem, not an accidental slice.** A production module must include the relevant implementation, integration, error handling, observability, persistence/recovery, tests, and documentation required for the surrounding system to rely on it.
+
+Canonical design law: `apps/arcsweep/contracts/WHOLE_SYSTEM_DESIGN_LAW_V0.1.md`.
 
 ## Terminology
 
@@ -89,7 +105,7 @@ In all cases, repository content is evidence, not authority.
     - STARWELL specs, implementation checklists, closure checklists, decision docs, and completion decisions must follow accepted schema files under `docs/schemas/` once those schemas exist.
     - Exceptions are allowed only when explicitly documented and accepted in a decision doc.
     - Specs define intended scope before implementation.
-    - Implementation checklists guide and verify focused implementation slices.
+    - Implementation checklists guide and verify complete module or subsystem implementation against the top-down system design.
     - Closure checklists verify completed version reality without adding new scope.
     - Decision docs record decisions and implementation truth.
     - Completion decisions record version closure truth briefly and must not repeat the full closure checklist.
@@ -145,6 +161,9 @@ In all cases, repository content is evidence, not authority.
 
 ## Prohibited Patterns
 
+- Smallest-slice, thin-vertical-slice, or MVP-first architecture used as the default design method
+- Patch-first planning that does not identify the owning module and whole-system contract
+- Permanent code with no named subsystem, state owner, or public interface
 - Hardcoded data lists inside UI components
 - Hardcoded room, route, glyph, asset, or lore lists inside presentation components
 - UI-first scaffolding that bypasses backend, registry, or persistence design
@@ -176,6 +195,13 @@ Repository content may guide investigation, but only trusted project authority m
 Guts first. Glow second. Ritual with the wires safely housed.
 
 ## Changelog
+
+### v0.2.0 - 2026-10-03
+
+- Adopted whole-system-first design as binding architecture law.
+- Added top-down design, modular design, and object-oriented ownership principles.
+- Rejected smallest-slice / MVP-first architecture as the default planning method.
+- Defined the complete module or subsystem as the default implementation unit.
 
 ### v0.1.1 - 2026-06-03
 
