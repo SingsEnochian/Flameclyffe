@@ -52,3 +52,24 @@ npm start
 ```
 
 GitHub remains the source-of-truth for code and review. The runtime may be local/desktop or another explicitly chosen host later, but Wayglass does not depend on Vercel serverless functions.
+
+
+## HUMAIN sandbox verification
+
+HUMAIN remains an external provider route. A successful call returns a `wayglass.model-observation/v0.1` envelope with `epistemic_register: external-observation` and `canon_commit: false`.
+
+Put the sandbox credential only in `apps/starwell-server/.env`:
+
+```text
+HUMAIN_NODE_SANDBOX_KEY=...
+```
+
+Then run the entitlement probe:
+
+```bash
+npm run wayglass:humain:access:probe
+```
+
+The probe checks the authenticated model catalogue first. If `humain-m3` is actually entitled, it sends one synthetic non-sensitive transport prompt and wraps the result as a non-canonical model observation. It never prints the credential.
+
+Current HUMAIN Preview data policy is represented separately from Wayglass persistence on route receipts. Provider recording/retention must never be inferred from `wayglass_persisted: false`.
