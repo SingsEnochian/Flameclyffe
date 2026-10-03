@@ -80,6 +80,7 @@ async function callOllama(route, payload) {
     body: JSON.stringify({
       model: route.model(),
       messages,
+      think: true,
       stream: false,
       options: {
         num_predict: Math.max(64, Math.min(4000, Number(payload.max_output_tokens) || 1400)),
@@ -97,6 +98,7 @@ async function callOllama(route, payload) {
 
   return {
     output: cleanText(data?.message?.content || data?.response || '', MAX_TEXT),
+    thinking: cleanText(data?.message?.thinking || '', MAX_TEXT * 2),
     response_id: null,
     usage: {
       prompt_tokens: data?.prompt_eval_count ?? null,
@@ -145,6 +147,7 @@ async function callHumainNode(route, payload) {
   const content = data?.choices?.[0]?.message?.content;
   return {
     output: cleanText(content || '', MAX_TEXT),
+    thinking: null,
     response_id: data.id || null,
     usage: data.usage || null,
   };
@@ -188,6 +191,7 @@ async function callOpenAI(route, payload) {
 
   return {
     output: outputText(data),
+    thinking: null,
     response_id: data.id || null,
     usage: data.usage || null,
   };
@@ -297,6 +301,7 @@ router.post('/respond', async (req, res) => {
       provider: route.provider,
       model: route.model(),
       output: result.output,
+      thinking: result.thinking || null,
       receipt: {
         response_id: result.response_id,
         session_id: cleanText(payload.session_id, 160) || null,
@@ -304,6 +309,7 @@ router.post('/respond', async (req, res) => {
         channel: payload?.interaction?.channel === 'OOC' ? 'OOC' : 'IC',
         completed_at: new Date().toISOString(),
         stored_by_provider_request: false,
+        thinking_exposed: Boolean(result.thinking),
         usage: result.usage,
       },
     });
