@@ -31,7 +31,6 @@ const catalogue = env.HUMAIN_NODE_SANDBOX_CATALOGUE_URL
 const response = await fetch(catalogue, {
   headers: {
     Authorization: 'Bearer ' + key,
-    'x-api-key': key,
   },
   signal: AbortSignal.timeout(30000),
 });
