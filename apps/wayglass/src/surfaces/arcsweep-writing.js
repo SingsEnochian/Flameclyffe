@@ -36,15 +36,16 @@ export async function mountArcSweepWritingSurface(root) {
         '<div class="wg-route-block">',
           '<div class="route-mineral" aria-hidden="true"><i></i><b></b><span></span></div>',
           '<label for="wg-route">Route</label>',
-          '<select id="wg-route" aria-label="Wayglass route"></select>',
+          '<select id="wg-route" aria-label="Wayglass route" aria-keyshortcuts="Alt+R"></select>',
           '<span id="wg-route-state" class="tiny">Loading route catalogue…</span>',
+          '<span id="wg-embodiment-state" class="tiny"></span>',
         '</div>',
       '</header>',
 
       '<section class="wg-control-ribbon glass-panel" aria-label="Writing state">',
         '<div class="glass-segment" role="group" aria-label="IC or OOC">',
-          '<button type="button" class="glass-chip active" data-channel="IC" aria-pressed="true">IC</button>',
-          '<button type="button" class="glass-chip" data-channel="OOC" aria-pressed="false">OOC</button>',
+          '<button type="button" class="glass-chip active" data-channel="IC" aria-pressed="true" aria-keyshortcuts="Alt+I">IC</button>',
+          '<button type="button" class="glass-chip" data-channel="OOC" aria-pressed="false" aria-keyshortcuts="Alt+O">OOC</button>',
         '</div>',
         '<div class="turn-jewel"><span>Turn</span><strong id="wg-turn-owner">Rowan</strong></div>',
         '<details class="ownership-drawer">',
@@ -70,19 +71,20 @@ export async function mountArcSweepWritingSurface(root) {
       '</section>',
 
       '<section class="wg-composer glass-panel">',
-        '<textarea id="wg-input" rows="6" placeholder="Write the next turn…" aria-label="Next writing turn"></textarea>',
+        '<textarea id="wg-input" rows="6" placeholder="Write the next turn…" aria-label="Next writing turn" aria-keyshortcuts="Alt+W Control+Enter Meta+Enter"></textarea>',
         '<div class="composer-foot">',
           '<span id="wg-status" class="tiny">IC · Rowan has the turn</span>',
           '<button id="wg-send" type="button" class="send-jewel">Pass turn</button>',
         '</div>',
       '</section>',
 
-      '<footer class="wg-receipt tiny" id="wg-receipt">No route receipt yet.</footer>',
+      '<footer class="wg-receipt tiny"><span id="wg-receipt">No route receipt yet.</span><span class="keyboard-hint"> · Keyboard: Alt+I/O channel · Alt+R route · Alt+W write</span></footer>',
     '</section>',
   ].join('');
 
   const routeSelect = root.querySelector('#wg-route');
   const routeState = root.querySelector('#wg-route-state');
+  const embodimentState = root.querySelector('#wg-embodiment-state');
   const channelButtons = [...root.querySelectorAll('[data-channel]')];
   const turnOwner = root.querySelector('#wg-turn-owner');
   const ownershipForm = root.querySelector('#wg-ownership-form');
@@ -92,6 +94,9 @@ export async function mountArcSweepWritingSurface(root) {
   const status = root.querySelector('#wg-status');
   const send = root.querySelector('#wg-send');
   const receipt = root.querySelector('#wg-receipt');
+
+  const arState = document.documentElement.dataset.wayglassAr || 'unknown';
+  embodimentState.textContent = 'Keyboard ready · AR ' + (arState === 'ready' ? 'ready' : arState.replaceAll('-', ' '));
 
   function selectedRouteLabel() {
     return routes.find((item) => item.route_id === selectedRoute)?.label || selectedRoute;
@@ -258,6 +263,35 @@ export async function mountArcSweepWritingSurface(root) {
     refreshState();
   });
 
+
+  function handleWayglassCommand(event) {
+    const command = event?.detail?.command;
+    if (command === 'channel:ic' || command === 'channel:ooc') {
+      const channel = command.endsWith(':ooc') ? 'OOC' : 'IC';
+      interaction.setChannel(channel);
+      wakeMaterial(0.58, 'channel', { intent: 0.52 });
+      void emitInteractionCue(channel === 'OOC' ? 'ooc' : 'switch');
+      refreshState();
+      return;
+    }
+    if (command === 'focus:route') {
+      routeSelect.focus();
+      wakeMaterial(0.52, 'route', { intent: 0.5 });
+      return;
+    }
+    if (command === 'focus:composer') {
+      input.focus();
+      wakeMaterial(0.42, 'focus', { intent: 0.35 });
+      return;
+    }
+    if (command === 'help:keyboard') {
+      status.textContent = 'Keyboard · Alt+I IC · Alt+O OOC · Alt+R route · Alt+W composer · Ctrl/Cmd+Enter pass turn';
+      globalThis.setTimeout?.(refreshState, 3600);
+    }
+  }
+
+  globalThis.addEventListener?.('wayglass:command', handleWayglassCommand);
+
   send.addEventListener('click', passTurn);
   input.addEventListener('keydown', (event) => {
     if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
@@ -276,5 +310,8 @@ export async function mountArcSweepWritingSurface(root) {
     session_id: session,
     messages,
     lastReceipt: () => lastReceipt,
+    destroy() {
+      globalThis.removeEventListener?.('wayglass:command', handleWayglassCommand);
+    },
   });
 }
