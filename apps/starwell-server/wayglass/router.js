@@ -5,6 +5,7 @@ const {
   publicWayglassRoutes,
   resolveWayglassRoute,
 } = require('../../../lib/wayglass-route-registry.cjs');
+const { bootWayglassKernel } = require('../../../lib/wayglass-kernel.cjs');
 
 const router = express.Router();
 const MAX_HISTORY = 16;
@@ -65,6 +66,45 @@ function outputText(data) {
     .trim();
 }
 
+async function callOllama(route, payload) {
+  const input = cleanText(payload.input);
+  const messages = [
+    { role: 'system', content: buildInstructions(payload.interaction) },
+    ...cleanHistory(payload.history),
+    { role: 'user', content: input },
+  ];
+
+  const response = await fetch(route.endpoint(), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: route.model(),
+      messages,
+      stream: false,
+      options: {
+        num_predict: Math.max(64, Math.min(4000, Number(payload.max_output_tokens) || 1400)),
+      },
+    }),
+    signal: AbortSignal.timeout(120000),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(data?.error || data?.message || 'Wayglass local route failed.');
+    error.status = response.status || 502;
+    throw error;
+  }
+
+  return {
+    output: cleanText(data?.message?.content || data?.response || '', MAX_TEXT),
+    response_id: null,
+    usage: {
+      prompt_tokens: data?.prompt_eval_count ?? null,
+      completion_tokens: data?.eval_count ?? null,
+    },
+  };
+}
+
 async function callOpenAI(route, payload) {
   const key = route.api_key();
   if (!key) {
@@ -108,6 +148,27 @@ async function callOpenAI(route, payload) {
   };
 }
 
+router.get('/kernel', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  const ar = req.query.ar === '1';
+  const touch = req.query.touch === '1';
+  const keyboard = req.query.keyboard !== '0';
+  return res.json(bootWayglassKernel({
+    preferred_route: cleanText(req.query.route, 120),
+    world_id: cleanText(req.query.world, 180),
+    continuity_ref: cleanText(req.query.continuity, 240),
+    embodiment: {
+      body_id: cleanText(req.query.body, 180) || 'browser-host',
+      body_class: cleanText(req.query.body_class, 80) || 'host-os',
+      platform_hint: cleanText(req.query.platform, 80),
+      keyboard,
+      touch,
+      ar,
+      haptics: req.query.haptics === '1',
+    },
+  }));
+});
+
 router.get('/routes', (_req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   return res.json({
@@ -125,8 +186,10 @@ router.post('/respond', async (req, res) => {
   if (!cleanText(payload.input)) return res.status(400).json({ error: 'input required.' });
 
   try {
-    if (route.provider !== 'openai') return res.status(501).json({ error: 'Provider adapter not implemented yet.' });
-    const result = await callOpenAI(route, payload);
+    let result;
+    if (route.provider === 'openai') result = await callOpenAI(route, payload);
+    else if (route.provider === 'ollama') result = await callOllama(route, payload);
+    else return res.status(501).json({ error: 'Provider adapter not implemented yet.' });
     return res.json({
       schema: 'wayglass.route-turn/v0.1',
       route_id: route.route_id,
