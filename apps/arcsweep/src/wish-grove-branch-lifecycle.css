@@ -1,0 +1,122 @@
+.wish-grove-lifecycle {
+  margin-top: 1rem;
+  padding-top: .85rem;
+  border-top: 1px solid rgba(93,67,31,.18);
+}
+
+.wish-grove-lifecycle > header,
+.wish-grove-lifecycle-branch > header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .75rem;
+}
+
+.wish-grove-lifecycle h4 {
+  margin: .15rem 0;
+  color: #294a3b;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.wish-grove-lifecycle-note {
+  margin: .35rem 0;
+  color: #735f4e;
+  font-size: .76rem;
+}
+
+.wish-grove-lifecycle-list {
+  display: grid;
+  gap: .6rem;
+  margin-top: .65rem;
+}
+
+.wish-grove-lifecycle-branch {
+  padding: .65rem;
+  border: 1px solid rgba(93,67,31,.16);
+  border-radius: 12px;
+  background: rgba(255,255,255,.19);
+}
+
+.wish-grove-lifecycle-branch header div,
+.wish-grove-lifecycle-branch header strong,
+.wish-grove-lifecycle-branch header small {
+  display: block;
+}
+
+.wish-grove-lifecycle-branch header small {
+  margin-top: .12rem;
+  color: #806b57;
+  font-size: .68rem;
+  overflow-wrap: anywhere;
+}
+
+.wish-grove-lifecycle-branch [data-branch-status] {
+  padding: .2rem .44rem;
+  border: 1px solid rgba(82,120,98,.28);
+  border-radius: 999px;
+  background: rgba(82,120,98,.09);
+  color: #3c594a;
+  font-size: .7rem;
+  text-transform: lowercase;
+}
+
+.wish-grove-lifecycle-branch [data-branch-status="realised"] {
+  border-color: rgba(217,184,107,.58);
+  background: rgba(217,184,107,.13);
+}
+
+.wish-grove-lifecycle-branch [data-branch-status="retired"] {
+  opacity: .76;
+}
+
+.wish-grove-lifecycle form,
+.wish-grove-lifecycle-merge form {
+  display: grid;
+  gap: .5rem;
+  margin-top: .55rem;
+}
+
+.wish-grove-lifecycle form label,
+.wish-grove-lifecycle fieldset {
+  display: grid;
+  gap: .24rem;
+  color: #604e40;
+  font-size: .78rem;
+}
+
+.wish-grove-lifecycle input,
+.wish-grove-lifecycle textarea,
+.wish-grove-lifecycle select {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(93,67,31,.24);
+  border-radius: 9px;
+  padding: .5rem .58rem;
+  color: #2b221b;
+  background: rgba(255,255,255,.48);
+}
+
+.wish-grove-lifecycle fieldset {
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  margin: 0;
+  padding: .55rem;
+  border: 1px solid rgba(93,67,31,.15);
+  border-radius: 10px;
+}
+
+.wish-grove-lifecycle fieldset label {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+}
+
+.wish-grove-lifecycle fieldset input {
+  width: auto;
+}
+
+.wish-grove-lifecycle-merge {
+  margin-top: .7rem;
+  padding: .65rem;
+  border: 1px dashed rgba(82,120,98,.3);
+  border-radius: 12px;
+}
