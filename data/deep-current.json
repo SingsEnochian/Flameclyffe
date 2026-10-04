@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-10-04T06:09:20.245Z",
+  "generated_at": "2026-10-04T12:41:35.918Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,51 +13,51 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-10-04T02:00",
-    "sky": "Night",
+    "time": "2026-10-04T08:30",
+    "sky": "Day",
     "current": {
-      "time": "2026-10-04T02:00",
+      "time": "2026-10-04T08:30",
       "interval": 900,
-      "temperature_2m": 74.3,
+      "temperature_2m": 76.9,
       "relative_humidity_2m": 96,
-      "is_day": 0,
+      "is_day": 1,
       "precipitation": 0,
       "rain": 0,
-      "weather_code": 2,
-      "cloud_cover": 78,
-      "pressure_msl": 1017.9,
-      "wind_speed_10m": 2.6,
-      "wind_direction_10m": 350
+      "weather_code": 1,
+      "cloud_cover": 40,
+      "pressure_msl": 1018.1,
+      "wind_speed_10m": 1.7,
+      "wind_direction_10m": 347
     }
   },
   "space_weather": {
     "kp": {
-      "value": 3.33,
-      "time_tag": "2026-10-04T03:00:00",
-      "a_running": 18
+      "value": 5,
+      "time_tag": "2026-10-04T09:00:00",
+      "a_running": 48
     },
     "solar_wind": {
-      "time_tag": "2026-10-04T06:02:00Z",
-      "bz": -16,
-      "bt": 22,
+      "time_tag": "2026-10-04T12:33:00Z",
+      "bz": -8,
+      "bt": 17,
       "density": null,
-      "speed": 378
+      "speed": 502
     }
   },
   "moon": {
-    "age_days": 22.4,
-    "illumination": 47.3,
+    "age_days": 22.67,
+    "illumination": 44.4,
     "name": "Last Quarter"
   },
   "field": {
-    "P": 0.5144444444444441,
-    "C": 0.24857142857142858,
-    "R": 0.9983333333333333,
+    "P": 0.5766666666666669,
+    "C": 0.4295238095238096,
+    "R": 0.9266666666666666,
     "E": 1,
-    "M": 0.473,
-    "A": 0.46461538461538465,
+    "M": 0.444,
+    "A": 0.8307692307692307,
     "Q": null,
-    "dpdt": 0.9983333333333333,
+    "dpdt": 0.9266666666666666,
     "dynamic_axes": [
       "P",
       "C",
