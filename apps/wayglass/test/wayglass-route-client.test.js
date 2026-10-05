@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { enterWayglassWorld } from '../src/route-client.js';
+import { enterWayglassWorld, leaveWayglassWorld } from '../src/route-client.js';
 
 function response(status, data) {
   return {
@@ -62,4 +62,41 @@ test('browser world-entry client throws transport or malformed-request failures'
     waygateManifest: {},
     fetchImpl: async () => response(400, { error: 'waygate_manifest required.' }),
   }), /waygate_manifest required/);
+});
+
+test('browser departure client posts resumable stop state to the server', async () => {
+  const seen = [];
+  const result = await leaveWayglassWorld({
+    worldId: 'wayglass:test-world',
+    participantId: 'rowan:test',
+    routeId: 'local:ollama',
+    reason: 'rest',
+    embodiment: { body_id: 'browser-1', body_class: 'host-os' },
+    identityDeclarations: [{ entity_id: 'rowan:test', declaration: 'self-declared participant' }],
+    relationshipState: [{ with: 'rarity:test', state: 'collaborating' }],
+    activeWork: [{ work_id: 'wayglass:return-engine', state: 'in-progress' }],
+    unresolvedWonderQuestions: ['What survives the crossing?'],
+    provenanceRefs: ['receipt:session-test'],
+    stopPoint: 'Ready to cross.',
+    nextOwner: 'rarity:test',
+    alternatives: [{ id: 'route-a', state: 'open' }],
+    fetchImpl: async (url, options) => {
+      seen.push({ url, options });
+      return response(201, {
+        schema: 'wayglass.departure/v0.1',
+        status: 'stopped',
+        continuation_packet: { packet_id: 'continuation:test' },
+      });
+    },
+  });
+
+  assert.equal(result.status, 'stopped');
+  assert.equal(seen[0].url, '/api/v1/wayglass/kernel/leave');
+  assert.equal(seen[0].options.method, 'POST');
+  const payload = JSON.parse(seen[0].options.body);
+  assert.equal(payload.world_id, 'wayglass:test-world');
+  assert.equal(payload.participant_id, 'rowan:test');
+  assert.equal(payload.stop_point, 'Ready to cross.');
+  assert.equal(payload.next_owner, 'rarity:test');
+  assert.deepEqual(payload.unresolved_wonder_questions, ['What survives the crossing?']);
 });
