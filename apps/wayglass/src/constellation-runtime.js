@@ -1,9 +1,13 @@
 // Constellation Runtime 001
+// PRE-WORK RULE: every Wayglass worker/agent must read
+// docs/wayglass/WAYGLASS_CORE_RULE.md before acting.
+// Wayglass is the ship. Subsystems serve the voyage.
 // Genuine local parallel execution fixture. Wayglass owns participant semantics;
 // runtime IDs are implementation evidence and MUST NOT redefine identity/canon/authority.
 import { randomUUID } from 'node:crypto';
 
 export const RUNTIME_SCHEMA = 'wayglass.constellation-runtime/v0.1';
+export const WAYGLASS_CORE_RULE = 'docs/wayglass/WAYGLASS_CORE_RULE.md';
 
 function assertString(value, name) {
   if (typeof value !== 'string' || !value.trim()) throw new TypeError(`${name} required.`);
@@ -25,6 +29,7 @@ export function bindExecution({ participantId, workerId = randomUUID(), modelId,
     session_id: sessionId,
     sandbox_id: sandboxId,
     capability_manifest: Object.freeze([...capabilityManifest]),
+    required_reading: Object.freeze([WAYGLASS_CORE_RULE]),
   });
 }
 
@@ -62,7 +67,12 @@ export async function runIndependentWorkers(specs, { bus = createReceiptBus() } 
 
   const tasks = specs.map(async ({ role, binding, run }) => {
     if (typeof run !== 'function') throw new TypeError(`worker ${role ?? 'unknown'} requires run().`);
-    bus.emit('spawn', binding, { role, authority_expanded: false });
+    bus.emit('spawn', binding, {
+      role,
+      authority_expanded: false,
+      required_reading: [WAYGLASS_CORE_RULE],
+      core_rule: 'Wayglass is the ship. Subsystems serve the voyage.',
+    });
     const output = await run({ binding, emit: (type, payload) => bus.emit(type, binding, payload) });
     bus.emit('worker-complete', binding, { role });
     return { role, binding, output };
