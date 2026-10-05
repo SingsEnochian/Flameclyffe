@@ -27,6 +27,8 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - name: Syntax-check Wayglass server ingress
+        run: node --check apps/starwell-server/wayglass/router.js
       - run: npm run wayglass:test
       - run: npm run wayglass:build
       - run: npm run wayglass:stage:server
