@@ -3,7 +3,7 @@ import { installWayglassField } from './glass-field.js';
 import { installMotionChoreography } from './motion-choreography.js';
 import { installKeyboardControls } from './keyboard-controls.js';
 import { detectEmbodimentCapabilities, detectARSupport, publishEmbodiment } from './embodiment.js';
-import { enterWayglassWorld } from './route-client.js';
+import { enterWayglassWorld, leaveWayglassWorld } from './route-client.js';
 import { mountWayglassSurface, registerWayglassSurface, listWayglassSurfaces } from './surface-registry.js';
 import { mountArcSweepWritingSurface } from './surfaces/arcsweep-writing.js';
 
@@ -42,6 +42,10 @@ const wayglass = Object.freeze({
   enter: ({ embodiment: entryEmbodiment = {}, ...entry } = {}) => enterWayglassWorld({
     ...entry,
     embodiment: { ...browserEmbodiment, ...entryEmbodiment },
+  }),
+  leave: ({ embodiment: departureEmbodiment = {}, ...departure } = {}) => leaveWayglassWorld({
+    ...departure,
+    embodiment: { ...browserEmbodiment, ...departureEmbodiment },
   }),
   embodiment: Object.freeze({ ...embodiment, ar }),
 });
