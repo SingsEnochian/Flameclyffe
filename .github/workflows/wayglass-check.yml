@@ -6,7 +6,7 @@ on:
       - 'apps/wayglass/**'
       - 'apps/starwell-server/wayglass/**'
       - 'apps/starwell-server/server.js'
-      - 'lib/wayglass-route-registry.*'
+      - 'lib/wayglass-*'
       - 'docs/architecture/WAYGLASS_OS_V0_1.md'
       - 'package.json'
       - 'package-lock.json'
