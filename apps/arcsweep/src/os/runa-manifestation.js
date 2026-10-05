@@ -119,7 +119,27 @@ export function createRunaManifestationAdapter({
     const soundscape = story();
     if (!soundscape) throw new Error('ArcSweep StorySoundscape is not mounted yet.');
     if (typeof soundscape.arm !== 'function') throw new Error('Mounted StorySoundscape cannot arm audio.');
-    await soundscape.arm(worldInput(input));
+    const requested = worldInput(input);
+    const live = soundscape.snapshot?.()?.world || soundscape.world || {};
+    const liveId = live.worldId || live.id;
+    const switchingWorld = requested.id && requested.id !== liveId;
+    let world;
+    if (switchingWorld) {
+      // Workspace defaults initialise a different world, but never overwrite
+      // adjustments already made to the currently mounted world's mixer.
+      const source = input.world?.id === requested.id ? input.world : {};
+      world = { ...source, ...requested, soundscape: { ...source.soundscape, ...requested.soundscape } };
+      if (requested.root_hz) world.soundscape.rootHz = requested.root_hz;
+    } else if (requested.root_hz || requested.soundscape || (requested.name && requested.name !== live.worldName)) {
+      world = {
+        id: liveId,
+        name: live.worldName || live.name,
+        root_hz: live.rootHz ?? live.root_hz,
+        ...requested,
+        soundscape: { waveform: live.waveform, overtones: live.overtones, ...requested.soundscape },
+      };
+    }
+    await soundscape.arm(world);
     return soundscape;
   }
 
@@ -305,7 +325,7 @@ export function createRunaManifestationAdapter({
     const soundscape = story();
     soundscape?.stopHum?.();
     soundscape?.stopHeartfield?.();
-    soundscape?.stopBluebirdHome?.();
+    soundscape?.stopBluebirdWeightedHome?.();
     try { gatewayBus?.feather?.(); } catch {}
     try { navigatorProvider?.()?.vibrate?.(0); } catch {}
     gatewayActive = false;
@@ -314,7 +334,7 @@ export function createRunaManifestationAdapter({
     return receipt('feather', {
       applied: true,
       reason,
-      stopped: ['world-hum', 'safe-gateway', 'glyph-sonification', 'legacy-heartfield-output'],
+      stopped: ['world-hum', 'safe-gateway', 'glyph-sonification', 'legacy-heartfield-output', 'bluebird-weighted-home'],
     });
   }
 
