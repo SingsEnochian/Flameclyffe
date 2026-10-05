@@ -1,0 +1,92 @@
+{
+  "contract": "arcsweep.knowledge-cell-bank/v1",
+  "bankId": "shared:hermes-ecosystem-architecture",
+  "subject": { "kind": "shared_constellation", "id": "hermes-ecosystem-architecture" },
+  "status": "active-user-authorized",
+  "cells": [
+    {
+      "id": "hermes-ecosystem.rule.discovery-before-verification",
+      "cellType": "shared_doctrine",
+      "subject": { "kind": "shared_constellation", "id": "hermes-ecosystem-architecture" },
+      "predicate": "routes_external_components_through",
+      "value": ["discovery", "source inspection", "capability verification", "local fit analysis", "adopt or compose or adapt or reject"],
+      "status": "active",
+      "authority": { "kind": "user_confirmed", "speakerOrAuthor": "Rowan", "confidence": 1 },
+      "source": { "surface": "github", "repository": "SingsEnochian/Flameclyffe", "locator": "docs/research/HERMES_ECOSYSTEM_ARCHITECTURE_INGEST_V0_1.md" },
+      "scope": { "modes": ["research", "architecture", "build", "tool-selection"] },
+      "mutability": "revisable_with_provenance",
+      "privacy": "house",
+      "tags": ["ecosystem", "verification", "adopt-fork-build", "provenance"]
+    },
+    {
+      "id": "hermes-ecosystem.boundary.installed-not-authorized",
+      "cellType": "boundary",
+      "subject": { "kind": "shared_constellation", "id": "hermes-ecosystem-architecture" },
+      "predicate": "forbids",
+      "value": "treating an installed, listed, or discoverable external capability as automatically authorized, safe, or available for durable action",
+      "status": "stable",
+      "authority": { "kind": "founding_law", "speakerOrAuthor": "Hearthweave", "confidence": 1 },
+      "source": { "surface": "github", "repository": "SingsEnochian/Flameclyffe", "locator": "docs/research/HERMES_ECOSYSTEM_ARCHITECTURE_INGEST_V0_1.md" },
+      "scope": { "modes": ["architecture", "runtime", "tool-use"] },
+      "mutability": "stable_core",
+      "privacy": "house",
+      "tags": ["capability", "permissions", "trust-boundary"]
+    },
+    {
+      "id": "hermes-ecosystem.rule.ui-control-plane-not-brain",
+      "cellType": "shared_doctrine",
+      "subject": { "kind": "shared_constellation", "id": "hermes-ecosystem-architecture" },
+      "predicate": "separates_workspace_ui_from",
+      "value": ["agent cognition", "memory authority", "task runtime", "semantic source of truth"],
+      "status": "active",
+      "authority": { "kind": "user_confirmed", "speakerOrAuthor": "Rowan", "confidence": 1 },
+      "source": { "surface": "github", "repository": "SingsEnochian/Flameclyffe", "locator": "docs/research/HERMES_ECOSYSTEM_ARCHITECTURE_INGEST_V0_1.md" },
+      "scope": { "modes": ["architecture", "ui", "runtime"] },
+      "mutability": "revisable_with_provenance",
+      "privacy": "house",
+      "tags": ["ui", "control-plane", "separation-of-concerns"]
+    },
+    {
+      "id": "hermes-ecosystem.rule.capability-truth",
+      "cellType": "shared_doctrine",
+      "subject": { "kind": "shared_constellation", "id": "hermes-ecosystem-architecture" },
+      "predicate": "requires_ui_to_surface_capability_as",
+      "value": ["available", "degraded", "absent", "unknown"],
+      "status": "active",
+      "authority": { "kind": "user_confirmed", "speakerOrAuthor": "Rowan", "confidence": 1 },
+      "source": { "surface": "github", "repository": "SingsEnochian/Flameclyffe", "locator": "docs/research/HERMES_ECOSYSTEM_ARCHITECTURE_INGEST_V0_1.md" },
+      "scope": { "modes": ["architecture", "ui", "runtime"] },
+      "mutability": "revisable_with_provenance",
+      "privacy": "house",
+      "tags": ["capability-gate", "truthful-ui", "degradation"]
+    },
+    {
+      "id": "hermes-ecosystem.rule.handoff-owner",
+      "cellType": "shared_doctrine",
+      "subject": { "kind": "shared_constellation", "id": "hermes-ecosystem-architecture" },
+      "predicate": "requires_worker_handoff_to_record",
+      "value": ["current owner", "next owner", "acknowledgement state", "blocked_on", "checkpoint evidence", "reclaim or stop path"],
+      "status": "active",
+      "authority": { "kind": "user_confirmed", "speakerOrAuthor": "Rowan", "confidence": 1 },
+      "source": { "surface": "github", "repository": "SingsEnochian/Flameclyffe", "locator": "docs/research/HERMES_ECOSYSTEM_ARCHITECTURE_INGEST_V0_1.md" },
+      "scope": { "modes": ["multi-agent", "handoff", "runtime", "build"] },
+      "mutability": "revisable_with_provenance",
+      "privacy": "house",
+      "tags": ["handoff", "ownership", "receipt"]
+    },
+    {
+      "id": "hermes-ecosystem.boundary.theme-not-state",
+      "cellType": "boundary",
+      "subject": { "kind": "shared_constellation", "id": "hermes-ecosystem-architecture" },
+      "predicate": "forbids",
+      "value": "letting presentation theme or skin state silently mutate agent identity, memory, world canon, task state, or authority",
+      "status": "stable",
+      "authority": { "kind": "founding_law", "speakerOrAuthor": "Hearthweave", "confidence": 1 },
+      "source": { "surface": "github", "repository": "SingsEnochian/Flameclyffe", "locator": "docs/research/HERMES_ECOSYSTEM_ARCHITECTURE_INGEST_V0_1.md" },
+      "scope": { "modes": ["ui", "theme", "skin", "runtime"] },
+      "mutability": "stable_core",
+      "privacy": "house",
+      "tags": ["theme", "skin", "state-separation"]
+    }
+  ]
+}
