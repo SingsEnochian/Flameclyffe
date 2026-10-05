@@ -3,6 +3,7 @@ import { installWayglassField } from './glass-field.js';
 import { installMotionChoreography } from './motion-choreography.js';
 import { installKeyboardControls } from './keyboard-controls.js';
 import { detectEmbodimentCapabilities, detectARSupport, publishEmbodiment } from './embodiment.js';
+import { enterWayglassWorld } from './route-client.js';
 import { mountWayglassSurface, registerWayglassSurface, listWayglassSurfaces } from './surface-registry.js';
 import { mountArcSweepWritingSurface } from './surfaces/arcsweep-writing.js';
 
@@ -24,10 +25,24 @@ registerWayglassSurface({
   mount: mountArcSweepWritingSurface,
 });
 
+const browserEmbodiment = Object.freeze({
+  body_id: 'browser-host',
+  body_class: 'host-os',
+  platform_hint: embodiment.platform_hint || null,
+  keyboard: embodiment.keyboard,
+  touch: embodiment.touch,
+  ar: ar.supported,
+  haptics: embodiment.vibration,
+});
+
 const wayglass = Object.freeze({
   schema: 'wayglass.os/v0.1',
   surfaces: listWayglassSurfaces,
   mount: (surfaceId) => mountWayglassSurface(surfaceId, root),
+  enter: ({ embodiment: entryEmbodiment = {}, ...entry } = {}) => enterWayglassWorld({
+    ...entry,
+    embodiment: { ...browserEmbodiment, ...entryEmbodiment },
+  }),
   embodiment: Object.freeze({ ...embodiment, ar }),
 });
 
