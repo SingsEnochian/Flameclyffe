@@ -1,0 +1,65 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+
+import { enterWayglassWorld } from '../src/route-client.js';
+
+function response(status, data) {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    async json() { return data; },
+  };
+}
+
+test('browser world-entry client posts the crossing contract to the server', async () => {
+  const seen = [];
+  const result = await enterWayglassWorld({
+    worldId: 'wayglass:test-world',
+    participantId: 'rowan:test',
+    routeId: 'local:ollama',
+    waygateManifest: { schema: 'wayglass.waygate/v0.1', waygate_id: 'wg:test', world_id: 'wayglass:test-world' },
+    continuationPacket: { schema: 'wayglass.continuation-packet/v0.1', packet_id: 'cp:test' },
+    embodiment: { body_id: 'browser-1', body_class: 'host-os', keyboard: true },
+    fetchImpl: async (url, options) => {
+      seen.push({ url, options });
+      return response(200, { schema: 'wayglass.world-entry/v0.1', status: 'entered', entered: true });
+    },
+  });
+
+  assert.equal(result.entered, true);
+  assert.equal(seen.length, 1);
+  assert.equal(seen[0].url, '/api/v1/wayglass/kernel/enter');
+  assert.equal(seen[0].options.method, 'POST');
+  const payload = JSON.parse(seen[0].options.body);
+  assert.equal(payload.world_id, 'wayglass:test-world');
+  assert.equal(payload.participant_id, 'rowan:test');
+  assert.equal(payload.route_id, 'local:ollama');
+  assert.equal(payload.embodiment.body_id, 'browser-1');
+});
+
+test('browser world-entry client preserves a 409 blocking receipt for inspection', async () => {
+  const blocked = {
+    schema: 'wayglass.world-entry/v0.1',
+    status: 'blocked-continuation',
+    entered: false,
+    blocked_by: ['participant-mismatch'],
+  };
+
+  const result = await enterWayglassWorld({
+    worldId: 'wayglass:test-world',
+    participantId: 'someone-else',
+    waygateManifest: { schema: 'wayglass.waygate/v0.1' },
+    fetchImpl: async () => response(409, blocked),
+  });
+
+  assert.deepEqual(result, blocked);
+});
+
+test('browser world-entry client throws transport or malformed-request failures', async () => {
+  await assert.rejects(() => enterWayglassWorld({
+    worldId: 'wayglass:test-world',
+    participantId: 'rowan:test',
+    waygateManifest: {},
+    fetchImpl: async () => response(400, { error: 'waygate_manifest required.' }),
+  }), /waygate_manifest required/);
+});
