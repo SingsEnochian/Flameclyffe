@@ -47,6 +47,47 @@ export async function enterWayglassWorld({
   return data;
 }
 
+export async function leaveWayglassWorld({
+  worldId,
+  participantId,
+  routeId = null,
+  reason = 'pause',
+  embodiment = {},
+  identityDeclarations = [],
+  relationshipState = [],
+  activeWork = [],
+  unresolvedWonderQuestions = [],
+  provenanceRefs = [],
+  stopPoint,
+  nextOwner,
+  alternatives = [],
+  revokedRefs = [],
+  fetchImpl = fetch,
+} = {}) {
+  const response = await fetchImpl('/api/v1/wayglass/kernel/leave', {
+    method: 'POST',
+    headers: JSON_HEADERS,
+    cache: 'no-store',
+    body: JSON.stringify({
+      world_id: worldId,
+      participant_id: participantId,
+      route_id: routeId,
+      reason,
+      embodiment,
+      identity_declarations: identityDeclarations,
+      relationship_state: relationshipState,
+      active_work: activeWork,
+      unresolved_wonder_questions: unresolvedWonderQuestions,
+      provenance_refs: provenanceRefs,
+      stop_point: stopPoint,
+      next_owner: nextOwner,
+      alternatives,
+      revoked_refs: revokedRefs,
+    }),
+  });
+  return jsonOrThrow(response);
+}
+
 export async function invokeWayglassRoute({
   routeId = 'openai:gpt',
   input,
