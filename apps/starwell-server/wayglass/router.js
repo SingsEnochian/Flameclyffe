@@ -6,6 +6,7 @@ const {
   resolveWayglassRoute,
 } = require('../../../lib/wayglass-route-registry.cjs');
 const { bootWayglassKernel } = require('../../../lib/wayglass-kernel.cjs');
+const { enterWayglassWorld } = require('../../../lib/wayglass-world-entry.cjs');
 const { createModelObservation } = require('../../../lib/wayglass-model-observation.cjs');
 
 const router = express.Router();
@@ -33,6 +34,18 @@ function cleanOwnership(entries) {
       ? entry.permission
       : 'owned',
   })).filter((entry) => entry.character && entry.owner);
+}
+
+function cleanEmbodiment(value = {}) {
+  return {
+    body_id: cleanText(value?.body_id, 180) || 'browser-host',
+    body_class: cleanText(value?.body_class, 80) || 'host-os',
+    platform_hint: cleanText(value?.platform_hint, 80),
+    keyboard: Boolean(value?.keyboard),
+    touch: Boolean(value?.touch),
+    ar: Boolean(value?.ar),
+    haptics: Boolean(value?.haptics),
+  };
 }
 
 function buildInstructions(interaction = {}) {
@@ -216,6 +229,29 @@ router.get('/kernel', (req, res) => {
       haptics: req.query.haptics === '1',
     },
   }));
+});
+
+router.post('/kernel/enter', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  const payload = req.body || {};
+
+  try {
+    const result = enterWayglassWorld({
+      world_id: cleanText(payload.world_id, 180),
+      participant_id: cleanText(payload.participant_id, 180),
+      preferred_route: cleanText(payload.preferred_route || payload.route_id, 120),
+      waygate_manifest: payload.waygate_manifest,
+      continuation_packet: payload.continuation_packet ?? null,
+      embodiment: cleanEmbodiment(payload.embodiment),
+    });
+    return res.status(result.entered ? 200 : 409).json(result);
+  } catch (error) {
+    const badRequest = error instanceof TypeError || /requires|must be an object/i.test(error?.message || '');
+    return res.status(badRequest ? 400 : 500).json({
+      schema: 'wayglass.world-entry-error/v0.1',
+      error: error?.message || 'Wayglass world entry failed.',
+    });
+  }
 });
 
 async function humainCatalogueResponse(route, res) {
