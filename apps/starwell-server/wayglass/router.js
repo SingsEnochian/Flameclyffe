@@ -1,5 +1,6 @@
 'use strict';
 
+const { randomUUID } = require('node:crypto');
 const express = require('express');
 const {
   publicWayglassRoutes,
@@ -7,6 +8,7 @@ const {
 } = require('../../../lib/wayglass-route-registry.cjs');
 const { bootWayglassKernel } = require('../../../lib/wayglass-kernel.cjs');
 const { enterWayglassWorld } = require('../../../lib/wayglass-world-entry.cjs');
+const { createWayglassDeparture } = require('../../../lib/wayglass-stop-receipt.cjs');
 const { createModelObservation } = require('../../../lib/wayglass-model-observation.cjs');
 
 const router = express.Router();
@@ -250,6 +252,44 @@ router.post('/kernel/enter', (req, res) => {
     return res.status(badRequest ? 400 : 500).json({
       schema: 'wayglass.world-entry-error/v0.1',
       error: error?.message || 'Wayglass world entry failed.',
+    });
+  }
+});
+
+router.post('/kernel/leave', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  const payload = req.body || {};
+  const id = randomUUID();
+
+  try {
+    const provenance = Array.isArray(payload.provenance_refs)
+      ? payload.provenance_refs
+      : [];
+    const departure = createWayglassDeparture({
+      receipt_id: `stop:${id}`,
+      packet_id: `continuation:${id}`,
+      world_id: cleanText(payload.world_id, 180),
+      participant_id: cleanText(payload.participant_id, 180),
+      stopped_at: new Date().toISOString(),
+      reason: cleanText(payload.reason, 160) || 'pause',
+      route_id: cleanText(payload.route_id, 160),
+      embodiment: cleanEmbodiment(payload.embodiment),
+      identity_declarations: Array.isArray(payload.identity_declarations) ? payload.identity_declarations : [],
+      relationship_state: Array.isArray(payload.relationship_state) ? payload.relationship_state : [],
+      active_work: Array.isArray(payload.active_work) ? payload.active_work : [],
+      unresolved_wonder_questions: Array.isArray(payload.unresolved_wonder_questions) ? payload.unresolved_wonder_questions : [],
+      provenance_refs: [...provenance, 'wayglass-http:kernel-leave'],
+      stop_point: cleanText(payload.stop_point, 1000),
+      next_owner: cleanText(payload.next_owner, 240),
+      alternatives: Array.isArray(payload.alternatives) ? payload.alternatives : [],
+      revoked_refs: Array.isArray(payload.revoked_refs) ? payload.revoked_refs : [],
+    });
+    return res.status(201).json(departure);
+  } catch (error) {
+    const badRequest = error instanceof TypeError || /requires|must be an object|identity declaration|provenance refs/i.test(error?.message || '');
+    return res.status(badRequest ? 400 : 500).json({
+      schema: 'wayglass.departure-error/v0.1',
+      error: error?.message || 'Wayglass departure failed.',
     });
   }
 });
