@@ -29,6 +29,14 @@ async function copyTree(from, to) {
     throw new Error(`Wayglass web build missing at: ${source}. Run npm run wayglass:build first.`);
   }
 
+  const runtime = path.join(repoRoot, 'apps', 'starwell-server', 'wayglass-runtime');
+  await fsp.mkdir(runtime, { recursive: true });
+  for (const name of await fsp.readdir(path.join(repoRoot, 'lib'))) {
+    if (name.startsWith('wayglass-') && name.endsWith('.cjs')) {
+      await fsp.copyFile(path.join(repoRoot, 'lib', name), path.join(runtime, name));
+    }
+  }
+
   await fsp.rm(destination, { recursive: true, force: true });
   await copyTree(source, destination);
 

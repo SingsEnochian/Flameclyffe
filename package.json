@@ -57,7 +57,9 @@
     "wayglass:humain:sandbox:smoke": "node scripts/wayglass-humain-sandbox-smoke.mjs",
     "wayglass:humain:access:probe": "node scripts/wayglass-humain-access-probe.mjs",
     "design:verify": "node scripts/verify-whole-system-design-law.mjs",
-    "wayglass:stage:vercel": "node apps/wayglass/vercel-stage.cjs"
+    "wayglass:stage:vercel": "node apps/wayglass/vercel-stage.cjs",
+    "wayglass:hearthgate": "npm run wayglass:deploy:server && npm --prefix apps/starwell-server run start:core",
+    "prewayglass:test": "npm run wayglass:deploy:server"
   },
   "dependencies": {
     "@netlify/blobs": "^10.7.13",

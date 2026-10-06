@@ -5,11 +5,11 @@ const express = require('express');
 const {
   publicWayglassRoutes,
   resolveWayglassRoute,
-} = require('../../../lib/wayglass-route-registry.cjs');
-const { bootWayglassKernel } = require('../../../lib/wayglass-kernel.cjs');
-const { enterWayglassWorld } = require('../../../lib/wayglass-world-entry.cjs');
-const { createWayglassDeparture } = require('../../../lib/wayglass-stop-receipt.cjs');
-const { createModelObservation } = require('../../../lib/wayglass-model-observation.cjs');
+} = require('../wayglass-runtime/wayglass-route-registry.cjs');
+const { bootWayglassKernel } = require('../wayglass-runtime/wayglass-kernel.cjs');
+const { enterWayglassWorld } = require('../wayglass-runtime/wayglass-world-entry.cjs');
+const { createWayglassDeparture } = require('../wayglass-runtime/wayglass-stop-receipt.cjs');
+const { createModelObservation } = require('../wayglass-runtime/wayglass-model-observation.cjs');
 
 const MAX_HISTORY = 16;
 const MAX_TEXT = 12000;

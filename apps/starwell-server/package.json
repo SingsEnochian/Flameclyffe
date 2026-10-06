@@ -2,7 +2,7 @@
   "name": "hearthgate",
   "productName": "Hearthgate",
   "version": "0.1.0",
-  "description": "Local-first STARWELL, Arcsweep, Bifröst, and Hearthweave dual-aspect observatory for Hearthgate.",
+  "description": "Local-first STARWELL, Arcsweep, Bifr\u00f6st, and Hearthweave dual-aspect observatory for Hearthgate.",
   "author": "Hearthweave",
   "license": "UNLICENSED",
   "type": "commonjs",
@@ -16,10 +16,10 @@
     "stage:project-zero-companion": "node scripts/stage-project-zero-companion.js",
     "prepare:assets": "node scripts/prepare-assets.js",
     "test": "node --test test/*.test.js",
-    "electron:dev": "npm run prepare:assets && electron .",
-    "electron:pack:win": "npm run prepare:assets && electron-builder --win dir --x64 --publish never && npm run verify:dual-aspect-package",
-    "electron:build": "npm run prepare:assets && electron-builder",
-    "electron:build:win": "npm run prepare:assets && electron-builder --win nsis --x64 --publish never && npm run verify:dual-aspect-package",
+    "electron:dev": "npm run prepare:wayglass && npm run prepare:assets && electron .",
+    "electron:pack:win": "npm run prepare:wayglass && npm run prepare:assets && electron-builder --win dir --x64 --publish never && npm run verify:dual-aspect-package",
+    "electron:build": "npm run prepare:wayglass && npm run prepare:assets && electron-builder",
+    "electron:build:win": "npm run prepare:wayglass && npm run prepare:assets && electron-builder --win nsis --x64 --publish never && npm run verify:dual-aspect-package",
     "check:base-packaging": "node scripts/check-packaging.js",
     "check:dual-aspect": "node scripts/check-dual-aspect-packaging.js",
     "check:premaqc-shokz": "node scripts/check-premaqc-shokz-packaging.js",
@@ -27,7 +27,8 @@
     "check:packaging": "npm run check:base-packaging && npm run check:dual-aspect && npm run check:premaqc-shokz && npm run check:eleven-year-wav",
     "verify:eleven-year-wav-package": "node scripts/verify-eleven-year-wav-package.js",
     "create:bifrost-web-envelope": "node scripts/create-bifrost-web-bundle-envelope.js",
-    "verify:dual-aspect-package": "node scripts/verify-dual-aspect-package.js && npm run verify:eleven-year-wav-package && npm run create:bifrost-web-envelope"
+    "verify:dual-aspect-package": "node scripts/verify-dual-aspect-package.js && npm run verify:eleven-year-wav-package && npm run create:bifrost-web-envelope",
+    "prepare:wayglass": "npm --prefix ../.. run wayglass:deploy:server"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.111.0",
@@ -63,7 +64,9 @@
       "public/**",
       "build/hearthgate.png",
       "node_modules/**",
-      "node_modules/better-sqlite3/**"
+      "node_modules/better-sqlite3/**",
+      "wayglass/**",
+      "wayglass-runtime/**"
     ],
     "files": [
       "**/*",
