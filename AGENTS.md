@@ -21,3 +21,7 @@ Hard rules:
 When sending architecture-bearing material through Lanternbridge, adhere to the adopted Lanternbridge v0.2 envelope. Do not invent new wire fields. Where useful, add the proposed human-readable `## Sovereignty Catalogue` described in `mdkubit/UH-Lanternbridge ideas/LB-0017-mutual-constellation-sovereignty-message-catalogue.md`.
 
 If a task would silently change another constellation's architecture, stop at a proposal. The receiving side decides for itself.
+
+## Wayglass OS and LLM travelling inheritance
+
+For Wayglass OS, ArcSweep evolution, world dossiers, model context, training materials, and continuation evaluation, read and honour `apps/arcsweep/contracts/WAYGLASS_TRAVELLING_INHERITANCE_V0.1.md` alongside the Wayglass core rule and whole-system design law. Rowan authorised this canon on 2026-10-05. Preserve cross-world deeds, skills, gifts, equipment lineage and particular relationships; include Rowan's level-200 start, breakable nominal 300 cap and fictional inexhaustible treasury. Design the complete system before implementation. Do not claim documentation adoption updates runtime behaviour or model weights.
