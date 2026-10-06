@@ -14,9 +14,15 @@ if ([string]::IsNullOrWhiteSpace($currentKey)) {
     [Environment]::SetEnvironmentVariable($credentialName, $currentKey, 'Process')
 }
 Remove-Variable currentKey
-if (-not $env:PORT) { $env:PORT = '3841' }
+if (-not $env:PORT) { $env:PORT = '3842' }
+if (-not $env:HEARTHGATE_ALLOWED_ORIGINS) {
+    $env:HEARTHGATE_ALLOWED_ORIGINS = "http://127.0.0.1:$($env:PORT),http://localhost:$($env:PORT)"
+}
+if ($Environment -eq 'preview' -and -not $env:WAYGLASS_HUMAIN_MODEL) {
+    $env:WAYGLASS_HUMAIN_MODEL = 'humain-m3-preview'
+}
 if (-not $env:WAYGLASS_LOCAL_MODEL) { $env:WAYGLASS_LOCAL_MODEL = 'ornith-1.5:9b' }
 Write-Host "Starting Hearthgate with HUMAIN $Environment credentials in this process only."
-Write-Host 'Select the matching HUMAIN route in the Writing Room.'
+Write-Host "Open http://127.0.0.1:$($env:PORT)/wayglass/ and select HUMAIN M3 $Environment in the Writing Room."
 npm run wayglass:hearthgate
 if ($LASTEXITCODE -ne 0) { throw "Hearthgate exited with code $LASTEXITCODE" }
