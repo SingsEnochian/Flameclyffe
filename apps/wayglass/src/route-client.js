@@ -1,5 +1,16 @@
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
+export async function readVoyageMessages(fetchImpl = fetch) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/voyage/messages', { cache: 'no-store' }));
+}
+
+export async function replyToVoyage({ recipientId, voyageRef, text, fetchImpl = fetch } = {}) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/voyage/messages', {
+    method: 'POST', headers: JSON_HEADERS,
+    body: JSON.stringify({ recipient_id: recipientId, voyage_ref: voyageRef, text }),
+  }));
+}
+
 async function readJson(response) {
   return response.json().catch(() => ({}));
 }

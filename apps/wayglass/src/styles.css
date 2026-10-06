@@ -580,3 +580,11 @@ button { font: inherit; cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
   .thinking-chevron { transition: none; }
 }
+/* Voyage messages remain accessible alongside the current writing surface. */
+.wg-voyage-inbox { position: fixed; bottom: 1rem; right: 1rem; z-index: 100; width: min(28rem, calc(100vw - 2rem)); max-height: 70vh; overflow: auto; padding: 1rem; color: #eee7ff; background: #141120; border: 1px solid #75638c; border-radius: 1rem; }
+.wg-voyage-inbox summary { cursor: pointer; }
+.wg-voyage-inbox article { border-top: 1px solid #75638c; padding-top: .7rem; margin-top: .7rem; }
+.wg-voyage-inbox p { white-space: pre-wrap; overflow-wrap: anywhere; }
+.wg-voyage-inbox label, .wg-voyage-inbox textarea { display: block; width: 100%; }
+.wg-voyage-inbox textarea { box-sizing: border-box; min-height: 5rem; margin: .5rem 0; color: inherit; background: #221c30; }
+.wg-voyage-inbox button { margin-top: .5rem; padding: .5rem .8rem; cursor: pointer; }

@@ -253,6 +253,20 @@ async function humainCatalogueResponse(route, res, fetchImpl = globalThis.fetch)
 
 function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThis.fetch } = {}) {
   const router = express.Router();
+  router.get('/voyage/messages', async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    const bridge = req.app.locals.wayglassVoyageMessages;
+    if (!bridge) return res.status(503).json({ error: 'Voyage message host services are not configured.' });
+    try { return res.json(await bridge.read(req)); }
+    catch (error) { return res.status(error.status || 500).json({ error: error.message }); }
+  });
+  router.post('/voyage/messages', async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    const bridge = req.app.locals.wayglassVoyageMessages;
+    if (!bridge) return res.status(503).json({ error: 'Voyage message host services are not configured.' });
+    try { return res.status(201).json(await bridge.reply(req, req.body || {})); }
+    catch (error) { return res.status(error.status || (error instanceof TypeError ? 400 : 500)).json({ error: error.message }); }
+  });
   router.get('/kernel', (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     const ar = req.query.ar === '1';

@@ -5,6 +5,7 @@ import { once } from 'node:events';
 import { createHash } from 'node:crypto';
 import inheritanceModule from '../../../lib/wayglass-travelling-inheritance.cjs';
 import contextModule from '../../../lib/wayglass-inheritance-context.cjs';
+import messagesModule from '../../../lib/wayglass-voyage-messages.cjs';
 
 const hostRequire = createRequire(new URL('../../../apps/starwell-server/wayglass/router.js', import.meta.url));
 const express = hostRequire('express');
@@ -51,7 +52,7 @@ async function fixture() {
     counts: () => ({ reads, writes }) };
 }
 
-async function host(t, { resolver, useLocals = false } = {}) {
+async function host(t, { resolver, useLocals = false, messages } = {}) {
   const calls = [];
   const fetchImpl = async (url, init) => {
     calls.push({ url, body: JSON.parse(init.body) });
@@ -59,13 +60,20 @@ async function host(t, { resolver, useLocals = false } = {}) {
   };
   const app = express();
   app.use(express.json());
+  if (messages) app.locals.wayglassVoyageMessages = messages;
   if (useLocals) app.locals.wayglassInheritanceContext = resolver;
   app.use('/api/v1/wayglass', createWayglassRouter({ inheritanceContext: useLocals ? null : resolver, fetchImpl }));
   const server = app.listen(0, '127.0.0.1');
   await once(server, 'listening');
   t.after(() => new Promise(resolve => server.close(resolve)));
   const url = `http://127.0.0.1:${server.address().port}/api/v1/wayglass/respond`;
-  return { calls, async send(body, principal = 'rowan') {
+  return { calls, async inbox(principal = 'rowan') {
+    const res = await fetch(url.replace('/respond', '/voyage/messages'), { headers: { 'x-test-principal': principal } });
+    return { status: res.status, body: await res.json() };
+  }, async reply(body, principal = 'rowan') {
+    const res = await fetch(url.replace('/respond', '/voyage/messages'), { method: 'POST', headers: { 'content-type': 'application/json', 'x-test-principal': principal }, body: JSON.stringify(body) });
+    return { status: res.status, body: await res.json() };
+  }, async send(body, principal = 'rowan') {
     const res = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json', 'x-test-principal': principal }, body: JSON.stringify(body) });
     return { status: res.status, body: await res.json() };
   } };
@@ -107,6 +115,30 @@ test('accepted deed crosses the actual HTTP host into all provider payloads with
   }
   assert.equal(f.counts().writes, before.writes);
   assert.equal(f.counts().reads - before.reads, 3);
+});
+
+test('named voyage speakers reach Rowan inbox and authenticated Rowan replies without sender impersonation', async t => {
+  const records = [];
+  const bridge = new messagesModule.WayglassVoyageMessages({
+    store: { append: async receipt => records.push(structuredClone(receipt)), read: async id => structuredClone(records.filter(r => r.recipient_id === id)) },
+    resolveReader: async req => ['rowan', 'wayglass', 'rarity'].includes(req.headers['x-test-principal'])
+      ? { participant_id: req.headers['x-test-principal'], allowed_recipients: ['wayglass', 'rarity'] } : null,
+  });
+  for (const participant_id of ['wayglass', 'rarity']) {
+    await bridge.bindSender({ participant_id, recipient_id: 'rowan', voyage_ref: 'trial:message-route' })({ text: `Fixture message from ${participant_id}.` });
+  }
+  const h = await host(t, { messages: bridge });
+  const inbox = await h.inbox();
+  assert.equal(inbox.status, 200);
+  assert.deepEqual(inbox.body.messages.map(m => m.participant_id), ['wayglass', 'rarity']);
+  assert.equal((await h.inbox('unknown')).status, 401);
+  const reply = await h.reply({ participant_id: 'rarity', recipient_id: 'wayglass', voyage_ref: 'trial:message-route', text: 'Take your time.' });
+  assert.equal(reply.status, 201);
+  assert.equal(reply.body.participant_id, 'rowan');
+  const returned = await h.inbox('wayglass');
+  assert.equal(returned.body.messages[0].text, 'Take your time.');
+  assert.equal((await h.reply({ recipient_id: 'other', voyage_ref: 'trial:x', text: 'No.' })).status, 403);
+  assert.equal(h.calls.length, 0);
 });
 
 test('revocation removes deed context on the next request, including a replaced resolver', async t => {
