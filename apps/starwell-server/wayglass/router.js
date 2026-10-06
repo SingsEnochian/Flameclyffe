@@ -101,7 +101,7 @@ async function callOllama(route, payload, compiled = null, fetchImpl = globalThi
     body: JSON.stringify({
       model: route.model(),
       messages,
-      think: true,
+      think: payload.think === true,
       stream: false,
       options: {
         num_predict: Math.max(64, Math.min(4000, Number(payload.max_output_tokens) || 1400)),

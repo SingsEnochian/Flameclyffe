@@ -235,3 +235,12 @@ test('unconfigured inheritance blocks explicit bindings; legacy unbound turns st
   assert.equal(h.calls.length, 1);
   assert.equal(result.body.receipt.inheritance_context, undefined);
 });
+
+test('local thinking defaults off and requires explicit boolean opt-in', async t => {
+  const h = await host(t);
+  for (const [think, expected] of [[undefined, false], [false, false], [true, true], ['true', false]]) {
+    const result = await h.send({ route_id: 'local:ollama', input: 'Hello', think });
+    assert.equal(result.status, 200);
+    assert.equal(h.calls.at(-1).body.think, expected);
+  }
+});

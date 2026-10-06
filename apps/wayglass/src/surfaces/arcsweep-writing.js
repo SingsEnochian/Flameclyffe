@@ -29,7 +29,7 @@ export async function mountArcSweepWritingSurface(root) {
   const session = sessionId();
   const messages = [];
   let routes = [];
-  let selectedRoute = 'openai:gpt';
+  let selectedRoute = 'local:ollama';
   let busy = false;
   let lastReceipt = null;
 
@@ -45,6 +45,7 @@ export async function mountArcSweepWritingSurface(root) {
           '<div class="route-mineral" aria-hidden="true"><i></i><b></b><span></span></div>',
           '<label for="wg-route">Route</label>',
           '<select id="wg-route" aria-label="Wayglass route" aria-keyshortcuts="Alt+R"></select>',
+          '<label><input id="wg-think" type="checkbox" /> Deliberate thinking (local engine)</label>',
           '<span id="wg-route-state" class="tiny">Loading route catalogue…</span>',
           '<span id="wg-embodiment-state" class="tiny"></span>',
         '</div>',
@@ -202,6 +203,7 @@ export async function mountArcSweepWritingSurface(root) {
     try {
       const result = await invokeWayglassRoute({
         routeId: selectedRoute,
+        think: root.querySelector('#wg-think').checked,
         input: text,
         history,
         interaction: current,

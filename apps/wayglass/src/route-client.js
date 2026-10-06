@@ -107,6 +107,7 @@ export async function invokeWayglassRoute({
   sessionId,
   surfaceId = 'arcsweep:writing-room',
   maxOutputTokens = 1400,
+  think = false,
   fetchImpl = fetch,
 } = {}) {
   const response = await fetchImpl('/api/v1/wayglass/respond', {
@@ -120,6 +121,7 @@ export async function invokeWayglassRoute({
       session_id: sessionId,
       surface_id: surfaceId,
       max_output_tokens: maxOutputTokens,
+      think: think === true,
     }),
   });
   return jsonOrThrow(response);
