@@ -131,7 +131,7 @@ async function callOllama(route, payload, compiled = null, fetchImpl = globalThi
 async function callHumainNode(route, payload, compiled = null, fetchImpl = globalThis.fetch) {
   const key = route.api_key();
   if (!key) {
-    const error = new Error('HUMAIN Node is not configured for Wayglass.');
+    const error = new Error(route.label + ' is not configured for Wayglass.');
     error.status = 503;
     throw error;
   }
@@ -160,7 +160,7 @@ async function callHumainNode(route, payload, compiled = null, fetchImpl = globa
 
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const error = new Error(data?.error?.message || data?.error || data?.message || 'Wayglass HUMAIN Node route failed.');
+    const error = new Error(data?.error?.message || data?.error || data?.message || 'Wayglass ' + route.label + ' route failed.');
     error.status = response.status || 502;
     throw error;
   }
@@ -169,6 +169,7 @@ async function callHumainNode(route, payload, compiled = null, fetchImpl = globa
   return {
     output: cleanText(content || '', MAX_TEXT),
     thinking: null,
+    returned_model: data.model || null,
     response_id: data.id || null,
     usage: data.usage || null,
   };
@@ -214,6 +215,7 @@ async function callOpenAI(route, payload, compiled = null, fetchImpl = globalThi
   return {
     output: outputText(data),
     thinking: null,
+    returned_model: data.model || null,
     response_id: data.id || null,
     usage: data.usage || null,
   };
@@ -402,7 +404,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       let result;
       if (route.provider === 'openai') result = await callOpenAI(route, payload, compiled, fetchImpl);
       else if (route.provider === 'ollama') result = await callOllama(route, payload, compiled, fetchImpl);
-      else if (route.provider === 'humain-node') result = await callHumainNode(route, payload, compiled, fetchImpl);
+      else if (route.provider === 'humain-node' || route.provider === 'huggingface') result = await callHumainNode(route, payload, compiled, fetchImpl);
       else return res.status(501).json({ error: 'Provider adapter not implemented yet.' });
       const completedAt = new Date().toISOString();
       const observation = createModelObservation({
@@ -420,6 +422,10 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
         thinking: result.thinking || null,
         observation,
         receipt: {
+          requested_model: route.model(),
+          returned_model: result.returned_model || null,
+          provider: route.provider,
+          upstream_provider: null,
           response_id: result.response_id,
           observation_id: observation.observation_id,
           epistemic_register: observation.epistemic_register,

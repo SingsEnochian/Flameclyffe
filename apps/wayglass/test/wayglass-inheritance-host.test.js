@@ -259,3 +259,25 @@ test('catalogue distinguishes missing credentials from verified connectivity wit
     assert.ok(!JSON.stringify(routes).includes(process.env.HUMAIN_NODE_KEY));
   } finally { if (key === undefined) delete process.env.HUMAIN_NODE_KEY; else process.env.HUMAIN_NODE_KEY = key; }
 });
+
+test('HF route uses server token and model while preserving compiled inheritance', async t => {
+  const oldToken = process.env.HF_TOKEN, oldModel = process.env.WAYGLASS_HF_MODEL;
+  t.after(() => { for (const [key, value] of [['HF_TOKEN', oldToken], ['WAYGLASS_HF_MODEL', oldModel]]) {
+    if (value === undefined) delete process.env[key]; else process.env[key] = value;
+  } });
+  const f = await fixture();
+  const h = await host(t, { resolver: f.resolver });
+  delete process.env.HF_TOKEN;
+  assert.equal((await h.send({ ...payload, route_id: 'hf:inference' })).status, 503);
+  assert.equal(h.calls.length, 0);
+  process.env.HF_TOKEN = 'test-hf-token';
+  process.env.WAYGLASS_HF_MODEL = 'test/model:fastest';
+  const result = await h.send({ ...payload, route_id: 'hf:inference', model: 'body-must-not-select-model' });
+  assert.equal(result.status, 200);
+  assert.equal(h.calls[0].url, 'https://router.huggingface.co/v1/chat/completions');
+  assert.equal(h.calls[0].body.model, 'test/model:fastest');
+  assert.match(JSON.stringify(h.calls[0].body.messages), /Garden restoration craft/);
+  assert.equal(result.body.receipt.requested_model, 'test/model:fastest');
+  assert.equal(result.body.receipt.upstream_provider, null);
+  assert.ok(!JSON.stringify(result.body).includes('test-hf-token'));
+});
