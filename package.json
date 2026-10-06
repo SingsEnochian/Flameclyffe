@@ -51,7 +51,7 @@
     "wayglass:dev": "vite --config apps/wayglass/vite.config.js",
     "wayglass:build": "vite build --config apps/wayglass/vite.config.js",
     "wayglass:preview": "vite preview --config apps/wayglass/vite.config.js",
-    "wayglass:test": "node --test apps/wayglass/test/*.test.js",
+    "wayglass:test": "node --test apps/wayglass/test/*.test.js test/wayglass/*.test.cjs",
     "wayglass:stage:server": "node apps/wayglass/server-stage.cjs",
     "wayglass:deploy:server": "npm run wayglass:build && npm run wayglass:stage:server",
     "wayglass:humain:sandbox:smoke": "node scripts/wayglass-humain-sandbox-smoke.mjs",

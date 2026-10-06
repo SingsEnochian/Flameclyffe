@@ -7,6 +7,8 @@ on:
       - 'apps/starwell-server/wayglass/**'
       - 'apps/starwell-server/server.js'
       - 'lib/wayglass-*'
+      - 'test/wayglass/**'
+      - 'apps/starwell-server/package*.json'
       - 'docs/architecture/WAYGLASS_OS_V0_1.md'
       - 'package.json'
       - 'package-lock.json'
@@ -29,6 +31,8 @@ jobs:
       - run: npm ci
       - name: Syntax-check Wayglass server ingress
         run: node --check apps/starwell-server/wayglass/router.js
+      - name: Install host dependencies for HTTP integration tests
+        run: npm ci --prefix apps/starwell-server --omit=dev --ignore-scripts
       - run: npm run wayglass:test
       - run: npm run wayglass:build
       - run: npm run wayglass:stage:server
