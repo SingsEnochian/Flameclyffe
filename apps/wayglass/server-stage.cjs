@@ -9,7 +9,7 @@ const source = path.join(repoRoot, 'dist', 'wayglass');
 const destination = path.join(repoRoot, 'apps', 'starwell-server', 'public', 'wayglass');
 
 const HOST_INJECTION =
-  `<script>window.__wayglassHost=Object.freeze({host:'hearthgate',version:'0.1.0',hostedSince:Date.now()});</script>`;
+  `<script src="./hearthgate-host.js"></script>`;
 
 async function copyTree(from, to) {
   const stat = await fsp.stat(from);
@@ -39,6 +39,8 @@ async function copyTree(from, to) {
 
   await fsp.rm(destination, { recursive: true, force: true });
   await copyTree(source, destination);
+
+  await fsp.writeFile(path.join(destination, 'hearthgate-host.js'), "window.__wayglassHost=Object.freeze({host:'hearthgate',version:'0.1.0',hostedSince:Date.now()});\n", 'utf8');
 
   const indexPath = path.join(destination, 'index.html');
   let html = await fsp.readFile(indexPath, 'utf8');
