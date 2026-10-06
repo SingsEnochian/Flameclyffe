@@ -56,7 +56,8 @@
     "wayglass:deploy:server": "npm run wayglass:build && npm run wayglass:stage:server",
     "wayglass:humain:sandbox:smoke": "node scripts/wayglass-humain-sandbox-smoke.mjs",
     "wayglass:humain:access:probe": "node scripts/wayglass-humain-access-probe.mjs",
-    "design:verify": "node scripts/verify-whole-system-design-law.mjs"
+    "design:verify": "node scripts/verify-whole-system-design-law.mjs",
+    "wayglass:stage:vercel": "node apps/wayglass/vercel-stage.cjs"
   },
   "dependencies": {
     "@netlify/blobs": "^10.7.13",

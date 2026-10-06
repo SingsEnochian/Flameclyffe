@@ -7,6 +7,9 @@ on:
       - 'apps/starwell-server/wayglass/**'
       - 'apps/starwell-server/server.js'
       - 'lib/wayglass-*'
+      - 'api/_shared/wayglass-gateway.mjs'
+      - 'api/v1/wayglass/**'
+      - 'vercel.json'
       - 'test/wayglass/**'
       - 'apps/starwell-server/package*.json'
       - 'docs/architecture/WAYGLASS_OS_V0_1.md'
@@ -38,3 +41,7 @@ jobs:
       - run: npm run wayglass:stage:server
       - name: Verify staged host
         run: test -f apps/starwell-server/public/wayglass/index.html
+
+      - run: npm run wayglass:stage:vercel
+      - name: Verify preview browser bundle
+        run: test -f dist/starwell/wayglass/index.html
