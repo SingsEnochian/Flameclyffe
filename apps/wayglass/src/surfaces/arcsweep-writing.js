@@ -74,6 +74,7 @@ export async function mountArcSweepWritingSurface(root) {
       '</section>',
 
       '<section class="wg-thread glass-panel" aria-live="polite">',
+        '<button id="wg-copy-session" type="button" class="glass-chip">Copy session log</button>',
         '<div id="wg-thread" class="wg-thread-log">',
           '<div class="empty-thread">The room is quiet. Start anywhere.</div>',
         '</div>',
@@ -136,16 +137,50 @@ export async function mountArcSweepWritingSurface(root) {
       thread.innerHTML = '<div class="empty-thread">The room is quiet. Start anywhere.</div>';
       return;
     }
-    thread.innerHTML = messages.map((message) => {
-      const who = message.role === 'assistant' ? message.route_label : 'Rowan';
+    thread.innerHTML = messages.map((message, index) => {
+      const who = message.role === 'user' ? 'Rowan' : message.route_label;
       return '<article class="turn-card ' + message.role + '">' +
         '<header><strong>' + escapeHtml(who) + '</strong><span>' + escapeHtml(message.channel || 'IC') + '</span></header>' +
         renderThinking(message) +
         '<div class="turn-text">' + escapeHtml(message.content).replaceAll('\n', '<br>') + '</div>' +
+        '<footer><button type="button" class="glass-chip" data-copy-reply="' + index + '">Copy reply</button> ' +
+        '<button type="button" class="glass-chip" data-copy-through="' + index + '">Copy log through here</button></footer>' +
         '</article>';
     }).join('');
     thread.scrollTop = thread.scrollHeight;
   }
+
+  function sessionLog(end = messages.length - 1) {
+    return 'Wayglass session: ' + session + '\nCopied at: ' + new Date().toISOString() +
+      '\n\n' + messages.slice(0, end + 1).map(message => {
+        const who = message.role === 'user' ? 'Rowan' : (message.route_label || 'Wayglass');
+        return who + ' · ' + (message.channel || 'IC') + ' · ' + (message.content.startsWith('[Route error]') ? 'transport error' : message.role) +
+          '\n' + message.content;
+      }).join('\n\n');
+  }
+
+  async function copyText(text, button) {
+    const original = button.textContent;
+    try {
+      await navigator.clipboard.writeText(text);
+      button.textContent = 'Copied';
+    } catch {
+      button.textContent = 'Copy unavailable';
+      status.textContent = 'Clipboard unavailable. Select the conversation text to copy manually.';
+    }
+    globalThis.setTimeout(() => { button.textContent = original; }, 1800);
+  }
+
+  root.querySelector('#wg-copy-session').addEventListener('click', event => copyText(sessionLog(), event.currentTarget));
+  thread.addEventListener('click', event => {
+    const button = event.target.closest('[data-copy-reply], [data-copy-through]');
+    if (!button) return;
+    if (button.dataset.copyReply !== undefined) {
+      copyText(messages[Number(button.dataset.copyReply)].content, button);
+    } else {
+      copyText(sessionLog(Number(button.dataset.copyThrough)), button);
+    }
+  });
 
   async function loadRoutes() {
     try {
