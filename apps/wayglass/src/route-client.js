@@ -26,11 +26,17 @@ export async function listWayglassRoutes(fetchImpl = fetch) {
   return jsonOrThrow(response);
 }
 
+export async function recoverWayglassDeparture({ storageId, worldId, participantId, fetchImpl = fetch } = {}) {
+  const query = new URLSearchParams({ world_id: worldId, participant_id: participantId });
+  return jsonOrThrow(await fetchImpl(`/api/v1/wayglass/kernel/departures/${encodeURIComponent(storageId)}?${query}`, { cache: 'no-store' }));
+}
+
 export async function enterWayglassWorld({
   worldId,
   participantId,
   waygateManifest,
   continuationPacket = null,
+  storageId = null,
   routeId = null,
   embodiment = {},
   fetchImpl = fetch,
@@ -45,6 +51,7 @@ export async function enterWayglassWorld({
       route_id: routeId,
       waygate_manifest: waygateManifest,
       continuation_packet: continuationPacket,
+      storage_id: storageId,
       embodiment,
     }),
   });

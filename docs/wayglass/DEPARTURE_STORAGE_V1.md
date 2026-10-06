@@ -1,0 +1,15 @@
+# Local departure storage and return
+
+The Hearthgate host now persists `POST /api/v1/wayglass/kernel/leave` before returning success. The response includes `storage_receipt.storage_id`, a SHA-256 of the exact stored departure JSON. It preserves the existing stop receipt and continuation packet without promoting either to canon, identity or accepted deed evidence.
+
+Storage defaults to the host user's `.wayglass/departures` directory, outside the checkout. Set `WAYGLASS_DATA_DIR` before launching to select another directory. A complete temporary file is flushed with fsync and published by a hard link without overwriting an existing record. Failed storage does not return a success receipt. Recovery validates the content hash and declared world/participant binding.
+
+Recover using `GET /api/v1/wayglass/kernel/departures/<storage_id>?world_id=<world>&participant_id=<participant>`. Re-enter using the existing `/kernel/enter` payload with `storage_id`; the host loads the stored packet. If a packet is also submitted, it must equal the stored packet. The existing Waygate and continuation inspection still apply.
+
+The browser API exposes `__wayglassOS.leave`, `recoverDeparture({storageId,worldId,participantId})` and `enter({storageId,worldId,participantId,waygateManifest})`. Retain the storage ID from departure. No automatic room checkpoint extraction, latest-record discovery or provider-context injection is claimed by this slice.
+
+## Evidence and limits
+
+The focused HTTP test starts a real child host process, persists a departure, terminates it, starts a fresh process and recovers the exact packet. It tests re-entry plus rejection of changed alternatives, participant substitution and file tampering. This is restart evidence, not a live model continuity experiment.
+
+Bindings remain caller-declared on the existing local host API. A storage receipt proves local custody of the supplied departure, not authenticated authorship or acceptance of its assertions. Do not expose this API as a multi-user service without trusted principal binding. Hash verification detects changed content against a retained storage ID; it does not replace signatures or external receipt anchoring. File fsync and process restart are covered; power-loss directory durability, network filesystems, automatic revocation propagation and backups are not established. A recovered packet is continuation material for review, not current accepted deed evidence.

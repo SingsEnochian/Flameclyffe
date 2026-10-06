@@ -3,7 +3,7 @@ import { installWayglassField } from './glass-field.js';
 import { installMotionChoreography } from './motion-choreography.js';
 import { installKeyboardControls } from './keyboard-controls.js';
 import { detectEmbodimentCapabilities, detectARSupport, publishEmbodiment } from './embodiment.js';
-import { enterWayglassWorld, leaveWayglassWorld, readVoyageMessages, replyToVoyage } from './route-client.js';
+import { enterWayglassWorld, leaveWayglassWorld, recoverWayglassDeparture, readVoyageMessages, replyToVoyage } from './route-client.js';
 import { installVoyageInbox } from './voyage-inbox.js';
 import { mountWayglassSurface, registerWayglassSurface, listWayglassSurfaces } from './surface-registry.js';
 import { mountArcSweepWritingSurface } from './surfaces/arcsweep-writing.js';
@@ -50,6 +50,7 @@ const wayglass = Object.freeze({
   }),
   embodiment: Object.freeze({ ...embodiment, ar }),
   readMessages: readVoyageMessages,
+  recoverDeparture: recoverWayglassDeparture,
   reply: replyToVoyage,
 });
 

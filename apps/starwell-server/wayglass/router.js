@@ -9,6 +9,7 @@ const {
 const { bootWayglassKernel } = require('../wayglass-runtime/wayglass-kernel.cjs');
 const { enterWayglassWorld } = require('../wayglass-runtime/wayglass-world-entry.cjs');
 const { createWayglassDeparture } = require('../wayglass-runtime/wayglass-stop-receipt.cjs');
+const { createDepartureStore } = require('../wayglass-runtime/wayglass-departure-store.cjs');
 const { createModelObservation } = require('../wayglass-runtime/wayglass-model-observation.cjs');
 
 const MAX_HISTORY = 16;
@@ -253,8 +254,17 @@ async function humainCatalogueResponse(route, res, fetchImpl = globalThis.fetch)
   }
 }
 
-function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThis.fetch } = {}) {
+function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThis.fetch, departureStore = createDepartureStore() } = {}) {
   const router = express.Router();
+  router.get('/kernel/departures/:storageId', (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    try {
+      const departure = departureStore.read(req.params.storageId, req.query.world_id, req.query.participant_id);
+      return res.json({ ...departure, recovered_storage_id: req.params.storageId });
+    } catch (error) {
+      return res.status(409).json({ error: 'Stored departure could not be verified for this binding.' });
+    }
+  });
   router.get('/voyage/messages', async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     const bridge = req.app.locals.wayglassVoyageMessages;
@@ -295,15 +305,19 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     const payload = req.body || {};
 
     try {
+      const stored = payload.storage_id ? departureStore.read(payload.storage_id, payload.world_id, payload.participant_id) : null;
+      if (stored && payload.continuation_packet && JSON.stringify(stored.continuation_packet) !== JSON.stringify(payload.continuation_packet)) {
+        return res.status(409).json({ error: 'Continuation differs from stored departure evidence.' });
+      }
       const result = enterWayglassWorld({
         world_id: cleanText(payload.world_id, 180),
         participant_id: cleanText(payload.participant_id, 180),
         preferred_route: cleanText(payload.preferred_route || payload.route_id, 120),
         waygate_manifest: payload.waygate_manifest,
-        continuation_packet: payload.continuation_packet ?? null,
+        continuation_packet: stored?.continuation_packet ?? payload.continuation_packet ?? null,
         embodiment: cleanEmbodiment(payload.embodiment),
       });
-      return res.status(result.entered ? 200 : 409).json(result);
+      return res.status(result.entered ? 200 : 409).json({ ...result, recovered_storage_id: payload.storage_id || null });
     } catch (error) {
       const badRequest = error instanceof TypeError || /requires|must be an object/i.test(error?.message || '');
       return res.status(badRequest ? 400 : 500).json({
@@ -341,7 +355,8 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
         alternatives: Array.isArray(payload.alternatives) ? payload.alternatives : [],
         revoked_refs: Array.isArray(payload.revoked_refs) ? payload.revoked_refs : [],
       });
-      return res.status(201).json(departure);
+      const storage_receipt = departureStore.save(departure);
+      return res.status(201).json({ ...departure, storage_receipt });
     } catch (error) {
       const badRequest = error instanceof TypeError || /requires|must be an object|identity declaration|provenance refs/i.test(error?.message || '');
       return res.status(badRequest ? 400 : 500).json({
