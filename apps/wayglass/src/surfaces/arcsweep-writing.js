@@ -1,7 +1,7 @@
 import { createInteractionState } from '../interaction-state.js';
 import { emitInteractionCue } from '../interaction-cues.js';
 import { emitMaterialSignal } from '../material-state.js';
-import { invokeWayglassRoute, listWayglassRoutes } from '../route-client.js';
+import { invokeWayglassRoute, listWayglassRoutes, leaveWayglassWorld, recoverWayglassDeparture } from '../route-client.js';
 
 function escapeHtml(value = '') {
   return String(value)
@@ -32,6 +32,7 @@ export async function mountArcSweepWritingSurface(root) {
   let selectedRoute = 'local:ollama';
   let busy = false;
   let lastReceipt = null;
+  let checkpoint = null;
 
   root.innerHTML = [
     '<section class="wg-surface" data-surface="arcsweep-writing">',
@@ -73,6 +74,17 @@ export async function mountArcSweepWritingSurface(root) {
         '</details>',
       '</section>',
 
+      '<details class="glass-panel"><summary>Continuity checkpoint</summary>',
+      '<label>World <input id="wg-cp-world" value="wayglass:writing-room"></label>',
+      '<label>Participant <input id="wg-cp-participant" value="rowan"></label>',
+      '<label>Checkpoint text <textarea id="wg-cp-text" rows="3"></textarea></label>',
+      '<label>Open questions (one per line) <textarea id="wg-cp-questions" rows="2"></textarea></label>',
+      '<label>Stop point <input id="wg-cp-stop"></label>',
+      '<label>Next owner <input id="wg-cp-owner" value="Rowan"></label>',
+      '<button id="wg-cp-save" type="button">Save checkpoint</button>',
+      '<label>Storage receipt ID <input id="wg-cp-id"></label>',
+      '<button id="wg-cp-recover" type="button">Recover checkpoint</button>',
+      '<p id="wg-cp-status" role="status">No stored checkpoint attached.</p></details>',
       '<section class="wg-thread glass-panel" aria-live="polite">',
         '<button id="wg-copy-session" type="button" class="glass-chip">Copy session log</button>',
         '<div id="wg-thread" class="wg-thread-log">',
@@ -103,6 +115,32 @@ export async function mountArcSweepWritingSurface(root) {
   const input = root.querySelector('#wg-input');
   const status = root.querySelector('#wg-status');
   const send = root.querySelector('#wg-send');
+  const cp = name => root.querySelector('#wg-cp-' + name);
+  cp('save').addEventListener('click', async () => {
+    try {
+      const worldId = cp('world').value.trim(), participantId = cp('participant').value.trim();
+      const result = await leaveWayglassWorld({worldId, participantId, routeId: selectedRoute,
+        identityDeclarations: [{entity_id: participantId, declaration: 'Caller-declared checkpoint participant'}],
+        activeWork: [{description: cp('text').value}], unresolvedWonderQuestions: cp('questions').value.split('\n').filter(Boolean),
+        provenanceRefs: ['wayglass-writing-session:' + session], stopPoint: cp('stop').value, nextOwner: cp('owner').value});
+      checkpoint = {storageId: result.storage_receipt.storage_id, worldId, participantId};
+      cp('id').value = checkpoint.storageId;
+      cp('status').textContent = 'Stored locally; receipt ' + checkpoint.storageId + '. Copy this ID for return.';
+    } catch(error) { cp('status').textContent = 'Checkpoint save failed: ' + error.message; }
+  });
+  cp('recover').addEventListener('click', async () => {
+    try {
+      const candidate = {storageId: cp('id').value.trim(), worldId: cp('world').value.trim(), participantId: cp('participant').value.trim()};
+      const result = await recoverWayglassDeparture(candidate);
+      const packet = result.continuation_packet;
+      cp('text').value = packet.active_work.map(item => item.description || '').join('\n');
+      cp('questions').value = packet.unresolved_wonder_questions.join('\n');
+      cp('stop').value = packet.stop_point; cp('owner').value = packet.next_owner;
+      checkpoint = candidate;
+      cp('status').textContent = 'Verified stored checkpoint attached to subsequent turns. No canon promotion.';
+    } catch(error) { checkpoint = null; cp('status').textContent = 'Checkpoint recovery failed: ' + error.message; }
+  });
+
   const receipt = root.querySelector('#wg-receipt');
 
   const arState = document.documentElement.dataset.wayglassAr || 'unknown';
@@ -245,6 +283,7 @@ export async function mountArcSweepWritingSurface(root) {
         history,
         interaction: current,
         sessionId: session,
+        checkpoint,
       });
       messages.push({
         role: 'assistant',

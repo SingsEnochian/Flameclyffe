@@ -11,7 +11,7 @@ const require = createRequire(import.meta.url);
 const { createDepartureStore } = require('../../../lib/wayglass-departure-store.cjs');
 
 async function host(directory) {
-  const script = `const express=require('./apps/starwell-server/node_modules/express'); const {createWayglassRouter}=require('./apps/starwell-server/wayglass/router'); const {createDepartureStore}=require('./lib/wayglass-departure-store.cjs');const app=express();app.use(express.json());app.use('/api/v1/wayglass',createWayglassRouter({departureStore:createDepartureStore({directory:process.env.TRIAL_DIRECTORY})}));const server=app.listen(0,'127.0.0.1',()=>console.log(server.address().port));`;
+  const script = `const express=require('./apps/starwell-server/node_modules/express'); const {createWayglassRouter}=require('./apps/starwell-server/wayglass/router'); const {createDepartureStore}=require('./lib/wayglass-departure-store.cjs');const app=express();app.use(express.json());app.use('/api/v1/wayglass',createWayglassRouter({fetchImpl:async(url,options)=>Response.json({message:{content:JSON.stringify(JSON.parse(options.body).messages)}}),departureStore:createDepartureStore({directory:process.env.TRIAL_DIRECTORY})}));const server=app.listen(0,'127.0.0.1',()=>console.log(server.address().port));`;
   const child = spawn(process.execPath, ['-e', script], { env: { ...process.env, TRIAL_DIRECTORY: directory }, stdio: ['ignore', 'pipe', 'pipe'] });
   const [data] = await once(child.stdout, 'data');
   const base = `http://127.0.0.1:${String(data).trim()}/api/v1/wayglass`;
@@ -35,6 +35,14 @@ test('HTTP departure survives a fresh process; recovery preserves open alternati
     const entry = { world_id:'ship',participant_id:'rowan',storage_id:id,waygate_manifest:createWaygateManifest({waygate_id:'gate',world_id:'ship',allowed_body_classes:['host-os'],provenance_refs:['trial:gate']}),embodiment:{body_class:'host-os'} };
     const enter = body => fetch(server.base+'/kernel/enter',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
     assert.equal((await enter(entry)).status,200);
+    const turn = await fetch(server.base + '/respond', {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({route_id:'local:ollama',input:'Recover the checkpoint',checkpoint_storage_id:id,checkpoint_world_id:'ship',checkpoint_participant_id:'rowan',_storedCheckpoint:{fake:'BODY MUST NOT BECOME CHECKPOINT'}})});
+    assert.equal(turn.status,200);
+    const captured = await turn.json();
+    assert.match(captured.output,/Clock fast or ship slow/);
+    assert.match(captured.output,/Before any canon write/);
+    assert.doesNotMatch(captured.output,/BODY MUST NOT BECOME CHECKPOINT/);
+    assert.equal(captured.receipt.checkpoint_storage_id,id);
+
     assert.equal((await enter({...entry,continuation_packet:{...saved.continuation_packet,unresolved_wonder_questions:[]}})).status,409);
     const file = path.join(directory,id+'.json'); fs.appendFileSync(file,' ');
     assert.throws(()=>createDepartureStore({directory}).read(id,'ship','rowan'),/integrity/);

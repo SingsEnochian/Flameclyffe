@@ -113,6 +113,7 @@ export async function invokeWayglassRoute({
   interaction,
   sessionId,
   surfaceId = 'arcsweep:writing-room',
+  checkpoint = null,
   maxOutputTokens = 1400,
   think = false,
   fetchImpl = fetch,
@@ -128,6 +129,9 @@ export async function invokeWayglassRoute({
       session_id: sessionId,
       surface_id: surfaceId,
       max_output_tokens: maxOutputTokens,
+      checkpoint_storage_id: checkpoint?.storageId,
+      checkpoint_world_id: checkpoint?.worldId,
+      checkpoint_participant_id: checkpoint?.participantId,
       think: think === true,
     }),
   });
