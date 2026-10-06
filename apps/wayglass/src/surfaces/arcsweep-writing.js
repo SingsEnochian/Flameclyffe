@@ -151,18 +151,19 @@ export async function mountArcSweepWritingSurface(root) {
     try {
       const catalogue = await listWayglassRoutes();
       routes = catalogue.routes || [];
-      if (!routes.some((route) => route.route_id === selectedRoute) && routes[0]) selectedRoute = routes[0].route_id;
+      if (!routes.some((route) => route.route_id === selectedRoute && route.configured !== false)) selectedRoute = routes.find(route => route.configured !== false)?.route_id || '';
       routeSelect.innerHTML = routes.map((route) =>
-        '<option value="' + escapeHtml(route.route_id) + '">' +
-        escapeHtml(route.label + ' · ' + route.model) +
+        '<option value="' + escapeHtml(route.route_id) + '"' + (route.configured === false ? ' disabled' : '') + '>' +
+        escapeHtml(route.label + ' · ' + route.model + (route.configured === false ? ' · credentials missing' : '')) +
         '</option>'
       ).join('');
       routeSelect.value = selectedRoute;
       routeState.textContent = routes.length + ' registered route' + (routes.length === 1 ? '' : 's');
     } catch (error) {
-      routes = [{ route_id: 'openai:gpt', label: 'GPT', model: 'server-selected' }];
-      routeSelect.innerHTML = '<option value="openai:gpt">GPT · server-selected</option>';
-      routeState.textContent = 'Catalogue unavailable · fallback route shown';
+      routes = [];
+      selectedRoute = '';
+      routeSelect.innerHTML = '<option value="">Route catalogue unavailable</option>';
+      routeState.textContent = 'Catalogue unavailable · reload to reconnect';
     }
   }
 
@@ -184,6 +185,7 @@ export async function mountArcSweepWritingSurface(root) {
   async function passTurn() {
     const text = input.value.trim();
     if (!text || busy) return;
+    if (!selectedRoute) { status.textContent = 'No configured route available. Reload the route catalogue.'; return; }
     busy = true;
     send.disabled = true;
     input.disabled = true;

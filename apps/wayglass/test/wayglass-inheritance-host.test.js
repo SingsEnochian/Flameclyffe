@@ -244,3 +244,18 @@ test('local thinking defaults off and requires explicit boolean opt-in', async t
     assert.equal(h.calls.at(-1).body.think, expected);
   }
 });
+
+test('catalogue distinguishes missing credentials from verified connectivity without exposing secrets', async () => {
+  const { publicWayglassRoutes } = hostRequire('../wayglass-runtime/wayglass-route-registry.cjs');
+  const key = process.env.HUMAIN_NODE_KEY;
+  try {
+    delete process.env.HUMAIN_NODE_KEY;
+    assert.equal(publicWayglassRoutes().find(r => r.route_id === 'humain:m3-preview').configured, false);
+    process.env.HUMAIN_NODE_KEY = 'test-secret-not-for-catalogue';
+    const routes = publicWayglassRoutes();
+    const route = routes.find(r => r.route_id === 'humain:m3-preview');
+    assert.equal(route.configured, true);
+    assert.equal(route.connection_verified, false);
+    assert.ok(!JSON.stringify(routes).includes(process.env.HUMAIN_NODE_KEY));
+  } finally { if (key === undefined) delete process.env.HUMAIN_NODE_KEY; else process.env.HUMAIN_NODE_KEY = key; }
+});
