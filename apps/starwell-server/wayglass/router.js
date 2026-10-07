@@ -357,6 +357,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
         next_owner: cleanText(payload.next_owner, 240),
         alternatives: Array.isArray(payload.alternatives) ? payload.alternatives : [],
         revoked_refs: Array.isArray(payload.revoked_refs) ? payload.revoked_refs : [],
+        organ_refs: Array.isArray(payload.organ_refs) ? payload.organ_refs : [],
       });
       const storage_receipt = departureStore.save(departure);
       return res.status(201).json({ ...departure, storage_receipt });
