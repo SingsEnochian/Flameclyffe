@@ -29,27 +29,42 @@ def identify(path):
         if len(p)>=4: rows.append({"index":int(p[0]),"label":p[1],"compose":p[2],"geometry":p[3]})
     return rows
 
-def canon(label):
+def canon(label, aliases=None):
     clean=(label or "").strip(); key=clean.casefold()
-    if key in ALIASES: return ALIASES[key]
+    merged=dict(ALIASES)
+    if aliases: merged.update({str(k).casefold(): str(v) for k,v in aliases.items()})
+    if key in merged: return merged[key]
     if GENERIC.match(clean): return f"90 REVIEW | {clean}"
     return clean
+
+def preflight(rows):
+    blockers=[]
+    for r in rows:
+        if not r["compose"] or r["compose"].casefold()=="none":
+            blockers.append({
+                "index":r["index"],
+                "label":r["label"],
+                "reason":"compose mode is None/undefined and cannot be faithfully round-tripped by this writer"
+            })
+    return blockers
 
 def metric(a,b,diff):
     p=subprocess.run(["magick","compare","-metric","RMSE",a,b,str(diff)],text=True,stdout=subprocess.DEVNULL,stderr=subprocess.PIPE)
     m=re.search(r"\(([-+0-9.eE]+)\)",p.stderr)
     return float(m.group(1)) if m else (0.0 if p.returncode==0 else float("inf"))
 
-def normalize(src:Path,dst:Path):
-    rows=identify(src); cmd=["magick"]; changes=[]
+def normalize(src:Path,dst:Path,aliases=None):
+    rows=identify(src); blockers=preflight(rows)
+    if blockers: return rows,[],blockers
+    cmd=["magick"]; changes=[]
     for row in rows:
-        new=canon(row["label"])
+        new=canon(row["label"], aliases)
         if new!=row["label"]: changes.append({"index":row["index"],"from":row["label"],"to":new})
         cmd += ["(",f"{src}[{row['index']}]","-set","label",new,"-set","compose",row["compose"],")"]
     cmd += [str(dst)]
     dst.parent.mkdir(parents=True,exist_ok=True)
     subprocess.run(cmd,check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
-    return rows,changes
+    return rows,changes,[]
 
 def verify(src:Path,dst:Path):
     a,b=identify(src),identify(dst)
@@ -68,10 +83,35 @@ def verify(src:Path,dst:Path):
     return r
 
 def main():
-    ap=argparse.ArgumentParser(); ap.add_argument("source",type=Path); ap.add_argument("output",type=Path); ap.add_argument("--report",type=Path); a=ap.parse_args()
-    rows,changes=normalize(a.source,a.output); v=verify(a.source,a.output)
-    report={"source":str(a.source),"output":str(a.output),"changes":changes,"source_layers":rows,"verification":v}
-    if a.report: a.report.write_text(json.dumps(report,indent=2),encoding="utf-8")
+    ap=argparse.ArgumentParser()
+    ap.add_argument("source",type=Path)
+    ap.add_argument("output",type=Path,nargs="?")
+    ap.add_argument("--report",type=Path)
+    ap.add_argument("--mapping",type=Path,help="JSON object mapping exact source labels to canonical labels")
+    ap.add_argument("--inspect",action="store_true")
+    a=ap.parse_args()
+    rows=identify(a.source)
+    if a.inspect:
+        print(json.dumps({"source":str(a.source),"layers":rows,"blockers":preflight(rows)},indent=2))
+        return
+    if not a.output: ap.error("output required unless --inspect is used")
+    aliases=json.loads(a.mapping.read_text("utf-8")) if a.mapping else None
+    rows,changes,blockers=normalize(a.source,a.output,aliases)
+    if blockers:
+        report={
+            "source":str(a.source),"output":str(a.output),"changes":[],
+            "source_layers":rows,"blockers":blockers,
+            "verification":{"passed":False,"not_written":True}
+        }
+    else:
+        v=verify(a.source,a.output)
+        report={
+            "source":str(a.source),"output":str(a.output),"changes":changes,
+            "source_layers":rows,"blockers":[],"verification":v
+        }
+    if a.report:
+        a.report.parent.mkdir(parents=True,exist_ok=True)
+        a.report.write_text(json.dumps(report,indent=2),encoding="utf-8")
     print(json.dumps(report,indent=2))
-    if not v.get("passed"): raise SystemExit(2)
+    if not report["verification"].get("passed"): raise SystemExit(2)
 if __name__=="__main__": main()
