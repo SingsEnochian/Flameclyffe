@@ -52,3 +52,5 @@ apps/starwell-server/public/starwell/
 .vscode/
 .idea/
 .netlify/
+
+/apps/starwell-server/wayglass-runtime/

@@ -18,6 +18,8 @@ const FRAGMENT = `
   uniform float uOwnership;
   uniform float uHandoff;
   uniform float uCanonState;
+  uniform float uVelocity;
+  uniform float uThickness;
   uniform vec2 uPointer;
   uniform vec2 uResolution;
   varying vec2 vUv;
@@ -83,8 +85,20 @@ const FRAGMENT = `
     float pointerDistance = length(p - pointer);
     float lens = exp(-pointerDistance * (4.6 - uEnergy * 0.9));
 
+    // Optical mass. Movement thickens the apparent glass rather than merely
+    // making it brighter. The bend is local to the viewing/hand vector.
+    float motionMass = clamp(uVelocity * 0.78 + uEnergy * 0.34, 0.0, 1.0);
+    float opticalThickness = clamp(uThickness + motionMass * 0.42, 0.0, 1.0);
+    vec2 bendDirection = normalize((p - pointer) + vec2(0.0001));
+    float bendEnvelope = exp(-pointerDistance * mix(7.4, 3.8, opticalThickness));
+    float bendAmount = bendEnvelope * opticalThickness * 0.045;
+    vec2 refractedP = p + bendDirection * bendAmount;
+    float refractedMineral = fbm(refractedP * 3.2 + vec2(uTime * 0.008, -uTime * 0.005));
+    float thicknessBand = smoothstep(0.76, 0.18, pointerDistance) * opticalThickness;
+    float internalRim = pow(clamp(pointerDistance / 0.62, 0.0, 1.0), 3.0) * bendEnvelope * opticalThickness;
+
     // Black glass body. Almost still at rest, slightly deeper when awake.
-    float mineral = fbm(p * 2.2 + vec2(uTime * 0.009, -uTime * 0.006));
+    float mineral = mix(fbm(p * 2.2 + vec2(uTime * 0.009, -uTime * 0.006)), refractedMineral, bendEnvelope * opticalThickness * 0.42);
     float mineralFine = fbm(p * 7.0 - vec2(uTime * 0.014, uTime * 0.011));
     float opticalBreath = 0.5 + 0.5 * sin(uTime * 0.105 + mineral * 1.7);
     vec3 blackGlass = mix(
@@ -149,6 +163,11 @@ const FRAGMENT = `
     colour += labradorite(strata * 1.7 + angle, ribbonParticle * 1.35);
     colour += labradorite(strata + uTime * 0.08, handoffFilament * 0.88);
     colour += labradorite(angle + strata, caustic);
+    // A restrained internal edge and displaced mineral sample create the read
+    // of laminated thickness. This is deliberately not a generic bloom.
+    vec3 refractedFire = labradorite(angle * 1.6 + refractedMineral * 7.0 + strata, thicknessBand * 0.085);
+    colour += refractedFire;
+    colour += vec3(0.68, 0.93, 0.94) * internalRim * 0.045;
 
     // Canon state is deliberately subtle: verified settles; unresolved/conflicted
     // produces optical doubling instead of a louder colour wash.
@@ -195,6 +214,8 @@ export function installWayglassField({ host = document.body } = {}) {
     uOwnership: { value: 0 },
     uHandoff: { value: 0 },
     uCanonState: { value: 0 },
+    uVelocity: { value: 0 },
+    uThickness: { value: 0.34 },
     uPointer: { value: new THREE.Vector2(0.68, 0.3) },
     uResolution: { value: new THREE.Vector2(1, 1) },
   };
@@ -213,6 +234,10 @@ export function installWayglassField({ host = document.body } = {}) {
   let alive = true;
   let energyTarget = 0;
   let lastPointerAt = 0;
+  let lastPointerX = 0;
+  let lastPointerY = 0;
+  let lastPointerMoveAt = performance.now();
+  let velocityTarget = 0;
 
   function resize() {
     const width = Math.max(1, globalThis.innerWidth || 1);
@@ -231,9 +256,14 @@ export function installWayglassField({ host = document.body } = {}) {
       const idleFor = performance.now() - lastPointerAt;
       if (idleFor > 950) energyTarget *= 0.965;
       uniforms.uEnergy.value += (energyTarget - uniforms.uEnergy.value) * 0.055;
+      uniforms.uVelocity.value += (velocityTarget - uniforms.uVelocity.value) * 0.12;
+      uniforms.uThickness.value += ((0.34 + uniforms.uVelocity.value * 0.46) - uniforms.uThickness.value) * 0.075;
       energyTarget *= 0.992;
+      velocityTarget *= 0.90;
     } else {
       uniforms.uEnergy.value = 0.08;
+      uniforms.uVelocity.value = 0;
+      uniforms.uThickness.value = 0.34;
     }
 
     renderer.render(scene, camera);
@@ -249,7 +279,14 @@ export function installWayglassField({ host = document.body } = {}) {
     const width = Math.max(1, globalThis.innerWidth || 1);
     const height = Math.max(1, globalThis.innerHeight || 1);
     pointerTarget.set(event.clientX / width, 1 - (event.clientY / height));
-    lastPointerAt = performance.now();
+    const now = performance.now();
+    const dt = Math.max(8, now - lastPointerMoveAt);
+    const speed = Math.hypot(event.clientX - lastPointerX, event.clientY - lastPointerY) / dt;
+    velocityTarget = Math.min(1, speed / 1.6);
+    lastPointerX = event.clientX;
+    lastPointerY = event.clientY;
+    lastPointerMoveAt = now;
+    lastPointerAt = now;
     energyTarget = Math.min(1, energyTarget + 0.12);
     if (reduceMotion) render();
   }

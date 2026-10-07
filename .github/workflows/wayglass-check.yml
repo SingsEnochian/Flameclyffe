@@ -7,6 +7,11 @@ on:
       - 'apps/starwell-server/wayglass/**'
       - 'apps/starwell-server/server.js'
       - 'lib/wayglass-*'
+      - 'api/_shared/wayglass-gateway.mjs'
+      - 'api/v1/wayglass/**'
+      - 'vercel.json'
+      - 'test/wayglass/**'
+      - 'apps/starwell-server/package*.json'
       - 'docs/architecture/WAYGLASS_OS_V0_1.md'
       - 'package.json'
       - 'package-lock.json'
@@ -29,8 +34,14 @@ jobs:
       - run: npm ci
       - name: Syntax-check Wayglass server ingress
         run: node --check apps/starwell-server/wayglass/router.js
+      - name: Install host dependencies for HTTP integration tests
+        run: npm ci --prefix apps/starwell-server --omit=dev --ignore-scripts
       - run: npm run wayglass:test
       - run: npm run wayglass:build
       - run: npm run wayglass:stage:server
       - name: Verify staged host
         run: test -f apps/starwell-server/public/wayglass/index.html
+
+      - run: npm run wayglass:stage:vercel
+      - name: Verify preview browser bundle
+        run: test -f dist/starwell/wayglass/index.html

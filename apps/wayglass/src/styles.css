@@ -580,3 +580,220 @@ button { font: inherit; cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
   .thinking-chevron { transition: none; }
 }
+/* Voyage messages remain accessible alongside the current writing surface. */
+.wg-voyage-inbox { position: fixed; bottom: 1rem; right: 1rem; z-index: 100; width: min(28rem, calc(100vw - 2rem)); max-height: 70vh; overflow: auto; padding: 1rem; color: #eee7ff; background: #141120; border: 1px solid #75638c; border-radius: 1rem; }
+.wg-voyage-inbox summary { cursor: pointer; }
+.wg-voyage-inbox article { border-top: 1px solid #75638c; padding-top: .7rem; margin-top: .7rem; }
+.wg-voyage-inbox p { white-space: pre-wrap; overflow-wrap: anywhere; }
+.wg-voyage-inbox label, .wg-voyage-inbox textarea { display: block; width: 100%; }
+.wg-voyage-inbox textarea { box-sizing: border-box; min-height: 5rem; margin: .5rem 0; color: inherit; background: #221c30; }
+.wg-voyage-inbox button { margin-top: .5rem; padding: .5rem .8rem; cursor: pointer; }
+
+
+/* Optical mass pass
+   Shared with the WebGL field: movement changes apparent thickness/refraction,
+   not semantic authority. Quiet at rest; denser under hand velocity. */
+:root {
+  --wg-optical-mass: calc(.18 + var(--wg-velocity) * .82);
+  --wg-glass-lift: calc(1px + var(--wg-velocity) * 3px);
+}
+
+.glass-panel {
+  border-width: 1px;
+  box-shadow:
+    0 calc(30px + var(--wg-velocity) * 18px) calc(96px + var(--wg-velocity) * 34px) rgba(0,0,0,.48),
+    0 calc(8px + var(--wg-velocity) * 5px) 22px rgba(0,0,0,.31),
+    inset 0 calc(1px + var(--wg-velocity) * 1px) rgba(230,252,255,.13),
+    inset 0 calc(-2px - var(--wg-velocity) * 3px) calc(18px + var(--wg-velocity) * 22px) rgba(0,0,0,.42),
+    inset calc(8px + var(--wg-velocity) * 8px) 0 calc(34px + var(--wg-velocity) * 24px) rgba(24,99,106,.035),
+    inset calc(-10px - var(--wg-velocity) * 9px) 0 calc(38px + var(--wg-velocity) * 26px) rgba(83,41,121,.025);
+}
+
+.glass-panel::after {
+  inset: calc(3px + var(--wg-velocity) * 2px);
+  border-color: rgba(217,246,247,calc(.045 + var(--wg-velocity) * .065));
+  background:
+    radial-gradient(
+      360px circle at var(--wg-pointer-x) var(--wg-pointer-y),
+      rgba(225,255,253,calc(.018 + var(--wg-velocity) * .050)),
+      rgba(67,220,217,calc(.010 + var(--wg-velocity) * .035)) 23%,
+      rgba(93,83,221,calc(.006 + var(--wg-velocity) * .022)) 43%,
+      transparent 67%
+    ),
+    radial-gradient(80% 140% at 4% 12%, rgba(61,221,221,.055), transparent 42%),
+    radial-gradient(65% 130% at 92% 78%, rgba(125,68,221,.045), transparent 47%);
+}
+
+/* Text-bearing layers move only a fraction of the apparent glass depth.
+   Keeping content stable while the material shifts prevents motion sickness. */
+.wg-surface-head,
+.wg-thread,
+.wg-composer {
+  translate: 0 calc(var(--wg-velocity) * -1px);
+}
+
+.glass-chip:hover,
+.send-jewel:hover:not(:disabled),
+.ownership-chip:hover {
+  box-shadow:
+    inset 0 2px rgba(238,255,255,.15),
+    inset 0 -4px 10px rgba(0,0,0,.62),
+    0 calc(5px + var(--wg-glass-lift)) 0 rgba(1,4,6,.40),
+    0 16px 34px rgba(0,0,0,.31);
+}
+
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  :root {
+    --wg-optical-mass: .18;
+    --wg-glass-lift: 1px;
+  }
+  .wg-surface-head,
+  .wg-thread,
+  .wg-composer { translate: none; }
+}
+
+
+/* Ship deck navigation and organ bay */
+.wg-deck-nav {
+  display: flex;
+  gap: 8px;
+  width: max-content;
+  max-width: 100%;
+  padding: 6px;
+  border-radius: 999px;
+  position: sticky;
+  top: 10px;
+  z-index: 20;
+}
+.wg-systems .wg-surface-head { align-items: center; }
+.systems-vitals { display: grid; gap: 9px; }
+.systems-vitals span { display: flex; justify-content: space-between; gap: 18px; padding: 9px 12px; border-bottom: 1px solid rgba(190,225,227,.09); color: var(--glass-muted); font-size: .76rem; }
+.systems-vitals strong { color: var(--glass-text); }
+.organ-bay { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; }
+.organ-vessel {
+  grid-column: span 4;
+  min-height: 310px;
+  padding: 22px;
+  border-radius: 28px;
+  overflow: hidden;
+  isolation: isolate;
+  display: grid;
+  grid-template-rows: 112px 1fr;
+  transition: transform 420ms cubic-bezier(.18,.78,.18,1), border-color 300ms ease;
+}
+.organ-vessel:focus-visible { outline: 2px solid rgba(132,232,229,.82); outline-offset: 4px; }
+.organ-vessel:hover, .organ-vessel:focus-visible { transform: translateY(calc(-2px - var(--wg-velocity) * 2px)) rotateX(calc(var(--wg-tilt-x) * .28)) rotateY(calc(var(--wg-tilt-y) * .28)); border-color: rgba(126,225,222,.30); }
+.organ-core { width: 86px; height: 86px; position: relative; place-self: center; transform-style: preserve-3d; }
+.organ-core::before, .organ-core::after, .organ-core i, .organ-core b, .organ-core span { content:""; position:absolute; inset:0; display:block; pointer-events:none; }
+.organ-core::before {
+  inset: 8px;
+  border: 1px solid rgba(183,231,230,.24);
+  border-radius: 30% 70% 58% 42% / 44% 37% 63% 56%;
+  transform: rotate(calc(14deg + var(--organ-index) * 23deg));
+  background: radial-gradient(circle at 31% 24%, rgba(230,255,253,.20), rgba(50,211,208,.08) 24%, rgba(87,73,217,.06) 52%, rgba(1,5,8,.88) 72%);
+  box-shadow: inset 0 2px 5px rgba(240,255,255,.13), inset 0 -12px 28px rgba(0,0,0,.62), 0 16px 38px rgba(0,0,0,.35);
+}
+.organ-core::after {
+  inset: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 36% 30%, rgba(238,255,254,.90), rgba(58,220,216,.52) 12%, rgba(65,102,231,.24) 38%, rgba(126,59,201,.12) 58%, transparent 72%);
+  filter: drop-shadow(0 0 calc(7px + var(--wg-velocity) * 9px) rgba(69,218,214,.22));
+}
+.organ-core i, .organ-core b, .organ-core span { inset: 12px 4px; border: 1px solid rgba(124,216,215,.13); border-radius: 50%; }
+.organ-core i { transform: rotateX(68deg) rotateZ(calc(22deg + var(--organ-index) * 17deg)); }
+.organ-core b { transform: rotateY(68deg) rotateZ(calc(-31deg - var(--organ-index) * 13deg)); border-color: rgba(126,87,220,.13); }
+.organ-core span { inset: 5px 19px; border-radius: 5px; transform: rotate(calc(42deg + var(--organ-index) * 19deg)); border-color: rgba(210,239,239,.12); }
+.organ-title { display:flex; align-items:end; justify-content:space-between; gap:12px; }
+.organ-title h2 { margin:0; font:500 1.35rem/1.1 Georgia,serif; }
+.organ-lineage { min-height: 2.6em; color:var(--glass-muted); font-size:.70rem; line-height:1.45; overflow-wrap:anywhere; }
+.organ-tags { display:flex; flex-wrap:wrap; gap:6px; margin:12px 0; }
+.organ-tags span { border:1px solid rgba(164,211,213,.12); border-radius:999px; padding:4px 7px; color:rgba(220,239,240,.72); background:rgba(0,0,0,.16); font-size:.65rem; }
+.organ-vessel details { margin-top:12px; color:var(--glass-muted); font-size:.72rem; line-height:1.5; }
+.organ-vessel summary { cursor:pointer; color:rgba(224,242,242,.76); }
+@media (max-width: 900px) { .organ-vessel { grid-column: span 6; } }
+@media (max-width: 620px) { .organ-vessel { grid-column: 1 / -1; min-height: 260px; } .wg-deck-nav { width:100%; } }
+@media (prefers-reduced-motion: reduce) { .organ-vessel:hover, .organ-vessel:focus-visible { transform:none; } }
+
+
+/* Systems bay: organs are ship machinery, not dashboard cards.
+   Inspection reveals construction and provenance. Optical intensity means
+   local attention only; it never encodes truth, authority, or canon status. */
+.organ-bay {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(12px, 2vw, 20px);
+  align-items: stretch;
+}
+
+.organ-vessel {
+  min-height: 300px;
+  padding: clamp(18px, 3vw, 28px);
+  border-radius: 30px;
+  display: grid;
+  grid-template-rows: 112px 1fr;
+  gap: 18px;
+  overflow: hidden;
+  isolation: isolate;
+  cursor: default;
+  transition: transform 320ms cubic-bezier(.18,.78,.18,1), border-color 280ms ease, box-shadow 360ms ease;
+}
+
+.organ-vessel:focus-visible { outline: 2px solid rgba(132,232,229,.82); outline-offset: 5px; }
+.organ-vessel[data-inspecting="true"] {
+  transform: translateY(-3px);
+  border-color: rgba(172,225,225,.30);
+  box-shadow: 0 38px 110px rgba(0,0,0,.48), inset 0 1px rgba(238,255,255,.14), inset 0 -28px 60px rgba(0,0,0,.22);
+}
+
+.organ-core {
+  position: relative;
+  width: 94px;
+  height: 94px;
+  place-self: center;
+  border-radius: 38% 62% 58% 42% / 46% 38% 62% 54%;
+  border: 1px solid rgba(190,224,227,.24);
+  background: radial-gradient(circle at 32% 24%, rgba(229,255,252,.15), transparent 24%), rgba(1,6,9,.78);
+  box-shadow: inset 0 2px rgba(245,255,255,.12), inset 0 -12px 28px rgba(0,0,0,.72), 0 18px 38px rgba(0,0,0,.32);
+  transform: rotate(-7deg);
+  transition: transform 600ms cubic-bezier(.18,.78,.18,1), box-shadow 420ms ease;
+}
+
+.organ-core::before, .organ-core::after {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border: 1px solid rgba(91,224,220,.18);
+  border-radius: 50%;
+  transform: rotateX(68deg) rotateZ(22deg);
+  transition: transform 700ms cubic-bezier(.18,.78,.18,1);
+}
+.organ-core::after { inset: 18px 7px; border-color: rgba(156,94,229,.16); transform: rotateY(64deg) rotateZ(-28deg); }
+.organ-core i { position:absolute; inset:28px; border-radius:50%; background:radial-gradient(circle at 35% 28%,rgba(245,255,255,.92),rgba(74,224,219,.46) 24%,rgba(77,91,225,.18) 52%,transparent 72%); box-shadow:0 0 22px rgba(69,215,211,.13); }
+.organ-core b, .organ-core span { position:absolute; inset:20px 37px; border-radius:3px; border:1px solid rgba(200,230,232,.14); background:rgba(2,8,11,.72); }
+.organ-core span { transform:rotate(90deg); }
+
+.organ-vessel[data-organ-kind="memory"] .organ-core { border-radius: 22px; transform: rotate(4deg); }
+.organ-vessel[data-organ-kind="sensorium"] .organ-core { border-radius: 50%; transform: rotate(-3deg) scale(.94); }
+.organ-vessel[data-inspecting="true"] .organ-core { transform: rotate(3deg) scale(1.045); box-shadow: inset 0 2px rgba(245,255,255,.16), inset 0 -12px 28px rgba(0,0,0,.72), 0 22px 46px rgba(0,0,0,.38), 0 0 32px rgba(68,213,210,.08); }
+.organ-vessel[data-inspecting="true"] .organ-core::before { transform: rotateX(68deg) rotateZ(142deg) scale(1.12); }
+.organ-vessel[data-inspecting="true"] .organ-core::after { transform: rotateY(64deg) rotateZ(-154deg) scale(1.15); }
+
+.organ-copy { min-width: 0; }
+.organ-title h2 { margin: 0; font: 500 clamp(1.35rem,2vw,1.8rem)/1.05 Georgia,serif; letter-spacing:-.025em; }
+.organ-role { margin: 10px 0 0; color: rgba(225,243,243,.78); font-size:.78rem; letter-spacing:.04em; }
+.organ-lineage { margin: 10px 0; color: var(--glass-muted); font-size:.72rem; line-height:1.45; opacity:.58; transition:opacity 260ms ease; }
+.organ-vessel[data-inspecting="true"] .organ-lineage { opacity:1; }
+.organ-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
+.organ-tags span { padding:5px 8px; border:1px solid rgba(180,214,218,.11); border-radius:999px; color:rgba(224,241,242,.68); background:rgba(0,0,0,.12); font-size:.66rem; }
+.organ-vessel details { margin-top:14px; color:var(--glass-muted); font-size:.72rem; }
+.organ-vessel summary { cursor:pointer; color:rgba(225,243,243,.76); }
+.organ-vessel details p { overflow-wrap:anywhere; line-height:1.5; }
+
+.systems-vitals { display:grid; gap:7px; align-self:end; }
+.systems-vitals span { display:flex; justify-content:space-between; gap:20px; padding:7px 0; border-bottom:1px solid rgba(210,240,240,.08); color:var(--glass-muted); font-size:.72rem; }
+.systems-vitals strong { color:var(--glass-text); font-weight:700; }
+.wg-deck-nav { display:flex; gap:8px; padding:8px; border-radius:999px; width:max-content; max-width:100%; }
+
+@media (max-width: 860px) { .organ-bay { grid-template-columns:1fr; } .organ-vessel { min-height:0; grid-template-columns:92px 1fr; grid-template-rows:1fr; } .organ-core { width:76px; height:76px; } }
+@media (hover:none) { .organ-vessel { cursor:pointer; } .organ-lineage { opacity:.82; } }
+@media (prefers-reduced-motion:reduce) { .organ-vessel, .organ-core, .organ-core::before, .organ-core::after { transform:none !important; } }

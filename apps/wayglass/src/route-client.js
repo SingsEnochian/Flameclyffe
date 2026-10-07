@@ -1,5 +1,16 @@
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
+export async function readVoyageMessages(fetchImpl = fetch) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/voyage/messages', { cache: 'no-store' }));
+}
+
+export async function replyToVoyage({ recipientId, voyageRef, text, fetchImpl = fetch } = {}) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/voyage/messages', {
+    method: 'POST', headers: JSON_HEADERS,
+    body: JSON.stringify({ recipient_id: recipientId, voyage_ref: voyageRef, text }),
+  }));
+}
+
 async function readJson(response) {
   return response.json().catch(() => ({}));
 }
@@ -15,11 +26,17 @@ export async function listWayglassRoutes(fetchImpl = fetch) {
   return jsonOrThrow(response);
 }
 
+export async function recoverWayglassDeparture({ storageId, worldId, participantId, fetchImpl = fetch } = {}) {
+  const query = new URLSearchParams({ world_id: worldId, participant_id: participantId });
+  return jsonOrThrow(await fetchImpl(`/api/v1/wayglass/kernel/departures/${encodeURIComponent(storageId)}?${query}`, { cache: 'no-store' }));
+}
+
 export async function enterWayglassWorld({
   worldId,
   participantId,
   waygateManifest,
   continuationPacket = null,
+  storageId = null,
   routeId = null,
   embodiment = {},
   fetchImpl = fetch,
@@ -34,6 +51,7 @@ export async function enterWayglassWorld({
       route_id: routeId,
       waygate_manifest: waygateManifest,
       continuation_packet: continuationPacket,
+      storage_id: storageId,
       embodiment,
     }),
   });
@@ -62,6 +80,7 @@ export async function leaveWayglassWorld({
   nextOwner,
   alternatives = [],
   revokedRefs = [],
+  organRefs = [],
   fetchImpl = fetch,
 } = {}) {
   const response = await fetchImpl('/api/v1/wayglass/kernel/leave', {
@@ -83,6 +102,7 @@ export async function leaveWayglassWorld({
       next_owner: nextOwner,
       alternatives,
       revoked_refs: revokedRefs,
+      organ_refs: organRefs,
     }),
   });
   return jsonOrThrow(response);
@@ -95,7 +115,9 @@ export async function invokeWayglassRoute({
   interaction,
   sessionId,
   surfaceId = 'arcsweep:writing-room',
+  checkpoint = null,
   maxOutputTokens = 1400,
+  think = false,
   fetchImpl = fetch,
 } = {}) {
   const response = await fetchImpl('/api/v1/wayglass/respond', {
@@ -109,6 +131,10 @@ export async function invokeWayglassRoute({
       session_id: sessionId,
       surface_id: surfaceId,
       max_output_tokens: maxOutputTokens,
+      checkpoint_storage_id: checkpoint?.storageId,
+      checkpoint_world_id: checkpoint?.worldId,
+      checkpoint_participant_id: checkpoint?.participantId,
+      think: think === true,
     }),
   });
   return jsonOrThrow(response);
