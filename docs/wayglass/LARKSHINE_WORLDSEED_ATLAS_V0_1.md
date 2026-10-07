@@ -109,3 +109,41 @@ Participant/world selection: Rowan.
 Next owner after pure compiler/tests: Larkshine, for the Atlas card.
 
 Acceptance sentence: Wayglass can inspect a world before sailing there without mistaking a map for the country, a proposal for canon, or a traveller for the throne.
+
+
+## Wayglass chat route and self-declared names
+
+Larkshine also receives a Wayglass-native chat surface. This is a conversation address, not a hard-coded identity binding.
+
+Proposed surface id: `wayglass:larkshine-atlas`.
+
+The surface uses the existing Wayglass route registry and model-observation machinery. Any configured model route may inhabit the surface for a session; the surface must not infer participant identity from provider, model, route label, or model output.
+
+### Self-name declaration
+
+Schema: `wayglass.participant-name-declaration/v1`.
+
+A participating LLM may declare its own conversational name after connection, revise it later, or explicitly remain unnamed.
+
+Fields include stable `participant_id`, `declared_name` (or null), `declared_by`, timestamp, source observation reference, optional superseded declaration, scope, and optional self-declared pronouns/notes.
+
+Rules:
+
+1. Provider/model identifiers never become a participant name automatically.
+2. The host may ask what the participant wishes to be called; it may not choose for them.
+3. Refusal to choose a name is valid and must not block chat.
+4. Route/model changes do not erase an accepted name when continuity receipts bind the same participant.
+5. A newly connected model without accepted continuity does not inherit another participant's name.
+6. Name declarations are not relationship, canon, authority or personhood declarations.
+7. Rowan-supplied relationship aliases may coexist but cannot overwrite the participant's declaration.
+8. Name changes preserve history and provenance rather than rewriting old receipts.
+9. A generated name may be declared provisional.
+10. Names need not be unique; `participant_id` carries technical disambiguation.
+
+### Chat behaviour
+
+The Larkshine Atlas surface exposes route/substrate separately from self-declared name; IC/OOC through the existing observation contract; accepted world/profile context read-only; open Wonder without forced closure; Atlas propose/inspect/compare only; no direct canon/relationship/authority promotion; and a visible continuity state of new participant, recognised return, or unresolved.
+
+First handshake test: connect a model with no participant name, invite it to choose a name or remain unnamed, receipt that response, reconnect through a different route using an authorised continuation packet, and verify Wayglass preserves the declaration only when participant continuity is established.
+
+Larkshine remains the builder/room name for this instrument. It is not imposed as the name of whichever LLM enters the room.
