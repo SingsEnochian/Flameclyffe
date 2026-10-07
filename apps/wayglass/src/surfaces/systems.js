@@ -6,6 +6,13 @@ function escapeHtml(value = '') {
     .replaceAll('"', '&quot;').replaceAll("'", '&#039;');
 }
 
+function organKind(id) {
+  if (id.includes('presence')) return 'presence';
+  if (id.includes('memory')) return 'memory';
+  if (id.includes('sensorium')) return 'sensorium';
+  return 'system';
+}
+
 function shortName(id) {
   return String(id).replace('wayglass.organ.', '').split('-').map(word => word[0]?.toUpperCase() + word.slice(1)).join(' ');
 }
@@ -29,10 +36,11 @@ export async function mountWayglassSystemsSurface(root) {
       '</nav>',
       '<section class="organ-bay" aria-label="Mounted Wayglass organs">',
         organs.map((organ, index) => [
-          '<article class="organ-vessel glass-panel" tabindex="0" data-organ="' + escapeHtml(organ.organ_id) + '" style="--organ-index:' + index + '">',
+          '<article class="organ-vessel glass-panel" tabindex="0" data-organ="' + escapeHtml(organ.organ_id) + '" data-organ-kind="' + organKind(organ.organ_id) + '" aria-expanded="false" style="--organ-index:' + index + '">',
             '<div class="organ-core" aria-hidden="true"><i></i><b></b><span></span></div>',
             '<div class="organ-copy">',
               '<div class="organ-title"><p class="eyebrow">' + escapeHtml(organ.maturity) + '</p><h2>' + escapeHtml(shortName(organ.organ_id)) + '</h2></div>',
+              '<p class="organ-role">' + escapeHtml(organ.authority_ceiling.slice(0,2).join(' · ')) + '</p>',
               '<p class="organ-lineage">Lineage · ' + organ.lineage.map(escapeHtml).join(' · ') + '</p>',
               '<div class="organ-tags">' + organ.capabilities.map(cap => '<span>' + escapeHtml(cap) + '</span>').join('') + '</div>',
               '<details><summary>Authority ceiling & evidence</summary>',
@@ -53,7 +61,18 @@ export async function mountWayglassSystemsSurface(root) {
   });
   root.querySelectorAll('.organ-vessel').forEach(card => {
     const wake = () => globalThis.dispatchEvent?.(new CustomEvent('wayglass:material-wake', { detail: { strength: .62, intent: .45 } }));
-    card.addEventListener('pointerenter', wake);
-    card.addEventListener('focus', wake);
+    const setInspection = (open) => {
+      card.dataset.inspecting = open ? 'true' : 'false';
+      card.setAttribute('aria-expanded', String(open));
+      if (open) wake();
+    };
+    card.addEventListener('pointerenter', () => setInspection(true));
+    card.addEventListener('pointerleave', () => setInspection(false));
+    card.addEventListener('focus', () => setInspection(true));
+    card.addEventListener('blur', () => setInspection(false));
+    card.addEventListener('click', (event) => {
+      if (event.target.closest('details, summary')) return;
+      setInspection(card.dataset.inspecting !== 'true');
+    });
   });
 }
