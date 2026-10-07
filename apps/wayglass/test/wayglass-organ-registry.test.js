@@ -86,3 +86,12 @@ test('sensorium embodiment continuity is capability redetection, never device id
   assert.ok(!sensoriumOrgan.continuity_hooks.includes('device-identity'));
   assert.ok(!sensoriumOrgan.authority_ceiling.includes('participant-redefinition'));
 });
+
+
+test('presence continuity keeps participant identity stable across provider rebinding', () => {
+  const before = presenceOrgan.adapter.createPresence({ identityId:'rowan', sessionId:'outbound', providerId:'ollama', modelId:'ornith-1.5', createdAt:'2026-10-06T20:00:00.000Z' });
+  const after = presenceOrgan.adapter.rebindPresenceProvider(before, { providerId:'huggingface', modelId:'omni', updatedAt:'2026-10-06T21:00:00.000Z' });
+  assert.equal(after.identity_id, before.identity_id);
+  assert.notEqual(after.provider_binding.provider_id, before.provider_binding.provider_id);
+  assert.notEqual(after.provider_binding.model_id, before.provider_binding.model_id);
+});
