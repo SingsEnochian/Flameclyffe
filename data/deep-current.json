@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-10-07T11:13:22.183Z",
+  "generated_at": "2026-10-07T17:52:48.520Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,51 +13,51 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-10-07T07:00",
-    "sky": "Rain",
+    "time": "2026-10-07T13:45",
+    "sky": "Day",
     "current": {
-      "time": "2026-10-07T07:00",
+      "time": "2026-10-07T13:45",
       "interval": 900,
-      "temperature_2m": 73.5,
-      "relative_humidity_2m": 90,
-      "is_day": 0,
-      "precipitation": 0.016,
-      "rain": 0.016,
-      "weather_code": 61,
+      "temperature_2m": 77.9,
+      "relative_humidity_2m": 88,
+      "is_day": 1,
+      "precipitation": 0,
+      "rain": 0,
+      "weather_code": 3,
       "cloud_cover": 100,
-      "pressure_msl": 1012.3,
-      "wind_speed_10m": 8,
-      "wind_direction_10m": 87
+      "pressure_msl": 1011.5,
+      "wind_speed_10m": 7.9,
+      "wind_direction_10m": 145
     }
   },
   "space_weather": {
     "kp": {
       "value": 1,
-      "time_tag": "2026-10-07T06:00:00",
+      "time_tag": "2026-10-07T12:00:00",
       "a_running": 4
     },
     "solar_wind": {
-      "time_tag": "2026-10-07T11:06:00Z",
-      "bz": 1,
+      "time_tag": "2026-10-07T17:44:00Z",
+      "bz": -4,
       "bt": 4,
       "density": null,
-      "speed": 359
+      "speed": 350
     }
   },
   "moon": {
-    "age_days": 25.61,
-    "illumination": 16.4,
+    "age_days": 25.89,
+    "illumination": 14.3,
     "name": "Waning Crescent"
   },
   "field": {
-    "P": 0.4522222222222217,
-    "C": 0.2522095238095239,
-    "R": 0.7725000000000001,
-    "E": 0.6595824175824175,
-    "M": 0.16399999999999998,
-    "A": 0.38,
+    "P": 0.5033333333333333,
+    "C": 0.2538095238095239,
+    "R": 0.8233333333333334,
+    "E": 0.7498901098901098,
+    "M": 0.14300000000000002,
+    "A": 0.6,
     "Q": null,
-    "dpdt": 0.7725000000000001,
+    "dpdt": 0.8233333333333334,
     "dynamic_axes": [
       "P",
       "C",
