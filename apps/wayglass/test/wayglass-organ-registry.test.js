@@ -69,3 +69,20 @@ test('sensorium mount is inert until explicitly invoked and retains Feather stop
   assert.equal(typeof sensoriumOrgan.adapter.stopSomaticCue, 'function');
   assert.equal(sensoriumOrgan.adapter.stopSomaticCue('Feather'), false);
 });
+
+
+test('continuity references use organ IDs and evidence refs without importing organ authority', () => {
+  for (const organ of FIRST_WAYGLASS_ORGANS) {
+    const ref = { organ_id: organ.organ_id, evidence_ref: 'receipt:' + organ.organ_id };
+    assert.match(ref.organ_id, /^wayglass\.organ\./);
+    assert.ok(ref.evidence_ref);
+    assert.equal(ref.authority_grant, undefined);
+    assert.equal(ref.canon_commit, undefined);
+  }
+});
+
+test('sensorium embodiment continuity is capability redetection, never device identity', () => {
+  assert.ok(sensoriumOrgan.embodiment_hooks.includes('redetect-output-capabilities-on-return'));
+  assert.ok(!sensoriumOrgan.continuity_hooks.includes('device-identity'));
+  assert.ok(!sensoriumOrgan.authority_ceiling.includes('participant-redefinition'));
+});
