@@ -52,6 +52,9 @@ test('HTTP departure survives a fresh process; recovery preserves open alternati
     const captured = await turn.json();
     assert.match(captured.output,/Clock fast or ship slow/);
     assert.match(captured.output,/Before any canon write/);
+    assert.match(captured.output,/wayglass\.organ\.presence-nervous-system/);
+    assert.match(captured.output,/wayglass\.organ\.memory-flight-recorder/);
+    assert.match(captured.output,/wayglass\.organ\.sensorium/);
     assert.doesNotMatch(captured.output,/BODY MUST NOT BECOME CHECKPOINT/);
     assert.equal(captured.receipt.checkpoint_storage_id,id);
 
