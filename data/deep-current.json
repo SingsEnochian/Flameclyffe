@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-10-06T23:31:30.980Z",
+  "generated_at": "2026-10-07T04:02:38.856Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,51 +13,51 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-10-06T19:30",
+    "time": "2026-10-07T00:00",
     "sky": "Rain",
     "current": {
-      "time": "2026-10-06T19:30",
+      "time": "2026-10-07T00:00",
       "interval": 900,
-      "temperature_2m": 74.9,
-      "relative_humidity_2m": 90,
+      "temperature_2m": 74.3,
+      "relative_humidity_2m": 98,
       "is_day": 0,
-      "precipitation": 0.091,
-      "rain": 0.091,
+      "precipitation": 0.791,
+      "rain": 0.791,
       "weather_code": 65,
       "cloud_cover": 100,
-      "pressure_msl": 1012.3,
-      "wind_speed_10m": 9.3,
-      "wind_direction_10m": 54
+      "pressure_msl": 1013.3,
+      "wind_speed_10m": 7,
+      "wind_direction_10m": 63
     }
   },
   "space_weather": {
     "kp": {
-      "value": 2,
-      "time_tag": "2026-10-06T18:00:00",
-      "a_running": 7
+      "value": 1,
+      "time_tag": "2026-10-07T00:00:00",
+      "a_running": 4
     },
     "solar_wind": {
-      "time_tag": "2026-10-06T23:22:00Z",
-      "bz": -2,
+      "time_tag": "2026-10-07T03:54:00Z",
+      "bz": 1,
       "bt": 3,
       "density": null,
-      "speed": 408
+      "speed": 384
     }
   },
   "moon": {
-    "age_days": 25.13,
-    "illumination": 20.4,
+    "age_days": 25.31,
+    "illumination": 18.8,
     "name": "Waning Crescent"
   },
   "field": {
-    "P": 0.4522222222222217,
-    "C": 0.24470952380952388,
-    "R": 0.855,
-    "E": 0.790385989010989,
-    "M": 0.204,
+    "P": 0.4633333333333328,
+    "C": 0.17470952380952387,
+    "R": 0.7766666666666666,
+    "E": 0.7872266483516484,
+    "M": 0.188,
     "A": 0.38,
     "Q": null,
-    "dpdt": 0.855,
+    "dpdt": 0.7766666666666666,
     "dynamic_axes": [
       "P",
       "C",
