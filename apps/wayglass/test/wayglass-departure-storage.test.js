@@ -67,6 +67,9 @@ test('HTTP departure survives a fresh process; recovery preserves open alternati
     const illicitAuthority = {...state, organ_refs:[{organ_id:'wayglass.organ.memory-flight-recorder',evidence_ref:'receipt:bad-authority',authority_grant:true}]};
     const illicitSaved = await (await fetch(server.base + '/kernel/leave',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(illicitAuthority)})).json();
     assert.equal((await enter({...entry,storage_id:illicitSaved.storage_receipt.storage_id})).status,409);
+    const illicitRelationship = {...state, organ_refs:[{organ_id:'wayglass.organ.memory-flight-recorder',evidence_ref:'receipt:bad-relationship',relationship_commit:true}]};
+    const illicitRelationshipSaved = await (await fetch(server.base + '/kernel/leave',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(illicitRelationship)})).json();
+    assert.equal((await enter({...entry,storage_id:illicitRelationshipSaved.storage_receipt.storage_id})).status,409);
     const revoked = {...state, revoked_refs:['receipt:memory-1']};
     const revokedDeparture = await fetch(server.base + '/kernel/leave',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(revoked)});
     assert.equal(revokedDeparture.status,201);
