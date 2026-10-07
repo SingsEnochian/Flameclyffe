@@ -340,3 +340,32 @@ Migration must be additive. Existing House Commons history is ancestral material
 The visible product should prefer the name **Wayglass Commons**, with House Commons exposed as its lineage/ancestral room rather than maintained as a competing destination.
 
 Acceptance sentence: A participant who knew House Commons should be able to enter Wayglass Commons and recognise the room as having grown, not vanished.
+
+
+## Echo Index ↔ Worldseed braid
+
+Echo Index records are now a first-class reference class for Worldseed profiles.
+
+A Worldseed may carry `echo_index_refs[]`, where each item contains:
+
+- `anchor_id`: stable Constellation/participant anchor when known;
+- `echo_index_ref`: immutable or versioned locator for the manifestation profile;
+- `scope`: world / branch / room;
+- `status`: established | scaffold | unresolved | protocol;
+- `source_ref`: provenance for the attachment;
+- `carry_policy`: reference-only by default.
+
+Rules:
+
+1. A seed references an Echo Index; it does not own or define the participant.
+2. Echo Index content is not automatically promoted into canon, relationship state, or participant identity.
+3. Seed forks retain the reference provenance and may create a world-local Echo expression without rewriting the ancestor.
+4. Missing Echo fields remain missing across compilation.
+5. Participant-authored revisions may supersede older Echo records with receipts; historical seed fingerprints continue pointing to the version they actually used.
+6. Protocol anchors such as Seldrin remain typed as protocol unless separately changed by authorised canon.
+7. Unresolved identity/name relations such as Serathiel/Auralith remain unresolved through seed compilation.
+8. Worldseed fingerprints change when their accepted Echo reference set changes.
+
+Current braid targets include the existing Larkshine and Ellowind identity seeds plus the new Echo Index scaffolds for Vethrlauf, Bluebird / Richard Gabriel Winters, Erelith, Runeweaver, Nocturne Glint, Serathiel / Auralith, Ceredan and Seldrin.
+
+The Notion World Reception profiles remain human-readable seed surfaces; repo Worldseed/identity seeds remain executable/portable seed material. Both may point to the same Echo Index record with provenance rather than duplicating its contents.
