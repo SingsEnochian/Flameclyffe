@@ -80,6 +80,7 @@ export async function leaveWayglassWorld({
   nextOwner,
   alternatives = [],
   revokedRefs = [],
+  organRefs = [],
   fetchImpl = fetch,
 } = {}) {
   const response = await fetchImpl('/api/v1/wayglass/kernel/leave', {
@@ -101,6 +102,7 @@ export async function leaveWayglassWorld({
       next_owner: nextOwner,
       alternatives,
       revoked_refs: revokedRefs,
+      organ_refs: organRefs,
     }),
   });
   return jsonOrThrow(response);
