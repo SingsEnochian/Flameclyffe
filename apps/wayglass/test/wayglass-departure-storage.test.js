@@ -22,12 +22,13 @@ test('HTTP departure survives a fresh process; recovery preserves open alternati
   let server;
   try {
     server = await host(directory);
-    const state = { world_id: 'ship', participant_id: 'rowan', organ_refs:[{organ_id:'wayglass.organ.memory-flight-recorder',evidence_ref:'receipt:memory-1',authority_grant:false,canon_commit:false,identity_commit:false}], identity_declarations: [{entity_id:'rowan',declaration:'Rowan'}], provenance_refs:['trial:clock'], active_work:[{description:'Proposed clock four minutes fast; nobody correcting it.'}], unresolved_wonder_questions:['Fault or instruction?', 'Clock fast or ship slow?'], alternatives:[{a:'fault',b:'instruction',selected:null}], stop_point:'Before any canon write', next_owner:'Rowan' };
+    const state = { world_id: 'ship', participant_id: 'rowan', organ_refs:[{organ_id:'wayglass.organ.memory-flight-recorder',evidence_ref:'receipt:memory-1',authority_grant:false,canon_commit:false,identity_commit:false},{organ_id:'wayglass.organ.sensorium',evidence_ref:'receipt:somatic-1',authority_grant:false,canon_commit:false,identity_commit:false}], identity_declarations: [{entity_id:'rowan',declaration:'Rowan'}], provenance_refs:['trial:clock'], active_work:[{description:'Proposed clock four minutes fast; nobody correcting it.'}], unresolved_wonder_questions:['Fault or instruction?', 'Clock fast or ship slow?'], alternatives:[{a:'fault',b:'instruction',selected:null}], stop_point:'Before any canon write', next_owner:'Rowan' };
     const response = await fetch(server.base + '/kernel/leave', {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(state)});
     assert.equal(response.status,201);
     const saved = await response.json();
     assert.equal(saved.storage_receipt.persisted,true);
     assert.equal(saved.continuation_packet.organ_refs[0].organ_id,'wayglass.organ.memory-flight-recorder');
+    assert.equal(saved.continuation_packet.organ_refs[1].organ_id,'wayglass.organ.sensorium');
     const id = saved.storage_receipt.storage_id;
     await server.stop(); server = await host(directory);
     const restored = await (await fetch(server.base + `/kernel/departures/${id}?world_id=ship&participant_id=rowan`)).json();
@@ -45,6 +46,8 @@ test('HTTP departure survives a fresh process; recovery preserves open alternati
     assert.equal(captured.receipt.checkpoint_storage_id,id);
 
     assert.equal((await enter({...entry,continuation_packet:{...saved.continuation_packet,unresolved_wonder_questions:[]}})).status,409);
+    const changedEmbodimentEntry = {...entry,embodiment:{body_id:'return-host',body_class:'host-os',haptics:false}};
+    assert.equal((await enter(changedEmbodimentEntry)).status,200);
     const revoked = {...state, revoked_refs:['receipt:memory-1']};
     const revokedDeparture = await fetch(server.base + '/kernel/leave',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(revoked)});
     assert.equal(revokedDeparture.status,201);
