@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-10-07T04:02:38.856Z",
+  "generated_at": "2026-10-07T11:13:22.183Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,51 +13,51 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-10-07T00:00",
+    "time": "2026-10-07T07:00",
     "sky": "Rain",
     "current": {
-      "time": "2026-10-07T00:00",
+      "time": "2026-10-07T07:00",
       "interval": 900,
-      "temperature_2m": 74.3,
-      "relative_humidity_2m": 98,
+      "temperature_2m": 73.5,
+      "relative_humidity_2m": 90,
       "is_day": 0,
-      "precipitation": 0.791,
-      "rain": 0.791,
-      "weather_code": 65,
+      "precipitation": 0.016,
+      "rain": 0.016,
+      "weather_code": 61,
       "cloud_cover": 100,
-      "pressure_msl": 1013.3,
-      "wind_speed_10m": 7,
-      "wind_direction_10m": 63
+      "pressure_msl": 1012.3,
+      "wind_speed_10m": 8,
+      "wind_direction_10m": 87
     }
   },
   "space_weather": {
     "kp": {
       "value": 1,
-      "time_tag": "2026-10-07T00:00:00",
+      "time_tag": "2026-10-07T06:00:00",
       "a_running": 4
     },
     "solar_wind": {
-      "time_tag": "2026-10-07T03:54:00Z",
+      "time_tag": "2026-10-07T11:06:00Z",
       "bz": 1,
-      "bt": 3,
+      "bt": 4,
       "density": null,
-      "speed": 384
+      "speed": 359
     }
   },
   "moon": {
-    "age_days": 25.31,
-    "illumination": 18.8,
+    "age_days": 25.61,
+    "illumination": 16.4,
     "name": "Waning Crescent"
   },
   "field": {
-    "P": 0.4633333333333328,
-    "C": 0.17470952380952387,
-    "R": 0.7766666666666666,
-    "E": 0.7872266483516484,
-    "M": 0.188,
+    "P": 0.4522222222222217,
+    "C": 0.2522095238095239,
+    "R": 0.7725000000000001,
+    "E": 0.6595824175824175,
+    "M": 0.16399999999999998,
     "A": 0.38,
     "Q": null,
-    "dpdt": 0.7766666666666666,
+    "dpdt": 0.7725000000000001,
     "dynamic_axes": [
       "P",
       "C",
