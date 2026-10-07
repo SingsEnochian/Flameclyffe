@@ -49,6 +49,12 @@ test('HTTP departure survives a fresh process; recovery preserves open alternati
     assert.equal((await enter({...entry,continuation_packet:{...saved.continuation_packet,unresolved_wonder_questions:[]}})).status,409);
     const changedEmbodimentEntry = {...entry,embodiment:{body_id:'return-host',body_class:'host-os',haptics:false}};
     assert.equal((await enter(changedEmbodimentEntry)).status,200);
+    const badNamespace = {...state, organ_refs:[{organ_id:'arcsweep.memory',evidence_ref:'receipt:bad'}]};
+    const badNamespaceSaved = await (await fetch(server.base + '/kernel/leave',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(badNamespace)})).json();
+    assert.equal((await enter({...entry,storage_id:badNamespaceSaved.storage_receipt.storage_id})).status,409);
+    const illicitAuthority = {...state, organ_refs:[{organ_id:'wayglass.organ.memory-flight-recorder',evidence_ref:'receipt:bad-authority',authority_grant:true}]};
+    const illicitSaved = await (await fetch(server.base + '/kernel/leave',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(illicitAuthority)})).json();
+    assert.equal((await enter({...entry,storage_id:illicitSaved.storage_receipt.storage_id})).status,409);
     const revoked = {...state, revoked_refs:['receipt:memory-1']};
     const revokedDeparture = await fetch(server.base + '/kernel/leave',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(revoked)});
     assert.equal(revokedDeparture.status,201);
