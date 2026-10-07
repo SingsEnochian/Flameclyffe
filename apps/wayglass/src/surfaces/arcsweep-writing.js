@@ -36,6 +36,7 @@ export async function mountArcSweepWritingSurface(root) {
 
   root.innerHTML = [
     '<section class="wg-surface" data-surface="arcsweep-writing">',
+      '<nav class="wg-deck-nav glass-panel" aria-label="Wayglass rooms"><button type="button" class="glass-chip active" aria-current="page">Writing Room</button><button type="button" class="glass-chip" data-wayglass-room="wayglass:systems">Organs</button></nav>',
       '<header class="wg-surface-head glass-panel">',
         '<div>',
           '<p class="eyebrow">ArcSweep attached surface</p>',
@@ -103,6 +104,8 @@ export async function mountArcSweepWritingSurface(root) {
       '<footer class="wg-receipt tiny"><span id="wg-receipt">No route receipt yet.</span><span class="keyboard-hint"> · Keyboard: Alt+I/O channel · Alt+R route · Alt+W write</span></footer>',
     '</section>',
   ].join('');
+
+  root.querySelectorAll('[data-wayglass-room]').forEach(button => button.addEventListener('click', () => globalThis.__wayglassOS?.mount(button.dataset.wayglassRoom)));
 
   const routeSelect = root.querySelector('#wg-route');
   const routeState = root.querySelector('#wg-route-state');
