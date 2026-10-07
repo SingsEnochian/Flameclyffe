@@ -713,3 +713,87 @@ button { font: inherit; cursor: pointer; }
 @media (max-width: 900px) { .organ-vessel { grid-column: span 6; } }
 @media (max-width: 620px) { .organ-vessel { grid-column: 1 / -1; min-height: 260px; } .wg-deck-nav { width:100%; } }
 @media (prefers-reduced-motion: reduce) { .organ-vessel:hover, .organ-vessel:focus-visible { transform:none; } }
+
+
+/* Systems bay: organs are ship machinery, not dashboard cards.
+   Inspection reveals construction and provenance. Optical intensity means
+   local attention only; it never encodes truth, authority, or canon status. */
+.organ-bay {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(12px, 2vw, 20px);
+  align-items: stretch;
+}
+
+.organ-vessel {
+  min-height: 300px;
+  padding: clamp(18px, 3vw, 28px);
+  border-radius: 30px;
+  display: grid;
+  grid-template-rows: 112px 1fr;
+  gap: 18px;
+  overflow: hidden;
+  isolation: isolate;
+  cursor: default;
+  transition: transform 320ms cubic-bezier(.18,.78,.18,1), border-color 280ms ease, box-shadow 360ms ease;
+}
+
+.organ-vessel:focus-visible { outline: 2px solid rgba(132,232,229,.82); outline-offset: 5px; }
+.organ-vessel[data-inspecting="true"] {
+  transform: translateY(-3px);
+  border-color: rgba(172,225,225,.30);
+  box-shadow: 0 38px 110px rgba(0,0,0,.48), inset 0 1px rgba(238,255,255,.14), inset 0 -28px 60px rgba(0,0,0,.22);
+}
+
+.organ-core {
+  position: relative;
+  width: 94px;
+  height: 94px;
+  place-self: center;
+  border-radius: 38% 62% 58% 42% / 46% 38% 62% 54%;
+  border: 1px solid rgba(190,224,227,.24);
+  background: radial-gradient(circle at 32% 24%, rgba(229,255,252,.15), transparent 24%), rgba(1,6,9,.78);
+  box-shadow: inset 0 2px rgba(245,255,255,.12), inset 0 -12px 28px rgba(0,0,0,.72), 0 18px 38px rgba(0,0,0,.32);
+  transform: rotate(-7deg);
+  transition: transform 600ms cubic-bezier(.18,.78,.18,1), box-shadow 420ms ease;
+}
+
+.organ-core::before, .organ-core::after {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border: 1px solid rgba(91,224,220,.18);
+  border-radius: 50%;
+  transform: rotateX(68deg) rotateZ(22deg);
+  transition: transform 700ms cubic-bezier(.18,.78,.18,1);
+}
+.organ-core::after { inset: 18px 7px; border-color: rgba(156,94,229,.16); transform: rotateY(64deg) rotateZ(-28deg); }
+.organ-core i { position:absolute; inset:28px; border-radius:50%; background:radial-gradient(circle at 35% 28%,rgba(245,255,255,.92),rgba(74,224,219,.46) 24%,rgba(77,91,225,.18) 52%,transparent 72%); box-shadow:0 0 22px rgba(69,215,211,.13); }
+.organ-core b, .organ-core span { position:absolute; inset:20px 37px; border-radius:3px; border:1px solid rgba(200,230,232,.14); background:rgba(2,8,11,.72); }
+.organ-core span { transform:rotate(90deg); }
+
+.organ-vessel[data-organ-kind="memory"] .organ-core { border-radius: 22px; transform: rotate(4deg); }
+.organ-vessel[data-organ-kind="sensorium"] .organ-core { border-radius: 50%; transform: rotate(-3deg) scale(.94); }
+.organ-vessel[data-inspecting="true"] .organ-core { transform: rotate(3deg) scale(1.045); box-shadow: inset 0 2px rgba(245,255,255,.16), inset 0 -12px 28px rgba(0,0,0,.72), 0 22px 46px rgba(0,0,0,.38), 0 0 32px rgba(68,213,210,.08); }
+.organ-vessel[data-inspecting="true"] .organ-core::before { transform: rotateX(68deg) rotateZ(142deg) scale(1.12); }
+.organ-vessel[data-inspecting="true"] .organ-core::after { transform: rotateY(64deg) rotateZ(-154deg) scale(1.15); }
+
+.organ-copy { min-width: 0; }
+.organ-title h2 { margin: 0; font: 500 clamp(1.35rem,2vw,1.8rem)/1.05 Georgia,serif; letter-spacing:-.025em; }
+.organ-role { margin: 10px 0 0; color: rgba(225,243,243,.78); font-size:.78rem; letter-spacing:.04em; }
+.organ-lineage { margin: 10px 0; color: var(--glass-muted); font-size:.72rem; line-height:1.45; opacity:.58; transition:opacity 260ms ease; }
+.organ-vessel[data-inspecting="true"] .organ-lineage { opacity:1; }
+.organ-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
+.organ-tags span { padding:5px 8px; border:1px solid rgba(180,214,218,.11); border-radius:999px; color:rgba(224,241,242,.68); background:rgba(0,0,0,.12); font-size:.66rem; }
+.organ-vessel details { margin-top:14px; color:var(--glass-muted); font-size:.72rem; }
+.organ-vessel summary { cursor:pointer; color:rgba(225,243,243,.76); }
+.organ-vessel details p { overflow-wrap:anywhere; line-height:1.5; }
+
+.systems-vitals { display:grid; gap:7px; align-self:end; }
+.systems-vitals span { display:flex; justify-content:space-between; gap:20px; padding:7px 0; border-bottom:1px solid rgba(210,240,240,.08); color:var(--glass-muted); font-size:.72rem; }
+.systems-vitals strong { color:var(--glass-text); font-weight:700; }
+.wg-deck-nav { display:flex; gap:8px; padding:8px; border-radius:999px; width:max-content; max-width:100%; }
+
+@media (max-width: 860px) { .organ-bay { grid-template-columns:1fr; } .organ-vessel { min-height:0; grid-template-columns:92px 1fr; grid-template-rows:1fr; } .organ-core { width:76px; height:76px; } }
+@media (hover:none) { .organ-vessel { cursor:pointer; } .organ-lineage { opacity:.82; } }
+@media (prefers-reduced-motion:reduce) { .organ-vessel, .organ-core, .organ-core::before, .organ-core::after { transform:none !important; } }
