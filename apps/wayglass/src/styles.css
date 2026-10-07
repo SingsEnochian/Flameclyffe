@@ -588,3 +588,66 @@ button { font: inherit; cursor: pointer; }
 .wg-voyage-inbox label, .wg-voyage-inbox textarea { display: block; width: 100%; }
 .wg-voyage-inbox textarea { box-sizing: border-box; min-height: 5rem; margin: .5rem 0; color: inherit; background: #221c30; }
 .wg-voyage-inbox button { margin-top: .5rem; padding: .5rem .8rem; cursor: pointer; }
+
+
+/* Optical mass pass
+   Shared with the WebGL field: movement changes apparent thickness/refraction,
+   not semantic authority. Quiet at rest; denser under hand velocity. */
+:root {
+  --wg-optical-mass: calc(.18 + var(--wg-velocity) * .82);
+  --wg-glass-lift: calc(1px + var(--wg-velocity) * 3px);
+}
+
+.glass-panel {
+  border-width: 1px;
+  box-shadow:
+    0 calc(30px + var(--wg-velocity) * 18px) calc(96px + var(--wg-velocity) * 34px) rgba(0,0,0,.48),
+    0 calc(8px + var(--wg-velocity) * 5px) 22px rgba(0,0,0,.31),
+    inset 0 calc(1px + var(--wg-velocity) * 1px) rgba(230,252,255,.13),
+    inset 0 calc(-2px - var(--wg-velocity) * 3px) calc(18px + var(--wg-velocity) * 22px) rgba(0,0,0,.42),
+    inset calc(8px + var(--wg-velocity) * 8px) 0 calc(34px + var(--wg-velocity) * 24px) rgba(24,99,106,.035),
+    inset calc(-10px - var(--wg-velocity) * 9px) 0 calc(38px + var(--wg-velocity) * 26px) rgba(83,41,121,.025);
+}
+
+.glass-panel::after {
+  inset: calc(3px + var(--wg-velocity) * 2px);
+  border-color: rgba(217,246,247,calc(.045 + var(--wg-velocity) * .065));
+  background:
+    radial-gradient(
+      360px circle at var(--wg-pointer-x) var(--wg-pointer-y),
+      rgba(225,255,253,calc(.018 + var(--wg-velocity) * .050)),
+      rgba(67,220,217,calc(.010 + var(--wg-velocity) * .035)) 23%,
+      rgba(93,83,221,calc(.006 + var(--wg-velocity) * .022)) 43%,
+      transparent 67%
+    ),
+    radial-gradient(80% 140% at 4% 12%, rgba(61,221,221,.055), transparent 42%),
+    radial-gradient(65% 130% at 92% 78%, rgba(125,68,221,.045), transparent 47%);
+}
+
+/* Text-bearing layers move only a fraction of the apparent glass depth.
+   Keeping content stable while the material shifts prevents motion sickness. */
+.wg-surface-head,
+.wg-thread,
+.wg-composer {
+  translate: 0 calc(var(--wg-velocity) * -1px);
+}
+
+.glass-chip:hover,
+.send-jewel:hover:not(:disabled),
+.ownership-chip:hover {
+  box-shadow:
+    inset 0 2px rgba(238,255,255,.15),
+    inset 0 -4px 10px rgba(0,0,0,.62),
+    0 calc(5px + var(--wg-glass-lift)) 0 rgba(1,4,6,.40),
+    0 16px 34px rgba(0,0,0,.31);
+}
+
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  :root {
+    --wg-optical-mass: .18;
+    --wg-glass-lift: 1px;
+  }
+  .wg-surface-head,
+  .wg-thread,
+  .wg-composer { translate: none; }
+}
