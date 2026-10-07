@@ -37,7 +37,16 @@ test('HTTP departure survives a fresh process; recovery preserves open alternati
     assert.equal((await fetch(server.base + `/kernel/departures/${id}?world_id=ship&participant_id=other`)).status,409);
     const entry = { world_id:'ship',participant_id:'rowan',storage_id:id,waygate_manifest:createWaygateManifest({waygate_id:'gate',world_id:'ship',allowed_body_classes:['host-os'],provenance_refs:['trial:gate']}),embodiment:{body_class:'host-os'} };
     const enter = body => fetch(server.base+'/kernel/enter',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
-    assert.equal((await enter(entry)).status,200);
+    const returned = await enter(entry);
+    assert.equal(returned.status,200);
+    const returnedBody = await returned.json();
+    assert.equal(returnedBody.entry.organ_refs.length,3);
+    assert.equal(returnedBody.entry.receipt.organ_refs_promoted,false);
+    assert.deepEqual(returnedBody.entry.organ_refs.map(ref=>ref.organ_id),[
+      'wayglass.organ.presence-nervous-system',
+      'wayglass.organ.memory-flight-recorder',
+      'wayglass.organ.sensorium'
+    ]);
     const turn = await fetch(server.base + '/respond', {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({route_id:'local:ollama',input:'Recover the checkpoint',checkpoint_storage_id:id,checkpoint_world_id:'ship',checkpoint_participant_id:'rowan',_storedCheckpoint:{fake:'BODY MUST NOT BECOME CHECKPOINT'}})});
     assert.equal(turn.status,200);
     const captured = await turn.json();
