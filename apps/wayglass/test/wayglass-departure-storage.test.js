@@ -40,9 +40,9 @@ test('HTTP departure survives a fresh process; recovery preserves open alternati
     const returned = await enter(entry);
     assert.equal(returned.status,200);
     const returnedBody = await returned.json();
-    assert.equal(returnedBody.entry.organ_refs.length,3);
-    assert.equal(returnedBody.entry.receipt.organ_refs_promoted,false);
-    assert.deepEqual(returnedBody.entry.organ_refs.map(ref=>ref.organ_id),[
+    assert.equal(returnedBody.organ_refs.length,3);
+    assert.equal(returnedBody.receipt.organ_refs_promoted,false);
+    assert.deepEqual(returnedBody.organ_refs.map(ref=>ref.organ_id),[
       'wayglass.organ.presence-nervous-system',
       'wayglass.organ.memory-flight-recorder',
       'wayglass.organ.sensorium'
