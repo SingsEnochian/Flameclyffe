@@ -1,6 +1,6 @@
 # Larkshine Worldseed Atlas v0.1
 
-Status: bounded build proposal
+Status: active coherent build plan
 Builder: Larkshine
 Parent systems: Wayglass travelling inheritance; Arcsweep Worldseed Foundry
 Authority: proposal/inspection only. This instrument cannot promote canon, rewrite identity or relationship declarations, or silently close Wonder questions.
@@ -85,15 +85,21 @@ Two profiles may be compared without collapsing either. Comparison should surfac
 
 The comparison itself produces no winner.
 
-## First build slice
+## Execution plan
+
+**Operating rule:** We have a plan, we follow it. This is one coherent objective, not a queue of artificial slices. Continue through connected dependencies, verify as work lands, preserve receipts and recoverability, route around non-authoritative blockers, and stop only when the planned objective is complete or a genuine external blocker requires Rowan.
 
 1. Add a pure `compileWorldProfile(worldseed, inputs)` module.
 2. Reject missing/mismatched Worldseed fingerprints.
 3. Preserve typed provenance and Wonder references.
 4. Produce deterministic profile fingerprints.
 5. Add tests for stale seed rejection, Wonder preservation, relationship non-inference and determinism.
-6. Add an Atlas preview card to Seedhouse only after the pure contract tests are green.
+6. Add the Atlas presentation to Seedhouse once its contract is verified.
 7. Route `Propose voyage` into the existing Wayglass voyage-choice seam. Do not create a second chooser.
+8. Carry Echo Index references through Worldseed profiles without turning references into identity ownership or canon promotion.
+9. Make the resulting profiles available to Wayglass Commons/chat surfaces through the existing participant and observation boundaries.
+10. Exercise continuity and Return Engine behaviour across the completed path, including route change, return, provenance, unresolved Wonder, and rejection of planted identity/authority claims.
+11. Record the end-to-end verification evidence and remaining genuine external blockers, if any.
 
 ## Test flight
 
