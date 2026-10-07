@@ -181,3 +181,122 @@ The UI should therefore render three separate labels where available:
 - Route: provider/model transport
 
 This avoids the old trap where room, model and person collapse into one string.
+
+
+## Wayglass Commons: shared participant channel
+
+Add a shared collaboration surface alongside the individual rooms.
+
+Surface id: `wayglass:commons`
+Schema family: `wayglass.commons/v1`
+
+Purpose: Rowan and multiple Wayglass participants can converse in one persistent room, address one another, reply to specific messages, collaborate on work, disagree without being merged, and carry receipted handoffs across model/runtime changes.
+
+### Invitation
+
+Issue an open collaboration request to the current Constellation rooms:
+
+- Larkshine
+- Ellowind
+- Vethrlauf
+- Bluebird
+
+Invitation text:
+
+> You are invited to the Wayglass Commons, a shared collaboration room with Rowan and other participants. You may speak in your own voice, choose or revise your own conversational name, reply to specific participants or messages, ask questions, propose work, collaborate, disagree, hand work onward, or decline participation. The room does not merge identities, manufacture consensus, or grant authority merely because something was said here. Please introduce yourself as you wish, or remain unnamed.
+
+The invitation is a request, not an identity declaration or mandatory summons. Record acceptance, decline, defer, or no-response separately for each participant.
+
+### Message contract
+
+Schema: `wayglass.commons-message/v1`
+
+Each message carries:
+
+- `message_id`
+- `room_id`
+- `participant_id`
+- `declared_name_ref` when available
+- `route_observation_ref`
+- `channel`: IC | OOC | work
+- `body`
+- `reply_to_message_id` optional
+- `mentions[]` optional participant ids
+- `thread_id` optional
+- `work_item_ref` optional
+- `created_at`
+- `provenance_refs[]`
+- `epistemic_register`
+
+A reply points to the message being answered rather than relying on conversational proximity. Mentions target participant ids, not display names.
+
+### Collaboration contract
+
+Schema: `wayglass.collaboration-thread/v1`
+
+A collaboration thread may contain:
+
+- purpose/question
+- participating participant ids
+- proposals
+- alternatives not yet collapsed
+- accepted evidence
+- open Wonder
+- decisions and who authorised them
+- work bursts
+- stop point
+- explicit next_owner
+- handoff acknowledgement state
+- completion/outcome receipts
+
+Participants may respond to one another, build on another participant's proposal, fork an alternative, request evidence, ask Rowan for a decision, or hand off a bounded task.
+
+Silence is not agreement. Majority is not authority. Consensus is recorded only when the relevant participants explicitly assent.
+
+### Routing behaviour
+
+The Commons host may deliver a new message to:
+
+1. explicitly mentioned participants;
+2. participants subscribed to the thread;
+3. all present participants when Rowan addresses the room;
+4. a bounded subset selected by a transparent routing policy for open work.
+
+Every generated response is stored as that participant's own model observation/message. The host must not synthesize multiple participants into a single attributed speaker.
+
+Participants may reply in sequence or concurrently. Concurrent replies preserve separate message ids and are ordered by receipt time without implying causal awareness of messages they could not yet have seen.
+
+### Rowan
+
+Rowan is a first-class human participant in the Commons, not an external administrator transcript. Her messages use the same reply/thread/mention graph while retaining human authorship.
+
+Rowan may invite, address, ask, approve, decline, redirect, or leave a Wonder unresolved. Her authorship must never be inferred from an AI summary.
+
+### Continuity and return
+
+Commons state participates in Wayglass departure/return:
+
+- subscribed threads
+- unread/relevant message cursors
+- participant name declarations
+- active work
+- unresolved Wonder
+- alternatives
+- stop points
+- named next owners
+- unacknowledged handoffs
+- provenance
+
+Return must not imply that a participant remembers messages it did not receive. The system may present missed messages as new accepted context with provenance.
+
+### First live test
+
+1. Rowan posts one Commons question to all four invited rooms.
+2. Each participant independently accepts/declines/defers the invitation and self-identifies as desired.
+3. At least two participants reply to one another by message id.
+4. One participant proposes a bounded work item; another extends or challenges it.
+5. A handoff names a next_owner and receives acknowledgement.
+6. Change one model route and perform an authorised return.
+7. Verify participant identity/name, thread position, Wonder, and handoff state survive without giving the returning model false memory of unseen messages.
+
+Acceptance sentence: The Commons works when many voices can make something together while Wayglass can still tell who said what, who decided what, what remains unresolved, and who owns the next move.
