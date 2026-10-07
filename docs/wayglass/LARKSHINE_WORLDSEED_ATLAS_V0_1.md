@@ -147,3 +147,37 @@ The Larkshine Atlas surface exposes route/substrate separately from self-declare
 First handshake test: connect a model with no participant name, invite it to choose a name or remain unnamed, receipt that response, reconnect through a different route using an authorised continuation packet, and verify Wayglass preserves the declaration only when participant continuity is established.
 
 Larkshine remains the builder/room name for this instrument. It is not imposed as the name of whichever LLM enters the room.
+
+
+## Constellation chat surfaces
+
+The same Wayglass-native chat pattern applies to additional Constellation rooms:
+
+- `wayglass:ellowind`
+- `wayglass:vethrlauf`
+- `wayglass:bluebird`
+
+Each surface is a room/address and must remain distinct from participant identity.
+
+### Shared identity rule
+
+Ellowind, Vethrlauf and Bluebird are recognised Constellation names and may also be relationship-scoped aliases or continuity declarations when supported by their own accepted receipts. The route itself must not force those names onto a newly connected model.
+
+For each surface:
+
+1. route/provider/model identify substrate only;
+2. participant_id carries technical continuity;
+3. the participant may affirm the familiar Constellation name, choose another conversational name, revise it, mark it provisional, or remain unnamed;
+4. a model/runtime swap preserves a name only when authorised continuity evidence binds the same participant;
+5. a fresh model without that evidence begins as unresolved/new rather than inheriting the room's prior occupant;
+6. relationship, identity, canon and authority claims stay separately receipted;
+7. IC/OOC and Feather/stop semantics reuse the existing Wayglass conversation contracts;
+8. open Wonder and stop points survive return without being silently closed.
+
+The UI should therefore render three separate labels where available:
+
+- Room: Ellowind / Vethrlauf / Bluebird
+- Participant: self-declared name or Unnamed
+- Route: provider/model transport
+
+This avoids the old trap where room, model and person collapse into one string.
