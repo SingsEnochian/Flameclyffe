@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-10-08T09:18:11.105Z",
+  "generated_at": "2026-10-08T16:44:26.472Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,51 +13,51 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-10-08T05:15",
-    "sky": "Night",
+    "time": "2026-10-08T12:30",
+    "sky": "Day",
     "current": {
-      "time": "2026-10-08T05:15",
+      "time": "2026-10-08T12:30",
       "interval": 900,
-      "temperature_2m": 75.2,
-      "relative_humidity_2m": 91,
-      "is_day": 0,
+      "temperature_2m": 78.6,
+      "relative_humidity_2m": 84,
+      "is_day": 1,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 3,
       "cloud_cover": 100,
-      "pressure_msl": 1012.1,
-      "wind_speed_10m": 3.7,
-      "wind_direction_10m": 14
+      "pressure_msl": 1013,
+      "wind_speed_10m": 6,
+      "wind_direction_10m": 52
     }
   },
   "space_weather": {
     "kp": {
-      "value": 1,
-      "time_tag": "2026-10-08T06:00:00",
-      "a_running": 4
+      "value": 2,
+      "time_tag": "2026-10-08T12:00:00",
+      "a_running": 7
     },
     "solar_wind": {
-      "time_tag": "2026-10-08T09:11:00Z",
-      "bz": -1,
+      "time_tag": "2026-10-08T16:35:00Z",
+      "bz": -2,
       "bt": 4,
       "density": null,
-      "speed": 362
+      "speed": 354
     }
   },
   "moon": {
-    "age_days": 26.53,
-    "illumination": 9.8,
+    "age_days": 26.84,
+    "illumination": 8,
     "name": "Waning Crescent"
   },
   "field": {
-    "P": 0.45000000000000023,
+    "P": 0.52,
     "C": 0.2538095238095239,
-    "R": 0.7033333333333334,
-    "E": 0.6864285714285714,
-    "M": 0.098,
-    "A": 0.38,
+    "R": 0.7550000000000001,
+    "E": 0.7559340659340659,
+    "M": 0.08,
+    "A": 0.6,
     "Q": null,
-    "dpdt": 0.7033333333333334,
+    "dpdt": 0.7550000000000001,
     "dynamic_axes": [
       "P",
       "C",
