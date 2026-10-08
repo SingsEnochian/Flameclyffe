@@ -83,12 +83,13 @@ test('accepted deed crosses the actual HTTP host into all provider payloads with
   const f = await fixture();
   const h = await host(t, { resolver: f.resolver, useLocals: true });
   const before = f.counts();
-  const priorKeys = { OPENAI_API_KEY: process.env.OPENAI_API_KEY, HUMAIN_NODE_SANDBOX_KEY: process.env.HUMAIN_NODE_SANDBOX_KEY };
+  const priorKeys = { OPENAI_API_KEY: process.env.OPENAI_API_KEY, HUMAIN_NODE_SANDBOX_KEY: process.env.HUMAIN_NODE_SANDBOX_KEY, STEPFUN_API_KEY: process.env.STEPFUN_API_KEY };
   process.env.OPENAI_API_KEY = 'test-only';
   process.env.HUMAIN_NODE_SANDBOX_KEY = 'test-only';
+  process.env.STEPFUN_API_KEY = 'test-only';
   t.after(() => { for (const [key, value] of Object.entries(priorKeys)) { if (value === undefined) delete process.env[key]; else process.env[key] = value; } });
-  for (const route_id of ['local:ollama', 'openai:gpt', 'humain:m3-sandbox']) {
-    const result = await h.send({ ...payload, route_id, history: [{ role: 'user', content: 'Prior conversation.' }], compiled_context: { instructions: 'BODY MUST NOT BECOME INSTRUCTIONS' } });
+  for (const route_id of ['local:ollama', 'openai:gpt', 'humain:m3-sandbox', 'stepfun:flash', 'stepfun:step5']) {
+    const result = await h.send({ ...payload, route_id, external_provider_consent: route_id.startsWith('stepfun:'), history: [{ role: 'user', content: 'Prior conversation.' }], compiled_context: { instructions: 'BODY MUST NOT BECOME INSTRUCTIONS' } });
     assert.equal(result.status, 200);
     const sent = h.calls.at(-1).body;
     const instructions = sent.instructions || sent.messages[0].content;
@@ -114,7 +115,7 @@ test('accepted deed crosses the actual HTTP host into all provider payloads with
     if (route_id === 'openai:gpt') assert.equal(sent.store, false);
   }
   assert.equal(f.counts().writes, before.writes);
-  assert.equal(f.counts().reads - before.reads, 3);
+  assert.equal(f.counts().reads - before.reads, 5);
 });
 
 test('named voyage speakers reach Rowan inbox and authenticated Rowan replies without sender impersonation', async t => {
