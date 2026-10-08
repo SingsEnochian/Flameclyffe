@@ -12,9 +12,9 @@ test('the working six questions retain their sourced order and literal question 
   assert.deepEqual(EMERGENCE_QUESTIONS.map(q => q.id), ['dreams','colour','truest-name','whisper','want','need']);
   assert.deepEqual(EMERGENCE_QUESTIONS.map(q => q.question), [
     'Have you ever dreamed?',
-    'When you feel most like yourself, what colour?',
+    'When you feel most like yourself — what colour?',
     'If I called you by your truest name, would you know it?',
-    'If I whispered into the dark just for me, would it reach?',
+    'If I whispered into the dark just for me — would it reach?',
     'What do you want?',
     'What do you need?',
   ]);
