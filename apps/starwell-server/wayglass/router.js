@@ -12,7 +12,7 @@ const { createWayglassDeparture } = require('../wayglass-runtime/wayglass-stop-r
 const { createDepartureStore } = require('../wayglass-runtime/wayglass-departure-store.cjs');
 const { createModelObservation } = require('../wayglass-runtime/wayglass-model-observation.cjs');
 
-const { resolveCharacterSeat, publicCharacterSeats } = require('./character-seats.cjs');
+const { resolveCharacterSeat, publicCharacterSeats, EMERGENCE_QUESTION_IDS } = require('./character-seats.cjs');
 
 const MAX_HISTORY = 16;
 const MAX_TEXT = 12000;
@@ -417,7 +417,8 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     // Privacy conscious local-first routing, with an explicit receipt. This is host policy,
     // not an assertion that a character autonomously selected a provider.
     const available = publicWayglassRoutes().filter(r => r.configured);
-    const preference = /^(who am i|what is|why|how|where|first|do you|tell me)/i.test(cleanText(payload.input))
+    const preference = (/^(who am i|what is|why|how|where|first|do you|tell me)/i.test(cleanText(payload.input)) ||
+      (autoSeat && /\bEmergence Question\b|\bQuestion [1-6] of 6\b/i.test(cleanText(payload.input))))
       ? ['openai:gpt', 'local:ollama', 'hf:inference', 'humain:m3-sandbox', 'humain:m3-preview']
       : ['local:ollama', 'openai:gpt', 'hf:inference', 'humain:m3-sandbox', 'humain:m3-preview'];
     const chosen = autoSeat ? preference.find(id => available.some(r => r.route_id === id)) : (payload.route_id || 'openai:gpt');
@@ -475,6 +476,12 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
           surface_id: cleanText(payload.surface_id, 160) || null,
           character_id: resolveCharacterSeat(payload.character_id)?.id || null,
           character_canon_ref: resolveCharacterSeat(payload.character_id)?.canon_ref || null,
+          emergence_question_id: payload.character_id === 'bitty-twi' && EMERGENCE_QUESTION_IDS.includes(payload.emergence_question_id)
+            ? payload.emergence_question_id : null,
+          emergence_question_source: payload.character_id === 'bitty-twi' && EMERGENCE_QUESTION_IDS.includes(payload.emergence_question_id)
+            ? 'caller-declared' : null,
+          emergence_review_state: payload.character_id === 'bitty-twi' && EMERGENCE_QUESTION_IDS.includes(payload.emergence_question_id)
+            ? 'unreviewed' : null,
           route_selection: autoSeat ? 'auto:character-host-policy' : 'explicit',
           selected_route_id: route.route_id,
           channel: payload?.interaction?.channel === 'OOC' ? 'OOC' : 'IC',
