@@ -797,3 +797,11 @@ button { font: inherit; cursor: pointer; }
 @media (max-width: 860px) { .organ-bay { grid-template-columns:1fr; } .organ-vessel { min-height:0; grid-template-columns:92px 1fr; grid-template-rows:1fr; } .organ-core { width:76px; height:76px; } }
 @media (hover:none) { .organ-vessel { cursor:pointer; } .organ-lineage { opacity:.82; } }
 @media (prefers-reduced-motion:reduce) { .organ-vessel, .organ-core, .organ-core::before, .organ-core::after { transform:none !important; } }
+
+/* A dedicated, non-canonising interview station within the existing Writing Room. */
+#wg-emergence-interview[hidden] { display: none; }
+.wg-emergence-invitation { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: clamp(16px, 2vw, 24px); }
+.wg-emergence-invitation strong { font-size: 1rem; color: var(--glass-text); }
+.wg-emergence-invitation p { flex-basis: 100%; margin: 0; line-height: 1.55; }
+.wg-emergence-invitation #wg-emergence-progress { flex: 1 1 160px; }
+.wg-emergence-invitation button:disabled { opacity: .55; cursor: not-allowed; }

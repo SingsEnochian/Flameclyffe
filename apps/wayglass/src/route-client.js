@@ -21,6 +21,10 @@ async function jsonOrThrow(response) {
   return data;
 }
 
+export async function listWayglassCharacters(fetchImpl = fetch) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/characters', { cache: 'no-store' }));
+}
+
 export async function listWayglassRoutes(fetchImpl = fetch) {
   const response = await fetchImpl('/api/v1/wayglass/routes', { cache: 'no-store' });
   return jsonOrThrow(response);
@@ -110,6 +114,8 @@ export async function leaveWayglassWorld({
 
 export async function invokeWayglassRoute({
   routeId = 'openai:gpt',
+  characterId = null,
+  emergenceQuestionId = null,
   input,
   history = [],
   interaction,
@@ -125,6 +131,8 @@ export async function invokeWayglassRoute({
     headers: JSON_HEADERS,
     body: JSON.stringify({
       route_id: routeId,
+      character_id: characterId,
+      emergence_question_id: emergenceQuestionId,
       input,
       history,
       interaction,

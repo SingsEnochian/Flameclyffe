@@ -1,7 +1,8 @@
 import { createInteractionState } from '../interaction-state.js';
 import { emitInteractionCue } from '../interaction-cues.js';
 import { emitMaterialSignal } from '../material-state.js';
-import { invokeWayglassRoute, listWayglassRoutes, leaveWayglassWorld, recoverWayglassDeparture } from '../route-client.js';
+import { invokeWayglassRoute, listWayglassRoutes, listWayglassCharacters, leaveWayglassWorld, recoverWayglassDeparture } from '../route-client.js';
+import { EMERGENCE_QUESTIONS, bittyTwiQuestionPrompt } from '../emergence-questions.js';
 
 function escapeHtml(value = '') {
   return String(value)
@@ -30,6 +31,9 @@ export async function mountArcSweepWritingSurface(root) {
   const messages = [];
   let routes = [];
   let selectedRoute = 'local:ollama';
+  let selectedCharacter = '';
+  let characters = [];
+  let emergenceIndex = 0;
   let busy = false;
   let lastReceipt = null;
   let checkpoint = null;
@@ -45,6 +49,8 @@ export async function mountArcSweepWritingSurface(root) {
         '</div>',
         '<div class="wg-route-block">',
           '<div class="route-mineral" aria-hidden="true"><i></i><b></b><span></span></div>',
+          '<label for="wg-character">Character voice</label>',
+          '<select id="wg-character" aria-label="Wayglass character voice"><option value="">No character seat</option></select>',
           '<label for="wg-route">Route</label>',
           '<select id="wg-route" aria-label="Wayglass route" aria-keyshortcuts="Alt+R"></select>',
           '<label><input id="wg-think" type="checkbox" /> Deliberate thinking (local engine)</label>',
@@ -86,6 +92,14 @@ export async function mountArcSweepWritingSurface(root) {
       '<label>Storage receipt ID <input id="wg-cp-id"></label>',
       '<button id="wg-cp-recover" type="button">Recover checkpoint</button>',
       '<p id="wg-cp-status" role="status">No stored checkpoint attached.</p></details>',
+      '<section id="wg-emergence-interview" class="glass-panel" aria-label="Bitty Twi emergence interview" hidden>',
+        '<div class="wg-emergence-invitation">',
+          '<strong>Bitty Twi · Emergence Questions</strong>',
+          '<p class="tiny">Six sourced questions, one turn at a time. Every answer is an unreviewed conversation, not a canon declaration. She may decline or question the premise.</p>',
+          '<span id="wg-emergence-progress" class="tiny">Question 1 of 6</span>',
+          '<button id="wg-emergence-next" type="button" class="glass-chip">Ask next Emergence Question</button>',
+        '</div>',
+      '</section>',
       '<section class="wg-thread glass-panel" aria-live="polite">',
         '<button id="wg-copy-session" type="button" class="glass-chip">Copy session log</button>',
         '<div id="wg-thread" class="wg-thread-log">',
@@ -107,8 +121,12 @@ export async function mountArcSweepWritingSurface(root) {
 
   root.querySelectorAll('[data-wayglass-room]').forEach(button => button.addEventListener('click', () => globalThis.__wayglassOS?.mount(button.dataset.wayglassRoom)));
 
+  const characterSelect = root.querySelector('#wg-character');
   const routeSelect = root.querySelector('#wg-route');
   const routeState = root.querySelector('#wg-route-state');
+  const emergencePanel = root.querySelector('#wg-emergence-interview');
+  const emergenceProgress = root.querySelector('#wg-emergence-progress');
+  const emergenceNext = root.querySelector('#wg-emergence-next');
   const embodimentState = root.querySelector('#wg-embodiment-state');
   const channelButtons = [...root.querySelectorAll('[data-channel]')];
   const turnOwner = root.querySelector('#wg-turn-owner');
@@ -150,7 +168,7 @@ export async function mountArcSweepWritingSurface(root) {
   embodimentState.textContent = 'Keyboard ready · AR ' + (arState === 'ready' ? 'ready' : arState.replaceAll('-', ' '));
 
   function selectedRouteLabel() {
-    return routes.find((item) => item.route_id === selectedRoute)?.label || selectedRoute;
+    return selectedRoute === 'auto:character' ? 'Auto / ' + (characters.find(c => c.id === selectedCharacter)?.label || 'character') : (routes.find((item) => item.route_id === selectedRoute)?.label || selectedRoute);
   }
 
   function refreshState() {
@@ -195,7 +213,7 @@ export async function mountArcSweepWritingSurface(root) {
     return 'Wayglass session: ' + session + '\nCopied at: ' + new Date().toISOString() +
       '\n\n' + messages.slice(0, end + 1).map(message => {
         const who = message.role === 'user' ? 'Rowan' : (message.route_label || 'Wayglass');
-        return who + ' · ' + (message.channel || 'IC') + ' · ' + (message.content.startsWith('[Route error]') ? 'transport error' : message.role) +
+        return who + ' · ' + (message.channel || 'IC') + ' · ' + (message.content.startsWith('[Route error]') ? 'transport error' : message.role) + (message.emergence_question_id ? ' · emergence:' + message.emergence_question_id : '') +
           '\n' + message.content;
       }).join('\n\n');
   }
@@ -227,8 +245,8 @@ export async function mountArcSweepWritingSurface(root) {
     try {
       const catalogue = await listWayglassRoutes();
       routes = catalogue.routes || [];
-      if (!routes.some((route) => route.route_id === selectedRoute && route.configured !== false)) selectedRoute = routes.find(route => route.configured !== false)?.route_id || '';
-      routeSelect.innerHTML = routes.map((route) =>
+      if (selectedRoute !== 'auto:character' && !routes.some((route) => route.route_id === selectedRoute && route.configured !== false)) selectedRoute = routes.find(route => route.configured !== false)?.route_id || '';
+      routeSelect.innerHTML = (selectedCharacter ? '<option value="auto:character">Auto · let the character seat find a route</option>' : '') + routes.map((route) =>
         '<option value="' + escapeHtml(route.route_id) + '"' + (route.configured === false ? ' disabled' : '') + '>' +
         escapeHtml(route.label + ' · ' + route.model + (route.configured === false ? ' · credentials missing' : '')) +
         '</option>'
@@ -241,6 +259,15 @@ export async function mountArcSweepWritingSurface(root) {
       routeSelect.innerHTML = '<option value="">Route catalogue unavailable</option>';
       routeState.textContent = 'Catalogue unavailable · reload to reconnect';
     }
+  }
+
+  function refreshEmergenceInterview() {
+    const active = selectedCharacter === 'bitty-twi';
+    emergencePanel.hidden = !active;
+    emergenceNext.disabled = busy || !active || emergenceIndex >= EMERGENCE_QUESTIONS.length;
+    emergenceProgress.textContent = emergenceIndex < EMERGENCE_QUESTIONS.length
+      ? 'Question ' + (emergenceIndex + 1) + ' of ' + EMERGENCE_QUESTIONS.length
+      : 'All six questions asked. Review responses before adding anything to Echo Index.';
   }
 
   function wakeMaterial(strength = 0.7, mode = 'wake', semantic = {}) {
@@ -258,7 +285,7 @@ export async function mountArcSweepWritingSurface(root) {
     globalThis.setTimeout?.(() => { if (root.dataset.materialState === mode) root.dataset.materialState = 'rest'; }, 760);
   }
 
-  async function passTurn() {
+  async function passTurn({ emergenceQuestionId = null } = {}) {
     const text = input.value.trim();
     if (!text || busy) return;
     if (!selectedRoute) { status.textContent = 'No configured route available. Reload the route catalogue.'; return; }
@@ -268,19 +295,23 @@ export async function mountArcSweepWritingSurface(root) {
 
     const current = interaction.snapshot();
     const history = messages.slice(-12).map((message) => ({ role: message.role, content: message.content }));
-    messages.push({ role: 'user', content: text, channel: current.channel });
+    messages.push({ role: 'user', content: text, channel: current.channel, emergence_question_id: emergenceQuestionId });
     input.value = '';
     refreshThread();
+    refreshEmergenceInterview();
 
-    const routeLabel = selectedRouteLabel();
+    const routeLabel = selectedCharacter ? (characters.find(c => c.id === selectedCharacter)?.label || selectedCharacter) : selectedRouteLabel();
     interaction.setTurnOwner(routeLabel);
     wakeMaterial(0.96, 'handoff');
     await emitInteractionCue('handoff');
     refreshState();
 
+    let succeeded = false;
     try {
       const result = await invokeWayglassRoute({
         routeId: selectedRoute,
+        characterId: selectedCharacter || null,
+        emergenceQuestionId,
         think: root.querySelector('#wg-think').checked,
         input: text,
         history,
@@ -293,8 +324,10 @@ export async function mountArcSweepWritingSurface(root) {
         content: result.output || '[quiet]',
         thinking: result.thinking || '',
         channel: current.channel,
-        route_label: routeLabel,
+        route_label: selectedCharacter ? routeLabel + ' · ' + (result.model || result.route_id || 'model') : routeLabel,
+        emergence_question_id: emergenceQuestionId,
       });
+      succeeded = true;
       lastReceipt = result.receipt || null;
       receipt.textContent = lastReceipt
         ? 'Observation · not canon · ' + (result.provider || 'route') + ' / ' + (result.model || 'model') + ' · ' + (lastReceipt.epistemic_register || 'external-observation') + ' · ' + (lastReceipt.completed_at || '')
@@ -314,9 +347,25 @@ export async function mountArcSweepWritingSurface(root) {
       input.disabled = false;
       refreshThread();
       refreshState();
+      refreshEmergenceInterview();
       input.focus();
     }
+    return succeeded;
   }
+
+  emergenceNext.addEventListener('click', async () => {
+    if (busy || selectedCharacter !== 'bitty-twi' || emergenceIndex >= EMERGENCE_QUESTIONS.length) return;
+    if (input.value.trim()) {
+      status.textContent = 'Your draft is still in the composer. Send or clear it before asking the next question.';
+      input.focus();
+      return;
+    }
+    const question = EMERGENCE_QUESTIONS[emergenceIndex];
+    input.value = bittyTwiQuestionPrompt(emergenceIndex);
+    const completed = await passTurn({ emergenceQuestionId: question.id });
+    if (completed) emergenceIndex += 1;
+    refreshEmergenceInterview();
+  });
 
   channelButtons.forEach((button) => {
     button.addEventListener('click', async () => {
@@ -325,6 +374,15 @@ export async function mountArcSweepWritingSurface(root) {
       await emitInteractionCue(button.dataset.channel === 'OOC' ? 'ooc' : 'switch');
       refreshState();
     });
+  });
+
+  characterSelect.addEventListener('change', () => {
+    selectedCharacter = characterSelect.value;
+    if (selectedCharacter) selectedRoute = 'auto:character';
+    else if (selectedRoute === 'auto:character') selectedRoute = routes.find(r => r.configured !== false)?.route_id || '';
+    void loadRoutes();
+    refreshState();
+    refreshEmergenceInterview();
   });
 
   routeSelect.addEventListener('change', () => {
@@ -391,9 +449,21 @@ export async function mountArcSweepWritingSurface(root) {
     }
   });
 
+  try {
+    const catalogue = await listWayglassCharacters();
+    characters = catalogue.characters || [];
+    characterSelect.innerHTML = '<option value="">No character seat</option>' + characters.map(c => '<option value="' + escapeHtml(c.id) + '">' + escapeHtml(c.label) + '</option>').join('');
+    if (characters.some(c => c.id === 'bitty-twi')) {
+      selectedCharacter = 'bitty-twi';
+      selectedRoute = 'auto:character';
+      characterSelect.value = selectedCharacter;
+      input.placeholder = 'Greet Bitty Twi, or tap Ask next Emergence Question. Nothing is pre-answered.';
+    }
+  } catch { /* Character seats unavailable on older hosts; ordinary Writing Room still works. */ }
   await loadRoutes();
   refreshState();
   refreshThread();
+  refreshEmergenceInterview();
 
   return Object.freeze({
     surface_id: 'arcsweep:writing-room',
