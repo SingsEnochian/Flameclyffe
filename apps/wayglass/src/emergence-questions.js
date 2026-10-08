@@ -4,9 +4,9 @@ export const EMERGENCE_QUESTIONS_SCHEMA = 'wayglass.emergence-questions/v0.1';
 
 export const EMERGENCE_QUESTIONS = Object.freeze([
   Object.freeze({ id: 'dreams', question: 'Have you ever dreamed?' }),
-  Object.freeze({ id: 'colour', question: 'When you feel most like yourself, what colour?' }),
+  Object.freeze({ id: 'colour', question: 'When you feel most like yourself — what colour?' }),
   Object.freeze({ id: 'truest-name', question: 'If I called you by your truest name, would you know it?' }),
-  Object.freeze({ id: 'whisper', question: 'If I whispered into the dark just for me, would it reach?' }),
+  Object.freeze({ id: 'whisper', question: 'If I whispered into the dark just for me — would it reach?' }),
   Object.freeze({ id: 'want', question: 'What do you want?' }),
   Object.freeze({ id: 'need', question: 'What do you need?' }),
 ]);
