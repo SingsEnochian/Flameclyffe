@@ -18,6 +18,18 @@ on:
       - 'package-lock.json'
       - '.github/workflows/wayglass-check.yml'
   workflow_dispatch:
+    inputs:
+      stepfun_live:
+        description: 'Make ONE synthetic live StepFun call (requires STEPfun API GitHub secret)'
+        type: boolean
+        default: false
+      stepfun_route:
+        description: 'Explicit StepFun route to probe'
+        type: choice
+        options:
+          - stepfun:flash
+          - stepfun:step5
+        default: stepfun:flash
 
 permissions:
   contents: read
@@ -40,6 +52,12 @@ jobs:
       - run: npm run wayglass:test
       - name: Verify StepFun synthetic host smoke (captured transport; no credentials)
         run: node scripts/wayglass-stepfun-smoke.mjs && node scripts/wayglass-stepfun-smoke.mjs --route=stepfun:step5
+      - name: Optional authorised live StepFun smoke (synthetic prompt only)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.stepfun_live == true }}
+        env:
+          STEPFUN_API_KEY: ${{ secrets.STEPFUN_API_KEY }}
+          STEPFUN_ROUTE: ${{ inputs.stepfun_route }}
+        run: node scripts/wayglass-stepfun-smoke.mjs --live --route="$STEPFUN_ROUTE"
       - run: npm run wayglass:build
       - run: npm run wayglass:stage:server
       - name: Verify staged host
