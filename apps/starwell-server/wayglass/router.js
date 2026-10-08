@@ -407,6 +407,12 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     const route = resolveWayglassRoute(payload.route_id || 'openai:gpt');
     if (!route) return res.status(404).json({ error: 'Unknown Wayglass route.' });
     if (!cleanText(payload.input)) return res.status(400).json({ error: 'input required.' });
+    // The external StepFun routes are deliberately opt-in for every request.
+    // This acknowledgement is a transport preflight, not a durable consent receipt
+    // or proof that another participant authorised disclosure of their material.
+    if (route.provider === 'stepfun' && payload.external_provider_consent !== true) {
+      return res.status(403).json({ error: 'StepFun requires explicit external-provider transfer confirmation for this request.' });
+    }
 
     try {
       const resolver = inheritanceContext || req.app.locals.wayglassInheritanceContext;
