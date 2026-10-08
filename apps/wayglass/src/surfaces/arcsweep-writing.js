@@ -311,6 +311,7 @@ export async function mountArcSweepWritingSurface(root) {
       const result = await invokeWayglassRoute({
         routeId: selectedRoute,
         characterId: selectedCharacter || null,
+        emergenceQuestionId,
         think: root.querySelector('#wg-think').checked,
         input: text,
         history,
