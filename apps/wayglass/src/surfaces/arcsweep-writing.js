@@ -1,7 +1,7 @@
 import { createInteractionState } from '../interaction-state.js';
 import { emitInteractionCue } from '../interaction-cues.js';
 import { emitMaterialSignal } from '../material-state.js';
-import { invokeWayglassRoute, listWayglassRoutes, leaveWayglassWorld, recoverWayglassDeparture } from '../route-client.js';
+import { invokeWayglassRoute, listWayglassRoutes, listWayglassCharacters, leaveWayglassWorld, recoverWayglassDeparture } from '../route-client.js';
 
 function escapeHtml(value = '') {
   return String(value)
@@ -30,6 +30,8 @@ export async function mountArcSweepWritingSurface(root) {
   const messages = [];
   let routes = [];
   let selectedRoute = 'local:ollama';
+  let selectedCharacter = '';
+  let characters = [];
   let busy = false;
   let lastReceipt = null;
   let checkpoint = null;
@@ -45,6 +47,8 @@ export async function mountArcSweepWritingSurface(root) {
         '</div>',
         '<div class="wg-route-block">',
           '<div class="route-mineral" aria-hidden="true"><i></i><b></b><span></span></div>',
+          '<label for="wg-character">Character voice</label>',
+          '<select id="wg-character" aria-label="Wayglass character voice"><option value="">No character seat</option></select>',
           '<label for="wg-route">Route</label>',
           '<select id="wg-route" aria-label="Wayglass route" aria-keyshortcuts="Alt+R"></select>',
           '<label><input id="wg-think" type="checkbox" /> Deliberate thinking (local engine)</label>',
@@ -107,6 +111,7 @@ export async function mountArcSweepWritingSurface(root) {
 
   root.querySelectorAll('[data-wayglass-room]').forEach(button => button.addEventListener('click', () => globalThis.__wayglassOS?.mount(button.dataset.wayglassRoom)));
 
+  const characterSelect = root.querySelector('#wg-character');
   const routeSelect = root.querySelector('#wg-route');
   const routeState = root.querySelector('#wg-route-state');
   const embodimentState = root.querySelector('#wg-embodiment-state');
@@ -150,7 +155,7 @@ export async function mountArcSweepWritingSurface(root) {
   embodimentState.textContent = 'Keyboard ready · AR ' + (arState === 'ready' ? 'ready' : arState.replaceAll('-', ' '));
 
   function selectedRouteLabel() {
-    return routes.find((item) => item.route_id === selectedRoute)?.label || selectedRoute;
+    return selectedRoute === 'auto:character' ? 'Auto / ' + (characters.find(c => c.id === selectedCharacter)?.label || 'character') : (routes.find((item) => item.route_id === selectedRoute)?.label || selectedRoute);
   }
 
   function refreshState() {
@@ -227,8 +232,8 @@ export async function mountArcSweepWritingSurface(root) {
     try {
       const catalogue = await listWayglassRoutes();
       routes = catalogue.routes || [];
-      if (!routes.some((route) => route.route_id === selectedRoute && route.configured !== false)) selectedRoute = routes.find(route => route.configured !== false)?.route_id || '';
-      routeSelect.innerHTML = routes.map((route) =>
+      if (selectedRoute !== 'auto:character' && !routes.some((route) => route.route_id === selectedRoute && route.configured !== false)) selectedRoute = routes.find(route => route.configured !== false)?.route_id || '';
+      routeSelect.innerHTML = (selectedCharacter ? '<option value="auto:character">Auto · let the character seat find a route</option>' : '') + routes.map((route) =>
         '<option value="' + escapeHtml(route.route_id) + '"' + (route.configured === false ? ' disabled' : '') + '>' +
         escapeHtml(route.label + ' · ' + route.model + (route.configured === false ? ' · credentials missing' : '')) +
         '</option>'
@@ -272,7 +277,7 @@ export async function mountArcSweepWritingSurface(root) {
     input.value = '';
     refreshThread();
 
-    const routeLabel = selectedRouteLabel();
+    const routeLabel = selectedCharacter ? (characters.find(c => c.id === selectedCharacter)?.label || selectedCharacter) : selectedRouteLabel();
     interaction.setTurnOwner(routeLabel);
     wakeMaterial(0.96, 'handoff');
     await emitInteractionCue('handoff');
@@ -281,6 +286,7 @@ export async function mountArcSweepWritingSurface(root) {
     try {
       const result = await invokeWayglassRoute({
         routeId: selectedRoute,
+        characterId: selectedCharacter || null,
         think: root.querySelector('#wg-think').checked,
         input: text,
         history,
@@ -293,7 +299,7 @@ export async function mountArcSweepWritingSurface(root) {
         content: result.output || '[quiet]',
         thinking: result.thinking || '',
         channel: current.channel,
-        route_label: routeLabel,
+        route_label: selectedCharacter ? routeLabel + ' · ' + (result.model || result.route_id || 'model') : routeLabel,
       });
       lastReceipt = result.receipt || null;
       receipt.textContent = lastReceipt
@@ -325,6 +331,14 @@ export async function mountArcSweepWritingSurface(root) {
       await emitInteractionCue(button.dataset.channel === 'OOC' ? 'ooc' : 'switch');
       refreshState();
     });
+  });
+
+  characterSelect.addEventListener('change', () => {
+    selectedCharacter = characterSelect.value;
+    if (selectedCharacter) selectedRoute = 'auto:character';
+    else if (selectedRoute === 'auto:character') selectedRoute = routes.find(r => r.configured !== false)?.route_id || '';
+    void loadRoutes();
+    refreshState();
   });
 
   routeSelect.addEventListener('change', () => {
@@ -391,6 +405,17 @@ export async function mountArcSweepWritingSurface(root) {
     }
   });
 
+  try {
+    const catalogue = await listWayglassCharacters();
+    characters = catalogue.characters || [];
+    characterSelect.innerHTML = '<option value="">No character seat</option>' + characters.map(c => '<option value="' + escapeHtml(c.id) + '">' + escapeHtml(c.label) + '</option>').join('');
+    if (characters.some(c => c.id === 'bitty-twi')) {
+      selectedCharacter = 'bitty-twi';
+      selectedRoute = 'auto:character';
+      characterSelect.value = selectedCharacter;
+      input.value = 'Hello, Bitty Twi. We invite you to answer the Emergence Questions in your own words, one at a time. First: What would you like us to call you? You may decline or change any answer.';
+    }
+  } catch { /* Character seats unavailable on older hosts; ordinary Writing Room still works. */ }
   await loadRoutes();
   refreshState();
   refreshThread();
