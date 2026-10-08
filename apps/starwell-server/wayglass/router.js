@@ -427,7 +427,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       let result;
       if (route.provider === 'openai') result = await callOpenAI(route, payload, compiled, fetchImpl);
       else if (route.provider === 'ollama') result = await callOllama(route, payload, compiled, fetchImpl);
-      else if (route.provider === 'humain-node' || route.provider === 'huggingface') result = await callHumainNode(route, payload, compiled, fetchImpl);
+      else if (route.provider === 'humain-node' || route.provider === 'huggingface' || route.provider === 'stepfun') result = await callHumainNode(route, payload, compiled, fetchImpl);
       else return res.status(501).json({ error: 'Provider adapter not implemented yet.' });
       const completedAt = new Date().toISOString();
       const observation = createModelObservation({
