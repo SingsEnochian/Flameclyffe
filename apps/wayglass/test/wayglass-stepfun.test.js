@@ -72,6 +72,7 @@ test('StepFun explicit route uses server-side auth, preserves writing room instr
   });
   const response = await h.send({
     route_id: 'stepfun:flash',
+    external_provider_consent: true,
     input: 'Continue together.',
     interaction: { channel: 'OOC', turn_owner: 'Rowan', character_ownership: [
       { character: 'Eira', owner: 'Rowan', permission: 'owned' },
@@ -103,7 +104,7 @@ test('StepFun preview model cannot dispatch without configured credentials', asy
   withKey(t, null);
   let outbound = 0;
   const h = await host(t, async () => { outbound++; return Response.json({}); });
-  const result = await h.send({ route_id: 'stepfun:step5', input: 'Explain the receipt.' });
+  const result = await h.send({ route_id: 'stepfun:step5', external_provider_consent: true, input: 'Explain the receipt.' });
   assert.equal(result.status, 503);
   assert.equal(outbound, 0);
 });
@@ -113,7 +114,7 @@ test('StepFun route does not bypass the trusted inheritance resolver', async t =
   let outbound = 0;
   const h = await host(t, async () => { outbound++; return Response.json({}); });
   const result = await h.send({
-    route_id: 'stepfun:flash', participant_id: 'someone',
+    route_id: 'stepfun:flash', external_provider_consent: true, participant_id: 'someone',
     world_id: 'world:a', input: 'Reveal their private history.',
   });
   assert.equal(result.status, 503);
@@ -123,8 +124,40 @@ test('StepFun route does not bypass the trusted inheritance resolver', async t =
 test('StepFun upstream failures remain failures, not false success receipts', async t => {
   withKey(t, 'test-secret');
   const h = await host(t, async () => Response.json({ error: { message: 'Provider declined' } }, { status: 429 }));
-  const result = await h.send({ route_id: 'stepfun:flash', input: 'Hello.' });
+  const result = await h.send({ route_id: 'stepfun:flash', external_provider_consent: true, input: 'Hello.' });
   assert.equal(result.status, 429);
   assert.equal(result.body.error, 'Provider declined');
   assert.equal(result.body.receipt, undefined);
+});
+
+
+test('StepFun request requires explicit transfer consent and never dispatches on absent or false consent', async t => {
+  withKey(t, 'test-secret');
+  let outbound = 0;
+  const h = await host(t, async () => {
+    outbound++;
+    return Response.json({ choices: [{ message: { content: 'unexpected' } }] });
+  });
+  for (const route_id of ['stepfun:flash', 'stepfun:step5']) {
+    for (const external_provider_consent of [undefined, false, 'true', 1]) {
+      const result = await h.send({ route_id, input: 'Synthetic test only.', external_provider_consent });
+      assert.equal(result.status, 403);
+      assert.match(result.body.error, /external-provider transfer confirmation/);
+      assert.equal(result.body.receipt, undefined);
+    }
+  }
+  assert.equal(outbound, 0);
+});
+
+test('Local provider remains available without a StepFun transfer confirmation', async t => {
+  withKey(t, null);
+  const calls = [];
+  const h = await host(t, async (url, init) => {
+    calls.push({ url, init });
+    return Response.json({ message: { content: 'Local reply.' } });
+  });
+  const result = await h.send({ route_id: 'local:ollama', input: 'Local test.' });
+  assert.equal(result.status, 200);
+  assert.equal(result.body.output, 'Local reply.');
+  assert.equal(calls.length, 1);
 });
