@@ -49,6 +49,10 @@ export async function mountArcSweepWritingSurface(root) {
           '<select id="wg-route" aria-label="Wayglass route" aria-keyshortcuts="Alt+R"></select>',
           '<label><input id="wg-think" type="checkbox" /> Deliberate thinking (local engine)</label>',
           '<span id="wg-route-state" class="tiny">Loading route catalogue…</span>',
+          '<div id="wg-stepfun-transfer" class="wg-stepfun-transfer" hidden>',
+            '<label for="wg-stepfun-consent"><input type="checkbox" id="wg-stepfun-consent" /> I approve sending this turn, permitted history, and any included continuity context to StepFun.</label>',
+            '<p class="tiny">StepFun is an external provider. Retention/training settings are not independently verified for this account. Do not send other participants\' private material without permission. No microphone is activated.</p>',
+          '</div>',
           '<span id="wg-embodiment-state" class="tiny"></span>',
         '</div>',
       '</header>',
@@ -110,6 +114,8 @@ export async function mountArcSweepWritingSurface(root) {
   const routeSelect = root.querySelector('#wg-route');
   const routeState = root.querySelector('#wg-route-state');
   const embodimentState = root.querySelector('#wg-embodiment-state');
+  const externalTransfer = root.querySelector('#wg-stepfun-transfer');
+  const externalConsent = root.querySelector('#wg-stepfun-consent');
   const channelButtons = [...root.querySelectorAll('[data-channel]')];
   const turnOwner = root.querySelector('#wg-turn-owner');
   const ownershipForm = root.querySelector('#wg-ownership-form');
@@ -223,6 +229,12 @@ export async function mountArcSweepWritingSurface(root) {
     }
   });
 
+  function refreshExternalTransfer() {
+    const isStepFun = selectedRoute.startsWith('stepfun:');
+    externalTransfer.hidden = !isStepFun;
+    if (!isStepFun) externalConsent.checked = false;
+  }
+
   async function loadRoutes() {
     try {
       const catalogue = await listWayglassRoutes();
@@ -234,10 +246,12 @@ export async function mountArcSweepWritingSurface(root) {
         '</option>'
       ).join('');
       routeSelect.value = selectedRoute;
+      refreshExternalTransfer();
       routeState.textContent = routes.length + ' registered route' + (routes.length === 1 ? '' : 's');
     } catch (error) {
       routes = [];
       selectedRoute = '';
+      refreshExternalTransfer();
       routeSelect.innerHTML = '<option value="">Route catalogue unavailable</option>';
       routeState.textContent = 'Catalogue unavailable · reload to reconnect';
     }
@@ -262,6 +276,11 @@ export async function mountArcSweepWritingSurface(root) {
     const text = input.value.trim();
     if (!text || busy) return;
     if (!selectedRoute) { status.textContent = 'No configured route available. Reload the route catalogue.'; return; }
+    if (selectedRoute.startsWith('stepfun:') && !externalConsent.checked) {
+      status.textContent = 'Confirm the external StepFun transfer before passing the turn.';
+      externalConsent.focus();
+      return;
+    }
     busy = true;
     send.disabled = true;
     input.disabled = true;
@@ -281,6 +300,7 @@ export async function mountArcSweepWritingSurface(root) {
     try {
       const result = await invokeWayglassRoute({
         routeId: selectedRoute,
+        externalProviderConsent: selectedRoute.startsWith('stepfun:') && externalConsent.checked,
         think: root.querySelector('#wg-think').checked,
         input: text,
         history,
@@ -329,6 +349,8 @@ export async function mountArcSweepWritingSurface(root) {
 
   routeSelect.addEventListener('change', () => {
     selectedRoute = routeSelect.value;
+    externalConsent.checked = false;
+    refreshExternalTransfer();
     wakeMaterial(0.88, 'route');
     routeState.textContent = 'Active · ' + selectedRouteLabel();
   });
