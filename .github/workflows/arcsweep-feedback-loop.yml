@@ -51,6 +51,11 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
+      - name: Inspect patched package integrity
+        run: |
+          npm view @fastify/busboy@3.2.2 dist.integrity
+          npm view source-map-js@1.2.2 dist.integrity
+
       - name: Audit production dependencies
         run: npm audit --omit=dev --audit-level=high
 
