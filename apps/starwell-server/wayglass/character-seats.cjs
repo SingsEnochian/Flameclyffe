@@ -2,6 +2,8 @@
 
 // Character seats are fictional roleplay lenses over an existing Wayglass route,
 // not autonomous participants and not identity or canon promotion.
+const EMERGENCE_QUESTION_IDS = Object.freeze(['dreams','colour','truest-name','whisper','want','need']);
+
 const SEATS = Object.freeze({
   'bitty-twi': Object.freeze({
     id: 'bitty-twi',
@@ -28,4 +30,4 @@ function publicCharacterSeats() {
   return Object.values(SEATS).map(({ id, label, canon_ref }) => ({ id, label, canon_ref }));
 }
 
-module.exports = { resolveCharacterSeat, publicCharacterSeats };
+module.exports = { resolveCharacterSeat, publicCharacterSeats, EMERGENCE_QUESTION_IDS };
