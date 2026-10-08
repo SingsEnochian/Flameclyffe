@@ -412,8 +412,17 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     res.setHeader('Cache-Control', 'no-store');
 
     const payload = req.body || {};
-    const route = resolveWayglassRoute(payload.route_id || 'openai:gpt');
-    if (!route) return res.status(404).json({ error: 'Unknown Wayglass route.' });
+    const autoSeat = payload.route_id === 'auto:character' && payload.character_id === 'bitty-twi';
+    if (payload.route_id === 'auto:character' && !autoSeat) return res.status(400).json({ error: 'Auto character route needs a supported character seat.' });
+    // Privacy conscious local-first routing, with an explicit receipt. This is host policy,
+    // not an assertion that a character autonomously selected a provider.
+    const available = publicWayglassRoutes().filter(r => r.configured);
+    const preference = /^(who am i|what is|why|how|where|first|do you|tell me)/i.test(cleanText(payload.input))
+      ? ['openai:gpt', 'local:ollama', 'hf:inference', 'humain:m3-sandbox', 'humain:m3-preview']
+      : ['local:ollama', 'openai:gpt', 'hf:inference', 'humain:m3-sandbox', 'humain:m3-preview'];
+    const chosen = autoSeat ? preference.find(id => available.some(r => r.route_id === id)) : (payload.route_id || 'openai:gpt');
+    const route = resolveWayglassRoute(chosen);
+    if (!route) return res.status(404).json({ error: 'No usable Wayglass route.' });
     if (payload.character_id && !resolveCharacterSeat(payload.character_id)) return res.status(400).json({ error: 'Unknown character seat.' });
     if (!cleanText(payload.input)) return res.status(400).json({ error: 'input required.' });
 
@@ -466,6 +475,8 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
           surface_id: cleanText(payload.surface_id, 160) || null,
           character_id: resolveCharacterSeat(payload.character_id)?.id || null,
           character_canon_ref: resolveCharacterSeat(payload.character_id)?.canon_ref || null,
+          route_selection: autoSeat ? 'auto:character-host-policy' : 'explicit',
+          selected_route_id: route.route_id,
           channel: payload?.interaction?.channel === 'OOC' ? 'OOC' : 'IC',
           completed_at: completedAt,
           provider_storage_requested_by_wayglass: false,
