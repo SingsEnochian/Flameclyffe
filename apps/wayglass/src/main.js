@@ -8,6 +8,7 @@ import { installVoyageInbox } from './voyage-inbox.js';
 import { mountWayglassSurface, registerWayglassSurface, listWayglassSurfaces } from './surface-registry.js';
 import { mountArcSweepWritingSurface } from './surfaces/arcsweep-writing.js';
 import { mountWayglassSystemsSurface } from './surfaces/systems.js';
+import { mountWayglassCommonsSurface } from './surfaces/commons.js';
 import { registerWayglassOrgan, listWayglassOrgans } from './organ-registry.js';
 import { FIRST_WAYGLASS_ORGANS } from './organ-donors.js';
 
@@ -29,6 +30,12 @@ registerWayglassSurface({
   surface_id: 'arcsweep:writing-room',
   label: 'ArcSweep · Writing Room',
   mount: mountArcSweepWritingSurface,
+});
+
+registerWayglassSurface({
+  surface_id: 'wayglass:commons',
+  label: 'Wayglass · Commons',
+  mount: mountWayglassCommonsSurface,
 });
 
 registerWayglassSurface({
