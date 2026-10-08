@@ -20,7 +20,7 @@ on:
   workflow_dispatch:
     inputs:
       stepfun_live:
-        description: 'Make ONE synthetic live StepFun call (requires STEPfun API GitHub secret)'
+        description: 'Make ONE synthetic live StepFun call (requires STEPFUN_API_KEY GitHub secret)'
         type: boolean
         default: false
       stepfun_route:
