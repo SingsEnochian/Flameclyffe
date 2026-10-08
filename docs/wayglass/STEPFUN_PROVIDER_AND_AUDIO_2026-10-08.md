@@ -85,3 +85,27 @@ This change extends the original Wayglass StepFun PR #443 without adding a secon
 ## Withness handoff
 
 Picked up: TLDR StepFun discovery and Wayglass's existing host architecture. Built: two explicit StepFun text route candidates and fixture-backed tests. Held: participant and world sovereignty, canonical receipts, unreviewed observations, consent, no Vercel. Hard/unproven: current provider-account privacy options, production keys, live inference, full Return Engine swap, voice runtime. Next owner: Rarity for CI and host verification; Rowan for external account authorisation and deliberate route choice.
+
+
+## Synthetic StepFun host smoke: reproducible operator gate (2026-10-08)
+
+Run from the repository root after `npm ci --prefix apps/starwell-server --omit=dev --ignore-scripts`:
+
+```sh
+node scripts/wayglass-stepfun-smoke.mjs
+node scripts/wayglass-stepfun-smoke.mjs --route=stepfun:step5
+```
+
+These default commands use a captured provider transport. They exercise the **real loopback Wayglass Express ingress** for both routes, check that absent consent returns 403 without external dispatch, and check one positive request's model, response, observation and non-canon receipt. They are now part of the Wayglass Check workflow. **Passing this mode does not prove StepFun credentials, entitlement, billing or external inference.**
+
+When Rowan has explicitly chosen a live synthetic provider probe and installed `STEPFUN_API_KEY` **in the trusted host's environment only**, run locally on that host (not in public CI or a browser):
+
+```sh
+node --env-file=apps/starwell-server/.env scripts/wayglass-stepfun-smoke.mjs --live
+# Optional, separate explicit heavier-model request:
+node --env-file=apps/starwell-server/.env scripts/wayglass-stepfun-smoke.mjs --live --route=stepfun:step5
+```
+
+If the host already exports `STEPFUN_API_KEY`, omit the `--env-file` Node argument. The script requires `--live` to call StepFun, fails closed without credentials, sends **only its hard-coded synthetic OOC prompt**, and makes at most one consented upstream request per invocation. No participant ID, world ID, private canon, history or inherited dossier is attached. It prints the HTTP result, returned model, usage and observation ID, **not** the model's text, provider error body or credentials. Any actual provider call may incur cost and is subject to the provider's unverified retention/training settings.
+
+A successful live probe verifies only the selected provider transport through Wayglass ingress and its unreviewed observation. It does **not** verify participant-specific access controls, private canon disclosure, the full cross-ancestry Return Trial, durable restart, or live audio. Keep those gates open. If the provider declines, use the printed status/classification to repair credentials, model entitlement or quota without logging secret-bearing responses.
