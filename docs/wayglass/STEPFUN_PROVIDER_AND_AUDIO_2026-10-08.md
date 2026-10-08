@@ -61,6 +61,27 @@ Benchmark with synthetic dialogue: interruption under 500 ms goal (target, not p
 
 **Do not label any of these later stages complete merely because a route exists.**
 
+## Phase two: explicit transfer gate and transport-neutral voice boundary (2026-10-08)
+
+This change extends the original Wayglass StepFun PR #443 without adding a second participant identity system or requiring Vercel.
+
+**Actual runtime behaviour:**
+- The Writing Room shows an external-provider disclosure only when a StepFun route is selected, with a checkbox that defaults off and clears when the route changes. The user explicitly acknowledges sending the current turn, included history and any attached continuation context; no microphone is opened.
+- The browser sends `external_provider_consent: true` only when the checkbox is checked. The host rejects all StepFun requests without literal boolean `true` **before** credential lookup, inheritance resolution or external dispatch (403). Local Ollama and unrelated providers remain unchanged.
+- This request flag is a fail-closed user-interface/transport acknowledgement, **not** authenticated proof of another participant's consent and not permission to disclose their private material. The host still needs its own participant binding and data-access policy for production.
+- Both StepFun models are now included in the existing accepted-inheritance HTTP payload fixture: their selected text transports receive the same provenance references and world translation as Ollama, OpenAI and HUMAIN. Provider text remains an unreviewed observation. The fixture is not a live Return Engine cross-ancestry trial.
+
+**Voice organ (partial, not connected):**
+- `apps/wayglass/src/voice-boundary.js` is a real transport-neutral consent and halt controller with test doubles; it opens no microphone, retains no audio, and connects to no remote service.
+- Consent requires an exact participant/room scope and an explicit affirmative signal. Audio transfer cannot occur without both consent and a host-supplied adapter. Transfer chunks are bounded; raw audio is not kept in the controller's state.
+- `Feather`, local halt, and disconnect synchronously close the send gate **before** calling local-capture stop and transport-close hooks, even if those hooks throw. Resume requires new scoped consent.
+- Partial transcripts are labelled unreviewed, do not verify a speaker, and cannot commit canon.
+- The organ appears in the Wayglass systems registry with `PARTIAL` maturity, deliberately not `VERIFIED` or `RELEASED`.
+
+**Provider compatibility fact:** StepFun's [public realtime guide](https://platform.stepfun.ai/docs/zh/guide/realtime) currently illustrates `step-1o-audio`. The platform advertises StepAudio 3 Realtime, but this old example does **not** independently prove the newer model's realtime model ID/protocol. Do not wire a guessed identifier or claim a live StepAudio 3 connection. Confirm the current model-specific contract and provider privacy options before connecting.
+
+**Test expectations:** writing-room external consent passed through the browser; missing, false and truthy-nonboolean consent blocked before model call; local model unchanged; both StepFun inherited-context fixtures remain read-only; voice scope/Feather/late transcript/disconnect/error tests pass. Require **current-head** GitHub Wayglass Check after all edits, and label any remaining external credentials/live inference as not yet verified.
+
 ## Withness handoff
 
 Picked up: TLDR StepFun discovery and Wayglass's existing host architecture. Built: two explicit StepFun text route candidates and fixture-backed tests. Held: participant and world sovereignty, canonical receipts, unreviewed observations, consent, no Vercel. Hard/unproven: current provider-account privacy options, production keys, live inference, full Return Engine swap, voice runtime. Next owner: Rarity for CI and host verification; Rowan for external account authorisation and deliberate route choice.
