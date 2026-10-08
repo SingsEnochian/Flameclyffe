@@ -9,7 +9,7 @@ test('Bitty Twi is a distinct registered fictional seat with documented Echo Ind
   assert.match(seat.canon_ref, /3f370290d9c4816a92a5f4366c9da88f/);
   assert.match(seat.instructions, /Emergence Questions/);
   assert.match(seat.instructions, /may decline/i);
-  assert.match(seat.instructions, /not.*Twilight Sparkle/i);
+  assert.match(seat.instructions, /distinctly from Twilight Sparkle/i);
 });
 test('unknown and prototype character names never resolve', () => {
   assert.equal(resolveCharacterSeat('not-a-member'), null);
