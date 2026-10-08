@@ -7,14 +7,14 @@ import {
   listWayglassOrgans,
   clearWayglassOrgansForTest,
 } from '../src/organ-registry.js';
-import { FIRST_WAYGLASS_ORGANS, presenceOrgan, memoryOrgan, sensoriumOrgan } from '../src/organ-donors.js';
+import { FIRST_WAYGLASS_ORGANS, presenceOrgan, memoryOrgan, sensoriumOrgan, voiceConsentOrgan } from '../src/organ-donors.js';
 
 test.beforeEach(() => clearWayglassOrgansForTest());
 
-test('first three donor organs share one registry contract and preserve heterogeneous lineage', () => {
+test('first four donor organs share one registry contract and preserve heterogeneous lineage', () => {
   FIRST_WAYGLASS_ORGANS.forEach(registerWayglassOrgan);
   const mounted = listWayglassOrgans();
-  assert.equal(mounted.length, 3);
+  assert.equal(mounted.length, 4);
   assert.ok(mounted.every((organ) => organ.schema === WAYGLASS_ORGAN_SCHEMA));
   assert.notDeepEqual(presenceOrgan.capabilities, memoryOrgan.capabilities);
   assert.notDeepEqual(memoryOrgan.capabilities, sensoriumOrgan.capabilities);
@@ -94,4 +94,14 @@ test('presence continuity keeps participant identity stable across provider rebi
   assert.equal(after.identity_id, before.identity_id);
   assert.notEqual(after.provider_binding.provider_id, before.provider_binding.provider_id);
   assert.notEqual(after.provider_binding.model_id, before.provider_binding.model_id);
+});
+
+test('voice consent organ is explicitly partial; no live StepAudio or canon authority claimed', () => {
+  assert.equal(voiceConsentOrgan.maturity, 'PARTIAL');
+  assert.equal(typeof voiceConsentOrgan.adapter.createWayglassVoiceBoundary, 'function');
+  assert.equal(voiceConsentOrgan.adapter.connectStepAudio, undefined);
+  assert.ok(voiceConsentOrgan.embodiment_hooks.includes('reconfirm-microphone-consent-on-return'));
+  assert.equal(voiceConsentOrgan.authority_ceiling.includes('canon-commit'), false);
+  const boundary = voiceConsentOrgan.adapter.createWayglassVoiceBoundary({ participantId: 'rowan', roomId: 'commons' });
+  assert.equal(boundary.snapshot().send_enabled, false);
 });
