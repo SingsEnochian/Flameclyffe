@@ -1,4 +1,5 @@
 import { createWayglassOrgan } from './organ-registry.js';
+import { createWayglassVoiceBoundary, WAYGLASS_VOICE_BOUNDARY_SCHEMA } from './voice-boundary.js';
 import {
   createPresence,
   rebindPresenceProvider,
@@ -57,4 +58,18 @@ export const sensoriumOrgan = createWayglassOrgan({
   adapter: { listSomaticCues, getSomaticCue, emitSomaticCue, stopSomaticCue },
 });
 
-export const FIRST_WAYGLASS_ORGANS = Object.freeze([presenceOrgan, memoryOrgan, sensoriumOrgan]);
+// A real consent/halt controller with a mockable transport seam, NOT a live
+// StepAudio session, microphone binding, or verified external connection.
+export const voiceConsentOrgan = createWayglassOrgan({
+  organ_id: 'wayglass.organ.voice-consent-gate',
+  lineage: ['wayglass:voice-boundary', 'stepfun:stepaudio-3-realtime-research'],
+  maturity: 'PARTIAL',
+  capabilities: ['voice.consent.scope', 'voice.feather.halt', 'voice.disconnect', 'voice.transcript.observe-unreviewed'],
+  authority_ceiling: ['gate-local-audio-transfer', 'halt-local-capture', 'observe-transcript-proposals'],
+  receipt_schemas: [WAYGLASS_VOICE_BOUNDARY_SCHEMA, 'wayglass.voice-transcript-observation/v0.1'],
+  embodiment_hooks: ['reconfirm-microphone-consent-on-return', 'fall-back-to-text-if-voice-unavailable'],
+  evidence: ['apps/wayglass/test/wayglass-voice-boundary.test.js', 'docs/wayglass/STEPFUN_PROVIDER_AND_AUDIO_2026-10-08.md'],
+  adapter: { createWayglassVoiceBoundary },
+});
+
+export const FIRST_WAYGLASS_ORGANS = Object.freeze([presenceOrgan, memoryOrgan, sensoriumOrgan, voiceConsentOrgan]);

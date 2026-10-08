@@ -11,12 +11,25 @@ on:
       - 'api/v1/wayglass/**'
       - 'vercel.json'
       - 'test/wayglass/**'
+      - 'scripts/wayglass-stepfun-smoke.mjs'
       - 'apps/starwell-server/package*.json'
       - 'docs/architecture/WAYGLASS_OS_V0_1.md'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/wayglass-check.yml'
   workflow_dispatch:
+    inputs:
+      stepfun_live:
+        description: 'Make ONE synthetic live StepFun call (requires STEPFUN_API_KEY GitHub secret)'
+        type: boolean
+        default: false
+      stepfun_route:
+        description: 'Explicit StepFun route to probe'
+        type: choice
+        options:
+          - stepfun:flash
+          - stepfun:step5
+        default: stepfun:flash
 
 permissions:
   contents: read
@@ -37,6 +50,14 @@ jobs:
       - name: Install host dependencies for HTTP integration tests
         run: npm ci --prefix apps/starwell-server --omit=dev --ignore-scripts
       - run: npm run wayglass:test
+      - name: Verify StepFun synthetic host smoke (captured transport; no credentials)
+        run: node scripts/wayglass-stepfun-smoke.mjs && node scripts/wayglass-stepfun-smoke.mjs --route=stepfun:step5
+      - name: Optional authorised live StepFun smoke (synthetic prompt only)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.stepfun_live == true }}
+        env:
+          STEPFUN_API_KEY: ${{ secrets.STEPFUN_API_KEY }}
+          STEPFUN_ROUTE: ${{ inputs.stepfun_route }}
+        run: node scripts/wayglass-stepfun-smoke.mjs --live --route="$STEPFUN_ROUTE"
       - run: npm run wayglass:build
       - run: npm run wayglass:stage:server
       - name: Verify staged host

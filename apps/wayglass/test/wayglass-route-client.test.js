@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { enterWayglassWorld, leaveWayglassWorld } from '../src/route-client.js';
+import { enterWayglassWorld, leaveWayglassWorld, invokeWayglassRoute } from '../src/route-client.js';
 
 function response(status, data) {
   return {
@@ -99,4 +99,19 @@ test('browser departure client posts resumable stop state to the server', async 
   assert.equal(payload.stop_point, 'Ready to cross.');
   assert.equal(payload.next_owner, 'rarity:test');
   assert.deepEqual(payload.unresolved_wonder_questions, ['What survives the crossing?']);
+});
+
+
+test('browser provider request serialises explicit StepFun transfer confirmation only when true', async () => {
+  const seen = [];
+  async function fetchImpl(url, options) {
+    seen.push({ url, payload: JSON.parse(options.body) });
+    return response(200, { output: 'Synthetic.' });
+  }
+  await invokeWayglassRoute({ routeId: 'stepfun:flash', input: 'Synthetic.', externalProviderConsent: false, fetchImpl });
+  await invokeWayglassRoute({ routeId: 'stepfun:step5', input: 'Synthetic.', externalProviderConsent: true, fetchImpl });
+  assert.equal(seen[0].url, '/api/v1/wayglass/respond');
+  assert.equal(seen[0].payload.external_provider_consent, false);
+  assert.equal(seen[1].payload.external_provider_consent, true);
+  assert.equal(seen[1].payload.route_id, 'stepfun:step5');
 });

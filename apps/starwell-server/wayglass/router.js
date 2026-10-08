@@ -407,6 +407,12 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     const route = resolveWayglassRoute(payload.route_id || 'openai:gpt');
     if (!route) return res.status(404).json({ error: 'Unknown Wayglass route.' });
     if (!cleanText(payload.input)) return res.status(400).json({ error: 'input required.' });
+    // The external StepFun routes are deliberately opt-in for every request.
+    // This acknowledgement is a transport preflight, not a durable consent receipt
+    // or proof that another participant authorised disclosure of their material.
+    if (route.provider === 'stepfun' && payload.external_provider_consent !== true) {
+      return res.status(403).json({ error: 'StepFun requires explicit external-provider transfer confirmation for this request.' });
+    }
 
     try {
       const resolver = inheritanceContext || req.app.locals.wayglassInheritanceContext;
@@ -427,7 +433,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       let result;
       if (route.provider === 'openai') result = await callOpenAI(route, payload, compiled, fetchImpl);
       else if (route.provider === 'ollama') result = await callOllama(route, payload, compiled, fetchImpl);
-      else if (route.provider === 'humain-node' || route.provider === 'huggingface') result = await callHumainNode(route, payload, compiled, fetchImpl);
+      else if (route.provider === 'humain-node' || route.provider === 'huggingface' || route.provider === 'stepfun') result = await callHumainNode(route, payload, compiled, fetchImpl);
       else return res.status(501).json({ error: 'Provider adapter not implemented yet.' });
       const completedAt = new Date().toISOString();
       const observation = createModelObservation({
