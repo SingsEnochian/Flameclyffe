@@ -64,7 +64,7 @@ test('synthetic demo and continuity candidate remain visibly unverified', () => 
   assert.equal(demo.verification_state,'synthetic');
   assert.equal(candidate.verification_state,'unverified-continuity');
   assert.equal(wonderLightVisual(demo,200,false).dashed,true);
-  assert.equal(wonderLightVisual(candidate,200,false).dashed,false);
+  assert.equal(wonderLightVisual(candidate,200,false).dashed,true);
 });
 
 test('low-stim and reduced-motion render deterministic zero-motion geometry', () => {
@@ -81,8 +81,27 @@ test('low-stim and reduced-motion render deterministic zero-motion geometry', ()
   };
   drawWonderLight(ctx,e,1200,{reducedMotion:true,lowStim:true});
   assert.deepEqual(output[1],['arc',410,410,338]);
+  assert.equal(output.filter(x=>Array.isArray(x)&&x[0]==='arc').length,2);
   assert.ok(output.includes('stroke'));
   assert.equal(output.at(-1),'restore');
+});
+
+test('one optical subscriber failing never converts a successful transport into failure', () => {
+  const stop=subscribeWonderLight(()=>{throw Error('Canvas detached');});
+  assert.doesNotThrow(()=>recordRouteAsWonderLight({status:'completed',sequence:91,route_id:'local'}));
+  stop();
+  assert.equal(readWonderLights()[0].verification_state,'transport-confirmed');
+});
+
+test('pointer lens produces three separate optical depths without altering event claims', () => {
+  const event=createWonderLightEvent({kind:'commons-accepted',source_ref:'commons-request:x'});
+  const arcs=[];
+  const g={save(){},restore(){},beginPath(){},setLineDash(){},arc(x,y,r){arcs.push([x,y,r]);},stroke(){}};
+  drawWonderLight(g,event,400,{lens:{x:700,y:600}});
+  assert.equal(arcs.length,3);
+  assert.equal(arcs[0][0],410);
+  assert.ok(arcs[1][0]>410);
+  assert.equal(event.verification_state,'http-confirmed');
 });
 
 test('retains bounded activity without collecting messages', () => {
@@ -101,6 +120,7 @@ test('wiring connects real route and Commons lifecycle; Feather does not enable 
   assert.match(main,/wayglass:commons/);
   assert.match(observer,/data-observer-haptics aria-pressed="false"/);
   assert.match(observer,/data-observer-feather/);
+  assert.match(observer,/arcsweep:gesture-feedback/);
   assert.match(observer,/if\(haptics&&!paused&&!lowStim&&!reduced/);
   assert.match(commons,/recordCommonsAsWonderLight\(\{ stage: 'pending'/);
   assert.match(commons,/recordCommonsAsWonderLight\(\{ stage: 'failed'/);
