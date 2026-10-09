@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
   OBSERVATION_SCHEMA, OBSERVER_CHANNELS,
-  createWayglassObservation, formatObservationForLLM,
+  createWayglassObservation, formatObservationForLLM, describeWayglassObserverChannel,
   recordWayglassRouteObservation, subscribeWayglassObserver,
   readWayglassRouteObservation, queueObserverContextForWriting,
   consumeObserverContextForWriting,
@@ -27,7 +27,8 @@ test('Direct readings remain independent of the labelled model projection',()=>{
   assert.equal(packet.direct.last_route,null);
   assert.match(packet.projection.note,/not measured minds/i);
   assert.equal(packet.transformation_receipt.math_spine,'local UI translation; not DEEP theoretical state inference');
-  assert.equal(OBSERVER_CHANNELS.length,8);
+  assert.equal(OBSERVER_CHANNELS.length,9);
+  assert.equal(packet.direct.memory_recorder_registered,false);
   for(const value of Object.values(packet.projection.variables)) assert.ok(value>=0&&value<=1);
 });
 test('Projection responds to actual UI controls, not invented psychological readings',()=>{
@@ -51,8 +52,27 @@ test('Route sample keeps evidence metadata, not private model/user text or untru
   assert.equal(JSON.stringify(result).includes('SECRET'),false);
   assert.deepEqual(events,['completed']);
   assert.equal(readWayglassRouteObservation().sequence,result.sequence);
-  assert.throws(()=>recordWayglassRouteObservation({status:'approved-canon'}),/completed or failed/);
+  assert.throws(()=>recordWayglassRouteObservation({status:'approved-canon'}),/started, completed or failed/);
 });
+test('readouts distinguish real direct readings from interpretation and absent memory contents',()=>{
+  const packet=sample({organs:['wayglass.organ.memory-flight-recorder','wayglass.organ.sensorium']});
+  const memory=describeWayglassObserverChannel(packet,'memory');
+  assert.match(memory.reading,/registered; no contents read/);
+  assert.match(memory.boundary,/does not read/i);
+  const time=describeWayglassObserverChannel(packet,'time');
+  assert.equal(time.reading,packet.created_at);
+  assert.match(formatObservationForLLM(packet),/Selected channel explanation/);
+  assert.throws(()=>describeWayglassObserverChannel(packet,'fictional'),/Unknown/);
+});
+
+test('a started route is visible as running work, never a completed answer',()=>{
+  const route=recordWayglassRouteObservation({status:'started',routeId:'local:ollama'});
+  const packet=sample({route});
+  assert.equal(packet.direct.last_route.status,'started');
+  assert.equal(packet.projection.variables.C,0.58);
+  assert.match(describeWayglassObserverChannel(packet,'routes').reading,/started/);
+});
+
 test('LLM observation uses deliberate single-consumption handoff; no hidden auto-submit',()=>{
   const packet=sample({route:null});
   assert.throws(()=>formatObservationForLLM({schema:'wrong'}),/Invalid/);
