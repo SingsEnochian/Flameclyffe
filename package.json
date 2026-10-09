@@ -59,7 +59,9 @@
     "design:verify": "node scripts/verify-whole-system-design-law.mjs",
     "wayglass:stage:vercel": "node apps/wayglass/vercel-stage.cjs",
     "wayglass:hearthgate": "npm run wayglass:deploy:server && npm --prefix apps/starwell-server run start:core",
-    "prewayglass:test": "npm run wayglass:deploy:server"
+    "prewayglass:test": "npm run wayglass:deploy:server",
+    "wayglass:local": "node scripts/wayglass-local.mjs",
+    "wayglass:local:doctor": "node scripts/wayglass-local.mjs --doctor"
   },
   "dependencies": {
     "@netlify/blobs": "^10.7.13",

@@ -82,5 +82,10 @@ const wayglass = Object.freeze({
 
 globalThis.__wayglassOS = wayglass;
 
-await wayglass.mount('arcsweep:writing-room');
+const roomQuery = new URLSearchParams(globalThis.location?.search || '').get('room');
+const startRoom = roomQuery === 'observer' ? 'wayglass:living-observer'
+  : roomQuery === 'organs' ? 'wayglass:systems'
+  : roomQuery === 'video' ? 'wayglass:video-atelier'
+  : 'arcsweep:writing-room';
+await wayglass.mount(startRoom);
 installVoyageInbox();
