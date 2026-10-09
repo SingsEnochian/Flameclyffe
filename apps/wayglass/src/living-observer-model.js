@@ -14,7 +14,8 @@ export const OBSERVER_CHANNELS = Object.freeze([
   ['time', 'Time', 'Browser clock, sampled on this device'],
   ['surface', 'Room', 'Currently mounted Wayglass room'],
   ['organs', 'Organs', 'Registered Wayglass organ identifiers'],
-  ['routes', 'Routes', 'Observed route completion or failure'],
+  ['routes', 'Routes', 'Observed route launch, completion or failure'],
+  ['memory', 'Memory', 'Memory flight recorder registration; not its private contents'],
   ['touch', 'Touch', 'User-initiated interactions with this instrument'],
   ['motion', 'Motion', 'Reduced-motion and manual low-stim settings'],
   ['sound', 'Sound', 'Explicitly enabled browser sound state'],
@@ -22,7 +23,7 @@ export const OBSERVER_CHANNELS = Object.freeze([
 ]);
 
 export function recordWayglassRouteObservation({ status, routeId, provider, model, receipt } = {}) {
-  if (!['completed', 'failed'].includes(status)) throw new Error('Route observation requires completed or failed status.');
+  if (!['started', 'completed', 'failed'].includes(status)) throw new Error('Route observation requires started, completed or failed status.');
   routeSequence++;
   routeSample = Object.freeze({
     sequence: routeSequence,
@@ -64,6 +65,7 @@ export function createWayglassObservation({
     surface_id: clean(surface),
     registered_surfaces: registeredSurfaces,
     registered_organs: registeredOrgans,
+    memory_recorder_registered: registeredOrgans.includes('wayglass.organ.memory-flight-recorder'),
     touch_count: Math.min(10000, Math.max(0, Math.trunc(Number(touches) || 0))),
     prefers_reduced_motion: reducedMotion === true,
     low_stim_enabled: lowStim === true,
@@ -74,7 +76,7 @@ export function createWayglassObservation({
   // of observable UI activity, NEVER personality, interiority or model capability.
   const vars = {
     P: clip01(0.18 + registeredOrgans.length * 0.1 + registeredSurfaces.length * 0.045),
-    C: route ? (route.status === 'completed' ? 0.82 : 0.26) : 0.42,
+    C: route ? (route.status === 'completed' ? 0.82 : route.status === 'started' ? 0.58 : 0.26) : 0.42,
     R: clip01(0.14 + (sound ? 0.3 : 0) + Math.min(direct.touch_count, 12) * 0.045),
     E: clip01(0.13 + registeredSurfaces.length * 0.075),
     M: clip01(0.1 + Math.min(direct.touch_count, 12) * 0.055 + (route ? 0.12 : 0)),
@@ -98,10 +100,50 @@ export function createWayglassObservation({
     },
     transformation_receipt: {
       rule: 'wayglass.living-observer-ui-map/v1',
-      inputs: ['browser_time', 'surface_id', 'registered_surfaces', 'registered_organs', 'touch_count', 'prefers_reduced_motion', 'low_stim_enabled', 'sound_enabled_by_user', 'last_route'],
+      inputs: ['browser_time', 'surface_id', 'registered_surfaces', 'registered_organs', 'memory_recorder_registered', 'touch_count', 'prefers_reduced_motion', 'low_stim_enabled', 'sound_enabled_by_user', 'last_route'],
       output: PROJECTION_SCHEMA,
       math_spine: 'local UI translation; not DEEP theoretical state inference',
     },
+  });
+}
+
+
+const sourcePath = Object.freeze({
+  time: ['Browser clock', 'clock → timing ring → pulse phase', 'A timestamp, not a remote time service'],
+  surface: ['Wayglass surface registry', 'current room → orbit orientation', 'The Observer knows which room is mounted here'],
+  organs: ['Wayglass organ registry', 'installed organ count → geometry density', 'Registered does not mean healthy or available for live inference'],
+  routes: ['Observed Wayglass response lifecycle', 'route status → edge clarity and route energy', 'A completed request is not a validated answer'],
+  memory: ['Wayglass organ registry', 'recorder presence → memory-channel indicator', 'Registration does not read, restore or verify anyone’s memories'],
+  touch: ['Instrument local interaction counter', 'touch count → mote and momentum density', 'Only interaction with this surface, not device-wide touch'],
+  motion: ['Browser accessibility and local setting', 'reduced motion → fixed motion phase', 'No inference about a person’s condition'],
+  sound: ['User-enabled sound setting', 'sound enabled → optional note and resonance', 'Sound stays off until explicitly enabled'],
+  receipt: ['Last observed route metadata', 'receipt status → route trace', 'A route receipt is evidence of transport, not canon'],
+});
+
+export function describeWayglassObserverChannel(packet, id) {
+  if (!packet || packet.schema !== OBSERVATION_SCHEMA) throw new Error('Invalid Wayglass observation.');
+  const info = sourcePath[id];
+  if (!info) throw new Error('Unknown Wayglass observation channel.');
+  const d = packet.direct;
+  const last = d.last_route;
+  const values = {
+    time: d.browser_time,
+    surface: d.surface_id,
+    organs: d.registered_organs.length + ' registered: ' + d.registered_organs.join(', '),
+    routes: last ? last.status + ' · ' + (last.route_id || 'unknown route') : 'No route has been observed this session',
+    memory: d.memory_recorder_registered ? 'Memory flight recorder registered; no contents read' : 'No recorder registration observed',
+    touch: d.touch_count + ' interactions with this instrument',
+    motion: d.prefers_reduced_motion ? 'Reduced motion requested by browser' : d.low_stim_enabled ? 'Low Stim enabled in instrument' : 'Normal motion enabled',
+    sound: d.sound_enabled_by_user ? 'Locally enabled' : 'Off',
+    receipt: last ? (last.epistemic_register + ' · ' + (last.receipt_time || 'no receipt timestamp')) : 'No model receipt observed',
+  };
+  return Object.freeze({
+    channel: id,
+    label: OBSERVER_CHANNELS.find(([key]) => key === id)?.[1] || id,
+    source: info[0],
+    reading: String(values[id]),
+    translation: info[1],
+    boundary: info[2],
   });
 }
 
@@ -115,6 +157,7 @@ export function formatObservationForLLM(packet) {
     JSON.stringify(packet.direct),
     'Interpretive UI projection (not a measurement of identity, consciousness, emotion or canon):',
     JSON.stringify(packet.projection.variables),
+    'Selected channel explanation: ' + JSON.stringify(describeWayglassObserverChannel(packet, packet.projection.focus)),
     'Transformation provenance: ' + packet.transformation_receipt.rule,
     'You may explain the interface readings and their visual mapping. Do not present projection variables as observations of any person or AI interior state.',
     '[/Wayglass Living Observer]',
