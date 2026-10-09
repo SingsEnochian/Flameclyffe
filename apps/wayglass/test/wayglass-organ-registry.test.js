@@ -7,14 +7,18 @@ import {
   listWayglassOrgans,
   clearWayglassOrgansForTest,
 } from '../src/organ-registry.js';
-import { FIRST_WAYGLASS_ORGANS, presenceOrgan, memoryOrgan, sensoriumOrgan } from '../src/organ-donors.js';
+import { FIRST_WAYGLASS_ORGANS, presenceOrgan, memoryOrgan, sensoriumOrgan, livingObserverOrgan } from '../src/organ-donors.js';
 
 test.beforeEach(() => clearWayglassOrgansForTest());
 
-test('first three donor organs share one registry contract and preserve heterogeneous lineage', () => {
+test('registered donor organs share one registry contract and preserve heterogeneous lineage', () => {
   FIRST_WAYGLASS_ORGANS.forEach(registerWayglassOrgan);
   const mounted = listWayglassOrgans();
-  assert.equal(mounted.length, 3);
+  assert.equal(mounted.length, 4);
+  assert.equal(mounted[3].organ_id, 'wayglass.organ.living-observer');
+  assert.ok(livingObserverOrgan.lineage.includes('starwell:deep-observer'));
+  assert.ok(!livingObserverOrgan.authority_ceiling.includes('canon-commit'));
+  assert.equal(typeof livingObserverOrgan.adapter.createWayglassObservation, 'function');
   assert.ok(mounted.every((organ) => organ.schema === WAYGLASS_ORGAN_SCHEMA));
   assert.notDeepEqual(presenceOrgan.capabilities, memoryOrgan.capabilities);
   assert.notDeepEqual(memoryOrgan.capabilities, sensoriumOrgan.capabilities);
