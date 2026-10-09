@@ -1,3 +1,4 @@
+import './video-atelier.css';
 import { WayglassVideoAtelier, WAYGLASS_SCENES } from '../ltx-desktop-bridge.js';
 
 export async function mountWayglassVideoAtelier(root) {
