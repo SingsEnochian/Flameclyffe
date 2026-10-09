@@ -19,13 +19,13 @@ Browser / Wayglass registries / observed response receipt
 Room: \`wayglass:living-observer\`; organ: \`wayglass.organ.living-observer\`.
 Implementation:
 - \`apps/wayglass/src/living-observer-model.js\`: direct readings, deterministic visual projection, metadata-only route events, opt-in LLM context queue.
-- \`apps/wayglass/src/surfaces/living-observer.js\`: layered canvas instrument, eight touch/keyboard-accessible direct channels, local time, projection meters, inspectable packet, explicit export, optional audio, accessibility controls.
+- \`apps/wayglass/src/surfaces/living-observer.js\`: layered canvas instrument, nine touch/keyboard-accessible channels including a memory-recorder registration probe, local time, projection meters, inspectable packet, explicit export, optional audio, accessibility controls.
 - \`apps/wayglass/src/surfaces/living-observer.css\`: responsive material treatment and reduced-motion safeguards.
-- Writing Room: records success/failure metadata after \`invokeWayglassRoute\`, and consumes queued observation into editable user input. The existing host request schema, kernel, prompt compiler and model weights are not altered.
+- Writing Room: records started/success/failure metadata after \`invokeWayglassRoute\`, and consumes queued observation into editable user input. The existing host request schema, kernel, prompt compiler and model weights are not altered.
 
 ## What is and is not measured
 
-Direct readings are: local browser timestamp, Wayglass room/organ identifiers, number of user interactions with the instrument, reduced-motion/low-stim/sound UI settings, and the last response transport receipt status/model/source metadata if a route was used in this browser session. If there is no route result, it stays null. The instrument does NOT read raw conversation text, secret tokens, GPS, microphone, camera, health data or unreviewed inner experiences.
+Direct readings are: local browser timestamp, Wayglass room/organ identifiers, number of user interactions with the instrument, reduced-motion/low-stim/sound UI settings, and the last response transport receipt status/model/source metadata if a route was used in this browser session. If there is no route result, it stays null. The Memory sensor only reports whether the recorder organ is registered, never the recorder's contents. The instrument does NOT read raw conversation text, secret tokens, GPS, microphone, camera, health data or unreviewed inner experiences.
 
 The \`P,C,R,E,M,A,Q,H\` variables are explicitly authored **UI translation weights** derived from the available direct readings. They are not values from the DEEP v1.8 lattice, psychological assessments, mind-states, consciousness detectors, model safety scores, or factual claims about any participant. Such interpretation belongs to separately labelled research and would need evidence and consent.
 
@@ -38,12 +38,19 @@ Linguistic and visual metaphor may coexist, but never impersonate formalism or m
 - Web Audio missing/blocked: silent graphic instrument.
 - Reduced motion: static, fully legible geometric view; Low Stim manually stops continuous animation.
 - Phone/tablet: responsive 2D canvas, pointer/touch selection, buttons as keyboard fallback.
-- On leaving room: animation terminates on disconnected canvas; route subscription/timer/audio release.
+- On leaving room: the surface registry invokes Observer cleanup immediately, releasing animation, route subscription, timer and Web Audio. Disconnected-canvas detection is a fallback.
 - Export and LLM insertion are separate affirmative actions; no server upload by simply observing.
 - No extra persona system, continuity fields, model fine-tune, public deployment, paid API, or Vercel verification.
 
 ## Verification
 
-Synthetic Node tests cover packet boundaries, deterministic projections, failed and successful receipt metadata, user-gated context handoff, and navigation/organ/writing wiring. GitHub Wayglass Check remains the build gate. A real browser smoke on touch/mobile and real authenticated LLM turn are still required to claim live outcomes.
+Synthetic Node tests cover packet boundaries, deterministic projections, started, failed and successful receipt metadata, exact rotated-node targeting, momentum damping, source-to-render readouts, cleanup, user-gated context handoff, and navigation/organ/writing wiring. GitHub Wayglass Check remains the build gate. A real browser smoke on touch/mobile and real authenticated LLM turn are still required to claim live outcomes.
 
 Further extension can connect additional source-qualified readings (e.g., weather/space telemetry, sound banks, deeper 3D gesture refraction) only with explicit data contracts and consent. Never invent missing observations to decorate the instrument.
+
+
+## Optical / interaction refinement
+
+Drag the astrolabe to rotate real sensor positions with damped inertia. Tap a **sensor node** to inspect its direct reading; empty space no longer selects a random neighbour. Nested highlights and pointer-relative caustics imply optical thickness, while route start, completion and failure produce different light paths. Browser reduced-motion and Low Stim freeze continuous movement without hiding the readings.
+
+The selected channel displays a **source**, **direct value**, **translation rule** and **boundary** separately from interpreted meters. Registering a memory-recorder organ is not proof that its contents were read or restored. User-to-LLM transmission remains opt-in and editable, not a background prompt channel.
