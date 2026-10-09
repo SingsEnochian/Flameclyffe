@@ -234,7 +234,7 @@ export async function mountWayglassLivingObserver(root) {
     if(audioContext){audioContext.close().catch(()=>{});audioContext=null;}
   }
   function playNote() {
-    if(!sound) return;
+    if(!sound||paused) return;
     try {
       const Audio=globalThis.AudioContext||globalThis.webkitAudioContext;
       if(!Audio)return;
@@ -303,6 +303,7 @@ export async function mountWayglassLivingObserver(root) {
     if(!lowStim&&!reduced&&!paused)animation=requestAnimationFrame(animate);
   });
   root.querySelector('[data-observer-haptics]').addEventListener('click',event=>{
+    if(paused){status.textContent='Feather held; haptics cannot be enabled.';return;}
     haptics=!haptics;event.currentTarget.setAttribute('aria-pressed',String(haptics));
     event.currentTarget.textContent='Haptics · '+(haptics?'On':'Off');
     status.textContent=haptics?'Haptics opted in. No vibration occurs with Feather, Low Stim or reduced motion.':'Haptics disabled.';
@@ -320,6 +321,7 @@ export async function mountWayglassLivingObserver(root) {
     status.textContent='Synthetic ripple only; no Commons message, model result or continuity receipt was created.';
   });
   root.querySelector('[data-observer-sound]').addEventListener('click',event=>{
+    if(paused){status.textContent='Feather held; sound cannot be enabled.';return;}
     sound=!sound;event.currentTarget.setAttribute('aria-pressed',String(sound));
     if(!sound&&audioContext){audioContext.close().catch(()=>{});audioContext=null;}
     event.currentTarget.textContent='Sound · '+(sound?'On':'Off');refresh();playNote();
