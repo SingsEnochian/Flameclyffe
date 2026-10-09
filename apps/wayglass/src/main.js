@@ -9,6 +9,7 @@ import { mountWayglassSurface, registerWayglassSurface, listWayglassSurfaces } f
 import { mountArcSweepWritingSurface } from './surfaces/arcsweep-writing.js';
 import { mountWayglassSystemsSurface } from './surfaces/systems.js';
 import { mountWayglassVideoAtelier } from './surfaces/video-atelier.js';
+import { mountWayglassLivingObserver } from './surfaces/living-observer.js';
 import { registerWayglassOrgan, listWayglassOrgans } from './organ-registry.js';
 import { FIRST_WAYGLASS_ORGANS } from './organ-donors.js';
 
@@ -42,6 +43,12 @@ registerWayglassSurface({
   surface_id: 'wayglass:video-atelier',
   label: 'Wayglass · Video Atelier',
   mount: mountWayglassVideoAtelier,
+});
+
+registerWayglassSurface({
+  surface_id: 'wayglass:living-observer',
+  label: 'Wayglass · Living Observer',
+  mount: mountWayglassLivingObserver,
 });
 
 const browserEmbodiment = Object.freeze({
