@@ -8,6 +8,7 @@ import { installVoyageInbox } from './voyage-inbox.js';
 import { mountWayglassSurface, registerWayglassSurface, listWayglassSurfaces } from './surface-registry.js';
 import { mountArcSweepWritingSurface } from './surfaces/arcsweep-writing.js';
 import { mountWayglassSystemsSurface } from './surfaces/systems.js';
+import { mountWayglassVideoAtelier } from './surfaces/video-atelier.js';
 import { registerWayglassOrgan, listWayglassOrgans } from './organ-registry.js';
 import { FIRST_WAYGLASS_ORGANS } from './organ-donors.js';
 
@@ -35,6 +36,12 @@ registerWayglassSurface({
   surface_id: 'wayglass:systems',
   label: 'Wayglass · Organs',
   mount: mountWayglassSystemsSurface,
+});
+
+registerWayglassSurface({
+  surface_id: 'wayglass:video-atelier',
+  label: 'Wayglass · Video Atelier',
+  mount: mountWayglassVideoAtelier,
 });
 
 const browserEmbodiment = Object.freeze({

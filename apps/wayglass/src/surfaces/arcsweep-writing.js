@@ -36,7 +36,7 @@ export async function mountArcSweepWritingSurface(root) {
 
   root.innerHTML = [
     '<section class="wg-surface" data-surface="arcsweep-writing">',
-      '<nav class="wg-deck-nav glass-panel" aria-label="Wayglass rooms"><button type="button" class="glass-chip active" aria-current="page">Writing Room</button><button type="button" class="glass-chip" data-wayglass-room="wayglass:systems">Organs</button></nav>',
+      '<nav class="wg-deck-nav glass-panel" aria-label="Wayglass rooms"><button type="button" class="glass-chip active" aria-current="page">Writing Room</button><button type="button" class="glass-chip" data-wayglass-room="wayglass:systems">Organs</button><button type="button" class="glass-chip" data-wayglass-room="wayglass:video-atelier">Video Atelier</button></nav>',
       '<header class="wg-surface-head glass-panel">',
         '<div>',
           '<p class="eyebrow">ArcSweep attached surface</p>',
