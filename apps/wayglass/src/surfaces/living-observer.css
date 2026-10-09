@@ -40,3 +40,33 @@
 @media(max-width:960px){.wg-living-observer .observer-deck{grid-template-columns:1fr}.wg-living-observer .observer-stage{max-width:790px;margin:auto}.wg-living-observer .observer-console{width:100%}}
 @media(max-width:480px){.wg-living-observer .observer-head{align-items:flex-start}.wg-living-observer .observer-clock{text-align:left}.wg-living-observer .observer-stage{padding:2px}.wg-living-observer .observer-inputs{gap:5px}.wg-living-observer .observer-input{padding:10px 2px;font-size:.75rem}.wg-living-observer .observer-console{padding:16px}}
 @media(prefers-reduced-motion:reduce){.wg-living-observer .observer-input{transition:none}.wg-living-observer canvas{filter:none}}
+
+
+/* Each selected reading has a literal observable value, a labelled mapping, and a boundary. */
+.wg-living-observer .observer-translation{
+  position:relative;display:grid;gap:8px;padding:15px 17px 16px;border-radius:18px;
+  border:1px solid rgba(148,230,223,.22);overflow-wrap:anywhere;
+  background:linear-gradient(145deg,rgba(92,174,184,.13),rgba(72,47,127,.10) 60%,rgba(13,26,42,.2));
+  box-shadow:inset 0 1px rgba(223,255,251,.11),inset 0 -18px 35px rgba(13,36,44,.16);
+}
+.wg-living-observer .observer-translation::before{
+  content:"";position:absolute;width:120px;height:120px;right:-38px;top:-42px;border-radius:50%;
+  background:radial-gradient(circle,rgba(145,232,224,.17),transparent 75%);pointer-events:none
+}
+.wg-living-observer .observer-translation strong{
+  font:600 .93rem/1.45 system-ui;color:#d1f7f1;position:relative
+}
+.wg-living-observer .observer-translation span{
+  font:500 .82rem/1.5 system-ui;color:#afcdeb;position:relative
+}
+.wg-living-observer .observer-translation small{
+  font:.75rem/1.45 system-ui;color:#a6adba;border-top:1px solid rgba(193,228,234,.13);
+  padding-top:9px;position:relative
+}
+.wg-living-observer canvas{touch-action:none}
+.wg-living-observer .observer-stage:focus-within{
+  box-shadow:inset 0 0 80px rgba(56,109,122,.18),0 20px 75px rgba(0,0,0,.23)
+}
+@media(prefers-reduced-motion:reduce){
+  .wg-living-observer .observer-stage,.wg-living-observer .observer-translation{transition:none;animation:none}
+}
