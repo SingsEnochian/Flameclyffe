@@ -117,6 +117,11 @@ export class LtxDesktopLocalClient {
     if (policy.force_api_generations !== false) {
       throw new Error('LTX Desktop is not in confirmed local-generation mode. Paid API fallback is blocked.');
     }
+    const settings = await this.request('/api/settings');
+    const apiPreference = settings.userPrefersLtxApiVideoGenerations ?? settings.user_prefers_ltx_api_video_generations;
+    if (apiPreference !== false) {
+      throw new Error('LTX Desktop cloud video preference is enabled or unknown. Local generation required.');
+    }
     const health = await this.request('/health');
     if (health.status !== 'ok') throw new Error('LTX Desktop health check did not report ready.');
     return Object.freeze({ local: true, gpu: health.gpu_info?.name || 'unreported' });
