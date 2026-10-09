@@ -32,7 +32,10 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const dataDir = process.env.HEARTHGATE_DATA_DIR || path.join(__dirname, 'data');
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+// Allow local-only Wayglass/Ollama to start without requiring a cloud credential.
+const anthropic = process.env.ANTHROPIC_API_KEY
+  ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+  : null;
 
 const MEMBER_CONFIGS = {
   lioreal: {
