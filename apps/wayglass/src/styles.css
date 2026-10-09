@@ -797,3 +797,18 @@ button { font: inherit; cursor: pointer; }
 @media (max-width: 860px) { .organ-bay { grid-template-columns:1fr; } .organ-vessel { min-height:0; grid-template-columns:92px 1fr; grid-template-rows:1fr; } .organ-core { width:76px; height:76px; } }
 @media (hover:none) { .organ-vessel { cursor:pointer; } .organ-lineage { opacity:.82; } }
 @media (prefers-reduced-motion:reduce) { .organ-vessel, .organ-core, .organ-core::before, .organ-core::after { transform:none !important; } }
+
+/* Wayglass Commons mobile room: readable transcripts and thumb-friendly controls. */
+.wg-commons .wg-surface-head { align-items: start; }
+.wg-commons .wg-thread { min-height: 320px; }
+.wg-commons #wg-commons-messages { max-height: min(62vh, 720px); overflow-y: auto; overscroll-behavior: contain; }
+.wg-commons .turn-card { overflow-wrap: anywhere; }
+.wg-commons .turn-card header { flex-wrap: wrap; gap: 7px; }
+.wg-commons .composer-foot { flex-wrap: wrap; }
+.wg-commons #wg-commons-input { width: 100%; min-height: 104px; font: inherit; }
+.wg-commons .glass-chip, .wg-commons .send-jewel { min-height: 44px; }
+@media (max-width: 650px) {
+ .wg-commons .wg-surface-head { grid-template-columns: minmax(0,1fr); }
+ .wg-commons #wg-commons-messages { max-height: 54vh; }
+ .wg-commons .composer-foot #wg-commons-send { width: 100%; }
+}
