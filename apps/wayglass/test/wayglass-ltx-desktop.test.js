@@ -58,6 +58,7 @@ test('LTX local engine happy path returns a distinct non-canonical receipt', asy
       paths.push(suffix);
       assert.equal(opts.headers.Authorization, 'Bearer synthetic-not-real');
       if (suffix === '/api/runtime-policy') return Response.json({force_api_generations:false});
+      if (suffix === '/api/settings') return Response.json({userPrefersLtxApiVideoGenerations:false});
       if (suffix === '/health') return Response.json({status:'ok',gpu_info:{name:'testGPU'}});
       if (suffix === '/api/generate') {
         sent = JSON.parse(opts.body);
@@ -68,7 +69,7 @@ test('LTX local engine happy path returns a distinct non-canonical receipt', asy
   });
   const job = handoff();
   const receipt = await client.render(job, {startImagePath:'/tmp/pony.png',endImagePath:'/tmp/human.png'});
-  assert.deepEqual(paths, ['/api/runtime-policy','/health','/api/generate']);
+  assert.deepEqual(paths, ['/api/runtime-policy','/api/settings','/health','/api/generate']);
   assert.equal(sent.imagePath, '/tmp/pony.png');
   assert.equal(sent.lastImagePath, '/tmp/human.png');
   assert.equal(sent.prompt, job.render_request.prompt);
@@ -85,10 +86,27 @@ test('LTX generation errors and cancellations never claim completion', async () 
     fetchImpl: async url => {
       const pathname = new URL(url).pathname;
       if (pathname === '/api/runtime-policy') return Response.json({force_api_generations:false});
+      if (pathname === '/api/settings') return Response.json({userPrefersLtxApiVideoGenerations:false});
       if (pathname === '/health') return Response.json({status:'ok'});
       return Response.json({status:'cancelled'});
     },
   });
   await assert.rejects(client.render(handoff()), /cancelled/);
   await assert.rejects(client.render(handoff(), {endImagePath:'/tmp/human.png'}), /requires a start frame/);
+});
+
+test('LTX refuses an enabled cloud-generation preference even on powerful hardware', async () => {
+  const seen = [];
+  const client = new LtxDesktopLocalClient({
+    token: 'synthetic-not-real',
+    fetchImpl: async url => {
+      const route = new URL(url).pathname;
+      seen.push(route);
+      return Response.json(route === '/api/settings'
+        ? {userPrefersLtxApiVideoGenerations:true}
+        : {force_api_generations:false});
+    },
+  });
+  await assert.rejects(client.render(handoff()), /cloud video preference/);
+  assert.deepEqual(seen, ['/api/runtime-policy','/api/settings']);
 });
