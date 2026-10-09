@@ -118,7 +118,7 @@ function drawAstrolabe(canvas, packet, time, focus, lowStim, {rotation = 0, lens
   g.ellipse(cx+parallaxX*.5,cy+parallaxY*.5,outer+42,outer+35,rotation*.08,0,TAU);
   g.strokeStyle='#b1ffff';g.globalAlpha=.06+v.Q*.07;g.lineWidth=9;g.stroke();
   g.globalAlpha=1;
-  drawWonderLight(g,light,lightAge,{reducedMotion:packet.direct.prefers_reduced_motion,lowStim,width:w,height:h});
+  drawWonderLight(g,light,lightAge,{reducedMotion:packet.direct.prefers_reduced_motion,lowStim,width:w,height:h,lens});
 }
 function formatClock(value) {
   const date=new Date(value);
@@ -231,6 +231,7 @@ export async function mountWayglassLivingObserver(root) {
     if(disposed)return;
     disposed=true;
     cancelAnimationFrame(animation);clearInterval(timer);unsubscribe();unsubscribeLight();
+    globalThis.removeEventListener?.('arcsweep:gesture-feedback', onExternalFeather);
     if(audioContext){audioContext.close().catch(()=>{});audioContext=null;}
   }
   function playNote() {
@@ -308,7 +309,13 @@ export async function mountWayglassLivingObserver(root) {
     event.currentTarget.textContent='Haptics · '+(haptics?'On':'Off');
     status.textContent=haptics?'Haptics opted in. No vibration occurs with Feather, Low Stim or reduced motion.':'Haptics disabled.';
   });
-  root.querySelector('[data-observer-feather]').addEventListener('click',event=>{
+  const featherButton=root.querySelector('[data-observer-feather]');
+  const onExternalFeather=(event)=>{
+    const detail=event?.detail;
+    if(detail?.schema==='arcsweep.gesture-feedback/v1' && detail.status==='stopped' && detail.reason==='Feather' && !paused)featherButton.click();
+  };
+  globalThis.addEventListener?.('arcsweep:gesture-feedback', onExternalFeather);
+  featherButton.addEventListener('click',event=>{
     paused=!paused;event.currentTarget.setAttribute('aria-pressed',String(paused));
     event.currentTarget.textContent=paused?'Feather · Resume':'Feather · Pause';
     if(paused){rotation.stop();cancelAnimationFrame(animation);haptics=false;root.querySelector('[data-observer-haptics]').setAttribute('aria-pressed','false');root.querySelector('[data-observer-haptics]').textContent='Haptics · Off';
