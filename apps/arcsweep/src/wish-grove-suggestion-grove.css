@@ -1,0 +1,161 @@
+.wish-grove-suggestion-grove {
+  margin-top: .75rem;
+  padding: .7rem;
+  border: 1px solid rgba(82,120,98,.24);
+  border-radius: 12px;
+  background: rgba(82,120,98,.045);
+}
+
+.wish-grove-suggestion-grove > header,
+.wish-grove-suggestion > header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .65rem;
+}
+
+.wish-grove-suggestion-grove h5 {
+  margin: .12rem 0 0;
+  color: #294a3b;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.wish-grove-suggestion-intro,
+.wish-grove-suggestion-law,
+.wish-grove-suggestion-rationale {
+  color: #735f4e;
+  font-size: .76rem;
+}
+
+.wish-grove-suggestion-counts,
+.wish-grove-suggestion-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+}
+
+.wish-grove-suggestion-counts span {
+  padding: .18rem .42rem;
+  border-radius: 999px;
+  background: rgba(82,120,98,.08);
+  color: #435b4e;
+  font-size: .68rem;
+}
+
+.wish-grove-suggestion-list {
+  display: grid;
+  gap: .55rem;
+  margin-top: .55rem;
+}
+
+.wish-grove-suggestion {
+  padding: .65rem;
+  border: 1px solid rgba(93,67,31,.14);
+  border-radius: 11px;
+  background: rgba(255,255,255,.22);
+}
+
+.wish-grove-suggestion[data-suggestion-status="accepted"] {
+  border-color: rgba(82,120,98,.42);
+}
+
+.wish-grove-suggestion[data-suggestion-status="declined"] {
+  opacity: .72;
+}
+
+.wish-grove-suggestion[data-suggestion-applied="true"] {
+  box-shadow: inset 0 0 0 1px rgba(82,120,98,.12);
+  background: rgba(82,120,98,.06);
+}
+
+.wish-grove-suggestion-payload {
+  display: grid;
+  gap: .25rem;
+  margin: .45rem 0;
+}
+
+.wish-grove-suggestion-payload div {
+  display: grid;
+  grid-template-columns: minmax(90px,.35fr) 1fr;
+  gap: .45rem;
+}
+
+.wish-grove-suggestion-payload dt {
+  color: #52665b;
+  font-size: .7rem;
+  font-weight: 700;
+}
+
+.wish-grove-suggestion-payload dd {
+  margin: 0;
+  color: #604e40;
+  font-size: .74rem;
+  overflow-wrap: anywhere;
+}
+
+.wish-grove-suggestion form {
+  display: grid;
+  gap: .45rem;
+  margin-top: .5rem;
+}
+
+.wish-grove-suggestion form label {
+  display: grid;
+  gap: .2rem;
+  color: #604e40;
+  font-size: .74rem;
+}
+
+.wish-grove-suggestion form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(93,67,31,.2);
+  border-radius: 9px;
+  padding: .48rem .55rem;
+  background: rgba(255,255,255,.46);
+  color: #2b221b;
+}
+
+.wish-grove-suggestion-actions button {
+  flex: 0 1 auto;
+}
+
+.wish-grove-suggestion-decisions,
+.wish-grove-suggestion-materialisations,
+.wish-grove-learning-reflections {
+  display: grid;
+  gap: .3rem;
+  margin: .45rem 0;
+  padding-left: 1.25rem;
+}
+
+.wish-grove-suggestion-decisions li span,
+.wish-grove-suggestion-decisions li small,
+.wish-grove-suggestion-materialisations li span,
+.wish-grove-suggestion-materialisations li small,
+.wish-grove-learning-reflections li span,
+.wish-grove-learning-reflections li small {
+  display: block;
+  color: #735f4e;
+  font-size: .7rem;
+}
+
+.wish-grove-suggestion-materialise,
+.wish-grove-learning-reflection {
+  margin-top: .55rem;
+  padding-top: .45rem;
+  border-top: 1px solid rgba(93,67,31,.12);
+}
+
+.wish-grove-suggestion-materialise summary,
+.wish-grove-learning-reflection summary {
+  cursor: pointer;
+  color: #294a3b;
+  font-size: .75rem;
+  font-weight: 700;
+}
+
+.wish-grove-suggestion-consent {
+  grid-template-columns: auto 1fr !important;
+  align-items: start;
+}
