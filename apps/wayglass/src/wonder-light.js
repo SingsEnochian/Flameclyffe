@@ -12,22 +12,18 @@ const states = Object.freeze({
   'commons-failed': ['failed', 'rose', 'Commons request failed'],
   'commons-unavailable': ['unavailable', 'amber', 'Commons host or sign-in unavailable'],
   'wonder-open': ['authored-open-question', 'gold', 'unresolved Wonder question, not a fact'],
-  'return-verified': ['continuity-receipt', 'teal', 'continuity receipt available; resumption still requires an explicit action'],
+  'return-candidate': ['unverified-continuity', 'gold', 'return candidate: continuity remains unverified; no resumption or relationship claim'],
   'synthetic-demo': ['synthetic', 'violet', 'synthetic demonstration only'],
 });
 const clean = (value, max=180) => String(value ?? '').trim().slice(0, max);
-let serial = 0;
 const entries = [];
 const listeners = new Set();
 
-export function createWonderLightEvent({ kind, source_ref, event_id, observed_at, room_id, stop_point, next_owner } = {}) {
+export function createWonderLightEvent({ kind, source_ref, event_id, observed_at, room_id } = {}) {
   const rule = states[kind];
   if (!rule) throw new Error('Unknown Wonder light event kind');
   const source = clean(source_ref);
   if (!source) throw new Error('Wonder light requires a source reference');
-  if (kind === 'return-verified' && (!clean(stop_point) || !clean(next_owner))) {
-    throw new Error('A return light requires verified stop point and named next owner');
-  }
   if (kind === 'commons-stored' && !source.startsWith('commons-entry:')) {
     throw new Error('Stored Commons light requires a persisted entry reference');
   }
@@ -37,7 +33,6 @@ export function createWonderLightEvent({ kind, source_ref, event_id, observed_at
     observed_at: clean(observed_at) || new Date().toISOString(),
     room_id: clean(room_id) || 'wayglass:living-observer',
     verification_state: rule[0], visual_cue: rule[1], boundary: rule[2],
-    ...(kind === 'return-verified' ? { stop_point: clean(stop_point), next_owner: clean(next_owner) } : {}),
   });
 }
 
@@ -48,7 +43,7 @@ export function subscribeWonderLight(listener) {
 }
 export function readWonderLights() { return entries.slice(); }
 export function publishWonderLight(input) {
-  const event = input?.schema === WONDER_LIGHT_SCHEMA ? createWonderLightEvent(input) : createWonderLightEvent(input);
+  const event = createWonderLightEvent(input);
   if (entries.some(x => x.event_id === event.event_id && x.kind === event.kind)) return event;
   entries.unshift(event);
   entries.length = Math.min(entries.length, MAX_EVENTS);
@@ -113,4 +108,4 @@ export function drawWonderLight(g, event, timeMs, { reducedMotion=false, lowStim
   g.stroke();
   g.restore();
 }
-export function resetWonderLightsForTest() { entries.length=0; serial=0; }
+export function resetWonderLightsForTest() { entries.length=0; }
