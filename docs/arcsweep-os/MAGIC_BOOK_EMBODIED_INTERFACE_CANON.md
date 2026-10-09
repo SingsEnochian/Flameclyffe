@@ -46,6 +46,22 @@ The Magic Book does not own the systems it presents. It translates and coordinat
 | Project Zero / compatibility adapters | Hidden bridgework beneath the binding; connection without ownership |
 | STARWELL | Observatory plates, instrument panels, health/status and projection views |
 
+## Wonder-field page grammar
+
+The Magic Book may render epistemic and cognitive state directly, not only final outputs.
+
+New page expressions include:
+
+- **Possibility folio:** several live explanations remain visible until an explicit selection is made.
+- **Transduction folio:** source -> interaction -> signal -> representation -> interpretation can be walked backward.
+- **Field page:** dimensions, constraints, boundaries, attractors, couplings, and available transformations appear as spatial structure.
+- **Thought-field page:** active, incubating, blocked, uncertain, delegated, complete, speculative, and quiet-signal nodes remain visible without forced deletion.
+- **Temporal palimpsest:** phase, duration, recurrence, and change can be replayed rather than reduced to one snapshot.
+- **Detection lens:** invisible or indirect phenomena are shown through their predicted effects, detector path, measurements, alternatives, and claim lane.
+- **Cue loom:** semantic state may be mapped to visual, auditory, haptic, spatial, or symbolic expression while the mapping remains inspectable.
+
+The Book therefore makes **how we know** something inhabitable alongside **what we know**.
+
 ## The binding
 
 The **binding** is the continuity layer of the Magic Book.

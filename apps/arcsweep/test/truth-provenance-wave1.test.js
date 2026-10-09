@@ -12,7 +12,7 @@ import {
 } from '../src/truth-provenance.js';
 
 test('truth provenance keeps observation, reconstruction, canon, hypothesis and model inference distinct', () => {
-  for (const id of ['observation', 'scientific-consensus', 'scientific-reconstruction', 'project-record', 'world-canon', 'hypothesis', 'model-inference', 'unknown']) {
+  for (const id of ['observation', 'scientific-consensus', 'scientific-reconstruction', 'project-record', 'world-canon', 'hypothesis', 'model-inference', 'active-research', 'phenomenology', 'analogy', 'symbolic', 'mythic', 'unknown']) {
     assert.ok(PROVENANCE_CLASSES[id], `missing provenance class ${id}`);
   }
   assert.notEqual(PROVENANCE_CLASSES.observation.authority, PROVENANCE_CLASSES.hypothesis.authority);

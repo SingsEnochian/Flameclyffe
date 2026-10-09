@@ -117,6 +117,38 @@ Enduring systems attached to the trunk with a clear purpose.
 
 **First complete module sequence:** define the full spatial-interaction subsystem and its provider-neutral contracts, then implement the camera/hand-tracking adapter, filtered landmark pipeline, approach/target/capture state machine, manipulate/release/settle behaviour, Three.js target adapter, accessibility fallbacks, capability checks, receipts, recovery/error handling, and integrated verification as one coherent system.
 
+### Wonder field + transduction architecture
+
+**Runtime:** `apps/arcsweep/src/wonder-field.js`
+
+**Spec:** `docs/arcsweep/WONDER_FIELD_TRANSDUCTION_V0_1.md`
+
+**Nikola lane:** `docs/arcsweep/NIKOLA_PARALLEL_SYNTHESIS_V0_1.md`
+
+**Purpose:** Preserve live questions, possibility sets, transduction chains, field-state conditions, temporal replay, and claim provenance without flattening analogy, phenomenology, active research, mythic meaning, and measured evidence into one register.
+
+**Behaviour:**
+
+- Wonder precedes premature collapse into the nearest familiar explanation.
+- Hidden-state and field claims are traced through predicted effects, detectors, measurements, alternatives, and provenance.
+- Source, signal, representation, interpretation, belief, and action remain distinct.
+- Thought fields organise without silently deleting weak signals, contradictions, or incubating ideas.
+- Multimodal cues remain semantic mappings rather than fixed meanings, so sound, haptic, visual, spatial, and symbolic channels can be swapped without corrupting the underlying state.
+- Time, phase, duration, recurrence, and replay remain part of state rather than metadata afterthoughts.
+- Cross-domain structural analogies are allowed and encouraged, but do not become ontological identity by default.
+
+**First living seam — Resonance Chamber:**
+
+- Permanent room id: `resonance-chamber`.
+- Field model: `apps/arcsweep/src/resonance-room-model.js`.
+- Spatial embodiment: `apps/arcsweep/src/resonance-room-sidecar.js` + `resonance-room.css`.
+- One persisted field state drives standing-wave geometry, node/antinode loci, draggable source position, MeshPhysicalMaterial thickness/refraction, bounded somatic modulation, and local receipts.
+- Three.js is lazy-loaded only when the room is present; the DOM remains the accessible control authority.
+- Audio/haptic output travels through the existing opt-in Somatic Interface rather than bypassing its profile or calibration contract.
+- Every tune, source move, reset, and pulse can leave an inspectable `arcsweep.resonance-room-receipt/v0.1`.
+- The current chamber is explicitly a simulation instrument, not a claim that the browser is measuring the physical room.
+
+
 ## Leaves
 
 Replaceable expressions of a branch.

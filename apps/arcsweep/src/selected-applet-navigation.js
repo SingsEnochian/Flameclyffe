@@ -5,7 +5,7 @@ export const SELECTED_APPLET_NAV_VERSION = 'arcsweep.selected-applet-navigation/
 
 const PERMANENT_ROOM_IDS = new Set([
   'portal', 'worlds', 'scripts', 'records', 'kelyran-school', 'feedback',
-  'commons', 'waking-thread', 'forge', 'deep-observer', 'settings',
+  'commons', 'waking-thread', 'forge', 'deep-observer', 'resonance-chamber', 'settings',
 ]);
 
 let refreshQueued = false;
