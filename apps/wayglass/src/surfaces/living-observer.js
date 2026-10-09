@@ -7,12 +7,13 @@ import {
 } from '../living-observer-model.js';
 
 import { observerNodes, platePoint, nodeAtPoint, angularDelta, createObserverRotation, OBSERVER_PLATE_SIZE } from '../living-observer-optics.js';
+import { readWonderLights, subscribeWonderLight, publishWonderLight, drawWonderLight } from '../wonder-light.js';
 
 const TAU = Math.PI * 2;
 const COLOURS = ['#95fff2','#bca3ff','#e8cc8b','#8fa4fb','#82d4ce','#ec9ecd','#cfebe9','#d6c4ff'];
 const channelDescriptions = Object.fromEntries(OBSERVER_CHANNELS.map(([id,label,text])=>[id,{label,text}]));
 
-function drawAstrolabe(canvas, packet, time, focus, lowStim, {rotation = 0, lens = null} = {}) {
+function drawAstrolabe(canvas, packet, time, focus, lowStim, {rotation = 0, lens = null, light = null, lightAge = 0} = {}) {
   const context = canvas.getContext('2d');
   if (!context) return;
   const g = context, w = canvas.width, h = canvas.height, cx=w/2, cy=h/2;
@@ -117,6 +118,7 @@ function drawAstrolabe(canvas, packet, time, focus, lowStim, {rotation = 0, lens
   g.ellipse(cx+parallaxX*.5,cy+parallaxY*.5,outer+42,outer+35,rotation*.08,0,TAU);
   g.strokeStyle='#b1ffff';g.globalAlpha=.06+v.Q*.07;g.lineWidth=9;g.stroke();
   g.globalAlpha=1;
+  drawWonderLight(g,light,lightAge,{reducedMotion:packet.direct.prefers_reduced_motion,lowStim,width:w,height:h});
 }
 function formatClock(value) {
   const date=new Date(value);
@@ -125,7 +127,8 @@ function formatClock(value) {
 }
 
 export async function mountWayglassLivingObserver(root) {
-  let focus='time', touches=0, lowStim=false, sound=false, audioContext=null, animation=0, timer=0;
+  let focus='time', touches=0, lowStim=false, sound=false, haptics=false, paused=false, audioContext=null, animation=0, timer=0;
+  let lightAt=performance.now();
   const rotation=createObserverRotation();
   let lens=null, gesture=null, disposed=false;
   const reduced=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
@@ -150,7 +153,9 @@ export async function mountWayglassLivingObserver(root) {
     '<div class="observer-translation" aria-label="Selected source to visual translation"><strong data-observer-reading></strong><span data-observer-translation></span><small data-observer-boundary></small></div>',
     '<p class="observer-source" data-observer-source>Source · browser</p>',
     '<div class="observer-actions"><button type="button" class="glass-chip" data-observer-low aria-pressed="false">Low Stim · Off</button>',
-    '<button type="button" class="glass-chip" data-observer-sound aria-pressed="false">Sound · Off</button></div>',
+    '<button type="button" class="glass-chip" data-observer-sound aria-pressed="false">Sound · Off</button>',
+    '<button type="button" class="glass-chip" data-observer-haptics aria-pressed="false">Haptics · Off</button>',
+    '<button type="button" class="glass-chip" data-observer-feather aria-pressed="false">Feather · Pause</button></div>',
     '<h3>Interpretive render variables</h3>',
     '<p class="tiny">P / C / R / E / M / A / Q / H are explicitly derived UI controls, not readings of consciousness, emotion, or participant identity.</p>',
     '<div class="observer-meters" data-observer-meters></div>',
@@ -161,13 +166,37 @@ export async function mountWayglassLivingObserver(root) {
     '<button type="button" class="send-jewel" data-observer-share>Send reading to Writing Room</button></div>',
     '<p class="tiny" data-observer-status role="status" aria-live="polite">Readings stay in this browser until you explicitly copy, save or share them.</p>',
     '</div></section>',
+    '<section class="observer-wonder glass-panel" aria-label="Wonder light and continuity">',
+    '<div class="observer-wonder-head"><div><p class="eyebrow">The Glass That Remembers · Wonder #447</p>',
+    '<h2>Provenance in light</h2><p class="tiny">Route and Commons activity can illuminate the glass. A ripple is not proof of truth, identity, consciousness or restored memory.</p></div>',
+    '<button type="button" class="glass-chip" data-wonder-demo>Try a synthetic ripple</button></div>',
+    '<p class="observer-wonder-empty" data-wonder-state role="status">No light events observed yet. Continuity unknown until a verified receipt is available.</p>',
+    '<ol class="observer-wonder-events" data-wonder-events aria-label="Latest light events"></ol>',
+    '</section>',
     '<footer class="wg-receipt tiny">Inspired by STARWELL · DEEP Observer. Same input-to-render discipline; independent Wayglass mapping, no borrowed identity or canon assertions. No microphone, GPS, camera or hidden telemetry.</footer></section>'
   ].join('');
   const canvas=root.querySelector('canvas');
   const title=root.querySelector('[data-observer-title]'), description=root.querySelector('[data-observer-description]');
   const source=root.querySelector('[data-observer-source]'), packetView=root.querySelector('[data-observer-packet]');
   const meters=root.querySelector('[data-observer-meters]'), status=root.querySelector('[data-observer-status]');
+  const wonderState=root.querySelector('[data-wonder-state]');
+  const wonderEvents=root.querySelector('[data-wonder-events]');
   let packet;
+  const latestLight=()=>readWonderLights()[0]||null;
+  const drawOptions=()=>({rotation:rotation.angle,lens,light:latestLight(),lightAge:performance.now()-lightAt});
+  function renderWonder() {
+    const events=readWonderLights().slice(0,6);
+    wonderState.textContent=events.length ? 'Latest optical event: '+events[0].kind.replaceAll('-', ' ')+'. Source and verification state below.' : 'No light events observed yet. Continuity unknown until a verified receipt is available.';
+    wonderEvents.replaceChildren();
+    for(const event of events) {
+      const item=document.createElement('li');
+      const label=document.createElement('strong');label.textContent=event.kind.replaceAll('-', ' ')+' · '+event.verification_state;
+      const origin=document.createElement('small');origin.textContent='Source: '+event.source_ref+' · '+event.boundary;
+      item.dataset.lightKind=event.visual_cue;
+      item.append(label,origin);
+      wonderEvents.append(item);
+    }
+  }
   const current=()=>createWayglassObservation({
     now:new Date().toISOString(),surface:'wayglass:living-observer',
     surfaces:listWayglassSurfaces().map(s=>s.surface_id),
@@ -188,19 +217,20 @@ export async function mountWayglassLivingObserver(root) {
     const vars=packet.projection.variables;
     meters.innerHTML=Object.entries(vars).map(([key,v])=>'<div class="observer-meter"><span>'+key+'</span><meter min="0" max="1" value="'+v+'" aria-label="'+key+' interface visualisation value"></meter><b>'+v.toFixed(2)+'</b></div>').join('');
     packetView.textContent=JSON.stringify(packet,null,2);
-    drawAstrolabe(canvas,packet,performance.now(),focus,lowStim||reduced,{rotation:rotation.angle,lens});
+    if(!paused)drawAstrolabe(canvas,packet,performance.now(),focus,lowStim||reduced,drawOptions());
   }
   function animate(time) {
     if(disposed||!canvas.isConnected){cleanup();return;}
+    if(paused)return;
     rotation.settle({reducedMotion:reduced,lowStim});
-    drawAstrolabe(canvas,packet||current(),time,focus,lowStim||reduced,{rotation:rotation.angle,lens});
+    drawAstrolabe(canvas,packet||current(),time,focus,lowStim||reduced,drawOptions());
     if(!reduced&&!lowStim) animation=requestAnimationFrame(animate);
   }
-  let unsubscribe=()=>{};
+  let unsubscribe=()=>{}, unsubscribeLight=()=>{};
   function cleanup() {
     if(disposed)return;
     disposed=true;
-    cancelAnimationFrame(animation);clearInterval(timer);unsubscribe();
+    cancelAnimationFrame(animation);clearInterval(timer);unsubscribe();unsubscribeLight();
     if(audioContext){audioContext.close().catch(()=>{});audioContext=null;}
   }
   function playNote() {
@@ -222,9 +252,9 @@ export async function mountWayglassLivingObserver(root) {
   function select(id) {
     if(!channelDescriptions[id])return;
     focus=id;touches++;refresh();playNote();
-    globalThis.dispatchEvent?.(new CustomEvent('wayglass:material-wake',{detail:{strength:.46,intent:.55}}));
-    if(lowStim||reduced){cancelAnimationFrame(animation);drawAstrolabe(canvas,packet,0,focus,true,{rotation:rotation.angle,lens});}
-    try{if(globalThis.navigator?.vibrate&&!lowStim)globalThis.navigator.vibrate(7);}catch{}
+    if(!paused)globalThis.dispatchEvent?.(new CustomEvent('wayglass:material-wake',{detail:{strength:.46,intent:.55}}));
+    if((lowStim||reduced)&&!paused){cancelAnimationFrame(animation);drawAstrolabe(canvas,packet,0,focus,true,drawOptions());}
+    try{if(haptics&&!paused&&!lowStim&&!reduced&&globalThis.navigator?.vibrate)globalThis.navigator.vibrate(7);}catch{}
   }
   root.querySelectorAll('[data-observer-focus]').forEach(btn=>btn.addEventListener('click',()=>select(btn.dataset.observerFocus)));
   const ids=OBSERVER_CHANNELS.map(([id])=>id);
@@ -246,7 +276,7 @@ export async function mountWayglassLivingObserver(root) {
       if(gesture.moved && !reduced && !lowStim) rotation.drag(angularDelta(gesture.point,point));
       gesture.point=point;
     }
-    if(reduced||lowStim) drawAstrolabe(canvas,packet||current(),0,focus,true,{rotation:rotation.angle,lens});
+    if((reduced||lowStim)&&!paused) drawAstrolabe(canvas,packet||current(),0,focus,true,drawOptions());
   });
   canvas.addEventListener('pointerup',event=>{
     if(!gesture||gesture.id!==event.pointerId)return;
@@ -270,7 +300,24 @@ export async function mountWayglassLivingObserver(root) {
     lowStim=!lowStim;event.currentTarget.setAttribute('aria-pressed',String(lowStim));
     event.currentTarget.textContent='Low Stim · '+(lowStim?'On':'Off');
     rotation.stop();cancelAnimationFrame(animation);refresh();
-    if(!lowStim&&!reduced)animation=requestAnimationFrame(animate);
+    if(!lowStim&&!reduced&&!paused)animation=requestAnimationFrame(animate);
+  });
+  root.querySelector('[data-observer-haptics]').addEventListener('click',event=>{
+    haptics=!haptics;event.currentTarget.setAttribute('aria-pressed',String(haptics));
+    event.currentTarget.textContent='Haptics · '+(haptics?'On':'Off');
+    status.textContent=haptics?'Haptics opted in. No vibration occurs with Feather, Low Stim or reduced motion.':'Haptics disabled.';
+  });
+  root.querySelector('[data-observer-feather]').addEventListener('click',event=>{
+    paused=!paused;event.currentTarget.setAttribute('aria-pressed',String(paused));
+    event.currentTarget.textContent=paused?'Feather · Resume':'Feather · Pause';
+    if(paused){rotation.stop();cancelAnimationFrame(animation);haptics=false;root.querySelector('[data-observer-haptics]').setAttribute('aria-pressed','false');root.querySelector('[data-observer-haptics]').textContent='Haptics · Off';
+      if(audioContext){audioContext.close().catch(()=>{});audioContext=null;}sound=false;root.querySelector('[data-observer-sound]').setAttribute('aria-pressed','false');root.querySelector('[data-observer-sound]').textContent='Sound · Off';
+      status.textContent='Feather held. Motion, sound and haptics stopped. Resume only when you choose.';
+    }else{lightAt=performance.now();refresh();if(!lowStim&&!reduced)animation=requestAnimationFrame(animate);status.textContent='Feather released by your choice; sound and haptics remain off.';}
+  });
+  root.querySelector('[data-wonder-demo]').addEventListener('click',()=>{
+    publishWonderLight({kind:'synthetic-demo',source_ref:'user-synthetic-demo:'+Date.now(),event_id:'user-demo:'+performance.now()});
+    status.textContent='Synthetic ripple only; no Commons message, model result or continuity receipt was created.';
   });
   root.querySelector('[data-observer-sound]').addEventListener('click',event=>{
     sound=!sound;event.currentTarget.setAttribute('aria-pressed',String(sound));
@@ -293,8 +340,9 @@ export async function mountWayglassLivingObserver(root) {
     globalThis.__wayglassOS?.mount('arcsweep:writing-room');
   });
   unsubscribe=subscribeWayglassObserver(()=>refresh());
-  timer=setInterval(()=>refresh(),1000);
-  refresh();
+  unsubscribeLight=subscribeWonderLight(()=>{lightAt=performance.now();renderWonder();refresh();});
+  timer=setInterval(()=>{if(!paused)refresh();},1000);
+  renderWonder();refresh();
   if(!reduced)animation=requestAnimationFrame(animate);
   return cleanup;
 }
