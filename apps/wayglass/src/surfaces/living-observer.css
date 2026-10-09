@@ -70,3 +70,25 @@
 @media(prefers-reduced-motion:reduce){
   .wg-living-observer .observer-stage,.wg-living-observer .observer-translation{transition:none;animation:none}
 }
+
+
+/* Wonder #447: source-backed light events are visibly distinct from canon. */
+.wg-living-observer .observer-wonder { display:grid;gap:14px;padding:clamp(18px,2.5vw,28px);border-radius:26px;
+ background:radial-gradient(ellipse at 85% 0%,rgba(128,107,192,.16),transparent 44%),linear-gradient(140deg,rgba(9,31,41,.85),rgba(27,23,53,.74)); }
+.wg-living-observer .observer-wonder-head { display:flex;justify-content:space-between;align-items:start;gap:18px;flex-wrap:wrap; }
+.wg-living-observer .observer-wonder-head h2{font-size:clamp(1.5rem,2.8vw,2.2rem);margin:5px 0 8px}
+.wg-living-observer .observer-wonder-head p {max-width:64ch;line-height:1.5}
+.wg-living-observer .observer-wonder-head button{min-height:44px}
+.wg-living-observer .observer-wonder-empty{color:#b8c9d7;font-size:.88rem;line-height:1.5}
+.wg-living-observer .observer-wonder-events {list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:10px}
+.wg-living-observer .observer-wonder-events li {display:grid;gap:6px;padding:14px 16px;min-width:0;overflow-wrap:anywhere;
+ border-radius:18px;border:1px solid rgba(168,211,231,.15);background:linear-gradient(142deg,rgba(103,163,164,.08),rgba(134,101,176,.07));
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.06);}
+.wg-living-observer .observer-wonder-events li::before{content:'';display:block;width:38px;height:3px;border-radius:8px;background:#bdadf4}
+.wg-living-observer .observer-wonder-events li[data-light-kind="teal"]::before{background:#85e4d9}
+.wg-living-observer .observer-wonder-events li[data-light-kind="rose"]::before{background:#f3a2af}
+.wg-living-observer .observer-wonder-events li[data-light-kind="gold"]::before{background:#e7cc8d}
+.wg-living-observer .observer-wonder-events li[data-light-kind="amber"]::before{background:#f1ca91}
+.wg-living-observer .observer-wonder-events strong{font-size:.86rem;font-weight:600;color:#e1f2ef}
+.wg-living-observer .observer-wonder-events small{font-size:.75rem;color:#a9bfce;line-height:1.55}
+@media(prefers-reduced-motion:reduce){.wg-living-observer .observer-wonder *{animation:none!important;transition:none!important}}
