@@ -1,4 +1,5 @@
 import { createInteractionState } from '../interaction-state.js';
+import { consumeObserverContextForWriting, recordWayglassRouteObservation } from '../living-observer-model.js';
 import { emitInteractionCue } from '../interaction-cues.js';
 import { emitMaterialSignal } from '../material-state.js';
 import { invokeWayglassRoute, listWayglassRoutes, leaveWayglassWorld, recoverWayglassDeparture } from '../route-client.js';
@@ -36,7 +37,7 @@ export async function mountArcSweepWritingSurface(root) {
 
   root.innerHTML = [
     '<section class="wg-surface" data-surface="arcsweep-writing">',
-      '<nav class="wg-deck-nav glass-panel" aria-label="Wayglass rooms"><button type="button" class="glass-chip active" aria-current="page">Writing Room</button><button type="button" class="glass-chip" data-wayglass-room="wayglass:systems">Organs</button><button type="button" class="glass-chip" data-wayglass-room="wayglass:video-atelier">Video Atelier</button></nav>',
+      '<nav class="wg-deck-nav glass-panel" aria-label="Wayglass rooms"><button type="button" class="glass-chip active" aria-current="page">Writing Room</button><button type="button" class="glass-chip" data-wayglass-room="wayglass:systems">Organs</button><button type="button" class="glass-chip" data-wayglass-room="wayglass:video-atelier">Video Atelier</button><button type="button" class="glass-chip" data-wayglass-room="wayglass:living-observer">Living Observer</button></nav>',
       '<header class="wg-surface-head glass-panel">',
         '<div>',
           '<p class="eyebrow">ArcSweep attached surface</p>',
@@ -116,6 +117,8 @@ export async function mountArcSweepWritingSurface(root) {
   const ownershipList = root.querySelector('#wg-ownership-list');
   const thread = root.querySelector('#wg-thread');
   const input = root.querySelector('#wg-input');
+  const sharedObserverReading = consumeObserverContextForWriting();
+  if (sharedObserverReading) input.value = sharedObserverReading + '\n\n[My question about this observation:]\n';
   const status = root.querySelector('#wg-status');
   const send = root.querySelector('#wg-send');
   const cp = name => root.querySelector('#wg-cp-' + name);
@@ -279,6 +282,7 @@ export async function mountArcSweepWritingSurface(root) {
     refreshState();
 
     try {
+      recordWayglassRouteObservation({status:'started',routeId:selectedRoute});
       const result = await invokeWayglassRoute({
         routeId: selectedRoute,
         think: root.querySelector('#wg-think').checked,
@@ -296,10 +300,12 @@ export async function mountArcSweepWritingSurface(root) {
         route_label: routeLabel,
       });
       lastReceipt = result.receipt || null;
+      recordWayglassRouteObservation({status:'completed',routeId:selectedRoute,provider:result.provider,model:result.model,receipt:lastReceipt});
       receipt.textContent = lastReceipt
         ? 'Observation · not canon · ' + (result.provider || 'route') + ' / ' + (result.model || 'model') + ' · ' + (lastReceipt.epistemic_register || 'external-observation') + ' · ' + (lastReceipt.completed_at || '')
         : 'Turn completed without a receipt payload.';
     } catch (error) {
+      recordWayglassRouteObservation({status:'failed',routeId:selectedRoute});
       messages.push({
         role: 'assistant',
         content: '[Route error] ' + error.message,

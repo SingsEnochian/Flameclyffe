@@ -33,7 +33,7 @@ export async function mountWayglassSystemsSurface(root) {
       '<nav class="wg-deck-nav glass-panel" aria-label="Wayglass rooms">',
         '<button type="button" class="glass-chip" data-wayglass-room="arcsweep:writing-room">Writing Room</button>',
         '<button type="button" class="glass-chip active" aria-current="page">Organs</button>',
-        '<button type="button" class="glass-chip" data-wayglass-room="wayglass:video-atelier">Video Atelier</button>',
+        '<button type="button" class="glass-chip" data-wayglass-room="wayglass:video-atelier">Video Atelier</button><button type="button" class="glass-chip" data-wayglass-room="wayglass:living-observer">Living Observer</button>',
       '</nav>',
       '<section class="organ-bay" aria-label="Mounted Wayglass organs">',
         organs.map((organ, index) => [

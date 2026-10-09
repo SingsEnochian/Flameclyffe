@@ -1,0 +1,72 @@
+/* STARWELL DEEP Observer inspired living instrument; Wayglass optical material system. */
+.wg-living-observer{display:grid;gap:clamp(16px,2vw,24px)}
+.wg-living-observer .observer-head{padding:clamp(18px,3vw,34px);border-radius:24px;display:flex;justify-content:space-between;align-items:center;gap:22px;flex-wrap:wrap;position:relative;overflow:hidden}
+.wg-living-observer .observer-head::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 90% 10%,rgba(115,212,213,.13),transparent 48%);pointer-events:none}
+.wg-living-observer .observer-head>div{position:relative}
+.wg-living-observer h1{font:500 clamp(2.2rem,5vw,4.8rem)/1.06 Georgia,serif;letter-spacing:-.035em;margin:4px 0 12px;color:#e5f1f4}
+.wg-living-observer .observer-head .lede{max-width:66ch}
+.wg-living-observer .observer-clock{min-width:160px;text-align:right;display:grid;gap:6px;color:#b5dadc}
+.wg-living-observer .observer-clock strong{font-size:clamp(1.1rem,2.5vw,1.5rem);font-variant-numeric:tabular-nums;font-weight:550;color:#f1f7ff}
+.wg-living-observer .observer-clock small{color:#8cb0b8}
+.wg-living-observer .observer-deck{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.8fr);gap:clamp(12px,2vw,26px);align-items:start}
+.wg-living-observer .observer-stage{min-width:0;display:grid;justify-items:center;gap:2px;padding:clamp(6px,1.6vw,18px);border-radius:32px;position:relative;background:linear-gradient(145deg,rgba(12,25,44,.82),rgba(28,25,57,.67) 50%,rgba(13,37,47,.7));box-shadow:inset 0 0 75px rgba(48,97,114,.12),0 20px 75px rgba(0,0,0,.19);overflow:hidden}
+.wg-living-observer .observer-stage::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 45% 40%,rgba(111,211,220,.055),transparent 62%);pointer-events:none}
+.wg-living-observer canvas{display:block;width:min(100%,690px);aspect-ratio:1;height:auto;touch-action:manipulation;cursor:crosshair;position:relative;filter:drop-shadow(0 0 20px rgba(101,174,203,.09))}
+.wg-living-observer .observer-inputs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;width:100%;padding:2px 5px 12px;position:relative}
+.wg-living-observer .observer-input{border:1px solid rgba(137,206,219,.22);border-radius:13px;padding:11px 6px;color:#d3e9ec;font:600 .82rem system-ui;background:linear-gradient(145deg,rgba(104,150,177,.1),rgba(46,64,109,.07));cursor:pointer;transition:transform .18s,border-color .18s,background .18s,box-shadow .18s}
+.wg-living-observer .observer-input:focus-visible,.wg-living-observer button:focus-visible{outline:2px solid #a6fff4;outline-offset:3px}
+.wg-living-observer .observer-input:hover,.wg-living-observer .observer-input[aria-pressed=true]{border-color:rgba(173,246,230,.68);background:linear-gradient(145deg,rgba(96,199,192,.22),rgba(118,89,193,.17));box-shadow:inset 0 0 20px rgba(139,244,237,.04),0 0 18px rgba(115,218,206,.09)}
+.wg-living-observer .observer-input:active{transform:scale(.97)}
+.wg-living-observer .observer-console{border-radius:25px;padding:clamp(18px,2.5vw,29px);display:grid;gap:14px;background:linear-gradient(158deg,rgba(13,26,44,.85),rgba(27,26,52,.7))}
+.wg-living-observer h2{font:500 clamp(1.7rem,3vw,2.6rem)/1.14 Georgia,serif;margin:0;color:#e7ecf5}
+.wg-living-observer h3{font:500 1.17rem Georgia,serif;margin:6px 0 0}
+.wg-living-observer .observer-console p{line-height:1.55;margin:0}
+.wg-living-observer .observer-console .eyebrow{color:#8fd5d0}
+.wg-living-observer .observer-source{font-size:.78rem;letter-spacing:.035em;color:#a6b7cb;border-left:2px solid #6dceb9;padding-left:10px}
+.wg-living-observer .observer-actions{display:flex;gap:8px;flex-wrap:wrap}
+.wg-living-observer .observer-actions button{cursor:pointer}
+.wg-living-observer .observer-actions [aria-pressed=true]{border-color:rgba(154,240,225,.85);color:#dcfff5}
+.wg-living-observer .observer-meters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.wg-living-observer .observer-meter{display:grid;grid-template-columns:20px minmax(0,1fr) 35px;gap:7px;align-items:center;font:600 .77rem system-ui;color:#b8d9de}
+.wg-living-observer .observer-meter b{font-variant-numeric:tabular-nums;font-weight:500;text-align:right}
+.wg-living-observer meter{width:100%;height:9px;accent-color:#83dbce}
+.wg-living-observer meter::-webkit-meter-bar{background:rgba(78,102,140,.25);border:0;border-radius:40px}
+.wg-living-observer meter::-webkit-meter-optimum-value{background:linear-gradient(90deg,#648db0,#6fdcc8,#b5a7f0);border-radius:40px}
+.wg-living-observer .observer-details{padding:10px 0;border-top:1px solid rgba(180,223,236,.13);border-bottom:1px solid rgba(180,223,236,.13)}
+.wg-living-observer summary{cursor:pointer;color:#c5dfdc}
+.wg-living-observer pre{max-height:260px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-size:.71rem;line-height:1.5;color:#a5d5d8;background:rgba(3,12,24,.4);padding:12px;border-radius:12px}
+.wg-living-observer .tiny{color:#a6b8be}
+.wg-living-observer .observer-console [role=status]{min-height:2.5em}
+@media(max-width:960px){.wg-living-observer .observer-deck{grid-template-columns:1fr}.wg-living-observer .observer-stage{max-width:790px;margin:auto}.wg-living-observer .observer-console{width:100%}}
+@media(max-width:480px){.wg-living-observer .observer-head{align-items:flex-start}.wg-living-observer .observer-clock{text-align:left}.wg-living-observer .observer-stage{padding:2px}.wg-living-observer .observer-inputs{gap:5px}.wg-living-observer .observer-input{padding:10px 2px;font-size:.75rem}.wg-living-observer .observer-console{padding:16px}}
+@media(prefers-reduced-motion:reduce){.wg-living-observer .observer-input{transition:none}.wg-living-observer canvas{filter:none}}
+
+
+/* Each selected reading has a literal observable value, a labelled mapping, and a boundary. */
+.wg-living-observer .observer-translation{
+  position:relative;display:grid;gap:8px;padding:15px 17px 16px;border-radius:18px;
+  border:1px solid rgba(148,230,223,.22);overflow-wrap:anywhere;
+  background:linear-gradient(145deg,rgba(92,174,184,.13),rgba(72,47,127,.10) 60%,rgba(13,26,42,.2));
+  box-shadow:inset 0 1px rgba(223,255,251,.11),inset 0 -18px 35px rgba(13,36,44,.16);
+}
+.wg-living-observer .observer-translation::before{
+  content:"";position:absolute;width:120px;height:120px;right:-38px;top:-42px;border-radius:50%;
+  background:radial-gradient(circle,rgba(145,232,224,.17),transparent 75%);pointer-events:none
+}
+.wg-living-observer .observer-translation strong{
+  font:600 .93rem/1.45 system-ui;color:#d1f7f1;position:relative
+}
+.wg-living-observer .observer-translation span{
+  font:500 .82rem/1.5 system-ui;color:#afcdeb;position:relative
+}
+.wg-living-observer .observer-translation small{
+  font:.75rem/1.45 system-ui;color:#a6adba;border-top:1px solid rgba(193,228,234,.13);
+  padding-top:9px;position:relative
+}
+.wg-living-observer canvas{touch-action:none}
+.wg-living-observer .observer-stage:focus-within{
+  box-shadow:inset 0 0 80px rgba(56,109,122,.18),0 20px 75px rgba(0,0,0,.23)
+}
+@media(prefers-reduced-motion:reduce){
+  .wg-living-observer .observer-stage,.wg-living-observer .observer-translation{transition:none;animation:none}
+}

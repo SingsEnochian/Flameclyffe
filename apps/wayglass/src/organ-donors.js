@@ -1,4 +1,5 @@
 import { createWayglassOrgan } from './organ-registry.js';
+import { createWayglassObservation } from './living-observer-model.js';
 import {
   createPresence,
   rebindPresenceProvider,
@@ -57,4 +58,16 @@ export const sensoriumOrgan = createWayglassOrgan({
   adapter: { listSomaticCues, getSomaticCue, emitSomaticCue, stopSomaticCue },
 });
 
-export const FIRST_WAYGLASS_ORGANS = Object.freeze([presenceOrgan, memoryOrgan, sensoriumOrgan]);
+export const livingObserverOrgan = createWayglassOrgan({
+  organ_id: 'wayglass.organ.living-observer',
+  lineage: ['starwell:deep-observer', 'wayglass:material-field'],
+  maturity: 'PARTIAL',
+  capabilities: ['observation.sample', 'observation.visualise', 'observation.export', 'observation.prepare-llm-context'],
+  authority_ceiling: ['observe-local-ui', 'render-local-feedback', 'propose-user-reviewed-model-input'],
+  receipt_schemas: ['wayglass.observer-reading/v1','wayglass.observer-projection/v1'],
+  embodiment_hooks: ['local-motion-preference','explicit-local-audio'],
+  evidence: ['apps/wayglass/test/wayglass-living-observer.test.js'],
+  adapter: { createWayglassObservation },
+});
+
+export const FIRST_WAYGLASS_ORGANS = Object.freeze([presenceOrgan, memoryOrgan, sensoriumOrgan, livingObserverOrgan]);

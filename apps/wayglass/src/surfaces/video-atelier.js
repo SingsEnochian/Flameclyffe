@@ -10,6 +10,7 @@ export async function mountWayglassVideoAtelier(root) {
     '<button type="button" class="glass-chip" data-wayglass-room="arcsweep:writing-room">Writing Room</button>',
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:systems">Organs</button>',
     '<button type="button" class="glass-chip active" aria-current="page">Video Atelier</button>',
+    '<button type="button" class="glass-chip" data-wayglass-room="wayglass:living-observer">Living Observer</button>',
     '</nav>',
     '<header class="wg-surface-head glass-panel"><div>',
     '<p class="eyebrow">Wayglass · creative engine room</p>',
