@@ -7,7 +7,7 @@ const states = Object.freeze({
   'route-completed': ['transport-confirmed', 'teal', 'model transport completed; answer not verified'],
   'route-failed': ['failed', 'rose', 'model transport failed'],
   'commons-pending': ['pending', 'violet', 'Commons request pending'],
-  'commons-accepted': ['http-confirmed', 'teal', 'Commons host accepted the request; persistence not independently checked'],
+  'commons-accepted': ['http-confirmed', 'ice', 'Commons host accepted the request; persistence not independently checked'],
   'commons-stored': ['stored-receipt', 'teal', 'Commons record returned by authenticated host'],
   'commons-failed': ['failed', 'rose', 'Commons request failed'],
   'commons-unavailable': ['unavailable', 'amber', 'Commons host or sign-in unavailable'],
@@ -47,7 +47,8 @@ export function publishWonderLight(input) {
   if (entries.some(x => x.event_id === event.event_id && x.kind === event.kind)) return event;
   entries.unshift(event);
   entries.length = Math.min(entries.length, MAX_EVENTS);
-  for (const listener of listeners) listener(event);
+  // An optical observer must never change the success/failure of a Commons write.
+  for (const listener of listeners) { try { listener(event); } catch { /* presentation failure is isolated */ } }
   return event;
 }
 export function recordRouteAsWonderLight(route) {
@@ -80,32 +81,42 @@ export function wonderLightVisual(event, ageMs = 0, lowStim = false) {
   if (!event || event.schema !== WONDER_LIGHT_SCHEMA) return null;
   const palette = {
     teal: '#85e4d9', violet: '#bc9fff', rose: '#f3a2af',
-    amber: '#f1ca91', gold: '#e7cc8d',
+    amber: '#f1ca91', gold: '#e7cc8d', ice: '#a5c8f4',
   };
   const reduced = lowStim === true;
   return Object.freeze({
     colour: palette[event.visual_cue] || '#accbd0',
     phase: reduced ? 0.5 : Math.min(1, Math.max(0, ageMs / 1700)),
-    dashed: ['authored-open-question','synthetic','unavailable'].includes(event.verification_state),
+    dashed: ['authored-open-question','synthetic','unavailable','unverified-continuity'].includes(event.verification_state),
     intensity: ['failed','unavailable'].includes(event.verification_state) ? 0.42 : 0.64,
     label: event.kind.replaceAll('-', ' ') + ' · ' + event.verification_state,
   });
 }
-export function drawWonderLight(g, event, timeMs, { reducedMotion=false, lowStim=false, width=820, height=820 } = {}) {
-  const config = wonderLightVisual(event, Math.max(0,timeMs), reducedMotion || lowStim);
+export function drawWonderLight(g, event, timeMs, { reducedMotion=false, lowStim=false, width=820, height=820, lens=null } = {}) {
+  const still = reducedMotion || lowStim;
+  const config = wonderLightVisual(event, Math.max(0,timeMs), still);
   if (!config || !g) return;
+  const cx=width/2,cy=height/2,progress=config.phase;
+  const radius=still?338:180+158*progress;
+  const bend=still?0:0.015;
+  const ox=Number.isFinite(lens?.x)?Math.max(-10,Math.min(10,(lens.x-cx)*bend)):0;
+  const oy=Number.isFinite(lens?.y)?Math.max(-10,Math.min(10,(lens.y-cy)*bend)):0;
+  const fading=still?0.4:1-progress*.72;
   g.save();
-  const cx=width/2, cy=height/2, progress=config.phase;
-  const radius=lowStim || reducedMotion ? 338 : 180 + 158*progress;
-  g.beginPath();
-  if (config.dashed && typeof g.setLineDash === 'function') g.setLineDash([10,15]);
-  g.arc(cx,cy,radius,0,Math.PI*2);
-  g.lineWidth=3.5;
-  g.strokeStyle=config.colour;
-  g.globalAlpha=config.intensity*(lowStim || reducedMotion ? .4 : 1-progress*.72);
-  g.shadowColor=config.colour;
-  g.shadowBlur=lowStim || reducedMotion ? 0 : 18;
-  g.stroke();
+  if(config.dashed && typeof g.setLineDash==='function')g.setLineDash([10,15]);
+  // Front rim, refracted inner interface and back rim: optical depth, not a flat stroke.
+  const shells=still ? [0,1] : [0,1,2];
+  for(const layer of shells){
+    const shift=layer===0?0:layer===1?-7:7;
+    g.beginPath();
+    g.arc(cx+ox*layer*.5,cy+oy*layer*.5,radius+shift,0,Math.PI*2);
+    g.lineWidth=layer===0?3.5:layer===1?1.35:5;
+    g.strokeStyle=config.colour;
+    g.globalAlpha=config.intensity*fading*(layer===0?1:layer===1?.52:.13);
+    g.shadowColor=config.colour;
+    g.shadowBlur=still?0:layer===0?18:6;
+    g.stroke();
+  }
   g.restore();
 }
 export function resetWonderLightsForTest() { entries.length=0; }
