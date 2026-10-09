@@ -282,6 +282,7 @@ export async function mountArcSweepWritingSurface(root) {
     refreshState();
 
     try {
+      recordWayglassRouteObservation({status:'started',routeId:selectedRoute});
       const result = await invokeWayglassRoute({
         routeId: selectedRoute,
         think: root.querySelector('#wg-think').checked,
