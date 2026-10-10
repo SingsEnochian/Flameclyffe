@@ -1,5 +1,6 @@
 import { WorkletSynthesizer } from 'spessasynth_lib';
 import { SoundBankLoader } from 'spessasynth_core';
+import { WorldweaveAcoustics } from './worldweave-acoustics.js';
 import { SYNAPTIC_HEARTFIELD_PROFILE, createHeartfieldReceipt, validateHeartfieldProfile } from './synaptic-heartfield.js';
 import { BLUEBIRD_WEIGHTED_HOME, createBluebirdWeightedHomeReceipt, validateBluebirdWeightedHome } from './bluebird-weighted-home.js';
 
@@ -120,6 +121,7 @@ export class StorySoundscape {
     this.bluebirdMode = 'stereo';
     this.bluebirdSomaticProxy = false;
     this.bluebirdReceipts = [];
+    this.worldweave = new WorldweaveAcoustics(this);
   }
 
   get armed() { return Boolean(this.context); }
@@ -129,6 +131,7 @@ export class StorySoundscape {
     this.world = { ...this.world, ...resolveWorldTone(world) };
     this.soundfontMap = resolveWorldSoundfontMap(world);
     if (this.humActive && previousRoot !== this.world.rootHz) this.restartHum();
+    this.worldweave.transition(world);
     return this.snapshot();
   }
 
@@ -688,6 +691,7 @@ export class StorySoundscape {
   }
 
   featherStop() {
+    this.worldweave.stop('feather-stop');
     this.stopHum();
     this.stopHeartfield();
     this.stopBluebirdWeightedHome('Feather');
@@ -717,6 +721,7 @@ export class StorySoundscape {
       soundfontMap: this.soundfontMap,
       selectedSoundfontPreset: this.selectedSoundfontPreset ? { ...this.selectedSoundfontPreset } : null,
       world: { ...this.world },
+      worldweave: this.worldweave.snapshot(),
       buses: { ...this.busValues },
       tracks: [...this.tracks.values()].map(({ id, name, playing, loop, level }) => ({ id, name, playing, loop, level })),
       recentReceipts: structuredClone(this.recentReceipts),
