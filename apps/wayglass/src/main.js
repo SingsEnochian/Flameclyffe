@@ -10,6 +10,9 @@ import { mountArcSweepWritingSurface } from './surfaces/arcsweep-writing.js';
 import { mountWayglassSystemsSurface } from './surfaces/systems.js';
 import { mountWayglassVideoAtelier } from './surfaces/video-atelier.js';
 import { mountWayglassLivingObserver } from './surfaces/living-observer.js';
+import { mountWayglassCommonsSurface } from './surfaces/commons.js';
+import { subscribeWayglassObserver } from './living-observer-model.js';
+import { recordRouteAsWonderLight } from './wonder-light.js';
 import { registerWayglassOrgan, listWayglassOrgans } from './organ-registry.js';
 import { FIRST_WAYGLASS_ORGANS } from './organ-donors.js';
 
@@ -44,6 +47,14 @@ registerWayglassSurface({
   label: 'Wayglass · Video Atelier',
   mount: mountWayglassVideoAtelier,
 });
+
+registerWayglassSurface({
+  surface_id: 'wayglass:commons',
+  label: 'Wayglass · Commons',
+  mount: mountWayglassCommonsSurface,
+});
+
+subscribeWayglassObserver(recordRouteAsWonderLight);
 
 registerWayglassSurface({
   surface_id: 'wayglass:living-observer',
