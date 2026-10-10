@@ -173,8 +173,11 @@ export class WorldweaveAcoustics {
     if (!graph) return;
     const now = this.soundscape.context.currentTime;
     graph.output.gain.cancelScheduledValues(now);
-    graph.output.gain.setValueAtTime(graph.output.gain.value, now);
-    graph.output.gain.linearRampToValueAtTime(0.0001, now + seconds);
+    if (seconds === 0) graph.output.gain.setValueAtTime(0, now);
+    else {
+      graph.output.gain.setValueAtTime(graph.output.gain.value, now);
+      graph.output.gain.linearRampToValueAtTime(0.0001, now + seconds);
+    }
     let remaining = graph.voices.length;
     for (const source of graph.voices) {
       const previous = source.onended;
@@ -182,7 +185,7 @@ export class WorldweaveAcoustics {
         try { previous?.(); source.disconnect(); } catch {}
         if (--remaining === 0) { try { graph.output.disconnect(); } catch {} }
       };
-      try { source.stop(now + seconds + 0.05); } catch {}
+      try { source.stop(seconds === 0 ? now : now + seconds + 0.05); } catch {}
     }
   }
 
@@ -210,7 +213,7 @@ export class WorldweaveAcoustics {
     if (!this.active) return null;
     const graph = this.active;
     this.active = null;
-    this._release(graph, reason === 'feather-stop' ? 0.12 : 0.65);
+    this._release(graph, reason === 'feather-stop' ? 0 : 0.65);
     return this._receipt('stopped', graph.profile, reason);
   }
 
