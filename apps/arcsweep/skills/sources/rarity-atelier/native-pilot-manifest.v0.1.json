@@ -1,0 +1,16 @@
+{
+  "schema": "rarity.atelier.native-procreate-pilot/v0.1",
+  "prepared_at": "2026-10-07",
+  "rule": "Only Document.archive layer-name strings changed. All other archive members must remain byte-identical.",
+  "documents": [
+    {"source":"Dragon_1_Christina_Weinman_-_Smaller.procreate","changes":9,"payload_identical":true,"review_layers":["90 REVIEW | Layer 17","90 REVIEW | Layer 6"],"layer_count":19},
+    {"source":"Dragon_2_Christina_Weinman_-_Smaller.procreate","changes":6,"payload_identical":true,"review_layers":[],"layer_count":9},
+    {"source":"Firelizard_2_Christina_Weinman_-_Smaller.procreate","changes":10,"payload_identical":true,"review_layers":["90 REVIEW | Layer 5"],"layer_count":10},
+    {"source":"Firelizard_4_Christina_Weinman_-_Smaller.procreate","changes":13,"payload_identical":true,"review_layers":[],"layer_count":13},
+    {"source":"HybridGeist_Sneaky_Wher_Lines_-_Mageling_Shading_-_Shine_by_Jabberwoky.procreate","changes":7,"payload_identical":true,"review_layers":["90 REVIEW | Layer 1","90 REVIEW | Layer 4"],"layer_count":8},
+    {"source":"HybridGeist_Wher_Lines_-__Regal_-_Mageling_Shading_-_Shine_by_Jabberwoky.procreate","changes":8,"payload_identical":true,"review_layers":["90 REVIEW | Layer 3","90 REVIEW | Layer 1","90 REVIEW | Layer 2","90 REVIEW | Layer 4"],"layer_count":8},
+    {"source":"MerlanDragonAdultScales_-_Shade_Shine_Jabberwoky.procreate","changes":11,"payload_identical":true,"review_layers":["90 REVIEW | Layer 1","90 REVIEW | Unfinished"],"layer_count":12},
+    {"source":"merlandragonhatch20201_-_shade_shine_Jabberwoky.procreate","changes":9,"payload_identical":true,"review_layers":["90 REVIEW | Layer 2","90 REVIEW | Layer 9","90 REVIEW | Layer 1","90 REVIEW | Layer 3"],"layer_count":9},
+    {"source":"merlandragonhatch20203_-_Shade_Shine_Jabberwoky.procreate","changes":1,"payload_identical":true,"review_layers":["90 REVIEW | Layer 1"],"layer_count":3}
+  ]
+}

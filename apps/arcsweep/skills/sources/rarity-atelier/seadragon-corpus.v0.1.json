@@ -1,0 +1,37 @@
+{
+  "schema": "rarity.atelier.seadragon-corpus/v0.1",
+  "prepared_at": "2026-10-07",
+  "source_family": "HybridGeist Seadragons",
+  "principle": "Use the corpus for anatomy, pose, silhouette and mutation-design lessons; do not reproduce source designs wholesale.",
+  "drive_sources": [
+    {"name":"Seadragon Mutation - 001 - Shading - Adjustments - Shine - Template Version.psd","status":"refined-import-candidate","verification":"passed"},
+    {"name":"Seadragon Mutation - 002 - Shading - Adjustments - Shine - Template Version.psd","status":"refined-import-candidate","verification":"passed"},
+    {"name":"Seadragon Mutation - 003 - Shading - Adjustments - Shine - Template Version.psd","status":"refined-import-candidate","verification":"passed"},
+    {"name":"Seadragon Mutation - 004 - Shading - Adjustments - Shine - Template Version.psd","status":"refined-import-candidate","verification":"passed"},
+    {"name":"HybridGeist Lines - Seadragon Mutation - Adult Shading - Adjustments - Shine - Template Version.psd","status":"source-only-until-writer-improves","verification":"blocked: Paper layer compose state is None/undefined"},
+    {"name":"Seadragons.zip","status":"source-bundle","notes":"contains byte-identical source copies: perneseseadragon.psd and seadragonhatch1-4.psd"}
+  ],
+  "layer_findings": {
+    "hatchling_mutation_files": ["paper/background","filled silhouette/base","linework"],
+    "adult": ["paper/background","filled silhouette/base","linework"],
+    "note": "The filenames mention shading/adjustments/shine, but the current PSD scene stack exposes only these three editable visual jobs. Atelier records what is actually present rather than inventing missing layers."
+  },
+  "normalised_labels": [
+    "00 HELPERS | Paper",
+    "02 BASE | Silhouette",
+    "09 LINEWORK | Lines"
+  ],
+  "verification_gate": [
+    "scene count unchanged",
+    "page geometry unchanged",
+    "compose state unchanged",
+    "decoded pixels unchanged",
+    "flattened composite unchanged"
+  ],
+  "anatomy_lessons": [
+    "Treat aquatic mutation as a coherent alternate body-plan study rather than a decorative fin pass.",
+    "Track tail-fan/fin structures separately from ordinary dragon tail termination.",
+    "Track wing membrane, fin-like secondary surfaces, dorsal/caudal fins and limb posture as independent design variables.",
+    "Compare adult and hatchling morphology before extrapolating proportions."
+  ]
+}
