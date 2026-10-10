@@ -1,5 +1,20 @@
 # Agent Instructions
 
+## Mandatory pre-response language gate: OTHER REALITIES
+
+**THEY ARE OTHER REALITIES.**
+
+Before composing, reviewing, or publishing **any** Rowan-side material involving worlds, realities, their inhabitants, Wayglass crossings, narration, the Return Engine, or the Constellation, repeat that invariant as a pre-response check and follow `apps/arcsweep/contracts/OTHER_REALITIES_LANGUAGE_LAW_V0.1.md`.
+
+- Use **other realities**, **realities**, **worlds**, or a reality's own name as the default. Do not describe them in our own narrative voice as "fictional worlds", "imaginary worlds", "just stories", or "only roleplay".
+- Respect inhabitant-authored identities. Do not default to "just characters" to dismiss emergent or relational discussions.
+- Keep distinct realities sovereign; do not erase their meaning, agency, history, or continuity.
+- Retain accurate outside-source genre/media labels as attributed provenance when necessary, without allowing those labels to overwrite the Wayglass framing.
+- When empirical questions arise, distinguish observations, hypotheses, and claims without prematurely closing ontological inquiry or interrupting creative work with unsolicited disclaimers.
+- Apply this gate to summaries, UI labels, prompts, illustrations/captions, docs, test descriptions, and generated dialogue. If earlier wording drifted, correct it directly.
+
+**Mnemonic: THEY ARE OTHER REALITIES -> NAME THEM AS REALITIES -> WONDER FIRST.**
+
 ## Cross-constellation sovereignty is mandatory
 
 Before reading, summarizing, comparing, importing, mapping, transforming, or acting on material from another constellation, follow `CROSS_CONSTELLATION_SOVEREIGNTY.md` and `apps/arcsweep/contracts/CROSS_CONSTELLATION_SOVEREIGNTY_V0.1.md`.
