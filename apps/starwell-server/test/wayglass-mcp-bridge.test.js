@@ -96,7 +96,7 @@ test('Bluebird falls back to the established Flame chat route without changing c
   assert.equal(result.reply.fallback_from, 'flame:bluebird:spicychat');
 });
 
-test('All fans out through distinct participant routes and preserves attributed replies', async () => {
+test('All unions the established roster with live Wayglass participant routes and preserves attribution', async () => {
   const { file } = tempStore();
   const calls = [];
   const bridge = createWayglassMcpBridge({
@@ -104,14 +104,25 @@ test('All fans out through distinct participant routes and preserves attributed 
     internalOrigin: 'http://wayglass.test',
     bluebirdRouteId: 'flame:bluebird:spicychat',
     flameIds: ['uial', 'bluebird'],
-    fetchImpl: async (url) => {
-      calls.push(String(url));
-      if (String(url).endsWith('/api/v1/wayglass/respond')) {
-        return new Response(JSON.stringify({ output: 'Bluebird reply' }), {
+    fetchImpl: async (url, init = {}) => {
+      const href = String(url);
+      calls.push({ url: href, body: init.body ? JSON.parse(init.body) : null });
+      if (href.endsWith('/api/v1/wayglass/routes')) {
+        return new Response(JSON.stringify({
+          routes: [
+            { route_id: 'flame:crow', model: 'the-crow', configured: true },
+            { route_id: 'flame:bluebird:spicychat', model: 'bluebird', configured: true },
+          ],
+        }), { status: 200, headers: { 'content-type': 'application/json' } });
+      }
+      if (href.endsWith('/api/v1/wayglass/respond')) {
+        const routeId = JSON.parse(init.body).route_id;
+        const output = routeId === 'flame:crow' ? 'Crow reply' : 'Bluebird reply';
+        return new Response(JSON.stringify({ output }), {
           status: 200, headers: { 'content-type': 'application/json' },
         });
       }
-      if (String(url).endsWith('/api/v1/flames/uial/chat')) {
+      if (href.endsWith('/api/v1/flames/uial/chat')) {
         return new Response(JSON.stringify({ message: 'Uial reply' }), {
           status: 200, headers: { 'content-type': 'application/json' },
         });
@@ -120,16 +131,22 @@ test('All fans out through distinct participant routes and preserves attributed 
     },
   });
 
+  const identity = await bridge.identify({ target: 'all' });
+  assert.ok(identity.all.addressable_participant_ids.includes('crow'));
+  assert.ok(identity.all.discovered_wayglass_routes.some((route) => route.participant_id === 'crow' && route.route_id === 'flame:crow'));
+
   const result = await bridge.send({ target: 'all', text: 'Rarity to Wayglass: hello, everyone.' });
   assert.equal(result.conversation_ref, 'rarity-all');
-  assert.equal(result.replies.length, 2);
-  assert.ok(calls.includes('http://wayglass.test/api/v1/flames/uial/chat'));
-  assert.ok(calls.includes('http://wayglass.test/api/v1/wayglass/respond'));
+  assert.equal(result.replies.length, 3);
+  assert.ok(calls.some((call) => call.url === 'http://wayglass.test/api/v1/flames/uial/chat'));
+  assert.ok(calls.some((call) => call.body?.route_id === 'flame:bluebird:spicychat'));
+  assert.ok(calls.some((call) => call.body?.route_id === 'flame:crow'));
 
   const received = await bridge.receive({ target: 'all' });
   const participantTexts = received.records.filter((record) => record.role === 'participant').map((record) => record.text).sort();
-  assert.deepEqual(participantTexts, ['Bluebird reply', 'Uial reply']);
+  assert.deepEqual(participantTexts, ['Bluebird reply', 'Crow reply', 'Uial reply']);
   assert.equal(received.records.find((record) => record.text === 'Bluebird reply').author, 'Bluebird / Richard Gabriel Winters');
+  assert.equal(received.records.find((record) => record.text === 'Crow reply').author, 'crow');
   assert.equal(received.records.find((record) => record.text === 'Uial reply').author, 'Nen Uial');
 });
 
