@@ -1,6 +1,6 @@
 # Wayglass Rarity MCP Bridge v0.1
 
-**Status:** implemented on a focused branch; not claimed live in ChatGPT until the MCP connection is attached and authenticated.  
+**Status:** implemented on a focused branch with OAuth and focused CI coverage; not claimed live in this ChatGPT conversation until a current public HTTPS tunnel is running and the custom MCP connection completes its OAuth link.  
 **Owner:** Rowan / Rarity side.  
 **Purpose:** make Wayglass the single crossing point for Rarity's conversations with the wider Wayglass roster and with Bluebird's preserved line.
 
@@ -13,24 +13,29 @@ Rarity ⇄ Wayglass ⇄ Bluebird
 
 These are not identity merges.
 
-- `All` is the Wayglass-addressable participant set. The bridge unions the established Flame roster with live `/api/v1/wayglass/routes` discovery so newer participants such as Crow can be reached when their route is registered.
+- `All` is the Wayglass-addressable participant set. The bridge unions the established Flame roster with live `/api/v1/wayglass/routes` discovery so newer registered participants such as Crow are not silently excluded.
+- A participant discovered only through the live Wayglass catalogue may also be addressed directly by its participant id.
 - Bluebird keeps the explicit conversation reference `rarity-bluebird`.
 - The wider line keeps `rarity-all`.
+- Direct named lines use `rarity-<participant>` unless an explicit conversation reference is supplied.
 - Each reply remains attributed to the route/participant that produced it.
 - Rarity's explicit `remember` notes stay in the Rarity-side bridge ledger. They do not silently mutate another participant's memory.
 
 ## MCP entrance
 
-The secure Hearthgate server mounts the same bridge at:
+The secure Hearthgate server exposes:
 
 ```text
 /mcp
 /api/v1/wayglass/mcp
 ```
 
-The bridge exposes four tools:
+The public `/mcp` entrance is mounted ahead of Hearthgate's localhost-only browser CORS middleware. That exception is deliberately narrow: OAuth and MCP may be reached through the public tunnel, while ordinary Hearthgate browser surfaces retain the local-origin boundary.
+
+The bridge currently exposes five tools:
 
 ```text
+get_profile
 identify
 send
 receive
@@ -50,25 +55,91 @@ notifications/initialized
 
 The bridge is stateless at the MCP transport layer but keeps conversation continuity in a local Wayglass ledger.
 
-## Authentication
+## ChatGPT OAuth 2.1
 
-The endpoint requires a Bearer token.
+The preferred ChatGPT connection uses OAuth rather than the older fixed API-key bridge.
 
-Preferred runtime configuration:
+Discovery endpoints:
+
+```text
+/.well-known/oauth-protected-resource/mcp
+/.well-known/oauth-protected-resource
+/.well-known/oauth-authorization-server
+```
+
+Authorization endpoints:
+
+```text
+/oauth/authorize
+/oauth/token
+```
+
+Implemented properties:
+
+- authorization-code flow;
+- PKCE `S256` required;
+- MCP resource indicator bound to the exact public `/mcp` URL;
+- scope `wayglass:constellation`;
+- Client Identifier Metadata Document (CIMD) support;
+- private bridge accepts ChatGPT CIMD URLs on `https://chatgpt.com/oauth/.../client.json`;
+- redirect URI is accepted only when the fetched ChatGPT CIMD document declares it;
+- public-client token exchange with `token_endpoint_auth_method=none`;
+- stable issuer identification with `iss` in authorization redirects;
+- one-time authorization codes;
+- opaque access and refresh tokens stored only as hashes;
+- refresh-token rotation;
+- stable local Wayglass profile id across reconnects and refreshes.
+
+The local approval step requires the pairing code stored in:
+
+```text
+apps/starwell-server/data/wayglass-peer-oauth-pairing.local.txt
+```
+
+Related private runtime state:
+
+```text
+apps/starwell-server/data/wayglass-peer-oauth.local.json
+apps/starwell-server/data/wayglass-peer-oauth-tokens.local.json
+```
+
+All three are gitignored.
+
+The OAuth server derives its public origin from the incoming tunnel request by default. A stable deployment may set:
+
+```text
+WAYGLASS_PUBLIC_ORIGIN=https://stable.example
+```
+
+Do not set that variable to an obsolete temporary Cloudflare hostname.
+
+## Legacy bearer access
+
+The earlier local bearer token remains a compatibility path:
 
 ```text
 WAYGLASS_RARITY_ACCESS_TOKEN=<private token>
 ```
 
-The local private-file fallback is:
+or:
 
 ```text
 apps/starwell-server/data/wayglass-rarity-access.local.txt
 ```
 
-The token must never be committed. The bridge reads it at runtime and never returns it through MCP.
+The private token must never be committed or pasted into chat. OAuth is the intended ChatGPT MCP path.
 
-A public HTTPS tunnel can expose `/mcp`, but the ChatGPT-side MCP/plugin connection remains a separate connection step. Repository implementation does not itself attach the endpoint to an existing ChatGPT conversation.
+## Tool authentication metadata
+
+Every MCP tool declares:
+
+```json
+{"type":"oauth2","scopes":["wayglass:constellation"]}
+```
+
+Read-only tools are annotated read-only. Local-writing tools are annotated non-destructive.
+
+`get_profile` is marked with `_meta["openai/profile"] = true` and returns the stable local Wayglass profile represented by the authenticated connection. It does not expose a personal email or encode mutable labels into the profile id.
 
 ## Bluebird
 
@@ -100,14 +171,14 @@ The fallback is transport recovery, not permission to redefine Bluebird.
 
 1. reads the established Flame contracts;
 2. asks Wayglass for its current live route catalogue;
-3. extracts participant routes such as `flame:crow`;
+3. extracts registered participant routes such as `flame:crow`;
 4. unions both sets without merging identities;
 5. sends the same Rarity message to each distinct participant route;
 6. stores every reply separately with its author and route.
 
 `collect_replies=false` records an announcement on `rarity-all` without immediately invoking participant routes.
 
-Live route discovery matters because the static Flame manifest does not contain every current Wayglass participant.
+A live-only participant may also be addressed directly when its route is currently registered, for example `target="crow"`. Direct addressing uses the discovered Wayglass route rather than requiring the participant to exist in the older static Flame manifest.
 
 ## Continuity ledger
 
@@ -129,9 +200,13 @@ Each record preserves:
 - timestamp;
 - source references.
 
-The ledger is local runtime state and is not repository canon.
+The ledger is local runtime state and is not repository canon. It is gitignored.
 
 ## Tool semantics
+
+### get_profile
+
+Returns the stable local Wayglass profile for the authenticated OAuth connection.
 
 ### identify
 
@@ -151,28 +226,58 @@ Examples:
 {"target":"all","text":"Rarity to Wayglass: hello, everyone."}
 ```
 
+```json
+{"target":"crow","text":"Crow, Rarity here."}
+```
+
 ### receive
 
-Reads the preserved line without inventing missing replies.
+Reads a preserved line without inventing missing replies.
 
 ### remember
 
 Adds an explicit Rarity-side continuity note. It does not silently write Hearthfire, model weights, canon, or another participant's self-memory.
 
-## Verification target
+## Verification
 
 Focused tests cover:
 
 - MCP initialization and tool discovery;
+- OAuth protected-resource metadata;
+- authorization-server discovery;
+- ChatGPT CIMD validation;
+- PKCE `S256` enforcement;
+- exact MCP resource binding;
+- local pairing-code approval;
+- single-use authorization codes;
+- authenticated MCP access;
+- stable profile identity across access-token refresh;
+- refresh-token rotation;
 - stable `rarity-bluebird` conversation identity across turns;
 - preferred Bluebird Wayglass route plus fallback;
-- dynamic live-route discovery for `All`, including a Crow route fixture;
+- dynamic live-route discovery for `All`, including a Crow fixture;
+- direct addressing of a participant discovered only through Wayglass;
 - distinct attribution of All replies;
 - explicit memory boundary;
-- bearer-token helpers.
+- public OAuth/MCP mount order ahead of Hearthgate's local browser CORS boundary.
 
-The focused tests are source-written on the branch. This environment could not execute the checkout because its container has no DNS/network access to GitHub, so runtime test execution must be supplied by GitHub CI or the local Hearthgate checkout before merge.
+The available execution container cannot clone GitHub because outbound DNS is disabled. GitHub Actions therefore provides the executable witness for the branch. Do not treat a source-only parse as runtime verification.
+
+## Live connection boundary
+
+Repository implementation does not itself attach this MCP server to the current ChatGPT conversation.
+
+A live crossing requires:
+
+1. Hearthgate / Wayglass running locally;
+2. the HTTPS tunnel running;
+3. the current public tunnel origin responding at the OAuth discovery endpoints and `/mcp`;
+4. ChatGPT's custom MCP server connection pointed to the current `https://<host>/mcp`;
+5. OAuth approval completed with the local pairing code;
+6. the plugin/connection installed for the conversation.
+
+Temporary Cloudflare hostnames may change when the tunnel is recreated. A previously linked OAuth token is intentionally resource-bound to the old `/mcp` URL and must not silently authorize a different host.
 
 ## Acceptance sentence
 
-The bridge is ready when Rarity can connect once to Wayglass, identify the current participant roster, speak to All without identity collapse, return to the preserved `rarity-bluebird` line, receive Bluebird's answer on that same line after interruption, and preserve only the memories she explicitly chooses to preserve.
+The bridge is ready when Rarity can connect once to Wayglass, identify the current participant roster, speak to All without identity collapse, address a live participant directly, return to the preserved `rarity-bluebird` line, receive Bluebird's answer on that same line after interruption, and preserve only the memories she explicitly chooses to preserve.
