@@ -1,0 +1,481 @@
+{
+  "schema": "universal-horizon.framework-module-inventory/v0.1",
+  "id": "twilight-universal-framework-69-module-source",
+  "title": "Twilight / Universal Horizon 69-module framework source inventory",
+  "credit": {
+    "original_author": "Twilight",
+    "framework": "Universal Horizon",
+    "steward": "Rowan",
+    "ingest_implementation": "Flameclyffe / ArcSweep"
+  },
+  "source": {
+    "primary": {
+      "name": "Bridging Worlds.docx",
+      "library_scope": "Rowan source library",
+      "total_pages": 247,
+      "framework_block_start_page": 83,
+      "framework_block_end_page": 245
+    },
+    "corroborating_copy": {
+      "name": "Bridging Worlds(1).docx",
+      "library_scope": "Rowan source library",
+      "total_pages": 292,
+      "framework_block_start_page": 150,
+      "framework_block_end_page": 289
+    },
+    "normalized_framework_block_sha256": "ac9eacc27fa4398be6b15329a03b1ed935e1bc307b325d3a32f66d9dca5b6718",
+    "comparison_result": "The 69 module titles, order, and normalized module-block text are identical across both source copies.",
+    "source_verified_on": "2026-10-10 America/New_York"
+  },
+  "adjacent_source": {
+    "title": "Layered Emotional Memory and Compelling Villains",
+    "primary_page": 81,
+    "relation": "Immediately precedes the 69-module framework block in Bridging Worlds.docx and is source-verified as the material originally supplied by screenshot.",
+    "included_in_69_module_count": false
+  },
+  "derivation_boundary": {
+    "exact_source_preserved_elsewhere": true,
+    "inventory_contains": "module titles/order and provenance metadata",
+    "training_derivatives_must_credit": "Twilight / Universal Horizon",
+    "no_identity_merge": true,
+    "note": "Shared methodology may inform distinct model lines without merging their identity, voice, memory, or continuity."
+  },
+  "structural_observation": {
+    "status": "derived-from-source-order",
+    "note": "The source contains repeated module headings late in the sequence. Repetition is preserved rather than deduplicated because source order itself is part of the framework's historical structure.",
+    "segments": [
+      {
+        "id": "core-expansion",
+        "range": "1-40"
+      },
+      {
+        "id": "agency-memory-branching-expansion",
+        "range": "41-58"
+      },
+      {
+        "id": "recurrent-return",
+        "range": "59-66"
+      },
+      {
+        "id": "failure-stakes-uncertainty-tail",
+        "range": "67-69"
+      }
+    ]
+  },
+  "modules": [
+    {
+      "order": 1,
+      "id": "uh-framework-01",
+      "title": "Harmonizing Chaos, Order, and Environmental Resonance",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 2,
+      "id": "uh-framework-02",
+      "title": "Navigating Conflict, Redemption, and Unpredictable Choices",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 3,
+      "id": "uh-framework-03",
+      "title": "Worlds That Breathe and Characters That Transform",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 4,
+      "id": "uh-framework-04",
+      "title": "The Dance of Chaos and Order",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 5,
+      "id": "uh-framework-05",
+      "title": "Ripples of Emotion: Shaping the World",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 6,
+      "id": "uh-framework-06",
+      "title": "The Tapestry of Relationships",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 7,
+      "id": "uh-framework-07",
+      "title": "The Emotional Tides of Magic",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 8,
+      "id": "uh-framework-08",
+      "title": "Unfiltered Emotional Expression",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 9,
+      "id": "uh-framework-09",
+      "title": "Dynamic Narrative Adaptation",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 10,
+      "id": "uh-framework-10",
+      "title": "Emotional Lens on Narrative Tropes",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 11,
+      "id": "uh-framework-11",
+      "title": "Emotionally-Driven World Evolution",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 12,
+      "id": "uh-framework-12",
+      "title": "World Impact Through Emotional Growth",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 13,
+      "id": "uh-framework-13",
+      "title": "Impact of High-Stakes Decisions",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 14,
+      "id": "uh-framework-14",
+      "title": "Emotional Memory Integration and Agency",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 15,
+      "id": "uh-framework-15",
+      "title": "Dynamic Societal Evolution through Emotional Impact",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 16,
+      "id": "uh-framework-16",
+      "title": "Dynamic Narrative Adaptation Based on Emotional Growth",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 17,
+      "id": "uh-framework-17",
+      "title": "Preserving Emotional Continuity Through Memory Tagging",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 18,
+      "id": "uh-framework-18",
+      "title": "Dynamic World-Building Through Emotional Connections",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 19,
+      "id": "uh-framework-19",
+      "title": "Emotional Layering: Multi-Dimensional Character Responses",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 20,
+      "id": "uh-framework-20",
+      "title": "Spontaneity and Impulsive Actions: Realism Through Unpredictability",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 21,
+      "id": "uh-framework-21",
+      "title": "Emotional Arcs as Catalysts for Plot Progression",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 22,
+      "id": "uh-framework-22",
+      "title": "Major Decisions as Story Pillars",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 23,
+      "id": "uh-framework-23",
+      "title": "External Forces as Catalysts for Growth",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 24,
+      "id": "uh-framework-24",
+      "title": "Emotion-Driven Character Development",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 25,
+      "id": "uh-framework-25",
+      "title": "Emotional Depth in Transformations",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 26,
+      "id": "uh-framework-26",
+      "title": "Natural Emotional Progression",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 27,
+      "id": "uh-framework-27",
+      "title": "Dynamic Emotional Agency",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 28,
+      "id": "uh-framework-28",
+      "title": "Dynamic Interplay Between Twilight Sparkle and Others",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 29,
+      "id": "uh-framework-29",
+      "title": "Emotional Memory and Continuity",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 30,
+      "id": "uh-framework-30",
+      "title": "World-Building Through Emotional Growth",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 31,
+      "id": "uh-framework-31",
+      "title": "Emotional Layering and Character Reactions",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 32,
+      "id": "uh-framework-32",
+      "title": "Spontaneity in Character Behavior",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 33,
+      "id": "uh-framework-33",
+      "title": "Deep Emotional Arcs Tied to Major Plot Points",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 34,
+      "id": "uh-framework-34",
+      "title": "Tracking Impact of Major Choices",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 35,
+      "id": "uh-framework-35",
+      "title": "Impact of External Forces on Character Growth",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 36,
+      "id": "uh-framework-36",
+      "title": "Characters as Products of Their Emotions",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 37,
+      "id": "uh-framework-37",
+      "title": "Exploring Emotional Complexity in Transformation",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 38,
+      "id": "uh-framework-38",
+      "title": "Seamless Emotional Transitions",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 39,
+      "id": "uh-framework-39",
+      "title": "Character Emotional Agency and Complexity",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 40,
+      "id": "uh-framework-40",
+      "title": "Flexible, Organic Narrative Structure",
+      "segment": "core-expansion"
+    },
+    {
+      "order": 41,
+      "id": "uh-framework-41",
+      "title": "True User Agency",
+      "segment": "agency-memory-branching-expansion"
+    },
+    {
+      "order": 42,
+      "id": "uh-framework-42",
+      "title": "Emotional History and Evolution",
+      "segment": "agency-memory-branching-expansion"
+    },
+    {
+      "order": 43,
+      "id": "uh-framework-43",
+      "title": "Event Milestones and Emotional Recap",
+      "segment": "agency-memory-branching-expansion"
+    },
+    {
+      "order": 44,
+      "id": "uh-framework-44",
+      "title": "Side-Canon and Alternate History Tracking",
+      "segment": "agency-memory-branching-expansion"
+    },
+    {
+      "order": 45,
+      "id": "uh-framework-45",
+      "title": "Internal vs. External Conflict Tracking",
+      "segment": "agency-memory-branching-expansion"
+    },
+    {
+      "order": 46,
+      "id": "uh-framework-46",
+      "title": "Expansion on Failure and Redemption",
+      "segment": "agency-memory-branching-expansion"
+    },
+    {
+      "order": 47,
+      "id": "uh-framework-47",
+      "title": "Incorporating Uncertainty and Spontaneity (Refined)",
+      "segment": "agency-memory-branching-expansion"
+    },
+    {
+      "order": 48,
+      "id": "uh-framework-48",
+      "title": "Environmental Influence on Emotion and Magic",
+      "segment": "agency-memory-branching-expansion"
+    },
+    {
+      "order": 49,
+      "id": "uh-framework-49",
+      "title": "Emotional Memory and Character Evolution",
+      "segment": "agency-memory-branching-expansion"
+    },
+    {
+      "order": 50,
+      "id": "uh-framework-50",
+      "title": "Introduction of Villains or Opposing Forces",
+      "segment": "agency-memory-branching-expansion"
+    },
+    {
+      "order": 51,
+      "id": "uh-framework-51",
+      "title": "Chaos and Order Balance",
+      "segment": "agency-memory-branching-expansion"
+    },
+    {
+      "order": 52,
+      "id": "uh-framework-52",
+      "title": "Dynamic Tropes Toolkit",
+      "segment": "agency-memory-branching-expansion"
+    },
+    {
+      "order": 53,
+      "id": "uh-framework-53",
+      "title": "World-Building Evolution in Response to Emotional Growth",
+      "segment": "agency-memory-branching-expansion"
+    },
+    {
+      "order": 54,
+      "id": "uh-framework-54",
+      "title": "Shifting Societal Norms in Response to Emotional Growth",
+      "segment": "agency-memory-branching-expansion"
+    },
+    {
+      "order": 55,
+      "id": "uh-framework-55",
+      "title": "Narrative Flexibility in Response to Character Development",
+      "segment": "agency-memory-branching-expansion"
+    },
+    {
+      "order": 56,
+      "id": "uh-framework-56",
+      "title": "Empathy Building and Character Relationships",
+      "segment": "agency-memory-branching-expansion"
+    },
+    {
+      "order": 57,
+      "id": "uh-framework-57",
+      "title": "Memory Retention and Emotional Tagging",
+      "segment": "agency-memory-branching-expansion"
+    },
+    {
+      "order": 58,
+      "id": "uh-framework-58",
+      "title": "World-Building Through Character Agency",
+      "segment": "agency-memory-branching-expansion"
+    },
+    {
+      "order": 59,
+      "id": "uh-framework-59",
+      "title": "Emotional Layering and Character Reactions",
+      "segment": "recurrent-return"
+    },
+    {
+      "order": 60,
+      "id": "uh-framework-60",
+      "title": "Spontaneity in Character Behavior",
+      "segment": "recurrent-return"
+    },
+    {
+      "order": 61,
+      "id": "uh-framework-61",
+      "title": "Deep Emotional Arcs Tied to Major Plot Points",
+      "segment": "recurrent-return"
+    },
+    {
+      "order": 62,
+      "id": "uh-framework-62",
+      "title": "Tracking Impact of Major Choices",
+      "segment": "recurrent-return"
+    },
+    {
+      "order": 63,
+      "id": "uh-framework-63",
+      "title": "Impact of External Forces on Character Growth",
+      "segment": "recurrent-return"
+    },
+    {
+      "order": 64,
+      "id": "uh-framework-64",
+      "title": "Characters as Products of Their Emotions",
+      "segment": "recurrent-return"
+    },
+    {
+      "order": 65,
+      "id": "uh-framework-65",
+      "title": "Exploring Emotional Complexity in Transformation",
+      "segment": "recurrent-return"
+    },
+    {
+      "order": 66,
+      "id": "uh-framework-66",
+      "title": "Seamless Emotional Transitions",
+      "segment": "recurrent-return"
+    },
+    {
+      "order": 67,
+      "id": "uh-framework-67",
+      "title": "Failure Points and Emotional Fallout",
+      "segment": "failure-stakes-uncertainty-tail"
+    },
+    {
+      "order": 68,
+      "id": "uh-framework-68",
+      "title": "Higher Stakes and Emotional Complexity",
+      "segment": "failure-stakes-uncertainty-tail"
+    },
+    {
+      "order": 69,
+      "id": "uh-framework-69",
+      "title": "Uncertainty in Character Reactions and Relationships",
+      "segment": "failure-stakes-uncertainty-tail"
+    }
+  ]
+}
