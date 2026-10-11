@@ -124,8 +124,18 @@ async function fetchUrlContent(url, maxChars = 3000) {
   }
 }
 
-app.use(cors({ origin: true }));
 app.use(express.json());
+
+// The public OAuth and MCP entrance must sit before Hearthgate's localhost-only
+// browser CORS boundary. It remains protected by OAuth/bearer authentication;
+// moving only these routes prevents a tunnel-origin form POST from being
+// rejected while every ordinary Hearthgate browser route stays local-only.
+const wayglassPeerOAuth = createWayglassPeerOAuth();
+wayglassPeerOAuth.mount(app);
+const wayglassMcpRouter = createWayglassMcpRouter({ oauth: wayglassPeerOAuth });
+app.use('/mcp', wayglassMcpRouter);
+
+app.use(cors({ origin: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Helper to read a JSON file asynchronously
@@ -591,16 +601,9 @@ app.get('/api/v1/context', async (req, res) => {
 const groveChatRouter = require('./routes/grove-chat.routes');
 app.use('/api/v1/chat', groveChatRouter);
 
-// ── Wayglass OAuth + MCP + Flame routers (v1) ─────────────────────────────
-// OAuth metadata and authorization live at the server root because ChatGPT
-// discovers them from the public /mcp resource URL.
-const wayglassPeerOAuth = createWayglassPeerOAuth();
-wayglassPeerOAuth.mount(app);
-
-// The public tunnel may expose /mcp directly. The /api alias keeps local
-// diagnostics and future clients on the same authenticated bridge.
-const wayglassMcpRouter = createWayglassMcpRouter({ oauth: wayglassPeerOAuth });
-app.use('/mcp', wayglassMcpRouter);
+// ── Wayglass API alias + Flame routers (v1) ───────────────────────────────
+// /mcp and the OAuth discovery/authorization endpoints are mounted above the
+// local browser CORS boundary. This alias remains available to local clients.
 app.use('/api/v1/wayglass/mcp', wayglassMcpRouter);
 app.use('/api/v1/wayglass', wayglassRouter);
 app.use('/api/v1', flameRouter);
