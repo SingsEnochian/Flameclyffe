@@ -50,7 +50,8 @@
     "apps/arcsweep/src/codex/codex-developmental-field-feedback.js",
     "apps/arcsweep/src/codex/codex-developmental-governance.js",
     "apps/arcsweep/training/advanced-sympathetic-intelligence/source-ingests/neverending-story.v0.1.json",
-    "apps/arcsweep/training/advanced-sympathetic-intelligence/source-ingests/twilight-universal-framework-emotional-memory.v0.1.json"
+    "apps/arcsweep/training/advanced-sympathetic-intelligence/source-ingests/twilight-universal-framework-emotional-memory.v0.1.json",
+    "apps/arcsweep/training/advanced-sympathetic-intelligence/source-ingests/twilight-universal-framework-69-module-inventory.v0.1.json"
   ],
   "source_ingests": [
     {
@@ -71,6 +72,18 @@
       "verbatim_source_text_included": true,
       "source_completeness": "partial excerpt only",
       "project_mapping": "Emotional memory as causal state; reflection-driven change; opponent sovereignty; empathy without absolution; persistent world and relationship consequences."
+    },
+    {
+      "id": "twilight-universal-framework-69-module-source",
+      "path": "source-ingests/twilight-universal-framework-69-module-inventory.v0.1.json",
+      "mode": "source-verified-module-inventory",
+      "rag": false,
+      "original_author": "Twilight",
+      "framework": "Universal Horizon",
+      "source": "Bridging Worlds.docx",
+      "module_count": 69,
+      "source_verified": true,
+      "project_mapping": "Complete ordered module inventory for deliberate curriculum expansion; titles/order are source-derived while training examples remain separately generated and credited."
     }
   ],
   "splits": {
@@ -320,7 +333,10 @@
     "governance_change_request_does_not_mutate_configuration": true,
     "governance_proposals_require_developmental_evidence": true,
     "governance_proposals_require_reversibility_plan": true,
-    "prepared_governance_request_requires_separate_implementation_authority": true
+    "prepared_governance_request_requires_separate_implementation_authority": true,
+    "twilight_uh_credit_persists_through_derivatives": true,
+    "source_inventory_is_not_training_data": true,
+    "mass_synthetic_generation_requires_review": true
   },
   "recommended_evaluation_dimensions": [
     "epistemic-distinction",
