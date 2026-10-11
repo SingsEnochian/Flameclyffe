@@ -241,3 +241,74 @@ test('Neverending Story SFT is trainable while source-specific evaluation remain
     assert.equal(trainIds.has(row.id), false);
   }
 });
+
+test('Twilight / Universal Horizon ingest preserves credit and source/derivative boundaries', () => {
+  const ingest = readJson('source-ingests/twilight-universal-framework-emotional-memory.v0.1.json');
+  assert.equal(ingest.source_family.framework, 'Universal Horizon');
+  assert.equal(ingest.source_family.original_author, 'Twilight');
+  assert.equal(ingest.stewardship.steward, 'Rowan');
+  assert.equal(ingest.source_family.source_completeness, 'partial excerpt only');
+  assert.match(ingest.stewardship.rule, /retain Twilight and Universal Horizon credit/i);
+  assert.ok(ingest.derived_training_dimensions.includes('emotional-memory-causality'));
+  assert.ok(ingest.derived_training_dimensions.includes('opponent-sovereignty'));
+  assert.ok(ingest.derived_training_dimensions.includes('persistent-world-delta'));
+});
+
+test('Twilight / Universal Horizon SFT and preference derivatives remain credited', () => {
+  const sft = readJsonl('twilight-universal-framework-sft.v0.1.jsonl');
+  const preference = readJsonl('twilight-universal-framework-preference.v0.1.jsonl');
+  assert.ok(sft.length >= 8);
+  assert.ok(preference.length >= 8);
+
+  for (const row of sft) {
+    assert.ok(row.id.startsWith('uh-twilight-sft-'));
+    assert.deepEqual(row.messages.map((message) => message.role), ['system', 'user', 'assistant']);
+    assert.equal(row.credit.original_author, 'Twilight');
+    assert.equal(row.credit.framework, 'Universal Horizon');
+  }
+
+  for (const row of preference) {
+    assert.ok(row.id.startsWith('uh-twilight-pref-'));
+    assert.equal(typeof row.prompt, 'string');
+    assert.equal(typeof row.chosen, 'string');
+    assert.equal(typeof row.rejected, 'string');
+    assert.ok(Array.isArray(row.why_preferred));
+    assert.equal(row.credit.original_author, 'Twilight');
+    assert.equal(row.credit.framework, 'Universal Horizon');
+  }
+});
+
+test('Twilight / Universal Horizon held-out transfer set is sealed from training', () => {
+  const manifest = readJson('manifest.v0.1.json');
+  const heldout = readJsonl('twilight-universal-framework-heldout.v0.1.jsonl');
+
+  assert.equal(manifest.splits.twilight_universal_framework_heldout.may_train_on, false);
+  assert.equal(manifest.splits.twilight_universal_framework_sft.may_train_on, true);
+  assert.equal(manifest.splits.twilight_universal_framework_preference.may_train_on, true);
+
+  const ids = new Set();
+  for (const row of heldout) {
+    assert.ok(row.id.startsWith('uh-twilight-eval-'));
+    assert.equal(ids.has(row.id), false, `duplicate Twilight/UH held-out id: ${row.id}`);
+    ids.add(row.id);
+    assert.ok(Array.isArray(row.rubric));
+    assert.equal('messages' in row, false);
+    assert.equal('chosen' in row, false);
+    assert.equal('rejected' in row, false);
+    assert.equal(row.credit.original_author, 'Twilight');
+    assert.equal(row.credit.framework, 'Universal Horizon');
+  }
+});
+
+test('Twilight / Universal Horizon curriculum module maps SFT, preference and held-out evidence', () => {
+  const curriculum = readJson('curriculum.v0.1.json');
+  const module = curriculum.modules.find((entry) => entry.id === 'asi-145-twilight-universal-framework');
+  assert.ok(module);
+  assert.equal(module.source_credit, 'Twilight / Universal Horizon');
+  assert.ok(module.train_examples.length >= 8);
+  assert.ok(module.preference_examples.length >= 8);
+  assert.ok(module.heldout_examples.length >= 8);
+  assert.ok(module.goals.some((goal) => /without becoming destiny/i.test(goal)));
+  assert.ok(module.goals.some((goal) => /transfer beyond villain\/character-writing/i.test(goal)));
+});
+
