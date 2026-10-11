@@ -1,6 +1,8 @@
 'use strict';
 
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const test = require('node:test');
 const {
   isAllowedLocalOrigin,
@@ -51,6 +53,18 @@ test('CORS callback rejects origins outside the local boundary', async () => {
       }
     });
   });
+});
+
+test('public Wayglass OAuth and MCP routes are mounted before local browser CORS', () => {
+  const source = fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8');
+  const oauthMount = source.indexOf('wayglassPeerOAuth.mount(app)');
+  const mcpMount = source.indexOf("app.use('/mcp', wayglassMcpRouter)");
+  const corsMount = source.indexOf("app.use(cors({ origin: true }))");
+  assert.ok(oauthMount >= 0);
+  assert.ok(mcpMount >= 0);
+  assert.ok(corsMount >= 0);
+  assert.ok(oauthMount < corsMount);
+  assert.ok(mcpMount < corsMount);
 });
 
 test('sanitises provider configuration and freezes out runtime injection names', () => {
