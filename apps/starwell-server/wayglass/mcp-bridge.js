@@ -265,10 +265,21 @@ function createWayglassMcpBridge({
     return byParticipant;
   }
 
-  function resolveTarget(value) {
+  function normaliseTarget(value) {
     const raw = cleanText(value, 120).toLowerCase();
     if (!raw || raw === 'all' || raw === '*' || raw === 'commons') return 'all';
-    return resolveCanonicalFlameId(raw) || (flameIds.includes(raw) ? raw : null);
+    const canonical = resolveCanonicalFlameId(raw);
+    if (canonical) return canonical;
+    if (!/^[a-z0-9][a-z0-9:._-]{0,119}$/.test(raw)) return null;
+    return raw;
+  }
+
+  async function resolveAddressableTarget(value, discovered = null) {
+    const target = normaliseTarget(value);
+    if (!target || target === 'all') return target;
+    if (flameIds.includes(target) || FLAMES[target]) return target;
+    const routes = discovered || await discoveredParticipantRoutes();
+    return routes.has(target) ? target : null;
   }
 
   async function callBluebird(text, conversationRef, records) {
@@ -371,8 +382,8 @@ function createWayglassMcpBridge({
   }
 
   async function identify(args = {}) {
-    const target = resolveTarget(args.target);
     const discovered = await discoveredParticipantRoutes();
+    const target = await resolveAddressableTarget(args.target, discovered);
     if (args.target && !target) throw new Error(`Unknown Wayglass target: ${args.target}`);
     const conversationRef = defaultConversationRef(target || 'all');
     return {
@@ -397,7 +408,8 @@ function createWayglassMcpBridge({
   }
 
   async function send(args = {}) {
-    const target = resolveTarget(args.target);
+    const discovered = await discoveredParticipantRoutes();
+    const target = await resolveAddressableTarget(args.target, discovered);
     if (!target) throw new Error(`Unknown Wayglass target: ${args.target}`);
     const text = cleanText(args.text);
     if (!text) throw new Error('text required');
@@ -418,7 +430,7 @@ function createWayglassMcpBridge({
     const history = [...before, { role: 'rarity', author: 'Rarity', text, kind: 'message' }];
 
     if (target !== 'all') {
-      const reply = await callFlame(target, text, conversationRef, history);
+      const reply = await callFlame(target, text, conversationRef, history, discovered.get(target) || null);
       if (reply.ok && reply.text) {
         appendRecord(storePath, {
           conversation_ref: conversationRef,
@@ -450,7 +462,6 @@ function createWayglassMcpBridge({
       };
     }
 
-    const discovered = await discoveredParticipantRoutes();
     const allParticipantIds = [...new Set([...flameIds, ...discovered.keys()])];
     const settled = await Promise.all(allParticipantIds.map(async (participantId) => (
       callFlame(participantId, text, conversationRef, history, discovered.get(participantId) || null)
@@ -478,8 +489,8 @@ function createWayglassMcpBridge({
   }
 
   async function receive(args = {}) {
-    const target = resolveTarget(args.target);
-    if (args.target && !target) throw new Error(`Unknown Wayglass target: ${args.target}`);
+    const target = normaliseTarget(args.target);
+    if (args.target && !target) throw new Error(`Invalid Wayglass target: ${args.target}`);
     const resolvedTarget = target || 'all';
     const conversationRef = safeConversationRef(args.conversation_ref, defaultConversationRef(resolvedTarget));
     return {
@@ -491,8 +502,8 @@ function createWayglassMcpBridge({
   }
 
   async function remember(args = {}) {
-    const target = resolveTarget(args.target);
-    if (!target) throw new Error(`Unknown Wayglass target: ${args.target}`);
+    const target = normaliseTarget(args.target);
+    if (!target) throw new Error(`Invalid Wayglass target: ${args.target}`);
     const text = cleanText(args.text);
     if (!text) throw new Error('text required');
     const conversationRef = safeConversationRef(args.conversation_ref, defaultConversationRef(target));
