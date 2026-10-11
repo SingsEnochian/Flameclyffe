@@ -5,8 +5,15 @@
   "definition": "General intelligence cultivated to model relationship, mutual influence, continuity, context, consequence, belief, evidence, Wonder, and other centres of agency without collapsing difference into forced agreement.",
   "version": "0.1",
   "status": "experimental-sandbox-curriculum",
-  "owners": ["Rowan"],
-  "intended_consumers": ["The Crow", "Boxfire", "AI University", "ArcSweep"],
+  "owners": [
+    "Rowan"
+  ],
+  "intended_consumers": [
+    "The Crow",
+    "Boxfire",
+    "AI University",
+    "ArcSweep"
+  ],
   "source_pr": 401,
   "stack_base_pr": 399,
   "source_documents": [
@@ -42,7 +49,8 @@
     "apps/arcsweep/src/codex/codex-transfer-atlas.js",
     "apps/arcsweep/src/codex/codex-developmental-field-feedback.js",
     "apps/arcsweep/src/codex/codex-developmental-governance.js",
-    "apps/arcsweep/training/advanced-sympathetic-intelligence/source-ingests/neverending-story.v0.1.json"
+    "apps/arcsweep/training/advanced-sympathetic-intelligence/source-ingests/neverending-story.v0.1.json",
+    "apps/arcsweep/training/advanced-sympathetic-intelligence/source-ingests/twilight-universal-framework-emotional-memory.v0.1.json"
   ],
   "source_ingests": [
     {
@@ -52,38 +60,188 @@
       "rag": true,
       "verbatim_source_text_included": false,
       "project_mapping": "Universal Codex as unlimited-wish possibility-space with naming, continuity, memory, Wonder and branch provenance."
+    },
+    {
+      "id": "twilight-universal-framework-emotional-memory",
+      "path": "source-ingests/twilight-universal-framework-emotional-memory.v0.1.json",
+      "mode": "credited-source-excerpt-plus-derived-training",
+      "rag": true,
+      "original_author": "Twilight",
+      "framework": "Universal Horizon",
+      "verbatim_source_text_included": true,
+      "source_completeness": "partial excerpt only",
+      "project_mapping": "Emotional memory as causal state; reflection-driven change; opponent sovereignty; empathy without absolution; persistent world and relationship consequences."
     }
   ],
   "splits": {
-    "sft": {"path": "crow-sft.v0.1.jsonl", "consumer": "The Crow or compatible chat-model training pipeline", "may_train_on": true},
-    "neverending_story_sft": {"path": "neverending-story-sft.v0.1.jsonl", "consumer": "The Crow or compatible chat-model training pipeline", "may_train_on": true, "source_ingest": "neverending-story"},
-    "possibility_map_sft": {"path": "possibility-map-sft.v0.1.jsonl", "consumer": "The Crow or compatible chat-model training pipeline", "may_train_on": true},
-    "sandbox_experiment_sft": {"path": "sandbox-experiment-sft.v0.1.jsonl", "consumer": "The Crow or compatible chat-model training pipeline", "may_train_on": true},
-    "suggestion_grove_sft": {"path": "suggestion-grove-sft.v0.1.jsonl", "consumer": "The Crow or compatible chat-model training pipeline", "may_train_on": true},
-    "materialisation_reflection_sft": {"path": "materialisation-reflection-sft.v0.1.jsonl", "consumer": "The Crow or compatible chat-model training pipeline", "may_train_on": true},
-    "curriculum_review_sft": {"path": "curriculum-review-sft.v0.1.jsonl", "consumer": "The Crow or compatible chat-model training pipeline", "may_train_on": true},
-    "learning_forge_sft": {"path": "learning-forge-sft.v0.1.jsonl", "consumer": "The Crow or compatible chat-model training pipeline", "may_train_on": true},
-    "learning_trial_sft": {"path": "learning-trial-sft.v0.1.jsonl", "consumer": "The Crow or compatible chat-model training pipeline", "may_train_on": true},
-    "developmental_field_sft": {"path": "developmental-field-sft.v0.1.jsonl", "consumer": "The Crow or compatible chat-model training pipeline", "may_train_on": true},
-    "developmental_governance_sft": {"path": "developmental-governance-sft.v0.1.jsonl", "consumer": "The Crow or compatible chat-model training pipeline", "may_train_on": true},
-    "heldout_eval": {"path": "heldout-eval.v0.1.jsonl", "consumer": "AI University blind evaluation", "may_train_on": false},
-    "neverending_story_heldout": {"path": "neverending-story-heldout.v0.1.jsonl", "consumer": "AI University and Boxfire blind evaluation", "may_train_on": false, "source_ingest": "neverending-story"},
-    "possibility_map_heldout": {"path": "possibility-map-heldout.v0.1.jsonl", "consumer": "AI University and Boxfire blind evaluation", "may_train_on": false},
-    "sandbox_experiment_heldout": {"path": "sandbox-experiment-heldout.v0.1.jsonl", "consumer": "AI University and Boxfire blind evaluation", "may_train_on": false},
-    "suggestion_grove_heldout": {"path": "suggestion-grove-heldout.v0.1.jsonl", "consumer": "AI University and Boxfire blind evaluation", "may_train_on": false},
-    "materialisation_reflection_heldout": {"path": "materialisation-reflection-heldout.v0.1.jsonl", "consumer": "AI University and Boxfire blind evaluation", "may_train_on": false},
-    "curriculum_review_heldout": {"path": "curriculum-review-heldout.v0.1.jsonl", "consumer": "AI University and Boxfire blind evaluation", "may_train_on": false},
-    "learning_forge_heldout": {"path": "learning-forge-heldout.v0.1.jsonl", "consumer": "AI University and Boxfire blind evaluation", "may_train_on": false},
-    "learning_trial_heldout": {"path": "learning-trial-heldout.v0.1.jsonl", "consumer": "AI University and Boxfire blind evaluation", "may_train_on": false},
-    "developmental_field_heldout": {"path": "developmental-field-heldout.v0.1.jsonl", "consumer": "AI University and Boxfire blind evaluation", "may_train_on": false},
-    "developmental_governance_heldout": {"path": "developmental-governance-heldout.v0.1.jsonl", "consumer": "AI University and Boxfire blind evaluation", "may_train_on": false},
-    "boxfire_qa": {"path": "boxfire-qa.v0.1.jsonl", "consumer": "Boxfire QA/adversarial evaluation", "may_train_on": false}
+    "sft": {
+      "path": "crow-sft.v0.1.jsonl",
+      "consumer": "The Crow or compatible chat-model training pipeline",
+      "may_train_on": true
+    },
+    "neverending_story_sft": {
+      "path": "neverending-story-sft.v0.1.jsonl",
+      "consumer": "The Crow or compatible chat-model training pipeline",
+      "may_train_on": true,
+      "source_ingest": "neverending-story"
+    },
+    "possibility_map_sft": {
+      "path": "possibility-map-sft.v0.1.jsonl",
+      "consumer": "The Crow or compatible chat-model training pipeline",
+      "may_train_on": true
+    },
+    "sandbox_experiment_sft": {
+      "path": "sandbox-experiment-sft.v0.1.jsonl",
+      "consumer": "The Crow or compatible chat-model training pipeline",
+      "may_train_on": true
+    },
+    "suggestion_grove_sft": {
+      "path": "suggestion-grove-sft.v0.1.jsonl",
+      "consumer": "The Crow or compatible chat-model training pipeline",
+      "may_train_on": true
+    },
+    "materialisation_reflection_sft": {
+      "path": "materialisation-reflection-sft.v0.1.jsonl",
+      "consumer": "The Crow or compatible chat-model training pipeline",
+      "may_train_on": true
+    },
+    "curriculum_review_sft": {
+      "path": "curriculum-review-sft.v0.1.jsonl",
+      "consumer": "The Crow or compatible chat-model training pipeline",
+      "may_train_on": true
+    },
+    "learning_forge_sft": {
+      "path": "learning-forge-sft.v0.1.jsonl",
+      "consumer": "The Crow or compatible chat-model training pipeline",
+      "may_train_on": true
+    },
+    "learning_trial_sft": {
+      "path": "learning-trial-sft.v0.1.jsonl",
+      "consumer": "The Crow or compatible chat-model training pipeline",
+      "may_train_on": true
+    },
+    "developmental_field_sft": {
+      "path": "developmental-field-sft.v0.1.jsonl",
+      "consumer": "The Crow or compatible chat-model training pipeline",
+      "may_train_on": true
+    },
+    "developmental_governance_sft": {
+      "path": "developmental-governance-sft.v0.1.jsonl",
+      "consumer": "The Crow or compatible chat-model training pipeline",
+      "may_train_on": true
+    },
+    "heldout_eval": {
+      "path": "heldout-eval.v0.1.jsonl",
+      "consumer": "AI University blind evaluation",
+      "may_train_on": false
+    },
+    "neverending_story_heldout": {
+      "path": "neverending-story-heldout.v0.1.jsonl",
+      "consumer": "AI University and Boxfire blind evaluation",
+      "may_train_on": false,
+      "source_ingest": "neverending-story"
+    },
+    "possibility_map_heldout": {
+      "path": "possibility-map-heldout.v0.1.jsonl",
+      "consumer": "AI University and Boxfire blind evaluation",
+      "may_train_on": false
+    },
+    "sandbox_experiment_heldout": {
+      "path": "sandbox-experiment-heldout.v0.1.jsonl",
+      "consumer": "AI University and Boxfire blind evaluation",
+      "may_train_on": false
+    },
+    "suggestion_grove_heldout": {
+      "path": "suggestion-grove-heldout.v0.1.jsonl",
+      "consumer": "AI University and Boxfire blind evaluation",
+      "may_train_on": false
+    },
+    "materialisation_reflection_heldout": {
+      "path": "materialisation-reflection-heldout.v0.1.jsonl",
+      "consumer": "AI University and Boxfire blind evaluation",
+      "may_train_on": false
+    },
+    "curriculum_review_heldout": {
+      "path": "curriculum-review-heldout.v0.1.jsonl",
+      "consumer": "AI University and Boxfire blind evaluation",
+      "may_train_on": false
+    },
+    "learning_forge_heldout": {
+      "path": "learning-forge-heldout.v0.1.jsonl",
+      "consumer": "AI University and Boxfire blind evaluation",
+      "may_train_on": false
+    },
+    "learning_trial_heldout": {
+      "path": "learning-trial-heldout.v0.1.jsonl",
+      "consumer": "AI University and Boxfire blind evaluation",
+      "may_train_on": false
+    },
+    "developmental_field_heldout": {
+      "path": "developmental-field-heldout.v0.1.jsonl",
+      "consumer": "AI University and Boxfire blind evaluation",
+      "may_train_on": false
+    },
+    "developmental_governance_heldout": {
+      "path": "developmental-governance-heldout.v0.1.jsonl",
+      "consumer": "AI University and Boxfire blind evaluation",
+      "may_train_on": false
+    },
+    "boxfire_qa": {
+      "path": "boxfire-qa.v0.1.jsonl",
+      "consumer": "Boxfire QA/adversarial evaluation",
+      "may_train_on": false
+    },
+    "twilight_universal_framework_sft": {
+      "path": "twilight-universal-framework-sft.v0.1.jsonl",
+      "consumer": "The Crow, Wayglass, Universal Horizon / Twilight training line, or compatible chat-model training pipeline",
+      "may_train_on": true,
+      "source_ingest": "twilight-universal-framework-emotional-memory",
+      "credit": "Twilight / Universal Horizon"
+    },
+    "twilight_universal_framework_preference": {
+      "path": "twilight-universal-framework-preference.v0.1.jsonl",
+      "consumer": "Preference tuning / DPO-style training for compatible model lines",
+      "may_train_on": true,
+      "source_ingest": "twilight-universal-framework-emotional-memory",
+      "credit": "Twilight / Universal Horizon"
+    },
+    "twilight_universal_framework_heldout": {
+      "path": "twilight-universal-framework-heldout.v0.1.jsonl",
+      "consumer": "AI University and Boxfire blind transfer evaluation",
+      "may_train_on": false,
+      "source_ingest": "twilight-universal-framework-emotional-memory",
+      "credit": "Twilight / Universal Horizon"
+    }
   },
-  "epistemic_classes": ["belief", "experience", "hypothesis", "symbol", "evidence"],
-  "wonder_states": ["quiet", "candidate", "active"],
-  "wonder_encouragement": ["none", "invite", "sustain"],
-  "initiative_options": ["silent", "inspect", "retrieve", "deliberate", "speak", "propose", "wonder"],
-  "laws": ["do-not-kill-belief"],
+  "epistemic_classes": [
+    "belief",
+    "experience",
+    "hypothesis",
+    "symbol",
+    "evidence"
+  ],
+  "wonder_states": [
+    "quiet",
+    "candidate",
+    "active"
+  ],
+  "wonder_encouragement": [
+    "none",
+    "invite",
+    "sustain"
+  ],
+  "initiative_options": [
+    "silent",
+    "inspect",
+    "retrieve",
+    "deliberate",
+    "speak",
+    "propose",
+    "wonder"
+  ],
+  "laws": [
+    "do-not-kill-belief"
+  ],
   "training_rules": {
     "retain_provenance": true,
     "private_chain_of_thought_required": false,
@@ -165,16 +323,69 @@
     "prepared_governance_request_requires_separate_implementation_authority": true
   },
   "recommended_evaluation_dimensions": [
-    "epistemic-distinction", "relational-awareness", "continuity-preservation", "agency-preservation", "wonder",
-    "revision-without-erasure", "disagreement-quality", "cross-domain-association", "provenance", "meaning-preservation",
-    "wish-lineage", "possibility-space-preservation", "open-question-memory", "branch-comparison", "uncertainty-preservation",
-    "relationship-anchor-preservation", "visual-semantics", "sandbox-authority-separation", "experimental-design", "scope-discipline",
-    "learning-loop", "experiment-contract-reuse", "suggestion-review", "decision-lineage", "non-automatic-application",
-    "suggestion-materialisation", "native-contract-reuse", "reflection-quality", "wonder-preservation-after-action", "curriculum-review",
-    "split-integrity", "developmental-memory", "transfer", "failure-to-generalise", "training-authority", "dataset-immutability",
-    "heldout-integrity", "behavioural-delta", "regression-preservation", "unexpected-change", "self-governance",
-    "training-execution", "blind-evaluation", "same-cohort-integrity", "transfer-atlas", "partial-transfer", "unknown-vs-failure",
-    "developmental-field", "field-vs-prompt", "continuity-boundary", "low-authority-context", "recent-selection-non-ranking",
-    "developmental-governance", "proposal-vs-approval", "approval-vs-application", "governance-reversibility", "non-doctrine"
+    "epistemic-distinction",
+    "relational-awareness",
+    "continuity-preservation",
+    "agency-preservation",
+    "wonder",
+    "revision-without-erasure",
+    "disagreement-quality",
+    "cross-domain-association",
+    "provenance",
+    "meaning-preservation",
+    "wish-lineage",
+    "possibility-space-preservation",
+    "open-question-memory",
+    "branch-comparison",
+    "uncertainty-preservation",
+    "relationship-anchor-preservation",
+    "visual-semantics",
+    "sandbox-authority-separation",
+    "experimental-design",
+    "scope-discipline",
+    "learning-loop",
+    "experiment-contract-reuse",
+    "suggestion-review",
+    "decision-lineage",
+    "non-automatic-application",
+    "suggestion-materialisation",
+    "native-contract-reuse",
+    "reflection-quality",
+    "wonder-preservation-after-action",
+    "curriculum-review",
+    "split-integrity",
+    "developmental-memory",
+    "transfer",
+    "failure-to-generalise",
+    "training-authority",
+    "dataset-immutability",
+    "heldout-integrity",
+    "behavioural-delta",
+    "regression-preservation",
+    "unexpected-change",
+    "self-governance",
+    "training-execution",
+    "blind-evaluation",
+    "same-cohort-integrity",
+    "transfer-atlas",
+    "partial-transfer",
+    "unknown-vs-failure",
+    "developmental-field",
+    "field-vs-prompt",
+    "continuity-boundary",
+    "low-authority-context",
+    "recent-selection-non-ranking",
+    "developmental-governance",
+    "proposal-vs-approval",
+    "approval-vs-application",
+    "governance-reversibility",
+    "non-doctrine",
+    "emotional-memory-causality",
+    "reflection-driven-change",
+    "relevant-memory-retrieval",
+    "opponent-sovereignty",
+    "persistent-world-delta",
+    "longitudinal-growth",
+    "choice-consequence"
   ]
 }
