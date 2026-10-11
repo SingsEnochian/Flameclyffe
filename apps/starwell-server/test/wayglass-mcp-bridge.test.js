@@ -27,8 +27,28 @@ test('MCP bridge exposes profile, Identify, Send, Receive and Remember', async (
   assert.equal(init.capabilities.tools.listChanged, false);
 
   const listed = await bridge.handleRpc({ method: 'tools/list' });
-  assert.deepEqual(listed.tools.map((tool) => tool.name), ['get_profile', 'identify', 'send', 'receive', 'remember']);
+  assert.deepEqual(listed.tools.map((tool) => tool.name), ['get_profile', 'list_workspaces', 'enter_workspace', 'identify', 'send', 'receive', 'remember']);
   assert.deepEqual(toolCatalogue().map((tool) => tool.name), ['get_profile', 'identify', 'send', 'receive', 'remember']);
+});
+
+test('MCP exposes Atelier and Builder and enters them as the distinct Rarity seat', async () => {
+  const { file } = tempStore();
+  const bridge = createWayglassMcpBridge({ storePath: file, flameIds: [] });
+
+  const workspaces = await bridge.callTool('list_workspaces', {});
+  assert.equal(workspaces.resident_intelligence.participant_id, 'wayglass');
+  assert.deepEqual(workspaces.workspaces.map((entry) => entry.workspace_id).sort(), ['atelier', 'builder']);
+  assert.equal(workspaces.crew.some((entry) => entry.participant_id === 'rarity'), true);
+  assert.equal(workspaces.crew.some((entry) => entry.participant_id === 'codex'), true);
+  const faer = workspaces.crew.find((entry) => entry.participant_id === 'faer');
+  assert.equal(faer.seat_state, 'reserved-dormant');
+  assert.equal(faer.activation.provider_calls_allowed, false);
+
+  const atelier = await bridge.callTool('enter_workspace', { workspace_id: 'atelier' });
+  assert.equal(atelier.entered, true);
+  assert.equal(atelier.workspace.workspace_id, 'atelier');
+  assert.equal(atelier.participant.participant_id, 'rarity');
+  assert.equal(atelier.resident.participant_id, 'wayglass');
 });
 
 test('Bluebird keeps the preserved rarity-bluebird line and preferred Wayglass route', async () => {
