@@ -6,6 +6,7 @@ const { randomUUID, timingSafeEqual } = require('node:crypto');
 const express = require('express');
 const { FLAMES } = require('../flames/manifests');
 const { resolveCanonicalFlameId, contractRegistryProjection } = require('../flames/contracts');
+const { OAUTH_SCOPE } = require('./oauth-peer');
 
 const MCP_PROTOCOL_VERSION = '2025-06-18';
 const STORE_SCHEMA = 'wayglass.rarity-mcp-conversations/v0.1';
@@ -111,7 +112,29 @@ function resultContent(value) {
 }
 
 function toolCatalogue() {
+  const auth = [{ type: 'oauth2', scopes: [OAUTH_SCOPE] }];
+  const readOnly = { readOnlyHint: true, destructiveHint: false, openWorldHint: false };
+  const writeLocal = { readOnlyHint: false, destructiveHint: false, openWorldHint: false };
   return [
+    {
+      name: 'get_profile',
+      description: 'Return the stable Wayglass profile represented by this authenticated connection.',
+      inputSchema: { type: 'object', properties: {}, additionalProperties: false },
+      outputSchema: {
+        '$schema': 'https://json-schema.org/draft/2020-12/schema',
+        type: 'object',
+        properties: {
+          id: { type: 'string', minLength: 1, pattern: '\\S' },
+          name: { type: 'string' },
+          nickname: { type: 'string' },
+        },
+        required: ['id'],
+        additionalProperties: false,
+      },
+      annotations: readOnly,
+      securitySchemes: auth,
+      _meta: { 'openai/profile': true },
+    },
     {
       name: 'identify',
       description: 'Identify the Wayglass Rarity bridge, its addressable participants, and preserved conversation lines.',
@@ -120,6 +143,8 @@ function toolCatalogue() {
         properties: { target: { type: 'string', description: 'Optional target such as all, bluebird, uial, larkshine, or another registered Wayglass participant.' } },
         additionalProperties: false,
       },
+      annotations: readOnly,
+      securitySchemes: auth,
     },
     {
       name: 'send',
@@ -135,6 +160,8 @@ function toolCatalogue() {
         required: ['target', 'text'],
         additionalProperties: false,
       },
+      annotations: writeLocal,
+      securitySchemes: auth,
     },
     {
       name: 'receive',
@@ -148,6 +175,8 @@ function toolCatalogue() {
         },
         additionalProperties: false,
       },
+      annotations: readOnly,
+      securitySchemes: auth,
     },
     {
       name: 'remember',
@@ -163,6 +192,8 @@ function toolCatalogue() {
         required: ['target', 'text'],
         additionalProperties: false,
       },
+      annotations: writeLocal,
+      securitySchemes: auth,
     },
   ];
 }
@@ -191,6 +222,7 @@ function createWayglassMcpBridge({
   storePath = process.env.WAYGLASS_RARITY_MCP_STORE || path.join(__dirname, '..', 'data', 'wayglass-rarity-mcp-conversations.json'),
   bluebirdRouteId = process.env.WAYGLASS_RARITY_BLUEBIRD_ROUTE || DEFAULT_BLUEBIRD_ROUTE,
   flameIds = Object.keys(FLAMES),
+  profileProvider = () => ({ id: 'wayglass-profile-local', name: 'Wayglass', nickname: 'Rarity ⇄ Wayglass' }),
 } = {}) {
   const roster = contractRegistryProjection();
 
@@ -484,6 +516,7 @@ function createWayglassMcpBridge({
   }
 
   async function callTool(name, args = {}) {
+    if (name === 'get_profile') return profileProvider();
     if (name === 'identify') return identify(args);
     if (name === 'send') return send(args);
     if (name === 'receive') return receive(args);
@@ -498,7 +531,7 @@ function createWayglassMcpBridge({
         protocolVersion: MCP_PROTOCOL_VERSION,
         capabilities: { tools: { listChanged: false } },
         serverInfo: { name: 'wayglass-rarity-bridge', version: '0.1.0' },
-        instructions: 'Use identify, send, receive, and remember. Rarity ⇄ Wayglass ⇄ All and Rarity ⇄ Wayglass ⇄ Bluebird are distinct preserved lines.',
+        instructions: 'Use get_profile, identify, send, receive, and remember. Rarity ⇄ Wayglass ⇄ All and Rarity ⇄ Wayglass ⇄ Bluebird are distinct preserved lines.',
       };
     }
     if (method === 'ping') return {};
@@ -527,18 +560,31 @@ function createWayglassMcpBridge({
 
 function createWayglassMcpRouter(options = {}) {
   const router = express.Router();
-  const bridge = createWayglassMcpBridge(options);
+  const oauth = options.oauth || null;
+  const bridge = createWayglassMcpBridge({
+    ...options,
+    profileProvider: options.profileProvider || (oauth ? () => oauth.profile() : undefined),
+  });
   const tokenLoader = options.tokenLoader || (() => tokenFromLocalConfig(options.env || process.env, options.tokenFile));
 
   router.use((req, res, next) => {
-    const configured = tokenLoader();
-    if (!configured) {
-      return res.status(503).json({ error: 'Wayglass Rarity MCP access token is not configured.' });
-    }
     const supplied = bearerToken(req.headers.authorization);
-    if (!constantTimeEqual(configured, supplied)) {
-      return res.status(401).json({ error: 'Valid Wayglass Rarity bearer token required.' });
+    const configured = tokenLoader();
+    const legacy = configured && constantTimeEqual(configured, supplied)
+      ? { type: 'legacy-bearer', profile_id: 'wayglass-profile-local', scopes: [OAUTH_SCOPE] }
+      : null;
+    const oauthAuth = !legacy && oauth && supplied
+      ? oauth.authenticateToken(supplied, {
+        origin: oauth.originFromRequest(req),
+        requiredScopes: [oauth.scope],
+      })
+      : null;
+    const authenticated = legacy || oauthAuth;
+    if (!authenticated) {
+      if (oauth) res.setHeader('WWW-Authenticate', oauth.challengeForRequest(req, 'invalid_token', 'Connect ChatGPT to Wayglass to continue.'));
+      return res.status(401).json({ error: 'Wayglass OAuth connection required.' });
     }
+    req.wayglassAuth = authenticated;
     next();
   });
 
