@@ -247,7 +247,8 @@ test('Twilight / Universal Horizon ingest preserves credit and source/derivative
   assert.equal(ingest.source_family.framework, 'Universal Horizon');
   assert.equal(ingest.source_family.original_author, 'Twilight');
   assert.equal(ingest.stewardship.steward, 'Rowan');
-  assert.equal(ingest.source_family.source_completeness, 'partial excerpt only');
+  assert.match(ingest.source_family.source_completeness, /complete for the named .* section/i);
+  assert.match(ingest.source_family.source_completeness, /separate verified 69-module block/i);
   assert.match(ingest.stewardship.rule, /retain Twilight and Universal Horizon credit/i);
   assert.ok(ingest.derived_training_dimensions.includes('emotional-memory-causality'));
   assert.ok(ingest.derived_training_dimensions.includes('opponent-sovereignty'));
