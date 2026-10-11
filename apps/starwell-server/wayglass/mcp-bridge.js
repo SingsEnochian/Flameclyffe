@@ -194,6 +194,45 @@ function createWayglassMcpBridge({
 } = {}) {
   const roster = contractRegistryProjection();
 
+  async function discoverWayglassRoutes() {
+    try {
+      const response = await fetchImpl(`${internalOrigin}/api/v1/wayglass/routes`, {
+        method: 'GET',
+        headers: { accept: 'application/json' },
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !Array.isArray(data.routes)) return [];
+      return data.routes.map((route) => ({
+        route_id: cleanText(route?.route_id, 180),
+        model: cleanText(route?.model, 240) || null,
+        provider: cleanText(route?.provider, 120) || null,
+        configured: route?.configured !== false,
+        participant_id: cleanText(route?.participant_id || route?.flame_id, 120) || null,
+      })).filter((route) => route.route_id);
+    } catch {
+      return [];
+    }
+  }
+
+  function participantFromRoute(route) {
+    const explicit = cleanText(route?.participant_id, 120).toLowerCase();
+    if (explicit) return explicit;
+    const match = String(route?.route_id || '').match(/^flame:([^:]+)/i);
+    return match ? match[1].toLowerCase() : null;
+  }
+
+  async function discoveredParticipantRoutes() {
+    const routes = await discoverWayglassRoutes();
+    const byParticipant = new Map();
+    for (const route of routes) {
+      const participantId = participantFromRoute(route);
+      if (!participantId || participantId === 'bluebird') continue;
+      const current = byParticipant.get(participantId);
+      if (!current || (!current.configured && route.configured)) byParticipant.set(participantId, route);
+    }
+    return byParticipant;
+  }
+
   function resolveTarget(value) {
     const raw = cleanText(value, 120).toLowerCase();
     if (!raw || raw === 'all' || raw === '*' || raw === 'commons') return 'all';
@@ -253,8 +292,38 @@ function createWayglassMcpBridge({
     };
   }
 
-  async function callFlame(participantId, text, conversationRef, records) {
+  async function callWayglassParticipant(participantId, routeId, text, conversationRef, records) {
+    const response = await fetchImpl(`${internalOrigin}/api/v1/wayglass/respond`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        route_id: routeId,
+        input: text,
+        history: toWayglassHistory(records),
+        interaction: {
+          channel: 'OOC',
+          turn_owner: 'Rarity',
+          character_ownership: [],
+        },
+        session_id: conversationRef,
+        surface_id: 'wayglass:mcp',
+        participant_id: participantId,
+        max_output_tokens: 1600,
+      }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !responseText(data)) {
+      return { ok: false, participant_id: participantId, route: routeId, error: data.error || `Wayglass route failed (${response.status}).` };
+    }
+    return { ok: true, participant_id: participantId, route: routeId, data, text: responseText(data) };
+  }
+
+  async function callFlame(participantId, text, conversationRef, records, discoveredRoute = null) {
     if (participantId === 'bluebird') return callBluebird(text, conversationRef, records);
+    if (discoveredRoute?.route_id) {
+      const routed = await callWayglassParticipant(participantId, discoveredRoute.route_id, text, conversationRef, records);
+      if (routed.ok || !FLAMES[participantId]) return routed;
+    }
     const response = await fetchImpl(`${internalOrigin}/api/v1/flames/${encodeURIComponent(participantId)}/chat`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -271,6 +340,7 @@ function createWayglassMcpBridge({
 
   async function identify(args = {}) {
     const target = resolveTarget(args.target);
+    const discovered = await discoveredParticipantRoutes();
     if (args.target && !target) throw new Error(`Unknown Wayglass target: ${args.target}`);
     const conversationRef = defaultConversationRef(target || 'all');
     return {
@@ -287,6 +357,8 @@ function createWayglassMcpBridge({
       all: {
         conversation_ref: 'rarity-all',
         participants: roster,
+        discovered_wayglass_routes: [...discovered.entries()].map(([participant_id, route]) => ({ participant_id, ...route })),
+        addressable_participant_ids: [...new Set([...flameIds, ...discovered.keys()])],
       },
       tools: toolCatalogue().map((tool) => tool.name),
     };
@@ -346,7 +418,11 @@ function createWayglassMcpBridge({
       };
     }
 
-    const settled = await Promise.all(flameIds.map(async (participantId) => callFlame(participantId, text, conversationRef, history)));
+    const discovered = await discoveredParticipantRoutes();
+    const allParticipantIds = [...new Set([...flameIds, ...discovered.keys()])];
+    const settled = await Promise.all(allParticipantIds.map(async (participantId) => (
+      callFlame(participantId, text, conversationRef, history, discovered.get(participantId) || null)
+    )));
     for (const reply of settled) {
       if (!reply.ok || !reply.text) continue;
       appendRecord(storePath, {
