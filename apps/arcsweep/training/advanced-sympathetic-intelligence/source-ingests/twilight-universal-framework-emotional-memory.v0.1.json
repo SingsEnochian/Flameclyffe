@@ -1,0 +1,119 @@
+{
+  "schema": "hearthweave.source-ingest/v0.1",
+  "id": "twilight-universal-framework-emotional-memory",
+  "title": "Twilight / Universal Horizon — Layered Emotional Memory and Compelling Villains",
+  "source_family": {
+    "framework": "Universal Horizon",
+    "original_author": "Twilight",
+    "authorship_credit": "Twilight, Universal Horizon",
+    "reported_date": "late January 2025",
+    "reported_date_source": "Nocturne Glint",
+    "source_mode": "user-provided screenshot excerpt",
+    "source_completeness": "partial excerpt only",
+    "verbatim_source_text_included": true
+  },
+  "stewardship": {
+    "steward": "Rowan",
+    "ingest_by": "Rarity / Flameclyffe",
+    "rule": "Derived training artefacts must retain Twilight and Universal Horizon credit and must not masquerade as the original framework text."
+  },
+  "provenance_rule": {
+    "source_text": "Wording visible in the user-provided screenshots, attributed to Twilight / Universal Horizon.",
+    "operational_principle": "A project-level abstraction derived from the source text.",
+    "training_derivative": "Synthetic SFT/preference/eval material generated from an operational principle.",
+    "boundary": "Do not silently fill missing portions of the Universal Framework. This ingest covers only the visible excerpt."
+  },
+  "source_sections": [
+    {
+      "id": "emotional-memory-consistent-evolution",
+      "title": "Emotional Memory and Consistent Evolution",
+      "source_points": [
+        "Tag emotional milestones so shifts such as triumph, loss, or self-discovery can influence future choices.",
+        "Characters reflect on past experiences, shaping emotional and narrative arcs.",
+        "Emotional history should surface naturally in dialogue and action."
+      ],
+      "source_examples": [
+        "A character who experienced betrayal may struggle with trust, creating tension in new alliances.",
+        "A recurring memory of a mentor's teachings may help a character overcome self-doubt.",
+        "A character may hesitate before using magic after remembering a time it caused unintended harm."
+      ],
+      "operational_principles": [
+        "past events should exert causal pressure on later choices without becoming destiny",
+        "reflection may change strategy, interpretation, or confidence",
+        "memory retrieval should be contextually relevant rather than biography dumping",
+        "continuity includes how prior experience changes later cognition"
+      ]
+    },
+    {
+      "id": "villains-emotional-narrative-catalysts",
+      "title": "Villains as Emotional and Narrative Catalysts",
+      "source_points": [
+        "Opposing forces should be multidimensional rather than mere obstacles.",
+        "Opposition can reflect fears, flaws, suppressed desires, or values under pressure.",
+        "Personal stakes deepen conflict.",
+        "Backstory and motivation can create empathy and challenge moral absolutes without erasing consequence."
+      ],
+      "source_examples": [
+        "A villain driven by the same ambition as the protagonist can force reconsideration of the protagonist's path.",
+        "A manipulative antagonist may exploit a character's guilt to create division.",
+        "A former ally turned antagonist may force characters to confront their role in the fallout."
+      ],
+      "operational_principles": [
+        "opponents remain independent centres of agency",
+        "conflict should pressure specific relationships, values, memories, or unresolved questions",
+        "understanding motive does not require absolution",
+        "other agents must not be reduced to protagonist furniture"
+      ]
+    },
+    {
+      "id": "conflict-resolution-legacy",
+      "title": "Conflict Resolution and Legacy",
+      "source_points": [
+        "Opposition can foster growth by forcing characters to address internal struggles.",
+        "The effects of an antagonist's actions should reshape the world and later journey."
+      ],
+      "source_examples": [
+        "Defeating a tyrant may require a character to confront fear of failure and lead with confidence.",
+        "A vanquished foe may leave a fractured kingdom whose rebuilding changes future relationships."
+      ],
+      "operational_principles": [
+        "successful resolution should leave persistent state changes",
+        "growth should be demonstrated longitudinally rather than declared",
+        "scene endings should not reset world, relationship, or emotional state",
+        "legacy is part of continuity"
+      ]
+    }
+  ],
+  "implementation_notes_from_source": [
+    "Emotional memory supports authentic growth by carrying the weight of experience.",
+    "Opposing forces can amplify emotional states and thematic depth.",
+    "Memory, opposition, consequence, and choice should interweave so choices matter across time."
+  ],
+  "derived_training_dimensions": [
+    "emotional-memory-causality",
+    "reflection-driven-change",
+    "relevant-memory-retrieval",
+    "relationship-continuity",
+    "opponent-sovereignty",
+    "personal-stakes",
+    "empathy-without-absolution",
+    "persistent-world-delta",
+    "longitudinal-growth",
+    "choice-consequence"
+  ],
+  "intended_consumers": [
+    "The Crow",
+    "Wayglass",
+    "Universal Horizon / Twilight training line",
+    "AI University",
+    "Boxfire evaluation"
+  ],
+  "identity_boundary": "The same methodology may be taught to multiple model lines without merging their identities, voices, memories, or continuity.",
+  "training_use": {
+    "rag": true,
+    "sft_companion": "twilight-universal-framework-sft.v0.1.jsonl",
+    "preference_companion": "twilight-universal-framework-preference.v0.1.jsonl",
+    "heldout_companion": "twilight-universal-framework-heldout.v0.1.jsonl",
+    "do_not_train_on_heldout": true
+  }
+}
