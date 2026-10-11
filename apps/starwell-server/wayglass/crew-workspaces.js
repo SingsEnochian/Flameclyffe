@@ -69,6 +69,10 @@ const WORKSPACES = Object.freeze({
     capabilities: Object.freeze([
       'inspect-reference',
       'source-preserving-edit',
+      'procreate-inspect',
+      'procreate-render',
+      'procreate-analyse',
+      'procreate-roundtrip-validation',
       'layered-art',
       'template-forge',
       'material-study',
@@ -83,6 +87,7 @@ const WORKSPACES = Object.freeze({
       'Keep independently editable parts independently editable when the deliverable requires it.',
       'Record who changed what.',
       'A renderer or image model is a tool hand, not the identity of the participant using it.',
+      'Native Procreate writing remains disabled until a disposable round-trip test proves the document reopens with intended structure intact.',
       'Wayglass may surface context and observations but does not silently take authorship from crew.',
     ]),
   }),
