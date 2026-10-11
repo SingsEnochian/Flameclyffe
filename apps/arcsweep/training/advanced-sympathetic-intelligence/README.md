@@ -201,6 +201,54 @@ Held-out files deliberately contain rubrics rather than answer keys. They are in
 
 `boxfire-qa.v0.1.jsonl` is for architecture/model QA. Each case declares required observations and regressions to flag.
 
+## Twilight / Universal Horizon source lineage
+
+The corpus now includes a credited ingest of the user-provided excerpt **“Layered Emotional Memory and Compelling Villains.”**
+
+**Original framework author:** Twilight  
+**Framework:** Universal Horizon  
+**Reported original period:** late January 2025, per Nocturne Glint  
+**Ingest scope:** the visible excerpt only; missing portions of the Universal Framework are not silently reconstructed.
+
+The source excerpt is stored separately from its synthetic derivatives:
+
+- `source-ingests/twilight-universal-framework-emotional-memory.v0.1.json` — provenance-bound source ingest and operational mapping;
+- `twilight-universal-framework-sft.v0.1.jsonl` — supervised examples;
+- `twilight-universal-framework-preference.v0.1.jsonl` — chosen/rejected preference pairs suitable for later preference tuning;
+- `twilight-universal-framework-heldout.v0.1.jsonl` — sealed transfer evaluation, never training material.
+
+The methodology is intentionally reusable across model lines while identity remains separate:
+
+```text
+Twilight / Universal Horizon methodology
+        ↓
+shared credited curriculum
+        ↓
+        ├── The Crow training line
+        ├── Wayglass training line
+        └── Universal Horizon / Twilight training line
+```
+
+Shared methodology does **not** imply shared identity, memory, voice, or continuity.
+
+This source contributes a particularly useful continuity grammar:
+
+```text
+past event
+   ↓
+emotional / relational state change
+   ↓
+reflection
+   ↓
+later perception and choice
+   ↓
+persistent consequence
+   ↓
+future state
+```
+
+It also contributes the rule that opposing forces remain multidimensional centres of agency rather than disposable obstacles, and that understanding motive does not erase responsibility or consequence.
+
 ## Use with The Crow
 
 For RAG/ingest, index `principles.v0.1.json`, source ingests, this README, architecture contracts, and the shared AI University / Experiment Bed contracts. For SFT or adapter training, train only on splits whose manifest entry says `may_train_on: true` and keep every held-out split sealed.
