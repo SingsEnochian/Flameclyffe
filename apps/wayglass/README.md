@@ -73,3 +73,30 @@ npm run wayglass:humain:access:probe
 The probe checks the authenticated model catalogue first. If `humain-m3` is actually entitled, it sends one synthetic non-sensitive transport prompt and wraps the result as a non-canonical model observation. It never prints the credential.
 
 Current HUMAIN Preview data policy is represented separately from Wayglass persistence on route receipts. Provider recording/retention must never be inferred from `wayglass_persisted: false`.
+
+## Toybox
+
+Wayglass now has an optional sensory-play room at `?room=toybox`.
+
+The v0.1 drawer contains:
+
+- **Mote Herd** — attract/repel light particles;
+- **Ghost Trace** — draw fading luminous trails;
+- **Click Garden** — satisfying jewel toggles;
+- **Vibe Stone** — explicit device haptic patterns where supported;
+- **Sound Nest** — locally generated hum, pink noise and brown noise;
+- **Time Puddle** — a visual, non-scolding chosen-time container.
+
+Toybox sensory profiles are **Soft**, **Balanced**, and **Sparkly**. They change render intensity, motion, density, audio gain and haptic strength without changing the meaning or availability of a toy. They are user preferences, not diagnostic labels.
+
+Standing Toybox laws:
+
+- no autoplay;
+- no hidden telemetry;
+- no productivity scoring, streaks or task debt;
+- audio/haptics require explicit user action and expose an immediate stop path;
+- browser reduced-motion suppresses autonomous motion while preserving interaction;
+- a toy is allowed to exist simply because it is satisfying.
+
+Research provenance and licence posture live in `docs/research/WAYGLASS_TOYBOX_GITHUB_INGEST_V0_1.md`.
+
