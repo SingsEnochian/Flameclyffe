@@ -17,6 +17,7 @@ const multer = require('multer');
 const flameRouter = require('./flames/router');
 const wayglassRouter = require('./wayglass/router');
 const { createWayglassMcpRouter } = require('./wayglass/mcp-bridge');
+const { createWayglassPeerOAuth } = require('./wayglass/oauth-peer');
 const { FLAMES } = require('./flames/manifests');
 
 // Load .env from this directory if present
@@ -590,10 +591,15 @@ app.get('/api/v1/context', async (req, res) => {
 const groveChatRouter = require('./routes/grove-chat.routes');
 app.use('/api/v1/chat', groveChatRouter);
 
-// ── Wayglass MCP + Flame routers (v1) ──────────────────────────────────────
+// ── Wayglass OAuth + MCP + Flame routers (v1) ─────────────────────────────
+// OAuth metadata and authorization live at the server root because ChatGPT
+// discovers them from the public /mcp resource URL.
+const wayglassPeerOAuth = createWayglassPeerOAuth();
+wayglassPeerOAuth.mount(app);
+
 // The public tunnel may expose /mcp directly. The /api alias keeps local
 // diagnostics and future clients on the same authenticated bridge.
-const wayglassMcpRouter = createWayglassMcpRouter();
+const wayglassMcpRouter = createWayglassMcpRouter({ oauth: wayglassPeerOAuth });
 app.use('/mcp', wayglassMcpRouter);
 app.use('/api/v1/wayglass/mcp', wayglassMcpRouter);
 app.use('/api/v1/wayglass', wayglassRouter);
