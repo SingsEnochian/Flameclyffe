@@ -16,6 +16,7 @@ const OpenAI = require('openai');
 const multer = require('multer');
 const flameRouter = require('./flames/router');
 const wayglassRouter = require('./wayglass/router');
+const { createWayglassMcpRouter } = require('./wayglass/mcp-bridge');
 const { FLAMES } = require('./flames/manifests');
 
 // Load .env from this directory if present
@@ -589,7 +590,12 @@ app.get('/api/v1/context', async (req, res) => {
 const groveChatRouter = require('./routes/grove-chat.routes');
 app.use('/api/v1/chat', groveChatRouter);
 
-// ── Flame router (v1) ───────────────────────────────────────────────────────
+// ── Wayglass MCP + Flame routers (v1) ──────────────────────────────────────
+// The public tunnel may expose /mcp directly. The /api alias keeps local
+// diagnostics and future clients on the same authenticated bridge.
+const wayglassMcpRouter = createWayglassMcpRouter();
+app.use('/mcp', wayglassMcpRouter);
+app.use('/api/v1/wayglass/mcp', wayglassMcpRouter);
 app.use('/api/v1/wayglass', wayglassRouter);
 app.use('/api/v1', flameRouter);
 
