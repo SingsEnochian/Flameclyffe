@@ -208,7 +208,7 @@ The corpus now includes a credited ingest of the user-provided excerpt **“Laye
 **Original framework author:** Twilight  
 **Framework:** Universal Horizon  
 **Reported original period:** late January 2025, per Nocturne Glint  
-**Ingest scope:** the visible excerpt only; missing portions of the Universal Framework are not silently reconstructed.
+**Ingest scope:** the named emotional-memory/opposing-forces section is now source-document verified in `Bridging Worlds.docx`; the adjacent complete 69-module Universal Framework block is separately inventoried from the same source.
 
 The source excerpt is stored separately from its synthetic derivatives:
 
@@ -216,6 +216,8 @@ The source excerpt is stored separately from its synthetic derivatives:
 - `twilight-universal-framework-sft.v0.1.jsonl` — supervised examples;
 - `twilight-universal-framework-preference.v0.1.jsonl` — chosen/rejected preference pairs suitable for later preference tuning;
 - `twilight-universal-framework-heldout.v0.1.jsonl` — sealed transfer evaluation, never training material.
+- `source-ingests/twilight-universal-framework-69-module-inventory.v0.1.json` — verified ordered inventory of all 69 source modules, with duplicate-copy hash/provenance;
+- `twilight-universal-framework-69-module-training-map.v0.1.json` — deliberate curriculum map over all 69 modules; this map is not itself training data.
 
 The methodology is intentionally reusable across model lines while identity remains separate:
 
@@ -230,6 +232,8 @@ shared credited curriculum
 ```
 
 Shared methodology does **not** imply shared identity, memory, voice, or continuity.
+
+Source verification found the 69-module block in both `Bridging Worlds.docx` and `Bridging Worlds(1).docx`. The block contains the same 69 titles in the same order and identical normalized module text in both copies. The normalized block SHA-256 is `ac9eacc27fa4398be6b15329a03b1ed935e1bc307b325d3a32f66d9dca5b6718`. The previously screenshot-supplied **Layered Emotional Memory and Compelling Villains** section immediately precedes that 69-module block and is not counted among the 69 modules.
 
 This source contributes a particularly useful continuity grammar:
 
