@@ -8,9 +8,18 @@
     "authorship_credit": "Twilight, Universal Horizon",
     "reported_date": "late January 2025",
     "reported_date_source": "Nocturne Glint",
-    "source_mode": "user-provided screenshot excerpt",
-    "source_completeness": "partial excerpt only",
-    "verbatim_source_text_included": true
+    "source_mode": "source-document-verified excerpt; screenshots were the discovery path",
+    "source_completeness": "complete for the named 'Layered Emotional Memory and Compelling Villains' section; broader Universal Framework continues into a separate verified 69-module block",
+    "verbatim_source_text_included": true,
+    "primary_source": {
+      "name": "Bridging Worlds.docx",
+      "page": 81,
+      "library_scope": "Rowan source library"
+    },
+    "corroborating_source": {
+      "name": "Bridging Worlds(1).docx",
+      "relation": "corroborating copy"
+    }
   },
   "stewardship": {
     "steward": "Rowan",
@@ -18,10 +27,10 @@
     "rule": "Derived training artefacts must retain Twilight and Universal Horizon credit and must not masquerade as the original framework text."
   },
   "provenance_rule": {
-    "source_text": "Wording visible in the user-provided screenshots, attributed to Twilight / Universal Horizon.",
+    "source_text": "Wording in the named source section of Bridging Worlds.docx, authored by Twilight / Universal Horizon and independently located after the screenshot-led discovery.",
     "operational_principle": "A project-level abstraction derived from the source text.",
     "training_derivative": "Synthetic SFT/preference/eval material generated from an operational principle.",
-    "boundary": "Do not silently fill missing portions of the Universal Framework. This ingest covers only the visible excerpt."
+    "boundary": "This ingest covers the complete named section. The adjacent 69-module framework is inventoried separately in twilight-universal-framework-69-module-inventory.v0.1.json."
   },
   "source_sections": [
     {
@@ -115,5 +124,13 @@
     "preference_companion": "twilight-universal-framework-preference.v0.1.jsonl",
     "heldout_companion": "twilight-universal-framework-heldout.v0.1.jsonl",
     "do_not_train_on_heldout": true
+  },
+  "source_verification": {
+    "verified_on": "2026-10-10 America/New_York",
+    "named_section_primary_page": 81,
+    "adjacent_69_module_block_primary_pages": "83-245",
+    "adjacent_69_module_block_corroborating_pages": "150-289",
+    "adjacent_inventory": "twilight-universal-framework-69-module-inventory.v0.1.json",
+    "note": "The screenshot excerpt was matched back to the original source document; source provenance now supersedes screenshot-only provenance."
   }
 }
