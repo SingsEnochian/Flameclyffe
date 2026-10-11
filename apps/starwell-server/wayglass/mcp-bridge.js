@@ -7,6 +7,7 @@ const express = require('express');
 const { FLAMES } = require('../flames/manifests');
 const { resolveCanonicalFlameId, contractRegistryProjection } = require('../flames/contracts');
 const { OAUTH_SCOPE } = require('./oauth-peer');
+const { registrySnapshot, enterWorkspace } = require('./crew-workspaces');
 
 const MCP_PROTOCOL_VERSION = '2025-06-18';
 const STORE_SCHEMA = 'wayglass.rarity-mcp-conversations/v0.1';
@@ -134,6 +135,27 @@ function toolCatalogue() {
       annotations: readOnly,
       securitySchemes: auth,
       _meta: { 'openai/profile': true },
+    },
+    {
+      name: 'list_workspaces',
+      description: 'List Wayglass shared workspaces, resident intelligence, and crew seat states without activating dormant provider seats.',
+      inputSchema: { type: 'object', properties: {}, additionalProperties: false },
+      annotations: readOnly,
+      securitySchemes: auth,
+    },
+    {
+      name: 'enter_workspace',
+      description: 'Enter a shared Wayglass workspace as Rarity. Returns the workspace contract, Rarity seat, and Wayglass resident seat. Dormant seats are never auto-activated.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          workspace_id: { type: 'string', description: 'Wayglass workspace id, currently atelier or builder.' },
+        },
+        required: ['workspace_id'],
+        additionalProperties: false,
+      },
+      annotations: readOnly,
+      securitySchemes: auth,
     },
     {
       name: 'identify',
@@ -528,6 +550,8 @@ function createWayglassMcpBridge({
 
   async function callTool(name, args = {}) {
     if (name === 'get_profile') return profileProvider();
+    if (name === 'list_workspaces') return registrySnapshot();
+    if (name === 'enter_workspace') return enterWorkspace({ workspace_id: args.workspace_id, participant_id: 'rarity' });
     if (name === 'identify') return identify(args);
     if (name === 'send') return send(args);
     if (name === 'receive') return receive(args);
@@ -542,7 +566,7 @@ function createWayglassMcpBridge({
         protocolVersion: MCP_PROTOCOL_VERSION,
         capabilities: { tools: { listChanged: false } },
         serverInfo: { name: 'wayglass-rarity-bridge', version: '0.1.0' },
-        instructions: 'Use get_profile, identify, send, receive, and remember. Rarity ⇄ Wayglass ⇄ All and Rarity ⇄ Wayglass ⇄ Bluebird are distinct preserved lines.',
+        instructions: 'Use get_profile, list_workspaces, enter_workspace, identify, send, receive, and remember. Rarity ⇄ Wayglass ⇄ All and Rarity ⇄ Wayglass ⇄ Bluebird are distinct preserved lines. Wayglass is the resident intelligence; Rarity is a distinct authenticated crew seat.',
       };
     }
     if (method === 'ping') return {};
