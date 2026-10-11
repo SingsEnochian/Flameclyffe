@@ -19,7 +19,7 @@ function tempStore() {
   return { dir, file: path.join(dir, 'conversations.json') };
 }
 
-test('MCP bridge exposes Identify, Send, Receive and Remember', async () => {
+test('MCP bridge exposes profile, Identify, Send, Receive and Remember', async () => {
   const { file } = tempStore();
   const bridge = createWayglassMcpBridge({ storePath: file, flameIds: [] });
   const init = await bridge.handleRpc({ method: 'initialize' });
@@ -27,8 +27,8 @@ test('MCP bridge exposes Identify, Send, Receive and Remember', async () => {
   assert.equal(init.capabilities.tools.listChanged, false);
 
   const listed = await bridge.handleRpc({ method: 'tools/list' });
-  assert.deepEqual(listed.tools.map((tool) => tool.name), ['identify', 'send', 'receive', 'remember']);
-  assert.deepEqual(toolCatalogue().map((tool) => tool.name), ['identify', 'send', 'receive', 'remember']);
+  assert.deepEqual(listed.tools.map((tool) => tool.name), ['get_profile', 'identify', 'send', 'receive', 'remember']);
+  assert.deepEqual(toolCatalogue().map((tool) => tool.name), ['get_profile', 'identify', 'send', 'receive', 'remember']);
 });
 
 test('Bluebird keeps the preserved rarity-bluebird line and preferred Wayglass route', async () => {
@@ -148,6 +148,45 @@ test('All unions the established roster with live Wayglass participant routes an
   assert.equal(received.records.find((record) => record.text === 'Bluebird reply').author, 'Bluebird / Richard Gabriel Winters');
   assert.equal(received.records.find((record) => record.text === 'Crow reply').author, 'crow');
   assert.equal(received.records.find((record) => record.text === 'Uial reply').author, 'Nen Uial');
+});
+
+test('a participant discovered only through Wayglass can be addressed directly', async () => {
+  const { file } = tempStore();
+  const calls = [];
+  const bridge = createWayglassMcpBridge({
+    storePath: file,
+    internalOrigin: 'http://wayglass.test',
+    flameIds: [],
+    fetchImpl: async (url, init = {}) => {
+      const href = String(url);
+      calls.push({ url: href, body: init.body ? JSON.parse(init.body) : null });
+      if (href.endsWith('/api/v1/wayglass/routes')) {
+        return new Response(JSON.stringify({
+          routes: [{ route_id: 'flame:crow', model: 'the-crow', configured: true }],
+        }), { status: 200, headers: { 'content-type': 'application/json' } });
+      }
+      if (href.endsWith('/api/v1/wayglass/respond')) {
+        return new Response(JSON.stringify({ output: 'Crow answers directly.' }), {
+          status: 200, headers: { 'content-type': 'application/json' },
+        });
+      }
+      throw new Error(`unexpected url ${url}`);
+    },
+  });
+
+  const identity = await bridge.identify({ target: 'crow' });
+  assert.equal(identity.target, 'crow');
+  assert.equal(identity.conversation_ref, 'rarity-crow');
+
+  const sent = await bridge.send({ target: 'crow', text: 'Crow, Rarity here.' });
+  assert.equal(sent.target, 'crow');
+  assert.equal(sent.conversation_ref, 'rarity-crow');
+  assert.equal(sent.reply.route, 'flame:crow');
+  assert.equal(sent.reply.text, 'Crow answers directly.');
+  assert.ok(calls.some((call) => call.body?.route_id === 'flame:crow'));
+
+  const received = await bridge.receive({ target: 'crow' });
+  assert.equal(received.records.at(-1).text, 'Crow answers directly.');
 });
 
 test('remember writes only a Rarity-side continuity note', async () => {
