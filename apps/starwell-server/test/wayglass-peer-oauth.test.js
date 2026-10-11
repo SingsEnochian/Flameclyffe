@@ -245,7 +245,7 @@ test('authorization code is single-use, access token opens MCP, profile is stabl
   assert.equal(listResponse.status, 200);
   const listed = await listResponse.json();
   const names = listed.result.tools.map((tool) => tool.name);
-  assert.deepEqual(names, ['get_profile', 'identify', 'send', 'receive', 'remember']);
+  assert.deepEqual(names, ['get_profile', 'list_workspaces', 'enter_workspace', 'identify', 'send', 'receive', 'remember']);
   for (const tool of listed.result.tools) {
     assert.deepEqual(tool.securitySchemes, [{ type: 'oauth2', scopes: [OAUTH_SCOPE] }]);
   }
