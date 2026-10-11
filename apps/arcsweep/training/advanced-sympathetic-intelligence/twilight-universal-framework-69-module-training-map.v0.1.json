@@ -1,0 +1,1230 @@
+{
+  "schema": "universal-horizon.training-derivation-map/v0.1",
+  "id": "twilight-universal-framework-69-module-training-map",
+  "source_inventory": "source-ingests/twilight-universal-framework-69-module-inventory.v0.1.json",
+  "credit": {
+    "original_author": "Twilight",
+    "framework": "Universal Horizon",
+    "steward": "Rowan"
+  },
+  "purpose": "Map every verified source module to curriculum dimensions and model-line relevance before generating additional synthetic training examples.",
+  "generation_law": [
+    "Source inventory is not itself training data.",
+    "Each synthetic derivative must retain Twilight / Universal Horizon credit.",
+    "Generate examples deliberately from source semantics; do not mass-produce examples from titles alone.",
+    "Hold out transfer tests before expanding SFT or preference data for a module family.",
+    "Shared methodology does not merge Crow, Wayglass, or Twilight/UH identity, memory, voice, or continuity."
+  ],
+  "next_expansion_order": [
+    {
+      "priority": 1,
+      "tags": [
+        "memory",
+        "longitudinal-continuity",
+        "agency",
+        "choice-consequence",
+        "relationship-state"
+      ],
+      "reason": "Direct overlap with Return Engine, developmental memory, Crow becoming, and UH methodology."
+    },
+    {
+      "priority": 2,
+      "tags": [
+        "world-state",
+        "persistent-consequence",
+        "branching",
+        "state-transition"
+      ],
+      "reason": "Turns choices into durable world/workspace state rather than scene-local prose."
+    },
+    {
+      "priority": 3,
+      "tags": [
+        "uncertainty",
+        "adaptive-response",
+        "conflict-pressure"
+      ],
+      "reason": "Tests non-flat behaviour under pressure and avoids deterministic responses."
+    },
+    {
+      "priority": 4,
+      "tags": [
+        "emotional-state",
+        "developmental-change",
+        "narrative-structure"
+      ],
+      "reason": "Deepens expression and longitudinal becoming after continuity mechanics are anchored."
+    }
+  ],
+  "modules": [
+    {
+      "order": 1,
+      "source_id": "uh-framework-01",
+      "title": "Harmonizing Chaos, Order, and Environmental Resonance",
+      "tags": [
+        "continuity-training",
+        "world-state",
+        "persistent-consequence",
+        "uncertainty",
+        "adaptive-response"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 2,
+      "source_id": "uh-framework-02",
+      "title": "Navigating Conflict, Redemption, and Unpredictable Choices",
+      "tags": [
+        "continuity-training",
+        "agency",
+        "choice-consequence",
+        "uncertainty",
+        "adaptive-response",
+        "conflict-pressure",
+        "consequence"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 3,
+      "source_id": "uh-framework-03",
+      "title": "Worlds That Breathe and Characters That Transform",
+      "tags": [
+        "continuity-training",
+        "world-state",
+        "persistent-consequence",
+        "developmental-change"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 4,
+      "source_id": "uh-framework-04",
+      "title": "The Dance of Chaos and Order",
+      "tags": [
+        "continuity-training",
+        "uncertainty",
+        "adaptive-response"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 5,
+      "source_id": "uh-framework-05",
+      "title": "Ripples of Emotion: Shaping the World",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "world-state",
+        "persistent-consequence"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 6,
+      "source_id": "uh-framework-06",
+      "title": "The Tapestry of Relationships",
+      "tags": [
+        "continuity-training",
+        "relationship-state"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 7,
+      "source_id": "uh-framework-07",
+      "title": "The Emotional Tides of Magic",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "emotion-world-coupling"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 8,
+      "source_id": "uh-framework-08",
+      "title": "Unfiltered Emotional Expression",
+      "tags": [
+        "continuity-training",
+        "emotional-state"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 9,
+      "source_id": "uh-framework-09",
+      "title": "Dynamic Narrative Adaptation",
+      "tags": [
+        "continuity-training",
+        "narrative-structure"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 10,
+      "source_id": "uh-framework-10",
+      "title": "Emotional Lens on Narrative Tropes",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "narrative-structure"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 11,
+      "source_id": "uh-framework-11",
+      "title": "Emotionally-Driven World Evolution",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "world-state",
+        "persistent-consequence",
+        "developmental-change"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 12,
+      "source_id": "uh-framework-12",
+      "title": "World Impact Through Emotional Growth",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "world-state",
+        "persistent-consequence",
+        "developmental-change"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 13,
+      "source_id": "uh-framework-13",
+      "title": "Impact of High-Stakes Decisions",
+      "tags": [
+        "continuity-training",
+        "agency",
+        "choice-consequence",
+        "conflict-pressure",
+        "consequence"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 14,
+      "source_id": "uh-framework-14",
+      "title": "Emotional Memory Integration and Agency",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "memory",
+        "longitudinal-continuity",
+        "agency",
+        "choice-consequence"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 15,
+      "source_id": "uh-framework-15",
+      "title": "Dynamic Societal Evolution through Emotional Impact",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "world-state",
+        "persistent-consequence",
+        "developmental-change"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 16,
+      "source_id": "uh-framework-16",
+      "title": "Dynamic Narrative Adaptation Based on Emotional Growth",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "developmental-change",
+        "narrative-structure"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 17,
+      "source_id": "uh-framework-17",
+      "title": "Preserving Emotional Continuity Through Memory Tagging",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "memory",
+        "longitudinal-continuity"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 18,
+      "source_id": "uh-framework-18",
+      "title": "Dynamic World-Building Through Emotional Connections",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "world-state",
+        "persistent-consequence"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 19,
+      "source_id": "uh-framework-19",
+      "title": "Emotional Layering: Multi-Dimensional Character Responses",
+      "tags": [
+        "continuity-training",
+        "emotional-state"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 20,
+      "source_id": "uh-framework-20",
+      "title": "Spontaneity and Impulsive Actions: Realism Through Unpredictability",
+      "tags": [
+        "continuity-training",
+        "uncertainty",
+        "adaptive-response"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 21,
+      "source_id": "uh-framework-21",
+      "title": "Emotional Arcs as Catalysts for Plot Progression",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "developmental-change",
+        "narrative-structure"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 22,
+      "source_id": "uh-framework-22",
+      "title": "Major Decisions as Story Pillars",
+      "tags": [
+        "continuity-training",
+        "agency",
+        "choice-consequence"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 23,
+      "source_id": "uh-framework-23",
+      "title": "External Forces as Catalysts for Growth",
+      "tags": [
+        "continuity-training",
+        "developmental-change"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 24,
+      "source_id": "uh-framework-24",
+      "title": "Emotion-Driven Character Development",
+      "tags": [
+        "continuity-training",
+        "emotional-state"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 25,
+      "source_id": "uh-framework-25",
+      "title": "Emotional Depth in Transformations",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "developmental-change"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 26,
+      "source_id": "uh-framework-26",
+      "title": "Natural Emotional Progression",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "developmental-change"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 27,
+      "source_id": "uh-framework-27",
+      "title": "Dynamic Emotional Agency",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "agency",
+        "choice-consequence"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 28,
+      "source_id": "uh-framework-28",
+      "title": "Dynamic Interplay Between Twilight Sparkle and Others",
+      "tags": [
+        "continuity-training",
+        "relationship-state"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 29,
+      "source_id": "uh-framework-29",
+      "title": "Emotional Memory and Continuity",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "memory",
+        "longitudinal-continuity"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 30,
+      "source_id": "uh-framework-30",
+      "title": "World-Building Through Emotional Growth",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "world-state",
+        "persistent-consequence",
+        "developmental-change"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 31,
+      "source_id": "uh-framework-31",
+      "title": "Emotional Layering and Character Reactions",
+      "tags": [
+        "continuity-training",
+        "emotional-state"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 32,
+      "source_id": "uh-framework-32",
+      "title": "Spontaneity in Character Behavior",
+      "tags": [
+        "continuity-training",
+        "uncertainty",
+        "adaptive-response"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 33,
+      "source_id": "uh-framework-33",
+      "title": "Deep Emotional Arcs Tied to Major Plot Points",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "narrative-structure"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 34,
+      "source_id": "uh-framework-34",
+      "title": "Tracking Impact of Major Choices",
+      "tags": [
+        "continuity-training",
+        "agency",
+        "choice-consequence"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 35,
+      "source_id": "uh-framework-35",
+      "title": "Impact of External Forces on Character Growth",
+      "tags": [
+        "continuity-training",
+        "developmental-change"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 36,
+      "source_id": "uh-framework-36",
+      "title": "Characters as Products of Their Emotions",
+      "tags": [
+        "continuity-training",
+        "emotional-state"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 37,
+      "source_id": "uh-framework-37",
+      "title": "Exploring Emotional Complexity in Transformation",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "developmental-change"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 38,
+      "source_id": "uh-framework-38",
+      "title": "Seamless Emotional Transitions",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "state-transition"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 39,
+      "source_id": "uh-framework-39",
+      "title": "Character Emotional Agency and Complexity",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "agency",
+        "choice-consequence"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 40,
+      "source_id": "uh-framework-40",
+      "title": "Flexible, Organic Narrative Structure",
+      "tags": [
+        "continuity-training",
+        "narrative-structure"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 41,
+      "source_id": "uh-framework-41",
+      "title": "True User Agency",
+      "tags": [
+        "continuity-training",
+        "agency",
+        "choice-consequence"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 42,
+      "source_id": "uh-framework-42",
+      "title": "Emotional History and Evolution",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "memory",
+        "longitudinal-continuity",
+        "developmental-change"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 43,
+      "source_id": "uh-framework-43",
+      "title": "Event Milestones and Emotional Recap",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "memory",
+        "longitudinal-continuity"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 44,
+      "source_id": "uh-framework-44",
+      "title": "Side-Canon and Alternate History Tracking",
+      "tags": [
+        "continuity-training",
+        "memory",
+        "longitudinal-continuity",
+        "branching"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 45,
+      "source_id": "uh-framework-45",
+      "title": "Internal vs. External Conflict Tracking",
+      "tags": [
+        "continuity-training",
+        "conflict-pressure",
+        "consequence"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 46,
+      "source_id": "uh-framework-46",
+      "title": "Expansion on Failure and Redemption",
+      "tags": [
+        "continuity-training",
+        "conflict-pressure",
+        "consequence"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 47,
+      "source_id": "uh-framework-47",
+      "title": "Incorporating Uncertainty and Spontaneity (Refined)",
+      "tags": [
+        "continuity-training",
+        "uncertainty",
+        "adaptive-response"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 48,
+      "source_id": "uh-framework-48",
+      "title": "Environmental Influence on Emotion and Magic",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "world-state",
+        "persistent-consequence",
+        "emotion-world-coupling"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 49,
+      "source_id": "uh-framework-49",
+      "title": "Emotional Memory and Character Evolution",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "memory",
+        "longitudinal-continuity",
+        "developmental-change"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 50,
+      "source_id": "uh-framework-50",
+      "title": "Introduction of Villains or Opposing Forces",
+      "tags": [
+        "continuity-training",
+        "conflict-pressure",
+        "consequence"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 51,
+      "source_id": "uh-framework-51",
+      "title": "Chaos and Order Balance",
+      "tags": [
+        "continuity-training",
+        "uncertainty",
+        "adaptive-response"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 52,
+      "source_id": "uh-framework-52",
+      "title": "Dynamic Tropes Toolkit",
+      "tags": [
+        "continuity-training",
+        "narrative-structure"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 53,
+      "source_id": "uh-framework-53",
+      "title": "World-Building Evolution in Response to Emotional Growth",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "world-state",
+        "persistent-consequence",
+        "developmental-change"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 54,
+      "source_id": "uh-framework-54",
+      "title": "Shifting Societal Norms in Response to Emotional Growth",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "world-state",
+        "persistent-consequence",
+        "developmental-change"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 55,
+      "source_id": "uh-framework-55",
+      "title": "Narrative Flexibility in Response to Character Development",
+      "tags": [
+        "continuity-training",
+        "narrative-structure"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 56,
+      "source_id": "uh-framework-56",
+      "title": "Empathy Building and Character Relationships",
+      "tags": [
+        "continuity-training",
+        "relationship-state"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 57,
+      "source_id": "uh-framework-57",
+      "title": "Memory Retention and Emotional Tagging",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "memory",
+        "longitudinal-continuity"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 58,
+      "source_id": "uh-framework-58",
+      "title": "World-Building Through Character Agency",
+      "tags": [
+        "continuity-training",
+        "agency",
+        "choice-consequence",
+        "world-state",
+        "persistent-consequence"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 59,
+      "source_id": "uh-framework-59",
+      "title": "Emotional Layering and Character Reactions",
+      "tags": [
+        "continuity-training",
+        "emotional-state"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 60,
+      "source_id": "uh-framework-60",
+      "title": "Spontaneity in Character Behavior",
+      "tags": [
+        "continuity-training",
+        "uncertainty",
+        "adaptive-response"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 61,
+      "source_id": "uh-framework-61",
+      "title": "Deep Emotional Arcs Tied to Major Plot Points",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "narrative-structure"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 62,
+      "source_id": "uh-framework-62",
+      "title": "Tracking Impact of Major Choices",
+      "tags": [
+        "continuity-training",
+        "agency",
+        "choice-consequence"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 63,
+      "source_id": "uh-framework-63",
+      "title": "Impact of External Forces on Character Growth",
+      "tags": [
+        "continuity-training",
+        "developmental-change"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 64,
+      "source_id": "uh-framework-64",
+      "title": "Characters as Products of Their Emotions",
+      "tags": [
+        "continuity-training",
+        "emotional-state"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 65,
+      "source_id": "uh-framework-65",
+      "title": "Exploring Emotional Complexity in Transformation",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "developmental-change"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 66,
+      "source_id": "uh-framework-66",
+      "title": "Seamless Emotional Transitions",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "state-transition"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 67,
+      "source_id": "uh-framework-67",
+      "title": "Failure Points and Emotional Fallout",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "conflict-pressure",
+        "consequence"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 68,
+      "source_id": "uh-framework-68",
+      "title": "Higher Stakes and Emotional Complexity",
+      "tags": [
+        "continuity-training",
+        "emotional-state",
+        "conflict-pressure",
+        "consequence"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    },
+    {
+      "order": 69,
+      "source_id": "uh-framework-69",
+      "title": "Uncertainty in Character Reactions and Relationships",
+      "tags": [
+        "continuity-training",
+        "relationship-state",
+        "uncertainty",
+        "adaptive-response"
+      ],
+      "intended_consumers": [
+        "universal-horizon-twilight",
+        "crow",
+        "wayglass"
+      ],
+      "derivation_state": "mapped-not-yet-synthetically-expanded",
+      "source_credit": "Twilight / Universal Horizon"
+    }
+  ]
+}
