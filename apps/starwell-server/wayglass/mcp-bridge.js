@@ -389,7 +389,7 @@ function createWayglassMcpBridge({
       all: {
         conversation_ref: 'rarity-all',
         participants: roster,
-        discovered_wayglass_routes: [...discovered.entries()].map(([participant_id, route]) => ({ participant_id, ...route })),
+        discovered_wayglass_routes: [...discovered.entries()].map(([participant_id, route]) => ({ ...route, participant_id })),
         addressable_participant_ids: [...new Set([...flameIds, ...discovered.keys()])],
       },
       tools: toolCatalogue().map((tool) => tool.name),
