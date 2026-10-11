@@ -39,7 +39,12 @@ test('Atelier inherits Rarity Atelier craft without becoming a Rarity identity s
   assert.ok(WORKSPACES.atelier.lineage.includes('rarity-atelier'));
   assert.equal(WORKSPACES.atelier.resident, 'wayglass');
   assert.ok(WORKSPACES.atelier.capabilities.includes('layered-art'));
+  assert.ok(WORKSPACES.atelier.capabilities.includes('procreate-inspect'));
+  assert.ok(WORKSPACES.atelier.capabilities.includes('procreate-render'));
+  assert.ok(WORKSPACES.atelier.capabilities.includes('procreate-analyse'));
+  assert.ok(WORKSPACES.atelier.capabilities.includes('procreate-roundtrip-validation'));
   assert.ok(WORKSPACES.atelier.capabilities.includes('visual-qa'));
+  assert.ok(WORKSPACES.atelier.rules.some((rule) => /Native Procreate writing remains disabled/.test(rule)));
   assert.ok(WORKSPACES.atelier.rules.some((rule) => /does not silently take authorship/.test(rule)));
 });
 
