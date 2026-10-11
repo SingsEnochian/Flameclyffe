@@ -312,3 +312,28 @@ test('Twilight / Universal Horizon curriculum module maps SFT, preference and he
   assert.ok(module.goals.some((goal) => /transfer beyond villain\/character-writing/i.test(goal)));
 });
 
+test('Twilight / Universal Horizon source inventory contains the verified 69-module framework in order', () => {
+  const inventory = readJson('source-ingests/twilight-universal-framework-69-module-inventory.v0.1.json');
+  assert.equal(inventory.credit.original_author, 'Twilight');
+  assert.equal(inventory.credit.framework, 'Universal Horizon');
+  assert.equal(inventory.modules.length, 69);
+  assert.equal(inventory.modules[0].title, 'Harmonizing Chaos, Order, and Environmental Resonance');
+  assert.equal(inventory.modules[68].title, 'Uncertainty in Character Reactions and Relationships');
+  assert.equal(inventory.source.normalized_framework_block_sha256, 'ac9eacc27fa4398be6b15329a03b1ed935e1bc307b325d3a32f66d9dca5b6718');
+  assert.match(inventory.source.comparison_result, /identical across both source copies/i);
+  assert.equal(inventory.adjacent_source.included_in_69_module_count, false);
+});
+
+test('Twilight / Universal Horizon 69-module training map preserves credit and defers mass synthetic expansion', () => {
+  const map = readJson('twilight-universal-framework-69-module-training-map.v0.1.json');
+  assert.equal(map.modules.length, 69);
+  assert.equal(map.credit.original_author, 'Twilight');
+  assert.equal(map.credit.framework, 'Universal Horizon');
+  assert.ok(map.generation_law.some((rule) => /Source inventory is not itself training data/i.test(rule)));
+  assert.ok(map.generation_law.some((rule) => /do not mass-produce examples from titles alone/i.test(rule)));
+  assert.ok(map.modules.every((entry) => entry.source_credit === 'Twilight / Universal Horizon'));
+  assert.ok(map.modules.some((entry) => entry.tags.includes('longitudinal-continuity')));
+  assert.ok(map.modules.some((entry) => entry.tags.includes('world-state')));
+  assert.ok(map.modules.some((entry) => entry.tags.includes('branching')));
+});
+
