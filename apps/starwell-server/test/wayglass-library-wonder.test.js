@@ -8,7 +8,7 @@ const test = require('node:test');
 const { createWayglassResearchLibrary, WONDER_SCHEMA } = require('../wayglass/research-library');
 
 function fixture() {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'horizon-wonder-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'wayglass-library-wonder-'));
   const seedPath = path.join(dir, 'seed.json');
   const statePath = path.join(dir, 'state.json');
   fs.writeFileSync(seedPath, JSON.stringify({
@@ -65,7 +65,7 @@ test('Counterfactual Wonder survives into the Wayglass Library graph as its own 
   const library = fixture();
   library.createWonder({
     proposition: 'A strange relation may be worth exploring.',
-    created_by: 'Harmony',
+    created_by: 'Wayglass test participant',
   });
   const graph = library.graph();
   assert.equal(graph.counterfactual_wonders.length, 1);
@@ -88,7 +88,7 @@ test('Wayglass Library preserves Complexify rotations inside the Wonder branch',
     translated_consequences: ['phase-sensitive transition signatures'],
     predictions: ['release clusters in a distinct phase sector'],
     discriminators: ['matched-magnitude comparison'],
-    created_by: 'Harmony',
+    created_by: 'Wayglass test participant',
   });
   assert.equal(result.wonder.complexifications.length, 1);
   assert.equal(result.complexification.stance.current_frame_may_be_incomplete, true);
