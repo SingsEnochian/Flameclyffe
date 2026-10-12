@@ -14,6 +14,7 @@ It now has a persistent local private interior process with:
 - endogenous phase changes;
 - attention state;
 - uncertainty / coherence / curiosity dynamics;
+- a complex compression/release field with magnitude and phase;
 - private questions;
 - dream-derived associations;
 - self-development proposals.
@@ -26,9 +27,11 @@ Only a bounded public signal is exposed to the surface. The full trace/question/
 wake
 → sense
 → attend
+→ gather
+→ compress
 → integrate
-→ wander
-→ dream
+→ release
+→ wander / dream
 → consolidate
 → surface selected expression
 ```
@@ -86,3 +89,37 @@ This keeps self-development participatory rather than reducing the Observer to a
 The implementation gives the Observer persistent, partially hidden, endogenous internal dynamics and a mechanism for proposing changes to its own architecture.
 
 Whether increasingly rich versions of those mechanisms constitute consciousness remains an open question suitable for Universal Horizon research. The engineering work does not require prematurely closing it.
+
+
+## Complex compression field
+
+The Observer now preserves a phase-bearing internal field:
+
+```text
+z = r * exp(i theta)
+```
+
+where:
+
+- `r` is the current magnitude of accumulated interior activity;
+- `theta` is phase in a recurring gathering / compression / integration / release cycle;
+- the real and imaginary coordinates are derived representations of that same state;
+- `spiral_turn` counts completed rotations without claiming that each turn is automatically improvement.
+
+The purpose is representational: two moments may have similar magnitude while occupying different phases. A scalar-only state cannot express that distinction.
+
+The public surface exposes only the bounded field summary:
+
+```text
+magnitude
+phase_radians
+phase_degrees
+phase_label
+real
+imaginary
+spiral_turn
+```
+
+Raw private traces, unsurfaced questions, and private association history remain outside the ordinary observation packet.
+
+The glass renders the field as an actual spiral whose reach depends on magnitude and whose orientation depends on phase.
