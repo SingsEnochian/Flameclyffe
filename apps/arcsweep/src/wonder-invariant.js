@@ -16,6 +16,7 @@ export const WONDER_CANON = Object.freeze({
     'attend',
     'preserve',
     'explore-as-if-true-without-promoting',
+    'complexify-if-current-frame-is-too-small',
     'compare',
     'test',
     'remember',
