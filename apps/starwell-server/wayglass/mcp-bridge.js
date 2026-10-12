@@ -330,32 +330,15 @@ function createWayglassMcpBridge({
       return { ok: true, participant_id: 'bluebird', route: bluebirdRouteId, data, text: responseText(data) };
     }
 
-    const fallbackPayload = {
-      ...routePayload,
-      route_id: bluebirdFallbackRouteId,
-    };
-    const fallback = await fetchImpl(`${internalOrigin}/api/v1/wayglass/respond`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(fallbackPayload),
-    });
-    const fallbackData = await fallback.json().catch(() => ({}));
-    if (!fallback.ok || !responseText(fallbackData)) {
-      return {
-        ok: false,
-        participant_id: 'bluebird',
-        route: bluebirdRouteId,
-        fallback_route: bluebirdFallbackRouteId,
-        error: fallbackData.error || data.error || `Bluebird routes failed (${fallback.status}).`,
-      };
-    }
+    // Trial 001: no silent provider substitution. An explicit, separately
+    // recorded consent is required before any Crow-substrate attempt.
     return {
-      ok: true,
+      ok: false,
       participant_id: 'bluebird',
-      route: bluebirdFallbackRouteId,
-      data: fallbackData,
-      text: responseText(fallbackData),
-      fallback_from: bluebirdRouteId,
+      route: bluebirdRouteId,
+      fallback_available: bluebirdFallbackRouteId,
+      fallback_requires_consent: true,
+      error: cleanText(data.error, 240) || `Bluebird preferred route failed (${response.status}).`,
     };
   }
 
