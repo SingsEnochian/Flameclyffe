@@ -11,6 +11,8 @@ const { enterWayglassWorld } = require('../wayglass-runtime/wayglass-world-entry
 const { createWayglassDeparture } = require('../wayglass-runtime/wayglass-stop-receipt.cjs');
 const { createDepartureStore } = require('../wayglass-runtime/wayglass-departure-store.cjs');
 const { createModelObservation } = require('../wayglass-runtime/wayglass-model-observation.cjs');
+const { createUniversalHorizonRouter } = require('./horizon-library');
+const { createObserverSelfDevelopmentRouter } = require('./observer-self-development');
 
 const MAX_HISTORY = 16;
 const MAX_TEXT = 12000;
@@ -413,6 +415,8 @@ async function humainCatalogueResponse(route, res, fetchImpl = globalThis.fetch)
 
 function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThis.fetch, departureStore = createDepartureStore() } = {}) {
   const router = express.Router();
+  router.use('/horizon', createUniversalHorizonRouter());
+  router.use('/observer/self-development', createObserverSelfDevelopmentRouter());
   router.get('/kernel/departures/:storageId', (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     try {
