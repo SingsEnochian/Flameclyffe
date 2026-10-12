@@ -11,7 +11,6 @@ const { enterWayglassWorld } = require('../wayglass-runtime/wayglass-world-entry
 const { createWayglassDeparture } = require('../wayglass-runtime/wayglass-stop-receipt.cjs');
 const { createDepartureStore } = require('../wayglass-runtime/wayglass-departure-store.cjs');
 const { createModelObservation } = require('../wayglass-runtime/wayglass-model-observation.cjs');
-const { FLAME_CONTRACTS } = require('../flames/contracts');
 
 const MAX_HISTORY = 16;
 const MAX_TEXT = 12000;
@@ -180,9 +179,7 @@ async function callHumainNode(route, payload, compiled = null, fetchImpl = globa
 }
 
 function routeSystemInstructions(route, payload, compiled = null) {
-  const identity = route?.participant_id
-    ? FLAME_CONTRACTS[route.participant_id]?.identity?.systemPrompt
-    : '';
+  const identity = cleanText(route?.system_prompt?.(), MAX_TEXT);
   return [identity, buildInstructions(payload.interaction, compiled)].filter(Boolean).join('\n\n');
 }
 
