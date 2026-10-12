@@ -31,3 +31,21 @@ No unverified Internet user may access Wayglass UI, its assets that contain priv
 Verified owner-only Access policy; MFA enabled; origin validation configured; DNS/tunnel configuration; positive and negative live browser checks; blocked direct origin; all alternate public routes audited; results recorded without tokens, personal account identifiers or sensitive response bodies.
 
 Until that evidence exists, label Wayglass **not confirmed private**. Do not advertise the web UI as owner-only.
+
+
+## Selected owner sign-in: GitHub OAuth (October 2026)
+
+**Selected provider:** GitHub, through Cloudflare Access. **Selected allow policy:** a single exact verified email supplied privately by the owner at deployment. The email MUST NOT be recorded in this repository. Confirm that GitHub exposes the selected email as a verified email to the Cloudflare Access GitHub identity provider; a GitHub profile's public email field is not enough. GitHub account 2FA should be enabled. Do not confuse GitHub repository write access with permission to enter the Wayglass web app.
+
+### Operator runbook (Cloudflare account access required)
+
+1. In GitHub Settings > Developer settings > OAuth Apps, register an OAuth app called `Wayglass Private Access`. Set Homepage to `https://<team>.cloudflareaccess.com`; callback to `https://<team>.cloudflareaccess.com/cdn-cgi/access/callback`.
+2. Store Client ID and Client Secret only in Cloudflare Zero Trust > Integrations > Identity providers > GitHub. Do not place either secret in git, browser bundles, or issue discussions. Test the IdP connection.
+3. In Zero Trust > Access controls > Applications, create a **Self-hosted and private** app covering the entire dedicated private hostname. Select **GitHub as the sole enabled identity provider**; optionally enable instant authentication.
+4. Create exactly one **Allow** policy with Include selector **Emails** matching the owner's verified GitHub-linked email (provided through Cloudflare's private dashboard). Require the GitHub login method if multiple IdPs exist at account level. Add no Everyone, email domain, Bypass, or service-token policy granting UI entry.
+5. Require GitHub account 2FA; note that Cloudflare's IdP-reported MFA selector does not support GitHub as an enforced MFA signal. If an independent Cloudflare Access second factor is available in the account, require it too. Do not claim MFA enforcement until checked.
+6. Bind the UI hostname to a Cloudflare Tunnel serving only loopback/private origins. Enforce Cloudflare Access JWT validation at the origin or Access token validation by the tunnel, and make sure no other public hostname, port, Pages path, or preview copies expose Wayglass state.
+7. Keep `/mcp` and the self-hosted Wayglass OAuth 2.1 protocol on a separate hostname. Do not put Cloudflare Managed OAuth in front of that self-hosted OAuth protocol unless the two flows are deliberately redesigned and tested.
+8. Verify: owner's real GitHub OAuth sign-in succeeds; an unrelated GitHub account is denied; anonymous/API/WebSocket/asset requests are denied; direct-origin access fails; revoked sessions are denied; live MCP on its separate host still works.
+
+**Not provisioned:** This document is an implementation/deployment plan, NOT evidence that Cloudflare Access, DNS, or tunnel configuration has been changed. Never report owner-only private web access until live negative tests pass.
