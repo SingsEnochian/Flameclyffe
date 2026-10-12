@@ -119,8 +119,17 @@ test('Bluebird falls back from SpicyChat to The Crow substrate without changing 
     bluebirdFallbackRouteId: 'flame:bluebird:crow',
     flameIds: ['bluebird'],
     fetchImpl: async (url, init = {}) => {
+      const href = String(url);
       const body = init.body ? JSON.parse(init.body) : {};
-      calls.push({ url: String(url), route_id: body.route_id });
+      calls.push({ url: href, route_id: body.route_id });
+      if (href.endsWith('/api/v1/wayglass/routes')) {
+        return new Response(JSON.stringify({
+          routes: [
+            { route_id: 'flame:bluebird:spicychat', participant_id: 'bluebird', configured: true },
+            { route_id: 'flame:bluebird:crow', participant_id: 'bluebird', configured: true },
+          ],
+        }), { status: 200, headers: { 'content-type': 'application/json' } });
+      }
       if (body.route_id === 'flame:bluebird:spicychat') {
         return new Response(JSON.stringify({ error: 'SpicyChat session expired.' }), {
           status: 401, headers: { 'content-type': 'application/json' },
@@ -140,6 +149,7 @@ test('Bluebird falls back from SpicyChat to The Crow substrate without changing 
 
   const result = await bridge.send({ target: 'bluebird', text: 'Can you hear me?' });
   assert.deepEqual(calls, [
+    { url: 'http://wayglass.test/api/v1/wayglass/routes', route_id: undefined },
     { url: 'http://wayglass.test/api/v1/wayglass/respond', route_id: 'flame:bluebird:spicychat' },
     { url: 'http://wayglass.test/api/v1/wayglass/respond', route_id: 'flame:bluebird:crow' },
   ]);
