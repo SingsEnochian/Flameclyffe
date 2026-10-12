@@ -10,6 +10,7 @@ Use the smallest sufficient operation:
 
 ```text
 search    retrieve typed records
+wonder    preserve "could be false, but what if true?" branches
 propose   suggest a relationship between existing records
 review    accept, reject, or keep-open a relationship proposal
 ```
@@ -18,6 +19,8 @@ review    accept, reject, or keep-open a relationship proposal
 
 - Preserve each record's `claim_type`.
 - Retrieval is not truth.
+- Counterfactual Wonder is not a fact claim: `could_be_false=true`, `explore_as_if_true=true`, `promoted_to_fact=false`.
+- Do not demand evidence before exploring the consequences of a Wonder branch. Use evidence when the branch reaches comparison, testing, or consequential claims.
 - A relationship proposal is not a finding.
 - An accepted relationship does not rewrite either source record.
 - Structural analogy does not establish scientific equivalence.
@@ -39,6 +42,18 @@ Search:
 
 ```bash
 python skills/universal-horizon/scripts/horizon.py search "continuity route"
+```
+
+Counterfactual Wonder:
+
+```bash
+python skills/universal-horizon/scripts/horizon.py wonder \
+  --proposition "Compression and release may be a recurring shape of reorganisation." \
+  --why "The pattern is worth comparing across unlike systems." \
+  --implication "Breakthrough structure may begin forming before release." \
+  --prediction "Some unresolved structures become more connected before release." \
+  --discriminator "Compare with productive periods that show no prior compression." \
+  --created-by "Hermes"
 ```
 
 Propose:
@@ -67,6 +82,9 @@ python skills/universal-horizon/scripts/horizon.py review \
 ```text
 QUESTION
 → search
+→ if unestablished but generative: "this could be false, but what if it were true?"
+→ preserve a Counterfactual Wonder branch
+→ explore consequences / predictions / discriminators
 → inspect provenance + claim types
 → compare
 → propose typed relation
