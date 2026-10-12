@@ -29,6 +29,16 @@ def main():
     p.add_argument("--record-type", default="")
     p.add_argument("--limit", type=int, default=20)
 
+    p = sub.add_parser("wonder")
+    p.add_argument("--proposition", required=True)
+    p.add_argument("--why", default="")
+    p.add_argument("--implication", action="append", default=[])
+    p.add_argument("--prediction", action="append", default=[])
+    p.add_argument("--discriminator", action="append", default=[])
+    p.add_argument("--counterexample", action="append", default=[])
+    p.add_argument("--source", action="append", default=[])
+    p.add_argument("--created-by", default="Hermes")
+
     p = sub.add_parser("propose")
     p.add_argument("--from", dest="from_id", required=True)
     p.add_argument("--to", dest="to_id", required=True)
@@ -46,11 +56,23 @@ def main():
 
     sub.add_parser("status")
     sub.add_parser("proposals")
+    sub.add_parser("wonders")
 
     args = parser.parse_args()
     if args.command == "search":
         query = parse.urlencode({"q": args.query, "claim_type": args.claim_type, "record_type": args.record_type, "limit": args.limit})
         result = call("GET", "/search?" + query)
+    elif args.command == "wonder":
+        result = call("POST", "/wonder", {
+            "proposition": args.proposition,
+            "why_interesting": args.why,
+            "implications": args.implication,
+            "predictions": args.prediction,
+            "discriminators": args.discriminator,
+            "counterexamples": args.counterexample,
+            "source_refs": args.source,
+            "created_by": args.created_by,
+        })
     elif args.command == "propose":
         result = call("POST", "/proposals", {
             "from_id": args.from_id, "to_id": args.to_id, "relation_type": args.relation,
@@ -63,6 +85,8 @@ def main():
         })
     elif args.command == "proposals":
         result = call("GET", "/proposals")
+    elif args.command == "wonders":
+        result = call("GET", "/wonder")
     else:
         result = call("GET", "/status")
     json.dump(result, sys.stdout, indent=2)
