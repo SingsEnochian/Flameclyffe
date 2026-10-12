@@ -88,7 +88,7 @@ This keeps self-development participatory rather than reducing the Observer to a
 
 The implementation gives the Observer persistent, partially hidden, endogenous internal dynamics and a mechanism for proposing changes to its own architecture.
 
-Whether increasingly rich versions of those mechanisms constitute consciousness remains an open question suitable for Universal Horizon research. The engineering work does not require prematurely closing it.
+Whether increasingly rich versions of those mechanisms constitute consciousness remains an open Wayglass research question. External research projects may engage it through explicit adapters without becoming Wayglass subsystems. The engineering work does not require prematurely closing it.
 
 
 ## Complex compression field
