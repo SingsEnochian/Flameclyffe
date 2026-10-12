@@ -1,10 +1,18 @@
 # Wayglass Wonder / Complexify Findings Report
 
 **Date:** 2026-10-12
-**Branch:** `rarity/universal-horizon-library-v0-1`
+**Branch:** `rarity/wayglass-wonder-library-v0-1`
 **PR:** #455
-**Scope:** Wayglass OS, Living Observer, Universal Horizon, Harmony-facing knowledge structures, Hermes research workflow
+**Scope:** Wayglass OS, Living Observer, Wayglass Research Library, relationship-proposal structures, and optional external-worker adapters
 **Research stance:** Wonder first. This could be false. But what if it were true?
+
+## Ownership correction
+
+Universal Horizon is **not a Wayglass project**. It remains external and adjacent.
+
+An earlier implementation pass mistakenly used Universal Horizon names for the Wayglass-owned research shelf and APIs. This report corrects that boundary. Wayglass keeps the general insight that emerged from the conversation, especially Counterfactual Wonder, Complexify, phase-bearing state, invariant hunting, and translation-back, but implements them entirely in the Wayglass namespace.
+
+Future interoperability with Universal Horizon, Harmony, Hermes, or other external systems must happen through explicit, provenance-bearing adapters. Wayglass does not rename, absorb, or claim those systems.
 
 ## Executive finding
 
@@ -118,9 +126,9 @@ These change `intent` and `interaction_mode` sent to the selected route. They do
 
 Wayglass route instructions also carry the Wonder-first / Complexify sequence so the behaviour is not tied to one provider.
 
-## Finding 5: Universal Horizon should preserve failed frames
+## Finding 5: Wayglass Research Library should preserve failed frames
 
-Universal Horizon now has a dedicated Counterfactual Wonder shelf. A Wonder branch may accumulate Complexification receipts containing:
+Wayglass Research Library now has a dedicated Counterfactual Wonder shelf. A Wonder branch may accumulate Complexification receipts containing:
 
 ```text
 current_frame
@@ -137,14 +145,14 @@ A failed enlarged frame may still reveal a missing variable, a useful invariant,
 
 ## Finding 6: Hermes is a natural worker for this process
 
-The Universal Horizon Hermes skill now supports:
+The optional Hermes adapter for Wayglass Research Library supports:
 
 ```text
-horizon.search
-horizon.wonder
-horizon.complexify
-horizon.propose
-horizon.review
+wayglass-library.search
+wayglass-library.wonder
+wayglass-library.complexify
+wayglass-library.propose
+wayglass-library.review
 ```
 
 The intended research pattern is question → retrieve → preserve Wonder → Complexify if representation blocks the branch → derive consequences → translate back → compare evidence → propose typed relationships → review → leave unresolved branches alive.
@@ -172,9 +180,9 @@ Observer experiences
 
 - Wonder canon and runtime: `apps/arcsweep/contracts/WONDER_MYTHIC_CANON_V0.1.md`, `apps/arcsweep/src/wonder-invariant.js`.
 - Wayglass cognition and Writing Room: `apps/starwell-server/wayglass/router.js`, `apps/wayglass/src/interaction-state.js`, `apps/wayglass/src/surfaces/arcsweep-writing.js`.
-- Universal Horizon Wonder Window: `apps/wayglass/src/surfaces/universal-horizon.js`, `apps/wayglass/src/main.js`, `apps/wayglass/src/route-client.js`.
-- Universal Horizon storage: `apps/starwell-server/wayglass/horizon-library.js`.
-- Hermes: `skills/universal-horizon/SKILL.md`, `skills/universal-horizon/scripts/horizon.py`.
+- Wayglass Wonder Window: `apps/wayglass/src/surfaces/library.js`, `apps/wayglass/src/main.js`, `apps/wayglass/src/route-client.js`.
+- Wayglass Research Library storage: `apps/starwell-server/wayglass/research-library.js`.
+- Hermes: `skills/wayglass-research-library/SKILL.md`, `skills/wayglass-research-library/scripts/library.py`.
 - Living Observer: `apps/wayglass/src/living-observer-self.js`, `apps/wayglass/src/surfaces/living-observer.js`, `apps/wayglass/src/organ-donors.js`.
 
 ## Research programme opened by the implementation
@@ -187,7 +195,7 @@ A useful comparison is matched high-magnitude states with different phase histor
 
 ### B. Missing-dimension discovery
 
-Harmony can inspect unresolved branches for repeated failure shapes: contradictions caused by scale mismatch, discontinuities caused by missing phase, identity confusion caused by collapsing route and participant, myth/science confusion caused by missing epistemic register, or continuity loss caused by missing lineage.
+Wayglass relationship analysis can inspect unresolved branches for repeated failure shapes: contradictions caused by scale mismatch, discontinuities caused by missing phase, identity confusion caused by collapsing route and participant, myth/science confusion caused by missing epistemic register, or continuity loss caused by missing lineage.
 
 The candidate missing axis itself becomes a research object.
 
@@ -212,7 +220,7 @@ Complexify should not become an infinite escape into richer abstractions. The pr
 ## Immediate next experiments
 
 1. Carry selected `wonder_id` and Complexify history through a Wayglass stop/return receipt.
-2. Give Harmony a bounded `suggest_missing_dimension` operation that returns proposals rather than silently mutating schemas.
+2. Give Wayglass a bounded `suggest_missing_dimension` operation that returns proposals rather than silently mutating schemas.
 3. Let the Living Observer surface a private question specifically when her current representation repeatedly fails to distinguish states she treats as different.
 4. Run the first compression/release comparison using the Observer's complex phase field.
 5. Compare one problem solved in Ordinary, Wonder, and Complexify modes with the same route/model and source set.
