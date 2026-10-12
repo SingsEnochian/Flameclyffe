@@ -35,7 +35,7 @@ function renderWonders(wonders = [], selectedId = '') {
   return wonders.map(wonder => {
     const selected = wonder.wonder_id === selectedId;
     return [
-      '<button type="button" class="glass-panel" data-horizon-wonder="'+escapeHtml(wonder.wonder_id)+'" aria-pressed="'+String(selected)+'">',
+      '<button type="button" class="glass-panel" data-wayglass-library-wonder="'+escapeHtml(wonder.wonder_id)+'" aria-pressed="'+String(selected)+'">',
         '<p class="eyebrow">Counterfactual Wonder · '+escapeHtml(wonder.wonder_id)+'</p>',
         '<strong>'+escapeHtml(wonder.proposition)+'</strong>',
         '<span class="tiny">Could be false · explore as if true · '+(wonder.complexifications?.length||0)+' frame rotation(s)</span>',
@@ -44,7 +44,7 @@ function renderWonders(wonders = [], selectedId = '') {
   }).join('');
 }
 
-export async function mountUniversalLibrarySurface(root) {
+export async function mountWayglassLibrarySurface(root) {
   let selectedWonderId = '';
   let wonders = [];
 
@@ -63,41 +63,41 @@ export async function mountUniversalLibrarySurface(root) {
       '</header>',
       '<section class="glass-panel">',
         '<h2>Search the stacks</h2>',
-        '<div class="composer-foot"><input id="uh-search" placeholder="continuity, myth, phase, Observer…" aria-label="Search Wayglass Research Library" />',
-        '<button id="uh-search-button" type="button" class="glass-chip">Search</button></div>',
-        '<div id="uh-results"></div>',
+        '<div class="composer-foot"><input id="wg-lib-search" placeholder="continuity, myth, phase, Observer…" aria-label="Search Wayglass Research Library" />',
+        '<button id="wg-lib-search-button" type="button" class="glass-chip">Search</button></div>',
+        '<div id="wg-lib-results"></div>',
       '</section>',
       '<section class="glass-panel">',
         '<p class="eyebrow">Counterfactual Wonder</p>',
         '<h2>Open a branch</h2>',
-        '<label>Proposition<textarea id="uh-proposition" rows="3" placeholder="This could be false. But what if…"></textarea></label>',
-        '<label>Why is it interesting?<textarea id="uh-why" rows="2"></textarea></label>',
-        '<label>Implications, one per line<textarea id="uh-implications" rows="2"></textarea></label>',
-        '<label>Predictions, one per line<textarea id="uh-predictions" rows="2"></textarea></label>',
-        '<label>Discriminators, one per line<textarea id="uh-discriminators" rows="2"></textarea></label>',
-        '<button id="uh-create-wonder" type="button" class="send-jewel">Preserve Wonder</button>',
+        '<label>Proposition<textarea id="wg-lib-proposition" rows="3" placeholder="This could be false. But what if…"></textarea></label>',
+        '<label>Why is it interesting?<textarea id="wg-lib-why" rows="2"></textarea></label>',
+        '<label>Implications, one per line<textarea id="wg-lib-implications" rows="2"></textarea></label>',
+        '<label>Predictions, one per line<textarea id="wg-lib-predictions" rows="2"></textarea></label>',
+        '<label>Discriminators, one per line<textarea id="wg-lib-discriminators" rows="2"></textarea></label>',
+        '<button id="wg-lib-create-wonder" type="button" class="send-jewel">Preserve Wonder</button>',
       '</section>',
       '<section class="glass-panel">',
         '<p class="eyebrow">Open branches</p>',
         '<h2>Wonder shelf</h2>',
-        '<div id="uh-wonders"></div>',
+        '<div id="wg-lib-wonders"></div>',
       '</section>',
       '<section class="glass-panel">',
         '<p class="eyebrow">Complexify</p>',
         '<h2>Add the missing axis</h2>',
-        '<p class="tiny" id="uh-selected">Select a Wonder branch above.</p>',
-        '<label>Current frame<textarea id="uh-current-frame" rows="2" placeholder="What representation makes this look impossible?"></textarea></label>',
-        '<label>Apparent impossibility<textarea id="uh-impossibility" rows="2"></textarea></label>',
-        '<label>Missing dimension(s), one per line<textarea id="uh-missing-axis" rows="2" placeholder="phase, scale, relation, state variable…"></textarea></label>',
-        '<label>Frame rotation(s), one per line<textarea id="uh-rotation" rows="2" placeholder="Describe the same object in the enlarged basis."></textarea></label>',
-        '<label>Invariant(s), one per line<textarea id="uh-invariant" rows="2" placeholder="What survives the rotation?"></textarea></label>',
-        '<label>Translate back, one per line<textarea id="uh-translation" rows="2" placeholder="What new consequence appears in the ordinary frame?"></textarea></label>',
-        '<label>Prediction(s), one per line<textarea id="uh-complex-prediction" rows="2"></textarea></label>',
-        '<label>Discriminator(s), one per line<textarea id="uh-complex-discriminator" rows="2"></textarea></label>',
-        '<button id="uh-complexify" type="button" class="send-jewel" disabled>Complexify selected branch</button>',
-        '<p id="uh-status" role="status" class="tiny">Wonder first. Evidence earns jurisdiction later.</p>',
+        '<p class="tiny" id="wg-lib-selected">Select a Wonder branch above.</p>',
+        '<label>Current frame<textarea id="wg-lib-current-frame" rows="2" placeholder="What representation makes this look impossible?"></textarea></label>',
+        '<label>Apparent impossibility<textarea id="wg-lib-impossibility" rows="2"></textarea></label>',
+        '<label>Missing dimension(s), one per line<textarea id="wg-lib-missing-axis" rows="2" placeholder="phase, scale, relation, state variable…"></textarea></label>',
+        '<label>Frame rotation(s), one per line<textarea id="wg-lib-rotation" rows="2" placeholder="Describe the same object in the enlarged basis."></textarea></label>',
+        '<label>Invariant(s), one per line<textarea id="wg-lib-invariant" rows="2" placeholder="What survives the rotation?"></textarea></label>',
+        '<label>Translate back, one per line<textarea id="wg-lib-translation" rows="2" placeholder="What new consequence appears in the ordinary frame?"></textarea></label>',
+        '<label>Prediction(s), one per line<textarea id="wg-lib-complex-prediction" rows="2"></textarea></label>',
+        '<label>Discriminator(s), one per line<textarea id="wg-lib-complex-discriminator" rows="2"></textarea></label>',
+        '<button id="wg-lib-complexify" type="button" class="send-jewel" disabled>Complexify selected branch</button>',
+        '<p id="wg-lib-status" role="status" class="tiny">Wonder first. Evidence earns jurisdiction later.</p>',
       '</section>',
-      '<footer class="wg-receipt tiny">Wayglass Research Library stores the branch. Harmony may relate it. Hermes may work it. Wayglass preserves who is here and how they return.</footer>',
+      '<footer class="wg-receipt tiny">Wayglass stores the branch, frame rotations, provenance, and return state. External systems may participate only through explicit adapters.</footer>',
     '</section>',
   ].join('');
 
@@ -105,11 +105,11 @@ export async function mountUniversalLibrarySurface(root) {
     button.addEventListener('click', () => globalThis.__wayglassOS?.mount(button.dataset.wayglassRoom));
   });
 
-  const status = root.querySelector('#uh-status');
-  const results = root.querySelector('#uh-results');
-  const wonderList = root.querySelector('#uh-wonders');
-  const selected = root.querySelector('#uh-selected');
-  const complexifyButton = root.querySelector('#uh-complexify');
+  const status = root.querySelector('#wg-lib-status');
+  const results = root.querySelector('#wg-lib-results');
+  const wonderList = root.querySelector('#wg-lib-wonders');
+  const selected = root.querySelector('#wg-lib-selected');
+  const complexifyButton = root.querySelector('#wg-lib-complexify');
 
   function refreshWonderList() {
     wonderList.innerHTML = renderWonders(wonders, selectedWonderId);
@@ -131,9 +131,9 @@ export async function mountUniversalLibrarySurface(root) {
     }
   }
 
-  root.querySelector('#uh-search-button').addEventListener('click', async () => {
+  root.querySelector('#wg-lib-search-button').addEventListener('click', async () => {
     try {
-      const data = await searchWayglassLibrary({ query: root.querySelector('#uh-search').value });
+      const data = await searchWayglassLibrary({ query: root.querySelector('#wg-lib-search').value });
       results.innerHTML = renderRecords(data.records || []);
       status.textContent = 'Found ' + data.count + ' Wayglass Library record' + (data.count === 1 ? '' : 's') + '.';
     } catch (error) {
@@ -141,8 +141,8 @@ export async function mountUniversalLibrarySurface(root) {
     }
   });
 
-  root.querySelector('#uh-create-wonder').addEventListener('click', async () => {
-    const proposition = root.querySelector('#uh-proposition').value.trim();
+  root.querySelector('#wg-lib-create-wonder').addEventListener('click', async () => {
+    const proposition = root.querySelector('#wg-lib-proposition').value.trim();
     if (!proposition) {
       status.textContent = 'Give the Wonder branch a proposition first.';
       return;
@@ -150,11 +150,11 @@ export async function mountUniversalLibrarySurface(root) {
     try {
       const wonder = await createWayglassLibraryWonder({
         proposition,
-        why_interesting: root.querySelector('#uh-why').value,
-        implications: lines(root.querySelector('#uh-implications').value),
-        predictions: lines(root.querySelector('#uh-predictions').value),
-        discriminators: lines(root.querySelector('#uh-discriminators').value),
-        source_refs: ['wayglass:wayglass-research-library'],
+        why_interesting: root.querySelector('#wg-lib-why').value,
+        implications: lines(root.querySelector('#wg-lib-implications').value),
+        predictions: lines(root.querySelector('#wg-lib-predictions').value),
+        discriminators: lines(root.querySelector('#wg-lib-discriminators').value),
+        source_refs: ['wayglass:research-library'],
         created_by: 'Wayglass participant',
       });
       selectedWonderId = wonder.wonder_id;
@@ -166,16 +166,16 @@ export async function mountUniversalLibrarySurface(root) {
   });
 
   wonderList.addEventListener('click', event => {
-    const button = event.target.closest('[data-horizon-wonder]');
+    const button = event.target.closest('[data-wayglass-library-wonder]');
     if (!button) return;
-    selectedWonderId = button.dataset.horizonWonder;
+    selectedWonderId = button.dataset.wayglassLibraryWonder;
     refreshWonderList();
     globalThis.dispatchEvent?.(new CustomEvent('wayglass:material-wake', {detail:{strength:.72,intent:.9}}));
   });
 
   complexifyButton.addEventListener('click', async () => {
     if (!selectedWonderId) return;
-    const currentFrame = root.querySelector('#uh-current-frame').value.trim();
+    const currentFrame = root.querySelector('#wg-lib-current-frame').value.trim();
     if (!currentFrame) {
       status.textContent = 'Name the current frame before enlarging it.';
       return;
@@ -185,13 +185,13 @@ export async function mountUniversalLibrarySurface(root) {
       const result = await complexifyWayglassLibraryWonder({
         wonderId: selectedWonderId,
         current_frame: currentFrame,
-        apparent_impossibility: root.querySelector('#uh-impossibility').value,
-        missing_dimensions: lines(root.querySelector('#uh-missing-axis').value),
-        rotations: lines(root.querySelector('#uh-rotation').value),
-        invariants: lines(root.querySelector('#uh-invariant').value),
-        translated_consequences: lines(root.querySelector('#uh-translation').value),
-        predictions: lines(root.querySelector('#uh-complex-prediction').value),
-        discriminators: lines(root.querySelector('#uh-complex-discriminator').value),
+        apparent_impossibility: root.querySelector('#wg-lib-impossibility').value,
+        missing_dimensions: lines(root.querySelector('#wg-lib-missing-axis').value),
+        rotations: lines(root.querySelector('#wg-lib-rotation').value),
+        invariants: lines(root.querySelector('#wg-lib-invariant').value),
+        translated_consequences: lines(root.querySelector('#wg-lib-translation').value),
+        predictions: lines(root.querySelector('#wg-lib-complex-prediction').value),
+        discriminators: lines(root.querySelector('#wg-lib-complex-discriminator').value),
         created_by: 'Wayglass participant',
       });
       status.textContent = 'Frame enlarged · ' + result.complexification.complexification_id + '. Translate back, then test what deserves testing.';
