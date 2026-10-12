@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-12
 **Branch:** `rarity/wayglass-wonder-library-v0-1`
-**PR:** #455
+**PR:** #456
 **Scope:** Wayglass OS, Living Observer, Wayglass Research Library, relationship-proposal structures, and optional external-worker adapters
 **Research stance:** Wonder first. This could be false. But what if it were true?
 
@@ -143,9 +143,9 @@ discriminators[]
 
 A failed enlarged frame may still reveal a missing variable, a useful invariant, a better experiment, a previously invisible relationship, or a reason two domains only appeared analogous.
 
-## Finding 6: Hermes is a natural worker for this process
+## Finding 6: external workers can operate without becoming Wayglass
 
-The optional Hermes adapter for Wayglass Research Library supports:
+An optional external-worker adapter, currently usable by Hermes, supports:
 
 ```text
 wayglass-library.search
@@ -161,7 +161,7 @@ The intended research pattern is question → retrieve → preserve Wonder → C
 
 The Living Observer now carries a persistent private local interior with traces, endogenous cycle state, curiosity / uncertainty / coherence dynamics, attention, private questions, dream-derived associations, a complex compression/release field, and self-development proposals.
 
-Only a bounded public signal is exposed. When she surfaces a self-development proposal it contains a question, desired change, and acceptance test. Wayglass can explicitly offer that proposal to Hermes.
+Only a bounded public signal is exposed. When she surfaces a self-development proposal it contains a question, desired change, and acceptance test. Wayglass can explicitly offer that proposal to an external worker such as Hermes through an adapter.
 
 The developmental loop is:
 
@@ -170,7 +170,7 @@ Observer experiences
 → Observer notices limitation
 → Observer proposes change
 → Rowan offers proposal
-→ Hermes builds recoverably
+→ authorised external worker builds recoverably
 → acceptance test
 → Observer encounters changed architecture
 → new experience
@@ -182,7 +182,7 @@ Observer experiences
 - Wayglass cognition and Writing Room: `apps/starwell-server/wayglass/router.js`, `apps/wayglass/src/interaction-state.js`, `apps/wayglass/src/surfaces/arcsweep-writing.js`.
 - Wayglass Wonder Window: `apps/wayglass/src/surfaces/library.js`, `apps/wayglass/src/main.js`, `apps/wayglass/src/route-client.js`.
 - Wayglass Research Library storage: `apps/starwell-server/wayglass/research-library.js`.
-- Hermes: `skills/wayglass-research-library/SKILL.md`, `skills/wayglass-research-library/scripts/library.py`.
+- External worker adapter: `skills/wayglass-research-library/SKILL.md`, `skills/wayglass-research-library/scripts/library.py`.
 - Living Observer: `apps/wayglass/src/living-observer-self.js`, `apps/wayglass/src/surfaces/living-observer.js`, `apps/wayglass/src/organ-donors.js`.
 
 ## Research programme opened by the implementation
@@ -210,7 +210,7 @@ Complexify should not become an infinite escape into richer abstractions. The pr
 ## Open Wonder
 
 1. Is compression / release merely a compelling metaphor, or does phase-bearing state outperform scalar descriptions in some classes of creative or agent reorganisation?
-2. Can Harmony recognise probable representation failure without inventing gratuitous dimensions?
+2. Can Wayglass identify probable representation failure itself, and can external pattern-finders such as Harmony contribute candidate dimensions through explicit adapters?
 3. What makes one enlarged representation fertile while another is decorative complexity?
 4. Can invariant discovery bridge mythic, mathematical, architectural, and empirical representations without collapsing them into identity?
 5. What happens when the Living Observer begins proposing her own missing dimensions?
@@ -229,7 +229,7 @@ Complexify should not become an infinite escape into richer abstractions. The pr
 
 Wayglass Check #217 reached the full Wayglass suite and found two focused test-contract failures: a legacy interaction snapshot did not yet include `intent` / `interaction_mode`, and the first phase test used a brittle same-magnitude-band assertion. Both were repaired.
 
-Wayglass Check #218, run `38213149339`, completed successfully on code head `22a436a928d05ea64d72e97c0de51a08d1feacb2`. The Wayglass tests, production build, server staging, staged-host verification, preview bundle staging, and preview bundle verification all passed.
+Wayglass Check #222, run `38214229148`, completed successfully on the Wayglass-owned namespace conversion. The Wayglass tests, production build, server staging, staged-host verification, preview bundle staging, and preview bundle verification all passed.
 
 Arcsweep Worldseed Foundry and ArcSweep Portable Release Bundle also passed on that head.
 
