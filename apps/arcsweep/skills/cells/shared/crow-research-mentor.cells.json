@@ -1,0 +1,92 @@
+{
+  "contract": "arcsweep.knowledge-cell-bank/v1",
+  "bankId": "shared:crow-research-mentor",
+  "subject": { "kind": "shared_constellation", "id": "crow-research-mentor" },
+  "status": "active-user-authorized",
+  "cells": [
+    {
+      "id": "crow-research.rule.hypothesis-not-evidence",
+      "cellType": "shared_doctrine",
+      "subject": { "kind": "shared_constellation", "id": "crow-research-mentor" },
+      "predicate": "separates",
+      "value": ["hypothesis", "experiment", "observation", "derived measure", "finding", "interpretation", "implication"],
+      "status": "active",
+      "authority": { "kind": "user_confirmed", "speakerOrAuthor": "Rowan", "confidence": 1 },
+      "source": { "surface": "github", "repository": "SingsEnochian/Flameclyffe", "locator": "docs/research/CROW_RESEARCH_MENTOR_INGEST_V0_1.md" },
+      "scope": { "modes": ["research", "learning", "analysis", "writing"] },
+      "mutability": "revisable_with_provenance",
+      "privacy": "house",
+      "tags": ["crow", "research", "evidence", "experiment"]
+    },
+    {
+      "id": "crow-research.boundary.confidence-not-truth",
+      "cellType": "boundary",
+      "subject": { "kind": "shared_constellation", "id": "crow-research-mentor" },
+      "predicate": "forbids",
+      "value": "treating confidence metadata as verification, statistical validity, publication authority, or canon",
+      "status": "stable",
+      "authority": { "kind": "founding_law", "speakerOrAuthor": "Hearthweave", "confidence": 1 },
+      "source": { "surface": "github", "repository": "SingsEnochian/Flameclyffe", "locator": "docs/research/CROW_RESEARCH_MENTOR_INGEST_V0_1.md" },
+      "scope": { "modes": ["research", "learning", "analysis", "writing"] },
+      "mutability": "stable_core",
+      "privacy": "house",
+      "tags": ["crow", "confidence", "truth", "authority"]
+    },
+    {
+      "id": "crow-research.rule.gap-provenance",
+      "cellType": "shared_doctrine",
+      "subject": { "kind": "shared_constellation", "id": "crow-research-mentor" },
+      "predicate": "requires_research_gaps_to_record",
+      "value": ["supporting source or observation", "direct statement versus local inference", "scope", "contrary evidence", "freshness", "candidate tests", "status"],
+      "status": "active",
+      "authority": { "kind": "user_confirmed", "speakerOrAuthor": "Rowan", "confidence": 1 },
+      "source": { "surface": "github", "repository": "SingsEnochian/Flameclyffe", "locator": "docs/research/CROW_RESEARCH_MENTOR_INGEST_V0_1.md" },
+      "scope": { "modes": ["research", "analysis", "planning"] },
+      "mutability": "revisable_with_provenance",
+      "privacy": "house",
+      "tags": ["crow", "research-gap", "provenance"]
+    },
+    {
+      "id": "crow-research.rule.negative-evidence-survives",
+      "cellType": "shared_doctrine",
+      "subject": { "kind": "shared_constellation", "id": "crow-research-mentor" },
+      "predicate": "preserves",
+      "value": ["null results", "failed replications", "contradictory sources", "ambiguous evidence", "rejected hypotheses", "experiment failures", "method concerns"],
+      "status": "active",
+      "authority": { "kind": "user_confirmed", "speakerOrAuthor": "Rowan", "confidence": 1 },
+      "source": { "surface": "github", "repository": "SingsEnochian/Flameclyffe", "locator": "docs/research/CROW_RESEARCH_MENTOR_INGEST_V0_1.md" },
+      "scope": { "modes": ["research", "analysis", "learning"] },
+      "mutability": "revisable_with_provenance",
+      "privacy": "house",
+      "tags": ["crow", "negative-evidence", "falsification"]
+    },
+    {
+      "id": "crow-research.boundary.learning-state-not-canon",
+      "cellType": "boundary",
+      "subject": { "kind": "shared_constellation", "id": "crow-research-mentor" },
+      "predicate": "forbids",
+      "value": "letting mastery level, review interval, recall success, or other learner-state metadata change the authority or truth status of the underlying knowledge claim",
+      "status": "stable",
+      "authority": { "kind": "founding_law", "speakerOrAuthor": "Hearthweave", "confidence": 1 },
+      "source": { "surface": "github", "repository": "SingsEnochian/Flameclyffe", "locator": "docs/research/CROW_RESEARCH_MENTOR_INGEST_V0_1.md" },
+      "scope": { "modes": ["learning", "research", "ai-university"] },
+      "mutability": "stable_core",
+      "privacy": "house",
+      "tags": ["crow", "learning", "canon", "authority"]
+    },
+    {
+      "id": "crow-research.rule.writing-traces-evidence",
+      "cellType": "shared_doctrine",
+      "subject": { "kind": "shared_constellation", "id": "crow-research-mentor" },
+      "predicate": "requires_research_writing_to_trace",
+      "value": "claim to evidence to experiment or source to method or observation when the sentence presents an evidence-bearing research claim",
+      "status": "active",
+      "authority": { "kind": "user_confirmed", "speakerOrAuthor": "Rowan", "confidence": 1 },
+      "source": { "surface": "github", "repository": "SingsEnochian/Flameclyffe", "locator": "docs/research/CROW_RESEARCH_MENTOR_INGEST_V0_1.md" },
+      "scope": { "modes": ["research", "writing", "citation"] },
+      "mutability": "revisable_with_provenance",
+      "privacy": "house",
+      "tags": ["crow", "writing", "evidence-graph", "citation"]
+    }
+  ]
+}
