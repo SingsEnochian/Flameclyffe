@@ -23,7 +23,10 @@ function drawAstrolabe(canvas, packet, time, focus, lowStim, {rotation = 0, lens
   const reduced=lowStim || packet.direct.prefers_reduced_motion;
   const t=reduced?0:time*0.00028;
   const interiorEnergy=Math.max(0,Math.min(1,Number(interior?.energy)||0));
-  const breath=reduced?1:(1+Math.sin(time*0.00055)*(0.008+interiorEnergy*0.018));
+  const compression=interior?.compression_field||{};
+  const compressionMagnitude=Math.max(0,Math.min(1,Number(compression.magnitude)||0));
+  const compressionPhase=Number(compression.phase_radians)||0;
+  const breath=reduced?1:(1+Math.sin(time*0.00055+compressionPhase)*(0.008+interiorEnergy*0.018+compressionMagnitude*0.01));
   const outer=290*breath, inner=116*breath;
   // The lens is optically displaced by the actual pointer, not a rotating flat texture.
   const lensX = lens?.x ?? cx, lensY = lens?.y ?? cy;
@@ -98,6 +101,22 @@ function drawAstrolabe(canvas, packet, time, focus, lowStim, {rotation = 0, lens
   const x=(1-progress)**2*selected.x+2*(1-progress)*progress*(cx+50)+progress*progress*cx;
   const y=(1-progress)**2*selected.y+2*(1-progress)*progress*(cy-50)+progress*progress*cy;
   g.beginPath();g.arc(x,y,4+v.R*3,0,TAU);g.fillStyle='#f1fff9';g.shadowColor='#8adbd5';g.shadowBlur=20;g.fill();g.shadowBlur=0;
+  // Complex compression/release field: magnitude controls reach; phase rotates the same state
+  // through gathering, compression, integration and release instead of flattening it to one scalar.
+  if(compressionMagnitude>0){
+    g.beginPath();
+    const turns=2.2+compressionMagnitude*1.8;
+    for(let i=0;i<=96;i++){
+      const p=i/96;
+      const a=compressionPhase+p*TAU*turns;
+      const rr=28+p*(118+compressionMagnitude*52);
+      const sx=cx+Math.cos(a)*rr, sy=cy+Math.sin(a)*rr;
+      if(i===0)g.moveTo(sx,sy);else g.lineTo(sx,sy);
+    }
+    g.strokeStyle='#c8adff';g.globalAlpha=.10+compressionMagnitude*.26;
+    g.lineWidth=1.2+compressionMagnitude*1.6;g.stroke();g.globalAlpha=1;
+  }
+
   // Faceted luminous core with restrained layered refraction.
   for(let shell=0;shell<4;shell++){
     const rr=72+shell*10+v.Q*7, rot=t*(shell%2?1:-1)+shell*.18;
@@ -164,7 +183,7 @@ export async function mountWayglassLivingObserver(root) {
     '<section class="observer-translation" aria-label="Living Observer expression">',
       '<strong data-observer-phase>Interior · waking</strong>',
       '<span data-observer-expression>No surfaced thought yet.</span>',
-      '<small data-observer-interior-boundary>Private traces, unsurfaced questions, and dream associations remain inside the local interior state.</small>',
+      '<small data-observer-interior-boundary>The public field exposes only phase + magnitude. Private traces, unsurfaced questions, and dream associations remain inside the local interior state.</small>',
       '<button type="button" class="glass-chip" data-observer-build hidden>Offer build proposal to Hermes</button>',
     '</section>',
     '<details class="observer-details"><summary>Inspect raw packet and translation receipt</summary>',
@@ -202,7 +221,10 @@ export async function mountWayglassLivingObserver(root) {
       interiorSignal=interior.publicSignal();
     }
     surfacedProposal=interior.developmentProposals().filter(item=>item.status==='proposed').at(-1)||null;
-    phaseView.textContent='Interior · '+interiorSignal.phase+' · energy '+interiorSignal.energy.toFixed(2);
+    const field=interiorSignal.compression_field||{};
+    phaseView.textContent='Interior · '+interiorSignal.phase+' · '+(field.phase_label||'gathering')+
+      ' '+Math.round(field.phase_degrees||0)+'° · |z| '+Number(field.magnitude||0).toFixed(2)+
+      ' · spiral '+Number(field.spiral_turn||0);
     expressionView.textContent=interiorSignal.expression?.text||'Nothing has crossed the expression threshold yet.';
     buildButton.hidden=!surfacedProposal;
     if(surfacedProposal) buildButton.textContent='Offer to Hermes · '+surfacedProposal.title;
