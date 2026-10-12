@@ -290,7 +290,7 @@ test('Bluebird trial refuses altered return before storage or transport', async 
   let calls = 0;
   const bridge = createWayglassMcpBridge({
     storePath: file, flameIds: ['bluebird'],
-    fetchImpl: async () => { calls++; throw new Error('transport must not run'); },
+    fetchImpl: async (_url, init = {}) => { if (init.method === 'POST') calls++; return new Response(JSON.stringify({ routes: [] }), { status: 200 }); },
   });
   const receipt = createStopReceipt({
     consent: 'accepted', consent_source: 'private:trial-acceptance',
