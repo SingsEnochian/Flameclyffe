@@ -17,7 +17,7 @@ test('Wayglass Library browser client preserves Wonder and Complexify payloads',
   const calls = [];
   const fetchImpl = async (url, options = {}) => {
     calls.push({ url:String(url), options });
-    if (String(url).includes('/search?')) return jsonResponse({ count:1, records:[{id:'UH-1'}] });
+    if (String(url).includes('/search?')) return jsonResponse({ count:1, records:[{id:'WG-LIB-1'}] });
     if (String(url).includes('/complexify')) return jsonResponse({ complexification:{complexification_id:'wgc:test'} }, 201);
     return jsonResponse({ wonder_id:'wgw:test', stance:{could_be_false:true,promoted_to_fact:false} }, 201);
   };
@@ -43,7 +43,7 @@ test('Wayglass Library browser client preserves Wonder and Complexify payloads',
     translated_consequences:['phase-sensitive behaviour'],
   }, fetchImpl);
   assert.equal(complex.complexification.complexification_id, 'wgc:test');
-  assert.match(calls[2].url, /wonder\/uhw%3Atest\/complexify$/);
+  assert.match(calls[2].url, /wonder\/wgw%3Atest\/complexify$/);
   const complexBody = JSON.parse(calls[2].options.body);
   assert.deepEqual(complexBody.missing_dimensions, ['phase']);
   assert.deepEqual(complexBody.invariants, ['magnitude']);
