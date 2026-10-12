@@ -212,7 +212,7 @@ function createWayglassResearchLibrary({
     const relationType = text(input.relation_type, 80);
     if (!byId.has(fromId) || !byId.has(toId)) throw new Error('Relationship proposal must reference two existing Wayglass Library records.');
     if (fromId === toId) throw new Error('Relationship proposal requires two distinct records.');
-    if (!RELATION_TYPES.has(relationType)) throw new Error('Unsupported Horizon relationship type.');
+    if (!RELATION_TYPES.has(relationType)) throw new Error('Unsupported Wayglass Library relationship type.');
     const summary = text(input.summary, 3000);
     if (!summary) throw new Error('Relationship proposal summary required.');
 
