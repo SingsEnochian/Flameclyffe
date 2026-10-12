@@ -14,10 +14,10 @@ export const WONDER_CANON = Object.freeze({
   sequence: Object.freeze([
     'attend',
     'preserve',
+    'explore-as-if-true-without-promoting',
     'compare',
     'test',
     'remember',
-    'explore-as-if-true-without-promoting',
     'interpret-only-as-evidence-earns',
   ]),
   distinctions: Object.freeze([
