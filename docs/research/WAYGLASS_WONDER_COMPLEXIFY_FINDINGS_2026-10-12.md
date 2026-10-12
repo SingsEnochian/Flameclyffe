@@ -229,7 +229,7 @@ Complexify should not become an infinite escape into richer abstractions. The pr
 
 Wayglass Check #217 reached the full Wayglass suite and found two focused test-contract failures: a legacy interaction snapshot did not yet include `intent` / `interaction_mode`, and the first phase test used a brittle same-magnitude-band assertion. Both were repaired.
 
-Wayglass Check #222, run `38214229148`, completed successfully on the Wayglass-owned namespace conversion. The Wayglass tests, production build, server staging, staged-host verification, preview bundle staging, and preview bundle verification all passed.
+Wayglass Check #223, run `38214308794`, completed successfully on the final Wayglass-owned namespace conversion. The Wayglass tests, production build, server staging, staged-host verification, preview bundle staging, and preview bundle verification all passed.
 
 Arcsweep Worldseed Foundry and ArcSweep Portable Release Bundle also passed on that head.
 
