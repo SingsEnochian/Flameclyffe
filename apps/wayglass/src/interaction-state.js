@@ -10,6 +10,8 @@ export function createInteractionState(initial = {}) {
   let state = {
     channel: initial.channel === 'OOC' ? 'OOC' : 'IC',
     turn_owner: clean(initial.turn_owner) || 'Rowan',
+    intent: clean(initial.intent, 240),
+    interaction_mode: clean(initial.interaction_mode, 80) || 'ordinary',
     character_ownership: Array.isArray(initial.character_ownership) ? initial.character_ownership.map(normaliseOwnership).filter(Boolean) : [],
   };
 
@@ -37,6 +39,15 @@ export function createInteractionState(initial = {}) {
     return snapshot();
   }
 
+  function setInteractionContext({ intent = state.intent, interaction_mode = state.interaction_mode } = {}) {
+    state = {
+      ...state,
+      intent: clean(intent, 240),
+      interaction_mode: clean(interaction_mode, 80) || 'ordinary',
+    };
+    return snapshot();
+  }
+
   function setOwnership(entry) {
     const next = normaliseOwnership(entry);
     if (!next) return snapshot();
@@ -56,5 +67,5 @@ export function createInteractionState(initial = {}) {
     return snapshot();
   }
 
-  return Object.freeze({ snapshot, setChannel, setTurnOwner, setOwnership, removeOwnership });
+  return Object.freeze({ snapshot, setChannel, setTurnOwner, setInteractionContext, setOwnership, removeOwnership });
 }
