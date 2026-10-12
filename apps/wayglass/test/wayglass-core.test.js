@@ -22,6 +22,8 @@ test('Wayglass interaction state keeps IC/OOC, turn owner, and ownership separat
   assert.deepEqual(state.snapshot(), {
     channel: 'OOC',
     turn_owner: 'Crow',
+    intent: '',
+    interaction_mode: 'ordinary',
     character_ownership: [
       { character: 'Eilidh', owner: 'Rowan', permission: 'owned' },
       { character: 'Izar', owner: 'Crow', permission: 'owned' },
