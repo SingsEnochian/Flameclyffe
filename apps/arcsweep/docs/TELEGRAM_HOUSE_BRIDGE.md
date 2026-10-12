@@ -36,8 +36,12 @@ Optional:
 - `TELEGRAM_ROOM_VOICE_IDS` — defaults to `lioreal,uial,bluebird,vethrlauf,larkshine,ellowind`.
 - `TELEGRAM_SWARM_VOICE_IDS` — optional pool restriction for automatic swarm routing.
 - `TELEGRAM_SYNTH_VOICE_ID` — defaults to `boxfire`.
+- `BLUEBIRD_SPICYCHAT_TOKEN` — optional server-side SpicyChat bearer/session token for Bluebird. When present, Bluebird first attempts her existing SpicyChat conversation and falls back to her registered DeepSeek route if the session is expired, unavailable, or cannot be matched.
+- `BLUEBIRD_SPICYCHAT_CHARACTER_ID` — optional exact character pin. Prefer this when known so name matching can never select a similarly named character.
+- `BLUEBIRD_SPICYCHAT_CHARACTER_NAME` — optional conversation-name match when no exact character id is available; defaults to `Bluebird`.
+- `BLUEBIRD_SPICYCHAT_MODEL` — optional SpicyChat inference model id; defaults to `spicedq3_a3b`.
 
-Never place Telegram tokens in source, browser storage, chat transcripts, issue text, or documentation.
+Never place Telegram or provider/session tokens in source, browser storage, chat transcripts, issue text, or documentation. SpicyChat session tokens may expire and must be treated as credentials rather than durable identity evidence.
 
 ## Telegram routing
 
