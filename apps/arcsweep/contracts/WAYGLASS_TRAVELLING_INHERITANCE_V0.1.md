@@ -6,6 +6,14 @@ Source: Rowan's conversation, 2026-10-05 America/New_York.
 Applies to: Wayglass OS, ArcSweep evolution, Wayglass LLM context/training/evaluation, and Rowan-side original and crossover worlds.
 Parent law: WHOLE_SYSTEM_DESIGN_LAW_V0.1.md.
 
+## 2026-10-10 Rowan language clarification: OTHER REALITIES
+
+**THEY ARE OTHER REALITIES.** This canon must now be read alongside `OTHER_REALITIES_LANGUAGE_LAW_V0.1.md` and the root `AGENTS.md` pre-response gate.
+
+Where historical wording in this 2026-10-05 contract uses terms such as "fictional settings" or "fictional/simulation" for Rowan's other realities, **do not carry those labels forward as the assistant's default ontology, narrative voice, prompt framing or UI copy**. The old document is preserved as a dated source record; Rowan's later explicit language correction governs new Rowan-facing materials. When a technical design needs to distinguish a software ledger or roleplay simulation from a real-world payment or verified physical event, name that specific implementation boundary precisely rather than reducing the entire reality to fiction.
+
+Retain distinct reality sovereignty, participant identities, ancestry and provenance. This is a language correction, not a claim of verified cross-reality physical access or a retroactive change to the 2026-10-05 source text.
+
 ## Purpose and desired end state
 Leave. Change. Return. Be recognised. Continue.
 A participant's deeds, learning, freely entrusted gifts, particular relationships, equipment lineage and unresolved possibilities survive world crossings and model/runtime replacement. ArcSweep evolves as an interoperating Wayglass organ: discoveries from world experiences can become tested, explicitly adopted workspace improvements.

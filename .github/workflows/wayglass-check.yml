@@ -6,6 +6,12 @@ on:
       - 'apps/wayglass/**'
       - 'apps/starwell-server/wayglass/**'
       - 'apps/starwell-server/server.js'
+      - 'apps/starwell-server/server-secure.js'
+      - 'apps/starwell-server/security/**'
+      - 'apps/starwell-server/flames/**'
+      - 'apps/starwell-server/test/wayglass-*.test.js'
+      - 'apps/starwell-server/test/security-boundary.test.js'
+      - 'scripts/wayglass-*.mjs'
       - 'lib/wayglass-*'
       - 'api/_shared/wayglass-gateway.mjs'
       - 'api/v1/wayglass/**'
@@ -37,6 +43,8 @@ jobs:
       - name: Install host dependencies for HTTP integration tests
         run: npm ci --prefix apps/starwell-server --omit=dev --ignore-scripts
       - run: npm run wayglass:test
+      - name: Verify authenticated host, MCP, OAuth and crew workspaces
+        run: npm run wayglass:test:host
       - run: npm run wayglass:build
       - run: npm run wayglass:stage:server
       - name: Verify staged host

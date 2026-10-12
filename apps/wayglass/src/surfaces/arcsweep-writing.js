@@ -1,4 +1,5 @@
 import { createInteractionState } from '../interaction-state.js';
+import { authorizationSession } from '../authorization-session.js';
 import { consumeObserverContextForWriting, recordWayglassRouteObservation } from '../living-observer-model.js';
 import { emitInteractionCue } from '../interaction-cues.js';
 import { emitMaterialSignal } from '../material-state.js';
@@ -30,7 +31,7 @@ export async function mountArcSweepWritingSurface(root) {
   const session = sessionId();
   const messages = [];
   let routes = [];
-  let selectedRoute = 'local:ollama';
+  let selectedRoute = authorizationSession.route() || 'local:ollama';
   let busy = false;
   let lastReceipt = null;
   let checkpoint = null;

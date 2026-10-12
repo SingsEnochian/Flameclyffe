@@ -1,4 +1,6 @@
 import './styles.css';
+import './authorization.css';
+import { openWayglassAuthorization } from './authorization.js';
 import { installWayglassField } from './glass-field.js';
 import { installMotionChoreography } from './motion-choreography.js';
 import { installKeyboardControls } from './keyboard-controls.js';
@@ -14,6 +16,11 @@ import { registerWayglassOrgan, listWayglassOrgans } from './organ-registry.js';
 import { FIRST_WAYGLASS_ORGANS } from './organ-donors.js';
 
 const root = document.querySelector('#app');
+
+await openWayglassAuthorization();
+globalThis.addEventListener('pageshow', event => {
+  if (event.persisted) void openWayglassAuthorization();
+});
 
 installWayglassField({ host: document.body });
 installMotionChoreography({ root: document.documentElement });

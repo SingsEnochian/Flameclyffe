@@ -54,6 +54,7 @@ apps/starwell-server/public/starwell/
 .netlify/
 
 /apps/starwell-server/wayglass-runtime/
+/apps/starwell-server/public/wayglass/
 
 # Wayglass private local MCP/OAuth state
 apps/starwell-server/data/wayglass-rarity-access.local.txt

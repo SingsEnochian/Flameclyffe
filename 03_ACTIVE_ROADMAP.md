@@ -73,6 +73,8 @@ This priority reaches its first usable milestone when:
 
 ### Scope rule
 
+2026-10-12 implementation follow-through is tracked in `docs/wayglass/DEPLOYMENT_READINESS_2026-10-12.md` and `docs/wayglass/CREW_SESSION_RUNBOOK_2026-10-12.md`: shared artifact/handoff custody, separate authenticated entrances, exact release lineage and live connection gates. Local host restart evidence must remain distinct from live ChatGPT and model-continuity acceptance.
+
 This priority is **not** permission for unrelated architecture expansion.
 
 The override is specific to making Wayglass a shared working environment for her resident intelligence and separately identified collaborators. Existing circulation, provenance, replay, and truthfulness laws still apply.
