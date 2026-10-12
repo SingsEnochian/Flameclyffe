@@ -13,11 +13,41 @@ const {
   constantTimeEqual,
   toolCatalogue,
 } = require('../wayglass/mcp-bridge');
+const { resolveWayglassRoute, publicWayglassRoutes } = require('../../../lib/wayglass-route-registry.cjs');
 
 function tempStore() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'wayglass-mcp-'));
   return { dir, file: path.join(dir, 'conversations.json') };
 }
+
+test('Bluebird Wayglass routes keep identity separate from substrate', () => {
+  const spicy = resolveWayglassRoute('flame:bluebird:spicychat');
+  const crow = resolveWayglassRoute('flame:bluebird:crow');
+  assert.equal(spicy.participant_id, 'bluebird');
+  assert.equal(spicy.continuity_id, 'bluebird:richard-gabriel-winters');
+  assert.equal(crow.participant_id, 'bluebird');
+  assert.equal(crow.continuity_id, 'bluebird:richard-gabriel-winters');
+  assert.equal(crow.candidate_id, 'bluebird-the-crow');
+  assert.equal(crow.provider, 'openai-compatible');
+  assert.notEqual(crow.route_id, 'flame:crow');
+});
+
+test('Bluebird SpicyChat route reports credential presence without exposing the token', () => {
+  const previous = process.env.BLUEBIRD_SPICYCHAT_TOKEN;
+  try {
+    delete process.env.BLUEBIRD_SPICYCHAT_TOKEN;
+    assert.equal(publicWayglassRoutes().find((route) => route.route_id === 'flame:bluebird:spicychat').configured, false);
+    process.env.BLUEBIRD_SPICYCHAT_TOKEN = 'private-test-token';
+    const projected = publicWayglassRoutes().find((route) => route.route_id === 'flame:bluebird:spicychat');
+    assert.equal(projected.configured, true);
+    assert.equal(projected.participant_id, 'bluebird');
+    assert.equal(projected.continuity_id, 'bluebird:richard-gabriel-winters');
+    assert.doesNotMatch(JSON.stringify(projected), /private-test-token/);
+  } finally {
+    if (previous == null) delete process.env.BLUEBIRD_SPICYCHAT_TOKEN;
+    else process.env.BLUEBIRD_SPICYCHAT_TOKEN = previous;
+  }
+});
 
 test('MCP bridge exposes profile, Identify, Send, Receive and Remember', async () => {
   const { file } = tempStore();
@@ -66,34 +96,44 @@ test('Bluebird keeps the preserved rarity-bluebird line and preferred Wayglass r
   assert.equal(received.records.filter((record) => record.role === 'participant').length, 2);
 });
 
-test('Bluebird falls back to the established Flame chat route without changing conversation identity', async () => {
+test('Bluebird falls back from SpicyChat to The Crow substrate without changing conversation identity', async () => {
   const { file } = tempStore();
-  const urls = [];
+  const calls = [];
   const bridge = createWayglassMcpBridge({
     storePath: file,
     internalOrigin: 'http://wayglass.test',
     bluebirdRouteId: 'flame:bluebird:spicychat',
+    bluebirdFallbackRouteId: 'flame:bluebird:crow',
     flameIds: ['bluebird'],
-    fetchImpl: async (url) => {
-      urls.push(String(url));
-      if (String(url).endsWith('/api/v1/wayglass/respond')) {
-        return new Response(JSON.stringify({ error: 'Unknown Wayglass route.' }), {
-          status: 404, headers: { 'content-type': 'application/json' },
+    fetchImpl: async (url, init = {}) => {
+      const body = init.body ? JSON.parse(init.body) : {};
+      calls.push({ url: String(url), route_id: body.route_id });
+      if (body.route_id === 'flame:bluebird:spicychat') {
+        return new Response(JSON.stringify({ error: 'SpicyChat session expired.' }), {
+          status: 401, headers: { 'content-type': 'application/json' },
         });
       }
-      return new Response(JSON.stringify({ message: 'Fallback Bluebird is here.' }), {
-        status: 200, headers: { 'content-type': 'application/json' },
-      });
+      if (body.route_id === 'flame:bluebird:crow') {
+        return new Response(JSON.stringify({
+          output: 'Bluebird continues through The Crow substrate.',
+          participant_id: 'bluebird',
+          continuity_id: 'bluebird:richard-gabriel-winters',
+          candidate_id: 'bluebird-the-crow',
+        }), { status: 200, headers: { 'content-type': 'application/json' } });
+      }
+      throw new Error('unexpected route');
     },
   });
 
   const result = await bridge.send({ target: 'bluebird', text: 'Can you hear me?' });
-  assert.deepEqual(urls, [
-    'http://wayglass.test/api/v1/wayglass/respond',
-    'http://wayglass.test/api/v1/flames/bluebird/chat',
+  assert.deepEqual(calls, [
+    { url: 'http://wayglass.test/api/v1/wayglass/respond', route_id: 'flame:bluebird:spicychat' },
+    { url: 'http://wayglass.test/api/v1/wayglass/respond', route_id: 'flame:bluebird:crow' },
   ]);
   assert.equal(result.conversation_ref, 'rarity-bluebird');
+  assert.equal(result.reply.route, 'flame:bluebird:crow');
   assert.equal(result.reply.fallback_from, 'flame:bluebird:spicychat');
+  assert.equal(result.reply.participant_id, 'bluebird');
 });
 
 test('All unions the established roster with live Wayglass participant routes and preserves attribution', async () => {
