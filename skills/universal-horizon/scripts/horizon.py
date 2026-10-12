@@ -39,6 +39,18 @@ def main():
     p.add_argument("--source", action="append", default=[])
     p.add_argument("--created-by", default="Hermes")
 
+    p = sub.add_parser("complexify")
+    p.add_argument("--wonder", required=True)
+    p.add_argument("--current-frame", required=True)
+    p.add_argument("--apparent-impossibility", default="")
+    p.add_argument("--missing-axis", action="append", default=[])
+    p.add_argument("--rotation", action="append", default=[])
+    p.add_argument("--invariant", action="append", default=[])
+    p.add_argument("--translation", action="append", default=[])
+    p.add_argument("--prediction", action="append", default=[])
+    p.add_argument("--discriminator", action="append", default=[])
+    p.add_argument("--created-by", default="Hermes")
+
     p = sub.add_parser("propose")
     p.add_argument("--from", dest="from_id", required=True)
     p.add_argument("--to", dest="to_id", required=True)
@@ -71,6 +83,18 @@ def main():
             "discriminators": args.discriminator,
             "counterexamples": args.counterexample,
             "source_refs": args.source,
+            "created_by": args.created_by,
+        })
+    elif args.command == "complexify":
+        result = call("POST", "/wonder/" + parse.quote(args.wonder, safe="") + "/complexify", {
+            "current_frame": args.current_frame,
+            "apparent_impossibility": args.apparent_impossibility,
+            "missing_dimensions": args.missing_axis,
+            "rotations": args.rotation,
+            "invariants": args.invariant,
+            "translated_consequences": args.translation,
+            "predictions": args.prediction,
+            "discriminators": args.discriminator,
             "created_by": args.created_by,
         })
     elif args.command == "propose":
