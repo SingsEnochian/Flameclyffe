@@ -164,22 +164,7 @@ export async function mountArcSweepWritingSurface(root) {
 
   function refreshState() {
     const state = interaction.snapshot();
-    wonderButtons.forEach((button) => {
-    button.addEventListener('click', async () => {
-      const mode = button.dataset.wonderMode;
-      const intent = mode === 'counterfactual-wonder'
-        ? 'Explore this possibility as if it were true while preserving that it could be false.'
-        : mode === 'complexify'
-          ? 'If the current frame makes the idea impossible, look for a missing dimension, rotate the representation, preserve invariants, and translate consequences back.'
-          : '';
-      interaction.setInteractionContext({ intent, interaction_mode: mode });
-      wakeMaterial(mode === 'complexify' ? 0.92 : mode === 'counterfactual-wonder' ? 0.78 : 0.5, 'wonder', { intent: mode === 'ordinary' ? 0.35 : 0.94 });
-      await emitInteractionCue('switch');
-      refreshState();
-    });
-  });
-
-  channelButtons.forEach((button) => {
+    channelButtons.forEach((button) => {
       const active = button.dataset.channel === state.channel;
       button.classList.toggle('active', active);
       button.setAttribute('aria-pressed', active ? 'true' : 'false');
@@ -352,6 +337,21 @@ export async function mountArcSweepWritingSurface(root) {
       input.focus();
     }
   }
+
+  wonderButtons.forEach((button) => {
+    button.addEventListener('click', async () => {
+      const mode = button.dataset.wonderMode;
+      const intent = mode === 'counterfactual-wonder'
+        ? 'Explore this possibility as if it were true while preserving that it could be false.'
+        : mode === 'complexify'
+          ? 'If the current frame makes the idea impossible, look for a missing dimension, rotate the representation, preserve invariants, and translate consequences back.'
+          : '';
+      interaction.setInteractionContext({ intent, interaction_mode: mode });
+      wakeMaterial(mode === 'complexify' ? 0.92 : mode === 'counterfactual-wonder' ? 0.78 : 0.5, 'wonder', { intent: mode === 'ordinary' ? 0.35 : 0.94 });
+      await emitInteractionCue('switch');
+      refreshState();
+    });
+  });
 
   channelButtons.forEach((button) => {
     button.addEventListener('click', async () => {
