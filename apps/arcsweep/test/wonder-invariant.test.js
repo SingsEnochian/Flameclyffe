@@ -155,7 +155,7 @@ test('Counterfactual Wonder explores a proposition without promoting it to fact'
     predictions: ['Some unresolved structures should become more connected before a release event.'],
     discriminators: ['Compare against equally productive periods without a compression phase.'],
     counterexamples: ['Breakthroughs that occur without prior accumulation would weaken a universal version of the pattern.'],
-    sourceRefs: ['universal-horizon:conversation-observation'],
+    sourceRefs: ['wayglass:conversation-observation'],
     createdBy: 'Rowan',
     createdAt: '2026-10-12T02:16:00-04:00',
   });
