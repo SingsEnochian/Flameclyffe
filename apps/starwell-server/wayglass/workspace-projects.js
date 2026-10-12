@@ -4,7 +4,10 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { createHash, randomUUID } = require('node:crypto');
 const { participant, enterWorkspace } = require('./crew-workspaces');
-const { createWayglassDeparture } = require('../wayglass-runtime/wayglass-stop-receipt.cjs');
+// Windows host tests run before staging; packaged hosts use the staged runtime.
+const stopModule = fs.existsSync(path.join(__dirname, '..', 'wayglass-runtime', 'wayglass-stop-receipt.cjs'))
+  ? '../wayglass-runtime/wayglass-stop-receipt.cjs' : '../../../lib/wayglass-stop-receipt.cjs';
+const { createWayglassDeparture } = require(stopModule);
 
 const SCHEMA = 'wayglass.workspace-journal/v0.1';
 const hash = value => createHash('sha256').update(value).digest('hex');
