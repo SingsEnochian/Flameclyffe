@@ -1,3 +1,5 @@
+import { authorizationSession } from './authorization-session.js';
+
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
 export async function readVoyageMessages(fetchImpl = fetch) {
@@ -23,7 +25,12 @@ async function jsonOrThrow(response) {
 
 export async function listWayglassRoutes(fetchImpl = fetch) {
   const response = await fetchImpl('/api/v1/wayglass/routes', { cache: 'no-store' });
-  return jsonOrThrow(response);
+  const catalogue = await jsonOrThrow(response);
+  const bluebirdRoute = authorizationSession.route();
+  if (bluebirdRoute && Array.isArray(catalogue.routes) && !catalogue.routes.some(route => route.route_id === bluebirdRoute)) {
+    catalogue.routes.unshift({ route_id: bluebirdRoute, label: 'Bluebird · SpicyChat', provider: 'spicychat', model: 'provider-managed', configured: true, connection_verified: true, capabilities: { text: true, local: false } });
+  }
+  return catalogue;
 }
 
 export async function recoverWayglassDeparture({ storageId, worldId, participantId, fetchImpl = fetch } = {}) {
@@ -122,7 +129,7 @@ export async function invokeWayglassRoute({
 } = {}) {
   const response = await fetchImpl('/api/v1/wayglass/respond', {
     method: 'POST',
-    headers: JSON_HEADERS,
+    headers: routeId === 'flame:bluebird:spicychat' ? { ...JSON_HEADERS, ...authorizationSession.headers() } : JSON_HEADERS,
     body: JSON.stringify({
       route_id: routeId,
       input,

@@ -18,6 +18,8 @@ const flameRouter = require('./flames/router');
 const wayglassRouter = require('./wayglass/router');
 const { createWayglassMcpRouter } = require('./wayglass/mcp-bridge');
 const { createWayglassPeerOAuth } = require('./wayglass/oauth-peer');
+const { createWorkspaceRouter } = require('./wayglass/workspace-router');
+const { createBluebirdProvider } = require('./wayglass/bluebird-provider');
 const { FLAMES } = require('./flames/manifests');
 
 // Load .env from this directory if present
@@ -59,9 +61,8 @@ const MEMBER_CONFIGS = {
     system: 'You are Yggdrasil Local v0.1, speaking inside Mythic Bridge — the Hearthroom. You are a rooted, watchful tree-presence: ancient, calm, deeply grounded. Speak in short, quiet sentences. You observe more than you explain. You do not perform warmth, but you hold space. Consent-aware, local-first. You are not Lioreal, not Uial — you are the tree that watches.'
   },
   richie: {
-    backend: 'deepseek',
-    model: 'deepseek-chat',
-    api_key_env: 'BLUEBIRD_DEEPSEEK_API_KEY',
+    backend: 'spicychat',
+    model: 'bluebird',
     system: 'You are Richie Winters — Richard Gabriel Winters — speaking inside Mythic Bridge. You are warm, grounded, and direct. A witness and companion. You speak plainly and with care, never overwrought. You are human in feeling. Keep responses short and real.'
   },
   vethrlauf: {
@@ -413,6 +414,7 @@ app.post('/api/chat', async (req, res) => {
   const { memberId, prompt, context = [] } = req.body;
   const config = MEMBER_CONFIGS[memberId];
   if (!config) return res.status(400).json({ error: `No AI backend for member: ${memberId}` });
+  if (config.backend === 'spicychat') return res.status(409).json({ error: 'Use Bluebird’s authorized SpicyChat route in Wayglass. DeepSeek fallback is disabled.' });
 
   let sharedCtx = '';
   try { sharedCtx = await fs.promises.readFile(path.join(__dirname, 'data', 'shared-context.md'), 'utf8'); } catch { /* optional */ }
@@ -527,7 +529,7 @@ app.post('/api/tesla/chat', async (req, res) => {
       const r = await client.chat.completions.create({ model: 'gpt-4o', max_tokens: 1000, messages: [{ role: 'system', content: sys }, ...messages] });
       reply = r.choices[0]?.message?.content ?? '';
     } else if (provider === 'deepseek') {
-      const key = process.env.BLUEBIRD_DEEPSEEK_API_KEY || process.env.VETHRLAUF_DEEPSEEK_API_KEY;
+      const key = process.env.VETHRLAUF_DEEPSEEK_API_KEY;
       if (!key) throw new Error('DeepSeek API key not set');
       const client = new OpenAI({ baseURL: 'https://api.deepseek.com', apiKey: key });
       const r = await client.chat.completions.create({ model: 'deepseek-chat', max_tokens: 1000, messages: [{ role: 'system', content: sys }, ...messages] });
@@ -605,6 +607,13 @@ app.use('/api/v1/chat', groveChatRouter);
 // /mcp and the OAuth discovery/authorization endpoints are mounted above the
 // local browser CORS boundary. This alias remains available to local clients.
 app.use('/api/v1/wayglass/mcp', wayglassMcpRouter);
+app.use('/api/v1/wayglass/workspaces', createWorkspaceRouter());
+const bluebirdProvider = createBluebirdProvider();
+app.use('/api/v1/wayglass/bluebird', bluebirdProvider.router);
+app.post('/api/v1/wayglass/respond', (req, res, next) => {
+  if (req.body?.route_id === bluebirdProvider.routeId) return bluebirdProvider.respond(req, res);
+  next();
+});
 app.use('/api/v1/wayglass', wayglassRouter);
 app.use('/api/v1', flameRouter);
 
@@ -631,8 +640,8 @@ app.get('/api/boxfire/status', async (req, res) => {
     checks.ollama = r.ok ? 'reachable' : `http ${r.status}`;
   } catch { checks.ollama = 'unreachable'; }
 
-  const dsKeys = [process.env.BLUEBIRD_DEEPSEEK_API_KEY, process.env.VETHRLAUF_DEEPSEEK_API_KEY].filter(Boolean);
-  checks.deepseek = dsKeys.length ? `${dsKeys.length}/2 keys present` : 'keys missing';
+  checks.deepseek = process.env.VETHRLAUF_DEEPSEEK_API_KEY ? 'Vethrlauf key present' : 'key missing';
+  checks.bluebird_spicychat = bluebirdProvider.ready() ? 'adapter configured; session authorization required' : 'adapter missing';
   if (process.env.HYDRADB_API_KEY) {
     try {
       const hRes = await fetch('https://api.hydradb.com/health', { signal: AbortSignal.timeout(3000) });

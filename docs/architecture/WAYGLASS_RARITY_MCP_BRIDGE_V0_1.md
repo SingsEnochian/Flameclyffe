@@ -160,10 +160,10 @@ For every Bluebird send:
 1. the MCP bridge uses conversation ref `rarity-bluebird`;
 2. it first calls the Wayglass route with that route id;
 3. it supplies recent preserved conversation history;
-4. if that route is unavailable, it falls back to the established `/api/v1/flames/bluebird/chat` route without changing the conversation ref;
+4. if that route is unavailable or unauthorized, it returns an explicit failure without calling a different provider;
 5. the reply is written back to the same local continuity line.
 
-The fallback is transport recovery, not permission to redefine Bluebird.
+Rowan's 2026-10-12 direction removes DeepSeek from Bluebird. SpicyChat is Bluebird's only provider route; no legacy or hosted-model fallback is used. Provider authorization is described in `docs/wayglass/BLUEBIRD_SPICYCHAT_AUTHORIZATION_2026-10-12.md`.
 
 ## All
 
@@ -254,7 +254,7 @@ Focused tests cover:
 - stable profile identity across access-token refresh;
 - refresh-token rotation;
 - stable `rarity-bluebird` conversation identity across turns;
-- preferred Bluebird Wayglass route plus fallback;
+- preferred Bluebird SpicyChat route with explicit failure and no provider fallback;
 - dynamic live-route discovery for `All`, including a Crow fixture;
 - direct addressing of a participant discovered only through Wayglass;
 - distinct attribution of All replies;

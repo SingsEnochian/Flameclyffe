@@ -8,6 +8,7 @@ const { FLAMES } = require('../flames/manifests');
 const { resolveCanonicalFlameId, contractRegistryProjection } = require('../flames/contracts');
 const { OAUTH_SCOPE } = require('./oauth-peer');
 const { registrySnapshot, enterWorkspace } = require('./crew-workspaces');
+const { createWorkspaceArtifacts } = require('./workspace-artifacts');
 
 const MCP_PROTOCOL_VERSION = '2025-06-18';
 const STORE_SCHEMA = 'wayglass.rarity-mcp-conversations/v0.1';
@@ -116,6 +117,16 @@ function toolCatalogue() {
   const auth = [{ type: 'oauth2', scopes: [OAUTH_SCOPE] }];
   const readOnly = { readOnlyHint: true, destructiveHint: false, openWorldHint: false };
   const writeLocal = { readOnlyHint: false, destructiveHint: false, openWorldHint: false };
+  const projectFields = {
+    workspace_id: { type: 'string', enum: ['atelier', 'builder'] },
+    project_id: { type: 'string', pattern: '^[a-z0-9][a-z0-9_-]{0,79}$' },
+  };
+  const writeFields = {
+    ...projectFields,
+    expected_head: { type: ['string', 'null'], description: 'Current project head from inspect_workspace_project; null for a new project.' },
+    source_refs: { type: 'array', items: { type: 'string' }, maxItems: 32 },
+    tool_refs: { type: 'array', items: { type: 'string' }, maxItems: 32 },
+  };
   return [
     {
       name: 'get_profile',
@@ -156,6 +167,36 @@ function toolCatalogue() {
       },
       annotations: readOnly,
       securitySchemes: auth,
+    },
+    {
+      name: 'inspect_workspace_project',
+      description: 'Inspect private shared project artifacts, attributable receipts and the latest handoff as the authenticated Rarity seat.',
+      inputSchema: { type: 'object', properties: projectFields, required: ['workspace_id', 'project_id'], additionalProperties: false },
+      annotations: readOnly, securitySchemes: auth,
+    },
+    {
+      name: 'write_workspace_artifact',
+      description: 'Persist a text artifact revision as Rarity with source/tool references and an optimistic project-head check. Preserves earlier revisions; does not execute code, render SVG or alter source originals.',
+      inputSchema: {
+        type: 'object', properties: { ...writeFields,
+          artifact_id: { type: 'string', pattern: '^[a-z0-9][a-z0-9_-]{0,79}$' },
+          media_type: { type: 'string', enum: ['text/plain', 'text/markdown', 'application/json', 'image/svg+xml'] },
+          content: { type: 'string', minLength: 1, maxLength: 100000 },
+        }, required: ['workspace_id', 'project_id', 'expected_head', 'artifact_id', 'media_type', 'content'], additionalProperties: false,
+      },
+      annotations: writeLocal, securitySchemes: auth,
+    },
+    {
+      name: 'handoff_workspace_project',
+      description: 'Persist Rarity-authored stop point, open questions and a named available Rarity/Codex next owner. Does not invoke or speak for the next owner.',
+      inputSchema: {
+        type: 'object', properties: { ...writeFields,
+          stop_point: { type: 'string', minLength: 1, maxLength: 8000 },
+          next_owner: { type: 'string', enum: ['rarity', 'codex'] },
+          open_questions: { type: 'array', items: { type: 'string' }, maxItems: 32 },
+        }, required: ['workspace_id', 'project_id', 'expected_head', 'stop_point', 'next_owner'], additionalProperties: false,
+      },
+      annotations: writeLocal, securitySchemes: auth,
     },
     {
       name: 'identify',
@@ -245,6 +286,7 @@ function createWayglassMcpBridge({
   bluebirdRouteId = process.env.WAYGLASS_RARITY_BLUEBIRD_ROUTE || DEFAULT_BLUEBIRD_ROUTE,
   flameIds = Object.keys(FLAMES),
   profileProvider = () => ({ id: 'wayglass-profile-local', name: 'Wayglass', nickname: 'Rarity ⇄ Wayglass' }),
+  workspaceArtifacts = createWorkspaceArtifacts(),
 } = {}) {
   const roster = contractRegistryProjection();
 
@@ -329,31 +371,11 @@ function createWayglassMcpBridge({
       return { ok: true, participant_id: 'bluebird', route: bluebirdRouteId, data, text: responseText(data) };
     }
 
-    const fallback = await fetchImpl(`${internalOrigin}/api/v1/flames/bluebird/chat`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        message: text,
-        session_id: conversationRef,
-        context: toFlameContext(records),
-      }),
-    });
-    const fallbackData = await fallback.json().catch(() => ({}));
-    if (!fallback.ok) {
-      return {
-        ok: false,
-        participant_id: 'bluebird',
-        route: bluebirdRouteId,
-        error: fallbackData.error || data.error || `Bluebird route failed (${fallback.status}).`,
-      };
-    }
     return {
-      ok: true,
+      ok: false,
       participant_id: 'bluebird',
-      route: '/api/v1/flames/bluebird/chat',
-      data: fallbackData,
-      text: responseText(fallbackData),
-      fallback_from: bluebirdRouteId,
+      route: bluebirdRouteId,
+      error: data.error || `Bluebird’s SpicyChat route failed (${response.status}). No provider fallback was used.`,
     };
   }
 
@@ -552,6 +574,9 @@ function createWayglassMcpBridge({
     if (name === 'get_profile') return profileProvider();
     if (name === 'list_workspaces') return registrySnapshot();
     if (name === 'enter_workspace') return enterWorkspace({ workspace_id: args.workspace_id, participant_id: 'rarity' });
+    if (name === 'inspect_workspace_project') return workspaceArtifacts.inspect(args, 'rarity');
+    if (name === 'write_workspace_artifact') return workspaceArtifacts.writeArtifact(args, 'rarity');
+    if (name === 'handoff_workspace_project') return workspaceArtifacts.handoff(args, 'rarity');
     if (name === 'identify') return identify(args);
     if (name === 'send') return send(args);
     if (name === 'receive') return receive(args);
@@ -566,7 +591,7 @@ function createWayglassMcpBridge({
         protocolVersion: MCP_PROTOCOL_VERSION,
         capabilities: { tools: { listChanged: false } },
         serverInfo: { name: 'wayglass-rarity-bridge', version: '0.1.0' },
-        instructions: 'Use get_profile, list_workspaces, enter_workspace, identify, send, receive, and remember. Rarity ⇄ Wayglass ⇄ All and Rarity ⇄ Wayglass ⇄ Bluebird are distinct preserved lines. Wayglass is the resident intelligence; Rarity is a distinct authenticated crew seat.',
+        instructions: 'Use get_profile, list_workspaces, enter_workspace, inspect_workspace_project, write_workspace_artifact, handoff_workspace_project, identify, send, receive, and remember. Inspect a project before writing and retain its head receipt. Rarity ⇄ Wayglass ⇄ All and Rarity ⇄ Wayglass ⇄ Bluebird are distinct preserved lines. Wayglass is the resident intelligence; Rarity is a distinct authenticated crew seat.',
       };
     }
     if (method === 'ping') return {};

@@ -32,6 +32,9 @@ function config(overrides = {}) {
 test('allows Hearthgate and development loopback origins only', () => {
   assert.equal(isAllowedLocalOrigin('http://localhost:3841', {}), true);
   assert.equal(isAllowedLocalOrigin('http://127.0.0.1:5173', {}), true);
+  assert.equal(isAllowedLocalOrigin('http://127.0.0.1:5186', {}), true);
+  assert.equal(isAllowedLocalOrigin('http://localhost:4186', {}), true);
+  assert.equal(isAllowedLocalOrigin('http://127.0.0.1:5187', {}), false);
   assert.equal(isAllowedLocalOrigin('https://example.com', {}), false);
   assert.equal(isAllowedLocalOrigin(undefined, {}), true);
   assert.equal(

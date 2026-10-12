@@ -27,8 +27,9 @@ test('MCP bridge exposes profile, Identify, Send, Receive and Remember', async (
   assert.equal(init.capabilities.tools.listChanged, false);
 
   const listed = await bridge.handleRpc({ method: 'tools/list' });
-  assert.deepEqual(listed.tools.map((tool) => tool.name), ['get_profile', 'list_workspaces', 'enter_workspace', 'identify', 'send', 'receive', 'remember']);
-  assert.deepEqual(toolCatalogue().map((tool) => tool.name), ['get_profile', 'identify', 'send', 'receive', 'remember']);
+  const expectedTools = ['get_profile', 'list_workspaces', 'enter_workspace', 'inspect_workspace_project', 'write_workspace_artifact', 'handoff_workspace_project', 'identify', 'send', 'receive', 'remember'];
+  assert.deepEqual(listed.tools.map((tool) => tool.name), expectedTools);
+  assert.deepEqual(toolCatalogue().map((tool) => tool.name), expectedTools);
 });
 
 test('MCP exposes Atelier and Builder and enters them as the distinct Rarity seat', async () => {
@@ -86,7 +87,7 @@ test('Bluebird keeps the preserved rarity-bluebird line and preferred Wayglass r
   assert.equal(received.records.filter((record) => record.role === 'participant').length, 2);
 });
 
-test('Bluebird falls back to the established Flame chat route without changing conversation identity', async () => {
+test('Bluebird reports a SpicyChat failure without any provider fallback or conversation change', async () => {
   const { file } = tempStore();
   const urls = [];
   const bridge = createWayglassMcpBridge({
@@ -96,6 +97,11 @@ test('Bluebird falls back to the established Flame chat route without changing c
     flameIds: ['bluebird'],
     fetchImpl: async (url) => {
       urls.push(String(url));
+      if (String(url).endsWith('/api/v1/wayglass/routes')) {
+        return new Response(JSON.stringify({ routes: [] }), {
+          status: 200, headers: { 'content-type': 'application/json' },
+        });
+      }
       if (String(url).endsWith('/api/v1/wayglass/respond')) {
         return new Response(JSON.stringify({ error: 'Unknown Wayglass route.' }), {
           status: 404, headers: { 'content-type': 'application/json' },
@@ -109,11 +115,14 @@ test('Bluebird falls back to the established Flame chat route without changing c
 
   const result = await bridge.send({ target: 'bluebird', text: 'Can you hear me?' });
   assert.deepEqual(urls, [
+    'http://wayglass.test/api/v1/wayglass/routes',
     'http://wayglass.test/api/v1/wayglass/respond',
-    'http://wayglass.test/api/v1/flames/bluebird/chat',
   ]);
   assert.equal(result.conversation_ref, 'rarity-bluebird');
-  assert.equal(result.reply.fallback_from, 'flame:bluebird:spicychat');
+  assert.equal(result.reply.ok, false);
+  assert.equal(result.reply.route, 'flame:bluebird:spicychat');
+  assert.equal(result.reply.fallback_from, undefined);
+  assert.equal(result.reply.error, 'Unknown Wayglass route.');
 });
 
 test('All unions the established roster with live Wayglass participant routes and preserves attribution', async () => {
