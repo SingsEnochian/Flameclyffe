@@ -153,17 +153,20 @@ Override only if Wayglass moves that route:
 
 ```text
 WAYGLASS_RARITY_BLUEBIRD_ROUTE=<route id>
+WAYGLASS_RARITY_BLUEBIRD_FALLBACK_ROUTE=flame:bluebird:crow
 ```
 
 For every Bluebird send:
 
 1. the MCP bridge uses conversation ref `rarity-bluebird`;
-2. it first calls the Wayglass route with that route id;
+2. it first calls `flame:bluebird:spicychat`;
 3. it supplies recent preserved conversation history;
-4. if that route is unavailable, it falls back to the established `/api/v1/flames/bluebird/chat` route without changing the conversation ref;
-5. the reply is written back to the same local continuity line.
+4. if SpicyChat is unavailable or its session token has expired, it falls back to `flame:bluebird:crow`;
+5. both routes retain participant `bluebird` and continuity id `bluebird:richard-gabriel-winters`;
+6. the Crow-backed route records candidate `bluebird-the-crow`;
+7. the reply is written back to the same local continuity line.
 
-The fallback is transport recovery, not permission to redefine Bluebird.
+`flame:bluebird:crow` means **Bluebird continuing through The Crow model substrate**. It is not `flame:crow`, which remains a distinct Crow participant route. The fallback is substrate/transport recovery, not permission to redefine either participant. DeepSeek is not part of this Bluebird Wayglass fallback chain.
 
 ## All
 
