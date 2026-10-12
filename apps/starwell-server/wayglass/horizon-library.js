@@ -158,6 +158,7 @@ function createUniversalHorizonLibrary({
       source_refs: cleanList(input.source_refs, 64),
       created_by: text(input.created_by, 240) || 'unspecified',
       status: 'open',
+      complexifications: [],
       created_at: now(),
     };
 
@@ -165,6 +166,39 @@ function createUniversalHorizonLibrary({
     state.wonders.push(wonder);
     saveState(state);
     return wonder;
+  }
+
+  function complexifyWonder(wonderId, input = {}) {
+    const state = loadState();
+    const wonder = state.wonders.find(item => item.wonder_id === text(wonderId, 220));
+    if (!wonder) throw new Error('Unknown Counterfactual Wonder branch.');
+    const currentFrame = text(input.current_frame, 3000);
+    if (!currentFrame) throw new Error('Complexification requires current_frame.');
+
+    const item = {
+      schema: 'universal-horizon.complexification/v0.1',
+      complexification_id: 'uhc:' + idFactory(),
+      current_frame: currentFrame,
+      apparent_impossibility: text(input.apparent_impossibility, 3000),
+      missing_dimensions: cleanList(input.missing_dimensions, 64),
+      rotations: cleanList(input.rotations, 64),
+      invariants: cleanList(input.invariants, 64),
+      translated_consequences: cleanList(input.translated_consequences, 64),
+      predictions: cleanList(input.predictions, 64),
+      discriminators: cleanList(input.discriminators, 64),
+      stance: {
+        current_frame_may_be_incomplete: true,
+        enlarged_frame_is_provisional: true,
+        translated_predictions_require_test: true,
+      },
+      created_by: text(input.created_by, 240) || 'unspecified',
+      created_at: now(),
+    };
+
+    if (!Array.isArray(wonder.complexifications)) wonder.complexifications = [];
+    wonder.complexifications.push(item);
+    saveState(state);
+    return { wonder, complexification: item };
   }
 
   function listProposals({ status = '' } = {}) {
@@ -254,7 +288,7 @@ function createUniversalHorizonLibrary({
     };
   }
 
-  return Object.freeze({ search, getRecord, propose, review, listProposals, createWonder, listWonders, graph, status });
+  return Object.freeze({ search, getRecord, propose, review, listProposals, createWonder, listWonders, complexifyWonder, graph, status });
 }
 
 function createUniversalHorizonRouter(options = {}) {
@@ -277,6 +311,10 @@ function createUniversalHorizonRouter(options = {}) {
   }));
   router.post('/wonder', (req, res) => {
     try { return res.status(201).json(library.createWonder(req.body || {})); }
+    catch (error) { return res.status(400).json({ error: error.message }); }
+  });
+  router.post('/wonder/:id/complexify', (req, res) => {
+    try { return res.status(201).json(library.complexifyWonder(req.params.id, req.body || {})); }
     catch (error) { return res.status(400).json({ error: error.message }); }
   });
   router.get('/graph', (_req, res) => res.json(library.graph()));
