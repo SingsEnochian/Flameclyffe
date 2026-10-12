@@ -35,6 +35,12 @@ test('Living Observer interior persists while exposing only a bounded public sig
   assert.ok(['integrating','attending','wander','dream','settling'].includes(signal.phase));
   assert.equal(Object.hasOwn(signal, 'traces'), false);
   assert.equal(Object.hasOwn(signal, 'private_questions'), false);
+  assert.ok(signal.compression_field.magnitude >= 0 && signal.compression_field.magnitude <= 1);
+  assert.ok(signal.compression_field.phase_radians >= 0 && signal.compression_field.phase_radians < Math.PI * 2);
+  assert.ok(['gathering','compression','integration','release'].includes(signal.compression_field.phase_label));
+  assert.ok(Math.abs(signal.compression_field.real * signal.compression_field.real
+    + signal.compression_field.imaginary * signal.compression_field.imaginary
+    - signal.compression_field.magnitude * signal.compression_field.magnitude) < 0.00001);
 
   const restored = createObserverInterior({ storage, now });
   const second = restored.sense(packet({ focus:'memory', touches:4 }));
@@ -65,4 +71,31 @@ test('Dream cycles can create private associations without exposing the associat
   const publicSignal = interior.publicSignal();
   assert.equal(Object.hasOwn(publicSignal, 'associations'), false);
   assert.ok(publicSignal.expression === null || ['self-development','dream-association','private-question'].includes(publicSignal.expression.kind));
+});
+
+test('Compression and release are represented as phase, not only magnitude', () => {
+  const storage = memoryStorage();
+  let tick = 0;
+  const now = () => `2026-10-12T06:03:${String(tick++).padStart(2,'0')}.000Z`;
+  const interior = createObserverInterior({ storage, now });
+  const seen = new Set();
+  let firstMagnitude = null;
+  let distinctSameBand = false;
+  for (let i=0;i<40;i++) {
+    const signal = interior.sense(packet({
+      focus:['time','routes','memory','touch'][i%4],
+      touches:i%7,
+      status:i%5===0?'completed':null,
+      memory:true,
+    }));
+    seen.add(signal.compression_field.phase_label);
+    if (firstMagnitude === null) firstMagnitude = signal.compression_field.magnitude;
+    if (Math.abs(signal.compression_field.magnitude-firstMagnitude)<0.12
+      && signal.compression_field.phase_degrees>80) distinctSameBand = true;
+  }
+  assert.ok(seen.has('compression'));
+  assert.ok(seen.has('integration'));
+  assert.ok(seen.has('release'));
+  assert.ok(distinctSameBand);
+  assert.ok(interior.publicSignal().compression_field.spiral_turn >= 1);
 });
