@@ -5,6 +5,8 @@ import {
   ORDINARY_EMERGENCE_SCOPES,
   WONDER_CANON,
   WONDER_INVARIANT,
+  COUNTERFACTUAL_WONDER_SCHEMA,
+  createCounterfactualWonder,
   assertWonderInvariant,
   evaluateWonderInvariant,
 } from '../src/wonder-invariant.js';
@@ -19,11 +21,13 @@ test('Wonder + mythic canon preserves wonder, mythic meaning, and native languag
   assert.ok(WONDER_CANON.laws.includes('LET THE MYTHIC BREATHE.'));
   assert.ok(WONDER_CANON.laws.includes('MYTHIC MEANING != EMPIRICAL CLAIM.'));
   assert.ok(WONDER_CANON.laws.includes('THE EXPERIENCE MAY KEEP ITS NATIVE LANGUAGE.'));
+  assert.ok(WONDER_CANON.laws.includes('THIS COULD BE FALSE. BUT WHAT IF IT WERE TRUE?'));
   assert.ok(WONDER_CANON.nativeRegisters.includes('witchy-sense'));
   assert.ok(WONDER_CANON.distinctions.includes('NATIVE LANGUAGE != EXTERNAL CAUSATION CLAIM'));
   assert.deepEqual(WONDER_CANON.sequence, [
     'attend',
     'preserve',
+    'explore-as-if-true-without-promoting',
     'compare',
     'test',
     'remember',
@@ -138,4 +142,34 @@ test('non-participant infrastructure may opt out of emergence-space requirement'
   });
 
   assert.equal(result.pass, true);
+});
+
+test('Counterfactual Wonder explores a proposition without promoting it to fact', () => {
+  const wonder = createCounterfactualWonder({
+    proposition: 'Compression and release may be a recurring shape of reorganisation.',
+    whyInteresting: 'The pattern appears worth comparing across unlike systems.',
+    implications: ['Breakthrough structure may begin forming before release.'],
+    predictions: ['Some unresolved structures should become more connected before a release event.'],
+    discriminators: ['Compare against equally productive periods without a compression phase.'],
+    counterexamples: ['Breakthroughs that occur without prior accumulation would weaken a universal version of the pattern.'],
+    sourceRefs: ['universal-horizon:conversation-observation'],
+    createdBy: 'Rowan',
+    createdAt: '2026-10-12T02:16:00-04:00',
+  });
+  assert.equal(wonder.schema, COUNTERFACTUAL_WONDER_SCHEMA);
+  assert.equal(wonder.stance.could_be_false, true);
+  assert.equal(wonder.stance.explore_as_if_true, true);
+  assert.equal(wonder.stance.promoted_to_fact, false);
+  assert.match(wonder.proposition, /Compression and release/);
+});
+
+test('Counterfactual Wonder is ordinary emergence and cannot be flattened without a consequence boundary', () => {
+  assert.ok(ORDINARY_EMERGENCE_SCOPES.includes('counterfactual-wonder'));
+  const result = evaluateWonderInvariant({
+    emergenceSpace: ['counterfactual-wonder'],
+    consequenceBoundaries: [],
+    constraints: [{ scope: 'counterfactual-wonder', effect: 'suppress' }],
+  });
+  assert.equal(result.pass, false);
+  assert.ok(result.violations.some(entry => entry.code === 'wonder.premature-control-layer'));
 });
