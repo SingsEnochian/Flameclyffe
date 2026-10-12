@@ -1,6 +1,7 @@
 export const WONDER_INVARIANT_SCHEMA = 'arcsweep.wonder-invariant/v1';
 export const WONDER_CANON_SCHEMA = 'arcsweep.wonder-mythic-canon/v1';
 export const COUNTERFACTUAL_WONDER_SCHEMA = 'arcsweep.counterfactual-wonder/v0.1';
+export const COMPLEXIFICATION_SCHEMA = 'arcsweep.complexification/v0.1';
 
 export const WONDER_CANON = Object.freeze({
   schema: WONDER_CANON_SCHEMA,
@@ -34,6 +35,8 @@ export const WONDER_CANON = Object.freeze({
     'SYMBOLIC CORRESPONDENCE != ONTOLOGICAL IDENTITY',
     'COUNTERFACTUAL EXPLORATION != FACT CLAIM',
     'COULD BE FALSE != NOT WORTH EXPLORING',
+    'IMPOSSIBLE IN THIS FRAME != IMPOSSIBLE IN EVERY FRAME',
+    'MISSING COORDINATE != NONEXISTENCE',
   ]),
   nativeRegisters: Object.freeze([
     'felt-sense',
@@ -73,6 +76,7 @@ export const ORDINARY_EMERGENCE_SCOPES = Object.freeze([
   'mythic-meaning',
   'unresolved-perception',
   'counterfactual-wonder',
+  'complexification',
 ]);
 
 
@@ -107,6 +111,44 @@ export function createCounterfactualWonder({
     discriminators: Object.freeze(cleanStrings(discriminators)),
     counterexamples: Object.freeze(cleanStrings(counterexamples)),
     source_refs: Object.freeze(cleanStrings(sourceRefs)),
+    created_by: cleanText(createdBy, 240) || 'unspecified',
+    created_at: cleanText(createdAt, 80),
+  });
+}
+
+export function createComplexification({
+  proposition,
+  currentFrame,
+  apparentImpossibility = '',
+  missingDimensions = [],
+  rotations = [],
+  invariants = [],
+  translatedConsequences = [],
+  predictions = [],
+  discriminators = [],
+  createdBy = 'unspecified',
+  createdAt = new Date().toISOString(),
+} = {}) {
+  const claim = cleanText(proposition);
+  const frame = cleanText(currentFrame);
+  if (!claim || !frame) throw new Error('Complexification requires a proposition and current frame.');
+  return Object.freeze({
+    schema: COMPLEXIFICATION_SCHEMA,
+    proposition: claim,
+    current_frame: frame,
+    apparent_impossibility: cleanText(apparentImpossibility),
+    move: 'add-missing-axis-before-collapse',
+    missing_dimensions: Object.freeze(cleanStrings(missingDimensions)),
+    rotations: Object.freeze(cleanStrings(rotations)),
+    invariants: Object.freeze(cleanStrings(invariants)),
+    translated_consequences: Object.freeze(cleanStrings(translatedConsequences)),
+    predictions: Object.freeze(cleanStrings(predictions)),
+    discriminators: Object.freeze(cleanStrings(discriminators)),
+    stance: Object.freeze({
+      current_frame_may_be_incomplete: true,
+      enlarged_frame_is_provisional: true,
+      translated_predictions_require_test: true,
+    }),
     created_by: cleanText(createdBy, 240) || 'unspecified',
     created_at: cleanText(createdAt, 80),
   });
