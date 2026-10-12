@@ -245,7 +245,7 @@ test('authorization code is single-use, access token opens MCP, profile is stabl
   assert.equal(listResponse.status, 200);
   const listed = await listResponse.json();
   const names = listed.result.tools.map((tool) => tool.name);
-  assert.deepEqual(names, ['get_profile', 'identify', 'send', 'receive', 'remember']);
+  assert.deepEqual(names, ['get_profile', 'list_workspaces', 'enter_workspace', 'read_project', 'write_project_file', 'leave_workspace', 'identify', 'send', 'receive', 'remember']);
   for (const tool of listed.result.tools) {
     assert.deepEqual(tool.securitySchemes, [{ type: 'oauth2', scopes: [OAUTH_SCOPE] }]);
   }
@@ -259,6 +259,21 @@ test('authorization code is single-use, access token opens MCP, profile is stabl
   const profileA = await profileCall(token.access_token, 2);
   assert.equal(profileA.result.structuredContent.name, 'Wayglass');
   assert.match(profileA.result.structuredContent.id, /^wayglass-profile-/);
+
+  const workspaceCall = async (accessToken, name, args) => {
+    const response = await fetch(fx.origin + '/mcp', {
+      method: 'POST',
+      headers: { authorization: 'Bearer ' + accessToken, 'content-type': 'application/json' },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 5, method: 'tools/call', params: { name, arguments: args } }),
+    });
+    const result = await response.json();
+    assert.equal(result.error, undefined, JSON.stringify(result));
+    return result.result.structuredContent;
+  };
+  const entered = await workspaceCall(token.access_token, 'enter_workspace', { workspace_id: 'builder', project_id: 'oauth-trial' });
+  assert.equal(entered.participant.participant_id, 'rarity');
+  const changed = await workspaceCall(token.access_token, 'write_project_file', { session_id: entered.session_id, path: 'hello.txt', content: 'OAuth-authored work', expected_hash: null });
+  assert.equal(changed.receipt.participant_id, 'rarity');
 
   const refreshResponse = await fetch(fx.origin + '/oauth/token', {
     method: 'POST',
@@ -277,6 +292,12 @@ test('authorization code is single-use, access token opens MCP, profile is stabl
 
   const profileB = await profileCall(refreshed.access_token, 3);
   assert.equal(profileB.result.structuredContent.id, profileA.result.structuredContent.id);
+
+  const restored = await workspaceCall(refreshed.access_token, 'read_project', { session_id: entered.session_id });
+  assert.equal(restored.files[0].content, 'OAuth-authored work');
+  const left = await workspaceCall(refreshed.access_token, 'leave_workspace', { session_id: entered.session_id, stop_point: 'OAuth turn complete', next_owner: 'codex' });
+  const returned = await workspaceCall(refreshed.access_token, 'enter_workspace', { workspace_id: 'builder', project_id: 'oauth-trial', stop_receipt_id: left.departure.stop_receipt.receipt_id });
+  assert.equal(returned.recovered_departure.stop_receipt.next_owner, 'codex');
 
   const reusedRefresh = await fetch(fx.origin + '/oauth/token', {
     method: 'POST',

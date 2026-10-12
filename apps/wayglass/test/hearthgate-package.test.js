@@ -15,6 +15,7 @@ test('Hearthgate packaged Wayglass router boots without repository siblings', ()
     fs.symlinkSync(path.join(host, 'node_modules'), path.join(temp, 'node_modules'), 'junction');
     const require = createRequire(path.join(temp, 'entry.cjs'));
     assert.equal(typeof require('./wayglass/router.js').createWayglassRouter, 'function');
+    assert.equal(typeof require('./wayglass/workspace-projects.js').WorkspaceProjects, 'function');
     assert.ok(fs.existsSync(path.join(host, 'public/wayglass/index.html')));
     const config = JSON.parse(fs.readFileSync(path.join(host, 'package.json')));
     assert.ok(config.build.asarUnpack.includes('wayglass-runtime/**'));
