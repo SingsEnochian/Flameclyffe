@@ -17,6 +17,79 @@ async function providerJson(fetchImpl, url, options, label) {
   return data;
 }
 
+const SPICYCHAT_API_URL = 'https://4mpanjbsf6.execute-api.us-east-1.amazonaws.com';
+const SPICYCHAT_CHAT_URL = 'https://chat.nd-api.com/chat';
+const SPICYCHAT_DEFAULT_MODEL = 'spicedq3_a3b';
+
+function spicyChatHeaders(token) {
+  return {
+    accept: 'application/json, text/plain, */*',
+    'content-type': 'application/json',
+    authorization: `Bearer ${token}`,
+    origin: 'https://spicychat.ai',
+    referer: 'https://spicychat.ai/',
+    'x-app-id': 'spicychat',
+  };
+}
+
+function spicyChatCharacterName(conversation = {}) {
+  return String(conversation?.character?.name || conversation?.label || '').trim();
+}
+
+async function resolveBluebirdSpicyChatConversation(env, fetchImpl) {
+  const token = String(env.get('BLUEBIRD_SPICYCHAT_TOKEN') || '').trim();
+  if (!token) throw new Error('Missing server configuration: BLUEBIRD_SPICYCHAT_TOKEN');
+  const data = await providerJson(fetchImpl, `${SPICYCHAT_API_URL}/v2/conversations?limit=50`, {
+    headers: spicyChatHeaders(token),
+  }, 'SpicyChat conversations');
+  const conversations = Array.isArray(data) ? data : Array.isArray(data?.conversations) ? data.conversations : [];
+  const pinnedId = String(env.get('BLUEBIRD_SPICYCHAT_CHARACTER_ID') || '').trim();
+  const targetName = String(env.get('BLUEBIRD_SPICYCHAT_CHARACTER_NAME') || 'Bluebird').trim().toLowerCase();
+  const conversation = conversations.find((item) => {
+    if (pinnedId) return String(item?.character_id || item?.character?.id || '') === pinnedId;
+    return spicyChatCharacterName(item).toLowerCase().includes(targetName);
+  });
+  if (!conversation) throw new Error(pinnedId
+    ? 'Pinned SpicyChat Bluebird character has no existing conversation.'
+    : 'SpicyChat Bluebird conversation was not found.');
+  return { token, conversation };
+}
+
+async function callBluebirdSpicyChat(contract, message, env, fetchImpl) {
+  const { token, conversation } = await resolveBluebirdSpicyChatConversation(env, fetchImpl);
+  const characterId = String(conversation.character_id || conversation?.character?.id || '').trim();
+  if (!characterId || !conversation.id) throw new Error('SpicyChat Bluebird conversation is missing its character or conversation id.');
+  const model = String(env.get('BLUEBIRD_SPICYCHAT_MODEL') || SPICYCHAT_DEFAULT_MODEL).trim() || SPICYCHAT_DEFAULT_MODEL;
+  const payload = {
+    message,
+    character_id: characterId,
+    conversation_id: conversation.id,
+    inference_model: model,
+    inference_settings: {
+      max_new_tokens: 180,
+      temperature: 0.7,
+      top_p: 0.7,
+      top_k: 90,
+    },
+    ...(conversation.user_persona_id ? { user_persona_id: conversation.user_persona_id } : {}),
+  };
+  const data = await providerJson(fetchImpl, SPICYCHAT_CHAT_URL, {
+    method: 'POST',
+    headers: spicyChatHeaders(token),
+    body: JSON.stringify(payload),
+  }, 'SpicyChat Bluebird');
+  const reply = String(data?.message?.content || '').trim();
+  if (!reply) throw new Error('SpicyChat Bluebird returned an empty response.');
+  return {
+    provider: 'spicychat-session',
+    model,
+    execution_path: 'bluebird-spicychat-session',
+    message: reply,
+    cited_sources: [],
+    memory_write_recommendation: false,
+  };
+}
+
 async function callCloud(contract, message, env, fetchImpl) {
   const manifest = contract.manifest;
   const key = env.get(manifest.platform.api_key_env);
@@ -93,6 +166,17 @@ export function flameStatus(flameId, env) {
     missing,
     memory_namespace: contract.knowledge.hearthfireNamespace,
     hosted_fallback: contract.runtime.hostedFallback,
+    ...(flameId === 'bluebird' ? {
+      spicychat_route: {
+        configured: Boolean(env.get('BLUEBIRD_SPICYCHAT_TOKEN')),
+        credential_env: 'BLUEBIRD_SPICYCHAT_TOKEN',
+        provider: 'spicychat-session',
+        model: String(env.get('BLUEBIRD_SPICYCHAT_MODEL') || SPICYCHAT_DEFAULT_MODEL),
+        character_pinned: Boolean(env.get('BLUEBIRD_SPICYCHAT_CHARACTER_ID')),
+        preferred_when_configured: true,
+        fallback_provider: manifest.platform.provider,
+      },
+    } : {}),
   };
 }
 
@@ -192,6 +276,35 @@ export async function invokeFlame(flameId, body, env, fetchImpl = fetch) {
       sensory_profile_id: contract.sensory.profileId,
       ...await callLocalGateway(contract, body, env, fetchImpl),
     };
+  }
+  if (contract.id === 'bluebird' && env.get('BLUEBIRD_SPICYCHAT_TOKEN')) {
+    try {
+      return {
+        flame_id: contract.id,
+        display_name: contract.identity.displayName,
+        formal_name: contract.identity.formalName,
+        flame_contract_schema: contract.schema,
+        sensory_profile_id: contract.sensory.profileId,
+        ...await callBluebirdSpicyChat(contract, message, env, fetchImpl),
+      };
+    } catch {
+      const reply = await callCloud(contract, message, env, fetchImpl);
+      return {
+        flame_id: contract.id,
+        display_name: contract.identity.displayName,
+        formal_name: contract.identity.formalName,
+        flame_contract_schema: contract.schema,
+        sensory_profile_id: contract.sensory.profileId,
+        provider: manifest.platform.provider,
+        model: manifest.platform.model,
+        execution_path: 'bluebird-deepseek-after-spicychat-fallback',
+        route_fallback: true,
+        route_fallback_from: 'spicychat-session',
+        message: reply,
+        cited_sources: [],
+        memory_write_recommendation: false,
+      };
+    }
   }
   const reply = await callCloud(contract, message, env, fetchImpl);
   return {
