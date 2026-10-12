@@ -54,11 +54,36 @@ The correct order is:
 WONDER
 → preserve the branch
 → explore as if true
-→ discover consequences and mechanisms
+→ if the current frame makes it look impossible: COMPLEXIFY
+→ name the missing dimension
+→ rotate the representation
+→ preserve invariants
+→ translate consequences back
 → derive discriminators
 → compare / test
 → let evidence earn claim strength
 ```
+
+### Complexify
+
+Complexify treats apparent impossibility as a possible failure of representation.
+
+A Complexify receipt records:
+
+```text
+current_frame
+apparent_impossibility
+missing_dimensions[]
+rotations[]
+invariants[]
+translated_consequences[]
+predictions[]
+discriminators[]
+```
+
+The enlarged frame remains provisional. The value of the move is whether it reveals structure or consequences that the smaller frame could not express.
+
+The canonical analogy is the extension from the real line to the complex plane: an object with no coordinate in the smaller space may become lawful when the representation is enlarged. This analogy motivates the move; it is not evidence that any specific speculative proposition is true.
 
 Counterfactual Wonder is neither belief nor a weak factual claim. A failed Wonder branch may remain historically valuable because it generated a useful experiment, distinction, or question.
 
@@ -100,6 +125,7 @@ The first Hermes-facing capability is deliberately small:
 
 - `horizon.search`
 - `horizon.wonder`
+- `horizon.complexify`
 - `horizon.propose`
 - `horizon.review`
 
@@ -110,7 +136,7 @@ Hermes may retrieve, compare, propose, and review within its delegated authority
 - **Door:** choose Research, Contribute, Explore, Replicate, Myth, or Return.
 - **Identity:** preserve participant id separately from provider/model/route.
 - **Worktable:** search and inspect Horizon records and provenance.
-- **Wonder Window:** unresolved questions, Counterfactual Wonder branches, and open Harmony relationship proposals.
+- **Wonder Window:** unresolved questions, Counterfactual Wonder branches, Complexify frame rotations, and open Harmony relationship proposals.
 - **Return Marker:** Wayglass stop receipt with active work, stop point, unresolved questions, and named next owner.
 
 ## Harmony
@@ -147,3 +173,18 @@ The seam is alive when one participant can:
 4. review that proposal without rewriting either record;
 5. leave with a verified stop receipt;
 6. return and continue from the same question.
+
+
+## Wayglass surface
+
+The Wayglass Library surface exposes the research sequence directly:
+
+```text
+Search the stacks
+→ Preserve Wonder
+→ Select open branch
+→ Complexify
+→ continue into Harmony / Hermes / test work
+```
+
+The Writing Room also exposes explicit `Ordinary`, `Wonder`, and `Complexify` interaction modes. Switching modes changes the cognitive stance passed to the route, not participant identity, ownership, canon, provider, or continuity.
