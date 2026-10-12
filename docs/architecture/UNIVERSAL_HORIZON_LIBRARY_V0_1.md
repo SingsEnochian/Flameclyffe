@@ -18,6 +18,50 @@ reviews           = explicit judgement receipts
 
 No layer silently becomes another.
 
+## Wonder before adjudication
+
+Universal Horizon carries a protected exploratory register called **Counterfactual Wonder**.
+
+Its canonical prompt is:
+
+> **This could be false. But what if it were true?**
+
+A Counterfactual Wonder branch has the fixed stance:
+
+```text
+could_be_false: true
+explore_as_if_true: true
+promoted_to_fact: false
+```
+
+The purpose is to let Harmony, Hermes, Wayglass participants, and the Living Observer explore consequences before demanding closure.
+
+Useful fields include:
+
+```text
+proposition
+why_interesting
+implications[]
+predictions[]
+discriminators[]
+counterexamples[]
+source_refs[]
+```
+
+The correct order is:
+
+```text
+WONDER
+→ preserve the branch
+→ explore as if true
+→ discover consequences and mechanisms
+→ derive discriminators
+→ compare / test
+→ let evidence earn claim strength
+```
+
+Counterfactual Wonder is neither belief nor a weak factual claim. A failed Wonder branch may remain historically valuable because it generated a useful experiment, distinction, or question.
+
 ## Library law
 
 A record keeps its own claim type. A myth may be related to a measurement. A hypothesis may be inspired by an analogy. A structural resemblance may be worth investigating.
@@ -55,6 +99,7 @@ Accepted relationships remain relationship records with review provenance. Sourc
 The first Hermes-facing capability is deliberately small:
 
 - `horizon.search`
+- `horizon.wonder`
 - `horizon.propose`
 - `horizon.review`
 
@@ -65,7 +110,7 @@ Hermes may retrieve, compare, propose, and review within its delegated authority
 - **Door:** choose Research, Contribute, Explore, Replicate, Myth, or Return.
 - **Identity:** preserve participant id separately from provider/model/route.
 - **Worktable:** search and inspect Horizon records and provenance.
-- **Wonder Window:** unresolved questions and open Harmony relationship proposals.
+- **Wonder Window:** unresolved questions, Counterfactual Wonder branches, and open Harmony relationship proposals.
 - **Return Marker:** Wayglass stop receipt with active work, stop point, unresolved questions, and named next owner.
 
 ## Harmony
