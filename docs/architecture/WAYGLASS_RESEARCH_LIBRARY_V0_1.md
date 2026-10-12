@@ -1,7 +1,7 @@
 # Wayglass Research Library v0.1
 
 **Status:** Rowan-authorised first executable seam, 2026-10-12  
-**Scope:** Wayglass + Hermes + Harmony + Wayglass Research Library  
+**Scope:** Wayglass OS + Wayglass Research Library; external systems only through explicit adapters  
 **Purpose:** make Wayglass Research Library a durable shared Library rather than a monolithic intelligence.
 
 ## Ownership and interoperability
@@ -42,7 +42,7 @@ explore_as_if_true: true
 promoted_to_fact: false
 ```
 
-The purpose is to let Harmony, Hermes, Wayglass participants, and the Living Observer explore consequences before demanding closure.
+The purpose is to let Wayglass participants and the Living Observer explore consequences before demanding closure. External systems may participate only through explicit adapters.
 
 Useful fields include:
 
@@ -127,9 +127,9 @@ enter Library
 
 Accepted relationships remain relationship records with review provenance. Source records are immutable in this seam.
 
-## Hermes operations
+## External worker adapter
 
-The first Hermes-facing capability is deliberately small:
+The first external-worker capability is deliberately small. Hermes is one possible client of this adapter:
 
 - `wayglass-library.search`
 - `wayglass-library.wonder`
@@ -144,12 +144,12 @@ An external worker such as Hermes may retrieve, compare, propose, and review onl
 - **Door:** choose Research, Contribute, Explore, Replicate, Myth, or Return.
 - **Identity:** preserve participant id separately from provider/model/route.
 - **Worktable:** search and inspect Wayglass Library records and provenance.
-- **Wonder Window:** unresolved questions, Counterfactual Wonder branches, Complexify frame rotations, and open Harmony relationship proposals.
+- **Wonder Window:** unresolved questions, Counterfactual Wonder branches, Complexify frame rotations, and open typed relationship proposals.
 - **Return Marker:** Wayglass stop receipt with active work, stop point, unresolved questions, and named next owner.
 
-## Harmony
+## External pattern-proposal adapters
 
-Harmony's v0.1 job is not to declare truth. It proposes typed edges such as:
+An external pattern-finder such as Harmony may propose typed edges through an explicit adapter. Those proposals remain external contributions until Wayglass records and reviews them:
 
 ```text
 supports
@@ -176,7 +176,7 @@ This preserves recoverability while we prove the Library loop on existing hardwa
 The seam is alive when one participant can:
 
 1. enter the Library in Wayglass;
-2. search the same Wayglass Library records Hermes can search;
+2. search Wayglass Library records through the same public adapter used by external workers;
 3. propose a typed connection between two records;
 4. review that proposal without rewriting either record;
 5. leave with a verified stop receipt;
@@ -192,7 +192,7 @@ Search the stacks
 → Preserve Wonder
 → Select open branch
 → Complexify
-→ continue into Harmony / Hermes / test work
+→ continue into local analysis / explicit external adapters / test work
 ```
 
 The Writing Room also exposes explicit `Ordinary`, `Wonder`, and `Complexify` interaction modes. Switching modes changes the cognitive stance passed to the route, not participant identity, ownership, canon, provider, or continuity.
