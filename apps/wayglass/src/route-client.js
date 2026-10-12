@@ -161,3 +161,35 @@ export async function reviewObserverDevelopmentProposal({ proposalId, decision, 
     body: JSON.stringify({ decision, notes }),
   }));
 }
+
+export async function searchUniversalHorizon({ query = '', claimType = '', recordType = '', limit = 20, fetchImpl = fetch } = {}) {
+  const params = new URLSearchParams({
+    q: query,
+    claim_type: claimType,
+    record_type: recordType,
+    limit: String(limit),
+  });
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/horizon/search?' + params, { cache: 'no-store' }));
+}
+
+export async function listUniversalHorizonWonders(fetchImpl = fetch) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/horizon/wonder', { cache: 'no-store' }));
+}
+
+export async function createUniversalHorizonWonder(payload, fetchImpl = fetch) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/horizon/wonder', {
+    method: 'POST',
+    headers: JSON_HEADERS,
+    cache: 'no-store',
+    body: JSON.stringify(payload || {}),
+  }));
+}
+
+export async function complexifyUniversalHorizonWonder({ wonderId, ...payload } = {}, fetchImpl = fetch) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/horizon/wonder/' + encodeURIComponent(wonderId) + '/complexify', {
+    method: 'POST',
+    headers: JSON_HEADERS,
+    cache: 'no-store',
+    body: JSON.stringify(payload),
+  }));
+}
