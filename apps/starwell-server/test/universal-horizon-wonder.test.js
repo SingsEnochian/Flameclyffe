@@ -72,3 +72,26 @@ test('Counterfactual Wonder survives into the Horizon graph as its own layer', (
   assert.equal(graph.counterfactual_wonders[0].stance.promoted_to_fact, false);
   assert.equal(graph.accepted_relationships.length, 0);
 });
+
+test('Horizon preserves Complexify rotations inside the Wonder branch', () => {
+  const library = fixture();
+  const wonder = library.createWonder({
+    proposition: 'The current representation may be missing phase.',
+    created_by: 'Rowan',
+  });
+  const result = library.complexifyWonder(wonder.wonder_id, {
+    current_frame: 'One scalar intensity value.',
+    apparent_impossibility: 'Same intensity cannot distinguish compression from release.',
+    missing_dimensions: ['phase'],
+    rotations: ['z = r * exp(i theta)'],
+    invariants: ['magnitude r'],
+    translated_consequences: ['phase-sensitive transition signatures'],
+    predictions: ['release clusters in a distinct phase sector'],
+    discriminators: ['matched-magnitude comparison'],
+    created_by: 'Harmony',
+  });
+  assert.equal(result.wonder.complexifications.length, 1);
+  assert.equal(result.complexification.stance.current_frame_may_be_incomplete, true);
+  assert.equal(result.complexification.stance.enlarged_frame_is_provisional, true);
+  assert.equal(result.wonder.stance.promoted_to_fact, false);
+});
