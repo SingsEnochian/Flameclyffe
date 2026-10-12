@@ -67,6 +67,8 @@ function appendRecord(filename, entry) {
     text: cleanText(entry.text),
     route: entry.route || null,
     kind: entry.kind || 'message',
+    intent: cleanText(entry.intent, 240) || null,
+    interaction_mode: cleanText(entry.interaction_mode, 80) || null,
     source_refs: Array.isArray(entry.source_refs) ? entry.source_refs.map((item) => cleanText(item, 320)).filter(Boolean).slice(0, 32) : [],
   };
   store.records.push(record);
@@ -82,6 +84,21 @@ function readConversation(filename, conversationRef, limit = 40) {
 
 function responseText(data) {
   return cleanText(data?.output || data?.message || data?.reply || data?.text || '', MAX_TEXT);
+}
+
+function latestInteractionContext(records = []) {
+  for (let index = records.length - 1; index >= 0; index -= 1) {
+    const record = records[index] || {};
+    const intent = cleanText(record.intent, 240);
+    const interactionMode = cleanText(record.interaction_mode, 80);
+    if (intent || interactionMode) {
+      return {
+        ...(intent ? { intent } : {}),
+        ...(interactionMode ? { interaction_mode: interactionMode } : {}),
+      };
+    }
+  }
+  return {};
 }
 
 function toWayglassHistory(records) {
@@ -156,6 +173,8 @@ function toolCatalogue() {
           target: { type: 'string', description: 'all, bluebird, or a registered participant id/alias.' },
           text: { type: 'string' },
           conversation_ref: { type: 'string' },
+          intent: { type: 'string', description: 'Optional present human intent for this conversation line. It guides the turn but does not redefine identity, canon, or routing provenance.' },
+          interaction_mode: { type: 'string', description: 'Optional interaction mode such as reconnect, continue, create, explore, or troubleshoot-voice. Preserved above model/provider choice.' },
           collect_replies: { type: 'boolean', description: 'For target=all, invoke each registered route and collect replies. Defaults true.' },
         },
         required: ['target', 'text'],
@@ -285,6 +304,7 @@ function createWayglassMcpBridge({
   }
 
   async function callBluebird(text, conversationRef, records) {
+    const interactionContext = latestInteractionContext(records);
     const routePayload = {
       route_id: bluebirdRouteId,
       input: text,
@@ -293,6 +313,7 @@ function createWayglassMcpBridge({
         channel: 'OOC',
         turn_owner: 'Rarity',
         character_ownership: [],
+        ...interactionContext,
       },
       session_id: conversationRef,
       surface_id: 'wayglass:mcp',
@@ -339,6 +360,7 @@ function createWayglassMcpBridge({
   }
 
   async function callWayglassParticipant(participantId, routeId, text, conversationRef, records) {
+    const interactionContext = latestInteractionContext(records);
     const response = await fetchImpl(`${internalOrigin}/api/v1/wayglass/respond`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -350,6 +372,7 @@ function createWayglassMcpBridge({
           channel: 'OOC',
           turn_owner: 'Rarity',
           character_ownership: [],
+          ...interactionContext,
         },
         session_id: conversationRef,
         surface_id: 'wayglass:mcp',
@@ -420,6 +443,9 @@ function createWayglassMcpBridge({
     if (!text) throw new Error('text required');
     const conversationRef = safeConversationRef(args.conversation_ref, defaultConversationRef(target));
     const before = readConversation(storePath, conversationRef, 64);
+    const priorContext = latestInteractionContext(before);
+    const intent = cleanText(args.intent, 240) || priorContext.intent || '';
+    const interactionMode = cleanText(args.interaction_mode, 80) || priorContext.interaction_mode || '';
 
     appendRecord(storePath, {
       conversation_ref: conversationRef,
@@ -429,10 +455,19 @@ function createWayglassMcpBridge({
       text,
       route: 'mcp:send',
       kind: 'message',
+      intent,
+      interaction_mode: interactionMode,
       source_refs: ['wayglass:mcp'],
     });
 
-    const history = [...before, { role: 'rarity', author: 'Rarity', text, kind: 'message' }];
+    const history = [...before, {
+      role: 'rarity',
+      author: 'Rarity',
+      text,
+      kind: 'message',
+      intent,
+      interaction_mode: interactionMode,
+    }];
 
     if (target !== 'all') {
       const reply = await callFlame(target, text, conversationRef, history, discovered.get(target) || null);
@@ -445,6 +480,8 @@ function createWayglassMcpBridge({
           text: reply.text,
           route: reply.route,
           kind: 'message',
+          intent,
+          interaction_mode: interactionMode,
           source_refs: ['wayglass:mcp', reply.fallback_from].filter(Boolean),
         });
       }
@@ -452,6 +489,8 @@ function createWayglassMcpBridge({
         schema: 'wayglass.rarity-mcp-send/v0.1',
         target,
         conversation_ref: conversationRef,
+        intent: intent || null,
+        interaction_mode: interactionMode || null,
         reply,
       };
     }
@@ -481,6 +520,8 @@ function createWayglassMcpBridge({
         text: reply.text,
         route: reply.route,
         kind: 'message',
+        intent,
+        interaction_mode: interactionMode,
         source_refs: ['wayglass:mcp', reply.fallback_from].filter(Boolean),
       });
     }
@@ -488,6 +529,8 @@ function createWayglassMcpBridge({
       schema: 'wayglass.rarity-mcp-send/v0.1',
       target: 'all',
       conversation_ref: conversationRef,
+      intent: intent || null,
+      interaction_mode: interactionMode || null,
       replies_collected: true,
       replies: settled,
     };
