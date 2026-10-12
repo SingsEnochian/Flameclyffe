@@ -139,3 +139,57 @@ export async function invokeWayglassRoute({
   });
   return jsonOrThrow(response);
 }
+
+export async function queueObserverDevelopmentProposal(proposal, fetchImpl = fetch) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/observer/self-development/proposals', {
+    method: 'POST',
+    headers: JSON_HEADERS,
+    cache: 'no-store',
+    body: JSON.stringify(proposal),
+  }));
+}
+
+export async function listObserverDevelopmentProposals(fetchImpl = fetch) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/observer/self-development/proposals', { cache: 'no-store' }));
+}
+
+export async function reviewObserverDevelopmentProposal({ proposalId, decision, notes = '', fetchImpl = fetch } = {}) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/observer/self-development/proposals/' + encodeURIComponent(proposalId) + '/review', {
+    method: 'POST',
+    headers: JSON_HEADERS,
+    cache: 'no-store',
+    body: JSON.stringify({ decision, notes }),
+  }));
+}
+
+export async function searchWayglassLibrary({ query = '', claimType = '', recordType = '', limit = 20, fetchImpl = fetch } = {}) {
+  const params = new URLSearchParams({
+    q: query,
+    claim_type: claimType,
+    record_type: recordType,
+    limit: String(limit),
+  });
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/library/search?' + params, { cache: 'no-store' }));
+}
+
+export async function listWayglassLibraryWonders(fetchImpl = fetch) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/library/wonder', { cache: 'no-store' }));
+}
+
+export async function createWayglassLibraryWonder(payload, fetchImpl = fetch) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/library/wonder', {
+    method: 'POST',
+    headers: JSON_HEADERS,
+    cache: 'no-store',
+    body: JSON.stringify(payload || {}),
+  }));
+}
+
+export async function complexifyWayglassLibraryWonder({ wonderId, ...payload } = {}, fetchImpl = fetch) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/library/wonder/' + encodeURIComponent(wonderId) + '/complexify', {
+    method: 'POST',
+    headers: JSON_HEADERS,
+    cache: 'no-store',
+    body: JSON.stringify(payload),
+  }));
+}

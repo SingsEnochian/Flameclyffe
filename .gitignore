@@ -61,3 +61,5 @@ apps/starwell-server/data/wayglass-rarity-mcp-conversations.json
 apps/starwell-server/data/wayglass-peer-oauth.local.json
 apps/starwell-server/data/wayglass-peer-oauth-tokens.local.json
 apps/starwell-server/data/wayglass-peer-oauth-pairing.local.txt
+apps/starwell-server/data/wayglass-library.local.json
+apps/starwell-server/data/wayglass-observer-self-development.local.json

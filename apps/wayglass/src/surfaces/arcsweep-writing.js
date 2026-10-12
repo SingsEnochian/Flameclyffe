@@ -26,7 +26,7 @@ function renderThinking(message) {
 }
 
 export async function mountArcSweepWritingSurface(root) {
-  const interaction = createInteractionState({ channel: 'IC', turn_owner: 'Rowan' });
+  const interaction = createInteractionState({ channel: 'IC', turn_owner: 'Rowan', interaction_mode: 'ordinary' });
   const session = sessionId();
   const messages = [];
   let routes = [];
@@ -37,7 +37,7 @@ export async function mountArcSweepWritingSurface(root) {
 
   root.innerHTML = [
     '<section class="wg-surface" data-surface="arcsweep-writing">',
-      '<nav class="wg-deck-nav glass-panel" aria-label="Wayglass rooms"><button type="button" class="glass-chip active" aria-current="page">Writing Room</button><button type="button" class="glass-chip" data-wayglass-room="wayglass:systems">Organs</button><button type="button" class="glass-chip" data-wayglass-room="wayglass:video-atelier">Video Atelier</button><button type="button" class="glass-chip" data-wayglass-room="wayglass:living-observer">Living Observer</button></nav>',
+      '<nav class="wg-deck-nav glass-panel" aria-label="Wayglass rooms"><button type="button" class="glass-chip active" aria-current="page">Writing Room</button><button type="button" class="glass-chip" data-wayglass-room="wayglass:systems">Organs</button><button type="button" class="glass-chip" data-wayglass-room="wayglass:video-atelier">Video Atelier</button><button type="button" class="glass-chip" data-wayglass-room="wayglass:living-observer">Living Observer</button><button type="button" class="glass-chip" data-wayglass-room="wayglass:library">Library</button></nav>',
       '<header class="wg-surface-head glass-panel">',
         '<div>',
           '<p class="eyebrow">ArcSweep attached surface</p>',
@@ -58,6 +58,11 @@ export async function mountArcSweepWritingSurface(root) {
         '<div class="glass-segment" role="group" aria-label="IC or OOC">',
           '<button type="button" class="glass-chip active" data-channel="IC" aria-pressed="true" aria-keyshortcuts="Alt+I">IC</button>',
           '<button type="button" class="glass-chip" data-channel="OOC" aria-pressed="false" aria-keyshortcuts="Alt+O">OOC</button>',
+        '</div>',
+        '<div class="glass-segment" role="group" aria-label="Wonder mode">',
+          '<button type="button" class="glass-chip active" data-wonder-mode="ordinary" aria-pressed="true">Ordinary</button>',
+          '<button type="button" class="glass-chip" data-wonder-mode="counterfactual-wonder" aria-pressed="false">Wonder</button>',
+          '<button type="button" class="glass-chip" data-wonder-mode="complexify" aria-pressed="false">Complexify</button>',
         '</div>',
         '<div class="turn-jewel"><span>Turn</span><strong id="wg-turn-owner">Rowan</strong></div>',
         '<details class="ownership-drawer">',
@@ -112,6 +117,7 @@ export async function mountArcSweepWritingSurface(root) {
   const routeState = root.querySelector('#wg-route-state');
   const embodimentState = root.querySelector('#wg-embodiment-state');
   const channelButtons = [...root.querySelectorAll('[data-channel]')];
+  const wonderButtons = [...root.querySelectorAll('[data-wonder-mode]')];
   const turnOwner = root.querySelector('#wg-turn-owner');
   const ownershipForm = root.querySelector('#wg-ownership-form');
   const ownershipList = root.querySelector('#wg-ownership-list');
@@ -163,8 +169,16 @@ export async function mountArcSweepWritingSurface(root) {
       button.classList.toggle('active', active);
       button.setAttribute('aria-pressed', active ? 'true' : 'false');
     });
+    wonderButtons.forEach((button) => {
+      const active = button.dataset.wonderMode === state.interaction_mode;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
     turnOwner.textContent = state.turn_owner;
-    status.textContent = state.channel + ' · ' + state.turn_owner + ' has the turn';
+    const modeLabel = state.interaction_mode === 'counterfactual-wonder' ? 'Wonder'
+      : state.interaction_mode === 'complexify' ? 'Complexify'
+      : 'Ordinary';
+    status.textContent = state.channel + ' · ' + modeLabel + ' · ' + state.turn_owner + ' has the turn';
 
     ownershipList.innerHTML = state.character_ownership.length
       ? state.character_ownership.map((entry) =>
@@ -323,6 +337,21 @@ export async function mountArcSweepWritingSurface(root) {
       input.focus();
     }
   }
+
+  wonderButtons.forEach((button) => {
+    button.addEventListener('click', async () => {
+      const mode = button.dataset.wonderMode;
+      const intent = mode === 'counterfactual-wonder'
+        ? 'Explore this possibility as if it were true while preserving that it could be false.'
+        : mode === 'complexify'
+          ? 'If the current frame makes the idea impossible, look for a missing dimension, rotate the representation, preserve invariants, and translate consequences back.'
+          : '';
+      interaction.setInteractionContext({ intent, interaction_mode: mode });
+      wakeMaterial(mode === 'complexify' ? 0.92 : mode === 'counterfactual-wonder' ? 0.78 : 0.5, 'wonder', { intent: mode === 'ordinary' ? 0.35 : 0.94 });
+      await emitInteractionCue('switch');
+      refreshState();
+    });
+  });
 
   channelButtons.forEach((button) => {
     button.addEventListener('click', async () => {

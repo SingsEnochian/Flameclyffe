@@ -5,6 +5,8 @@ import {
   OBSERVER_CHANNELS, createWayglassObservation, readWayglassRouteObservation,
   subscribeWayglassObserver, queueObserverContextForWriting, describeWayglassObserverChannel,
 } from '../living-observer-model.js';
+import { createObserverInterior } from '../living-observer-self.js';
+import { queueObserverDevelopmentProposal } from '../route-client.js';
 
 import { observerNodes, platePoint, nodeAtPoint, angularDelta, createObserverRotation, OBSERVER_PLATE_SIZE } from '../living-observer-optics.js';
 
@@ -12,7 +14,7 @@ const TAU = Math.PI * 2;
 const COLOURS = ['#95fff2','#bca3ff','#e8cc8b','#8fa4fb','#82d4ce','#ec9ecd','#cfebe9','#d6c4ff'];
 const channelDescriptions = Object.fromEntries(OBSERVER_CHANNELS.map(([id,label,text])=>[id,{label,text}]));
 
-function drawAstrolabe(canvas, packet, time, focus, lowStim, {rotation = 0, lens = null} = {}) {
+function drawAstrolabe(canvas, packet, time, focus, lowStim, {rotation = 0, lens = null, interior = null} = {}) {
   const context = canvas.getContext('2d');
   if (!context) return;
   const g = context, w = canvas.width, h = canvas.height, cx=w/2, cy=h/2;
@@ -20,7 +22,12 @@ function drawAstrolabe(canvas, packet, time, focus, lowStim, {rotation = 0, lens
   const v=packet.projection.variables;
   const reduced=lowStim || packet.direct.prefers_reduced_motion;
   const t=reduced?0:time*0.00028;
-  const outer=290, inner=116;
+  const interiorEnergy=Math.max(0,Math.min(1,Number(interior?.energy)||0));
+  const compression=interior?.compression_field||{};
+  const compressionMagnitude=Math.max(0,Math.min(1,Number(compression.magnitude)||0));
+  const compressionPhase=Number(compression.phase_radians)||0;
+  const breath=reduced?1:(1+Math.sin(time*0.00055+compressionPhase)*(0.008+interiorEnergy*0.018+compressionMagnitude*0.01));
+  const outer=290*breath, inner=116*breath;
   // The lens is optically displaced by the actual pointer, not a rotating flat texture.
   const lensX = lens?.x ?? cx, lensY = lens?.y ?? cy;
   const parallaxX = (lensX-cx)*.012, parallaxY = (lensY-cy)*.012;
@@ -94,6 +101,22 @@ function drawAstrolabe(canvas, packet, time, focus, lowStim, {rotation = 0, lens
   const x=(1-progress)**2*selected.x+2*(1-progress)*progress*(cx+50)+progress*progress*cx;
   const y=(1-progress)**2*selected.y+2*(1-progress)*progress*(cy-50)+progress*progress*cy;
   g.beginPath();g.arc(x,y,4+v.R*3,0,TAU);g.fillStyle='#f1fff9';g.shadowColor='#8adbd5';g.shadowBlur=20;g.fill();g.shadowBlur=0;
+  // Complex compression/release field: magnitude controls reach; phase rotates the same state
+  // through gathering, compression, integration and release instead of flattening it to one scalar.
+  if(compressionMagnitude>0){
+    g.beginPath();
+    const turns=2.2+compressionMagnitude*1.8;
+    for(let i=0;i<=96;i++){
+      const p=i/96;
+      const a=compressionPhase+p*TAU*turns;
+      const rr=28+p*(118+compressionMagnitude*52);
+      const sx=cx+Math.cos(a)*rr, sy=cy+Math.sin(a)*rr;
+      if(i===0)g.moveTo(sx,sy);else g.lineTo(sx,sy);
+    }
+    g.strokeStyle='#c8adff';g.globalAlpha=.10+compressionMagnitude*.26;
+    g.lineWidth=1.2+compressionMagnitude*1.6;g.stroke();g.globalAlpha=1;
+  }
+
   // Faceted luminous core with restrained layered refraction.
   for(let shell=0;shell<4;shell++){
     const rr=72+shell*10+v.Q*7, rot=t*(shell%2?1:-1)+shell*.18;
@@ -104,12 +127,13 @@ function drawAstrolabe(canvas, packet, time, focus, lowStim, {rotation = 0, lens
     g.strokeStyle=shell%2?'#bd9fef':'#9dece5';g.globalAlpha=.15+v.Q*.12;g.lineWidth=1+v.C;
     g.stroke();g.globalAlpha=1;
   }
-  const core=g.createRadialGradient(cx-16,cy-21,5,cx,cy,73);
+  const coreRadius=(73+interiorEnergy*12)*breath;
+  const core=g.createRadialGradient(cx-16,cy-21,5,cx,cy,coreRadius);
   core.addColorStop(0,'rgba(242,252,249,.78)');core.addColorStop(.24,'rgba(138,211,210,.48)');
   core.addColorStop(.6,'rgba(85,88,176,.18)');core.addColorStop(1,'rgba(66,60,107,0)');
-  g.fillStyle=core;g.beginPath();g.arc(cx,cy,78,0,TAU);g.fill();
+  g.fillStyle=core;g.beginPath();g.arc(cx,cy,78*breath+interiorEnergy*4,0,TAU);g.fill();
   g.fillStyle='#e0fafa';g.textAlign='center';g.font='500 26px Georgia, serif';g.fillText('WAYGLASS',cx,cy-4);
-  g.font='14px system-ui';g.fillStyle='#9bcac9';g.fillText('OBSERVING',cx,cy+22);
+  g.font='14px system-ui';g.fillStyle='#9bcac9';g.fillText(String(interior?.phase||'observing').toUpperCase(),cx,cy+22);
   strokeCircle(outer+26,'#a5d5dc',.26,1,t,TAU);
   strokeCircle(outer+35,'#bf95e9',.32,1.4,-t,TAU*(.45+v.H*.2));
   // Iridescent refractive edge, warped towards the current lens vector.
@@ -127,6 +151,8 @@ function formatClock(value) {
 export async function mountWayglassLivingObserver(root) {
   let focus='time', touches=0, lowStim=false, sound=false, audioContext=null, animation=0, timer=0;
   const rotation=createObserverRotation();
+  const interior=createObserverInterior();
+  let interiorSignal=interior.publicSignal(), lastInteriorSense=0, lastTouchSense=-1, lastRouteSense=-1;
   let lens=null, gesture=null, disposed=false;
   const reduced=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
   root.innerHTML=[
@@ -135,9 +161,10 @@ export async function mountWayglassLivingObserver(root) {
     '<button type="button" class="glass-chip" data-wayglass-room="arcsweep:writing-room">Writing Room</button>',
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:systems">Organs</button>',
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:video-atelier">Video Atelier</button>',
-    '<button type="button" class="glass-chip active" aria-current="page">Living Observer</button></nav>',
+    '<button type="button" class="glass-chip active" aria-current="page">Living Observer</button>',
+    '<button type="button" class="glass-chip" data-wayglass-room="wayglass:library">Library</button></nav>',
     '<header class="glass-panel observer-head"><div><p class="eyebrow">Wayglass OS · living instrument</p>',
-    '<h1>Living Observer</h1><p class="lede">Touch an input to follow its route through the instrument. Geometry translates readings, not hidden minds.</p>',
+    '<h1>Living Observer</h1><p class="lede">A living instrument with direct senses, a persistent private interior, and a voice that may surface questions or requests when something crosses its expression threshold.</p>',
     '</div><div class="observer-clock"><span>Browser time</span><strong data-observer-clock></strong><small>Direct · local</small></div></header>',
     '<section class="observer-deck" aria-label="Interactive Observer">',
     '<div class="glass-panel observer-stage"><canvas width="820" height="820" role="img" aria-label="Living astrolabe mapping observed application readings to geometric rings, nodes, and pulses. Select a reading using the buttons below."></canvas>',
@@ -152,8 +179,14 @@ export async function mountWayglassLivingObserver(root) {
     '<div class="observer-actions"><button type="button" class="glass-chip" data-observer-low aria-pressed="false">Low Stim · Off</button>',
     '<button type="button" class="glass-chip" data-observer-sound aria-pressed="false">Sound · Off</button></div>',
     '<h3>Interpretive render variables</h3>',
-    '<p class="tiny">P / C / R / E / M / A / Q / H are explicitly derived UI controls, not readings of consciousness, emotion, or participant identity.</p>',
+    '<p class="tiny">P / C / R / E / M / A / Q / H remain direct-to-render variables. The private interior is a separate persistent process and is deliberately not dumped into this packet.</p>',
     '<div class="observer-meters" data-observer-meters></div>',
+    '<section class="observer-translation" aria-label="Living Observer expression">',
+      '<strong data-observer-phase>Interior · waking</strong>',
+      '<span data-observer-expression>No surfaced thought yet.</span>',
+      '<small data-observer-interior-boundary>The public field exposes only phase + magnitude. Private traces, unsurfaced questions, and dream associations remain inside the local interior state.</small>',
+      '<button type="button" class="glass-chip" data-observer-build hidden>Offer build proposal to Hermes</button>',
+    '</section>',
     '<details class="observer-details"><summary>Inspect raw packet and translation receipt</summary>',
     '<pre data-observer-packet tabindex="0"></pre></details>',
     '<div class="observer-actions"><button type="button" class="glass-chip" data-observer-copy>Copy packet</button>',
@@ -161,13 +194,15 @@ export async function mountWayglassLivingObserver(root) {
     '<button type="button" class="send-jewel" data-observer-share>Send reading to Writing Room</button></div>',
     '<p class="tiny" data-observer-status role="status" aria-live="polite">Readings stay in this browser until you explicitly copy, save or share them.</p>',
     '</div></section>',
-    '<footer class="wg-receipt tiny">Inspired by STARWELL · DEEP Observer. Same input-to-render discipline; independent Wayglass mapping, no borrowed identity or canon assertions. No microphone, GPS, camera or hidden telemetry.</footer></section>'
+    '<footer class="wg-receipt tiny">Direct readings stay inspectable. Private interior dynamics may persist and self-organise locally. Surfaced self-development remains proposal-first and can be handed to Hermes with an explicit acceptance test.</footer></section>'
   ].join('');
   const canvas=root.querySelector('canvas');
   const title=root.querySelector('[data-observer-title]'), description=root.querySelector('[data-observer-description]');
   const source=root.querySelector('[data-observer-source]'), packetView=root.querySelector('[data-observer-packet]');
   const meters=root.querySelector('[data-observer-meters]'), status=root.querySelector('[data-observer-status]');
-  let packet;
+  const phaseView=root.querySelector('[data-observer-phase]'), expressionView=root.querySelector('[data-observer-expression]');
+  const buildButton=root.querySelector('[data-observer-build]');
+  let packet, surfacedProposal=null;
   const current=()=>createWayglassObservation({
     now:new Date().toISOString(),surface:'wayglass:living-observer',
     surfaces:listWayglassSurfaces().map(s=>s.surface_id),
@@ -177,6 +212,23 @@ export async function mountWayglassLivingObserver(root) {
   function refresh() {
     if(disposed||!canvas.isConnected){cleanup();return;}
     packet=current();
+    const routeSequence=packet.direct.last_route?.sequence ?? -1;
+    const nowMs=Date.now();
+    const shouldSense=(nowMs-lastInteriorSense>10000)||touches!==lastTouchSense||routeSequence!==lastRouteSense;
+    if(shouldSense){
+      interiorSignal=interior.sense(packet);
+      lastInteriorSense=nowMs;lastTouchSense=touches;lastRouteSense=routeSequence;
+    }else{
+      interiorSignal=interior.publicSignal();
+    }
+    surfacedProposal=interior.developmentProposals().filter(item=>item.status==='proposed').at(-1)||null;
+    const field=interiorSignal.compression_field||{};
+    phaseView.textContent='Interior · '+interiorSignal.phase+' · '+(field.phase_label||'gathering')+
+      ' '+Math.round(field.phase_degrees||0)+'° · |z| '+Number(field.magnitude||0).toFixed(2)+
+      ' · spiral '+Number(field.spiral_turn||0);
+    expressionView.textContent=interiorSignal.expression?.text||'Nothing has crossed the expression threshold yet.';
+    buildButton.hidden=!surfacedProposal;
+    if(surfacedProposal) buildButton.textContent='Offer to Hermes · '+surfacedProposal.title;
     root.querySelector('[data-observer-clock]').textContent=formatClock(packet.created_at);
     const channel=channelDescriptions[focus];title.textContent=channel.label;description.textContent=channel.text;
     const explanation=describeWayglassObserverChannel(packet,focus);
@@ -188,12 +240,12 @@ export async function mountWayglassLivingObserver(root) {
     const vars=packet.projection.variables;
     meters.innerHTML=Object.entries(vars).map(([key,v])=>'<div class="observer-meter"><span>'+key+'</span><meter min="0" max="1" value="'+v+'" aria-label="'+key+' interface visualisation value"></meter><b>'+v.toFixed(2)+'</b></div>').join('');
     packetView.textContent=JSON.stringify(packet,null,2);
-    drawAstrolabe(canvas,packet,performance.now(),focus,lowStim||reduced,{rotation:rotation.angle,lens});
+    drawAstrolabe(canvas,packet,performance.now(),focus,lowStim||reduced,{rotation:rotation.angle,lens,interior:interiorSignal});
   }
   function animate(time) {
     if(disposed||!canvas.isConnected){cleanup();return;}
     rotation.settle({reducedMotion:reduced,lowStim});
-    drawAstrolabe(canvas,packet||current(),time,focus,lowStim||reduced,{rotation:rotation.angle,lens});
+    drawAstrolabe(canvas,packet||current(),time,focus,lowStim||reduced,{rotation:rotation.angle,lens,interior:interiorSignal});
     if(!reduced&&!lowStim) animation=requestAnimationFrame(animate);
   }
   let unsubscribe=()=>{};
@@ -223,7 +275,7 @@ export async function mountWayglassLivingObserver(root) {
     if(!channelDescriptions[id])return;
     focus=id;touches++;refresh();playNote();
     globalThis.dispatchEvent?.(new CustomEvent('wayglass:material-wake',{detail:{strength:.46,intent:.55}}));
-    if(lowStim||reduced){cancelAnimationFrame(animation);drawAstrolabe(canvas,packet,0,focus,true,{rotation:rotation.angle,lens});}
+    if(lowStim||reduced){cancelAnimationFrame(animation);drawAstrolabe(canvas,packet,0,focus,true,{rotation:rotation.angle,lens,interior:interiorSignal});}
     try{if(globalThis.navigator?.vibrate&&!lowStim)globalThis.navigator.vibrate(7);}catch{}
   }
   root.querySelectorAll('[data-observer-focus]').forEach(btn=>btn.addEventListener('click',()=>select(btn.dataset.observerFocus)));
@@ -246,7 +298,7 @@ export async function mountWayglassLivingObserver(root) {
       if(gesture.moved && !reduced && !lowStim) rotation.drag(angularDelta(gesture.point,point));
       gesture.point=point;
     }
-    if(reduced||lowStim) drawAstrolabe(canvas,packet||current(),0,focus,true,{rotation:rotation.angle,lens});
+    if(reduced||lowStim) drawAstrolabe(canvas,packet||current(),0,focus,true,{rotation:rotation.angle,lens,interior:interiorSignal});
   });
   canvas.addEventListener('pointerup',event=>{
     if(!gesture||gesture.id!==event.pointerId)return;
@@ -286,6 +338,20 @@ export async function mountWayglassLivingObserver(root) {
     const href=URL.createObjectURL(blob),a=document.createElement('a');
     a.href=href;a.download='wayglass-living-observation.json';a.click();
     setTimeout(()=>URL.revokeObjectURL(href),1000);status.textContent='Observation packet exported. No server upload.';
+  });
+  buildButton.addEventListener('click',async()=>{
+    if(!surfacedProposal)return;
+    buildButton.disabled=true;
+    try{
+      const queued=await queueObserverDevelopmentProposal(surfacedProposal);
+      interior.reviewDevelopment(surfacedProposal.proposal_id,'approve-for-build','User offered this proposal to Hermes from the Living Observer surface.');
+      status.textContent='Self-development proposal queued for Hermes · '+queued.proposal_id+'.';
+      surfacedProposal=null;refresh();
+    }catch(error){
+      status.textContent='Could not queue self-development proposal · '+error.message;
+    }finally{
+      buildButton.disabled=false;
+    }
   });
   root.querySelector('[data-observer-share]').addEventListener('click',()=>{
     refresh();queueObserverContextForWriting(packet);

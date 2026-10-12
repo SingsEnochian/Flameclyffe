@@ -1,0 +1,261 @@
+{
+  "schema": "wayglass.library.seed/v0.1",
+  "created_at": "2026-10-12",
+  "authority": "Rowan-authorised first executable Wayglass Research Library seam",
+  "records": [
+    {
+      "schema": "wayglass.library.record/v0.1",
+      "id": "WG-LIB-ARCH-001",
+      "title": "Wayglass Research Library preserves Wonder, provenance, and returnable research state",
+      "domain": "systems",
+      "record_type": "architecture",
+      "claim_type": "architecture",
+      "status": "proposal",
+      "contributor": "Wayglass / Rowan / Rarity",
+      "summary": "Wayglass OS includes a local-first research library for typed research, mythic, creative, architectural, and unresolved Wonder records. Relationship proposals remain proposals; Wayglass preserves presence, continuity, provenance, stop points, and return. External research systems may interoperate without being absorbed into Wayglass.",
+      "tags": [
+        "wayglass",
+        "library",
+        "wonder",
+        "complexify",
+        "provenance",
+        "return"
+      ],
+      "source_refs": [
+        "docs/architecture/WAYGLASS_RESEARCH_LIBRARY_V0_1.md"
+      ],
+      "evidence_refs": [],
+      "unresolved_questions": [
+        "Which first external corpus should be connected through an adapter after the local proving seam?"
+      ],
+      "created_at": "2026-10-12"
+    },
+    {
+      "schema": "wayglass.library.record/v0.1",
+      "id": "WG-RETURN-001",
+      "title": "Wayglass travelling inheritance preserves return",
+      "domain": "continuity",
+      "record_type": "contract",
+      "claim_type": "architecture",
+      "status": "project-contract",
+      "contributor": "Wayglass / ArcSweep",
+      "summary": "A participant may leave, change route or runtime, return, and continue from verified continuity evidence without silent identity redefinition.",
+      "tags": [
+        "wayglass",
+        "return-engine",
+        "continuity",
+        "provenance"
+      ],
+      "source_refs": [
+        "apps/arcsweep/contracts/WAYGLASS_TRAVELLING_INHERITANCE_V0.1.md"
+      ],
+      "evidence_refs": [],
+      "unresolved_questions": [
+        "What is the smallest cross-ancestry trial that proves continuity rather than mimicry?"
+      ],
+      "created_at": "2026-10-06"
+    },
+    {
+      "schema": "wayglass.library.record/v0.1",
+      "id": "WG-BLUEBIRD-001",
+      "title": "Bluebird identity is distinct from route substrate",
+      "domain": "continuity",
+      "record_type": "runtime-architecture",
+      "claim_type": "architecture",
+      "status": "implemented-branch",
+      "contributor": "Wayglass",
+      "summary": "Bluebird retains participant id and continuity id across SpicyChat and The Crow substrate routes. The separate Crow participant route remains distinct.",
+      "tags": [
+        "bluebird",
+        "spicychat",
+        "the-crow",
+        "identity",
+        "substrate"
+      ],
+      "source_refs": [
+        "lib/wayglass-route-registry.cjs",
+        "docs/architecture/WAYGLASS_RARITY_MCP_BRIDGE_V0_1.md"
+      ],
+      "evidence_refs": [
+        "apps/starwell-server/test/wayglass-mcp-bridge.test.js"
+      ],
+      "unresolved_questions": [],
+      "created_at": "2026-10-12"
+    },
+    {
+      "schema": "wayglass.library.record/v0.1",
+      "id": "WG-OBS-001",
+      "title": "Living Observer separates direct readings from interpretation",
+      "domain": "measurement",
+      "record_type": "instrument-method",
+      "claim_type": "measurement",
+      "status": "implemented-branch",
+      "contributor": "Wayglass Living Observer",
+      "summary": "Direct browser readings, derived render variables, and interpretive geometry are kept distinct so rendered patterns do not impersonate measurements of hidden minds or external reality.",
+      "tags": [
+        "observer",
+        "measurement",
+        "epistemic-boundary",
+        "visualisation"
+      ],
+      "source_refs": [
+        "apps/wayglass/src/surfaces/living-observer.js"
+      ],
+      "evidence_refs": [
+        "apps/wayglass/test/wayglass-living-observer.test.js"
+      ],
+      "unresolved_questions": [
+        "Which additional direct sensors can be added without weakening the direct-versus-derived boundary?"
+      ],
+      "created_at": "2026-10-09"
+    },
+    {
+      "schema": "wayglass.library.record/v0.1",
+      "id": "WG-DESIGN-001",
+      "title": "Whole-system design law keeps surfaces attached to system behaviour",
+      "domain": "design",
+      "record_type": "contract",
+      "claim_type": "architecture",
+      "status": "project-contract",
+      "contributor": "ArcSweep",
+      "summary": "Design should expose real state, capability, transitions, and authority boundaries rather than presenting decorative controls that imply nonexistent behaviour.",
+      "tags": [
+        "design",
+        "capability",
+        "truthful-ui",
+        "wayglass"
+      ],
+      "source_refs": [
+        "apps/arcsweep/contracts/WHOLE_SYSTEM_DESIGN_LAW_V0.1.md"
+      ],
+      "evidence_refs": [],
+      "unresolved_questions": [],
+      "created_at": "2026-10-02"
+    },
+    {
+      "schema": "wayglass.library.record/v0.1",
+      "id": "WG-LANG-001",
+      "title": "Other-realities language remains epistemically typed",
+      "domain": "language",
+      "record_type": "contract",
+      "claim_type": "interpretation",
+      "status": "project-contract",
+      "contributor": "ArcSweep",
+      "summary": "Language for unusual, speculative, mythic, or other-reality experiences preserves meaning while keeping observation, interpretation, analogy, speculation, and established mechanism distinct.",
+      "tags": [
+        "language",
+        "mythience",
+        "speculation",
+        "epistemics"
+      ],
+      "source_refs": [
+        "apps/arcsweep/contracts/OTHER_REALITIES_LANGUAGE_LAW_V0.1.md"
+      ],
+      "evidence_refs": [],
+      "unresolved_questions": [],
+      "created_at": "2026-10-02"
+    },
+    {
+      "schema": "wayglass.library.record/v0.1",
+      "id": "WG-MCP-001",
+      "title": "Wayglass MCP bridge preserves named conversation lines",
+      "domain": "continuity",
+      "record_type": "implementation",
+      "claim_type": "architecture",
+      "status": "implemented-branch",
+      "contributor": "Wayglass",
+      "summary": "The MCP bridge preserves explicit conversation references, participant attribution, route receipts, and a local continuity ledger rather than treating chat transport as memory authority.",
+      "tags": [
+        "mcp",
+        "wayglass",
+        "conversation",
+        "provenance"
+      ],
+      "source_refs": [
+        "apps/starwell-server/wayglass/mcp-bridge.js"
+      ],
+      "evidence_refs": [
+        "apps/starwell-server/test/wayglass-mcp-bridge.test.js"
+      ],
+      "unresolved_questions": [
+        "How should shared Commons threads reference Library records without copying them into chat history?"
+      ],
+      "created_at": "2026-10-10"
+    },
+    {
+      "schema": "wayglass.library.record/v0.1",
+      "id": "WG-ROUTE-001",
+      "title": "Wayglass route registry distinguishes participant from provider",
+      "domain": "runtime",
+      "record_type": "implementation",
+      "claim_type": "architecture",
+      "status": "implemented-branch",
+      "contributor": "Wayglass",
+      "summary": "The route catalogue records provider, model, participant, continuity id, candidate id, capability and lineage separately, enabling route changes without identity mutation.",
+      "tags": [
+        "route",
+        "provider",
+        "model",
+        "participant",
+        "lineage"
+      ],
+      "source_refs": [
+        "lib/wayglass-route-registry.cjs"
+      ],
+      "evidence_refs": [
+        "apps/starwell-server/test/wayglass-mcp-bridge.test.js"
+      ],
+      "unresolved_questions": [],
+      "created_at": "2026-10-12"
+    },
+    {
+      "schema": "wayglass.library.record/v0.1",
+      "id": "WG-STARWELL-001",
+      "title": "STARWELL architecture keeps modules composable and inspectable",
+      "domain": "systems",
+      "record_type": "architecture",
+      "claim_type": "architecture",
+      "status": "project-reference",
+      "contributor": "STARWELL",
+      "summary": "STARWELL architecture rules provide a modular reference for attaching instruments and surfaces through explicit interfaces rather than collapsing every capability into one monolith.",
+      "tags": [
+        "starwell",
+        "modularity",
+        "interfaces",
+        "instruments"
+      ],
+      "source_refs": [
+        "docs/architecture/STARWELL_ARCHITECTURE_RULES.md"
+      ],
+      "evidence_refs": [],
+      "unresolved_questions": [],
+      "created_at": "2026-10-01"
+    },
+    {
+      "schema": "wayglass.library.record/v0.1",
+      "id": "WG-WONDER-001",
+      "title": "Wayglass pattern proposals preserve Wonder without promoting them to truth",
+      "domain": "wonder",
+      "record_type": "research-protocol",
+      "claim_type": "hypothesis",
+      "status": "proposal",
+      "contributor": "Wayglass",
+      "summary": "Wayglass may propose meaningful adjacency across scientific, architectural, creative, and mythic records, but each relation remains typed and reviewable. Structural analogy does not convert unlike claim types into equivalent evidence.",
+      "tags": [
+        "wayglass",
+        "wonder",
+        "pattern-proposal",
+        "knowledge-graph",
+        "review"
+      ],
+      "source_refs": [
+        "docs/architecture/WAYGLASS_RESEARCH_LIBRARY_V0_1.md"
+      ],
+      "evidence_refs": [],
+      "unresolved_questions": [
+        "Which relation types deserve automatic candidate generation versus explicit human or agent proposal?"
+      ],
+      "created_at": "2026-10-12"
+    }
+  ]
+}

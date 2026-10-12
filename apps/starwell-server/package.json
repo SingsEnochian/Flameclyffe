@@ -2,7 +2,7 @@
   "name": "hearthgate",
   "productName": "Hearthgate",
   "version": "0.1.0",
-  "description": "Local-first STARWELL, Arcsweep, Bifr\u00f6st, and Hearthweave dual-aspect observatory for Hearthgate.",
+  "description": "Local-first STARWELL, Arcsweep, Bifröst, and Hearthweave dual-aspect observatory for Hearthgate.",
   "author": "Hearthweave",
   "license": "UNLICENSED",
   "type": "commonjs",
@@ -36,7 +36,7 @@
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "mammoth": "^1.12.0",
-    "multer": "^2.3.0",
+    "multer": "^2.4.0",
     "openai": "^6.46.0",
     "pdf-parse": "^2.4.5"
   },
