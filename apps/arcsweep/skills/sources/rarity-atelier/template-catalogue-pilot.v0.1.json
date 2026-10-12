@@ -1,0 +1,17 @@
+{
+  "schema": "rarity.atelier.template-catalogue-pilot/v0.1",
+  "prepared_at": "2026-10-07",
+  "scope": "First mixed PSD pose/refinement batch from the user's Google Drive Pern art archive",
+  "items": [
+    {"name":"Firelizard 1 (Lialumay).psd","role":["firelizard anatomy","standing pose","rendering reference"],"status":"blocked","reason":"OptionalShine compose is undefined; current PSD writer cannot preserve it."},
+    {"name":"Firelizard 2 (Lialumay).psd","role":["firelizard anatomy","upright/alert pose"],"status":"blocked","reason":"OptionalShine compose is undefined."},
+    {"name":"Firelizard 3 (Lialumay).psd","role":["firelizard anatomy","flight pose"],"status":"blocked","reason":"Rewrite preserved compose labels but changed decoded scene pixels/composite; requires PSD-aware writer."},
+    {"name":"Firelizard 4 (Lialumay).psd","role":["firelizard anatomy","curled/folded-wing pose"],"status":"blocked","reason":"OptionalShine compose is undefined."},
+    {"name":"HybridGeist Lines - Curled Dragon - Shading - Adjustments - Shine - Template Version.psd","role":["curled pose","linework construction"],"status":"verified-label-normalise","reason":"Label-only rewrite passed exact pixel, geometry, compose and composite checks."},
+    {"name":"HybridGeist Wings Spread - KiTelli Shading.psd","role":["wing spread","wing-root construction"],"status":"blocked","reason":"Several source scenes report undefined compose states."},
+    {"name":"KaiserFlames Firelizard - KiTelli Shading.psd","role":["firelizard pose","finished shading reference"],"status":"verified-label-normalise","reason":"All five decoded RGBA scenes matched exactly after label-only rewrite; compose and geometry preserved."},
+    {"name":"Pern Dragon Flying Template - Franknstein.psd","role":["flight mechanics","wing phase","foreshortening"],"status":"blocked","reason":"Metallic Shine source scene reports undefined compose state."},
+    {"name":"dragonposes_by_bronzehalo_de90hds.psd","role":["pose quarry","gesture reference"],"status":"source-reference-only","reason":"Many pose scenes report undefined compose states; retain as inspiration/reference until PSD-aware writer is available."}
+  ],
+  "interpretation_rule": "Pose/design sources teach mechanics and options; they are not instructions to reproduce a finished source design wholesale."
+}

@@ -1,0 +1,48 @@
+{
+  "schema": "arcsweep.external-reference-pack/v0.1",
+  "pack_id": "rarity-atelier-toolchain-v0.1",
+  "prepared_at": "2026-10-07",
+  "authority": "workflow-reference-only",
+  "source_policy": "Use external code and skill projects as attributed implementation references. Do not copy art assets or silently vendor code.",
+  "engineering_references": [
+    {
+      "repo": "NothingData/ProcreateViewer",
+      "license": "MIT",
+      "use": ["native .procreate container parsing", "Document.archive metadata", "layer inspection", "tile/preview understanding"]
+    },
+    {
+      "repo": "xubiod/import_from_procreate",
+      "use": ["Procreate layer metadata", "Apple LZ4 tile reconstruction", "blend-mode mapping"]
+    },
+    {
+      "repo": "Avarel/silicate",
+      "use": ["Procreate file-format reverse-engineering cross-check"]
+    },
+    {
+      "repo": "psd-tools/psd-tools",
+      "use": ["PSD/PSB low-level structure", "layer and group inspection", "blend modes", "pixel-layer manipulation where supported"]
+    },
+    {
+      "repo": "colour-science/colour",
+      "use": ["colour-space conversion and perceptual colour comparison when a batch needs quantitative palette checks"]
+    },
+    {
+      "repo": "JohannesBuchner/imagehash",
+      "use": ["perceptual duplicate/near-duplicate detection for large template/reference catalogues"]
+    },
+    {
+      "repo": "FerroxLabs/wayland",
+      "path": "src/process/resources/skills-library/bodies/skills/creative-arts/digital-illustrator/SKILL.md",
+      "license": "Apache-2.0",
+      "use": ["general non-destructive illustration layer workflow cross-check"]
+    }
+  ],
+  "house_findings": [
+    "Native Procreate metadata-only layer-name replacement can preserve all non-Document.archive ZIP members byte-for-byte.",
+    "Christina Firelizard templates repeatedly separate base materials, Multiply shadow, light and linework.",
+    "Jabberwoky corpus separates shading, highlights and shine into distinct material/lighting jobs.",
+    "Unknown generic layers must remain REVIEW until visually identified.",
+    "Image-generation pose studies are useful only when species/body-plan invariants are checked before acceptance."
+  ],
+  "automatic_canon_write": false
+}

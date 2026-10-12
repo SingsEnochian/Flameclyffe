@@ -1,0 +1,18 @@
+{
+  "schema":"rarity.atelier.psd-import-pilot/v0.1",
+  "prepared_at":"2026-10-07",
+  "status":"mixed",
+  "cases":[
+    {
+      "source":"Christina Weinman Firelizard 1",
+      "result":"pass",
+      "details":"13 scenes; layer labels normalised; layer pixels, geometry, compose modes and flattened composite compared equal (RMSE 0)."
+    },
+    {
+      "source":"LiaLumay Firelizard 1",
+      "result":"blocked",
+      "details":"Underlying raster layers compared equal, but source OptionalShine reports compose=None and ImageMagick rewrote it as Over. Flattened composite changed. File rejected; use a PSD-aware writer such as psd-tools before refinement."
+    }
+  ],
+  "rule":"Do not promote a PSD import candidate unless layer count, compose modes, page geometry, every raster layer and flattened composite all verify."
+}
