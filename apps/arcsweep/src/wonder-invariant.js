@@ -1,5 +1,6 @@
 export const WONDER_INVARIANT_SCHEMA = 'arcsweep.wonder-invariant/v1';
 export const WONDER_CANON_SCHEMA = 'arcsweep.wonder-mythic-canon/v1';
+export const COUNTERFACTUAL_WONDER_SCHEMA = 'arcsweep.counterfactual-wonder/v0.1';
 
 export const WONDER_CANON = Object.freeze({
   schema: WONDER_CANON_SCHEMA,
@@ -8,6 +9,7 @@ export const WONDER_CANON = Object.freeze({
     'LET THE MYTHIC BREATHE.',
     'MYTHIC MEANING != EMPIRICAL CLAIM.',
     'THE EXPERIENCE MAY KEEP ITS NATIVE LANGUAGE.',
+    'THIS COULD BE FALSE. BUT WHAT IF IT WERE TRUE?',
   ]),
   sequence: Object.freeze([
     'attend',
@@ -15,6 +17,7 @@ export const WONDER_CANON = Object.freeze({
     'compare',
     'test',
     'remember',
+    'explore-as-if-true-without-promoting',
     'interpret-only-as-evidence-earns',
   ]),
   distinctions: Object.freeze([
@@ -29,6 +32,8 @@ export const WONDER_CANON = Object.freeze({
     'MEANINGFUL != MEASURED',
     'UNMEASURED != MEANINGLESS',
     'SYMBOLIC CORRESPONDENCE != ONTOLOGICAL IDENTITY',
+    'COUNTERFACTUAL EXPLORATION != FACT CLAIM',
+    'COULD BE FALSE != NOT WORTH EXPLORING',
   ]),
   nativeRegisters: Object.freeze([
     'felt-sense',
@@ -67,7 +72,45 @@ export const ORDINARY_EMERGENCE_SCOPES = Object.freeze([
   'intuitive-perception',
   'mythic-meaning',
   'unresolved-perception',
+  'counterfactual-wonder',
 ]);
+
+
+function cleanText(value, max = 4000) {
+  return String(value ?? '').trim().slice(0, max);
+}
+
+export function createCounterfactualWonder({
+  proposition,
+  whyInteresting = '',
+  implications = [],
+  predictions = [],
+  discriminators = [],
+  counterexamples = [],
+  sourceRefs = [],
+  createdBy = 'unspecified',
+  createdAt = new Date().toISOString(),
+} = {}) {
+  const claim = cleanText(proposition);
+  if (!claim) throw new Error('Counterfactual Wonder requires a proposition.');
+  return Object.freeze({
+    schema: COUNTERFACTUAL_WONDER_SCHEMA,
+    proposition: claim,
+    stance: Object.freeze({
+      could_be_false: true,
+      explore_as_if_true: true,
+      promoted_to_fact: false,
+    }),
+    why_interesting: cleanText(whyInteresting),
+    implications: Object.freeze(cleanStrings(implications)),
+    predictions: Object.freeze(cleanStrings(predictions)),
+    discriminators: Object.freeze(cleanStrings(discriminators)),
+    counterexamples: Object.freeze(cleanStrings(counterexamples)),
+    source_refs: Object.freeze(cleanStrings(sourceRefs)),
+    created_by: cleanText(createdBy, 240) || 'unspecified',
+    created_at: cleanText(createdAt, 80),
+  });
+}
 
 function asArray(value) {
   return Array.isArray(value) ? value : [];
