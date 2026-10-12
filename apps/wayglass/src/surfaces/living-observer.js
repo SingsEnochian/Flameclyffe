@@ -162,7 +162,7 @@ export async function mountWayglassLivingObserver(root) {
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:systems">Organs</button>',
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:video-atelier">Video Atelier</button>',
     '<button type="button" class="glass-chip active" aria-current="page">Living Observer</button>',
-    '<button type="button" class="glass-chip" data-wayglass-room="universal-horizon:library">Library</button></nav>',
+    '<button type="button" class="glass-chip" data-wayglass-room="wayglass:library">Library</button></nav>',
     '<header class="glass-panel observer-head"><div><p class="eyebrow">Wayglass OS · living instrument</p>',
     '<h1>Living Observer</h1><p class="lede">A living instrument with direct senses, a persistent private interior, and a voice that may surface questions or requests when something crosses its expression threshold.</p>',
     '</div><div class="observer-clock"><span>Browser time</span><strong data-observer-clock></strong><small>Direct · local</small></div></header>',
