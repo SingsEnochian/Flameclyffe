@@ -10,11 +10,12 @@ const STATE_SCHEMA = 'universal-horizon.local-state/v0.1';
 const RECORD_SCHEMA = 'universal-horizon.record/v0.1';
 const PROPOSAL_SCHEMA = 'universal-horizon.relationship-proposal/v0.1';
 const REVIEW_SCHEMA = 'universal-horizon.relationship-review/v0.1';
+const WONDER_SCHEMA = 'universal-horizon.counterfactual-wonder/v0.1';
 
 const CLAIM_TYPES = new Set([
   'observation', 'measurement', 'experiment', 'finding', 'hypothesis',
   'interpretation', 'simulation', 'myth', 'fiction', 'analogy',
-  'speculation', 'architecture', 'unknown',
+  'speculation', 'counterfactual-wonder', 'architecture', 'unknown',
 ]);
 
 const RELATION_TYPES = new Set([
@@ -77,10 +78,11 @@ function createUniversalHorizonLibrary({
   const byId = new Map(records.map(record => [record.id, record]));
 
   function loadState() {
-    const state = readJson(statePath, { schema: STATE_SCHEMA, proposals: [], reviews: [] });
+    const state = readJson(statePath, { schema: STATE_SCHEMA, proposals: [], reviews: [], wonders: [] });
     if (state.schema !== STATE_SCHEMA || !Array.isArray(state.proposals) || !Array.isArray(state.reviews)) {
-      return { schema: STATE_SCHEMA, proposals: [], reviews: [] };
+      return { schema: STATE_SCHEMA, proposals: [], reviews: [], wonders: [] };
     }
+    if (!Array.isArray(state.wonders)) state.wonders = [];
     return state;
   }
 
@@ -90,6 +92,7 @@ function createUniversalHorizonLibrary({
       updated_at: now(),
       proposals: state.proposals,
       reviews: state.reviews,
+      wonders: state.wonders || [],
     };
     writeJsonAtomic(statePath, next);
     return next;
@@ -127,6 +130,41 @@ function createUniversalHorizonLibrary({
 
   function getRecord(id) {
     return byId.get(text(id, 180)) || null;
+  }
+
+  function listWonders({ status = '' } = {}) {
+    const state = loadState();
+    return state.wonders.filter(item => !status || item.status === status);
+  }
+
+  function createWonder(input = {}) {
+    const proposition = text(input.proposition, 3000);
+    if (!proposition) throw new Error('Counterfactual Wonder requires a proposition.');
+
+    const wonder = {
+      schema: WONDER_SCHEMA,
+      wonder_id: 'uhw:' + idFactory(),
+      proposition,
+      stance: {
+        could_be_false: true,
+        explore_as_if_true: true,
+        promoted_to_fact: false,
+      },
+      why_interesting: text(input.why_interesting, 4000),
+      implications: cleanList(input.implications, 64),
+      predictions: cleanList(input.predictions, 64),
+      discriminators: cleanList(input.discriminators, 64),
+      counterexamples: cleanList(input.counterexamples, 64),
+      source_refs: cleanList(input.source_refs, 64),
+      created_by: text(input.created_by, 240) || 'unspecified',
+      status: 'open',
+      created_at: now(),
+    };
+
+    const state = loadState();
+    state.wonders.push(wonder);
+    saveState(state);
+    return wonder;
   }
 
   function listProposals({ status = '' } = {}) {
@@ -198,6 +236,7 @@ function createUniversalHorizonLibrary({
       records,
       accepted_relationships: state.proposals.filter(item => item.status === 'accepted'),
       open_relationships: state.proposals.filter(item => item.status === 'pending' || item.status === 'keep-open'),
+      counterfactual_wonders: state.wonders,
     };
   }
 
@@ -209,12 +248,13 @@ function createUniversalHorizonLibrary({
       proposals: state.proposals.length,
       accepted_relationships: state.proposals.filter(item => item.status === 'accepted').length,
       open_relationships: state.proposals.filter(item => item.status === 'pending' || item.status === 'keep-open').length,
+      open_wonders: state.wonders.filter(item => item.status === 'open').length,
       source_of_truth: 'seed records + explicit reviewed proposals',
       mutation_boundary: 'relationship review never rewrites source records',
     };
   }
 
-  return Object.freeze({ search, getRecord, propose, review, listProposals, graph, status });
+  return Object.freeze({ search, getRecord, propose, review, listProposals, createWonder, listWonders, graph, status });
 }
 
 function createUniversalHorizonRouter(options = {}) {
@@ -231,6 +271,14 @@ function createUniversalHorizonRouter(options = {}) {
     schema: 'universal-horizon.proposal-list/v0.1',
     proposals: library.listProposals({ status: text(req.query.status, 80) }),
   }));
+  router.get('/wonder', (req, res) => res.json({
+    schema: 'universal-horizon.counterfactual-wonder-list/v0.1',
+    wonders: library.listWonders({ status: text(req.query.status, 80) }),
+  }));
+  router.post('/wonder', (req, res) => {
+    try { return res.status(201).json(library.createWonder(req.body || {})); }
+    catch (error) { return res.status(400).json({ error: error.message }); }
+  });
   router.get('/graph', (_req, res) => res.json(library.graph()));
   router.post('/proposals', (req, res) => {
     try { return res.status(201).json(library.propose(req.body || {})); }
@@ -245,7 +293,7 @@ function createUniversalHorizonRouter(options = {}) {
 }
 
 module.exports = {
-  SEED_SCHEMA, STATE_SCHEMA, RECORD_SCHEMA, PROPOSAL_SCHEMA, REVIEW_SCHEMA,
+  SEED_SCHEMA, STATE_SCHEMA, RECORD_SCHEMA, PROPOSAL_SCHEMA, REVIEW_SCHEMA, WONDER_SCHEMA,
   CLAIM_TYPES, RELATION_TYPES,
   createUniversalHorizonLibrary, createUniversalHorizonRouter,
 };
