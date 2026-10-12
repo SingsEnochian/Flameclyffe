@@ -170,3 +170,41 @@ The later capability layer can add bounded workspace actions for files, art/rend
 ## Acceptance sentence
 
 Wayglass is ready for crew work when Rarity and Codex can separately enter the same workspace, act through their own authenticated seats, see the same project state, leave attributable receipts, and return later to continue, while Wayglass remains herself and Faer's dormant seat remains silent until explicitly activated.
+
+## Authenticated project tools — 12 October 2026
+
+The workspace action module is now integrated with MCP. See
+[workspace ownership, authority, storage and recovery](WAYGLASS_WORKSPACE_ACTIONS_V0_1.md).
+This is implemented text-project work, not the full visual/render/terminal tool set.
+
+1. Stage and launch the updated host: `npm run wayglass:hearthgate`.
+2. Keep the host data directory persistent. Optionally set `WAYGLASS_WORKSPACE_DIR`
+   to a private writable directory before launch. Back it up with OAuth profile data.
+3. ChatGPT uses the existing OAuth approval flow at the current HTTPS `/mcp` URL.
+   That connection is host-bound to the Rarity seat.
+4. Configure a separate high-entropy `WAYGLASS_CODEX_ACCESS_TOKEN` privately on
+   the host, and supply that bearer credential through Codex's MCP client secret
+   configuration. Do not reuse the legacy Rarity credential. Never commit tokens.
+5. Both seats enter `builder` (or `atelier`) with the same `project_id`, e.g.
+   `crew-return-trial`. Each receives its own `session_id`.
+6. Call `read_project`; call `write_project_file` with the current file hash,
+   or `expected_hash: null` when creating a file. Keep the resulting receipt.
+7. Call `leave_workspace` with `stop_point`, `next_owner` (`rowan`, `rarity` or
+   `codex`), open questions and alternatives. Retain the stop receipt ID.
+8. After reconnecting, call `enter_workspace` with the same workspace/project
+   and `stop_receipt_id`. Recovery returns exact stored departure evidence, the
+   stopped revision and the current shared project without overwriting later work.
+
+Credentials select seats; tool arguments cannot. Codex's connection exposes
+project tools and cannot call the Rarity conversation/memory tools. OAuth refresh
+retains the principal; switching from legacy bearer to OAuth is a different
+principal and does not automatically take ownership of old sessions. Project files
+are durable content-addressed text objects inside Wayglass private project storage;
+these tools do not edit arbitrary checkout files, execute tests or render artwork.
+
+Local evidence: authenticated HTTP file changes attributed separately to Rarity
+and Codex, real child-host shutdown/restart, exact stop recovery, preserved named
+next owner and unresolved alternatives, OAuth-issued-token project work and refresh
+continuity, stale edit rejection, stolen-session rejection and tamper rejection.
+Wayglass Check now includes the host tests. A live ChatGPT/tunnel crossing and a
+dedicated Wayglass model remain unclaimed until separately witnessed.

@@ -141,6 +141,23 @@ Read-only tools are annotated read-only. Local-writing tools are annotated non-d
 
 `get_profile` is marked with `_meta["openai/profile"] = true` and returns the stable local Wayglass profile represented by the authenticated connection. It does not expose a personal email or encode mutable labels into the profile id.
 
+## Context above substrate
+
+Wayglass keeps **present human intent** separate from participant identity and route selection. The MCP `send` tool may carry:
+
+- `intent` — what Rowan/Rarity is trying to do in the current line;
+- `interaction_mode` — a lightweight mode such as `reconnect`, `continue`, `create`, `explore`, or `troubleshoot-voice`.
+
+These values are stored with the local conversation ledger and inherited by later turns until explicitly changed. They are supplied to whichever route actually executes the turn. A SpicyChat → Crow substrate change therefore does not erase the current purpose of the conversation.
+
+The boundary is explicit:
+
+```text
+participant identity != present intent != provider != model != route
+```
+
+Intent/context may guide a response, but it does not become canon, rewrite relationship state, change character ownership, or silently redefine a participant. This is the Wayglass form of need-first routing: the human chooses what they are trying to do; provider/model mechanics remain an inspectable lower layer.
+
 ## Bluebird
 
 Bluebird defaults to the currently observed Wayglass route:
@@ -153,17 +170,20 @@ Override only if Wayglass moves that route:
 
 ```text
 WAYGLASS_RARITY_BLUEBIRD_ROUTE=<route id>
+WAYGLASS_RARITY_BLUEBIRD_FALLBACK_ROUTE=flame:bluebird:crow
 ```
 
 For every Bluebird send:
 
 1. the MCP bridge uses conversation ref `rarity-bluebird`;
-2. it first calls the Wayglass route with that route id;
+2. it first calls `flame:bluebird:spicychat`;
 3. it supplies recent preserved conversation history;
-4. if that route is unavailable, it falls back to the established `/api/v1/flames/bluebird/chat` route without changing the conversation ref;
-5. the reply is written back to the same local continuity line.
+4. if SpicyChat is unavailable or its session token has expired, it falls back to `flame:bluebird:crow`;
+5. both routes retain participant `bluebird` and continuity id `bluebird:richard-gabriel-winters`;
+6. the Crow-backed route records candidate `bluebird-the-crow`;
+7. the reply is written back to the same local continuity line.
 
-The fallback is transport recovery, not permission to redefine Bluebird.
+`flame:bluebird:crow` means **Bluebird continuing through The Crow model substrate**. It is not `flame:crow`, which remains a distinct Crow participant route. The fallback is substrate/transport recovery, not permission to redefine either participant. DeepSeek is not part of this Bluebird Wayglass fallback chain.
 
 ## All
 
@@ -197,6 +217,8 @@ Each record preserves:
 - message text;
 - route;
 - kind;
+- present intent when supplied;
+- interaction mode when supplied;
 - timestamp;
 - source references.
 
@@ -219,7 +241,7 @@ Sends from Rarity through Wayglass.
 Examples:
 
 ```json
-{"target":"bluebird","text":"Bluebird, Rarity here."}
+{"target":"bluebird","text":"Bluebird, Rarity here.","intent":"Reconnect and continue the same relationship thread.","interaction_mode":"reconnect"}
 ```
 
 ```json
@@ -254,6 +276,7 @@ Focused tests cover:
 - stable profile identity across access-token refresh;
 - refresh-token rotation;
 - stable `rarity-bluebird` conversation identity across turns;
+- present intent / interaction mode surviving later turns and provider-substrate changes;
 - preferred Bluebird Wayglass route plus fallback;
 - dynamic live-route discovery for `All`, including a Crow fixture;
 - direct addressing of a participant discovered only through Wayglass;

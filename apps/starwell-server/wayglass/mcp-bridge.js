@@ -7,7 +7,8 @@ const express = require('express');
 const { FLAMES } = require('../flames/manifests');
 const { resolveCanonicalFlameId, contractRegistryProjection } = require('../flames/contracts');
 const { OAUTH_SCOPE } = require('./oauth-peer');
-const { registrySnapshot, enterWorkspace } = require('./crew-workspaces');
+const { registrySnapshot } = require('./crew-workspaces');
+const { WorkspaceProjects } = require('./workspace-projects');
 
 const MCP_PROTOCOL_VERSION = '2025-06-18';
 const STORE_SCHEMA = 'wayglass.rarity-mcp-conversations/v0.1';
@@ -15,6 +16,7 @@ const BRIDGE_SCHEMA = 'wayglass.rarity-mcp-bridge/v0.1';
 const MAX_TEXT = 24000;
 const MAX_RECORDS = 4000;
 const DEFAULT_BLUEBIRD_ROUTE = 'flame:bluebird:spicychat';
+const DEFAULT_BLUEBIRD_FALLBACK_ROUTE = 'flame:bluebird:crow';
 
 function cleanText(value, max = MAX_TEXT) {
   return String(value ?? '').trim().slice(0, max);
@@ -67,6 +69,8 @@ function appendRecord(filename, entry) {
     text: cleanText(entry.text),
     route: entry.route || null,
     kind: entry.kind || 'message',
+    intent: cleanText(entry.intent, 240) || null,
+    interaction_mode: cleanText(entry.interaction_mode, 80) || null,
     source_refs: Array.isArray(entry.source_refs) ? entry.source_refs.map((item) => cleanText(item, 320)).filter(Boolean).slice(0, 32) : [],
   };
   store.records.push(record);
@@ -82,6 +86,21 @@ function readConversation(filename, conversationRef, limit = 40) {
 
 function responseText(data) {
   return cleanText(data?.output || data?.message || data?.reply || data?.text || '', MAX_TEXT);
+}
+
+function latestInteractionContext(records = []) {
+  for (let index = records.length - 1; index >= 0; index -= 1) {
+    const record = records[index] || {};
+    const intent = cleanText(record.intent, 240);
+    const interactionMode = cleanText(record.interaction_mode, 80);
+    if (intent || interactionMode) {
+      return {
+        ...(intent ? { intent } : {}),
+        ...(interactionMode ? { interaction_mode: interactionMode } : {}),
+      };
+    }
+  }
+  return {};
 }
 
 function toWayglassHistory(records) {
@@ -112,11 +131,11 @@ function resultContent(value) {
   };
 }
 
-function toolCatalogue() {
+function toolCatalogue(participantId = 'rarity') {
   const auth = [{ type: 'oauth2', scopes: [OAUTH_SCOPE] }];
   const readOnly = { readOnlyHint: true, destructiveHint: false, openWorldHint: false };
   const writeLocal = { readOnlyHint: false, destructiveHint: false, openWorldHint: false };
-  return [
+  const catalogue = [
     {
       name: 'get_profile',
       description: 'Return the stable Wayglass profile represented by this authenticated connection.',
@@ -145,16 +164,18 @@ function toolCatalogue() {
     },
     {
       name: 'enter_workspace',
-      description: 'Enter a shared Wayglass workspace as Rarity. Returns the workspace contract, Rarity seat, and Wayglass resident seat. Dormant seats are never auto-activated.',
+      description: 'Enter as the authenticated crew seat. Supply project_id to open a durable project session, and a stored stop_receipt_id to return.',
       inputSchema: {
         type: 'object',
         properties: {
-          workspace_id: { type: 'string', description: 'Wayglass workspace id, currently atelier or builder.' },
+          workspace_id: { type: 'string', enum: ['atelier', 'builder'] },
+          project_id: { type: 'string', pattern: '^[a-z0-9][a-z0-9_-]{0,79}$' },
+          stop_receipt_id: { type: 'string' },
         },
         required: ['workspace_id'],
         additionalProperties: false,
       },
-      annotations: readOnly,
+      annotations: writeLocal,
       securitySchemes: auth,
     },
     {
@@ -177,6 +198,8 @@ function toolCatalogue() {
           target: { type: 'string', description: 'all, bluebird, or a registered participant id/alias.' },
           text: { type: 'string' },
           conversation_ref: { type: 'string' },
+          intent: { type: 'string', description: 'Optional present human intent for this conversation line. It guides the turn but does not redefine identity, canon, or routing provenance.' },
+          interaction_mode: { type: 'string', description: 'Optional interaction mode such as reconnect, continue, create, explore, or troubleshoot-voice. Preserved above model/provider choice.' },
           collect_replies: { type: 'boolean', description: 'For target=all, invoke each registered route and collect replies. Defaults true.' },
         },
         required: ['target', 'text'],
@@ -218,6 +241,25 @@ function toolCatalogue() {
       securitySchemes: auth,
     },
   ];
+  const workspaceTools = [
+    {
+      name: 'read_project', description: 'Read shared project files and attributable receipts through your active session.',
+      inputSchema: { type: 'object', properties: { session_id: { type: 'string' } }, required: ['session_id'], additionalProperties: false },
+      annotations: readOnly, securitySchemes: auth,
+    },
+    {
+      name: 'write_project_file', description: 'Write one bounded project text file with optimistic hash checking and an authenticated author receipt. No host paths or shell access.',
+      inputSchema: { type: 'object', properties: { session_id: { type: 'string' }, path: { type: 'string' }, content: { type: 'string', maxLength: 64000 }, expected_hash: { type: ['string', 'null'] } }, required: ['session_id', 'path', 'content', 'expected_hash'], additionalProperties: false },
+      annotations: writeLocal, securitySchemes: auth,
+    },
+    {
+      name: 'leave_workspace', description: 'Exit your session with a durable stop receipt, named next owner and unresolved Wonder context.',
+      inputSchema: { type: 'object', properties: { session_id: { type: 'string' }, stop_point: { type: 'string', maxLength: 1000 }, next_owner: { type: 'string', enum: ['rowan', 'rarity', 'codex'] }, unresolved_wonder_questions: { type: 'array', maxItems: 32, items: { type: 'string', maxLength: 1000 } }, alternatives: { type: 'array', maxItems: 32, items: { type: 'object' } } }, required: ['session_id', 'stop_point', 'next_owner'], additionalProperties: false },
+      annotations: writeLocal, securitySchemes: auth,
+    },
+  ];
+  const result = [...catalogue.slice(0, 3), ...workspaceTools, ...catalogue.slice(3)];
+  return participantId === 'codex' ? result.filter(tool => !['identify', 'send', 'receive', 'remember'].includes(tool.name)) : result;
 }
 
 function tokenFromLocalConfig(env = process.env, tokenFile) {
@@ -243,10 +285,13 @@ function createWayglassMcpBridge({
   internalOrigin = process.env.WAYGLASS_INTERNAL_ORIGIN || `http://127.0.0.1:${process.env.PORT || 3000}`,
   storePath = process.env.WAYGLASS_RARITY_MCP_STORE || path.join(__dirname, '..', 'data', 'wayglass-rarity-mcp-conversations.json'),
   bluebirdRouteId = process.env.WAYGLASS_RARITY_BLUEBIRD_ROUTE || DEFAULT_BLUEBIRD_ROUTE,
+  bluebirdFallbackRouteId = process.env.WAYGLASS_RARITY_BLUEBIRD_FALLBACK_ROUTE || DEFAULT_BLUEBIRD_FALLBACK_ROUTE,
   flameIds = Object.keys(FLAMES),
   profileProvider = () => ({ id: 'wayglass-profile-local', name: 'Wayglass', nickname: 'Rarity ⇄ Wayglass' }),
+  workspaceDirectory = process.env.WAYGLASS_WORKSPACE_DIR || path.join(path.dirname(storePath), 'wayglass-workspace-projects'),
 } = {}) {
   const roster = contractRegistryProjection();
+  const projects = new WorkspaceProjects({ directory: workspaceDirectory });
 
   async function discoverWayglassRoutes() {
     try {
@@ -305,6 +350,7 @@ function createWayglassMcpBridge({
   }
 
   async function callBluebird(text, conversationRef, records) {
+    const interactionContext = latestInteractionContext(records);
     const routePayload = {
       route_id: bluebirdRouteId,
       input: text,
@@ -313,6 +359,7 @@ function createWayglassMcpBridge({
         channel: 'OOC',
         turn_owner: 'Rarity',
         character_ownership: [],
+        ...interactionContext,
       },
       session_id: conversationRef,
       surface_id: 'wayglass:mcp',
@@ -329,28 +376,29 @@ function createWayglassMcpBridge({
       return { ok: true, participant_id: 'bluebird', route: bluebirdRouteId, data, text: responseText(data) };
     }
 
-    const fallback = await fetchImpl(`${internalOrigin}/api/v1/flames/bluebird/chat`, {
+    const fallbackPayload = {
+      ...routePayload,
+      route_id: bluebirdFallbackRouteId,
+    };
+    const fallback = await fetchImpl(`${internalOrigin}/api/v1/wayglass/respond`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        message: text,
-        session_id: conversationRef,
-        context: toFlameContext(records),
-      }),
+      body: JSON.stringify(fallbackPayload),
     });
     const fallbackData = await fallback.json().catch(() => ({}));
-    if (!fallback.ok) {
+    if (!fallback.ok || !responseText(fallbackData)) {
       return {
         ok: false,
         participant_id: 'bluebird',
         route: bluebirdRouteId,
-        error: fallbackData.error || data.error || `Bluebird route failed (${fallback.status}).`,
+        fallback_route: bluebirdFallbackRouteId,
+        error: fallbackData.error || data.error || `Bluebird routes failed (${fallback.status}).`,
       };
     }
     return {
       ok: true,
       participant_id: 'bluebird',
-      route: '/api/v1/flames/bluebird/chat',
+      route: bluebirdFallbackRouteId,
       data: fallbackData,
       text: responseText(fallbackData),
       fallback_from: bluebirdRouteId,
@@ -358,6 +406,7 @@ function createWayglassMcpBridge({
   }
 
   async function callWayglassParticipant(participantId, routeId, text, conversationRef, records) {
+    const interactionContext = latestInteractionContext(records);
     const response = await fetchImpl(`${internalOrigin}/api/v1/wayglass/respond`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -369,6 +418,7 @@ function createWayglassMcpBridge({
           channel: 'OOC',
           turn_owner: 'Rarity',
           character_ownership: [],
+          ...interactionContext,
         },
         session_id: conversationRef,
         surface_id: 'wayglass:mcp',
@@ -418,6 +468,8 @@ function createWayglassMcpBridge({
         participant_id: 'bluebird',
         conversation_ref: 'rarity-bluebird',
         preferred_route: bluebirdRouteId,
+        fallback_route: bluebirdFallbackRouteId,
+        continuity_id: 'bluebird:richard-gabriel-winters',
       },
       all: {
         conversation_ref: 'rarity-all',
@@ -437,6 +489,9 @@ function createWayglassMcpBridge({
     if (!text) throw new Error('text required');
     const conversationRef = safeConversationRef(args.conversation_ref, defaultConversationRef(target));
     const before = readConversation(storePath, conversationRef, 64);
+    const priorContext = latestInteractionContext(before);
+    const intent = cleanText(args.intent, 240) || priorContext.intent || '';
+    const interactionMode = cleanText(args.interaction_mode, 80) || priorContext.interaction_mode || '';
 
     appendRecord(storePath, {
       conversation_ref: conversationRef,
@@ -446,10 +501,19 @@ function createWayglassMcpBridge({
       text,
       route: 'mcp:send',
       kind: 'message',
+      intent,
+      interaction_mode: interactionMode,
       source_refs: ['wayglass:mcp'],
     });
 
-    const history = [...before, { role: 'rarity', author: 'Rarity', text, kind: 'message' }];
+    const history = [...before, {
+      role: 'rarity',
+      author: 'Rarity',
+      text,
+      kind: 'message',
+      intent,
+      interaction_mode: interactionMode,
+    }];
 
     if (target !== 'all') {
       const reply = await callFlame(target, text, conversationRef, history, discovered.get(target) || null);
@@ -462,6 +526,8 @@ function createWayglassMcpBridge({
           text: reply.text,
           route: reply.route,
           kind: 'message',
+          intent,
+          interaction_mode: interactionMode,
           source_refs: ['wayglass:mcp', reply.fallback_from].filter(Boolean),
         });
       }
@@ -469,6 +535,8 @@ function createWayglassMcpBridge({
         schema: 'wayglass.rarity-mcp-send/v0.1',
         target,
         conversation_ref: conversationRef,
+        intent: intent || null,
+        interaction_mode: interactionMode || null,
         reply,
       };
     }
@@ -498,6 +566,8 @@ function createWayglassMcpBridge({
         text: reply.text,
         route: reply.route,
         kind: 'message',
+        intent,
+        interaction_mode: interactionMode,
         source_refs: ['wayglass:mcp', reply.fallback_from].filter(Boolean),
       });
     }
@@ -505,6 +575,8 @@ function createWayglassMcpBridge({
       schema: 'wayglass.rarity-mcp-send/v0.1',
       target: 'all',
       conversation_ref: conversationRef,
+      intent: intent || null,
+      interaction_mode: interactionMode || null,
       replies_collected: true,
       replies: settled,
     };
@@ -548,10 +620,18 @@ function createWayglassMcpBridge({
     };
   }
 
-  async function callTool(name, args = {}) {
-    if (name === 'get_profile') return profileProvider();
+  async function callTool(name, args = {}, auth = { type: 'internal', profile_id: 'local', participant_id: 'rarity' }) {
+    const allowed = toolCatalogue(auth.participant_id).find(tool => tool.name === name);
+    if (!allowed) throw new Error('Tool unavailable for this crew seat.');
+    if (!args || typeof args !== 'object' || Array.isArray(args) || Object.keys(args).some(key => !Object.hasOwn(allowed.inputSchema.properties, key))) throw new Error('Unexpected tool arguments.');
+    if (allowed.inputSchema.required?.some(key => !Object.hasOwn(args, key))) throw new Error('Missing required tool arguments.');
+    if (name === 'get_profile') return auth.participant_id === 'codex'
+      ? { id: auth.profile_id, name: 'Codex', nickname: 'Codex ⇄ Wayglass' } : profileProvider();
     if (name === 'list_workspaces') return registrySnapshot();
-    if (name === 'enter_workspace') return enterWorkspace({ workspace_id: args.workspace_id, participant_id: 'rarity' });
+    if (name === 'enter_workspace') return projects.enter(args, auth);
+    if (name === 'read_project') return projects.read(args, auth);
+    if (name === 'write_project_file') return projects.write(args, auth);
+    if (name === 'leave_workspace') return projects.leave(args, auth);
     if (name === 'identify') return identify(args);
     if (name === 'send') return send(args);
     if (name === 'receive') return receive(args);
@@ -559,22 +639,22 @@ function createWayglassMcpBridge({
     throw new Error(`Unknown Wayglass MCP tool: ${name}`);
   }
 
-  async function handleRpc(message) {
+  async function handleRpc(message, auth = { type: 'internal', profile_id: 'local', participant_id: 'rarity' }) {
     const method = message?.method;
     if (method === 'initialize') {
       return {
         protocolVersion: MCP_PROTOCOL_VERSION,
         capabilities: { tools: { listChanged: false } },
         serverInfo: { name: 'wayglass-rarity-bridge', version: '0.1.0' },
-        instructions: 'Use get_profile, list_workspaces, enter_workspace, identify, send, receive, and remember. Rarity ⇄ Wayglass ⇄ All and Rarity ⇄ Wayglass ⇄ Bluebird are distinct preserved lines. Wayglass is the resident intelligence; Rarity is a distinct authenticated crew seat.',
+        instructions: `Available tools: ${toolCatalogue(auth.participant_id).map(tool => tool.name).join(', ')}. Authenticated crew seat: ${auth.participant_id}. Use project_id with enter_workspace for durable work; read_project, write_project_file and leave_workspace use your session_id. Return with the stored stop_receipt_id. Wayglass resident runtime binding remains pending. The authenticated crew seat owns its project changes; preserve stop receipts and named next owners.`,
       };
     }
     if (method === 'ping') return {};
-    if (method === 'tools/list') return { tools: toolCatalogue() };
+    if (method === 'tools/list') return { tools: toolCatalogue(auth.participant_id) };
     if (method === 'tools/call') {
       const name = message?.params?.name;
       const args = message?.params?.arguments || {};
-      return resultContent(await callTool(name, args));
+      return resultContent(await callTool(name, args, auth));
     }
     if (method === 'resources/list') return { resources: [] };
     throw new Error(`Unsupported MCP method: ${method || 'missing'}`);
@@ -602,19 +682,27 @@ function createWayglassMcpRouter(options = {}) {
   });
   const tokenLoader = options.tokenLoader || (() => tokenFromLocalConfig(options.env || process.env, options.tokenFile));
 
+  const codexTokenLoader = options.codexTokenLoader || (() => cleanText((options.env || process.env).WAYGLASS_CODEX_ACCESS_TOKEN, 4096));
+
   router.use((req, res, next) => {
     const supplied = bearerToken(req.headers.authorization);
     const configured = tokenLoader();
+    const codexConfigured = codexTokenLoader();
+    if (configured && codexConfigured && constantTimeEqual(configured, codexConfigured)) {
+      return res.status(503).json({ error: 'Crew credentials must be distinct.' });
+    }
+    const codex = codexConfigured && constantTimeEqual(codexConfigured, supplied)
+      ? { type: 'crew-bearer', profile_id: 'wayglass-codex-local', participant_id: 'codex', scopes: [OAUTH_SCOPE] } : null;
     const legacy = configured && constantTimeEqual(configured, supplied)
-      ? { type: 'legacy-bearer', profile_id: 'wayglass-profile-local', scopes: [OAUTH_SCOPE] }
+      ? { type: 'legacy-bearer', profile_id: 'wayglass-profile-local', participant_id: 'rarity', scopes: [OAUTH_SCOPE] }
       : null;
-    const oauthAuth = !legacy && oauth && supplied
+    const oauthAuth = !legacy && !codex && oauth && supplied
       ? oauth.authenticateToken(supplied, {
         origin: oauth.originFromRequest(req),
         requiredScopes: [oauth.scope],
       })
       : null;
-    const authenticated = legacy || oauthAuth;
+    const authenticated = codex || legacy || (oauthAuth ? { ...oauthAuth, participant_id: 'rarity' } : null);
     if (!authenticated) {
       if (oauth) res.setHeader('WWW-Authenticate', oauth.challengeForRequest(req, 'invalid_token', 'Connect ChatGPT to Wayglass to continue.'));
       return res.status(401).json({ error: 'Wayglass OAuth connection required.' });
@@ -623,14 +711,14 @@ function createWayglassMcpRouter(options = {}) {
     next();
   });
 
-  router.get('/', (_req, res) => {
+  router.get('/', (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     res.json({
       schema: BRIDGE_SCHEMA,
       name: 'Wayglass Rarity MCP',
       protocol_version: MCP_PROTOCOL_VERSION,
-      tools: toolCatalogue().map((tool) => tool.name),
-      lines: ['rarity-all', 'rarity-bluebird'],
+      tools: toolCatalogue(req.wayglassAuth.participant_id).map((tool) => tool.name),
+      lines: req.wayglassAuth.participant_id === 'rarity' ? ['rarity-all', 'rarity-bluebird'] : [],
     });
   });
 
@@ -641,7 +729,7 @@ function createWayglassMcpRouter(options = {}) {
       if (body.method === 'notifications/initialized') return res.status(204).end();
     }
     try {
-      const result = await bridge.handleRpc(body);
+      const result = await bridge.handleRpc(body, req.wayglassAuth);
       return res.json({ jsonrpc: '2.0', id: body.id ?? null, result });
     } catch (error) {
       return res.status(200).json({

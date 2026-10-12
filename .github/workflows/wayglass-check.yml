@@ -5,6 +5,8 @@ on:
     paths:
       - 'apps/wayglass/**'
       - 'apps/starwell-server/wayglass/**'
+      - 'apps/starwell-server/test/wayglass-*.test.js'
+      - 'apps/starwell-server/test/security-boundary.test.js'
       - 'apps/starwell-server/server.js'
       - 'lib/wayglass-*'
       - 'api/_shared/wayglass-gateway.mjs'
@@ -37,6 +39,8 @@ jobs:
       - name: Install host dependencies for HTTP integration tests
         run: npm ci --prefix apps/starwell-server --omit=dev --ignore-scripts
       - run: npm run wayglass:test
+      - name: Run authenticated Wayglass host tests
+        run: node --test apps/starwell-server/test/wayglass-*.test.js apps/starwell-server/test/security-boundary.test.js
       - run: npm run wayglass:build
       - run: npm run wayglass:stage:server
       - name: Verify staged host
