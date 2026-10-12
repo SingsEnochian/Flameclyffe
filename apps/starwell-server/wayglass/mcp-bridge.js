@@ -7,6 +7,7 @@ const express = require('express');
 const { FLAMES } = require('../flames/manifests');
 const { resolveCanonicalFlameId, contractRegistryProjection } = require('../flames/contracts');
 const { OAUTH_SCOPE } = require('./oauth-peer');
+const { verifyReturn } = require('./bluebird-bridge-trial');
 
 const MCP_PROTOCOL_VERSION = '2025-06-18';
 const STORE_SCHEMA = 'wayglass.rarity-mcp-conversations/v0.1';
@@ -425,6 +426,18 @@ function createWayglassMcpBridge({
     const text = cleanText(args.text);
     if (!text) throw new Error('text required');
     const conversationRef = safeConversationRef(args.conversation_ref, defaultConversationRef(target));
+    // Trial 001 is opt-in; verify against the immutable stop receipt BEFORE
+    // recording or transmitting a trial return. Ordinary messaging is unchanged.
+    if (args.trial_receipt || args.trial_return_packet) {
+      if (target !== 'bluebird' || !args.trial_receipt || !args.trial_return_packet) {
+        throw new Error('Bluebird trial requires both stop receipt and return packet');
+      }
+      if (args.trial_return_packet.conversation_id !== conversationRef) {
+        throw new Error('Bluebird trial conversation mismatch');
+      }
+      const verified = verifyReturn(args.trial_receipt, args.trial_return_packet);
+      if (!verified.ok) throw new Error(`Bluebird trial return rejected: ${verified.reason}`);
+    }
     const before = readConversation(storePath, conversationRef, 64);
     const priorContext = latestInteractionContext(before);
     const intent = cleanText(args.intent, 240) || priorContext.intent || '';
