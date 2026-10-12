@@ -10,6 +10,7 @@ import { mountArcSweepWritingSurface } from './surfaces/arcsweep-writing.js';
 import { mountWayglassSystemsSurface } from './surfaces/systems.js';
 import { mountWayglassVideoAtelier } from './surfaces/video-atelier.js';
 import { mountWayglassLivingObserver } from './surfaces/living-observer.js';
+import { mountUniversalHorizonSurface } from './surfaces/universal-horizon.js';
 import { registerWayglassOrgan, listWayglassOrgans } from './organ-registry.js';
 import { FIRST_WAYGLASS_ORGANS } from './organ-donors.js';
 
@@ -51,6 +52,12 @@ registerWayglassSurface({
   mount: mountWayglassLivingObserver,
 });
 
+registerWayglassSurface({
+  surface_id: 'universal-horizon:library',
+  label: 'Universal Horizon · Library',
+  mount: mountUniversalHorizonSurface,
+});
+
 const browserEmbodiment = Object.freeze({
   body_id: 'browser-host',
   body_class: 'host-os',
@@ -84,6 +91,7 @@ globalThis.__wayglassOS = wayglass;
 
 const roomQuery = new URLSearchParams(globalThis.location?.search || '').get('room');
 const startRoom = roomQuery === 'observer' ? 'wayglass:living-observer'
+  : roomQuery === 'library' ? 'universal-horizon:library'
   : roomQuery === 'organs' ? 'wayglass:systems'
   : roomQuery === 'video' ? 'wayglass:video-atelier'
   : 'arcsweep:writing-room';
