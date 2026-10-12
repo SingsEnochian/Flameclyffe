@@ -16,6 +16,8 @@ const OpenAI = require('openai');
 const multer = require('multer');
 const flameRouter = require('./flames/router');
 const wayglassRouter = require('./wayglass/router');
+const { createWayglassMcpRouter } = require('./wayglass/mcp-bridge');
+const { createWayglassPeerOAuth } = require('./wayglass/oauth-peer');
 const { FLAMES } = require('./flames/manifests');
 
 // Load .env from this directory if present
@@ -122,8 +124,18 @@ async function fetchUrlContent(url, maxChars = 3000) {
   }
 }
 
-app.use(cors({ origin: true }));
 app.use(express.json());
+
+// The public OAuth and MCP entrance must sit before Hearthgate's localhost-only
+// browser CORS boundary. It remains protected by OAuth/bearer authentication;
+// moving only these routes prevents a tunnel-origin form POST from being
+// rejected while every ordinary Hearthgate browser route stays local-only.
+const wayglassPeerOAuth = createWayglassPeerOAuth();
+wayglassPeerOAuth.mount(app);
+const wayglassMcpRouter = createWayglassMcpRouter({ oauth: wayglassPeerOAuth });
+app.use('/mcp', wayglassMcpRouter);
+
+app.use(cors({ origin: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Helper to read a JSON file asynchronously
@@ -589,7 +601,10 @@ app.get('/api/v1/context', async (req, res) => {
 const groveChatRouter = require('./routes/grove-chat.routes');
 app.use('/api/v1/chat', groveChatRouter);
 
-// ── Flame router (v1) ───────────────────────────────────────────────────────
+// ── Wayglass API alias + Flame routers (v1) ───────────────────────────────
+// /mcp and the OAuth discovery/authorization endpoints are mounted above the
+// local browser CORS boundary. This alias remains available to local clients.
+app.use('/api/v1/wayglass/mcp', wayglassMcpRouter);
 app.use('/api/v1/wayglass', wayglassRouter);
 app.use('/api/v1', flameRouter);
 

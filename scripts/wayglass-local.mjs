@@ -11,6 +11,9 @@ const hostDir = path.join(root, 'apps', 'starwell-server');
 const hostEntry = path.join(hostDir, 'server-secure.js');
 const ui = 'http://127.0.0.1:5186/?room=observer';
 const api = 'http://127.0.0.1:3000/api/v1/wayglass/routes';
+const mcp = 'http://127.0.0.1:3000/mcp';
+const oauthMetadata = 'http://127.0.0.1:3000/.well-known/oauth-protected-resource/mcp';
+const oauthPairingFile = path.join(hostDir, 'data', 'wayglass-peer-oauth-pairing.local.txt');
 const running = [];
 let stopping = false;
 const sleep = ms => new Promise(done => setTimeout(done, ms));
@@ -81,7 +84,11 @@ async function main() {
     console.log('[Wayglass] Port 5186 already responds; verify it is this Wayglass checkout.');
   }
   console.log('\n[Wayglass] OPEN ON THIS WINDOWS COMPUTER:\n' + ui + '\n');
-  console.log('Writing Room API: port 3000; Ollama: port 11434. Ctrl+C stops this launcher.');
+  console.log('Writing Room API: port 3000; Ollama: port 11434.');
+  console.log('[Wayglass] ChatGPT MCP local endpoint: ' + mcp);
+  console.log('[Wayglass] OAuth metadata: ' + oauthMetadata);
+  console.log('[Wayglass] OAuth pairing code file: ' + oauthPairingFile);
+  console.log('Ctrl+C stops this launcher.');
 }
 process.on('SIGINT', () => { stop(); process.exitCode = 0; });
 process.on('SIGTERM', () => { stop(); process.exitCode = 0; });

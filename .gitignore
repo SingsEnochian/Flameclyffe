@@ -54,3 +54,10 @@ apps/starwell-server/public/starwell/
 .netlify/
 
 /apps/starwell-server/wayglass-runtime/
+
+# Wayglass private local MCP/OAuth state
+apps/starwell-server/data/wayglass-rarity-access.local.txt
+apps/starwell-server/data/wayglass-rarity-mcp-conversations.json
+apps/starwell-server/data/wayglass-peer-oauth.local.json
+apps/starwell-server/data/wayglass-peer-oauth-tokens.local.json
+apps/starwell-server/data/wayglass-peer-oauth-pairing.local.txt
