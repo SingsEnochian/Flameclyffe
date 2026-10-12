@@ -6,7 +6,9 @@ import {
   WONDER_CANON,
   WONDER_INVARIANT,
   COUNTERFACTUAL_WONDER_SCHEMA,
+  COMPLEXIFICATION_SCHEMA,
   createCounterfactualWonder,
+  createComplexification,
   assertWonderInvariant,
   evaluateWonderInvariant,
 } from '../src/wonder-invariant.js';
@@ -28,6 +30,7 @@ test('Wonder + mythic canon preserves wonder, mythic meaning, and native languag
     'attend',
     'preserve',
     'explore-as-if-true-without-promoting',
+    'complexify-if-current-frame-is-too-small',
     'compare',
     'test',
     'remember',
@@ -169,6 +172,38 @@ test('Counterfactual Wonder is ordinary emergence and cannot be flattened withou
     emergenceSpace: ['counterfactual-wonder'],
     consequenceBoundaries: [],
     constraints: [{ scope: 'counterfactual-wonder', effect: 'suppress' }],
+  });
+  assert.equal(result.pass, false);
+  assert.ok(result.violations.some(entry => entry.code === 'wonder.premature-control-layer'));
+});
+
+test('Complexify treats apparent impossibility as a possible representation failure', () => {
+  const result = createComplexification({
+    proposition: 'Equal pressure can belong to different breakthrough states.',
+    currentFrame: 'Represent the process only as a scalar pressure value.',
+    apparentImpossibility: 'The same scalar value cannot distinguish accumulation from release.',
+    missingDimensions: ['phase in the process cycle'],
+    rotations: ['Represent the state as z = r * exp(i theta).'],
+    invariants: ['Accumulated intensity r survives the rotation.'],
+    translatedConsequences: ['Different phases at similar magnitude should produce different transition signatures.'],
+    predictions: ['Release events occupy a distinct phase region.'],
+    discriminators: ['Compare matched high-magnitude episodes with different phase histories.'],
+    createdBy: 'Wayglass',
+    createdAt: '2026-10-12T02:30:00-04:00',
+  });
+  assert.equal(result.schema, COMPLEXIFICATION_SCHEMA);
+  assert.equal(result.stance.current_frame_may_be_incomplete, true);
+  assert.equal(result.stance.enlarged_frame_is_provisional, true);
+  assert.equal(result.stance.translated_predictions_require_test, true);
+  assert.match(result.rotations[0], /exp\(i theta\)/);
+});
+
+test('Complexification is protected ordinary emergence before consequential claim strength', () => {
+  assert.ok(ORDINARY_EMERGENCE_SCOPES.includes('complexification'));
+  const result = evaluateWonderInvariant({
+    emergenceSpace: ['complexification'],
+    consequenceBoundaries: [],
+    constraints: [{ scope:'complexification', effect:'block' }],
   });
   assert.equal(result.pass, false);
   assert.ok(result.violations.some(entry => entry.code === 'wonder.premature-control-layer'));
