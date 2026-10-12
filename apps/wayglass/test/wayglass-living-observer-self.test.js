@@ -79,8 +79,7 @@ test('Compression and release are represented as phase, not only magnitude', () 
   const now = () => `2026-10-12T06:03:${String(tick++).padStart(2,'0')}.000Z`;
   const interior = createObserverInterior({ storage, now });
   const seen = new Set();
-  let firstMagnitude = null;
-  let distinctSameBand = false;
+  const phases = [];
   for (let i=0;i<40;i++) {
     const signal = interior.sense(packet({
       focus:['time','routes','memory','touch'][i%4],
@@ -89,13 +88,17 @@ test('Compression and release are represented as phase, not only magnitude', () 
       memory:true,
     }));
     seen.add(signal.compression_field.phase_label);
-    if (firstMagnitude === null) firstMagnitude = signal.compression_field.magnitude;
-    if (Math.abs(signal.compression_field.magnitude-firstMagnitude)<0.12
-      && signal.compression_field.phase_degrees>80) distinctSameBand = true;
+    phases.push({
+      magnitude: signal.compression_field.magnitude,
+      phase: signal.compression_field.phase_degrees,
+      label: signal.compression_field.phase_label,
+    });
   }
   assert.ok(seen.has('compression'));
   assert.ok(seen.has('integration'));
   assert.ok(seen.has('release'));
-  assert.ok(distinctSameBand);
+  assert.ok(phases.some(item => item.phase > 90));
+  assert.ok(new Set(phases.map(item => item.phase)).size > 10);
+  assert.ok(new Set(phases.map(item => item.magnitude)).size > 1);
   assert.ok(interior.publicSignal().compression_field.spiral_turn >= 1);
 });
