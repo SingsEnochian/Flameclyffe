@@ -162,22 +162,22 @@ export async function reviewObserverDevelopmentProposal({ proposalId, decision, 
   }));
 }
 
-export async function searchUniversalHorizon({ query = '', claimType = '', recordType = '', limit = 20, fetchImpl = fetch } = {}) {
+export async function searchWayglassLibrary({ query = '', claimType = '', recordType = '', limit = 20, fetchImpl = fetch } = {}) {
   const params = new URLSearchParams({
     q: query,
     claim_type: claimType,
     record_type: recordType,
     limit: String(limit),
   });
-  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/horizon/search?' + params, { cache: 'no-store' }));
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/library/search?' + params, { cache: 'no-store' }));
 }
 
-export async function listUniversalHorizonWonders(fetchImpl = fetch) {
-  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/horizon/wonder', { cache: 'no-store' }));
+export async function listWayglassLibraryWonders(fetchImpl = fetch) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/library/wonder', { cache: 'no-store' }));
 }
 
-export async function createUniversalHorizonWonder(payload, fetchImpl = fetch) {
-  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/horizon/wonder', {
+export async function createWayglassLibraryWonder(payload, fetchImpl = fetch) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/library/wonder', {
     method: 'POST',
     headers: JSON_HEADERS,
     cache: 'no-store',
@@ -185,8 +185,8 @@ export async function createUniversalHorizonWonder(payload, fetchImpl = fetch) {
   }));
 }
 
-export async function complexifyUniversalHorizonWonder({ wonderId, ...payload } = {}, fetchImpl = fetch) {
-  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/horizon/wonder/' + encodeURIComponent(wonderId) + '/complexify', {
+export async function complexifyWayglassLibraryWonder({ wonderId, ...payload } = {}, fetchImpl = fetch) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/library/wonder/' + encodeURIComponent(wonderId) + '/complexify', {
     method: 'POST',
     headers: JSON_HEADERS,
     cache: 'no-store',
