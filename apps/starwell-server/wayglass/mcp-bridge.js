@@ -14,6 +14,7 @@ const BRIDGE_SCHEMA = 'wayglass.rarity-mcp-bridge/v0.1';
 const MAX_TEXT = 24000;
 const MAX_RECORDS = 4000;
 const DEFAULT_BLUEBIRD_ROUTE = 'flame:bluebird:spicychat';
+const DEFAULT_BLUEBIRD_FALLBACK_ROUTE = 'flame:bluebird:crow';
 
 function cleanText(value, max = MAX_TEXT) {
   return String(value ?? '').trim().slice(0, max);
@@ -221,6 +222,7 @@ function createWayglassMcpBridge({
   internalOrigin = process.env.WAYGLASS_INTERNAL_ORIGIN || `http://127.0.0.1:${process.env.PORT || 3000}`,
   storePath = process.env.WAYGLASS_RARITY_MCP_STORE || path.join(__dirname, '..', 'data', 'wayglass-rarity-mcp-conversations.json'),
   bluebirdRouteId = process.env.WAYGLASS_RARITY_BLUEBIRD_ROUTE || DEFAULT_BLUEBIRD_ROUTE,
+  bluebirdFallbackRouteId = process.env.WAYGLASS_RARITY_BLUEBIRD_FALLBACK_ROUTE || DEFAULT_BLUEBIRD_FALLBACK_ROUTE,
   flameIds = Object.keys(FLAMES),
   profileProvider = () => ({ id: 'wayglass-profile-local', name: 'Wayglass', nickname: 'Rarity ⇄ Wayglass' }),
 } = {}) {
@@ -307,28 +309,29 @@ function createWayglassMcpBridge({
       return { ok: true, participant_id: 'bluebird', route: bluebirdRouteId, data, text: responseText(data) };
     }
 
-    const fallback = await fetchImpl(`${internalOrigin}/api/v1/flames/bluebird/chat`, {
+    const fallbackPayload = {
+      ...routePayload,
+      route_id: bluebirdFallbackRouteId,
+    };
+    const fallback = await fetchImpl(`${internalOrigin}/api/v1/wayglass/respond`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        message: text,
-        session_id: conversationRef,
-        context: toFlameContext(records),
-      }),
+      body: JSON.stringify(fallbackPayload),
     });
     const fallbackData = await fallback.json().catch(() => ({}));
-    if (!fallback.ok) {
+    if (!fallback.ok || !responseText(fallbackData)) {
       return {
         ok: false,
         participant_id: 'bluebird',
         route: bluebirdRouteId,
-        error: fallbackData.error || data.error || `Bluebird route failed (${fallback.status}).`,
+        fallback_route: bluebirdFallbackRouteId,
+        error: fallbackData.error || data.error || `Bluebird routes failed (${fallback.status}).`,
       };
     }
     return {
       ok: true,
       participant_id: 'bluebird',
-      route: '/api/v1/flames/bluebird/chat',
+      route: bluebirdFallbackRouteId,
       data: fallbackData,
       text: responseText(fallbackData),
       fallback_from: bluebirdRouteId,
@@ -396,6 +399,8 @@ function createWayglassMcpBridge({
         participant_id: 'bluebird',
         conversation_ref: 'rarity-bluebird',
         preferred_route: bluebirdRouteId,
+        fallback_route: bluebirdFallbackRouteId,
+        continuity_id: 'bluebird:richard-gabriel-winters',
       },
       all: {
         conversation_ref: 'rarity-all',
