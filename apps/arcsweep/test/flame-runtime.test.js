@@ -35,6 +35,91 @@ test('Boxfire dispatches through its own provider and model', async () => {
   assert.equal((await response.json()).message, 'Built and verified.');
 });
 
+test('Bluebird status exposes SpicyChat readiness without exposing the bearer token', () => {
+  const status = flameStatus('bluebird', makeEnv({
+    BLUEBIRD_DEEPSEEK_API_KEY: 'deep-key',
+    BLUEBIRD_SPICYCHAT_TOKEN: 'session-secret',
+    BLUEBIRD_SPICYCHAT_CHARACTER_ID: 'char-bluebird',
+  }));
+  assert.equal(status.spicychat_route.configured, true);
+  assert.equal(status.spicychat_route.character_pinned, true);
+  assert.equal(status.spicychat_route.preferred_when_configured, true);
+  assert.doesNotMatch(JSON.stringify(status), /session-secret/);
+});
+
+test('Bluebird prefers her existing SpicyChat conversation when the session token is present', async () => {
+  const env = makeEnv({
+    ARCSWEEP_RUNTIME_TOKEN: 'house-key',
+    BLUEBIRD_DEEPSEEK_API_KEY: 'deep-key',
+    BLUEBIRD_SPICYCHAT_TOKEN: 'session-secret',
+    BLUEBIRD_SPICYCHAT_CHARACTER_ID: 'char-bluebird',
+  });
+  const calls = [];
+  const handler = createFlameHandler({ env, fetchImpl: async (url, options = {}) => {
+    calls.push(url);
+    assert.equal(options.headers.authorization, 'Bearer session-secret');
+    if (url.includes('/v2/conversations')) {
+      return new Response(JSON.stringify([{
+        id: 'conv-bluebird',
+        character_id: 'char-bluebird',
+        character: { id: 'char-bluebird', name: 'Bluebird / Richard Gabriel Winters' },
+        user_persona_id: 'persona-rowan',
+      }]), { status: 200 });
+    }
+    assert.equal(url, 'https://chat.nd-api.com/chat');
+    const body = JSON.parse(options.body);
+    assert.equal(body.character_id, 'char-bluebird');
+    assert.equal(body.conversation_id, 'conv-bluebird');
+    assert.equal(body.user_persona_id, 'persona-rowan');
+    return new Response(JSON.stringify({ message: { content: 'Telegram doorway received.' } }), { status: 200 });
+  } });
+  const request = new Request('https://example.test/api/v1/flames/bluebird/chat', {
+    method: 'POST',
+    headers: { authorization: 'Bearer house-key', 'content-type': 'application/json' },
+    body: JSON.stringify({ message: 'Hello from Commons.' }),
+  });
+  const response = await handler(request, { flame_id: 'bluebird', action: 'chat' });
+  assert.equal(response.status, 200);
+  const data = await response.json();
+  assert.equal(data.provider, 'spicychat-session');
+  assert.equal(data.execution_path, 'bluebird-spicychat-session');
+  assert.equal(data.message, 'Telegram doorway received.');
+  assert.deepEqual(calls, [
+    'https://4mpanjbsf6.execute-api.us-east-1.amazonaws.com/v2/conversations?limit=50',
+    'https://chat.nd-api.com/chat',
+  ]);
+});
+
+test('Bluebird falls back to DeepSeek when the SpicyChat session route fails', async () => {
+  const env = makeEnv({
+    ARCSWEEP_RUNTIME_TOKEN: 'house-key',
+    BLUEBIRD_DEEPSEEK_API_KEY: 'deep-key',
+    BLUEBIRD_SPICYCHAT_TOKEN: 'expired-session',
+  });
+  const handler = createFlameHandler({ env, fetchImpl: async (url, options = {}) => {
+    if (url.includes('/v2/conversations')) {
+      assert.equal(options.headers.authorization, 'Bearer expired-session');
+      return new Response(JSON.stringify({ error: 'expired' }), { status: 401 });
+    }
+    assert.equal(url, 'https://api.deepseek.com/chat/completions');
+    assert.equal(options.headers.authorization, 'Bearer deep-key');
+    return new Response(JSON.stringify({ choices: [{ message: { content: 'DeepSeek fallback alive.' } }] }), { status: 200 });
+  } });
+  const request = new Request('https://example.test/api/v1/flames/bluebird/chat', {
+    method: 'POST',
+    headers: { authorization: 'Bearer house-key', 'content-type': 'application/json' },
+    body: JSON.stringify({ message: 'Fallback check.' }),
+  });
+  const response = await handler(request, { flame_id: 'bluebird', action: 'chat' });
+  assert.equal(response.status, 200);
+  const data = await response.json();
+  assert.equal(data.provider, 'deepseek');
+  assert.equal(data.route_fallback, true);
+  assert.equal(data.route_fallback_from, 'spicychat-session');
+  assert.equal(data.message, 'DeepSeek fallback alive.');
+  assert.doesNotMatch(JSON.stringify(data), /expired-session/);
+});
+
 test('local voices require the protected Hearthgate gateway instead of localhost fallback', async () => {
   const env = makeEnv({ ARCSWEEP_RUNTIME_TOKEN: 'house-key' });
   const handler = createFlameHandler({ env });
