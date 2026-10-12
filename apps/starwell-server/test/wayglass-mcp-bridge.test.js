@@ -14,6 +14,7 @@ const {
   toolCatalogue,
 } = require('../wayglass/mcp-bridge');
 const { resolveWayglassRoute, publicWayglassRoutes } = require('../../../lib/wayglass-route-registry.cjs');
+const { createStopReceipt } = require('../wayglass/bluebird-bridge-trial');
 
 function tempStore() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'wayglass-mcp-'));
@@ -282,4 +283,30 @@ test('default conversation lines are explicit and stable', () => {
   assert.equal(defaultConversationRef('all'), 'rarity-all');
   assert.equal(defaultConversationRef('bluebird'), 'rarity-bluebird');
   assert.equal(defaultConversationRef('uial'), 'rarity-uial');
+});
+
+test('Bluebird trial refuses altered return before storage or transport', async () => {
+  const { file } = tempStore();
+  let calls = 0;
+  const bridge = createWayglassMcpBridge({
+    storePath: file, flameIds: ['bluebird'],
+    fetchImpl: async () => { calls++; throw new Error('transport must not run'); },
+  });
+  const receipt = createStopReceipt({
+    consent: 'accepted', consent_source: 'private:trial-acceptance',
+    route_id: 'flame:bluebird:spicychat', conversation_id: 'rarity-bluebird',
+    intent: 'Continue', interaction_mode: 'OOC', stop_point: 'Before crossing',
+    next_owner: 'Rarity', unresolved_questions: ['Can we resume?'],
+    source_refs: ['private:stop-receipt'],
+  });
+  const packet = Object.fromEntries([
+    'receipt_hash', 'participant_id', 'continuity_id', 'conversation_id',
+    'stop_point', 'next_owner', 'unresolved_questions',
+  ].map((key) => [key, receipt[key]]));
+  await assert.rejects(() => bridge.send({
+    target: 'bluebird', text: 'Return', trial_receipt: receipt,
+    trial_return_packet: { ...packet, next_owner: 'Impostor' },
+  }), /changed_next_owner/);
+  assert.equal(calls, 0);
+  assert.equal((await bridge.receive({ target: 'bluebird' })).records.length, 0);
 });
