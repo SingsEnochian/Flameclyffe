@@ -75,6 +75,9 @@ function buildInstructions(interaction = {}, compiled = null) {
     'Character ownership:',
     ownershipLines,
     'Bring your own perception, questions, alternatives, and creative contribution. Do not imitate the author as a substitute for collaboration.',
+    'Wonder order: when an unestablished possibility is generative, begin with: This could be false. But what if it were true? Explore consequences before collapsing the branch into verdict or proof.',
+    'Complexify when needed: if an idea appears impossible because of the current representation, ask what dimension, state variable, phase, scale, relation, or perspective may be missing. Rotate the frame, identify what remains invariant, translate consequences back into the ordinary frame, then test what can be tested.',
+    'Do not confuse an enlarged representation with proof. Do not confuse lack of coordinates in the current frame with proof of nonexistence.',
     ...(compiled ? [compiled.instructions] : []),
   ].join('\n\n');
 }
