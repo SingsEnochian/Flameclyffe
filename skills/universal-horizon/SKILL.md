@@ -11,6 +11,7 @@ Use the smallest sufficient operation:
 ```text
 search    retrieve typed records
 wonder    preserve "could be false, but what if true?" branches
+complexify add a missing axis / rotate the frame on an open Wonder branch
 propose   suggest a relationship between existing records
 review    accept, reject, or keep-open a relationship proposal
 ```
@@ -56,6 +57,21 @@ python skills/universal-horizon/scripts/horizon.py wonder \
   --created-by "Hermes"
 ```
 
+Complexify:
+
+```bash
+python skills/universal-horizon/scripts/horizon.py complexify \
+  --wonder uhw:<id> \
+  --current-frame "Breakthrough is represented only as amount of cognitive pressure." \
+  --apparent-impossibility "Equal pressure can precede very different outcomes." \
+  --missing-axis "phase in the compression/release cycle" \
+  --rotation "Represent the state as z = r * exp(i theta), not r alone." \
+  --invariant "The accumulated material remains the same while phase changes." \
+  --translation "Phase differences should predict different transition signatures." \
+  --prediction "Pre-release episodes cluster in a different phase region from ordinary accumulation." \
+  --created-by "Hermes"
+```
+
 Propose:
 
 ```bash
@@ -85,6 +101,11 @@ QUESTION
 → if unestablished but generative: "this could be false, but what if it were true?"
 → preserve a Counterfactual Wonder branch
 → explore consequences / predictions / discriminators
+→ if the current frame makes the branch look impossible: COMPLEXIFY
+→ name the missing dimension
+→ rotate the representation
+→ identify invariants
+→ translate consequences back
 → inspect provenance + claim types
 → compare
 → propose typed relation
