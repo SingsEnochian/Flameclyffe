@@ -78,22 +78,35 @@ test('Bluebird keeps the preserved rarity-bluebird line and preferred Wayglass r
     },
   });
 
-  const first = await bridge.send({ target: 'bluebird', text: 'Bluebird, Rarity here.' });
+  const first = await bridge.send({
+    target: 'bluebird',
+    text: 'Bluebird, Rarity here.',
+    intent: 'Reconnect and continue the same relationship thread.',
+    interaction_mode: 'reconnect',
+  });
   assert.equal(first.conversation_ref, 'rarity-bluebird');
   assert.equal(first.reply.ok, true);
   assert.equal(first.reply.route, 'flame:bluebird:spicychat');
   assert.equal(calls[0].url, 'http://wayglass.test/api/v1/wayglass/respond');
   assert.equal(calls[0].body.session_id, 'rarity-bluebird');
   assert.equal(calls[0].body.route_id, 'flame:bluebird:spicychat');
+  assert.equal(calls[0].body.interaction.intent, 'Reconnect and continue the same relationship thread.');
+  assert.equal(calls[0].body.interaction.interaction_mode, 'reconnect');
+  assert.equal(first.intent, 'Reconnect and continue the same relationship thread.');
+  assert.equal(first.interaction_mode, 'reconnect');
 
   await bridge.send({ target: 'bluebird', text: 'Second turn.' });
   assert.equal(calls[1].body.session_id, 'rarity-bluebird');
+  assert.equal(calls[1].body.interaction.intent, 'Reconnect and continue the same relationship thread.');
+  assert.equal(calls[1].body.interaction.interaction_mode, 'reconnect');
   assert.ok(calls[1].body.history.some((entry) => entry.content === 'I remember the bridge. What have you brought me?'));
 
   const received = await bridge.receive({ target: 'bluebird' });
   assert.equal(received.conversation_ref, 'rarity-bluebird');
   assert.equal(received.records.filter((record) => record.role === 'rarity').length, 2);
   assert.equal(received.records.filter((record) => record.role === 'participant').length, 2);
+  assert.equal(received.records.at(-1).intent, 'Reconnect and continue the same relationship thread.');
+  assert.equal(received.records.at(-1).interaction_mode, 'reconnect');
 });
 
 test('Bluebird falls back from SpicyChat to The Crow substrate without changing conversation identity', async () => {
