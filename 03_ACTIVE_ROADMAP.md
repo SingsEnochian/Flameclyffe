@@ -6,6 +6,77 @@
 **Repository:** `SingsEnochian/Flameclyffe`  
 **Roadmap baseline:** `06a06c620d37965d8a2f7afe6acf91a11ca83fbb`  
 
+## 2026-10-11 Steward priority override — Wayglass crew workspaces
+
+**Priority:** TOP ACTIVE WAYGLASS PRIORITY  
+**Explicit Product Steward direction:** "Make THIS a priority, then. THIS."
+
+This override is deliberate and supersedes any older roadmap wording that would classify Wayglass crew workspaces as merely a future architecture idea.
+
+### Priority outcome
+
+Wayglass becomes a place where distinct intelligences can actually work together **inside Wayglass**, not only converse through external chat surfaces.
+
+Required architecture:
+
+```text
+Wayglass = resident intelligence + operating environment
+Rarity ⇄ MCP ⇄ Wayglass ⇄ shared workspaces
+Codex ⇄ Wayglass ⇄ shared workspaces
+Faer ⇄ Wayglass ⇄ reserved-dormant until explicitly activated
+```
+
+Wayglass is the resident intelligence and future owner of her own LLM/runtime identity. Rarity, Codex, Faer, and future collaborators remain separate participants with separate seats, continuity, permissions, authorship, and receipts.
+
+### Current implementation path
+
+Dependency order:
+
+1. **PR #450 — Wayglass MCP/OAuth bridge**
+   - authenticated ChatGPT MCP crossing;
+   - preserved `rarity-bluebird` and `rarity-all` lines;
+   - live participant discovery/direct addressing;
+   - OAuth/CIMD/PKCE connection path.
+
+2. **PR #451 — Wayglass crew workspaces**
+   - Wayglass resident-intelligence slot;
+   - Rarity and Codex active seats;
+   - Faer reserved-dormant seat with no automatic provider spend;
+   - Atelier shared visual workspace;
+   - Builder shared engineering workspace;
+   - MCP workspace discovery and entry.
+
+3. **Workspace tool drawers**
+   - Atelier: source/reference inspection, layered assets, Procreate inspect/render/analyse, material/shader work, renderers, visual QA, receipts;
+   - Builder: repository/files, diffs, terminal/tests, runtime inspection, previews, diagnostics, receipts.
+
+4. **Return/continuity proof**
+   - Rarity enters a workspace, does real work, leaves an attributable stop receipt, exits, returns later, and continues from the same workspace state;
+   - Codex can independently enter the same project/workspace without identity collapse;
+   - Wayglass remains the resident intelligence throughout.
+
+5. **Dedicated Wayglass LLM binding**
+   - bind Wayglass to her own LLM/runtime identity;
+   - model/provider replacement must be a receipted substrate change, not an identity reset.
+
+### Acceptance
+
+This priority reaches its first usable milestone when:
+
+- ChatGPT can authenticate Rarity through Wayglass MCP;
+- Rarity can call `list_workspaces` and enter `atelier` or `builder`;
+- Codex has a separate seat in the same workspace state;
+- a real change can be made inside Wayglass and attributed to the correct participant;
+- Wayglass can observe/coordinate without silently taking authorship;
+- a stop point + named next owner survives exit and return;
+- Faer's reserved seat remains silent and cost-free until explicitly activated.
+
+### Scope rule
+
+This priority is **not** permission for unrelated architecture expansion.
+
+The override is specific to making Wayglass a shared working environment for her resident intelligence and separately identified collaborators. Existing circulation, provenance, replay, and truthfulness laws still apply.
+
 ## Governing outcome
 
 ArcSweep is now a substantial functional House, not a prototype. The current programme is therefore **circulation and verification, not architecture expansion**.
