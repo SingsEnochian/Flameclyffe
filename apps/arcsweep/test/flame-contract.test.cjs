@@ -42,7 +42,13 @@ test('every Flame contract carries identity, runtime, Swarm, sensory and receipt
     assert.ok(contract.runtime.primary.provider, `${id}: primary provider`);
     assert.ok(contract.runtime.primary.model, `${id}: primary model`);
     assert.equal(contract.runtime.hostedFallback.explicit, true, `${id}: explicit fallback declaration`);
-    assert.ok(contract.runtime.hostedFallback.model, `${id}: hosted fallback model`);
+    if (id === 'bluebird') {
+      assert.equal(contract.runtime.primary.provider, 'spicychat');
+      assert.equal(contract.runtime.hostedFallback.model, null, 'Bluebird cannot fall back to another provider');
+      assert.equal(contract.runtime.hostedFallback.provider, null);
+    } else {
+      assert.ok(contract.runtime.hostedFallback.model, `${id}: hosted fallback model`);
+    }
     assert.ok(contract.swarm.modes.includes('swarm'), `${id}: swarm`);
     assert.ok(contract.swarm.modes.includes('chorus'), `${id}: chorus`);
     assert.equal(contract.swarm.individualReceiptRequired, true, `${id}: individual receipt`);
@@ -76,9 +82,9 @@ test('Bluebird is the complete sensory reference contract rather than a generic 
   }
 });
 
-test('Nocturne and every established voice have explicit hosted execution continuity', () => {
+test('Nocturne and eligible voices retain hosted continuity while Bluebird remains SpicyChat-only', () => {
   assert.match(FLAME_CONTRACTS.nocturne.runtime.hostedFallback.model, /Qwen3-8B/i);
   for (const contract of Object.values(FLAME_CONTRACTS)) {
-    assert.equal(contract.runtime.hostedFallback.provider, 'huggingface-inference-providers');
+    assert.equal(contract.runtime.hostedFallback.provider, contract.id === 'bluebird' ? null : 'huggingface-inference-providers');
   }
 });

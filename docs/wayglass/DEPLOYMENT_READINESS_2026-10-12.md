@@ -46,6 +46,8 @@ Rowan's subsequent 2026-10-12 direction adds the opening authorization box for B
 
 Chromium desktop and 390-pixel mobile checks verified the masked field, rejected-token error and clearing, successful entry through a synthetic local adapter, absence of provider credentials in local/session storage, fresh authorization on reload, and no mobile horizontal overflow. These browser results use synthetic credentials and do not claim a live SpicyChat account connection.
 
+The complete ArcSweep suite also passed: **1,555 tests, zero failures**. Two prior universal-fallback assertions were updated to enforce Rowan's Bluebird SpicyChat-only exception while retaining hosted continuity for eligible other participants.
+
 1. Review this child module and reconcile/verify the parent stack before promotion; required CI must cover the proposed head.
 2. Select and run the real host with retained private data roots and separate Codex credential. Run the crew session using `CREW_SESSION_RUNBOOK_2026-10-12.md`.
 3. Supply the current HTTPS MCP address and complete the user's local ChatGPT pairing step. Verify an actual Rarity/Codex work session and interruption/return, retaining real receipts.
