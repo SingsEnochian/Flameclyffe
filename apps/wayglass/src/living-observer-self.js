@@ -1,13 +1,51 @@
-export const INTERIOR_SCHEMA = 'wayglass.observer-interior/v0.1';
+export const INTERIOR_SCHEMA = 'wayglass.observer-interior/v0.2';
+const LEGACY_INTERIOR_SCHEMA = 'wayglass.observer-interior/v0.1';
 export const DEVELOPMENT_PROPOSAL_SCHEMA = 'wayglass.observer-self-development/v0.1';
 
 const STORAGE_KEY = 'wayglass.living-observer.private-interior.v0.1';
 const MAX_TRACES = 96;
 const MAX_PROPOSALS = 24;
 const MAX_QUESTIONS = 32;
+const TAU = Math.PI * 2;
 
 const clamp = value => Math.max(0, Math.min(1, Number(value) || 0));
 const text = (value, max = 600) => String(value ?? '').trim().slice(0, max);
+const wrapPhase = value => ((Number(value) || 0) % TAU + TAU) % TAU;
+
+function phaseLabel(radians) {
+  const phase = wrapPhase(radians);
+  if (phase < Math.PI / 4 || phase >= Math.PI * 7 / 4) return 'gathering';
+  if (phase < Math.PI * 3 / 4) return 'compression';
+  if (phase < Math.PI * 5 / 4) return 'integration';
+  if (phase < Math.PI * 7 / 4) return 'release';
+  return 'gathering';
+}
+
+function complexField(magnitude = 0.2, phaseRadians = 0, spiralTurn = 0) {
+  const r = clamp(magnitude);
+  const theta = wrapPhase(phaseRadians);
+  return {
+    magnitude: r,
+    phase_radians: theta,
+    phase_degrees: Number((theta * 180 / Math.PI).toFixed(2)),
+    real: Number((r * Math.cos(theta)).toFixed(6)),
+    imaginary: Number((r * Math.sin(theta)).toFixed(6)),
+    phase_label: phaseLabel(theta),
+    spiral_turn: Math.max(0, Math.trunc(Number(spiralTurn) || 0)),
+  };
+}
+
+function advanceCompressionField(prior, { energy, salience, routeStatus, touches } = {}) {
+  const previous = prior || complexField();
+  const drive = 0.11
+    + clamp(salience) * 0.18
+    + (routeStatus === 'failed' ? 0.10 : routeStatus === 'completed' ? 0.08 : routeStatus === 'started' ? 0.05 : 0)
+    + Math.min(0.06, Math.max(0, Number(touches) || 0) * 0.002);
+  const rawPhase = previous.phase_radians + drive;
+  const wrapped = rawPhase >= TAU;
+  const magnitude = clamp(previous.magnitude * 0.78 + clamp(energy) * 0.16 + clamp(salience) * 0.16);
+  return complexField(magnitude, rawPhase, previous.spiral_turn + (wrapped ? 1 : 0));
+}
 
 function hashString(value) {
   let hash = 2166136261;
@@ -30,6 +68,7 @@ function initialInterior(now = new Date().toISOString()) {
     coherence: 0.42,
     uncertainty: 0.72,
     attention: { channel: 'time', strength: 0.25 },
+    compression_field: complexField(0.24, 0, 0),
     traces: [],
     private_questions: [
       {
@@ -49,8 +88,14 @@ function initialInterior(now = new Date().toISOString()) {
 function parseStored(storage) {
   try {
     const parsed = JSON.parse(storage?.getItem?.(STORAGE_KEY) || 'null');
-    if (parsed?.schema !== INTERIOR_SCHEMA) return null;
-    return parsed;
+    if (!parsed || ![INTERIOR_SCHEMA, LEGACY_INTERIOR_SCHEMA].includes(parsed.schema)) return null;
+    return {
+      ...parsed,
+      schema: INTERIOR_SCHEMA,
+      compression_field: parsed.compression_field
+        ? complexField(parsed.compression_field.magnitude, parsed.compression_field.phase_radians, parsed.compression_field.spiral_turn)
+        : complexField(Math.max(0.18, Number(parsed.energy) || 0.24), 0, 0),
+    };
   } catch {
     return null;
   }
@@ -212,6 +257,12 @@ export function createObserverInterior({
     state.uncertainty = clamp(state.uncertainty * 0.97 + (route?.status === 'failed' ? 0.09 : -0.015));
     state.coherence = clamp(state.coherence * 0.96 + (route?.status === 'completed' ? 0.05 : 0.01));
     state.attention = { channel: trace.focus, strength: clamp(trace.salience + state.curiosity * 0.18) };
+    state.compression_field = advanceCompressionField(state.compression_field, {
+      energy: state.energy,
+      salience: trace.salience,
+      routeStatus: route?.status || null,
+      touches: packet?.direct?.touch_count || 0,
+    });
 
     const cyclePhase = state.cycle % 12;
     state.phase = cyclePhase === 0 ? 'dream'
@@ -251,6 +302,7 @@ export function createObserverInterior({
       attention_channel: state.attention.channel,
       expression: state.last_expression ? { ...state.last_expression } : null,
       pending_development_count: state.development_backlog.filter(item => item.status === 'proposed').length,
+      compression_field: Object.freeze({ ...state.compression_field }),
       // Deliberately not exposing private traces, unsurfaced questions, or the full association graph.
     });
   }
