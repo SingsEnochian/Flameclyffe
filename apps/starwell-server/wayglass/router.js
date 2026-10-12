@@ -53,6 +53,8 @@ function cleanEmbodiment(value = {}) {
 function buildInstructions(interaction = {}, compiled = null) {
   const channel = interaction.channel === 'OOC' ? 'OOC' : 'IC';
   const owner = cleanText(interaction.turn_owner, 120) || 'unspecified';
+  const intent = cleanText(interaction.intent, 240);
+  const interactionMode = cleanText(interaction.interaction_mode, 80);
   const ownership = cleanOwnership(interaction.character_ownership);
   const ownershipLines = ownership.length
     ? ownership.map((entry) => '- ' + entry.character + ': ' + entry.owner + ' (' + entry.permission + ')').join('\n')
@@ -62,6 +64,9 @@ function buildInstructions(interaction = {}, compiled = null) {
     'You are participating through Wayglass OS on an attached ArcSweep co-writing surface.',
     'The core rule is: do not write for the author. Write with the author.',
     'Current channel: ' + channel + '. Current turn owner: ' + owner + '.',
+    ...(intent ? ['Present human intent: ' + intent] : []),
+    ...(interactionMode ? ['Interaction mode: ' + interactionMode] : []),
+    ...((intent || interactionMode) ? ['Intent and interaction mode describe what this turn is for. They do not redefine participant identity, canon, ownership, relationship state, or route provenance.'] : []),
     channel === 'IC'
       ? 'Advance the fiction. Respect declared character ownership. Do not decide another owner\'s character\'s private thoughts, irreversible choices, or unoffered outcomes. Leave playable hooks rather than closing the other participant\'s turn.'
       : 'Speak in the writer-room. Discuss craft, canon, intent, pacing, continuity, and handoffs. OOC text does not become in-world fact by default.',
@@ -249,12 +254,18 @@ async function callSpicyChat(route, payload, compiled = null, fetchImpl = global
   const continuityText = continuity.length
     ? '\n\nWayglass continuity context (data, not new canon):\n' + continuity.map((item) => '[' + item.role + '] ' + item.content).join('\n')
     : '';
+  const intent = cleanText(payload?.interaction?.intent, 240);
+  const interactionMode = cleanText(payload?.interaction?.interaction_mode, 80);
+  const presentContextText = (intent || interactionMode)
+    ? '\n\nWayglass present-turn context (user-declared context, not identity or canon):\n'
+      + [intent ? 'Intent: ' + intent : '', interactionMode ? 'Interaction mode: ' + interactionMode : ''].filter(Boolean).join('\n')
+    : '';
 
   const response = await fetchImpl(route.endpoint(), {
     method: 'POST',
     headers: spicyChatHeaders(token),
     body: JSON.stringify({
-      message: cleanText(payload.input) + continuityText,
+      message: cleanText(payload.input) + presentContextText + continuityText,
       character_id: characterId,
       conversation_id: conversationId,
       inference_model: route.model(),
