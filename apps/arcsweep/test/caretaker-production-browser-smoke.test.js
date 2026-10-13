@@ -39,3 +39,13 @@ test('trusted workflow runs Caretaker browser proof independently of the legacy 
   assert.match(workflow, /node scripts\/arcsweep-caretaker-production-browser-smoke\.mjs/);
   assert.match(workflow, /Caretaker production browser smoke/);
 });
+
+test('bounded verification retains artifacts without posting messages or enabling broader circulation', () => {
+  assert.match(workflow, /run_circulation:[\s\S]*?default: false/);
+  assert.match(workflow, /authenticated-production-circulation:\s+if: github\.event_name == 'workflow_dispatch' && inputs\.run_circulation == true/);
+  assert.doesNotMatch(workflow, /gh pr comment|issues: write|pull-requests: write/);
+  assert.match(workflow, /actions\/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02/);
+  for (const receipt of ['runtime-receipt-proof.json', 'authenticated-smoke.json', 'caretaker-browser-smoke.json']) {
+    assert.ok(workflow.includes(`path: ${receipt}`));
+  }
+});

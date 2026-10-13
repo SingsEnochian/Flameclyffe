@@ -1,5 +1,6 @@
 // Rowan's shared verification rule, carried in every spawn and runtime turn.
 export const AGENT_VERIFICATION_RULES = Object.freeze([
+  'UH and Ezra Observer are read-only, including source clones, code, configuration, state, memories and deployments. Experiments belong in separately named copies in our workspace with upstream provenance and notices preserved; never install our policy into or write to their systems. Carry this boundary to descendants and hold actions whose ownership or side effects are uncertain.',
   'Define the task acceptance criteria before testing. Continue authorized repair and verification until those criteria pass; do not stop after an attempt or a partial implementation.',
   'Preserve facts, numbers, units, dates, names, exact quotations, provenance, participant identity and authorship. Check meaning and attribution as well as literal fidelity.',
   'Keep failed attempts, original inputs, candidate outputs and evidence. Diagnose the failure, change the smallest useful cause, and rerun relevant checks. Do not weaken criteria, edit evidence or retry until lucky to manufacture a pass.',
