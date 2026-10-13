@@ -8,8 +8,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 REFERENCE = Path(__file__).resolve().parent.parent / 'references' / 'HUMANIZER.json'
-QUOTES = re.compile(r'"[^"\n]+"|“[^”\n]+”|‘[^’\n]+’')
-NUMBERS = re.compile(r'(?<!\w)[+-]?\d+(?:[.,]\d+)*(?!\w)')
+QUOTES = re.compile(r'"[^"]+"|“[^”]+”|‘[^’]+’')
+NUMBERS = re.compile(r'(?<!\d)[+-]?\d+(?:[.,]\d+)*(?!\d)')
 MONTHS = 'January February March April May June July August September October November December'.split()
 
 
@@ -127,6 +127,7 @@ def run(args):
                '-c', '2048', '-t', '4', '-n', str(args.tokens), '--seed', '20261012',
                '--temp', '1.0', '--top-p', '0.95', '--top-k', '0', '--min-p', '0',
                '--repeat-penalty', '1.0']
+    runtime_error = None
     with (folder / 'runtime-output.txt').open('w') as output, (folder / 'runtime.log').open('w') as log:
         try:
             result = subprocess.run(command, stdout=output, stderr=log, timeout=900)
@@ -134,7 +135,8 @@ def run(args):
         except subprocess.TimeoutExpired:
             returncode = 124
         except OSError as exc:
-            log.write(str(exc) + '\n')
+            runtime_error = f'{type(exc).__name__}: {exc}'
+            log.write(runtime_error + '\n')
             returncode = 127
     raw = (folder / 'runtime-output.txt').read_text()
     reached_eos = raw.rstrip().endswith('[end of text]')
@@ -147,7 +149,8 @@ def run(args):
     errors += ['protected-marker-changed:' + token for token in marker_errors]
     receipt = {'instrument': 'Humanizer', 'student': 'The Crow', 'source': spec['source'],
                'revision': spec['revision'], 'checkpoint_sha256': spec['checkpoint_sha256'],
-               'runtime_sha256': sha256(runtime), 'returncode': returncode, 'reached_eos': reached_eos,
+               'runtime_sha256': sha256(runtime) if runtime.is_file() else None,
+               'runtime_error': runtime_error, 'returncode': returncode, 'reached_eos': reached_eos,
                'draft_sha256': hashlib.sha256(draft.encode()).hexdigest(),
                'candidate_sha256': hashlib.sha256(candidate.encode()).hexdigest(),
                'preservation_errors': errors, 'protected_spans': len(protected),
@@ -155,7 +158,7 @@ def run(args):
                'protected_explicit_spans': args.protect_span,
                'formatting_changes': formatting_changes,
                'wrapper_sha256': sha256(Path(__file__)),
-               'checks_scope': 'number and quotation multisets; specified literal occurrence counts only',
+               'checks_scope': 'embedded numeric and multiline quotation multisets; specified literal occurrence counts only',
                'verdict': 'held-for-review' if returncode == 0 and reached_eos and candidate.strip() and not errors else 'failed',
                'token_budget': args.tokens, 'completion_requires_review': True,
                'weights_updated': False, 'production_promoted': False, 'run_directory': str(folder)}
