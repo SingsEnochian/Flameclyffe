@@ -13,6 +13,7 @@ on:
       - 'api/v1/wayglass/**'
       - 'vercel.json'
       - 'test/wayglass/**'
+      - 'scripts/wayglass-return-trial-001.mjs'
       - 'apps/starwell-server/package*.json'
       - 'docs/architecture/WAYGLASS_OS_V0_1.md'
       - 'package.json'
@@ -39,6 +40,15 @@ jobs:
       - name: Install host dependencies for HTTP integration tests
         run: npm ci --prefix apps/starwell-server --omit=dev --ignore-scripts
       - run: npm run wayglass:test
+      - name: Run Return Trial 001 paired continuation
+        run: node scripts/wayglass-return-trial-001.mjs
+      - name: Preserve Return Trial 001 outcome receipts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayglass-return-trial-001-${{ github.sha }}
+          path: artifacts/wayglass/return-trial-001.json
+          if-no-files-found: error
+          retention-days: 30
       - name: Run authenticated Wayglass host tests
         run: node --test apps/starwell-server/test/wayglass-*.test.js apps/starwell-server/test/security-boundary.test.js
       - run: npm run wayglass:build
