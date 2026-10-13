@@ -147,9 +147,15 @@ def run(args):
     (folder / 'candidate.txt').write_text(candidate + '\n')
     errors = check_preservation(draft, candidate, args.require_literal)
     errors += ['protected-marker-changed:' + token for token in marker_errors]
+    try:
+        runtime_digest = sha256(runtime)
+    except OSError as exc:
+        runtime_digest = None
+        if runtime_error is None:
+            runtime_error = f'{type(exc).__name__}: {exc}'
     receipt = {'instrument': 'Humanizer', 'student': 'The Crow', 'source': spec['source'],
                'revision': spec['revision'], 'checkpoint_sha256': spec['checkpoint_sha256'],
-               'runtime_sha256': sha256(runtime) if runtime.is_file() else None,
+               'runtime_sha256': runtime_digest,
                'runtime_error': runtime_error, 'returncode': returncode, 'reached_eos': reached_eos,
                'draft_sha256': hashlib.sha256(draft.encode()).hexdigest(),
                'candidate_sha256': hashlib.sha256(candidate.encode()).hexdigest(),
