@@ -1,6 +1,14 @@
 """Regression checks for the observed quotation drift and fail-closed preservation."""
 import unittest
 import argparse
+import contextlib
+import hashlib
+import io
+import json
+import tempfile
+from pathlib import Path
+from unittest.mock import patch
+import humanizer
 from humanizer import add_command, canonicalize_literals, check_preservation, protect_quotes, restore_quotes
 
 
@@ -52,6 +60,38 @@ class PreservationTests(unittest.TestCase):
     def test_preserved_candidate_is_clean(self):
         self.assertEqual(check_preservation('Mara carried 8 crates, each 3 kg.',
                                             'Each 3 kg crate was carried by Mara: 8 crates.', ['Mara', '3 kg']), [])
+
+    def test_missing_runtime_creates_failed_receipt(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            model = root / 'model.gguf'
+            model.write_bytes(b'pinned-test-checkpoint')
+            draft = root / 'draft.txt'
+            draft.write_text('Keep 2kg intact.')
+            spec = {'checkpoint_bytes': model.stat().st_size,
+                    'checkpoint_sha256': hashlib.sha256(model.read_bytes()).hexdigest(),
+                    'instr': 'Instruction', 'sep': '<end>',
+                    'fingerprint': hashlib.sha256(b'Instruction\\n\\nX<end>').hexdigest()[:16],
+                    'source': 'test', 'revision': 'test'}
+            reference = root / 'spec.json'
+            reference.write_text(json.dumps(spec))
+            args = argparse.Namespace(model_file=str(model),
+                runtime=str(root / 'missing-llama-completion'), input=str(draft),
+                tokens=32, require_literal=[], protect_span=[],
+                protect_literals=False, protect_quotes=True)
+            with patch.object(humanizer, 'REFERENCE', reference), patch('os.getcwd', return_value=temp):
+                with patch('pathlib.Path.cwd', return_value=root):
+                    with contextlib.redirect_stdout(io.StringIO()):
+                        with self.assertRaises(SystemExit) as exc:
+                            humanizer.run(args)
+            self.assertEqual(exc.exception.code, 1)
+            receipts = list((root / '.crow-trainer' / 'humanizer').glob('*/receipt.json'))
+            self.assertEqual(len(receipts), 1)
+            result = json.loads(receipts[0].read_text())
+            self.assertEqual(result['returncode'], 127)
+            self.assertIsNone(result['runtime_sha256'])
+            self.assertIn('FileNotFoundError', result['runtime_error'])
+            self.assertEqual(result['verdict'], 'failed')
 
     def test_trainer_protects_quotations_by_default(self):
         parser = argparse.ArgumentParser()
