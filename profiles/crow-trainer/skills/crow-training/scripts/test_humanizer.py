@@ -13,6 +13,20 @@ class PreservationTests(unittest.TestCase):
         self.assertIn('numbers-changed', check_preservation('8 crates', '18 crates', []))
         self.assertIn('numbers-changed', check_preservation('Count: 8.', 'Count: 18.', []))
 
+    def test_embedded_numeric_identifiers_and_units(self):
+        for before, after in [('2kg', '3kg'), ('Model X1', 'Model X2'),
+                              ('rack9', 'rack8'), ('lot12B', 'lot13B')]:
+            with self.subTest(before=before):
+                self.assertIn('numbers-changed', check_preservation(before, after, []))
+
+    def test_multiline_quotation_preservation(self):
+        original = 'Neri wrote, "Keep the blue\\nseal intact."'
+        changed = 'Neri wrote, "Keep the red\\nseal intact."'
+        self.assertIn('quotations-changed', check_preservation(original, changed, []))
+        masked, tokens = protect_quotes(original)
+        self.assertNotIn('blue', masked)
+        self.assertEqual(restore_quotes(masked, tokens), (original, []))
+
     def test_duplicate_numbers_and_new_numbers_fail(self):
         self.assertTrue(check_preservation('8 crates', '8 crates and 8 boxes', []))
         self.assertTrue(check_preservation('8 crates', '8 crates and 3 boxes', []))
