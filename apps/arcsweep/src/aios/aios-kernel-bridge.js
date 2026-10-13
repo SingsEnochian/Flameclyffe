@@ -1,3 +1,5 @@
+import { agentVerificationInstructions } from '../swarm/agent-verification-inheritance.js';
+
 export const AIOS_KERNEL_BRIDGE_SCHEMA = 'hearthweave.aios-kernel-bridge/v0.1';
 export const AIOS_KERNEL_SNAPSHOT_SCHEMA = 'hearthweave.aios-kernel-snapshot/v0.1';
 export const AIOS_KERNEL_CONFIG_KEY = 'arcsweep.aios-kernel-bridge.v0.1';
@@ -216,7 +218,7 @@ export function createAIOSKernelBridge({
       timeout: 10_000,
       body: {
         agent_id: id,
-        agent_config: { ...config, task: work },
+        agent_config: { ...config, task: `${agentVerificationInstructions()}\n\nTask:\n${work}` },
       },
     });
   }

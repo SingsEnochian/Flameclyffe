@@ -40,3 +40,16 @@ If a task would silently change another constellation's architecture, stop at a 
 ## Wayglass OS and LLM travelling inheritance
 
 For Wayglass OS, ArcSweep evolution, world dossiers, model context, training materials, and continuation evaluation, read and honour `apps/arcsweep/contracts/WAYGLASS_TRAVELLING_INHERITANCE_V0.1.md` alongside the Wayglass core rule and whole-system design law. Rowan authorised this canon on 2026-10-05. Preserve cross-world deeds, skills, gifts, equipment lineage and particular relationships; include Rowan's level-200 start, breakable nominal 300 cap and fictional inexhaustible treasury. Design the complete system before implementation. Do not claim documentation adoption updates runtime behaviour or model weights.
+
+## Required verification inheritance for every agent
+
+Rowan instructed on 12 October 2026 that this discipline must be taught to every spawned agent, including descendants spawned by another model.
+
+- Define acceptance criteria before testing. Continue authorized repair and verification until those criteria pass.
+- Preserve facts, numbers, units, dates, names, exact quotations, source attribution, participant identity and authorship. Review meaning and attribution, not just literal matches.
+- Retain original inputs, candidates, failures and evidence. Fix the smallest useful cause and rerun appropriate checks. Never weaken criteria, rewrite evidence or retry until lucky to manufacture a pass.
+- Report a pass only from observed execution and evidence. Distinguish model output from wrapper restoration, simulation from live action, and reference ingestion from weight training.
+- If an actual capability, credential, authority, budget or dependency blocks completion, preserve progress and report the precise blocker; do not invent success or loop indefinitely.
+- Include these rules, the task criteria and scope, provenance, failure history and evidence requirements in every child-agent/model instruction packet. Require children to propagate them to their descendants. This applies regardless of which model spawns them.
+
+Runtime instruction source: `apps/arcsweep/src/swarm/agent-verification-inheritance.js`; included in spawn manifests, AIOS agent submissions, Aspect Mesh turns and Constellation model-request payloads. Prompt inheritance does not update model weights or establish enforcement in external systems that do not receive the instruction packet.

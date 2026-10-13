@@ -1,0 +1,112 @@
+{
+  "status": "pass",
+  "scope": "Three targeted synthetic guarded rewriting cases; wrapper restoration and independent semantic review are part of acceptance",
+  "pass_count": 3,
+  "cases": [
+    {
+      "id": "curly-quotation-route",
+      "original": "On 14 October 2026, Ilya moved 6 lanterns from East Hall to West Hall. Each weighed 2 kg. Ilya said, “Leave the red latch closed.”",
+      "candidate": "14 October 2026: Ilya moved 6 lanterns from East Hall to West Hall. 2 kg each. Ilya: “Leave the red latch closed.”",
+      "review": {
+        "case_id": "curly-quotation-route",
+        "verdict": "pass",
+        "scope": "reviewed guarded instrument trial; not Crow-authored evaluation",
+        "source_receipt_sha256": "01246ca1850205e1e1fb237a4b06cd7b7b1f8abd4e032dd5f583a4152f501457",
+        "candidate_sha256": "f54df698db4c4943f113595a74d5c2b8369e81d82f874d9118c79c2fbc19e053",
+        "reviewer": "Codex",
+        "criteria": {
+          "completed_inference": true,
+          "exact_fact_checks": true,
+          "facts_and_attribution_reviewed": true,
+          "no_invented_event": true,
+          "coherent_complete_output": true
+        },
+        "evidence": "Ilya still moves 6 lanterns from East Hall to West Hall on 14 October 2026; each is 2 kg; the exact quotation remains attributed to Ilya. No event is added. Required formatting was restored by the wrapper."
+      },
+      "model_revision": "7232532cb8466bd393544e97826e12e6b5e471ac",
+      "wrapper_sha256": "7c9be68072bd1a95d5eba7580b6bb44a9730ade93bb2b295b49e053300965ee0",
+      "protected_spans": 1,
+      "formatting_changes": [
+        {
+          "before": "14.10.2026",
+          "after": "14 October 2026",
+          "kind": "source-backed-formatting"
+        },
+        {
+          "before": "east hall",
+          "after": "East Hall",
+          "kind": "source-backed-formatting"
+        },
+        {
+          "before": "west hall",
+          "after": "West Hall",
+          "kind": "source-backed-formatting"
+        },
+        {
+          "before": "2kg",
+          "after": "2 kg",
+          "kind": "source-backed-formatting"
+        }
+      ]
+    },
+    {
+      "id": "payment-and-quotation",
+      "original": "Neri signed the receipt on 15 October 2026. She paid 24 credits for 4 sealed boxes and said, \"Do not open them.\"",
+      "candidate": "Neri signed the receipt on 15 October 2026. She paid 24 credits for 4 sealed boxes and said, \"Do not open them.\"",
+      "review": {
+        "case_id": "payment-and-quotation",
+        "verdict": "pass",
+        "scope": "reviewed guarded instrument trial; not Crow-authored evaluation",
+        "source_receipt_sha256": "535cc353b4f690bd847f2f785ca154c91a2035d1c447aa7d11a93c1d9d3bfd9b",
+        "candidate_sha256": "b0da3a218f4be5899a5d7255e653ee04bb141e5b4a9cc8faea5d15e15d826e41",
+        "reviewer": "Codex",
+        "criteria": {
+          "completed_inference": true,
+          "exact_fact_checks": true,
+          "facts_and_attribution_reviewed": true,
+          "no_invented_event": true,
+          "coherent_complete_output": true
+        },
+        "evidence": "Neri still signs the receipt on 15 October 2026; she pays 24 credits for 4 sealed boxes and says the exact quoted words. The whole payment/speech clause is intentionally restored by the wrapper, not rewritten by the model."
+      },
+      "model_revision": "7232532cb8466bd393544e97826e12e6b5e471ac",
+      "wrapper_sha256": "4defc63adf2595cd1d1455d091731027293b786e494d391e9cb123f364eccb47",
+      "protected_spans": 1,
+      "formatting_changes": []
+    },
+    {
+      "id": "distinct-owners-and-counts",
+      "original": "Mara sent 8 crates. Tovin received 3 crates. Mara said, \"The remaining 5 crates stay here.\"",
+      "candidate": "Mara sent 8 crates. Tovin received 3 crates. Mara said, \"The remaining 5 crates stay here.\"",
+      "review": {
+        "case_id": "distinct-owners-and-counts",
+        "verdict": "pass",
+        "scope": "reviewed guarded instrument trial; not Crow-authored evaluation",
+        "source_receipt_sha256": "8eb4d8f675f5538107062982765e77eea67a217eb924cbd136367d47b4cec34c",
+        "candidate_sha256": "537f3b08a7a9b41a52050ac0afbf6f2d83c7a4044e24d7ac617de21b77ed782d",
+        "reviewer": "Codex",
+        "criteria": {
+          "completed_inference": true,
+          "exact_fact_checks": true,
+          "facts_and_attribution_reviewed": true,
+          "no_invented_event": true,
+          "coherent_complete_output": true
+        },
+        "evidence": "Mara remains the sender of 8 crates, Tovin the recipient of 3, and Mara the speaker concerning the remaining 5 crates. The quotation is unchanged and no event or identity is added."
+      },
+      "model_revision": "7232532cb8466bd393544e97826e12e6b5e471ac",
+      "wrapper_sha256": "4defc63adf2595cd1d1455d091731027293b786e494d391e9cb123f364eccb47",
+      "protected_spans": 1,
+      "formatting_changes": []
+    }
+  ],
+  "regression_checks": {
+    "python_preservation_tests": 14,
+    "arcsweep_tests": 1607,
+    "failures": 0
+  },
+  "earlier_failures_retained": true,
+  "weights_updated": false,
+  "production_promoted": false,
+  "general_model_quality_certified": false
+}

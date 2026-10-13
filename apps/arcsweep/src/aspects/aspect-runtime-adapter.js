@@ -2,6 +2,7 @@ import { invokeConstellationRuntimeVoice } from '../constellation-runtime-adapte
 import { INITIAL_ASPECTS } from './aspect-contract.js';
 import { createAspectEnvelope } from './aspect-message-bus.js';
 import { createExperimentBody } from './aspect-experiment-bed.js';
+import { agentVerificationInstructions } from '../swarm/agent-verification-inheritance.js';
 
 export const ASPECT_RUNTIME_BINDING_SCHEMA = 'hearthweave.aspect-runtime-binding/v0.2';
 export const ASPECT_RUNTIME_REPLY_SCHEMA = 'hearthweave.aspect-runtime-reply/v0.3';
@@ -61,6 +62,7 @@ export function buildAspectRuntimePrompt({ aspect, binding, incoming, sharedCont
 
   return [
     'HEARTHWEAVE ASPECT MESH · RUNTIME TURN',
+    agentVerificationInstructions(),
     `Aspect: ${aspect.name} (${aspect.id})`,
     `Current runtime voice: ${binding.voiceId}`,
     `Strengths: ${(aspect.strengths || []).join(', ') || 'open'}`,
