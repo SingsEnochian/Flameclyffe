@@ -62,8 +62,8 @@ class PreservationTests(unittest.TestCase):
                                             'Each 3 kg crate was carried by Mara: 8 crates.', ['Mara', '3 kg']), [])
 
     def test_inch_mark_does_not_swallow_later_quotation(self):
-        original = 'Use the 5" pipe.\\nMara said "Keep the seal."'
-        altered = 'Use the 5" pipe.\\nMara said "Discard it."'
+        original = 'Use the 5" pipe.\nMara said "Keep the seal."'
+        altered = 'Use the 5" pipe.\nMara said "Discard it."'
         self.assertIn('quotations-changed', check_preservation(original, altered, []))
         masked, spans = protect_quotes(original)
         self.assertIn('5" pipe.', masked)
@@ -114,7 +114,7 @@ class PreservationTests(unittest.TestCase):
             spec = {'checkpoint_bytes': model.stat().st_size,
                     'checkpoint_sha256': hashlib.sha256(model.read_bytes()).hexdigest(),
                     'instr': 'Instruction', 'sep': '<end>',
-                    'fingerprint': hashlib.sha256(b'Instruction\\n\\nX<end>').hexdigest()[:16],
+                    'fingerprint': hashlib.sha256(b'Instruction\n\nX<end>').hexdigest()[:16],
                     'source': 'test', 'revision': 'test'}
             reference = root / 'spec.json'
             reference.write_text(json.dumps(spec))
