@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 REFERENCE = Path(__file__).resolve().parent.parent / 'references' / 'HUMANIZER.json'
-QUOTES = re.compile(r'"[^"]+"|“[^”]+”|‘[^’]+’')
+QUOTES = re.compile(r'(?<!\\d)"[^"]+"|“[^”]+”|‘[^’]+’')
 NUMBERS = re.compile(r'(?<!\d)[+-]?\d+(?:[.,]\d+)*(?!\d)')
 MONTHS = 'January February March April May June July August September October November December'.split()
 
@@ -165,7 +165,7 @@ def run(args):
                'formatting_changes': formatting_changes,
                'wrapper_sha256': sha256(Path(__file__)),
                'checks_scope': 'embedded numeric and multiline quotation multisets; specified literal occurrence counts only',
-               'verdict': 'held-for-review' if returncode == 0 and reached_eos and candidate.strip() and not errors else 'failed',
+               'verdict': 'held-for-review' if returncode == 0 and runtime_digest is not None and runtime_error is None and reached_eos and candidate.strip() and not errors else 'failed',
                'token_budget': args.tokens, 'completion_requires_review': True,
                'weights_updated': False, 'production_promoted': False, 'run_directory': str(folder)}
     (folder / 'receipt.json').write_text(json.dumps(receipt, indent=2) + '\n')
