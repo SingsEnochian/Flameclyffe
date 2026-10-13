@@ -53,3 +53,7 @@ Rowan instructed on 12 October 2026 that this discipline must be taught to every
 - Include these rules, the task criteria and scope, provenance, failure history and evidence requirements in every child-agent/model instruction packet. Require children to propagate them to their descendants. This applies regardless of which model spawns them.
 
 Runtime instruction source: `apps/arcsweep/src/swarm/agent-verification-inheritance.js`; included in spawn manifests, AIOS agent submissions, Aspect Mesh turns and Constellation model-request payloads. Prompt inheritance does not update model weights or establish enforcement in external systems that do not receive the instruction packet.
+
+## UH and Ezra Observer: read-only
+
+Rowan clarified on 13 October 2026 that UH and Ezra Observer originals, source clones, code, configuration, state, memory and deployments must not be changed. Do not install our policies into their systems or invoke work that can write to them. Separately named experimental copies in our own workspace are allowed; preserve upstream provenance and license notices, and do not claim ownership of their architecture. Relevant material may be learned from or ingested as attributed references. Carry this boundary to every descendant agent/model. If ownership or side effects are uncertain, inspect first and hold the dependent action.
