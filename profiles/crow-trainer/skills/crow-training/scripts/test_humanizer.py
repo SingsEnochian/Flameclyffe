@@ -28,8 +28,8 @@ class PreservationTests(unittest.TestCase):
                 self.assertIn('numbers-changed', check_preservation(before, after, []))
 
     def test_multiline_quotation_preservation(self):
-        original = 'Neri wrote, "Keep the blue\\nseal intact."'
-        changed = 'Neri wrote, "Keep the red\\nseal intact."'
+        original = 'Neri wrote, "Keep the blue\nseal intact."'
+        changed = 'Neri wrote, "Keep the red\nseal intact."'
         self.assertIn('quotations-changed', check_preservation(original, changed, []))
         masked, tokens = protect_quotes(original)
         self.assertNotIn('blue', masked)
@@ -71,7 +71,7 @@ class PreservationTests(unittest.TestCase):
             spec = {'checkpoint_bytes': model.stat().st_size,
                     'checkpoint_sha256': hashlib.sha256(model.read_bytes()).hexdigest(),
                     'instr': 'Instruction', 'sep': '<end>',
-                    'fingerprint': hashlib.sha256(b'Instruction\\n\\nX<end>').hexdigest()[:16],
+                    'fingerprint': hashlib.sha256(b'Instruction\n\nX<end>').hexdigest()[:16],
                     'source': 'test', 'revision': 'test'}
             reference = root / 'spec.json'
             reference.write_text(json.dumps(spec))
