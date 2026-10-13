@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 REFERENCE = Path(__file__).resolve().parent.parent / 'references' / 'HUMANIZER.json'
-QUOTES = re.compile(r'(?<!\\d)"[^"]+"|“[^”]+”|‘[^’]+’')
+QUOTES = re.compile(r'(?<!\d)"[^"]+"|“[^”]+”|‘[^’]+’')
 NUMBERS = re.compile(r'(?<!\d)[+-]?\d+(?:[.,]\d+)*(?!\d)')
 MONTHS = 'January February March April May June July August September October November December'.split()
 
