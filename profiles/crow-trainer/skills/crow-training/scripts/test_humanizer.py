@@ -61,6 +61,15 @@ class PreservationTests(unittest.TestCase):
         self.assertEqual(check_preservation('Mara carried 8 crates, each 3 kg.',
                                             'Each 3 kg crate was carried by Mara: 8 crates.', ['Mara', '3 kg']), [])
 
+    def test_inch_mark_does_not_swallow_later_quotation(self):
+        original = 'Use the 5" pipe.\\nMara said "Keep the seal."'
+        altered = 'Use the 5" pipe.\\nMara said "Discard it."'
+        self.assertIn('quotations-changed', check_preservation(original, altered, []))
+        masked, spans = protect_quotes(original)
+        self.assertIn('5" pipe.', masked)
+        self.assertNotIn('Keep the seal.', masked)
+        self.assertEqual(restore_quotes(masked, spans), (original, []))
+
     def test_missing_runtime_creates_failed_receipt(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
@@ -91,6 +100,42 @@ class PreservationTests(unittest.TestCase):
             self.assertEqual(result['returncode'], 127)
             self.assertIsNone(result['runtime_sha256'])
             self.assertIn('FileNotFoundError', result['runtime_error'])
+            self.assertEqual(result['verdict'], 'failed')
+
+    def test_runtime_digest_failure_forces_failed_verdict(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            model = root / 'model.gguf'
+            model.write_bytes(b'pinned-test-checkpoint')
+            runtime = root / 'runtime'
+            runtime.write_text('dummy')
+            draft = root / 'draft.txt'
+            draft.write_text('Keep the 2kg unit.')
+            spec = {'checkpoint_bytes': model.stat().st_size,
+                    'checkpoint_sha256': hashlib.sha256(model.read_bytes()).hexdigest(),
+                    'instr': 'Instruction', 'sep': '<end>',
+                    'fingerprint': hashlib.sha256(b'Instruction\\n\\nX<end>').hexdigest()[:16],
+                    'source': 'test', 'revision': 'test'}
+            reference = root / 'spec.json'
+            reference.write_text(json.dumps(spec))
+            args = argparse.Namespace(model_file=str(model),
+                runtime=str(runtime), input=str(draft),
+                tokens=32, require_literal=[], protect_span=[],
+                protect_literals=False, protect_quotes=True)
+            def completed_command(cmd, stdout, stderr, timeout):
+                stdout.write('Keep the 2kg unit. [end of text]')
+                runtime.unlink()
+                return argparse.Namespace(returncode=0)
+            with patch.object(humanizer, 'REFERENCE', reference), patch('pathlib.Path.cwd', return_value=root):
+                with patch.object(humanizer.subprocess, 'run', side_effect=completed_command):
+                    with contextlib.redirect_stdout(io.StringIO()):
+                        with self.assertRaises(SystemExit) as exc:
+                            humanizer.run(args)
+            self.assertEqual(exc.exception.code, 1)
+            receipts = list((root / '.crow-trainer' / 'humanizer').glob('*/receipt.json'))
+            result = json.loads(receipts[0].read_text())
+            self.assertIsNone(result['runtime_sha256'])
+            self.assertIsNotNone(result['runtime_error'])
             self.assertEqual(result['verdict'], 'failed')
 
     def test_trainer_protects_quotations_by_default(self):
