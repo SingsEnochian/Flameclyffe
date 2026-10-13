@@ -1,3 +1,5 @@
+import { AGENT_VERIFICATION_RULES } from './agent-verification-inheritance.js';
+
 export const SPAWN_WORK_MANIFEST_SCHEMA = 'hearthweave.spawn-work-manifest/v0.1';
 
 const DEFAULT_LANES = Object.freeze([
@@ -56,7 +58,7 @@ export function createSpawnWorkManifest({
     traceId: text(traceId) || id('spawn-trace'),
     title: workTitle,
     objective: workObjective,
-    constraints: Object.freeze(unique(constraints)),
+    constraints: Object.freeze(unique([...AGENT_VERIFICATION_RULES, ...constraints])),
     context: Object.freeze(unique(context)),
     lanes: Object.freeze((Array.isArray(lanes) ? lanes : []).map(normaliseSpawnLane)),
     synthesisAspectId: text(synthesisAspectId) || 'mapper',

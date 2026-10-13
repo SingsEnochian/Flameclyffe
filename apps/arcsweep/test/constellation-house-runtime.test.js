@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { constellationRuntimeRouteForVoice, invokeConstellationRuntimeVoice } from '../src/constellation-runtime-adapter.js';
 import { createLearningCellFromMargin } from '../src/knowledge-learning-store.js';
+import { AGENT_VERIFICATION_RULES } from '../src/swarm/agent-verification-inheritance.js';
 
 const registry = { canonicalEstablishedVoices: [
   { id: 'lioreal', displayName: 'Lioreal', runtimeAliases: ['lioreal'] },
@@ -30,6 +31,7 @@ function liveFetch(mismatched = false) {
       assert.equal(body.metadata.world_context.schema, 'arcsweep.runtime-world-context/v1');
       assert.match(body.message, /^ARCSWEEP ACTIVE WORLD RUNTIME CONTEXT/);
       assert.match(body.message, /World: Terra Prime/);
+      for (const rule of AGENT_VERIFICATION_RULES) assert.ok(body.message.includes(rule));
       return response({ flame_id: mismatched ? 'uial' : 'lioreal', provider: 'openai', model: 'gpt-4o', message: '[CONTINUITY] Current surname: al’Valari.', cited_sources: ['canon-overlay'], world_context: body.metadata.world_context });
     }
     throw new Error(`Unexpected fetch: ${url}`);

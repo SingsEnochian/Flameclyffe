@@ -3,6 +3,7 @@ import { WRITER_CONTEXT_EVENTS } from './writer-context-resolver.js';
 import { CONSTELLATION_LENS_EVENTS } from './constellation-lens.js';
 import { runAstraVerticalSlice } from './architecture/astra-vertical-slice.js';
 import { createCognitiveEvent } from './architecture/cognitive-provider.js';
+import { agentVerificationInstructions } from './swarm/agent-verification-inheritance.js';
 import {
   HOUSE_COOKIE_SESSION,
   readHouseRuntimeToken,
@@ -109,7 +110,8 @@ export async function invokeConstellationRuntimeVoice({
     runtimeMetadata.world_id = resolvedWorldContext.identity_anchor.world_id;
     runtimeMetadata.world_context = resolvedWorldContext;
   }
-  const runtimeMessage = bindRuntimeWorldContextMessage(String(message).trim(), resolvedWorldContext);
+  const runtimeMessage = bindRuntimeWorldContextMessage(
+    `${agentVerificationInstructions()}\n\n${String(message).trim()}`, resolvedWorldContext);
 
   const startedAt = globalThis.performance?.now?.() ?? Date.now();
   const response = await fetchImpl(`/api/v1/flames/${route.route}/chat`, {

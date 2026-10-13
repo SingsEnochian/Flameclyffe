@@ -6,6 +6,7 @@ on:
       - codex/arcsweep-feedback-loop
     paths:
       - 'apps/arcsweep/**'
+      - 'profiles/crow-trainer/**'
       - 'apps/starwell/src/math-spine/**'
       - 'apps/starwell/src/world-tone-fold-approval.js'
       - 'starwell/deep-observer/**'
@@ -15,6 +16,7 @@ on:
   pull_request:
     paths:
       - 'apps/arcsweep/**'
+      - 'profiles/crow-trainer/**'
       - 'apps/starwell/src/math-spine/**'
       - 'apps/starwell/src/world-tone-fold-approval.js'
       - 'starwell/deep-observer/**'
@@ -59,6 +61,11 @@ jobs:
 
       - name: Run Arcsweep tests
         run: npm run arcsweep:test
+
+      - name: Verify Crow Trainer preservation checks
+        run: |
+          python3 profiles/crow-trainer/skills/crow-training/scripts/test_humanizer.py
+          python3 profiles/crow-trainer/skills/crow-training/scripts/trainer.py selftest
 
       - name: Build Arcsweep
         run: npm run arcsweep:build

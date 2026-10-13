@@ -1,0 +1,15 @@
+{
+  "style": "legacy",
+  "sep": "\n\n### Rewritten:\n\n",
+  "fingerprint": "cc51d66b4c593fbe",
+  "instr": "Rewrite the text below so it reads like a person wrote it, not a language model.\n\nReorganize it as you see fit. Vary sentence length on purpose. Cut hedging,\nthroat-clearing, and any sentence that only announces what comes next.\nPrefer the concrete word over the abstract one. It is fine to sound uneven.\n\nEvery fact, number, unit, date, name and quotation must survive unchanged.",
+  "chat": false,
+  "note": "\u63a8\u7406\u65f6\u9700 instr + draft + sep",
+  "source": "https://huggingface.co/jialinyyzz/humanizer",
+  "revision": "7232532cb8466bd393544e97826e12e6b5e471ac",
+  "checkpoint": "humanizer-12b-IQ2_XS-QAT.gguf",
+  "checkpoint_sha256": "383e5ca8f1f48ab5f65013adbc1965fa70d1d1afa6c45d932c34b854e38edbb5",
+  "checkpoint_bytes": 3893632896,
+  "license": "Apache-2.0",
+  "role": "optional rewriting instrument; never Crow identity or a training base"
+}

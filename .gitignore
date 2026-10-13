@@ -52,3 +52,6 @@ apps/starwell-server/public/starwell/
 .vscode/
 .idea/
 .netlify/
+
+# Crow Trainer project-local attempts and instrument outputs
+.crow-trainer/

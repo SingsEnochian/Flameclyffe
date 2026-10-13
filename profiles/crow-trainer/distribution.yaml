@@ -1,0 +1,12 @@
+name: crow-trainer
+version: 0.1.0
+description: "Nikola-driven training and evaluation profile for The Crow"
+author: "Rowan, Rarity"
+license: "MIT"
+
+distribution_owned:
+  - SOUL.md
+  - NIKOLA_DRIVER.md
+  - skills/crow-training/
+  - skills/wonder-field-design/
+  - README.md
