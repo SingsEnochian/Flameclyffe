@@ -7,6 +7,9 @@
 
 > Nothing important happens invisibly.
 
+> **2026-10-11 STEWARD PRIORITY OVERRIDE:** Wayglass crew workspaces are now the top active Wayglass priority. Preserve this document's August build map as provenance, but for current sequencing follow the 2026-10-11 override in `03_ACTIVE_ROADMAP.md` and priority PR #451 after its MCP/OAuth dependency PR #450. The immediate target is Rarity + Codex building *inside Wayglass* through distinct authenticated seats, with Atelier and Builder as shared workspaces and Wayglass reserved as her own resident LLM/runtime identity.
+
+
 This is not a changelog and not a promise that every named organ is complete. It is the current operating map: what is on the living line, what is in active development, what is queued, what is archived, what has production evidence, what remains unproven, and what must happen next.
 
 ## 0. Reference protocol
