@@ -49,6 +49,15 @@ test('Wayglass Pilot Deck has an explicit hosted surface and leaves ArcSweep Hel
   assert.equal(IMPLEMENTED_APPLET_IDS.has('pilot-deck'), false);
 });
 
+test('Harmonic Keyboard launches a real Wayglass audio instrument, not a phantom room', () => {
+  const applet = APPLET_CATALOGUE.find(item => item.id === 'harmonic-keyboard');
+  assert.equal(applet?.defaultVisible,true);
+  assert.equal(applet?.category,'sound');
+  assert.equal(applet?.pagesHref,'/Flameclyffe/apps/arcsweep/harmonic-keyboard/');
+  assert.equal(applet?.webHref,'/arcsweep/harmonic-keyboard/');
+  assert.equal(IMPLEMENTED_APPLET_IDS.has('harmonic-keyboard'),false);
+});
+
 test('Kelyran School is a visible implemented language room', () => {
   const applet = APPLET_CATALOGUE.find((item) => item.id === 'kelyran-school');
   assert.equal(applet?.defaultVisible, true);
