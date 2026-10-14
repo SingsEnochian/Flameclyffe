@@ -154,6 +154,77 @@ def sha256(path):
     return digest.hexdigest()
 
 
+def sha256_fd(fd):
+    """Hash the opened executable artifact rather than re-resolving its path."""
+    digest = hashlib.sha256()
+    os.lseek(fd, 0, os.SEEK_SET)
+    while True:
+        chunk = os.read(fd, 8 * 1024 * 1024)
+        if not chunk:
+            break
+        digest.update(chunk)
+    os.lseek(fd, 0, os.SEEK_SET)
+    return digest.hexdigest()
+
+
+def bind_runtime_artifact(snapshot):
+    """Return a kernel-bound launch path, retained fd, options and attestation.
+
+    Linux uses a sealed anonymous executable FD; Windows retains a handle that
+    denies FILE_SHARE_WRITE/DELETE while CreateProcess opens the pathname.
+    Unsupported platforms fail closed rather than claiming executable identity.
+    """
+    fd = None
+    try:
+        if sys.platform.startswith('linux'):
+            import fcntl
+            required = ('memfd_create', 'MFD_ALLOW_SEALING')
+            if any(not hasattr(os, name) for name in required):
+                raise OSError('Sealed memfd execution is unavailable')
+            fd = os.memfd_create('crow-humanizer-runtime', os.MFD_ALLOW_SEALING)
+            with snapshot.open('rb') as source:
+                for chunk in iter(lambda: source.read(8 * 1024 * 1024), b''):
+                    view = memoryview(chunk)
+                    while view:
+                        view = view[os.write(fd, view):]
+            seal_mask = (fcntl.F_SEAL_WRITE | fcntl.F_SEAL_GROW |
+                         fcntl.F_SEAL_SHRINK | fcntl.F_SEAL_SEAL)
+            fcntl.fcntl(fd, fcntl.F_ADD_SEALS, seal_mask)
+            if fcntl.fcntl(fd, fcntl.F_GET_SEALS) & seal_mask != seal_mask:
+                raise OSError('Executable memfd could not be sealed')
+            return ('/proc/self/fd/' + str(fd), fd, {'pass_fds': (fd,)},
+                    'linux-sealed-memfd', sha256_fd(fd))
+        if sys.platform == 'win32':
+            import ctypes
+            import msvcrt
+            from ctypes import wintypes
+            kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
+            kernel32.CreateFileW.argtypes = [
+                wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD, wintypes.LPVOID,
+                wintypes.DWORD, wintypes.DWORD, wintypes.HANDLE,
+            ]
+            kernel32.CreateFileW.restype = wintypes.HANDLE
+            # Share READ only; deny competing write/delete/rename until after
+            # CreateProcess has launched and the process has exited.
+            handle = kernel32.CreateFileW(str(snapshot), 0x80000000, 1, None, 3, 0x80, None)
+            if handle == wintypes.HANDLE(-1).value:
+                raise ctypes.WinError(ctypes.get_last_error())
+            try:
+                fd = msvcrt.open_osfhandle(handle, os.O_RDONLY)
+            except BaseException:
+                kernel32.CloseHandle(handle)
+                raise
+            return (str(snapshot), fd, {}, 'windows-deny-write-delete-handle', sha256_fd(fd))
+        raise OSError('Attested runtime launch is unsupported on this platform')
+    except BaseException:
+        if fd is not None:
+            try:
+                os.close(fd)
+            except OSError:
+                pass
+        raise
+
+
 def run(args):
     spec = json.loads(REFERENCE.read_text())
     model = Path(args.model_file).resolve()
@@ -182,37 +253,45 @@ def run(args):
     (folder / 'protected-quotations.json').write_text(json.dumps(protected, indent=2) + '\n')
     prompt_file = folder / 'prompt.txt'
     prompt_file.write_text(prompt, encoding='utf-8')
-    # Execute the captured bytes, not a mutable original pathname.
-    # The private snapshot prevents a substitute-and-restore race on the source.
+    # Snapshot the runtime for retention, but execute a kernel-bound opened
+    # artifact so renaming/replacing a pathname cannot change what is launched.
     snapshot = folder / ('runtime-snapshot.exe' if os.name == 'nt' else 'runtime-snapshot')
     runtime_error = None
     runtime_digest_before = None
     runtime_digest_after = None
+    launch_fd = None
+    launch_binding = None
+    launch_options = {}
+    launch_path = None
     try:
         source_digest = sha256(runtime)
         shutil.copy2(runtime, snapshot)
         snapshot.chmod(0o700)
-        runtime_digest_before = sha256(snapshot)
+        if sha256(snapshot) != source_digest:
+            raise OSError('Runtime changed during snapshot capture')
+        (launch_path, launch_fd, launch_options,
+         launch_binding, runtime_digest_before) = bind_runtime_artifact(snapshot)
         if runtime_digest_before != source_digest:
-            runtime_error = 'Runtime changed during snapshot capture'
-    except OSError as exc:
+            raise OSError('Captured executable does not match pinned source')
+    except (OSError, RuntimeError) as exc:
         runtime_error = f'{type(exc).__name__}: {exc}'
-    command = [str(snapshot), '-m', str(model), '-f', str(prompt_file), '-no-cnv',
-               '--no-display-prompt', '--simple-io', '--color', 'off', '-ngl', '0',
-               '-c', '2048', '-t', '4', '-n', str(args.tokens), '--seed', '20261012',
-               '--temp', '1.0', '--top-p', '0.95', '--top-k', '0', '--min-p', '0',
-               '--repeat-penalty', '1.0']
     runtime_env = os.environ.copy()
-    # Preserve sibling-library resolution when llama.cpp was built dynamically.
-    library_key = 'PATH' if os.name == 'nt' else ('DYLD_LIBRARY_PATH' if os.uname().sysname == 'Darwin' else 'LD_LIBRARY_PATH')
+    library_key = 'PATH' if os.name == 'nt' else (
+        'DYLD_LIBRARY_PATH' if sys.platform == 'darwin' else 'LD_LIBRARY_PATH')
     runtime_env[library_key] = str(runtime.parent) + os.pathsep + runtime_env.get(library_key, '')
     with (folder / 'runtime-output.txt').open('w') as output, (folder / 'runtime.log').open('w') as log:
         if runtime_error is not None:
             log.write(runtime_error + '\n')
             returncode = 127
         else:
+            command = [launch_path, '-m', str(model), '-f', str(prompt_file), '-no-cnv',
+                       '--no-display-prompt', '--simple-io', '--color', 'off', '-ngl', '0',
+                       '-c', '2048', '-t', '4', '-n', str(args.tokens), '--seed', '20261012',
+                       '--temp', '1.0', '--top-p', '0.95', '--top-k', '0', '--min-p', '0',
+                       '--repeat-penalty', '1.0']
             try:
-                result = subprocess.run(command, stdout=output, stderr=log, timeout=900, env=runtime_env)
+                result = subprocess.run(command, stdout=output, stderr=log,
+                                        timeout=900, env=runtime_env, **launch_options)
                 returncode = result.returncode
             except subprocess.TimeoutExpired:
                 returncode = 124
@@ -230,13 +309,20 @@ def run(args):
     errors = check_preservation(draft, candidate, args.require_literal)
     errors += ['protected-marker-changed:' + token for token in marker_errors]
     try:
-        runtime_digest_after = sha256(snapshot)
+        if launch_fd is not None:
+            runtime_digest_after = sha256_fd(launch_fd)
     except OSError as exc:
         if runtime_error is None:
             runtime_error = f'{type(exc).__name__}: {exc}'
+    finally:
+        if launch_fd is not None:
+            try:
+                os.close(launch_fd)
+            except OSError:
+                pass
     if (runtime_digest_before is not None and runtime_digest_after is not None
             and runtime_digest_before != runtime_digest_after):
-        runtime_error = 'Executed runtime snapshot changed during operation'
+        runtime_error = 'Executed runtime artifact changed during operation'
     runtime_intact = (runtime_error is None and runtime_digest_before is not None
                       and runtime_digest_after == runtime_digest_before)
     receipt = {'instrument': 'Humanizer', 'student': 'The Crow', 'source': spec['source'],
@@ -244,6 +330,7 @@ def run(args):
                'runtime_sha256': runtime_digest_before,
                'runtime_sha256_after': runtime_digest_after,
                'runtime_snapshot': str(snapshot),
+               'runtime_execution_binding': launch_binding,
                'runtime_integrity_verified': runtime_intact,
                'runtime_error': runtime_error, 'returncode': returncode, 'reached_eos': reached_eos,
                'draft_sha256': hashlib.sha256(draft.encode()).hexdigest(),
