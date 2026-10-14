@@ -94,7 +94,7 @@ button.feather,button.danger {background:linear-gradient(150deg,#663954,#422838)
 /* Honest local instrument activity illuminates the glass only while a note is actually observed. */
 html[data-wayglass-resonance='active'] :is(.ship-mast,.masthead,.hero.panel) {
   border-color:rgba(131,219,211,.58);
-  box-shadow:0 0 calc(18px + 45px * var(--wg-resonance-power, .1)) rgba(103,198,193,.18),
+  box-shadow:0 0 29px rgba(103,198,193,.18),
     inset 0 1px 0 rgba(212,245,239,.24);
 }
 html[data-wayglass-resonance='active'] :is(.ship-mast,.masthead,.hero.panel)::before {
