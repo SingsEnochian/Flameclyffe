@@ -56,6 +56,7 @@ function validateSnapshot(snapshot){
     if(!Array.isArray(pair)||pair.length!==2||!Number.isInteger(pair[0])||!Number.isInteger(pair[1])||pair[0]<0||pair[1]>=MAX_ENTITIES||pair[0]>=pair[1])throw new TypeError('Invalid ecology bond');
     const key=pair.join(':');if(pairs.has(key))throw new TypeError('Duplicate ecology bond');pairs.add(key);
   }
+  if(!Array.isArray(snapshot.seen)||snapshot.seen.length>64||!snapshot.seen.every(v=>typeof v==='string'&&v.length>=16&&v.length<=96)||new Set(snapshot.seen).size!==snapshot.seen.length)throw new TypeError('Invalid ecology event history');
   if(!finite(snapshot.excitation,0,1))throw new TypeError('Invalid ecology excitation');
   if(!WORLD_SLUG.test(snapshot.world_id))throw new TypeError('Invalid ecology world');
   return snapshot;
@@ -71,6 +72,7 @@ export class LivingShipEcology {
       this.entities=incoming.entities.map(e=>({...e}));
       this.bonds=incoming.bonds.map(pair=>[...pair]);
       this.excitation=incoming.excitation;
+      this.seen=[...incoming.seen];
       this.worldId=incoming.world_id;
     }else{
       if(!Number.isInteger(seed)||seed<1||seed>0xffffffff)throw new TypeError('Seed must be a positive uint32');
@@ -78,12 +80,14 @@ export class LivingShipEcology {
       this.seed=seed;this.rng=seed;this.tick=0;this.field=Array(CELLS).fill(0);
       const next=()=>{this.rng=nextRng(this.rng);return this.rng/4294967296;};
       this.entities=Array.from({length:MAX_ENTITIES},(_,i)=>makeEntity(i,next));
-      this.bonds=[];this.excitation=0;this.worldId=worldId;
+      this.bonds=[];this.excitation=0;this.seen=[];this.worldId=worldId;
     }
   }
   observe(signal,{now=Date.now()}={}){
     const s=acceptSensorySignal(signal,{now});
-    if(!s)return false;
+    if(!s||this.seen.includes(s.event_id))return false;
+    this.seen.push(s.event_id);
+    if(this.seen.length>64)this.seen.shift();
     this.worldId=s.world_id;
     if(s.kind==='feather'){this.excitation=0;return true;}
     if(s.kind==='note-off'){this.excitation*=.78;return true;}
@@ -145,7 +149,7 @@ export class LivingShipEcology {
       source:'Wayglass living-glass simulation, not authenticated ship runtime',
       seed:this.seed,rng:this.rng,tick:this.tick,world_id:this.worldId,
       field:[...this.field],entities:this.entities.map(e=>({...e})),
-      bonds:this.bonds.map(pair=>[...pair]),excitation:this.excitation,
+      bonds:this.bonds.map(pair=>[...pair]),excitation:this.excitation,seen:[...this.seen],
       canonical_receipt:false,identity_attested:false,flight_authority:false,
     };
   }
