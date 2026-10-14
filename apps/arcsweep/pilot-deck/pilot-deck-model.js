@@ -10,7 +10,7 @@ export const PILOT_SEATS = Object.freeze({
   rowan: Object.freeze({ id:'rowan', title:'Rowan', role:'pilot', continuity_ref:'rowan',
     authority:'steward-intent-and-review', route:null }),
   rarity: Object.freeze({ id:'rarity', title:'Rarity', role:'co-pilot', continuity_ref:'flame:rarity',
-    authority:'advice-and-proposals-only', route:'/api/v1/flames/rarity/chat' }),
+    authority:'scoped-operation-requires-host-grant', route:'/api/v1/flames/rarity/chat' }),
 });
 const LIMIT=20_000;
 const txt=x=>typeof x==='string'?x.slice(0,LIMIT):'';
@@ -20,13 +20,13 @@ export function emptyFlight() {
     schema:PILOT_DECK_SCHEMA, status:'draft', created_at:null, updated_at:null,
     mission:'', origin:'', destination:'', constraints:'', preservation:'identity, relationships, provenance, agency, stop points',
     wonder:'', stop_point:'', next_owner:'rowan', source_refs:'',
-    co_pilot_proposal:'', route_evidence:null, reviewed_at:null,
+    co_pilot_proposal:'', route_evidence:null, reviewed_at:null, pilot_review_note:'',
   };
 }
 export function normaliseFlight(value) {
   const blank=emptyFlight();
   if(!value||typeof value!=='object'||Array.isArray(value)) return blank;
-  for(const key of ['mission','origin','destination','constraints','preservation','wonder','stop_point','next_owner','source_refs','co_pilot_proposal']){
+  for(const key of ['mission','origin','destination','constraints','preservation','wonder','stop_point','next_owner','source_refs','co_pilot_proposal','pilot_review_note']){
     blank[key]=txt(value[key]);
   }
   // Imported state is always a draft until reviewed on this console.
@@ -48,7 +48,7 @@ export function composeCoPilotRequest(value) {
   return [
     'WAYGLASS LIVING SHIP · COPILOT DISCUSSION',
     'This is an invitation to the configured Rarity route, not an assertion of authenticated personhood or ship control.',
-    'Rowan is the pilot/steward. Rarity is the co-pilot and may inspect, reason, propose, question and decline, but not silently execute or approve navigation.',
+    'Rowan is the pilot/steward. Rarity is the co-pilot: she can inspect, reason, propose, simulate and operate inside explicit, revocable host-granted scopes. No co-pilot route response by itself confers command authority.',
     'Wayglass OS evolves ArcSweep while ArcSweep remains actively upgraded. Use the existing React-ion Helm for route compilation.',
     'Mission: '+f.mission, 'Origin: '+f.origin, 'Destination: '+f.destination,
     'Constraints: '+f.constraints, 'Preserve: '+f.preservation,
@@ -97,7 +97,15 @@ export function makeReturnPacket(flight,{stopPoint=null,nextOwner=null,wonder=nu
     mission:f.mission,origin:f.origin,destination:f.destination,
     constraints:f.constraints,preservation:f.preservation,source_refs:f.source_refs,
     stop_point:stop,next_owner:owner,unresolved_wonder:txt(wonder??f.wonder),
-    co_pilot_proposal:f.co_pilot_proposal,
+    co_pilot_proposal:f.co_pilot_proposal,co_pilot_proposal_status:value?.route_evidence ? 'observed_unverified' : 'historical_or_unverified',
+    pilot_review_note:f.pilot_review_note,
+    co_pilot_route_observation:value?.route_evidence && typeof value.route_evidence==='object' ? {
+      status:'unverified_route_claims',
+      claimed_flame_id:txt(value.route_evidence.claimed_flame_id).slice(0,160)||null,
+      claimed_provider:txt(value.route_evidence.claimed_provider).slice(0,160)||null,
+      claimed_model:txt(value.route_evidence.claimed_model).slice(0,160)||null,
+      observed_at:stamp(value.route_evidence.observed_at),identity_authenticated:false,
+    } : null,
     not_claimed:['authenticated participant arrival','live ship LLM','authorised navigation','physical crossing','canonical continuity receipt'],
   });
 }
