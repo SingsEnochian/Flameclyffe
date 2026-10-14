@@ -76,7 +76,9 @@ export function replayLocalReceipts(receipts, resolveAuthorPublicKey) {
     }
     if (event.kind === 'return.accepted') {
       if (!stopPoint || !nextOwner || event.payload?.stop_point !== stopPoint ||
-          event.payload?.next_owner !== nextOwner) throw new Error('unauthorised or inconsistent return');
+          event.payload?.next_owner !== nextOwner || event.author_ref !== nextOwner) {
+        throw new Error('unauthorised or inconsistent return');
+      }
       stopPoint = null; nextOwner = null;
     }
     head = event.id;
