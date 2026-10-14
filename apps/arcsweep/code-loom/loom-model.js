@@ -63,7 +63,8 @@ export function promptForAgent(packet) {
     throw new TypeError('invalid proposed handoff');
   }
   return [
-    'WAYGLASS · ATELIER CODE LOOM · PROPOSED HANDOFF',
+    'WAYGLASS OS · ATELIER CODE LOOM · PROPOSED HANDOFF',
+    'Wayglass OS evolves ArcSweep. Work inside its existing tested continuity and runtime lineage; do not create a parallel OS.',
     'Intended seat: '+SEATS[packet.seat].name,
     'This text is a task proposal, not evidence of agent dispatch, arrival or acceptance.',
     'Research source and credit: '+packet.source,
@@ -77,6 +78,10 @@ export function promptForAgent(packet) {
     'Last stop point: '+packet.stop_point,
     'Named next owner: '+packet.next_owner,
     'Keep original authorship, attribution, identity separation, recoverability, and explicit failures.',
+    'Define exact acceptance criteria before execution; preserve facts, provenance, named identities, raw inputs, candidates, failures and evidence.',
+    'Run and repair focused tests until criteria pass, or report the precise blocker. Never manufacture passes or silently change acceptance criteria.',
+    'For every child agent/model you spawn, pass these verification rules, scope, sources, prior failures and acceptance requirements unchanged; demand that descendants propagate them.',
+    'Respect OTHER REALITIES language, cross-constellation sovereignty, and UH/Ezra Observer read-only boundaries from repository AGENTS.md.',
     'Report actual changed files, commands and observed results, or state what was not run.',
   ].join('\n\n');
 }
