@@ -1,0 +1,48 @@
+name: Hearthgate Security Lockfile Probe
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/hearthgate-audit-lockfile-probe.yml'
+      - 'apps/starwell-server/package-lock.json'
+      - 'apps/starwell-server/package.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit-and-export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: apps/starwell-server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: apps/starwell-server/package-lock.json
+      - name: Use locked npm 11
+        run: npm install --global npm@11.16.0
+      - name: Generate non-forced production audit repair
+        run: npm audit fix --package-lock-only --ignore-scripts --no-fund
+      - name: Verify lockfile installs reproducibly
+        run: npm ci --ignore-scripts --no-fund --no-audit
+      - name: Verify production audit is free of high/critical findings
+        run: npm audit --omit=dev --audit-level=high
+      - name: Publish reviewed diff without writing to repository
+        working-directory: .
+        shell: bash
+        run: |
+          echo 'LOCKFILE_PATCH_BEGIN'
+          git diff -- apps/starwell-server/package-lock.json
+          echo 'LOCKFILE_PATCH_END'
+      - name: Preserve generated lockfile as private CI evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: hearthgate-audit-lockfile-probe
+          path: apps/starwell-server/package-lock.json
+          retention-days: 7
