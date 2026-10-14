@@ -1,0 +1,28 @@
+name: Crow Humanizer Native Integrity
+
+on:
+  pull_request:
+    paths:
+      - 'profiles/crow-trainer/skills/crow-training/scripts/humanizer.py'
+      - 'profiles/crow-trainer/skills/crow-training/scripts/test_humanizer.py'
+      - '.github/workflows/crow-humanizer-native-integrity.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-integrity:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify native Humanizer security regressions
+        run: python profiles/crow-trainer/skills/crow-training/scripts/test_humanizer.py
