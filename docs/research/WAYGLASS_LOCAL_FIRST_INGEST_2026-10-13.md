@@ -1,4 +1,6 @@
-# Wayglass local-first engineering ingest | 2026-10-13
+# Wayglass OS local-first engineering ingest | 2026-10-13
+
+Product lineage: **Wayglass OS is the evolution of ArcSweep**, not a second competing system. Existing `apps/arcsweep` paths are inherited implementation locations. Follow `apps/arcsweep/contracts/WAYGLASS_OS_ARCSWEEP_EVOLUTION_V0.1.md`.
 
 Status: implementation research and bounded experimental score adapter; NOT deployment proof.
 
