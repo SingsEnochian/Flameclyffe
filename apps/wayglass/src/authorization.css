@@ -25,3 +25,35 @@
 }
 .wayglass-authorization__form button:disabled { opacity: .6; cursor: wait; }
 @media (max-width: 420px) { .wayglass-authorization__form { padding: 1.3rem; } }
+
+/* Bluebird's per-opening authorisation uses the same dark glass dialect.
+   Credentials stay inside the existing private session boundary. */
+.wayglass-authorization {
+  color-scheme: dark;
+  border-color: rgba(84, 194, 229, .43);
+  background:
+    radial-gradient(ellipse at 65% 0%, rgba(34, 118, 170, .16), transparent 55%),
+    linear-gradient(155deg, #0d2231, #06111e 80%);
+  box-shadow: inset 0 1px rgba(240,255,255,.10), 0 35px 100px rgba(0,0,0,.72);
+}
+.wayglass-authorization::backdrop {
+  background: rgba(1, 7, 15, .89);
+  backdrop-filter: blur(8px);
+}
+.wayglass-authorization__form { gap: 1rem; }
+.wayglass-authorization__eyebrow { color: #65d9f4; font-weight: 750; }
+.wayglass-authorization__form input {
+  color-scheme: dark;
+  border: 1px solid rgba(103, 195, 229, .44);
+  background: #071624;
+  border-radius: .8rem;
+  color: #eaf7ff;
+}
+.wayglass-authorization__form input:focus-visible { outline-color: #5cd8f4; }
+.wayglass-authorization__form button {
+  border: 1px solid rgba(78,211,255,.70);
+  border-radius: .8rem;
+  color: #eaf7ff;
+  background: linear-gradient(105deg, #145274, #172d5a);
+}
+.wayglass-authorization__form button:hover:not(:disabled) { background: #164d70; }
