@@ -3,116 +3,117 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#0b0f12" />
-  <title>ArcSweep · Hearthgate</title>
+  <meta name="theme-color" content="#0d0b07" />
+  <title>ArcSweep · Hearthgate Observatory</title>
   <style>
     :root {
       color-scheme: dark;
-      --bg: #0b0f12;
-      --glass: rgba(255,255,255,.035);
-      --glass-2: rgba(0,0,0,.24);
-      --line: rgba(255,255,255,.10);
-      --text: #e8eef4;
-      --muted: #91a0ad;
-      --signal: #79f2d2;
-      --signal-soft: rgba(121,242,210,.16);
-      --warn: #ffd58a;
+      --bg: #0d0b07;
+      --raised: #15110c;
+      --amber: #ffb852;
+      --gold: #d9a05b;
+      --bronze: #3c3224;
+      --bone: #f5f2eb;
+      --stone: #8c7f70;
+      --error: #d9826b;
     }
     * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background:
-        radial-gradient(circle at 18% 12%, rgba(121,242,210,.07), transparent 34rem),
-        radial-gradient(circle at 82% 80%, rgba(104,141,255,.07), transparent 38rem),
-        var(--bg);
-      color: var(--text);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-    main { width: min(1180px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 42px; }
-    .shell {
-      border: 1px solid var(--line);
-      border-radius: 22px;
-      background: var(--glass);
-      backdrop-filter: blur(18px);
-      box-shadow: 0 28px 80px rgba(0,0,0,.34);
-      overflow: hidden;
-    }
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-      padding: 20px 22px;
-      border-bottom: 1px solid var(--line);
-    }
-    .eyebrow { color: var(--signal); text-transform: uppercase; letter-spacing: .16em; font-size: .72rem; }
-    h1 { margin: 4px 0 0; font-size: clamp(1.35rem, 2vw, 2rem); font-weight: 620; }
-    .status { display: flex; align-items: center; gap: 9px; color: var(--muted); font: 600 .76rem/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; }
-    .status-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--warn); box-shadow: 0 0 14px currentColor; }
-    .status[data-state="live"] .status-dot { background: var(--signal); }
-    .status[data-state="error"] .status-dot { background: #ff8e8e; }
-    .content { padding: 22px; display: grid; gap: 18px; grid-template-columns: minmax(0, 1.15fr) minmax(300px, .85fr); }
-    .panel { background: var(--glass-2); border: 1px solid var(--line); border-radius: 16px; padding: 16px; min-width: 0; }
-    .panel h2 { margin: 0 0 12px; color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .12em; font-weight: 620; }
-    #hearthgate-three { height: 390px; border-radius: 12px; overflow: hidden; background: rgba(0,0,0,.2); }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--bone); }
+    body { font-family: "Courier New", ui-monospace, SFMono-Regular, Menlo, monospace; }
+    main { width: min(1240px, calc(100% - 28px)); margin: 0 auto; padding: 18px 0 28px; }
+    .shell { border: 1px solid var(--bronze); background: #0d0b07; overflow: hidden; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 16px 18px; border-bottom: 1px solid var(--bronze); }
+    .eyebrow { color: var(--gold); text-transform: uppercase; letter-spacing: .14em; font-size: .7rem; }
+    h1 { margin: 4px 0 0; font-size: clamp(1.1rem, 2vw, 1.55rem); letter-spacing: .045em; font-weight: 700; }
+    .status { display: flex; align-items: center; gap: 8px; color: var(--stone); font: 700 .72rem/1.2 ui-monospace, monospace; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 10px rgba(255,184,82,.2); }
+    .status[data-state="live"] .status-dot { background: var(--amber); }
+    .status[data-state="simulation"] .status-dot { background: var(--gold); }
+    .status[data-state="error"] .status-dot { background: var(--error); }
+    .content { padding: 16px; display: grid; gap: 14px; grid-template-columns: minmax(0, 1.45fr) minmax(320px, .75fr); }
+    .panel { min-width: 0; border: 1px solid var(--bronze); background: rgba(21,17,12,.78); padding: 14px; }
+    .panel h2 { margin: 0 0 10px; color: var(--gold); font-size: .72rem; text-transform: uppercase; letter-spacing: .12em; padding-bottom: 6px; border-bottom: 1px solid var(--bronze); }
+    #hearthgate-three { height: 520px; overflow: hidden; background: radial-gradient(circle at 50% 45%, rgba(255,184,82,.035), transparent 45%), #090704; }
     #hearthgate-three canvas { width: 100%; height: 100%; display: block; }
-    .right-stack { display: grid; gap: 18px; }
-    .metric-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-    .metric { padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255,255,255,.025); }
-    .metric small { display: block; color: var(--muted); margin-bottom: 7px; }
-    .metric strong { font: 650 1.15rem/1 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--signal); }
-    .coordinate-box { min-height: 112px; margin: 0; padding: 13px; overflow: auto; border-radius: 12px; background: rgba(0,0,0,.28); color: var(--signal); font: .82rem/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre-wrap; word-break: break-word; }
-    .spectrometer { height: 150px; display: flex; align-items: end; gap: 5px; padding-top: 8px; border-bottom: 1px solid var(--line); }
-    .bar { flex: 1 1 0; min-width: 4px; height: 4%; border-radius: 5px 5px 0 0; background: linear-gradient(to top, rgba(94,139,255,.78), var(--signal)); transition: height 140ms ease; box-shadow: 0 0 12px rgba(121,242,210,.08); }
-    .footer { display: flex; gap: 14px; justify-content: space-between; flex-wrap: wrap; padding: 13px 22px 18px; color: var(--muted); font: .72rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; }
-    .footer a { color: var(--signal); text-decoration: none; }
-    @media (max-width: 820px) {
-      .content { grid-template-columns: 1fr; }
-      #hearthgate-three { height: 320px; }
-    }
+    .note { margin: 8px 0 0; color: var(--stone); font-size: .69rem; line-height: 1.45; }
+    .right-stack { display: grid; gap: 14px; align-content: start; }
+    .metric-row { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; margin-bottom: 10px; }
+    .metric { border: 1px solid var(--bronze); padding: 9px; background: rgba(13,11,7,.58); }
+    .metric small { display: block; color: var(--stone); margin-bottom: 5px; font-size: .66rem; text-transform: uppercase; }
+    .metric strong { color: var(--amber); font: 700 .92rem/1 ui-monospace, monospace; overflow-wrap: anywhere; }
+    .coordinate-box, .event-log { margin: 0; padding: 10px; overflow: auto; border: 1px solid var(--bronze); background: #090704; color: var(--gold); font: .72rem/1.45 ui-monospace, monospace; white-space: pre-wrap; word-break: break-word; }
+    .coordinate-box { min-height: 156px; max-height: 260px; }
+    .event-log { min-height: 94px; max-height: 150px; color: var(--stone); }
+    .spectrometer { height: 115px; display: flex; align-items: end; gap: 4px; padding-top: 6px; border-bottom: 1px solid var(--bronze); }
+    .bar { flex: 1 1 0; min-width: 4px; height: 4%; background: linear-gradient(to top, var(--bronze), var(--amber)); transition: height 140ms ease; box-shadow: 0 0 8px rgba(255,184,82,.07); }
+    .controls { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 10px; }
+    .instrument-switch { background: transparent; border: 1px solid var(--bronze); color: var(--gold); font: 700 .67rem/1 ui-monospace, monospace; text-transform: uppercase; letter-spacing: .06em; padding: 6px 9px; cursor: pointer; }
+    .instrument-switch:hover:not(:disabled) { border-color: var(--amber); color: var(--bone); background: var(--raised); }
+    .instrument-switch:disabled { opacity: .35; cursor: not-allowed; }
+    .digest { margin-top: 10px; color: var(--stone); font-size: .7rem; line-height: 1.4; }
+    .digest button { all: unset; cursor: pointer; color: var(--amber); }
+    .footer { display: flex; gap: 12px; justify-content: space-between; flex-wrap: wrap; padding: 10px 16px 14px; color: var(--stone); font: .68rem/1.4 ui-monospace, monospace; border-top: 1px solid var(--bronze); }
+    .footer-links { display: flex; gap: 12px; flex-wrap: wrap; }
+    .footer a { color: var(--gold); text-decoration: none; }
+    @media (max-width: 900px) { .content { grid-template-columns: 1fr; } #hearthgate-three { height: 380px; } }
   </style>
 </head>
 <body>
   <main>
-    <section class="shell" aria-label="Hearthgate live matrix stream">
+    <section class="shell" aria-label="Hearthgate matrix observatory">
       <header>
         <div>
-          <div class="eyebrow">ArcSweep · Vala Work</div>
-          <h1>Hearthgate Matrix Observatory</h1>
+          <div class="eyebrow">Earth Gate // Hearthgate</div>
+          <h1>Lantern Mathematics Observatory</h1>
         </div>
         <div id="stream-status" class="status" data-state="connecting">
-          <span class="status-dot"></span>
-          <span id="stream-status-label">CONNECTING</span>
+          <span class="status-dot"></span><span id="stream-status-label">CONNECTING</span>
         </div>
       </header>
 
       <div class="content">
         <section class="panel">
           <h2>Projected spine field</h2>
-          <div id="hearthgate-three" aria-label="Live three-dimensional projection"></div>
+          <div id="hearthgate-three" aria-label="Three-dimensional telemetry projection"></div>
+          <p class="note">Projection contract: projected[0..2] → x/y/z · radius cap 2.6 · lerp 0.12 · simulation never masquerades as persistence.</p>
         </section>
 
         <div class="right-stack">
           <section class="panel">
-            <h2>Frame</h2>
+            <h2>Frame receipt</h2>
             <div class="metric-row">
               <div class="metric"><small>Step</small><strong id="step-counter">0000</strong></div>
               <div class="metric"><small>Frame</small><strong id="frame-counter">0</strong></div>
+              <div class="metric"><small>Trail</small><strong id="trail-counter">0/96</strong></div>
+              <div class="metric"><small>Mode</small><strong id="mode-counter">WAITING</strong></div>
             </div>
             <pre id="matrix-spine-display" class="coordinate-box">Waiting for Vala Work…</pre>
+            <div class="digest">SHA-256 receipt: <button id="digest-copy" type="button" title="Copy full digest"><span id="digest-short">not-yet-hashed</span></button></div>
+            <div class="controls">
+              <button id="pause-stream" class="instrument-switch" type="button">Pause</button>
+              <button id="step-stream" class="instrument-switch" type="button" disabled>Step</button>
+            </div>
           </section>
 
           <section class="panel">
             <h2>Structural harmonics</h2>
             <div id="spectrometer" class="spectrometer" aria-label="Coordinate amplitude spectrometer"></div>
           </section>
+
+          <section class="panel">
+            <h2>Transaction / event log</h2>
+            <pre id="event-log" class="event-log">[BOOT] Hearthgate instrument initializing…</pre>
+          </section>
         </div>
       </div>
 
       <div class="footer">
         <span id="stream-provenance">source: Vala Work / matrix_stream</span>
-        <span><a href="../">Return to ArcSweep</a></span>
+        <span class="footer-links">
+          <a href="?simulation=1">Synthetic simulation</a>
+          <a href="?">Live Vala mode</a>
+          <a href="../">Return to ArcSweep</a>
+        </span>
       </div>
     </section>
   </main>
