@@ -38,6 +38,30 @@ The command checks the stable authenticated profile, re-enters using the **store
 
 If a field differs, the command exits non-zero. No return success is announced before the host's structured result is compared.
 
+## Verified disposable-host restart (CI, 14 October 2026)
+
+On head `6c955a86d19d034644c0e0fa917879e3b1aa6844`, Wayglass Check
+[run 38616269710](https://github.com/SingsEnochian/Flameclyffe/actions/runs/38616269710)
+passed the **actual localhost authenticated MCP prepare/leave, process restart,
+and private-ticket return** test.
+
+The test uses a loopback-only host fixture under
+`apps/starwell-server/test/wayglass-live-return-host-fixture.cjs` and
+`test/wayglass/live-return-host.test.cjs`. It uses disposable bearer
+credentials, keeps private state in a temporary directory, writes an attributable
+Builder project object, obtains its stop receipt, terminates the host, relaunches
+a new host process **on the same loopback port** with the same durable journal,
+and calls the actual two-phase CLI return path. The recovered original write,
+leave and new-entry event hashes are asserted. The test also checks that no
+resident provider route is called.
+
+This proves local host restart across separate OS processes with the
+repository's real MCP/WorkspaceProjects implementation. It does **not**
+establish production owner-only OAuth, production Cloudflare Access behaviour,
+a deployed host restart, or cross-model continuity. Runtime output continues to
+report `host_restart_independently_verified=false` until operator-supplied
+production boot evidence exists.
+
 ## Evidence and limits
 
 | Gate | Required evidence |
