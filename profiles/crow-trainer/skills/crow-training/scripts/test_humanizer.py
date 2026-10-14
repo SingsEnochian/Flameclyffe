@@ -70,6 +70,25 @@ class PreservationTests(unittest.TestCase):
         self.assertNotIn('Keep the seal.', masked)
         self.assertEqual(restore_quotes(masked, spans), (original, []))
 
+    def test_spaced_inch_mark_does_not_swallow_dialogue(self):
+        original = 'Use the 5 " pipe.\nMara said "Keep the seal."'
+        changed = 'Use the 5 " pipe.\nMara said "Discard it."'
+        self.assertIn('quotations-changed', check_preservation(original, changed, []))
+        masked, tokens = protect_quotes(original)
+        self.assertIn('5 " pipe.', masked)
+        self.assertNotIn('Keep the seal.', masked)
+        self.assertEqual(restore_quotes(masked, tokens), (original, []))
+
+    def test_unbalanced_nonnumeric_marks_fail_closed(self):
+        original = 'A stray " mark.\nMara said "Keep the seal."'
+        self.assertIn('quotations-unbalanced', check_preservation(original, original, []))
+
+    def test_quoted_numeric_text_remains_protected(self):
+        original = 'Read "22" aloud, then say "Hold."'
+        masked, tokens = protect_quotes(original)
+        self.assertNotIn('"22"', masked)
+        self.assertEqual(restore_quotes(masked, tokens), (original, []))
+
     def test_missing_runtime_creates_failed_receipt(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
@@ -134,8 +153,48 @@ class PreservationTests(unittest.TestCase):
             self.assertEqual(exc.exception.code, 1)
             receipts = list((root / '.crow-trainer' / 'humanizer').glob('*/receipt.json'))
             result = json.loads(receipts[0].read_text())
-            self.assertIsNone(result['runtime_sha256'])
+            self.assertEqual(result['runtime_sha256'],
+                             hashlib.sha256(b'dummy').hexdigest())
+            self.assertIsNone(result['runtime_sha256_after'])
+            self.assertFalse(result['runtime_integrity_verified'])
             self.assertIsNotNone(result['runtime_error'])
+            self.assertEqual(result['verdict'], 'failed')
+
+    def test_runtime_replacement_during_execution_fails(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            model = root / 'model.gguf'
+            model.write_bytes(b'pinned-test-checkpoint')
+            runtime = root / 'runtime'
+            runtime.write_bytes(b'original-runtime')
+            draft = root / 'draft.txt'
+            draft.write_text('Keep the 2kg unit.')
+            spec = {'checkpoint_bytes': model.stat().st_size,
+                    'checkpoint_sha256': hashlib.sha256(model.read_bytes()).hexdigest(),
+                    'instr': 'Instruction', 'sep': '<end>',
+                    'fingerprint': hashlib.sha256(b'Instruction\n\nX<end>').hexdigest()[:16],
+                    'source': 'test', 'revision': 'test'}
+            reference = root / 'spec.json'
+            reference.write_text(json.dumps(spec))
+            args = argparse.Namespace(model_file=str(model),
+                runtime=str(runtime), input=str(draft),
+                tokens=32, require_literal=[], protect_span=[],
+                protect_literals=False, protect_quotes=True)
+            def replace_while_running(cmd, stdout, stderr, timeout):
+                stdout.write('Keep the 2kg unit. [end of text]')
+                runtime.write_bytes(b'replacement-runtime')
+                return argparse.Namespace(returncode=0)
+            with patch.object(humanizer, 'REFERENCE', reference), patch('pathlib.Path.cwd', return_value=root):
+                with patch.object(humanizer.subprocess, 'run', side_effect=replace_while_running):
+                    with contextlib.redirect_stdout(io.StringIO()):
+                        with self.assertRaises(SystemExit) as exc:
+                            humanizer.run(args)
+            self.assertEqual(exc.exception.code, 1)
+            receipts = list((root / '.crow-trainer' / 'humanizer').glob('*/receipt.json'))
+            result = json.loads(receipts[0].read_text())
+            self.assertEqual(result['returncode'], 0)
+            self.assertNotEqual(result['runtime_sha256'], result['runtime_sha256_after'])
+            self.assertFalse(result['runtime_integrity_verified'])
             self.assertEqual(result['verdict'], 'failed')
 
     def test_trainer_protects_quotations_by_default(self):
