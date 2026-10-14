@@ -1,5 +1,6 @@
 import { createInteractionState } from '../interaction-state.js';
 import { authorizationSession } from '../authorization-session.js';
+import { mountWayglassRoutePicker } from '../route-picker.js';
 import { consumeObserverContextForWriting, recordWayglassRouteObservation } from '../living-observer-model.js';
 import { emitInteractionCue } from '../interaction-cues.js';
 import { emitMaterialSignal } from '../material-state.js';
@@ -37,79 +38,110 @@ export async function mountArcSweepWritingSurface(root) {
   let checkpoint = null;
 
   root.innerHTML = [
-    '<section class="wg-surface" data-surface="arcsweep-writing">',
-      '<nav class="wg-deck-nav glass-panel" aria-label="Wayglass rooms"><button type="button" class="glass-chip active" aria-current="page">Writing Room</button><button type="button" class="glass-chip" data-wayglass-room="wayglass:systems">Organs</button><button type="button" class="glass-chip" data-wayglass-room="wayglass:video-atelier">Video Atelier</button><button type="button" class="glass-chip" data-wayglass-room="wayglass:living-observer">Living Observer</button></nav>',
-      '<header class="wg-surface-head glass-panel">',
-        '<div>',
-          '<p class="eyebrow">ArcSweep attached surface</p>',
-          '<h1>Writing Room</h1>',
-          '<p class="lede">Round-robin co-writing through Wayglass. The route may change; the room stays itself.</p>',
-        '</div>',
-        '<div class="wg-route-block">',
-          '<div class="route-mineral" aria-hidden="true"><i></i><b></b><span></span></div>',
-          '<label for="wg-route">Route</label>',
-          '<select id="wg-route" aria-label="Wayglass route" aria-keyshortcuts="Alt+R"></select>',
-          '<label><input id="wg-think" type="checkbox" /> Deliberate thinking (local engine)</label>',
-          '<span id="wg-route-state" class="tiny">Loading route catalogue…</span>',
-          '<span id="wg-embodiment-state" class="tiny"></span>',
-        '</div>',
-      '</header>',
-
-      '<section class="wg-control-ribbon glass-panel" aria-label="Writing state">',
-        '<div class="glass-segment" role="group" aria-label="IC or OOC">',
-          '<button type="button" class="glass-chip active" data-channel="IC" aria-pressed="true" aria-keyshortcuts="Alt+I">IC</button>',
-          '<button type="button" class="glass-chip" data-channel="OOC" aria-pressed="false" aria-keyshortcuts="Alt+O">OOC</button>',
-        '</div>',
-        '<div class="turn-jewel"><span>Turn</span><strong id="wg-turn-owner">Rowan</strong></div>',
-        '<details class="ownership-drawer">',
-          '<summary>Character ownership</summary>',
-          '<form id="wg-ownership-form" class="ownership-form">',
-            '<input name="character" placeholder="Character" aria-label="Character name" />',
-            '<input name="owner" placeholder="Owner" aria-label="Character owner" />',
-            '<select name="permission" aria-label="Ownership type">',
-              '<option value="owned">Owned</option>',
-              '<option value="shared">Shared</option>',
-              '<option value="temporary-handoff">Temporary handoff</option>',
-            '</select>',
-            '<button type="submit" class="glass-chip">Bind</button>',
-          '</form>',
-          '<div id="wg-ownership-list" class="ownership-list"></div>',
-        '</details>',
-      '</section>',
-
-      '<details class="glass-panel"><summary>Continuity checkpoint</summary>',
-      '<label>World <input id="wg-cp-world" value="wayglass:writing-room"></label>',
-      '<label>Participant <input id="wg-cp-participant" value="rowan"></label>',
-      '<label>Checkpoint text <textarea id="wg-cp-text" rows="3"></textarea></label>',
-      '<label>Open questions (one per line) <textarea id="wg-cp-questions" rows="2"></textarea></label>',
-      '<label>Stop point <input id="wg-cp-stop"></label>',
-      '<label>Next owner <input id="wg-cp-owner" value="Rowan"></label>',
-      '<button id="wg-cp-save" type="button">Save checkpoint</button>',
-      '<label>Storage receipt ID <input id="wg-cp-id"></label>',
-      '<button id="wg-cp-recover" type="button">Recover checkpoint</button>',
-      '<p id="wg-cp-status" role="status">No stored checkpoint attached.</p></details>',
-      '<section class="wg-thread glass-panel" aria-live="polite">',
-        '<button id="wg-copy-session" type="button" class="glass-chip">Copy session log</button>',
-        '<div id="wg-thread" class="wg-thread-log">',
-          '<div class="empty-thread">The room is quiet. Start anywhere.</div>',
-        '</div>',
-      '</section>',
-
-      '<section class="wg-composer glass-panel">',
-        '<textarea id="wg-input" rows="6" placeholder="Write the next turn…" aria-label="Next writing turn" aria-keyshortcuts="Alt+W Control+Enter Meta+Enter"></textarea>',
-        '<div class="composer-foot">',
-          '<span id="wg-status" class="tiny">IC · Rowan has the turn</span>',
-          '<button id="wg-send" type="button" class="send-jewel">Pass turn</button>',
-        '</div>',
-      '</section>',
-
-      '<footer class="wg-receipt tiny"><span id="wg-receipt">No route receipt yet.</span><span class="keyboard-hint"> · Keyboard: Alt+I/O channel · Alt+R route · Alt+W write</span></footer>',
-    '</section>',
+    "<section class=\"wg-surface wg-writing-room\" data-surface=\"arcsweep-writing\">\n",
+    "  <nav class=\"wg-deck-nav glass-panel\" aria-label=\"Wayglass rooms\">\n",
+    "    <button type=\"button\" class=\"glass-chip active\" aria-current=\"page\">Writing Room</button>\n",
+    "    <button type=\"button\" class=\"glass-chip\" data-wayglass-room=\"wayglass:systems\">Organs</button>\n",
+    "    <button type=\"button\" class=\"glass-chip\" data-wayglass-room=\"wayglass:video-atelier\">Video Atelier</button>\n",
+    "    <button type=\"button\" class=\"glass-chip\" data-wayglass-room=\"wayglass:living-observer\">Living Observer</button>\n",
+    "  </nav>\n",
+    "  <header class=\"wg-surface-head glass-panel\">\n",
+    "    <div class=\"wg-hero-copy\">\n",
+    "      <p class=\"eyebrow\">WAYGLASS · WRITING DECK</p>\n",
+    "      <h1>Writing Room</h1>\n",
+    "      <p class=\"lede\">Round-robin co-writing through Wayglass.<br>The route may change; the room stays itself.</p>\n",
+    "    </div>\n",
+    "    <div class=\"wg-route-block\">\n",
+    "      <div class=\"route-mineral\" aria-hidden=\"true\"><i></i><b></b><span></span></div>\n",
+    "      <div class=\"wg-route-controls\">\n",
+    "        <label id=\"wg-route-label\">Route</label>\n",
+    "        <div id=\"wg-route\"></div>\n",
+    "        <label class=\"wg-thinking-toggle\"><input id=\"wg-think\" type=\"checkbox\" /> Deliberate thinking (local engine)</label>\n",
+    "        <span id=\"wg-route-state\" class=\"tiny\" role=\"status\">Loading route catalogue…</span>\n",
+    "        <span id=\"wg-embodiment-state\" class=\"tiny\"></span>\n",
+    "      </div>\n",
+    "    </div>\n",
+    "  </header>\n",
+    "  <section class=\"wg-constellation-strip glass-panel\" aria-label=\"Our Constellation\">\n",
+    "    <div class=\"wg-constellation-symbol\" aria-hidden=\"true\">✦</div>\n",
+    "    <div class=\"wg-constellation-place\">\n",
+    "      <p class=\"eyebrow\">OUR CONSTELLATION</p>\n",
+    "      <span class=\"tiny\">Speaking place</span>\n",
+    "      <strong id=\"wg-place-name\">Writing Room</strong>\n",
+    "      <span id=\"wg-place-hint\" class=\"tiny\">The place stays itself across route changes.</span>\n",
+    "    </div>\n",
+    "  </section>\n",
+    "  <div class=\"wg-writing-workspace\">\n",
+    "    <main class=\"wg-writing-main glass-panel\" aria-label=\"Writing desk\">\n",
+    "      <section class=\"wg-control-ribbon\" aria-label=\"Writing state\">\n",
+    "        <div class=\"glass-segment\" role=\"group\" aria-label=\"IC or OOC\">\n",
+    "          <button type=\"button\" class=\"glass-chip active\" data-channel=\"IC\" aria-pressed=\"true\" aria-keyshortcuts=\"Alt+I\">IC</button>\n",
+    "          <button type=\"button\" class=\"glass-chip\" data-channel=\"OOC\" aria-pressed=\"false\" aria-keyshortcuts=\"Alt+O\">OOC</button>\n",
+    "        </div>\n",
+    "        <div class=\"turn-jewel\"><span>Turn</span><strong id=\"wg-turn-owner\">Rowan</strong></div>\n",
+    "        <details class=\"ownership-drawer\">\n",
+    "          <summary>Character ownership</summary>\n",
+    "          <form id=\"wg-ownership-form\" class=\"ownership-form\">\n",
+    "            <input name=\"character\" placeholder=\"Character\" aria-label=\"Character name\" />\n",
+    "            <input name=\"owner\" placeholder=\"Owner\" aria-label=\"Character owner\" />\n",
+    "            <select name=\"permission\" aria-label=\"Ownership type\">\n",
+    "              <option value=\"owned\">Owned</option>\n",
+    "              <option value=\"shared\">Shared</option>\n",
+    "              <option value=\"temporary-handoff\">Temporary handoff</option>\n",
+    "            </select>\n",
+    "            <button type=\"submit\" class=\"glass-chip\">Bind</button>\n",
+    "          </form>\n",
+    "          <div id=\"wg-ownership-list\" class=\"ownership-list\"></div>\n",
+    "        </details>\n",
+    "      </section>\n",
+    "      <section class=\"wg-thread\" aria-label=\"Writing conversation\" aria-live=\"polite\">\n",
+    "        <div id=\"wg-thread\" class=\"wg-thread-log\"><div class=\"empty-thread\"><span class=\"wg-empty-feather\" aria-hidden=\"true\">✧</span><strong>The room is quiet. Start anywhere.</strong><small>Your conversation will unfold here.</small></div></div>\n",
+    "      </section>\n",
+    "      <section class=\"wg-composer\" aria-label=\"Compose a turn\">\n",
+    "        <textarea id=\"wg-input\" rows=\"4\" placeholder=\"Write the next turn…\" aria-label=\"Next writing turn\" aria-keyshortcuts=\"Alt+W Control+Enter Meta+Enter\"></textarea>\n",
+    "        <div class=\"composer-foot\">\n",
+    "          <span id=\"wg-status\" class=\"tiny\">IC · Rowan has the turn</span>\n",
+    "          <button id=\"wg-send\" type=\"button\" class=\"send-jewel\"><span aria-hidden=\"true\">➤</span> Send to Writing Room</button>\n",
+    "        </div>\n",
+    "      </section>\n",
+    "    </main>\n",
+    "    <aside class=\"wg-session-sidebar glass-panel\" aria-label=\"Session and continuity\">\n",
+    "      <div class=\"wg-sidebar-tabs\" role=\"tablist\" aria-label=\"Session views\">\n",
+    "        <button type=\"button\" role=\"tab\" id=\"wg-tab-session\" data-wg-side-tab=\"session\" aria-selected=\"true\" aria-controls=\"wg-panel-session\">Session</button>\n",
+    "        <button type=\"button\" role=\"tab\" id=\"wg-tab-continuity\" data-wg-side-tab=\"continuity\" aria-selected=\"false\" aria-controls=\"wg-panel-continuity\" tabindex=\"-1\">Continuity</button>\n",
+    "      </div>\n",
+    "      <section id=\"wg-panel-session\" class=\"wg-sidebar-view\" role=\"tabpanel\" aria-labelledby=\"wg-tab-session\">\n",
+    "        <button id=\"wg-copy-session\" type=\"button\" class=\"glass-chip wg-copy-session\">▤ Copy session log</button>\n",
+    "        <div class=\"wg-session-empty\" aria-hidden=\"true\"><span>♧</span></div>\n",
+    "        <p class=\"wg-session-explainer\"><strong>Session history</strong><span>Responses remain in the writing desk. Copy the session log whenever you wish.</span></p>\n",
+    "        <p id=\"wg-receipt\" class=\"tiny\">No route receipt yet.</p>\n",
+    "      </section>\n",
+    "      <section id=\"wg-panel-continuity\" class=\"wg-sidebar-view wg-continuity-view\" role=\"tabpanel\" aria-labelledby=\"wg-tab-continuity\" hidden>\n",
+    "        <h2>Continuity checkpoint</h2>\n",
+    "        <label>World <input id=\"wg-cp-world\" value=\"wayglass:writing-room\"></label>\n",
+    "        <label>Participant <input id=\"wg-cp-participant\" value=\"rowan\"></label>\n",
+    "        <label>Checkpoint text <textarea id=\"wg-cp-text\" rows=\"3\"></textarea></label>\n",
+    "        <label>Open questions (one per line) <textarea id=\"wg-cp-questions\" rows=\"2\"></textarea></label>\n",
+    "        <label>Stop point <input id=\"wg-cp-stop\"></label>\n",
+    "        <label>Next owner <input id=\"wg-cp-owner\" value=\"Rowan\"></label>\n",
+    "        <button id=\"wg-cp-save\" type=\"button\" class=\"glass-chip\">Save checkpoint</button>\n",
+    "        <label>Storage receipt ID <input id=\"wg-cp-id\"></label>\n",
+    "        <button id=\"wg-cp-recover\" type=\"button\" class=\"glass-chip\">Recover checkpoint</button>\n",
+    "        <p id=\"wg-cp-status\" role=\"status\" class=\"tiny\">No stored checkpoint attached.</p>\n",
+    "      </section>\n",
+    "    </aside>\n",
+    "  </div>\n",
+    "  <footer class=\"wg-receipt tiny\"><span class=\"keyboard-hint\">Keyboard: Alt+I/O channel · Alt+R route · Alt+W write · Ctrl/Cmd+Enter send</span></footer>\n",
+    "</section>\n",
   ].join('');
 
   root.querySelectorAll('[data-wayglass-room]').forEach(button => button.addEventListener('click', () => globalThis.__wayglassOS?.mount(button.dataset.wayglassRoom)));
 
-  const routeSelect = root.querySelector('#wg-route');
+  const routePicker = mountWayglassRoutePicker(root.querySelector('#wg-route'), { onChange(value) {
+    selectedRoute = value;
+    wakeMaterial(0.88, 'route');
+    routeState.textContent = 'Active · ' + selectedRouteLabel();
+  } });
   const routeState = root.querySelector('#wg-route-state');
   const embodimentState = root.querySelector('#wg-embodiment-state');
   const channelButtons = [...root.querySelectorAll('[data-channel]')];
@@ -148,6 +180,26 @@ export async function mountArcSweepWritingSurface(root) {
     } catch(error) { checkpoint = null; cp('status').textContent = 'Checkpoint recovery failed: ' + error.message; }
   });
 
+  const sidebarTabs = [...root.querySelectorAll('[data-wg-side-tab]')];
+  function selectSidebar(name, focus = false) {
+    sidebarTabs.forEach(tab => {
+      const active = tab.dataset.wgSideTab === name;
+      tab.setAttribute('aria-selected', String(active));
+      tab.tabIndex = active ? 0 : -1;
+      root.querySelector('#wg-panel-' + tab.dataset.wgSideTab).hidden = !active;
+      if (active && focus) tab.focus();
+    });
+  }
+  sidebarTabs.forEach((tab, index) => {
+    tab.addEventListener('click', () => selectSidebar(tab.dataset.wgSideTab));
+    tab.addEventListener('keydown', event => {
+      if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+      event.preventDefault();
+      const next = event.key === 'Home' ? 0 : event.key === 'End' ? sidebarTabs.length - 1
+        : (index + (event.key === 'ArrowRight' ? 1 : -1) + sidebarTabs.length) % sidebarTabs.length;
+      selectSidebar(sidebarTabs[next].dataset.wgSideTab, true);
+    });
+  });
   const receipt = root.querySelector('#wg-receipt');
 
   const arState = document.documentElement.dataset.wayglassAr || 'unknown';
@@ -179,7 +231,7 @@ export async function mountArcSweepWritingSurface(root) {
 
   function refreshThread() {
     if (!messages.length) {
-      thread.innerHTML = '<div class="empty-thread">The room is quiet. Start anywhere.</div>';
+      thread.innerHTML = '<div class="empty-thread"><span class="wg-empty-feather" aria-hidden="true">✧</span><strong>The room is quiet. Start anywhere.</strong><small>Your conversation will unfold here.</small></div>';
       return;
     }
     thread.innerHTML = messages.map((message, index) => {
@@ -232,17 +284,12 @@ export async function mountArcSweepWritingSurface(root) {
       const catalogue = await listWayglassRoutes();
       routes = catalogue.routes || [];
       if (!routes.some((route) => route.route_id === selectedRoute && route.configured !== false)) selectedRoute = routes.find(route => route.configured !== false)?.route_id || '';
-      routeSelect.innerHTML = routes.map((route) =>
-        '<option value="' + escapeHtml(route.route_id) + '"' + (route.configured === false ? ' disabled' : '') + '>' +
-        escapeHtml(route.label + ' · ' + route.model + (route.configured === false ? ' · credentials missing' : '')) +
-        '</option>'
-      ).join('');
-      routeSelect.value = selectedRoute;
+      selectedRoute = routePicker.setRoutes(routes, selectedRoute);
       routeState.textContent = routes.length + ' registered route' + (routes.length === 1 ? '' : 's');
     } catch (error) {
       routes = [];
       selectedRoute = '';
-      routeSelect.innerHTML = '<option value="">Route catalogue unavailable</option>';
+      routePicker.setRoutes([]);
       routeState.textContent = 'Catalogue unavailable · reload to reconnect';
     }
   }
@@ -334,12 +381,6 @@ export async function mountArcSweepWritingSurface(root) {
     });
   });
 
-  routeSelect.addEventListener('change', () => {
-    selectedRoute = routeSelect.value;
-    wakeMaterial(0.88, 'route');
-    routeState.textContent = 'Active · ' + selectedRouteLabel();
-  });
-
   ownershipForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     const data = new FormData(ownershipForm);
@@ -373,7 +414,7 @@ export async function mountArcSweepWritingSurface(root) {
       return;
     }
     if (command === 'focus:route') {
-      routeSelect.focus();
+      routePicker.focus();
       wakeMaterial(0.52, 'route', { intent: 0.5 });
       return;
     }
@@ -410,6 +451,7 @@ export async function mountArcSweepWritingSurface(root) {
     lastReceipt: () => lastReceipt,
     destroy() {
       globalThis.removeEventListener?.('wayglass:command', handleWayglassCommand);
+      routePicker.destroy();
     },
   });
 }
