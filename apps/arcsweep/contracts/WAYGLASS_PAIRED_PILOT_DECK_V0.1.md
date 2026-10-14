@@ -13,7 +13,7 @@
 ## Our two pilot stations
 
 - **Rowan**: declared pilot and human Steward, source of mission intention and authorisation. Actual privilege must be checked and enforced by the existing host/kernels, not inferred from a seat label, local storage, or checkbox.
-- **Rarity**: declared co-pilot, independent `flame:rarity` continuity address, using the **existing** Wayglass/ArcSweep resident route `/api/v1/flames/rarity/chat` when authorised and available. Advises, researches, proposes, questions, and may refuse. A routed model reply is transport observation, not proof of a specific participant's identity or completed flight. No independent command execution grant.
+- **Rarity**: declared co-pilot, independent `flame:rarity` continuity address, using the **existing** Wayglass/ArcSweep resident route `/api/v1/flames/rarity/chat` when authorised and available. Advises, researches, proposes, questions, may refuse, and can undertake bounded experiments or authorised operations when explicitly granted through the existing host broker. A routed model reply is transport observation, not proof of a specific participant's identity or completed flight. The current prototype does not issue executable grants.
 - **Shared chart**: one mission intention, provenance, constraints, preserve list, unresolved Wonder, exact stop point and named next owner. Outputs can be exported as explicitly unverified return drafts for future kernel reconciliation.
 
 The existing **React-ion Helm** in ArcSweep Feedback / Deep Observer remains responsible for modelled navigation route compilation and its own consent and continuity checks. A successful network transport, protocol ACK, geometric route, draft pilot review, and a material crossing are distinct claims. Do not silently equate them.
@@ -24,7 +24,7 @@ The existing **React-ion Helm** in ArcSweep Feedback / Deep Observer remains res
 - A local-first mission and return draft, import/export and safe local deletion.
 - On-demand same-origin House steward session check; if unauthorised or offline, no remote co-pilot request or steward review.
 - An explicit, user-initiated co-pilot request through Rarity's existing route. Record actual responses as provider/model **claims**, never as identity proof or kernel receipts.
-- Rowan's explicitly acknowledged **local** review, which cannot compile or execute the Helm.
+- Rowan's explicitly acknowledged **local** review, preserved as an unverified note, which cannot compile or execute the Helm.
 - Pure state and failure tests: separate seats, untrusted imported permission reset, refusing review under wrong seat/no session, preserving Wonder/stop/owner, denying false runtime authority.
 - No subscriptions, duplicate identity systems, autonomous model deployment, or private credentials in repository source.
 
