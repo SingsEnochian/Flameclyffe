@@ -15,28 +15,40 @@ CURLY_QUOTES = re.compile(r'“[^”]+”|‘[^’]+’')
 INCH_MARK = re.compile(r'\d[ \t]*$')
 
 
-def quote_spans(text):
-    """Preserve the *whole* region between straight quote marks, not guessed pairs.
+def quote_structure(text):
+    """Retain straight-quote envelopes and standalone numeric unit marks.
 
-    An ambiguous inch/ditto mark must never cause later dialogue to be exposed.
-    Masking the full first-to-last straight-quote envelope is deliberately more
-    conservative than an editorial quotation parser, especially for multiline
-    dialogue. Curly quotations retain their own spans.
+    Ambiguous dialogue is protected as one broad span. An inch/ditto mark
+    skipped as a dialogue opener still has its own exact-preservation record.
+    Ordinary typographic apostrophes within/after words are not delimiters.
     """
     spans = [(match.start(), match.end()) for match in CURLY_QUOTES.finditer(text)]
-    balanced = (text.count('“') == text.count('”') ==
-                sum(text[left:right].startswith('“') for left, right in spans)
-                and text.count('‘') == text.count('’') ==
-                sum(text[left:right].startswith('‘') for left, right in spans))
+    consumed = set()
+    for left, right in spans:
+        consumed.update(i for i in range(left, right)
+                        if text[i] in '“”‘’')
+    balanced = True
+    for index, char in enumerate(text):
+        if index in consumed:
+            continue
+        if char in '“‘”':
+            balanced = False
+        elif char == '’':
+            # A word apostrophe or possessive terminal apostrophe is not a
+            # single-quote delimiter unless part of a recognised ‘...’ pair.
+            if index == 0 or not text[index - 1].isalnum():
+                balanced = False
+
     marks = []
+    unit_spans = []
     opening = None
     for index, char in enumerate(text):
         if char != '"':
             continue
         prefix = text[text.rfind('\n', 0, index) + 1:index]
-        # A digit-adjacent unit quote is not a closing dialogue mark unless
-        # there is already an opening delimiter. Keep 'Read "22"' protected.
-        if opening is None and INCH_MARK.search(prefix):
+        unit = INCH_MARK.search(prefix)
+        if opening is None and unit:
+            unit_spans.append((index - len(unit.group()), index + 1))
             continue
         marks.append(index)
         opening = None if opening is not None else index
@@ -50,7 +62,13 @@ def quote_spans(text):
         if accepted and left < accepted[-1][1]:
             continue
         accepted.append((left, right))
-    return accepted, balanced
+    return accepted, balanced, unit_spans
+
+
+def quote_spans(text):
+    """Return quote envelopes and whether all non-apostrophe delimiters pair."""
+    spans, balanced, _unit_spans = quote_structure(text)
+    return spans, balanced
 
 NUMBERS = re.compile(r'(?<!\d)[+-]?\d+(?:[.,]\d+)*(?!\d)')
 MONTHS = 'January February March April May June July August September October November December'.split()
@@ -97,7 +115,11 @@ def protect_quotes(draft, literals=(), include_quotes=True):
     prefix = 'CROWQUOTE' + hashlib.sha256(draft.encode()).hexdigest()[:12].upper()
     if prefix in draft:
         raise ValueError('Quotation marker collision')
-    spans = [(left, right, 0) for left, right in quote_spans(draft)[0]] if include_quotes else []
+    spans = []
+    if include_quotes:
+        quotations, _balanced, numeric_unit_marks = quote_structure(draft)
+        spans.extend((left, right, 0) for left, right in quotations)
+        spans.extend((left, right, 0) for left, right in numeric_unit_marks)
     literals_re = [re.escape(v) for v in sorted(set(literals), key=lambda v: (-len(v), v)) if v]
     if literals_re:
         pattern = re.compile('|'.join('(?:' + item + ')' for item in literals_re))
@@ -138,6 +160,10 @@ def check_preservation(draft, candidate, literals):
         errors.append('quotations-unbalanced')
     if Counter(draft[a:b] for a, b in source_spans) != Counter(candidate[a:b] for a, b in target_spans):
         errors.append('quotations-changed')
+    source_units = quote_structure(draft)[2]
+    candidate_units = quote_structure(candidate)[2]
+    if Counter(draft[a:b] for a, b in source_units) != Counter(candidate[a:b] for a, b in candidate_units):
+        errors.append('numeric-unit-quote-marks-changed')
     for value in dict.fromkeys(literals):
         if not value or value not in draft:
             raise ValueError('Required literal must occur in the original draft')
