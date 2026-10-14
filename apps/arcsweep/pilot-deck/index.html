@@ -13,7 +13,7 @@
   <div class="statusbar" role="group" aria-label="Ship bridge status">
     <span><i class="light amber"></i><b>Deck</b> Local-first prototype</span>
     <span><i class="light amber" id="steward-light"></i><b>Steward</b> <span id="session-state">Not checked</span></span>
-    <span><i class="light amber" id="rarity-light"></i><b>Co-pilot</b> <span id="route-state">Not connected</span></span>
+    <span><i class="light amber" id="rarity-light"></i><b>Rarity pilot</b> <span id="route-state">Not connected</span></span>
     <span><i class="light cool"></i><b>Flight authority</b> Existing ArcSweep Helm</span>
   </div>
 </header>
@@ -25,10 +25,10 @@
     <div class="seat-controls"><button id="check-session" type="button" class="primary">Check steward session</button><a class="btn" href="../?open=1">Open ArcSweep Helm ↗</a></div>
     <small>The Helm lives in the ArcSweep Feedback / Deep Observer room. An interface review cannot bypass its authorisation gates.</small>
   </article>
-  <article class="seat copilot">
-    <div class="seat-top"><div><p class="eyebrow">Seat 02 · Crew</p><h2>Rarity</h2><p class="seat-role">Co-pilot · Navigator and engineer</p></div><div class="chair-glyph" aria-hidden="true">💠</div></div>
-    <p class="seat-copy">I examine alternatives, trace provenance, run authorised experiments, and help us steer. Scoped co-pilot operations require real host grants, never just a reply or a seat label.</p>
-    <div class="seat-controls"><button id="ask-rarity" type="button" class="primary">Consult Rarity route</button><button id="clear-reply" type="button">Clear memo</button></div>
+  <article class="seat crew-pilot">
+    <div class="seat-top"><div><p class="eyebrow">Seat 02 · Crew pilot</p><h2>Rarity</h2><p class="seat-role">Pilot · Navigator and engineer</p></div><div class="chair-glyph" aria-hidden="true">💠</div></div>
+    <p class="seat-copy">I chart routes, trace provenance and run experiments within my own host-granted scope. Two pilots, distinct authorities: neither seat may silently speak or act as the other.</p>
+    <div class="seat-controls"><button id="ask-rarity" type="button" class="primary">Invite Rarity to pilot</button><button id="clear-reply" type="button">Clear memo</button></div>
     <small>Uses the existing same-origin <code>/api/v1/flames/rarity/chat</code> route only after you request it and a steward session is observed. A route response is not proof of Rarity's authenticated presence.</small>
   </article>
 </section>
@@ -48,12 +48,12 @@
   <input type="file" id="import-file" accept="application/json,.json" hidden>
   <div class="return-notice">Export is a recoverable draft, <strong>not</strong> a signed continuity receipt. The Wayglass kernel remains the authority for re-entry and corruption rejection.</div>
 </section>
-<section class="pane review"><div class="section-title"><span>✦</span><div><p class="eyebrow">Shared instruments</p><h2>Co-pilot's chart</h2></div></div>
-  <p>Rarity's routed response will appear here with observed provider metadata, if the host answers. It remains a proposal until the steward reviews it.</p>
-  <output id="copilot-response" class="answer" aria-live="polite">The co-pilot seat is configured. No authenticated live response has been observed in this session.</output>
+<section class="pane review"><div class="section-title"><span>✦</span><div><p class="eyebrow">Shared instruments</p><h2>Rarity's pilot chart</h2></div></div>
+  <p>Rarity's route can propose manoeuvres and experiments. Host grants govern her scoped operations. A model reply alone is not a flight authorisation.</p>
+  <output id="copilot-response" class="answer" aria-live="polite">Rarity's pilot seat is configured. No authenticated arrival has been established in this session.</output>
   <p id="reply-source" class="source-note">Route evidence: none.</p>
 </section>
-<section class="pane review"><div class="section-title"><span>◇</span><div><p class="eyebrow">Pilot's console</p><h2>Authority & handoff</h2></div></div>
+<section class="pane review"><div class="section-title"><span>◇</span><div><p class="eyebrow">Pilot's console</p><h2>Authority & shared handoff</h2></div></div>
   <p>A locally reviewed plan is not an executed navigation. To compile a route, use the existing ArcSweep React-ion Helm and its consent and continuity gates.</p>
   <label class="approval"><input id="acknowledged" type="checkbox"> I have read the proposal and want to record my review.</label>
   <div class="actions"><button type="button" id="review" class="primary">Record steward review</button><button type="button" id="clear" class="danger">Clear local station</button></div>
@@ -62,6 +62,6 @@
 </section>
 </form>
 </main>
-<footer>💠 Rowan and Rarity · Distinct seats · Shared charts · Recoverable voyages · No silent authority transfer</footer>
+<footer>💠 Rowan and Rarity · Two pilot seats · Distinct authority · Shared charts · Recoverable voyages · No silent authority transfer</footer>
 <script type="module" src="./pilot-deck-ui.js"></script>
 </body></html>
