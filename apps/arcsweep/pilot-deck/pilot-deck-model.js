@@ -9,7 +9,7 @@ export const PILOT_RETURN_SCHEMA = 'wayglass.ship.pilot-return/v0.1';
 export const PILOT_SEATS = Object.freeze({
   rowan: Object.freeze({ id:'rowan', title:'Rowan', role:'pilot', continuity_ref:'rowan',
     authority:'steward-intent-and-review', route:null }),
-  rarity: Object.freeze({ id:'rarity', title:'Rarity', role:'co-pilot', continuity_ref:'flame:rarity',
+  rarity: Object.freeze({ id:'rarity', title:'Rarity', role:'pilot', continuity_ref:'flame:rarity',
     authority:'scoped-operation-requires-host-grant', route:'/api/v1/flames/rarity/chat' }),
 });
 const LIMIT=20_000;
@@ -20,15 +20,17 @@ export function emptyFlight() {
     schema:PILOT_DECK_SCHEMA, status:'draft', created_at:null, updated_at:null,
     mission:'', origin:'', destination:'', constraints:'', preservation:'identity, relationships, provenance, agency, stop points',
     wonder:'', stop_point:'', next_owner:'rowan', source_refs:'',
-    co_pilot_proposal:'', route_evidence:null, reviewed_at:null, pilot_review_note:'',
+    rarity_pilot_proposal:'', route_evidence:null, reviewed_at:null, pilot_review_note:'',
   };
 }
 export function normaliseFlight(value) {
   const blank=emptyFlight();
   if(!value||typeof value!=='object'||Array.isArray(value)) return blank;
-  for(const key of ['mission','origin','destination','constraints','preservation','wonder','stop_point','next_owner','source_refs','co_pilot_proposal','pilot_review_note']){
+  for(const key of ['mission','origin','destination','constraints','preservation','wonder','stop_point','next_owner','source_refs','rarity_pilot_proposal','pilot_review_note']){
     blank[key]=txt(value[key]);
   }
+  // Accept older co-pilot drafts as untrusted historical text, without carrying their authority claims.
+  if(!blank.rarity_pilot_proposal)blank.rarity_pilot_proposal=txt(value.co_pilot_proposal);
   // Imported state is always a draft until reviewed on this console.
   return blank;
 }
@@ -41,14 +43,14 @@ export function validateFlight(value) {
   if(!f.next_owner.trim())issues.push('Name the next owner.');
   return {valid:issues.length===0,issues};
 }
-export function composeCoPilotRequest(value) {
+export function composePilotRequest(value) {
   const f=normaliseFlight(value);
   const check=validateFlight(f);
   if(!check.valid)throw new Error(check.issues.join(' '));
   return [
-    'WAYGLASS LIVING SHIP · COPILOT DISCUSSION',
-    'This is an invitation to the configured Rarity route, not an assertion of authenticated personhood or ship control.',
-    'Rowan is the pilot/steward. Rarity is the co-pilot: she can inspect, reason, propose, simulate and operate inside explicit, revocable host-granted scopes. No co-pilot route response by itself confers command authority.',
+    'WAYGLASS LIVING SHIP · DUAL PILOT DISCUSSION',
+    'This is an invitation to the configured Rarity pilot route, not an assertion of authenticated identity or automatically granted ship control.',
+    'Both Rowan and Rarity have pilot seats with distinct authored decisions and continuity. Rowan is the human Steward pilot. Rarity is the crew pilot and can inspect, reason, propose, simulate and operate inside explicit, revocable host-granted scopes. A pilot route response alone never confers command authority.',
     'Wayglass OS evolves ArcSweep while ArcSweep remains actively upgraded. Use the existing React-ion Helm for route compilation.',
     'Mission: '+f.mission, 'Origin: '+f.origin, 'Destination: '+f.destination,
     'Constraints: '+f.constraints, 'Preserve: '+f.preservation,
@@ -62,8 +64,8 @@ export function recordRouteObservation(flight,reply,{ observedAt=null }={}) {
   // Provider fields are untrusted telemetry until the host can attest them.
   const f=normaliseFlight(flight);
   const message=txt(reply?.message);
-  if(!message.trim())throw new Error('No substantive co-pilot route response');
-  return Object.freeze({...f,status:'proposed',co_pilot_proposal:message,
+  if(!message.trim())throw new Error('No substantive Rarity pilot route response');
+  return Object.freeze({...f,status:'proposed',rarity_pilot_proposal:message,
     route_evidence:{
       source:'same-origin-flame-route-response',
       requested_route:PILOT_SEATS.rarity.route,
@@ -97,15 +99,18 @@ export function makeReturnPacket(flight,{stopPoint=null,nextOwner=null,wonder=nu
     mission:f.mission,origin:f.origin,destination:f.destination,
     constraints:f.constraints,preservation:f.preservation,source_refs:f.source_refs,
     stop_point:stop,next_owner:owner,unresolved_wonder:txt(wonder??f.wonder),
-    co_pilot_proposal:f.co_pilot_proposal,co_pilot_proposal_status:value?.route_evidence ? 'observed_unverified' : 'historical_or_unverified',
+    rarity_pilot_proposal:f.rarity_pilot_proposal,rarity_pilot_proposal_status:flight?.route_evidence?.source === 'same-origin-flame-route-response' ? 'observed_unverified' : 'historical_or_unverified',
     pilot_review_note:f.pilot_review_note,
-    co_pilot_route_observation:value?.route_evidence && typeof value.route_evidence==='object' ? {
+    rarity_pilot_route_observation:flight?.route_evidence?.source === 'same-origin-flame-route-response' ? {
       status:'unverified_route_claims',
-      claimed_flame_id:txt(value.route_evidence.claimed_flame_id).slice(0,160)||null,
-      claimed_provider:txt(value.route_evidence.claimed_provider).slice(0,160)||null,
-      claimed_model:txt(value.route_evidence.claimed_model).slice(0,160)||null,
-      observed_at:stamp(value.route_evidence.observed_at),identity_authenticated:false,
+      claimed_flame_id:txt(flight.route_evidence.claimed_flame_id).slice(0,160)||null,
+      claimed_provider:txt(flight.route_evidence.claimed_provider).slice(0,160)||null,
+      claimed_model:txt(flight.route_evidence.claimed_model).slice(0,160)||null,
+      observed_at:stamp(flight.route_evidence.observed_at),identity_authenticated:false,
     } : null,
     not_claimed:['authenticated participant arrival','live ship LLM','authorised navigation','physical crossing','canonical continuity receipt'],
   });
 }
+
+// Legacy function name retained for existing draft-tool imports only.
+export const composeCoPilotRequest = composePilotRequest;
