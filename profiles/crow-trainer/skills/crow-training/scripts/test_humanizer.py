@@ -93,7 +93,7 @@ class PreservationTests(unittest.TestCase):
         original = 'A stray " mark.\nMara said "...Keep the seal."\nAnother stray " mark.'
         altered = original.replace('Keep the seal.', 'Discard it.')
         self.assertIn('quotations-unbalanced', check_preservation(original, altered, []))
-        self.assertTrue(check_preservation(original, original))
+        self.assertTrue(check_preservation(original, original, []))
         masked, tokens = protect_quotes(original)
         self.assertEqual(restore_quotes(masked, tokens), (original, []))
 
