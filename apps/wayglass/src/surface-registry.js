@@ -19,6 +19,6 @@ export async function mountWayglassSurface(surfaceId, root) {
   if (prior?.cleanup) prior.cleanup();
   activeMounts.delete(root);
   const result = await surface.mount(root);
-  activeMounts.set(root, { surfaceId, cleanup: typeof result === 'function' ? result : null });
+  activeMounts.set(root, { surfaceId, cleanup: typeof result === 'function' ? result : (typeof result?.destroy === 'function' ? () => result.destroy() : null) });
   return result;
 }
