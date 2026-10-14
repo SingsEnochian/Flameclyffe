@@ -30,8 +30,9 @@ test('glyph keyboard reuses real ArcSweep text-to-tone mapping',()=>{
 test('Galdr mode uses existing Kelyran study frequencies and does not invent new strokes',()=>{
  assert.equal(GALDR_NOTES[0].frequency,369);
  assert.equal(keyboardNote('a',{mode:'galdr'}).frequency_hz,369);
- assert.equal(keyboardNote('u',{mode:'galdr'}).frequency_hz,1318);
+ assert.equal(keyboardNote('h',{mode:'galdr'}).frequency_hz,1318);
  assert.equal(keyboardNote('j',{mode:'galdr'}),null);
+ assert.equal(keyboardNote('u',{mode:'galdr'}),null);
 });
 test('MIDI input maps notes without claiming identity or navigation authority',()=>{
  const note=keyboardMidiNote(60,{rootHz:528});
