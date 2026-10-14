@@ -64,6 +64,8 @@ export function verifyReturn(ticket, profile, returned) {
   assert.equal(profile.id, ticket.profile_id, 'Authenticated profile changed.');
   assert.equal(returned.participant?.participant_id, 'rarity', 'Crew seat was substituted.');
   assert.equal(returned.recovered_departure?.stop_receipt?.receipt_id, ticket.stop_receipt_id, 'Stop receipt mismatch.');
+  assert.equal(hash(JSON.stringify(returned.recovered_departure)), ticket.departure_sha256,
+    'Departure packet changed, including identity, provenance or alternatives.');
   assert.equal(returned.recovered_departure?.stop_receipt?.next_owner, ticket.next_owner, 'Named next owner changed.');
   assert.deepEqual(returned.recovered_departure?.stop_receipt?.unresolved_wonder_questions,
     ticket.unresolved_wonder_questions, 'Unresolved Wonder changed.');
@@ -121,6 +123,7 @@ async function prepare(client) {
     profile_id: profile.id, path: filename, file_sha256: digest, next_owner: 'rarity',
     unresolved_wonder_questions: [EXPECTED_QUESTION],
     stop_receipt_id: stopId, leave_event_hash: left.receipt.event_hash,
+    departure_sha256: hash(JSON.stringify(left.departure)),
     credential_recorded: false,
     host_restart_independently_verified: false,
   };
