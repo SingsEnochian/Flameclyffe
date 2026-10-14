@@ -355,9 +355,13 @@ def run(args):
     except (OSError, RuntimeError) as exc:
         runtime_error = f'{type(exc).__name__}: {exc}'
     runtime_env = os.environ.copy()
-    library_key = 'PATH' if os.name == 'nt' else (
-        'DYLD_LIBRARY_PATH' if sys.platform == 'darwin' else 'LD_LIBRARY_PATH')
-    runtime_env[library_key] = str(runtime.parent) + os.pathsep + runtime_env.get(library_key, '')
+    # Do not inherit user-controlled loader search paths or preload hooks.
+    # Dynamic dependencies are not trusted by the verifier, so inserting the
+    # original runtime directory would contradict the static-only proof.
+    for loader_variable in ('LD_LIBRARY_PATH', 'LD_PRELOAD', 'LD_AUDIT',
+                            'DYLD_LIBRARY_PATH', 'DYLD_INSERT_LIBRARIES',
+                            'DYLD_FALLBACK_LIBRARY_PATH'):
+        runtime_env.pop(loader_variable, None)
     with (folder / 'runtime-output.txt').open('w') as output, (folder / 'runtime.log').open('w') as log:
         if runtime_error is not None:
             log.write(runtime_error + '\n')
