@@ -92,7 +92,7 @@ export function createWayglassBrokerWorkScheduler({
       route_id: identifier(request.route_id, 'route_id'),
       work_ref: identifier(request.work_ref, 'work_ref'),
       stop_point: bounded(request.stop_point, 'stop_point'),
-      next_owner: identifier(request.next_owner, 'next_owner'),
+      next_owner: bounded(request.next_owner, 'next_owner', 240),
       unresolved_wonder_questions: [...wonder],
       provenance_refs: [...refs],
       visible_output: '',
