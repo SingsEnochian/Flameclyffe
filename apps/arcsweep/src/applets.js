@@ -5,6 +5,7 @@ import { contextualOrganLaunchHref, organLaunchHref } from './organ-launch-route
 
 const CORE_APPLETS = [
   { id: 'portal', label: 'Portal', glyph: '◉', category: 'core', defaultVisible: true },
+  { id: 'code-loom', label: 'Rarity’s Code Loom', glyph: '💠', category: 'creative-instrument', defaultVisible: true, pagesHref: '/Flameclyffe/apps/arcsweep/code-loom/', webHref: '/arcsweep/code-loom/', description: 'Atelier for provenance, original code, test evidence and proposed agent handoffs.' },
   { id: 'worlds', label: 'World Registry', glyph: '✧', category: 'core', defaultVisible: true },
   { id: 'canonical-spine', label: 'Canonical Spine', glyph: '⌘', category: 'core', defaultVisible: true, pagesHref: '/Flameclyffe/apps/arcsweep/spine/', webHref: '/arcsweep/spine/' },
   { id: 'ancestry', label: 'Ancestral Reader', glyph: '↟', category: 'continuity', defaultVisible: true, pagesHref: '/Flameclyffe/apps/arcsweep/ancestry/', webHref: '/arcsweep/ancestry/' },
