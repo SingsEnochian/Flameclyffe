@@ -11,13 +11,13 @@ const { once } = require('node:events');
 const test = require('node:test');
 const execute = promisify(execFile);
 const repoRoot = path.resolve(__dirname, '../..');
-const hostFile = path.join(repoRoot, 'apps/starwell-server/test/wayglass-workspace-projects.test.js');
+const hostFile = path.join(repoRoot, 'apps/starwell-server/test/wayglass-live-return-host-fixture.cjs');
 const witnessFile = path.join(repoRoot, 'scripts/wayglass-live-return-witness.mjs');
 
-async function launchHost(directory) {
-  const child = spawn(process.execPath, [hostFile, '--workspace-host'], {
+async function launchHost(directory, fixedPort = 0) {
+  const child = spawn(process.execPath, [hostFile], {
     cwd: repoRoot,
-    env: { ...process.env, WORKSPACE_TEST_DIRECTORY: directory },
+    env: { ...process.env, WORKSPACE_TEST_DIRECTORY: directory, WORKSPACE_TEST_PORT: String(fixedPort) },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   let errorOutput = '';
@@ -99,7 +99,7 @@ test('actual localhost authenticated MCP prepare/leave, process restart, and pri
 
   await hostOne.stop();
   liveHost = null;
-  const hostTwo = await launchHost(workspaceDirectory);
+  const hostTwo = await launchHost(workspaceDirectory, Number(new URL(hostOne.origin).port));
   liveHost = hostTwo;
   env.WAYGLASS_MCP_URL = hostTwo.origin + '/mcp';
   const returned = await witness('return', env, prepared.ticket_path);
