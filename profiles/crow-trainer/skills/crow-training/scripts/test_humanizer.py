@@ -117,6 +117,56 @@ class PreservationTests(unittest.TestCase):
             original, original.replace('gap between scenes', 'changed scene'), []))
         self.assertEqual(restore_quotes(masked, protected), (original, []))
 
+    def test_numeric_inch_marks_cannot_disappear_while_numbers_remain(self):
+        for original, changed in [
+            ('Use the 5" pipe.\nMara said "Keep the seal."', 'Use the 5 pipe.\nMara said "Keep the seal."'),
+            ('Use the 5 " pipe.\nMara said "Keep the seal."', 'Use the 5 pipe.\nMara said "Keep the seal."'),
+            ('Use the 5" pipe.', 'Use the 5 pipe.'),
+        ]:
+            with self.subTest(original=original):
+                self.assertIn('numeric-unit-quote-marks-changed',
+                              check_preservation(original, changed, []))
+                masked, spans = protect_quotes(original)
+                self.assertNotIn('5"', masked) if '5"' in original else self.assertNotIn('5 "', masked)
+                self.assertEqual(restore_quotes(masked, spans), (original, []))
+
+    def test_typographic_apostrophes_are_not_unmatched_quotes(self):
+        original = 'Mara’s note says “Keep the seal.” James’ report agrees.'
+        self.assertEqual(check_preservation(original, original, []), [])
+        masked, spans = protect_quotes(original)
+        self.assertNotIn('Keep the seal.', masked)
+        self.assertEqual(restore_quotes(masked, spans), (original, []))
+        changed = original.replace('Keep the seal.', 'Discard the seal.')
+        self.assertIn('quotations-changed', check_preservation(original, changed, []))
+
+    @unittest.skipUnless(sys.platform.startswith('linux') and Path('/bin/true').is_file(),
+                         'Linux ELF dependency probe requires Linux')
+    def test_dynamic_elf_dependencies_are_rejected(self):
+        with self.assertRaisesRegex(OSError, 'dynamic libraries'):
+            humanizer.verify_runtime_dependency_mode(Path('/bin/true'))
+
+    @unittest.skipUnless(sys.platform.startswith('linux') and shutil.which('cc'),
+                         'Static ELF compilation needs Linux C toolchain')
+    def test_static_elf_dependency_mode_is_verified(self):
+        with tempfile.TemporaryDirectory() as temp:
+            binary = Path(temp) / 'static-runner'
+            result = subprocess.run(
+                ['cc', '-static', '-o', str(binary), '-x', 'c', '-'],
+                input=b'int main(void){return 0;}',
+                capture_output=True, timeout=60)
+            if result.returncode != 0:
+                self.skipTest('Static C toolchain unavailable: ' + result.stderr.decode()[:120])
+            self.assertEqual(humanizer.verify_runtime_dependency_mode(binary),
+                             'linux-static-elf-no-pt-dynamic-or-interp')
+            command, fd, options, mode, digest = humanizer.bind_runtime_artifact(binary)
+            try:
+                binary.write_bytes(b'replaced-path-after-attestation')
+                self.assertEqual(subprocess.run([command], check=False, timeout=10, **options).returncode, 0)
+                self.assertEqual(humanizer.sha256_fd(fd), digest)
+                self.assertEqual(mode, 'linux-sealed-memfd')
+            finally:
+                os.close(fd)
+
     def test_missing_runtime_creates_failed_receipt(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
@@ -175,7 +225,8 @@ class PreservationTests(unittest.TestCase):
                 os.close(kwargs['pass_fds'][0])
                 return argparse.Namespace(returncode=0)
             with patch.object(humanizer, 'REFERENCE', reference), patch('pathlib.Path.cwd', return_value=root):
-                with patch.object(humanizer.subprocess, 'run', side_effect=completed_command):
+                with patch.object(humanizer.subprocess, 'run', side_effect=completed_command), \
+                     patch.object(humanizer, 'verify_runtime_dependency_mode', return_value='fixture-static'):
                     with contextlib.redirect_stdout(io.StringIO()):
                         with self.assertRaises(SystemExit) as exc:
                             humanizer.run(args)
@@ -216,7 +267,8 @@ class PreservationTests(unittest.TestCase):
                 stdout.write('Keep the 2kg unit. [end of text]')
                 return argparse.Namespace(returncode=0)
             with patch.object(humanizer, 'REFERENCE', reference), patch('pathlib.Path.cwd', return_value=root):
-                with patch.object(humanizer.subprocess, 'run', side_effect=replace_while_running):
+                with patch.object(humanizer.subprocess, 'run', side_effect=replace_while_running), \
+                     patch.object(humanizer, 'verify_runtime_dependency_mode', return_value='fixture-static'):
                     with contextlib.redirect_stdout(io.StringIO()):
                         humanizer.run(args)
             receipts = list((root / '.crow-trainer' / 'humanizer').glob('*/receipt.json'))
@@ -259,7 +311,8 @@ class PreservationTests(unittest.TestCase):
                 stdout.write('Keep the 2kg unit. [end of text]')
                 return argparse.Namespace(returncode=0)
             with patch.object(humanizer, 'REFERENCE', reference), patch('pathlib.Path.cwd', return_value=root):
-                with patch.object(humanizer.subprocess, 'run', side_effect=attempted_swap):
+                with patch.object(humanizer.subprocess, 'run', side_effect=attempted_swap), \
+                     patch.object(humanizer, 'verify_runtime_dependency_mode', return_value='fixture-static'):
                     with contextlib.redirect_stdout(io.StringIO()):
                         humanizer.run(args)
             receipts = list((root / '.crow-trainer' / 'humanizer').glob('*/receipt.json'))
