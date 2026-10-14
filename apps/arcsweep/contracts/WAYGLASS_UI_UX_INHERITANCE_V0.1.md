@@ -15,6 +15,10 @@
 - `apps/arcsweep/src/ancestral-reader-holography.css`: nonblocking holographic overlays and readable foreground semantics.
 - `apps/arcsweep/src/typing-sonification.js`, `apps/arcsweep/src/somatic-event-bridge.js`, and `apps/arcsweep/src/story-soundscape.js`: sound and body feedback driven by meaningful instrument state, not gratuitous decoration.
 
+## Whole-ship visualisation law
+
+**The entire Wayglass vessel and its working UI is the living visualisation.** An independent canvas or window cannot impersonate this system. The shared ship ecological substrate appears across the ArcSweep shell, both pilot seats, Atelier and Harmonic Keyboard through `apps/arcsweep/ship-ui/wayglass-living-ship.js`; its evolving signals represent explicit local simulation, while real sensory observations retain their source labels and authority limitations. Ship intelligence, canon, identity and navigation remain owned by validated Wayglass host infrastructure.
+
 ## Visual, somatic and interaction laws
 
 1. **Black mineral / labradorite glass.** Structured optical layers have perceived thickness, curved catches of light, depth between sheets, physically responsive highlights and local refraction where supported. Use the existing Wayglass shaders and Three.js embodiment for actual refractive rendering when integrated; a CSS approximation is a compatibility fallback, not the final effect.
