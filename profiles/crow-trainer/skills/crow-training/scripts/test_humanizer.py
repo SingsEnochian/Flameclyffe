@@ -305,6 +305,9 @@ class PreservationTests(unittest.TestCase):
                 tokens=32, require_literal=[], protect_span=[],
                 protect_literals=False, protect_quotes=True)
             def attempted_swap(cmd, stdout, stderr, timeout, env, **kwargs):
+                self.assertNotIn('LD_PRELOAD', env)
+                self.assertNotIn('LD_LIBRARY_PATH', env)
+                self.assertNotIn('LD_AUDIT', env)
                 self.assertNotEqual(Path(cmd[0]), runtime)
                 self.assertEqual(Path(cmd[0]).read_bytes(), b'original-runtime')
                 runtime.write_bytes(b'evil-runtime')
@@ -315,7 +318,9 @@ class PreservationTests(unittest.TestCase):
                 self.assertEqual(Path(cmd[0]).read_bytes(), b'original-runtime')
                 stdout.write('Keep the 2kg unit. [end of text]')
                 return argparse.Namespace(returncode=0)
-            with patch.object(humanizer, 'REFERENCE', reference), patch('pathlib.Path.cwd', return_value=root):
+            with patch.object(humanizer, 'REFERENCE', reference), \
+                 patch('pathlib.Path.cwd', return_value=root), \
+                 patch.dict(os.environ, {'LD_PRELOAD': 'attack.so', 'LD_LIBRARY_PATH': '/hostile', 'LD_AUDIT': 'attack.so'}):
                 with patch.object(humanizer.subprocess, 'run', side_effect=attempted_swap), \
                      patch.object(humanizer, 'verify_runtime_dependency_mode', return_value='fixture-static'):
                     with contextlib.redirect_stdout(io.StringIO()):
