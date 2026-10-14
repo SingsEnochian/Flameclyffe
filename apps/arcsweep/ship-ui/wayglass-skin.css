@@ -49,6 +49,7 @@ body {
   border-radius:inherit;
   background:
     linear-gradient(112deg,transparent 4%,rgba(155,226,235,.045) 29%,transparent 38%),
+    radial-gradient(circle at var(--wg-highlight-x,48%) var(--wg-highlight-y,5%),rgba(135,227,219,.13),transparent 40%),
     radial-gradient(ellipse at 6% 0%,rgba(197,170,111,.11),transparent 30%);
   pointer-events:none;
   z-index:-1;
@@ -67,6 +68,9 @@ body {
   border-top:2px solid var(--wg-gold);
 }
 .seat.crew-pilot {border-top-color:var(--wg-seafoam)}
+:is(.panel,.pane,.seat,.instrument):focus-within {
+  border-color:rgba(155,230,224,.48);
+}
 :is(h1,h2) {text-shadow:0 2px 18px rgba(18,77,92,.22)}
 :is(.ship-mark,.brand,.eyebrow) {color:#b6dbdf}
 :is(input:not([type='checkbox']):not([type='range']),textarea,select,.answer,.preview,#status) {
