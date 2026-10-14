@@ -20,7 +20,9 @@ export WAYGLASS_MCP_URL=http://127.0.0.1:3841/mcp
 node scripts/wayglass-live-return-witness.mjs prepare
 ```
 
-The command rejects unauthenticated access, proves the current profile, enters a randomly named Builder project, writes one harmless text file, obtains an attributable write event, and leaves a stop receipt retaining a named next owner and an unresolved Wonder question. It prints a **private ticket path**, not the token. File permissions: home-local directory 0700, ticket 0600. The ticket contains hashes/ids but no credential.
+The command rejects unauthenticated access, proves the current profile, enters a randomly named Builder project, writes one harmless text file, obtains an attributable write event, and leaves a stop receipt retaining a named next owner and an unresolved Wonder question.
+
+Before the ticket is accepted, it checks the complete host departure and continuation schemas, binding identity declarations, project/world, active-work hash, provenance, stop point, named owner, unanswered question, alternatives and non-granting authority. It validates the write and leave journal events and stores the **original write event hash** and authenticated principal reference in the private ticket. Incomplete evidence exits non-zero without issuing a ticket. It prints a **private ticket path**, not the token. File permissions: home-local directory 0700, ticket 0600. The ticket contains hashes/ids but no credential.
 
 ## Host restart
 
@@ -32,7 +34,7 @@ Stop and restart the **actual** Hearthgate/Wayglass process while retaining the 
 node scripts/wayglass-live-return-witness.mjs return /private/path/from/phase-a.json
 ```
 
-The command checks the stable authenticated profile, re-enters using the **stored receipt ID**, compares the full recovered departure digest (identity declarations, alternatives, provenance and Wonder), the leave-event link, and the saved immutable file content/hash. It writes a second private witness `.result.json`, refusing to overwrite prior evidence.
+The command checks the stable authenticated profile, re-enters using the **stored receipt ID**, compares the full recovered departure digest (identity declarations, alternatives, provenance and Wonder), the leave-event link, and the saved immutable file content/hash. It additionally validates the return entry's own event hash, identity, principal, project, workspace, new session and stop-event link, and requires the recovered journal to retain the original validated write and leave event hashes. Every authenticated JSON-RPC response must match the specific request ID and declare version 2.0. It writes a second private witness `.result.json`, refusing to overwrite prior evidence.
 
 If a field differs, the command exits non-zero. No return success is announced before the host's structured result is compared.
 
