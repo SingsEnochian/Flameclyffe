@@ -86,11 +86,11 @@ test('the visualiser is the ship UI itself, not a separate decorative room',()=>
   assert.match(html,/wayglass-living-ship\.js/);
  }
  const root=content('../index.html');
- assert.match(root,/wayglass-living-ship\\.css/);
- assert.doesNotMatch(root,/src="\\.\\/ship-ui\\/wayglass-living-ship\\.js"/);
+ assert.ok(root.includes('wayglass-living-ship.css'));
+ assert.ok(!root.includes('src="./ship-ui/wayglass-living-ship.js"'));
  const bootstrap=content('../src/main-bootstrap.js');
- assert.match(bootstrap,/import\\('\\.\\.\\/ship-ui\\/wayglass-living-ship\\.js'\\)/);
- assert.match(bootstrap,/if \\(!safeBoot\\)/);
+ assert.ok(bootstrap.includes("import('../ship-ui/wayglass-living-ship.js')"));
+ assert.ok(bootstrap.includes('if (!safeBoot)'));
  const render=content('../ship-ui/wayglass-living-ship.js');
  const css=content('../ship-ui/wayglass-living-ship.css');
  assert.match(render,/new LivingShipEcology/);
