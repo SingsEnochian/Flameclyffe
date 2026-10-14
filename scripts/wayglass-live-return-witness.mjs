@@ -9,6 +9,9 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
+const { inspectContinuationPacket } = require('../lib/wayglass-continuation-packet.cjs');
 
 const hash = value => createHash('sha256').update(value).digest('hex');
 const EXPECTED_QUESTION = 'How does verified return differ from reconstructed familiarity?';
@@ -51,17 +54,25 @@ export function validateDeparture(departure, expected) {
     'stop world/participant/time');
   need(stop.stop_point === EXPECTED_STOP && stop.next_owner === 'rarity',
     'stop point or next owner');
-  need(records(stop.identity_declarations) && stop.identity_declarations.some(entry =>
-    entry.participant_id === 'rarity' && nonempty(entry.continuity_ref) && nonempty(entry.source_ref)),
-    'stop identity declarations');
+  need(records(stop.identity_declarations) &&
+    stop.identity_declarations.length === 1 &&
+    stop.identity_declarations[0].participant_id === 'rarity' &&
+    stop.identity_declarations[0].continuity_ref === 'rarity-wayglass' &&
+    stop.identity_declarations[0].source_ref === 'wayglass:crew-workspace-registry/v0.1',
+    'stop identity declarations must contain only the authorised Rarity seat');
   need(nonemptyStrings(stop.provenance_refs) &&
     stop.provenance_refs.includes('wayglass-session:' + expected.session_id),
     'stop provenance');
   need(boundWork(stop.active_work, expected.path, expected.file_sha256), 'stop active work');
   need(same(stop.unresolved_wonder_questions, [EXPECTED_QUESTION]), 'stop Wonder questions');
   need(same(stop.alternatives, EXPECTED_ALTERNATIVES), 'stop alternatives');
-  need(records(stop.relationship_state) && records(stop.organ_refs) &&
-    Array.isArray(stop.revoked_refs), 'stop retained relationship/revocation state');
+  // This one-session witness requests no organ, relationship or revocation
+  // additions. Never baseline an unsolicited authority-bearing organ, even
+  // when the host echoes the same corrupted record on return.
+  need(records(stop.relationship_state) && stop.relationship_state.length === 0 &&
+    records(stop.organ_refs) && stop.organ_refs.length === 0 &&
+    Array.isArray(stop.revoked_refs) && stop.revoked_refs.length === 0,
+    'unexpected relationship, organ or revocation authority in trial departure');
   need(stop.authority?.scope === 'departure-evidence-only' &&
     stop.authority.canon_commit === false && stop.authority.identity_commit === false &&
     stop.authority.relationship_commit === false && stop.authority.authority_grant === false,
@@ -87,6 +98,11 @@ export function validateDeparture(departure, expected) {
     same(packet.relationship_state, stop.relationship_state) &&
     same(packet.organ_refs, stop.organ_refs),
     'continuation context');
+  const inspection = inspectContinuationPacket(packet, {
+    expected_world_id: world, expected_participant_id: 'rarity',
+  });
+  need(inspection.status === 'accepted-for-review' && inspection.can_restore_context === true &&
+    inspection.blocking.length === 0, 'canonical continuation inspection rejected evidence');
   need(packet.authority?.scope === 'continuation-context-only' &&
     packet.authority.requires_review_before_promotion === true &&
     packet.authority.canon_commit === false && packet.authority.identity_commit === false &&
