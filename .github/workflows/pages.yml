@@ -94,8 +94,10 @@ jobs:
           test -f dist/arcsweep/index.html
           test -d dist/arcsweep/assets
           test -f dist/arcsweep/code-loom/index.html
+          test -f dist/arcsweep/pilot-deck/index.html
+          test -f dist/arcsweep/pilot-deck/pilot-deck-ui.js || find dist/arcsweep/assets -name '*.js' | grep -q .
           grep -Fq 'Rarity' dist/arcsweep/code-loom/index.html
-          node --test apps/arcsweep/test/code-loom-model.test.js apps/arcsweep/test/wayglass-local-event-ledger.test.js apps/arcsweep/test/wayglass-sonic-score.test.js
+          node --test apps/arcsweep/test/code-loom-model.test.js apps/arcsweep/test/pilot-deck-model.test.js apps/arcsweep/test/wayglass-local-event-ledger.test.js apps/arcsweep/test/wayglass-sonic-score.test.js
 
       - name: Verify Arcsweep production module boundary
         run: |
