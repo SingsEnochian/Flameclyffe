@@ -26,6 +26,8 @@ test('agent task packets preserve attribution and constraints',()=>{
   assert.match(promptForAgent(packet),/Wayglass-local offline author receipts/);
   assert.match(promptForAgent(packet),/not evidence of agent dispatch/);
   assert.match(promptForAgent(packet),/Wayglass OS evolves ArcSweep/);
+  assert.match(promptForAgent(packet),/ArcSweep continues to be actively upgraded/);
+  assert.match(promptForAgent(packet),/ArcSweep, Wayglass OS, or both/);
   assert.match(promptForAgent(packet),/every child agent\/model/);
   assert.equal(packet.next_owner,'Codex');
  }
