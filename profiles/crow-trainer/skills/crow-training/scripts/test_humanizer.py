@@ -7,6 +7,8 @@ import io
 import json
 import os
 import sys
+import shutil
+import subprocess
 import tempfile
 from pathlib import Path
 from unittest.mock import patch
@@ -267,6 +269,23 @@ class PreservationTests(unittest.TestCase):
             self.assertEqual(result['verdict'], 'held-for-review')
             self.assertNotEqual(result['runtime_snapshot'], str(runtime))
             self.assertEqual(result['runtime_execution_binding'], 'linux-sealed-memfd')
+
+    @unittest.skipUnless(sys.platform.startswith('linux') and Path('/bin/true').is_file(),
+                         'Kernel-sealed executable integration proof requires Linux')
+    def test_kernel_sealed_artifact_executes_the_original_bytes(self):
+        with tempfile.TemporaryDirectory() as temp:
+            runtime = Path(temp) / 'runner'
+            shutil.copy2('/bin/true', runtime)
+            original_digest = hashlib.sha256(runtime.read_bytes()).hexdigest()
+            executable, fd, options, binding, captured_hash = humanizer.bind_runtime_artifact(runtime)
+            try:
+                self.assertEqual(binding, 'linux-sealed-memfd')
+                self.assertEqual(captured_hash, original_digest)
+                runtime.write_bytes(b'hostile pathname replacement')
+                self.assertEqual(subprocess.run([executable], check=False, timeout=10, **options).returncode, 0)
+                self.assertEqual(humanizer.sha256_fd(fd), original_digest)
+            finally:
+                os.close(fd)
 
     def test_trainer_protects_quotations_by_default(self):
         parser = argparse.ArgumentParser()
