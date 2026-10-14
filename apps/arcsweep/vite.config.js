@@ -106,6 +106,7 @@ export default defineConfig({
       input: {
         main: resolve(ARCSWEEP_ROOT, 'index.html'),
         codeLoom: resolve(ARCSWEEP_ROOT, 'code-loom/index.html'),
+        pilotDeck: resolve(ARCSWEEP_ROOT, 'pilot-deck/index.html'),
         spine: resolve(ARCSWEEP_ROOT, 'spine/index.html'),
         hearthgate: resolve(ARCSWEEP_ROOT, 'hearthgate/index.html'),
         ancestry: resolve(ARCSWEEP_ROOT, 'ancestry/index.html'),
