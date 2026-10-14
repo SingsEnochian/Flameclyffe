@@ -4,6 +4,7 @@ import json
 import os
 import re
 import shutil
+import struct
 import subprocess
 import sys
 from collections import Counter
@@ -193,6 +194,55 @@ def sha256_fd(fd):
     return digest.hexdigest()
 
 
+def verify_runtime_dependency_mode(snapshot):
+    """Fail closed unless the runtime is a structurally static Linux ELF.
+
+    This checks the ELF program-header table for an interpreter or dynamic
+    segment. It is not a claim that untrusted OS state or explicit dlopen calls
+    are fully attested; those require a separately reviewed execution sandbox.
+    Dynamic llama.cpp builds and Windows PE dependency graphs remain
+    unverified and cannot produce a held-for-review receipt.
+    """
+    if not sys.platform.startswith('linux'):
+        raise OSError('Runtime dependency attestation is unavailable on this platform')
+    with snapshot.open('rb') as stream:
+        header = stream.read(64)
+        if len(header) < 52 or header[:4] != b'\x7fELF':
+            raise OSError('Runtime is not a verifiable Linux ELF executable')
+        elf_class, endian_type = header[4], header[5]
+        if elf_class not in (1, 2) or endian_type not in (1, 2):
+            raise OSError('Unsupported ELF class or byte order')
+        order = '<' if endian_type == 1 else '>'
+        if elf_class == 2:
+            if len(header) < 64:
+                raise OSError('Incomplete ELF64 header')
+            ph_offset = struct.unpack_from(order + 'Q', header, 32)[0]
+            ph_entry_size, ph_count = struct.unpack_from(order + 'HH', header, 54)
+        else:
+            ph_offset = struct.unpack_from(order + 'I', header, 28)[0]
+            ph_entry_size, ph_count = struct.unpack_from(order + 'HH', header, 42)
+        elf_type = struct.unpack_from(order + 'H', header, 16)[0]
+        if elf_type not in (2, 3) or not 1 <= ph_count <= 512 or ph_entry_size < 32:
+            raise OSError('ELF is not a supported loadable executable')
+        filesize = snapshot.stat().st_size
+        if ph_offset <= 0 or ph_offset + ph_count * ph_entry_size > filesize:
+            raise OSError('ELF program-header table is missing or truncated')
+        found_load = False
+        for index in range(ph_count):
+            stream.seek(ph_offset + index * ph_entry_size)
+            encoded = stream.read(4)
+            if len(encoded) != 4:
+                raise OSError('Truncated ELF program header')
+            kind = struct.unpack(order + 'I', encoded)[0]
+            if kind in (2, 3):  # PT_DYNAMIC or PT_INTERP
+                raise OSError('Runtime imports unverified dynamic libraries')
+            if kind == 1:  # PT_LOAD
+                found_load = True
+        if not found_load:
+            raise OSError('ELF has no loadable segments')
+    return 'linux-static-elf-no-pt-dynamic-or-interp'
+
+
 def bind_runtime_artifact(snapshot):
     """Return a kernel-bound launch path, retained fd, options and attestation.
 
@@ -288,6 +338,7 @@ def run(args):
     runtime_digest_after = None
     launch_fd = None
     launch_binding = None
+    runtime_dependency_mode = None
     launch_options = {}
     launch_path = None
     try:
@@ -296,6 +347,7 @@ def run(args):
         snapshot.chmod(0o700)
         if sha256(snapshot) != source_digest:
             raise OSError('Runtime changed during snapshot capture')
+        runtime_dependency_mode = verify_runtime_dependency_mode(snapshot)
         (launch_path, launch_fd, launch_options,
          launch_binding, runtime_digest_before) = bind_runtime_artifact(snapshot)
         if runtime_digest_before != source_digest:
@@ -358,6 +410,7 @@ def run(args):
                'runtime_sha256_after': runtime_digest_after,
                'runtime_snapshot': str(snapshot),
                'runtime_execution_binding': launch_binding,
+               'runtime_dependency_mode': runtime_dependency_mode,
                'runtime_integrity_verified': runtime_intact,
                'runtime_error': runtime_error, 'returncode': returncode, 'reached_eos': reached_eos,
                'draft_sha256': hashlib.sha256(draft.encode()).hexdigest(),
@@ -367,7 +420,7 @@ def run(args):
                'protected_explicit_spans': args.protect_span,
                'formatting_changes': formatting_changes,
                'wrapper_sha256': sha256(Path(__file__)),
-               'checks_scope': 'numbers, protected straight-quote envelopes and curly quotes, literal counts, executed artefact digest; not a semantic audit',
+               'checks_scope': 'numeric units and quotes, literal counts, executed artefact digest, ELF dependency headers; not a full OS or semantic audit',
                'verdict': 'held-for-review' if returncode == 0 and runtime_intact and reached_eos and candidate.strip() and not errors else 'failed',
                'token_budget': args.tokens, 'completion_requires_review': True,
                'weights_updated': False, 'production_promoted': False, 'run_directory': str(folder)}
