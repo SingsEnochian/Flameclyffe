@@ -2,6 +2,8 @@
 
 Product lineage: **Wayglass OS evolves from ArcSweep, and ArcSweep is actively upgraded too.** These are complementary development tracks sharing tested architecture, not a replacement that abandons ArcSweep. Existing `apps/arcsweep` paths remain living ArcSweep implementation locations while supporting Wayglass OS features. Follow `apps/arcsweep/contracts/WAYGLASS_OS_ARCSWEEP_EVOLUTION_V0.1.md`.
 
+**Wayglass is also the living ship LLM.** The vessel's evolving OS, ship model/runtime, memory, voice, agentic crew participation, instruments, rooms and Return Engine form one design. ArcSweep remains an actively upgraded system as well as engineering ancestry. Do not equate a registered model route, manifest or mock result with a live deployed dedicated ship LLM.
+
 Status: implementation research and bounded experimental score adapter; NOT deployment proof.
 
 ## Sources: how, why, where
