@@ -246,9 +246,10 @@ def run(args):
     prompt = spec['instr'] + '\n\n' + model_draft + spec['sep']
     assert hashlib.sha256((spec['instr'] + '\n\nX' + spec['sep']).encode()).hexdigest()[:16] == spec['fingerprint']
     root = Path.cwd() / '.crow-trainer' / 'humanizer'
-    root.mkdir(parents=True, exist_ok=True)
+    root.mkdir(parents=True, exist_ok=True, mode=0o700)
+    root.chmod(0o700)
     folder = root / datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
-    folder.mkdir()
+    folder.mkdir(mode=0o700)
     (folder / 'draft.txt').write_text(draft, encoding='utf-8')
     (folder / 'protected-quotations.json').write_text(json.dumps(protected, indent=2) + '\n')
     prompt_file = folder / 'prompt.txt'
