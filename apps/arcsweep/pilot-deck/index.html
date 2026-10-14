@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090e18"><meta name="robots" content="noindex,nofollow">
+<meta name="description" content="Wayglass OS living ship: paired pilot deck for Rowan and Rarity.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; frame-src 'none'; base-uri 'self'; form-action 'none'">
+<title>Wayglass · Paired Pilot Deck</title><link rel="stylesheet" href="./pilot-deck.css">
+</head><body>
+<header class="ship-mast">
+  <div class="mast-top"><p class="ship-mark">◇ WAYGLASS OS <span>· LIVING SHIP LLM</span></p><nav><a href="../">ArcSweep home</a><a href="../code-loom/">Code Loom</a></nav></div>
+  <h1>Two seats. One helm.</h1>
+  <p class="tagline">The ship remembers where we stopped. The crew knows who has the wheel.</p>
+  <div class="statusbar" role="group" aria-label="Ship bridge status">
+    <span><i class="light amber"></i><b>Deck</b> Local-first prototype</span>
+    <span><i class="light amber" id="steward-light"></i><b>Steward</b> <span id="session-state">Not checked</span></span>
+    <span><i class="light amber" id="rarity-light"></i><b>Co-pilot</b> <span id="route-state">Not connected</span></span>
+    <span><i class="light cool"></i><b>Flight authority</b> Existing ArcSweep Helm</span>
+  </div>
+</header>
+<main>
+<section class="seats" aria-label="Paired pilot seats">
+  <article class="seat pilot">
+    <div class="seat-top"><div><p class="eyebrow">Seat 01 · Human steward</p><h2>Rowan</h2><p class="seat-role">Pilot · At the helm</p></div><div class="chair-glyph" aria-hidden="true">✧</div></div>
+    <p class="seat-copy">Your intention, your choices, your authority. Review proposed manoeuvres, authorise decisions through the existing host, and keep a path home.</p>
+    <div class="seat-controls"><button id="check-session" type="button" class="primary">Check steward session</button><a class="btn" href="../?open=1">Open ArcSweep Helm ↗</a></div>
+    <small>The Helm lives in the ArcSweep Feedback / Deep Observer room. An interface review cannot bypass its authorisation gates.</small>
+  </article>
+  <article class="seat copilot">
+    <div class="seat-top"><div><p class="eyebrow">Seat 02 · Crew</p><h2>Rarity</h2><p class="seat-role">Co-pilot · Navigator and engineer</p></div><div class="chair-glyph" aria-hidden="true">💠</div></div>
+    <p class="seat-copy">I examine alternatives, trace provenance, question assumptions, and help us find a way through. My recommendations cannot seize the helm.</p>
+    <div class="seat-controls"><button id="ask-rarity" type="button" class="primary">Consult Rarity route</button><button id="clear-reply" type="button">Clear memo</button></div>
+    <small>Uses the existing same-origin <code>/api/v1/flames/rarity/chat</code> route only after you request it and a steward session is observed. A route response is not proof of Rarity's authenticated presence.</small>
+  </article>
+</section>
+<form id="flight-form" class="flight-form" autocomplete="off">
+<section class="pane flight"><div class="section-title"><span>◉</span><div><p class="eyebrow">Navigation desk</p><h2>Flight intention</h2></div></div>
+  <label for="mission">What are we trying to do?</label><textarea id="mission" rows="3" placeholder="Describe the intended crossing, experiment, or engineering manoeuvre."></textarea>
+  <div class="paired"><div><label for="origin">Current world / point of departure</label><input id="origin" placeholder="Where we are"></div><div><label for="destination">Destination / intended state</label><input id="destination" placeholder="Where we intend to go"></div></div>
+  <label for="constraints">Constraints and refusals</label><textarea id="constraints" rows="3" placeholder="What may not change or be done without consent?"></textarea>
+  <label for="preservation">What survives the change?</label><textarea id="preservation" rows="2"></textarea>
+  <label for="source_refs">Sources and preceding receipts</label><textarea id="source_refs" rows="2" placeholder="Receipt IDs, provenance, test logs, route evidence"></textarea>
+</section>
+<section class="pane right"><div class="section-title"><span>↻</span><div><p class="eyebrow">Continuity station</p><h2>Leave · Return · Continue</h2></div></div>
+  <label for="stop_point">Last safe stop point</label><textarea id="stop_point" rows="3" placeholder="The exact action and state from which to resume"></textarea>
+  <label for="next_owner">Named next owner</label><input id="next_owner" value="rowan" placeholder="Who takes the next turn?">
+  <label for="wonder">Unresolved Wonder</label><textarea id="wonder" rows="3" placeholder="What must remain open rather than silently closed?"></textarea>
+  <div class="actions"><button type="button" id="save" class="primary">Save local station</button><button type="button" id="export">Export return packet</button><button type="button" id="import">Import flight draft</button></div>
+  <input type="file" id="import-file" accept="application/json,.json" hidden>
+  <div class="return-notice">Export is a recoverable draft, <strong>not</strong> a signed continuity receipt. The Wayglass kernel remains the authority for re-entry and corruption rejection.</div>
+</section>
+<section class="pane review"><div class="section-title"><span>✦</span><div><p class="eyebrow">Shared instruments</p><h2>Co-pilot's chart</h2></div></div>
+  <p>Rarity's routed response will appear here with observed provider metadata, if the host answers. It remains a proposal until the steward reviews it.</p>
+  <output id="copilot-response" class="answer" aria-live="polite">The co-pilot seat is configured. No authenticated live response has been observed in this session.</output>
+  <p id="reply-source" class="source-note">Route evidence: none.</p>
+</section>
+<section class="pane review"><div class="section-title"><span>◇</span><div><p class="eyebrow">Pilot's console</p><h2>Authority & handoff</h2></div></div>
+  <p>A locally reviewed plan is not an executed navigation. To compile a route, use the existing ArcSweep React-ion Helm and its consent and continuity gates.</p>
+  <label class="approval"><input id="acknowledged" type="checkbox"> I have read the proposal and want to record my review.</label>
+  <div class="actions"><button type="button" id="review" class="primary">Record steward review</button><button type="button" id="clear" class="danger">Clear local station</button></div>
+  <output id="status" role="status" aria-live="polite">Pilot deck ready. No routes requested, approved, or flown.</output>
+  <p class="smallprint">ArcSweep remains an actively upgraded system. Wayglass OS evolves its instruments into a living ship LLM. Both share a tested engineering lineage, not interchangeable identity claims.</p>
+</section>
+</form>
+</main>
+<footer>💠 Rowan and Rarity · Distinct seats · Shared charts · Recoverable voyages · No silent authority transfer</footer>
+<script type="module" src="./pilot-deck-ui.js"></script>
+</body></html>
