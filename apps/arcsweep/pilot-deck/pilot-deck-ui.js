@@ -46,6 +46,7 @@ el('flight-form').addEventListener('input',event=>{
   // Edited mission parameters cannot silently carry a previously approved route.
   if(latestRoute){
     latestRoute=null;
+    flight.route_evidence=null;
     el('route-state').textContent='Proposal now stale';
     el('rarity-light').className='light amber';
     showMemo('Mission changed. Ask the co-pilot again before treating the old proposal as current.',
@@ -105,6 +106,7 @@ el('ask-rarity').addEventListener('click',async()=>{
     if(!response.ok)throw new Error(String(data.error||'Rarity route returned '+response.status).slice(0,200));
     latestRoute=recordRouteObservation(flight,data,{observedAt:new Date().toISOString()});
     flight.co_pilot_proposal=latestRoute.co_pilot_proposal;
+    flight.route_evidence=latestRoute.route_evidence;
     showMemo(latestRoute.co_pilot_proposal,
       'Observed: same-origin Rarity route · provider claim: '+(latestRoute.route_evidence.claimed_provider||'unknown')+
       ' · model claim: '+(latestRoute.route_evidence.claimed_model||'unknown')+
@@ -120,7 +122,7 @@ el('ask-rarity').addEventListener('click',async()=>{
   }finally{button.disabled=false;}
 });
 el('clear-reply').addEventListener('click',()=>{
-  latestRoute=null;flight.co_pilot_proposal='';
+  latestRoute=null;flight.co_pilot_proposal='';flight.route_evidence=null;
   showMemo('The co-pilot chart has been cleared.','Route evidence: none.');
   el('route-state').textContent='Not connected';
   el('rarity-light').className='light amber';
@@ -134,6 +136,8 @@ el('review').addEventListener('click',async()=>{
     const reviewed=recordPilotReview(flight,{
       reviewer:'rowan',acknowledged:true,sessionVerified:houseSessionObserved,reviewedAt:new Date().toISOString()
     });
+    flight.pilot_review_note='Local review at '+reviewed.reviewed_at+' after observed House steward session. Not an executed Helm command.';
+    save(false);
     say('Pilot review recorded on this console at '+reviewed.reviewed_at+
       '. This is local review only. To compile a route, use ArcSweep React-ion Helm. No navigation was executed.');
     el('acknowledged').checked=false;
@@ -161,7 +165,7 @@ el('import-file').addEventListener('change',async event=>{
       say('Import refused: unknown pilot draft or return packet schema.');return;
     }
     const incoming=data.schema===PILOT_RETURN_SCHEMA ? {
-      ...data,wonder:data.unresolved_wonder,co_pilot_proposal:data.co_pilot_proposal
+      ...data,wonder:data.unresolved_wonder,co_pilot_proposal:data.co_pilot_proposal,pilot_review_note:data.pilot_review_note
     } : data;
     flight=normaliseFlight(incoming);paint(flight);latestRoute=null;
     showMemo(flight.co_pilot_proposal||'No co-pilot memo in this imported draft.',
