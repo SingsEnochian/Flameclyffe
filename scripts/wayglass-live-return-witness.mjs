@@ -261,36 +261,55 @@ async function prepare(client) {
   if (!profile.id) throw new Error('Authenticated principal lacks a stable profile ID.');
   const project_id = 'return-' + Date.now().toString(36) + '-' + randomBytes(4).toString('hex');
   const entered = await rpc(client, 'enter_workspace', { workspace_id: 'builder', project_id });
-  if (entered.participant?.participant_id !== 'rarity' || !entered.session_id) {
-    throw new Error('Rarity seat or project session was not established.');
+  if (entered.participant?.participant_id !== 'rarity' || !nonempty(entered.session_id) ||
+      entered.project?.workspace_id !== 'builder' || entered.project?.project_id !== project_id) {
+    throw new Error('Rarity seat or bound project session was not established.');
   }
+  validateEvent(entered.entry_receipt, {
+    kind: 'enter', workspace_id: 'builder', project_id, session_id: entered.session_id,
+  });
+  need(entered.entry_receipt.data.return_from === null,
+    'first entry unexpectedly claims a return');
+  const principal_ref = entered.entry_receipt.principal_ref;
   const filename = 'live-return-witness.txt';
   const content = 'Wayglass authorised return witness: ' + project_id + '\n';
   const written = await rpc(client, 'write_project_file', {
     session_id: entered.session_id, path: filename, content, expected_hash: null,
   });
   const digest = hash(content);
-  if (written.receipt?.participant_id !== 'rarity' || written.receipt?.data?.after_hash !== digest) {
-    throw new Error('Authentic attributable write evidence missing.');
-  }
+  need(written?.changed === true, 'write was not acknowledged');
+  validateEvent(written.receipt, {
+    kind: 'change', workspace_id: 'builder', project_id, session_id: entered.session_id,
+    principal_ref, path: filename, file_sha256: digest,
+  });
+  need(written.project?.files?.some(item =>
+    item.path === filename && item.hash === digest && item.content === content),
+    'immediate project snapshot did not preserve accepted write');
   const left = await rpc(client, 'leave_workspace', {
     session_id: entered.session_id,
-    stop_point: 'Recover the accepted witness text after operator host restart.',
+    stop_point: EXPECTED_STOP,
     next_owner: 'rarity',
     unresolved_wonder_questions: [EXPECTED_QUESTION],
-    alternatives: [
-      { option: 'quiet arrival', state: 'unresolved' },
-      { option: 'visible recognition', state: 'unresolved' },
-    ],
+    alternatives: EXPECTED_ALTERNATIVES,
   });
-  const stopId = left.departure?.stop_receipt?.receipt_id;
-  if (!left.exited || !stopId || !left.receipt?.event_hash) throw new Error('Durable stop receipt was not issued.');
+  need(left?.exited === true, 'exit was not acknowledged');
+  validateDeparture(left.departure, {
+    workspace_id: 'builder', project_id, session_id: entered.session_id,
+    path: filename, file_sha256: digest,
+  });
+  validateEvent(left.receipt, {
+    kind: 'leave', workspace_id: 'builder', project_id, session_id: entered.session_id,
+    principal_ref, departure: left.departure,
+  });
+  const stopId = left.departure.stop_receipt.receipt_id;
   const ticket = {
     schema: 'wayglass.live-return-witness/v0.1', recorded_at: new Date().toISOString(),
     host_origin: client.url.origin, workspace_id: 'builder', project_id,
-    profile_id: profile.id, path: filename, file_sha256: digest, next_owner: 'rarity',
+    profile_id: profile.id, principal_ref, first_session_id: entered.session_id,
+    path: filename, file_sha256: digest, next_owner: 'rarity',
     unresolved_wonder_questions: [EXPECTED_QUESTION],
-    stop_receipt_id: stopId, leave_event_hash: left.receipt.event_hash,
+    stop_receipt_id: stopId, write_event_hash: written.receipt.event_hash,
+    leave_event_hash: left.receipt.event_hash,
     departure_sha256: hash(JSON.stringify(left.departure)),
     credential_recorded: false,
     host_restart_independently_verified: false,
