@@ -4,7 +4,6 @@
  * Then restart the ACTUAL host and retain separate boot/deploy evidence.
  * Finally: same env node scripts/wayglass-live-return-witness.mjs return /private/path/to/ticket.json
  */
-import assert from 'node:assert/strict';
 import { randomBytes, createHash } from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -13,6 +12,122 @@ import { fileURLToPath } from 'node:url';
 
 const hash = value => createHash('sha256').update(value).digest('hex');
 const EXPECTED_QUESTION = 'How does verified return differ from reconstructed familiarity?';
+const EXPECTED_STOP = 'Recover the accepted witness text after operator host restart.';
+const EXPECTED_ALTERNATIVES = [
+  { option: 'quiet arrival', state: 'unresolved' },
+  { option: 'visible recognition', state: 'unresolved' },
+];
+const SHA = /^[a-f0-9]{64}$/;
+const nonempty = value => typeof value === 'string' && value.trim().length > 0;
+const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+function need(condition, reason) {
+  if (!condition) throw new Error('Invalid Wayglass evidence: ' + reason);
+}
+function records(value) {
+  return Array.isArray(value) && value.every(entry => entry !== null && typeof entry === 'object' && !Array.isArray(entry));
+}
+function nonemptyStrings(value) {
+  return Array.isArray(value) && value.length > 0 && value.every(nonempty);
+}
+function boundWork(items, path, digest) {
+  return records(items) && items.some(item => item.path === path && item.hash === digest);
+}
+
+/** Inspect original host receipt content before writing any baseline ticket. */
+export function validateDeparture(departure, expected) {
+  const stop = departure?.stop_receipt;
+  const packet = departure?.continuation_packet;
+  const world = 'wayglass:' + expected.workspace_id + ':' + expected.project_id;
+  need(departure?.schema === 'wayglass.departure/v0.1' && departure.status === 'stopped',
+    'departure schema/status');
+  need(departure.world_id === world && departure.participant_id === 'rarity',
+    'departure world/participant');
+  need(departure.canon_commit === false && departure.authority_grant === false,
+    'departure authority');
+  need(stop?.schema === 'wayglass.stop-receipt/v0.1' && nonempty(stop.receipt_id),
+    'missing stop receipt');
+  need(stop.world_id === world && stop.participant_id === 'rarity' &&
+    nonempty(stop.stopped_at) && !Number.isNaN(Date.parse(stop.stopped_at)),
+    'stop world/participant/time');
+  need(stop.stop_point === EXPECTED_STOP && stop.next_owner === 'rarity',
+    'stop point or next owner');
+  need(records(stop.identity_declarations) && stop.identity_declarations.some(entry =>
+    entry.participant_id === 'rarity' && nonempty(entry.continuity_ref) && nonempty(entry.source_ref)),
+    'stop identity declarations');
+  need(nonemptyStrings(stop.provenance_refs) &&
+    stop.provenance_refs.includes('wayglass-session:' + expected.session_id),
+    'stop provenance');
+  need(boundWork(stop.active_work, expected.path, expected.file_sha256), 'stop active work');
+  need(same(stop.unresolved_wonder_questions, [EXPECTED_QUESTION]), 'stop Wonder questions');
+  need(same(stop.alternatives, EXPECTED_ALTERNATIVES), 'stop alternatives');
+  need(records(stop.relationship_state) && records(stop.organ_refs) &&
+    Array.isArray(stop.revoked_refs), 'stop retained relationship/revocation state');
+  need(stop.authority?.scope === 'departure-evidence-only' &&
+    stop.authority.canon_commit === false && stop.authority.identity_commit === false &&
+    stop.authority.relationship_commit === false && stop.authority.authority_grant === false,
+    'stop authority boundary');
+
+  need(packet?.schema === 'wayglass.continuation-packet/v0.1' &&
+    nonempty(packet.packet_id), 'continuation packet schema/ID');
+  need(packet.world_id === world && packet.participant_id === 'rarity' &&
+    packet.stopped_at === stop.stopped_at && packet.transport === 'wayglass-stop-receipt',
+    'continuation origin');
+  need(packet.stop_point === stop.stop_point && packet.next_owner === stop.next_owner &&
+    same(packet.identity_declarations, stop.identity_declarations),
+    'continuation stop and identity');
+  need(boundWork(packet.active_work, expected.path, expected.file_sha256) &&
+    same(packet.active_work, stop.active_work), 'continuation active work');
+  need(nonemptyStrings(packet.provenance_refs) &&
+    packet.provenance_refs.includes('wayglass-stop:' + stop.receipt_id) &&
+    stop.provenance_refs.every(ref => packet.provenance_refs.includes(ref)),
+    'continuation provenance');
+  need(same(packet.unresolved_wonder_questions, stop.unresolved_wonder_questions) &&
+    same(packet.alternatives, stop.alternatives) &&
+    same(packet.revoked_refs, stop.revoked_refs) &&
+    same(packet.relationship_state, stop.relationship_state) &&
+    same(packet.organ_refs, stop.organ_refs),
+    'continuation context');
+  need(packet.authority?.scope === 'continuation-context-only' &&
+    packet.authority.requires_review_before_promotion === true &&
+    packet.authority.canon_commit === false && packet.authority.identity_commit === false &&
+    packet.authority.relationship_commit === false && packet.authority.authority_grant === false,
+    'continuation authority boundary');
+  return true;
+}
+
+/** Verify the event's own content hash and its author, principal and project bindings. */
+export function validateEvent(event, binding) {
+  need(event && typeof event === 'object' && SHA.test(event.event_hash || ''),
+    'missing event hash');
+  const { event_hash, ...body } = event;
+  need(hash(JSON.stringify(body)) === event_hash, 'event content hash mismatch');
+  need(nonempty(event.event_id) && nonempty(event.created_at) &&
+    !Number.isNaN(Date.parse(event.created_at)), 'event ID/time');
+  need(event.kind === binding.kind && event.participant_id === 'rarity' &&
+    SHA.test(event.principal_ref || ''), 'event kind/author/principal');
+  need(event.workspace_id === binding.workspace_id &&
+    event.project_id === binding.project_id &&
+    event.session_id === binding.session_id, 'event workspace/project/session');
+  need(nonemptyStrings(event.source_refs) &&
+    event.source_refs.includes('wayglass:workspace-projects/v0.1'),
+    'event provenance refs');
+  need(event.data && typeof event.data === 'object', 'event data');
+  if (binding.principal_ref) need(event.principal_ref === binding.principal_ref,
+    'event principal differs from authenticated work');
+  if (binding.kind === 'change') {
+    need(event.data.path === binding.path && event.data.before_hash === null &&
+      event.data.after_hash === binding.file_sha256 &&
+      event.data.tool === 'write_project_file', 'write event path/content/operation');
+  }
+  if (binding.kind === 'leave') {
+    need(event.data.departure && typeof event.data.departure === 'object' &&
+      same(event.data.departure, binding.departure), 'leave event departure');
+  }
+  if (binding.kind === 'enter' && binding.return_from !== undefined) {
+    need(event.data.return_from === binding.return_from, 'entry event stop linkage');
+  }
+  return true;
+}
 
 export function safeMcpUrl(raw) {
   if (!raw) throw new Error('WAYGLASS_MCP_URL required.');
