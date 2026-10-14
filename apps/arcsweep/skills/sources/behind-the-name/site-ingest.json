@@ -1,0 +1,140 @@
+{
+  "schema": "hearthfire.web-corpus-ingest/v0.1",
+  "corpus_id": "behind-the-name-onomastics",
+  "name": "Behind the Name / Behind the Surname licensed onomastics registry",
+  "prepared_at": "2026-09-09",
+  "base_url": "https://www.behindthename.com/",
+  "companion_base_url": "https://surnames.behindthename.com/",
+  "intent": "Create a provenance-bound given-name and surname reference registry for ArcSweep using only Behind the Name's authorised download/API lanes. Live HTML pages remain references and are never mirrored into the corpus.",
+  "authority": {
+    "corpus_class": "external-licensed-reference-dataset",
+    "canon_write": false,
+    "source_library_route": "reference-with-provenance",
+    "deep_theory_route": "none",
+    "implementation_route": "lookup-and-generation-support-only",
+    "training_allowed": false,
+    "training_note": "Website content explicitly signals ai-train=no. Download/API data remain retrieval/reference material unless a later explicit licence review authorises a separate training corpus."
+  },
+  "live_site_policy": {
+    "crawl_enabled": false,
+    "scrape_html": false,
+    "snapshot_html": false,
+    "follow_internal_links": false,
+    "copy_definitions": false,
+    "copy_meaning_history": false,
+    "copy_articles": false,
+    "copy_comments": false,
+    "copy_message_boards": false,
+    "copy_submitted_names": false,
+    "ai_train": false,
+    "use": "reference-only",
+    "reason": "Behind the Name copyright/terms prohibit scraping, redistribution, and extraction of significant portions of the website. robots.txt declares search=yes, ai-train=no, use=reference."
+  },
+  "authorised_acquisition": {
+    "downloads": {
+      "enabled": true,
+      "landing_page": "https://www.behindthename.com/api/download.php",
+      "data_access_page": "https://www.behindthename.com/api/",
+      "licence": "CC-BY-SA-4.0",
+      "attribution_required": true,
+      "manual_verification_required": true,
+      "note": "The official download flow currently includes a human verification challenge. Do not automate around it.",
+      "requested_products": [
+        "given-names-genders-related-names",
+        "surnames"
+      ]
+    },
+    "api": {
+      "enabled_by_default": false,
+      "optional": true,
+      "documentation": "https://www.behindthename.com/api/help.php",
+      "key_environment_variable": "BEHINDTHENAME_API_KEY",
+      "endpoints": {
+        "lookup": "https://www.behindthename.com/api/lookup.json",
+        "related": "https://www.behindthename.com/api/related.json"
+      },
+      "rate_limits": {
+        "requests_per_second": 2,
+        "requests_per_hour": 400,
+        "requests_per_day": 4000,
+        "requests_per_year": 400000
+      },
+      "allowed_enrichment": [
+        "given-name gender",
+        "given-name usage",
+        "related names"
+      ],
+      "forbidden_assumption": "The public API does not provide meaning/history text; do not scrape page descriptions to fill that gap."
+    }
+  },
+  "reference_urls": [
+    "https://www.behindthename.com/",
+    "https://www.behindthename.com/names/list",
+    "https://surnames.behindthename.com/names/list",
+    "https://www.behindthename.com/api/",
+    "https://www.behindthename.com/api/help.php",
+    "https://www.behindthename.com/info/copyright",
+    "https://www.behindthename.com/info/terms",
+    "https://www.behindthename.com/robots.txt"
+  ],
+  "excluded_collections": [
+    "meaning-and-history prose",
+    "articles",
+    "namesakes prose",
+    "name comments",
+    "message boards",
+    "user-submitted given names",
+    "user-submitted surnames",
+    "page HTML snapshots"
+  ],
+  "normalisation": {
+    "unicode": "NFC",
+    "preserve_diacritics": true,
+    "preserve_display_case": true,
+    "dedupe_key": "kind + canonical_display_name + source_dataset",
+    "relationship_policy": "Preserve related-name edges supplied by licensed download/API data; do not infer etymological relationships from website prose.",
+    "gender_policy": "Preserve source labels verbatim and separately from any ArcSweep character gender model.",
+    "usage_policy": "Preserve source usage labels/codes with provenance; usage is not silently rewritten as origin."
+  },
+  "record_schema": {
+    "schema": "arcsweep.onomastics-record/v1",
+    "fields": [
+      "id",
+      "kind",
+      "display_name",
+      "flat_name",
+      "gender",
+      "usage",
+      "related_names",
+      "source_dataset",
+      "source_url",
+      "source_licence",
+      "retrieved_at",
+      "source_hash"
+    ],
+    "kind_values": ["given-name", "surname"],
+    "nullable_fields": ["flat_name", "gender", "usage", "related_names"],
+    "prohibited_fields_from_live_pages": ["meaning", "history", "description", "article_text", "comment_text"]
+  },
+  "output": {
+    "default_directory": "ingests/behind-the-name",
+    "raw_licensed_downloads": "raw/licensed",
+    "normalised_records": "records/onomastics.jsonl",
+    "given_name_index": "indexes/given-names.json",
+    "surname_index": "indexes/surnames.json",
+    "relationship_index": "indexes/related-names.json",
+    "source_index": "source-index.json",
+    "ingest_receipt": "ingest-receipt.json"
+  },
+  "receipt_requirements": {
+    "hash_every_input": true,
+    "record_download_timestamp": true,
+    "record_licence": true,
+    "record_attribution": true,
+    "record_normalised_count": true,
+    "record_rejected_count": true,
+    "record_duplicates": true,
+    "record_api_calls_if_used": true,
+    "no_success_without_source_hashes": true
+  }
+}

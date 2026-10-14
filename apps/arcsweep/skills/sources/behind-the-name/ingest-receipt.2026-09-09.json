@@ -1,0 +1,48 @@
+{
+  "schema": "hearthfire.licensed-dataset-ingest-receipt/v1",
+  "corpus_id": "behind-the-name-onomastics",
+  "status": "verified-local-ingest",
+  "source_licence": "CC-BY-SA-4.0",
+  "attribution": "Behind the Name (behindthename.com)",
+  "inputs": [
+    {
+      "file": "btn_givennames.txt",
+      "sha256": "aad7d788cc1e521769d259affc41eb1f3cb61bafa846759bcccaf478b7db28d8",
+      "exported_at": "2026-05-27T00:49:19-07:00",
+      "rows": 29815
+    },
+    {
+      "file": "btn_surnames.txt",
+      "sha256": "c34734a34898a906effe20df1d287ec48ee16bdc999ed4631d54356e379d39be",
+      "exported_at": "2026-05-27T00:51:19-07:00",
+      "rows": 8590
+    },
+    {
+      "file": "btn_givennames_synonyms.txt",
+      "sha256": "3633abd9633df29c3a3bfcf6b510b3166ceb8ac1bf5d643b77a32fe883f8f82b",
+      "exported_at": "2026-05-27T00:51:31-07:00",
+      "rows": 29815
+    }
+  ],
+  "counts": {
+    "given_names": 29815,
+    "surnames": 8590,
+    "records": 38405,
+    "related_name_edges": 46633,
+    "given_names_with_related": 14008
+  },
+  "output_hashes": {
+    "records/onomastics.jsonl": "sha256:bce1dbe06d16ff9e9c6b1fc857a88748037792f80c18ad2e1a8a19ad83f4d96a",
+    "indexes/given-names.json": "sha256:257aec08fb9dfab53275ed09d9aa0125ebda350a1aacdd198cd7f6034d55b45f",
+    "indexes/surnames.json": "sha256:5e47a9c1d5a7f26d36f9b69fb6e8e4f7e526a68d512c9efd36873ddd96379d0c",
+    "indexes/related-names.json": "sha256:7f858e6da7debeb095e1fd30d8663814f0d8d8fedaa27f21825834476ce70dea"
+  },
+  "validation": {
+    "given_and_related_sources_match": true,
+    "unique_given_names": true,
+    "unique_surnames": true,
+    "html_scraped": false,
+    "live_page_prose_copied": false,
+    "training_authorised": false
+  }
+}
