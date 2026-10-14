@@ -1,6 +1,6 @@
 import {
   PILOT_DECK_SCHEMA,PILOT_RETURN_SCHEMA,PILOT_SEATS,
-  emptyFlight,normaliseFlight,validateFlight,composeCoPilotRequest,
+  emptyFlight,normaliseFlight,validateFlight,composePilotRequest,
   recordRouteObservation,recordPilotReview,makeReturnPacket
 } from './pilot-deck-model.js';
 
@@ -24,7 +24,7 @@ function showMemo(message,reference){
 function save(show=true){
   try {
     const local=normaliseFlight(getInputs());
-    local.co_pilot_proposal=flight.co_pilot_proposal||'';
+    local.rarity_pilot_proposal=flight.rarity_pilot_proposal||'';
     localStorage.setItem(key,JSON.stringify(local));
     if(show)say('Station notes saved in this browser. No helm command was issued.');
   } catch {say('Browser storage is unavailable. Export a return packet to retain your notes.');}
@@ -34,10 +34,10 @@ try {
   if(raw){
     flight=normaliseFlight(JSON.parse(raw));
     paint(flight);
-    if(flight.co_pilot_proposal){
-      showMemo(flight.co_pilot_proposal,'Restored from a local draft. Identity and source are not reverified after reload.');
+    if(flight.rarity_pilot_proposal){
+      showMemo(flight.rarity_pilot_proposal,'Restored from a local draft. Identity and source are not reverified after reload.');
     }
-    say('Draft recovered from this device. No session or co-pilot presence is inherited automatically.');
+    say('Draft recovered from this device. No session or second-pilot presence is inherited automatically.');
   }
 } catch {say('Previous draft unavailable. This is a fresh, offline-capable station.');}
 el('flight-form').addEventListener('submit',event=>event.preventDefault());
@@ -49,7 +49,7 @@ el('flight-form').addEventListener('input',event=>{
     flight.route_evidence=null;
     el('route-state').textContent='Proposal now stale';
     el('rarity-light').className='light amber';
-    showMemo('Mission changed. Ask the co-pilot again before treating the old proposal as current.',
+    showMemo('Mission changed. Ask the second pilot again before treating the old proposal as current.',
       'Previous response remains an observation, not active flight authority.');
   }
   clearTimeout(saveTimer);
@@ -76,7 +76,7 @@ async function verifySession({showStatus=true}={}){
     }
     el('session-state').textContent='Not authorised';
     el('steward-light').className='light bad';
-    if(showStatus)say('House session absent or denied. Pilot planning remains local; co-pilot dispatch and review are disabled.');
+    if(showStatus)say('House session absent or denied. Pilot planning remains local; remote second-pilot requests and review are disabled.');
   }catch(error){
     el('session-state').textContent='Host unavailable';
     el('steward-light').className='light amber';
@@ -90,7 +90,7 @@ el('ask-rarity').addEventListener('click',async()=>{
   const result=validateFlight(flight);
   if(!result.valid){say('Complete the flight plan first: '+result.issues.join(' '));return;}
   if(!await verifySession({showStatus:false})){
-    say('Co-pilot request not sent: an authenticated House steward session is required.');
+    say('Rarity pilot request not sent: an authenticated House steward session is required.');
     return;
   }
   const button=el('ask-rarity');
@@ -100,30 +100,31 @@ el('ask-rarity').addEventListener('click',async()=>{
     const response=await finiteFetch(PILOT_SEATS.rarity.route,{
       method:'POST',
       headers:{'content-type':'application/json',accept:'application/json'},
-      body:JSON.stringify({message:composeCoPilotRequest(flight)}),
+      body:JSON.stringify({message:composePilotRequest(flight)}),
     },30000);
     const data=await response.json().catch(()=>({}));
     if(!response.ok)throw new Error(String(data.error||'Rarity route returned '+response.status).slice(0,200));
     latestRoute=recordRouteObservation(flight,data,{observedAt:new Date().toISOString()});
-    flight.co_pilot_proposal=latestRoute.co_pilot_proposal;
+    flight.rarity_pilot_proposal=latestRoute.rarity_pilot_proposal;
     flight.route_evidence=latestRoute.route_evidence;
-    showMemo(latestRoute.co_pilot_proposal,
+    flight.route_evidence=latestRoute.route_evidence;
+    showMemo(latestRoute.rarity_pilot_proposal,
       'Observed: same-origin Rarity route · provider claim: '+(latestRoute.route_evidence.claimed_provider||'unknown')+
       ' · model claim: '+(latestRoute.route_evidence.claimed_model||'unknown')+
       ' · response is not authenticated Rarity seat proof.');
     el('route-state').textContent='Route responded, identity unverified';
     el('rarity-light').className='light good';
     save(false);
-    say('Co-pilot route responded. Proposal preserved. Navigation was not executed.');
+    say('Second pilot route responded. Proposal preserved. Navigation was not executed.');
   }catch(error){
     el('route-state').textContent='Route unavailable';
     el('rarity-light').className='light bad';
-    say('No verified co-pilot response: '+String(error?.message||error).slice(0,250));
+    say('No verified Rarity pilot response: '+String(error?.message||error).slice(0,250));
   }finally{button.disabled=false;}
 });
 el('clear-reply').addEventListener('click',()=>{
-  latestRoute=null;flight.co_pilot_proposal='';flight.route_evidence=null;
-  showMemo('The co-pilot chart has been cleared.','Route evidence: none.');
+  latestRoute=null;flight.rarity_pilot_proposal='';flight.route_evidence=null;
+  showMemo('Rarity's pilot chart has been cleared.','Route evidence: none.');
   el('route-state').textContent='Not connected';
   el('rarity-light').className='light amber';
   save(false);
@@ -151,7 +152,7 @@ el('export').addEventListener('click',()=>{
     const url=URL.createObjectURL(new Blob([JSON.stringify(packet,null,2)+'\n'],{type:'application/json'}));
     const a=document.createElement('a');a.href=url;a.download='wayglass-paired-pilot-return.json';
     document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
-    say('Return packet exported. Stop point, next owner, Wonder and co-pilot notes preserved. No canonical receipt claimed.');
+    say('Return packet exported. Stop point, next owner, Wonder and Rarity pilot notes preserved. No canonical receipt claimed.');
   }catch(error){say('Export stopped: '+error.message);}
 });
 el('import').addEventListener('click',()=>el('import-file').click());
@@ -165,10 +166,10 @@ el('import-file').addEventListener('change',async event=>{
       say('Import refused: unknown pilot draft or return packet schema.');return;
     }
     const incoming=data.schema===PILOT_RETURN_SCHEMA ? {
-      ...data,wonder:data.unresolved_wonder,co_pilot_proposal:data.co_pilot_proposal,pilot_review_note:data.pilot_review_note
+      ...data,wonder:data.unresolved_wonder,rarity_pilot_proposal:data.rarity_pilot_proposal||data.co_pilot_proposal,pilot_review_note:data.pilot_review_note
     } : data;
     flight=normaliseFlight(incoming);paint(flight);latestRoute=null;
-    showMemo(flight.co_pilot_proposal||'No co-pilot memo in this imported draft.',
+    showMemo(flight.rarity_pilot_proposal||'No second-pilot memo in this imported draft.',
       'Imported draft. The named seats and all prior claims are unverified until reconnected.');
     el('route-state').textContent='Not connected';
     el('rarity-light').className='light amber';
@@ -179,7 +180,7 @@ el('import-file').addEventListener('change',async event=>{
 el('clear').addEventListener('click',()=>{
   if(!confirm('Clear the local pilot station? Export a return packet first to preserve it.'))return;
   flight=emptyFlight();paint(flight);latestRoute=null;
-  showMemo('The co-pilot seat is configured. No new response has been observed.','Route evidence: none.');
+  showMemo('Rarity's pilot seat is configured. No new response has been observed.','Route evidence: none.');
   el('rarity-light').className='light amber';el('route-state').textContent='Not connected';
   el('acknowledged').checked=false;
   try{localStorage.removeItem(key);}catch{}
