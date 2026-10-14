@@ -56,7 +56,7 @@ export function visualiserFrame({
       x:.5+Math.cos(theta)*magnitude,
       y:.5+Math.sin(theta)*magnitude*.79,
       radius:1.2+2.1*rng,
-      intensity:.12+.15*rng+(active.length?.09:0),
+      intensity:.12+.15*rng+(active.length>0?0.09:0),
       hue:palette.hue,
     });
   });
