@@ -28,7 +28,7 @@ jobs:
       - name: Use locked npm 11
         run: npm install --global npm@11.16.0
       - name: Generate non-forced production audit repair
-        run: npm audit fix --package-lock-only --ignore-scripts --no-fund
+        run: npm audit fix --package-lock-only --omit=dev --ignore-scripts --no-fund --audit-level=high
       - name: Verify lockfile installs reproducibly
         run: npm ci --ignore-scripts --no-fund --no-audit
       - name: Verify production audit is free of high/critical findings
