@@ -91,6 +91,23 @@ button:not(.key),.btn {
 }
 button.primary {background:linear-gradient(150deg,#297d7a,#174d56)}
 button.feather,button.danger {background:linear-gradient(150deg,#663954,#422838)}
+/* Honest local instrument activity illuminates the glass only while a note is actually observed. */
+html[data-wayglass-resonance='active'] :is(.ship-mast,.masthead,.hero.panel) {
+  border-color:rgba(131,219,211,.58);
+  box-shadow:0 0 calc(18px + 45px * var(--wg-resonance-power, .1)) rgba(103,198,193,.18),
+    inset 0 1px 0 rgba(212,245,239,.24);
+}
+html[data-wayglass-resonance='active'] :is(.ship-mast,.masthead,.hero.panel)::before {
+  background:radial-gradient(ellipse at 60% 9%,rgba(125,219,223,.23),transparent 47%),
+    radial-gradient(ellipse at 6% 0%,rgba(197,170,111,.11),transparent 30%);
+}
+.ship-sensory-note {
+  margin:.5rem 0 0;
+  font-size:.8rem;
+  line-height:1.45;
+  color:var(--wg-seafoam);
+  width:100%;
+}
 /* Keystrokes provide feedback without moving notes under the performer's hand. */
 .key {
   box-shadow:inset 0 2px 0 rgba(255,255,255,.12),0 3px 12px rgba(0,0,0,.24);
