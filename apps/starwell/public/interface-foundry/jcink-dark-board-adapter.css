@@ -1,0 +1,359 @@
+/*
+ * Astra 6 · JCINK dark-board adapter
+ *
+ * Progressive enhancement only. This file maps common JCINK/source-package hooks
+ * onto the shared ArcSweep dark-board material grammar. It does not own content,
+ * identity, canon, posting state, or permissions.
+ *
+ * Install after the site's structural CSS. Refine selector aliases against the
+ * live board before production use; the source package's named hooks are retained
+ * so JCINK-specific markup never leaks into ArcSweep component contracts.
+ */
+
+:root {
+  --jc-void:#050507;
+  --jc-surface:#0a0c10;
+  --jc-raised:#11151b;
+  --jc-well:#05080a;
+  --jc-text:#edf1ef;
+  --jc-muted:#929c9a;
+  --jc-teal:#72d8d2;
+  --jc-gold:#d2b26e;
+  --jc-copper:#b9774f;
+  --jc-violet:#9a78c7;
+  --jc-line:rgba(114,216,210,.16);
+  --jc-line-gold:rgba(210,178,110,.22);
+  --jc-e1:0 8px 18px rgba(0,0,0,.2),inset 0 1px rgba(255,255,255,.025);
+  --jc-e2:0 18px 42px rgba(0,0,0,.3),0 3px 8px rgba(0,0,0,.18),inset 0 1px rgba(255,255,255,.035);
+  --jc-e3:0 32px 88px rgba(0,0,0,.46),0 8px 20px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.045);
+  --jc-well-shadow:inset 0 2px 12px rgba(0,0,0,.48),inset 0 1px rgba(255,255,255,.018);
+}
+
+html,body {
+  background:
+    radial-gradient(circle at 14% 0%,rgba(114,216,210,.05),transparent 30rem),
+    radial-gradient(circle at 88% 9%,rgba(210,178,110,.035),transparent 24rem),
+    linear-gradient(180deg,#050507,#080a0d 54%,#050507);
+  color:var(--jc-text);
+}
+
+/* Main board frame. Keep these aliases broad and structural. */
+#wrapper,
+#board,
+#mainarea,
+#innerwrapper,
+.jcink-board-shell {
+  color:var(--jc-text);
+}
+
+/* Category / forum / topic surfaces. */
+.hologram-category-block,
+.holo-forum-card,
+.psionic-topic-row,
+.forum-row,
+.topic-row,
+.category-block {
+  position:relative;
+  border:1px solid var(--jc-line);
+  border-radius:.78rem .78rem .78rem .2rem;
+  background:
+    linear-gradient(150deg,rgba(255,255,255,.022),transparent 34%),
+    linear-gradient(180deg,rgba(18,21,27,.97),rgba(7,9,12,.98));
+  color:var(--jc-text);
+  box-shadow:var(--jc-e1);
+  transition:transform 160ms ease,border-color 160ms ease,box-shadow 160ms ease,background 160ms ease;
+}
+
+.hologram-category-block::before,
+.holo-forum-card::before,
+.psionic-topic-row::before,
+.forum-row::before,
+.topic-row::before,
+.category-block::before {
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  width:2.4rem;
+  height:1px;
+  background:linear-gradient(90deg,var(--jc-gold),transparent);
+  opacity:.5;
+  pointer-events:none;
+}
+
+.holo-forum-card:hover,
+.psionic-topic-row:hover,
+.forum-row:hover,
+.topic-row:hover {
+  transform:translateY(-2px);
+  border-color:rgba(114,216,210,.27);
+  box-shadow:var(--jc-e2);
+}
+
+/* Category/title bars read as instrument labels, not glowing banners. */
+.maintitle,
+.category-title,
+.holo-category-title,
+.forum-titlebar {
+  position:relative;
+  border:1px solid var(--jc-line-gold);
+  border-radius:.7rem .7rem .7rem .18rem;
+  padding:.72rem .86rem;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.025),transparent 44%),
+    linear-gradient(90deg,rgba(210,178,110,.075),rgba(114,216,210,.02));
+  color:var(--jc-gold);
+  box-shadow:var(--jc-e1);
+  font-family:Georgia,"Times New Roman",serif;
+  letter-spacing:.02em;
+}
+
+/* Directory and profile projection. */
+.epran-profile-hud,
+.psionic-mini-profile,
+.glowhound-directory-card,
+.profile-card,
+.member-card {
+  position:relative;
+  border:1px solid var(--jc-line);
+  border-radius:.82rem .82rem .82rem .2rem;
+  background:
+    radial-gradient(circle at 16% 12%,rgba(114,216,210,.035),transparent 12rem),
+    linear-gradient(155deg,rgba(255,255,255,.02),transparent 34%),
+    linear-gradient(180deg,rgba(18,21,27,.98),rgba(7,9,12,.98));
+  box-shadow:var(--jc-e2);
+  color:var(--jc-text);
+}
+
+.epran-profile-hud .profile-meta,
+.psionic-mini-profile .profile-meta,
+.glowhound-directory-card .profile-meta,
+.profile-card .profile-meta {
+  color:var(--jc-muted);
+}
+
+/* Posts become layered dossier surfaces. */
+.ep-post-wrap,
+.ep-post-flight,
+.ep-post-ledger,
+.post-wrap,
+.post-container,
+.post1,
+.post2 {
+  position:relative;
+  border:1px solid var(--jc-line);
+  border-radius:.86rem .86rem .86rem .22rem;
+  background:
+    linear-gradient(150deg,rgba(255,255,255,.02),transparent 32%),
+    linear-gradient(180deg,rgba(17,20,26,.98),rgba(7,9,12,.985));
+  color:var(--jc-text);
+  box-shadow:var(--jc-e2);
+}
+
+.ep-post-wrap::after,
+.post-wrap::after,
+.post-container::after {
+  content:"";
+  position:absolute;
+  left:1rem;
+  right:1rem;
+  bottom:-.32rem;
+  height:.46rem;
+  border-radius:0 0 .7rem .18rem;
+  background:linear-gradient(180deg,rgba(0,0,0,.34),transparent);
+  filter:blur(.8px);
+  opacity:.68;
+  pointer-events:none;
+}
+
+/* Post author/meta rail. */
+.post-author,
+.post-details,
+.ep-post-author,
+.ep-post-meta {
+  border-color:var(--jc-line);
+  background:rgba(4,7,9,.44);
+  color:var(--jc-muted);
+  box-shadow:var(--jc-well-shadow);
+}
+
+/* Navigation and dropdowns. */
+.hud-sidebar,
+.hud-dropdown-container,
+#submenu,
+#userlinks,
+.jcink-nav {
+  border-color:var(--jc-line);
+  background:rgba(7,9,12,.92);
+  box-shadow:var(--jc-e2);
+  backdrop-filter:blur(18px) saturate(112%);
+}
+
+.hud-nav-link,
+.jcink-nav a,
+#submenu a,
+#userlinks a {
+  border:1px solid transparent;
+  border-radius:.58rem .58rem .58rem .16rem;
+  color:var(--jc-muted);
+  transition:color 140ms ease,background 140ms ease,border-color 140ms ease,transform 140ms ease;
+}
+
+.hud-nav-link:hover,
+.jcink-nav a:hover,
+#submenu a:hover,
+#userlinks a:hover {
+  color:var(--jc-text);
+  background:rgba(114,216,210,.04);
+  border-color:rgba(114,216,210,.15);
+  transform:translateY(-1px);
+}
+
+/* Inputs and quick reply are inset work surfaces. */
+#quick_reply,
+.quick-reply,
+.posting-form,
+#posting-form,
+#ucpcontent,
+#ucpmenu {
+  border:1px solid var(--jc-line);
+  border-radius:.8rem .8rem .8rem .2rem;
+  background:rgba(4,7,9,.58);
+  box-shadow:var(--jc-well-shadow);
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+textarea,
+select {
+  border:1px solid var(--jc-line);
+  border-radius:.56rem .56rem .56rem .16rem;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.012),transparent 30%),
+    rgba(2,4,6,.78);
+  color:var(--jc-text);
+  box-shadow:var(--jc-well-shadow);
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+a:focus-visible,
+button:focus-visible {
+  outline:2px solid var(--jc-teal);
+  outline-offset:3px;
+}
+
+/* Buttons feel physical without becoming arcade controls. */
+.button-large,
+.button-small,
+.button-medium,
+input[type="submit"],
+input[type="button"],
+button,
+.jcink-button {
+  border:1px solid rgba(210,178,110,.32);
+  border-radius:.58rem .58rem .58rem .16rem;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.035),transparent 44%),
+    linear-gradient(180deg,rgba(210,178,110,.15),rgba(210,178,110,.055));
+  color:#f2e4c4;
+  box-shadow:inset 0 1px rgba(255,255,255,.045),inset 0 -1px rgba(0,0,0,.34),0 5px 10px rgba(0,0,0,.16);
+  transition:transform 130ms ease,border-color 130ms ease,background 130ms ease,box-shadow 130ms ease;
+}
+
+.button-large:hover,
+.button-small:hover,
+.button-medium:hover,
+input[type="submit"]:hover,
+input[type="button"]:hover,
+button:hover,
+.jcink-button:hover {
+  transform:translateY(-1px);
+  border-color:rgba(114,216,210,.38);
+  background:linear-gradient(180deg,rgba(114,216,210,.095),rgba(114,216,210,.035));
+  color:var(--jc-text);
+  box-shadow:inset 0 1px rgba(255,255,255,.05),0 8px 17px rgba(0,0,0,.2);
+}
+
+.button-large:active,
+.button-small:active,
+.button-medium:active,
+input[type="submit"]:active,
+input[type="button"]:active,
+button:active,
+.jcink-button:active {
+  transform:translateY(1px);
+  box-shadow:var(--jc-well-shadow);
+}
+
+/* Meters/runes retain semantic labels; glow is deliberately restrained. */
+.holo-status-rune,
+.pulse-indicator,
+.vector-card,
+.status-chip,
+.user-group-chip {
+  border:1px solid var(--jc-line);
+  background:rgba(4,7,9,.48);
+  box-shadow:var(--jc-well-shadow);
+}
+
+.vector-bar-track {
+  background:rgba(2,4,6,.72);
+  border:1px solid var(--jc-line);
+  box-shadow:var(--jc-well-shadow);
+}
+
+.vector-bar-fill {
+  background:linear-gradient(90deg,var(--jc-teal),color-mix(in srgb,var(--jc-teal) 55%,var(--jc-gold)));
+  box-shadow:none;
+}
+
+/* Decorative prototype pieces that should not run forever on the live board. */
+.particle-field,
+.scanline-layer,
+.scanlines,
+.hud-orbit-ring,
+.warp-overlay,
+.glitch-overlay {
+  display:none !important;
+}
+
+@media (prefers-reduced-motion:reduce) {
+  *,*::before,*::after {
+    scroll-behavior:auto!important;
+    transition-duration:.001ms!important;
+    animation-duration:.001ms!important;
+    animation-iteration-count:1!important;
+  }
+
+  .holo-forum-card:hover,
+  .psionic-topic-row:hover,
+  .forum-row:hover,
+  .topic-row:hover,
+  .hud-nav-link:hover,
+  .jcink-nav a:hover,
+  button:hover,
+  input[type="submit"]:hover {
+    transform:none!important;
+  }
+}
+
+@media (max-width:760px) {
+  .hologram-category-block,
+  .holo-forum-card,
+  .psionic-topic-row,
+  .epran-profile-hud,
+  .ep-post-wrap,
+  .post-wrap,
+  .post-container {
+    border-radius:.7rem .7rem .7rem .18rem;
+  }
+
+  .hud-sidebar,
+  .jcink-nav {
+    backdrop-filter:blur(12px);
+  }
+}
