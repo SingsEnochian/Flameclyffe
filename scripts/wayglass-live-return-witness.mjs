@@ -154,13 +154,14 @@ function approvedEnvironment() {
 
 async function rpc(client, name, args = {}, authenticated = true) {
   const headers = { 'content-type': 'application/json' };
+  const requestId = randomBytes(12).toString('hex');
   if (authenticated) headers.authorization = 'Bearer ' + client.token;
   const response = await fetch(client.url, {
     method: 'POST',
     redirect: 'manual',
     headers,
     body: JSON.stringify({
-      jsonrpc: '2.0', id: randomBytes(5).toString('hex'),
+      jsonrpc: '2.0', id: requestId,
       method: 'tools/call', params: { name, arguments: args },
     }),
     signal: AbortSignal.timeout(20000),
@@ -169,6 +170,9 @@ async function rpc(client, name, args = {}, authenticated = true) {
   if (response.status !== 200) throw new Error('Authenticated MCP request was not accepted (HTTP ' + response.status + ').');
   let envelope;
   try { envelope = await response.json(); } catch { throw new Error('MCP returned non-JSON content.'); }
+  if (envelope?.jsonrpc !== '2.0' || envelope.id !== requestId) {
+    throw new Error('MCP response does not match its JSON-RPC request.');
+  }
   if (envelope.error || envelope.result?.isError || !envelope.result?.structuredContent) {
     throw new Error('MCP tool ' + name + ' did not return a successful structured result.');
   }
@@ -176,22 +180,71 @@ async function rpc(client, name, args = {}, authenticated = true) {
 }
 
 export function verifyReturn(ticket, profile, returned) {
-  assert.equal(profile.id, ticket.profile_id, 'Authenticated profile changed.');
-  assert.equal(returned.participant?.participant_id, 'rarity', 'Crew seat was substituted.');
-  assert.equal(returned.recovered_departure?.stop_receipt?.receipt_id, ticket.stop_receipt_id, 'Stop receipt mismatch.');
-  assert.equal(hash(JSON.stringify(returned.recovered_departure)), ticket.departure_sha256,
-    'Departure packet changed, including identity, provenance or alternatives.');
-  assert.equal(returned.recovered_departure?.stop_receipt?.next_owner, ticket.next_owner, 'Named next owner changed.');
-  assert.deepEqual(returned.recovered_departure?.stop_receipt?.unresolved_wonder_questions,
-    ticket.unresolved_wonder_questions, 'Unresolved Wonder changed.');
-  assert.equal(returned.entry_receipt?.data?.return_from, ticket.leave_event_hash, 'Leave event binding mismatch.');
+  need(nonempty(ticket.profile_id) && profile?.id === ticket.profile_id,
+    'authenticated profile mismatch');
+  need(ticket.workspace_id === 'builder' && nonempty(ticket.project_id) &&
+    nonempty(ticket.path) && SHA.test(ticket.file_sha256 || '') &&
+    SHA.test(ticket.principal_ref || '') &&
+    SHA.test(ticket.write_event_hash || '') &&
+    SHA.test(ticket.leave_event_hash || '') &&
+    SHA.test(ticket.departure_sha256 || '') &&
+    nonempty(ticket.first_session_id) && nonempty(ticket.stop_receipt_id),
+    'incomplete private return ticket');
+  need(returned?.participant?.participant_id === 'rarity' &&
+    nonempty(returned.session_id), 'crew seat or session mismatch');
+  need(returned.project?.workspace_id === ticket.workspace_id &&
+    returned.project?.project_id === ticket.project_id,
+    'recovered project identity mismatch');
+  const expected = {
+    workspace_id: ticket.workspace_id, project_id: ticket.project_id,
+    session_id: ticket.first_session_id, path: ticket.path,
+    file_sha256: ticket.file_sha256,
+  };
+  validateDeparture(returned.recovered_departure, expected);
+  need(returned.recovered_departure.stop_receipt.receipt_id === ticket.stop_receipt_id,
+    'stop receipt mismatch');
+  need(hash(JSON.stringify(returned.recovered_departure)) === ticket.departure_sha256,
+    'departure content changed');
+  need(returned.recovered_departure.stop_receipt.next_owner === ticket.next_owner &&
+    same(returned.recovered_departure.stop_receipt.unresolved_wonder_questions,
+      ticket.unresolved_wonder_questions), 'named owner/Wonder changed');
+  validateEvent(returned.entry_receipt, {
+    kind: 'enter', workspace_id: ticket.workspace_id,
+    project_id: ticket.project_id, session_id: returned.session_id,
+    principal_ref: ticket.principal_ref, return_from: ticket.leave_event_hash,
+  });
   const file = returned.project?.files?.find(item => item.path === ticket.path);
-  assert.ok(file, 'Trial work was not recovered.');
-  assert.equal(file.hash, ticket.file_sha256, 'Recovered work hash changed.');
-  assert.equal(hash(file.content), ticket.file_sha256, 'Recovered work content disagrees with object digest.');
-  return { accepted: true, profile_id: profile.id, stop_receipt_id: ticket.stop_receipt_id,
-    leave_event_hash: ticket.leave_event_hash, file_sha256: ticket.file_sha256,
-    host_restart_independently_verified: false };
+  need(file && file.hash === ticket.file_sha256 &&
+    typeof file.content === 'string' &&
+    hash(file.content) === ticket.file_sha256, 'recovered work changed');
+  const work = returned.project?.receipts;
+  need(Array.isArray(work), 'missing durable event history');
+  const write = work.find(event => event?.event_hash === ticket.write_event_hash);
+  need(Boolean(write), 'original write-event receipt was not recovered');
+  validateEvent(write, {
+    kind: 'change', workspace_id: ticket.workspace_id,
+    project_id: ticket.project_id, session_id: ticket.first_session_id,
+    principal_ref: ticket.principal_ref, path: ticket.path,
+    file_sha256: ticket.file_sha256,
+  });
+  const leave = work.find(event => event?.event_hash === ticket.leave_event_hash);
+  need(Boolean(leave), 'original departure-event receipt was not recovered');
+  validateEvent(leave, {
+    kind: 'leave', workspace_id: ticket.workspace_id,
+    project_id: ticket.project_id, session_id: ticket.first_session_id,
+    principal_ref: ticket.principal_ref, departure: returned.recovered_departure,
+  });
+  return {
+    accepted: true,
+    profile_id: profile.id,
+    principal_ref: ticket.principal_ref,
+    stop_receipt_id: ticket.stop_receipt_id,
+    write_event_hash: ticket.write_event_hash,
+    leave_event_hash: ticket.leave_event_hash,
+    return_event_hash: returned.entry_receipt.event_hash,
+    file_sha256: ticket.file_sha256,
+    host_restart_independently_verified: false,
+  };
 }
 
 function writePrivateJson(file, value) {
