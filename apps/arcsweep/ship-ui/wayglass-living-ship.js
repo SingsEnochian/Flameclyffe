@@ -81,8 +81,14 @@ export function mountLivingShipSurface({
    toggle.textContent=quiet?'Resume visual ecology':'Quiet visuals';
    toggle.setAttribute('aria-pressed',String(quiet));
    toggle.setAttribute('aria-label',quiet?'Resume simulated ship visuals':'Quiet simulated ship visuals');
-   if(subdued)doc.documentElement.style.removeProperty('--wg-ship-excitation');
-   else worldTint(doc,model);
+   if(subdued){
+     doc.documentElement.removeAttribute('data-wayglass-ship');
+     for(const property of ['--wg-ship-hue','--wg-ship-memory','--wg-ship-excitation'])doc.documentElement.style.removeProperty(property);
+     caption.textContent='Ship ecology · visual simulation paused';
+   }else{
+     caption.textContent='Ship ecology · local visual simulation';
+     worldTint(doc,model);
+   }
  };
  toggle.addEventListener('click',()=>{
    quiet=!quiet;
@@ -130,9 +136,9 @@ export function mountLivingShipSurface({
  };
  const unsubscribe=spine.subscribe(signal=>{
    if(!model.observe(signal,{now:Date.now()}))return;
-   worldTint(doc,model);
    save();
    if(quiet||motion?.matches||contrast?.matches)return;
+   worldTint(doc,model);
    resize();paint(canvas,model,{width:canvas.width,height:canvas.height});
  });
  const onPageHide=()=>stop();
