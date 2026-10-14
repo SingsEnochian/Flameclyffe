@@ -93,6 +93,9 @@ jobs:
           npm run arcsweep:build
           test -f dist/arcsweep/index.html
           test -d dist/arcsweep/assets
+          test -f dist/arcsweep/code-loom/index.html
+          grep -Fq 'Rarity' dist/arcsweep/code-loom/index.html
+          node --test apps/arcsweep/test/code-loom-model.test.js apps/arcsweep/test/wayglass-local-event-ledger.test.js apps/arcsweep/test/wayglass-sonic-score.test.js
 
       - name: Verify Arcsweep production module boundary
         run: |
