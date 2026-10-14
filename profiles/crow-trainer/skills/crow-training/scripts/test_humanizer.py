@@ -201,6 +201,7 @@ class PreservationTests(unittest.TestCase):
             self.assertIn('FileNotFoundError', result['runtime_error'])
             self.assertEqual(result['verdict'], 'failed')
 
+    @unittest.skipUnless(sys.platform.startswith('linux'), 'Kernel sealed memfd test requires Linux')
     def test_runtime_digest_failure_forces_failed_verdict(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
@@ -242,6 +243,7 @@ class PreservationTests(unittest.TestCase):
             self.assertIsNotNone(result['runtime_error'])
             self.assertEqual(result['verdict'], 'failed')
 
+    @unittest.skipUnless(sys.platform.startswith('linux'), 'Kernel sealed memfd test requires Linux')
     def test_runtime_replacement_during_execution_fails(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
@@ -281,6 +283,7 @@ class PreservationTests(unittest.TestCase):
             self.assertEqual(result['runtime_execution_binding'], 'linux-sealed-memfd')
             self.assertEqual(result['verdict'], 'held-for-review')
 
+    @unittest.skipUnless(sys.platform.startswith('linux'), 'Kernel sealed memfd test requires Linux')
     def test_original_path_swap_cannot_change_executed_snapshot(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
@@ -339,6 +342,28 @@ class PreservationTests(unittest.TestCase):
                 runtime.write_bytes(b'hostile pathname replacement')
                 self.assertEqual(subprocess.run([executable], check=False, timeout=10, **options).returncode, 0)
                 self.assertEqual(humanizer.sha256_fd(fd), original_digest)
+            finally:
+                os.close(fd)
+
+    @unittest.skipUnless(sys.platform == 'win32', 'Native Windows locked-handle proof')
+    def test_windows_snapshot_handle_blocks_replacement(self):
+        with tempfile.TemporaryDirectory() as temp:
+            runtime = Path(temp) / 'runtime-snapshot.exe'
+            runtime.write_bytes(b'locked-executable-fixture')
+            path, fd, options, mode, digest = humanizer.bind_runtime_artifact(runtime)
+            try:
+                self.assertEqual(mode, 'windows-deny-write-delete-handle')
+                self.assertEqual(path, str(runtime))
+                self.assertEqual(digest, hashlib.sha256(runtime.read_bytes()).hexdigest())
+                replacement = runtime.with_name('replacement.exe')
+                replacement.write_bytes(b'hostile-payload')
+                with self.assertRaises(OSError):
+                    os.replace(replacement, runtime)
+                with self.assertRaises(OSError):
+                    runtime.write_bytes(b'hostile-overwrite')
+                self.assertEqual(humanizer.sha256_fd(fd), digest)
+                with self.assertRaisesRegex(OSError, 'unavailable'):
+                    humanizer.verify_runtime_dependency_mode(runtime)
             finally:
                 os.close(fd)
 
