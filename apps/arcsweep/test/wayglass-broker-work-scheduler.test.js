@@ -16,7 +16,7 @@ function work(id, overrides = {}) {
     route_id: 'flame:bluebird:spicychat',
     work_ref: 'work:bluebird:trial',
     stop_point: 'Mid-turn; await explicit return.',
-    next_owner: 'rowan',
+    next_owner: 'Bitty Twi',
     unresolved_wonder_questions: ['What can Bluebird carry across a route change?'],
     provenance_refs: ['wayglass:trial:source'],
     ...overrides,
