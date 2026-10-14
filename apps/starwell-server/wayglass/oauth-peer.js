@@ -3,6 +3,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const express = require('express');
+const { createRequestGate } = require('../security/wayglass-request-gate');
 const {
   createHash,
   randomBytes,
@@ -337,8 +338,13 @@ function createWayglassPeerOAuth({
     });
 
     const urlencoded = express.urlencoded({ extended: false, limit: '32kb' });
+    // Limits are deliberately shared across a private tunnel. Forwarded IPs
+    // cannot create attacker-controlled buckets or bypass the local boundary.
+    const authorizeViewGate = createRequestGate({ maxRequests: 24, maxConcurrent: 4 });
+    const pairingGate = createRequestGate({ maxRequests: 12, maxConcurrent: 3 });
+    const tokenGate = createRequestGate({ maxRequests: 60, maxConcurrent: 6 });
 
-    app.get('/oauth/authorize', async (req, res) => {
+    app.get('/oauth/authorize', authorizeViewGate, async (req, res) => {
       res.setHeader('Cache-Control', 'no-store');
       const meta = metadataFor(req);
       const params = {
@@ -373,7 +379,7 @@ function createWayglassPeerOAuth({
       }
     });
 
-    app.post('/oauth/authorize', urlencoded, async (req, res) => {
+    app.post('/oauth/authorize', pairingGate, urlencoded, async (req, res) => {
       res.setHeader('Cache-Control', 'no-store');
       const meta = metadataFor(req);
       const body = req.body || {};
@@ -431,7 +437,7 @@ function createWayglassPeerOAuth({
       }
     });
 
-    app.post('/oauth/token', urlencoded, async (req, res) => {
+    app.post('/oauth/token', tokenGate, urlencoded, async (req, res) => {
       res.setHeader('Cache-Control', 'no-store');
       const meta = metadataFor(req);
       const body = req.body || {};

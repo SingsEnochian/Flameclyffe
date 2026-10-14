@@ -3,6 +3,7 @@
 const express = require('express');
 const path = require('node:path');
 const { randomBytes, createHash } = require('node:crypto');
+const { createRequestGate } = require('../security/wayglass-request-gate');
 
 const ROUTE_ID = 'flame:bluebird:spicychat';
 const digest = token => createHash('sha256').update(token).digest('hex');
@@ -16,6 +17,8 @@ function loadSpicyChatAdapter(env = process.env) {
 function createBluebirdProvider({ adapter = loadSpicyChatAdapter(), env = process.env, clock = Date.now } = {}) {
   const sessions = new Map();
   const router = express.Router();
+  const credentialGate = createRequestGate({ maxRequests: 12, maxConcurrent: 3, clock });
+  const replyGate = createRequestGate({ maxRequests: 120, maxConcurrent: 4, clock });
   const characterId = env.WAYGLASS_BLUEBIRD_SPICYCHAT_CHARACTER_ID;
   const ready = () => Boolean(characterId && adapter?.provider === 'spicychat' && typeof adapter.validateCredential === 'function' && typeof adapter.respond === 'function');
   const drop = id => { const session = sessions.get(id); if (session) clearTimeout(session.timer); sessions.delete(id); };
@@ -24,7 +27,7 @@ function createBluebirdProvider({ adapter = loadSpicyChatAdapter(), env = proces
 
   router.use((_req, res, next) => { res.setHeader('Cache-Control', 'no-store'); next(); });
   router.get('/status', (_req, res) => res.json({ provider: 'spicychat', route_id: ROUTE_ID, configured: ready(), connection_verified: false }));
-  router.post('/authorize', async (req, res) => {
+  router.post('/authorize', credentialGate, async (req, res) => {
     if (!ready()) return unavailable(res);
     const code = req.body?.code;
     if (typeof code !== 'string' || !code.trim() || code.length > 4096 || /[\r\n\0]/.test(code)) return res.status(400).json({ error: 'Enter a valid SpicyChat token code.' });
@@ -77,7 +80,7 @@ function createBluebirdProvider({ adapter = loadSpicyChatAdapter(), env = proces
       });
     } catch { return res.status(502).json({ error: 'Bluebird’s SpicyChat connection failed. No provider fallback was used.' }); }
   }
-  router.post('/respond', respond);
+  router.post('/respond', replyGate, respond);
   return { router, respond, ready, routeId: ROUTE_ID };
 }
 
