@@ -70,7 +70,8 @@ class PreservationTests(unittest.TestCase):
         altered = 'Use the 5" pipe.\nMara said "Discard it."'
         self.assertIn('quotations-changed', check_preservation(original, altered, []))
         masked, spans = protect_quotes(original)
-        self.assertIn('5" pipe.', masked)
+        self.assertNotIn('5"', masked)
+        self.assertIn(' pipe.', masked)
         self.assertNotIn('Keep the seal.', masked)
         self.assertEqual(restore_quotes(masked, spans), (original, []))
 
@@ -79,7 +80,8 @@ class PreservationTests(unittest.TestCase):
         changed = 'Use the 5 " pipe.\nMara said "Discard it."'
         self.assertIn('quotations-changed', check_preservation(original, changed, []))
         masked, tokens = protect_quotes(original)
-        self.assertIn('5 " pipe.', masked)
+        self.assertNotIn('5 "', masked)
+        self.assertIn(' pipe.', masked)
         self.assertNotIn('Keep the seal.', masked)
         self.assertEqual(restore_quotes(masked, tokens), (original, []))
 
