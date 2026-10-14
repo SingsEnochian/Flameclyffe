@@ -5,6 +5,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
@@ -15,36 +16,34 @@ INCH_MARK = re.compile(r'\d[ \t]*$')
 
 
 def quote_spans(text):
-    """Conservatively pair straight quotes within lines or unambiguous multiline spans.
+    """Preserve the *whole* region between straight quote marks, not guessed pairs.
 
-    Ambiguous marks fail closed. Numeric measurement marks are not openings.
-    This does not purport to parse every form of literary quotation.
+    An ambiguous inch/ditto mark must never cause later dialogue to be exposed.
+    Masking the full first-to-last straight-quote envelope is deliberately more
+    conservative than an editorial quotation parser, especially for multiline
+    dialogue. Curly quotations retain their own spans.
     """
-    spans = [(m.start(), m.end()) for m in CURLY_QUOTES.finditer(text)]
-    balanced = (text.count('“') == text.count('”') == sum(text[a:b].startswith('“') for a, b in spans)
-                and text.count('‘') == text.count('’') == sum(text[a:b].startswith('‘') for a, b in spans))
+    spans = [(match.start(), match.end()) for match in CURLY_QUOTES.finditer(text)]
+    balanced = (text.count('“') == text.count('”') ==
+                sum(text[left:right].startswith('“') for left, right in spans)
+                and text.count('‘') == text.count('’') ==
+                sum(text[left:right].startswith('‘') for left, right in spans))
+    marks = []
     opening = None
-    offset = 0
-    for line in text.splitlines(keepends=True):
-        marks = [(offset + i, line[:i]) for i, char in enumerate(line) if char == '"']
-        if opening is not None and len(marks) > 1:
-            # Do not pair an unmatched mark on an earlier line with the start
-            # of a complete later quotation, even if dialogue begins "...".
-            balanced = False
-            opening = None
-        for index, prefix in marks:
-            if opening is None:
-                if INCH_MARK.search(prefix):
-                    continue
-                opening = index
-            else:
-                if index + 1 < len(text) and text[index + 1].isalnum():
-                    balanced = False
-                spans.append((opening, index + 1))
-                opening = None
-        offset += len(line)
+    for index, char in enumerate(text):
+        if char != '"':
+            continue
+        prefix = text[text.rfind('\n', 0, index) + 1:index]
+        # A digit-adjacent unit quote is not a closing dialogue mark unless
+        # there is already an opening delimiter. Keep 'Read "22"' protected.
+        if opening is None and INCH_MARK.search(prefix):
+            continue
+        marks.append(index)
+        opening = None if opening is not None else index
     if opening is not None:
         balanced = False
+    if len(marks) >= 2:
+        spans.append((marks[0], marks[-1] + 1))
     spans.sort(key=lambda span: (span[0], -(span[1] - span[0])))
     accepted = []
     for left, right in spans:
@@ -254,7 +253,7 @@ def run(args):
                'protected_explicit_spans': args.protect_span,
                'formatting_changes': formatting_changes,
                'wrapper_sha256': sha256(Path(__file__)),
-               'checks_scope': 'numeric substrings, balanced quotation spans, literal counts, captured executable snapshot SHA-256; not a semantic audit',
+               'checks_scope': 'numbers, protected straight-quote envelopes and curly quotes, literal counts, executed artefact digest; not a semantic audit',
                'verdict': 'held-for-review' if returncode == 0 and runtime_intact and reached_eos and candidate.strip() and not errors else 'failed',
                'token_budget': args.tokens, 'completion_requires_review': True,
                'weights_updated': False, 'production_promoted': False, 'run_directory': str(folder)}
