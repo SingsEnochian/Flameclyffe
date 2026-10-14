@@ -144,6 +144,23 @@ test('write event hash, principal, project, session, file and event type cannot 
   }
 });
 
+test('departure cannot attest an unrelated or omitted stopped project revision', async () => {
+  const { validateEvent } = await instrument();
+  const { ticket, leave, departure } = fixture();
+  for (const field of ['missing','wrong']) {
+    const broken = structuredClone(leave);
+    if (field === 'missing') delete broken.data.project_revision;
+    else broken.data.project_revision = hash('other-write');
+    const { event_hash, ...body } = broken;
+    broken.event_hash = hash(JSON.stringify(body));
+    assert.throws(() => validateEvent(broken, {
+      kind: 'leave', workspace_id: ticket.workspace_id, project_id: ticket.project_id,
+      session_id: ticket.first_session_id, principal_ref: ticket.principal_ref,
+      departure, project_revision: ticket.write_event_hash,
+    }), undefined, field);
+  }
+});
+
 test('full authenticated return validates re-entry authorship and original durable events', async () => {
   const { verifyReturn } = await instrument();
   const { ticket, profile, returned } = fixture();
@@ -157,11 +174,12 @@ test('full authenticated return validates re-entry authorship and original durab
 test('stale or forged re-entry cannot succeed with only a matching stop linkage', async () => {
   const { verifyReturn } = await instrument();
   for (const field of ['entry','event_hash','principal_ref','workspace_id','project_id',
-    'session_id','kind','wrong_return_link','stale_entry_session','missing_history']) {
+    'session_id','kind','wrong_return_link','stale_entry_session','reused_session','missing_history']) {
     const { ticket, profile, returned } = fixture();
     if (field === 'entry') delete returned.entry_receipt;
     else if (field === 'wrong_return_link') returned.entry_receipt.data.return_from = 'wrong';
     else if (field === 'stale_entry_session') returned.session_id = 'other-session';
+    else if (field === 'reused_session') returned.session_id = ticket.first_session_id;
     else if (field === 'missing_history') returned.project.receipts = [];
     else delete returned.entry_receipt[field];
     assert.throws(() => verifyReturn(ticket, profile, returned), undefined, field);
