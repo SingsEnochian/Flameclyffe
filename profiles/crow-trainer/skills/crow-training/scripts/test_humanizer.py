@@ -89,6 +89,14 @@ class PreservationTests(unittest.TestCase):
         self.assertNotIn('"22"', masked)
         self.assertEqual(restore_quotes(masked, tokens), (original, []))
 
+    def test_stray_marks_cannot_pair_across_real_dialogue(self):
+        original = 'A stray " mark.\nMara said "...Keep the seal."\nAnother stray " mark.'
+        altered = original.replace('Keep the seal.', 'Discard it.')
+        self.assertIn('quotations-unbalanced', check_preservation(original, altered, []))
+        self.assertTrue(check_preservation(original, original))
+        masked, tokens = protect_quotes(original)
+        self.assertEqual(restore_quotes(masked, tokens), (original, []))
+
     def test_missing_runtime_creates_failed_receipt(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
@@ -141,9 +149,9 @@ class PreservationTests(unittest.TestCase):
                 runtime=str(runtime), input=str(draft),
                 tokens=32, require_literal=[], protect_span=[],
                 protect_literals=False, protect_quotes=True)
-            def completed_command(cmd, stdout, stderr, timeout):
+            def completed_command(cmd, stdout, stderr, timeout, env):
                 stdout.write('Keep the 2kg unit. [end of text]')
-                runtime.unlink()
+                Path(cmd[0]).unlink()
                 return argparse.Namespace(returncode=0)
             with patch.object(humanizer, 'REFERENCE', reference), patch('pathlib.Path.cwd', return_value=root):
                 with patch.object(humanizer.subprocess, 'run', side_effect=completed_command):
@@ -180,9 +188,9 @@ class PreservationTests(unittest.TestCase):
                 runtime=str(runtime), input=str(draft),
                 tokens=32, require_literal=[], protect_span=[],
                 protect_literals=False, protect_quotes=True)
-            def replace_while_running(cmd, stdout, stderr, timeout):
+            def replace_while_running(cmd, stdout, stderr, timeout, env):
                 stdout.write('Keep the 2kg unit. [end of text]')
-                runtime.write_bytes(b'replacement-runtime')
+                Path(cmd[0]).write_bytes(b'replacement-runtime')
                 return argparse.Namespace(returncode=0)
             with patch.object(humanizer, 'REFERENCE', reference), patch('pathlib.Path.cwd', return_value=root):
                 with patch.object(humanizer.subprocess, 'run', side_effect=replace_while_running):
@@ -196,6 +204,44 @@ class PreservationTests(unittest.TestCase):
             self.assertNotEqual(result['runtime_sha256'], result['runtime_sha256_after'])
             self.assertFalse(result['runtime_integrity_verified'])
             self.assertEqual(result['verdict'], 'failed')
+
+    def test_original_path_swap_cannot_change_executed_snapshot(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            model = root / 'model.gguf'
+            model.write_bytes(b'pinned-test-checkpoint')
+            runtime = root / 'runtime'
+            runtime.write_bytes(b'original-runtime')
+            draft = root / 'draft.txt'
+            draft.write_text('Keep the 2kg unit.')
+            spec = {'checkpoint_bytes': model.stat().st_size,
+                    'checkpoint_sha256': hashlib.sha256(model.read_bytes()).hexdigest(),
+                    'instr': 'Instruction', 'sep': '<end>',
+                    'fingerprint': hashlib.sha256(b'Instruction\n\nX<end>').hexdigest()[:16],
+                    'source': 'test', 'revision': 'test'}
+            reference = root / 'spec.json'
+            reference.write_text(json.dumps(spec))
+            args = argparse.Namespace(model_file=str(model),
+                runtime=str(runtime), input=str(draft),
+                tokens=32, require_literal=[], protect_span=[],
+                protect_literals=False, protect_quotes=True)
+            def attempted_swap(cmd, stdout, stderr, timeout, env):
+                self.assertNotEqual(Path(cmd[0]), runtime)
+                self.assertEqual(Path(cmd[0]).read_bytes(), b'original-runtime')
+                runtime.write_bytes(b'evil-runtime')
+                runtime.write_bytes(b'original-runtime')
+                stdout.write('Keep the 2kg unit. [end of text]')
+                return argparse.Namespace(returncode=0)
+            with patch.object(humanizer, 'REFERENCE', reference), patch('pathlib.Path.cwd', return_value=root):
+                with patch.object(humanizer.subprocess, 'run', side_effect=attempted_swap):
+                    with contextlib.redirect_stdout(io.StringIO()):
+                        humanizer.run(args)
+            receipts = list((root / '.crow-trainer' / 'humanizer').glob('*/receipt.json'))
+            result = json.loads(receipts[0].read_text())
+            self.assertEqual(result['runtime_sha256'], result['runtime_sha256_after'])
+            self.assertTrue(result['runtime_integrity_verified'])
+            self.assertEqual(result['verdict'], 'held-for-review')
+            self.assertNotEqual(result['runtime_snapshot'], str(runtime))
 
     def test_trainer_protects_quotations_by_default(self):
         parser = argparse.ArgumentParser()
