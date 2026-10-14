@@ -5,6 +5,8 @@ import contextlib
 import hashlib
 import io
 import json
+import os
+import sys
 import tempfile
 from pathlib import Path
 from unittest.mock import patch
@@ -92,10 +94,26 @@ class PreservationTests(unittest.TestCase):
     def test_stray_marks_cannot_pair_across_real_dialogue(self):
         original = 'A stray " mark.\nMara said "...Keep the seal."\nAnother stray " mark.'
         altered = original.replace('Keep the seal.', 'Discard it.')
-        self.assertIn('quotations-unbalanced', check_preservation(original, altered, []))
-        self.assertTrue(check_preservation(original, original, []))
+        self.assertIn('quotations-changed', check_preservation(original, altered, []))
         masked, tokens = protect_quotes(original)
+        self.assertNotIn('Keep the seal.', masked)
         self.assertEqual(restore_quotes(masked, tokens), (original, []))
+
+    def test_multiline_stray_marks_cannot_expose_dialogue(self):
+        original = 'A stray " mark.\nMara said "...Keep the blue\nseal intact."\nAnother stray " mark.'
+        altered = original.replace('Keep the blue', 'Discard the blue')
+        self.assertIn('quotations-changed', check_preservation(original, altered, []))
+        masked, tokens = protect_quotes(original)
+        self.assertNotIn('Keep the blue', masked)
+        self.assertEqual(restore_quotes(masked, tokens), (original, []))
+
+    def test_multiple_quote_paragraphs_remain_safe(self):
+        original = 'Mara said "First."\nA gap between scenes.\nNeri said "Second."'
+        masked, protected = protect_quotes(original)
+        self.assertNotIn('gap between scenes', masked)
+        self.assertIn('quotations-changed', check_preservation(
+            original, original.replace('gap between scenes', 'changed scene'), []))
+        self.assertEqual(restore_quotes(masked, protected), (original, []))
 
     def test_missing_runtime_creates_failed_receipt(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -149,9 +167,10 @@ class PreservationTests(unittest.TestCase):
                 runtime=str(runtime), input=str(draft),
                 tokens=32, require_literal=[], protect_span=[],
                 protect_literals=False, protect_quotes=True)
-            def completed_command(cmd, stdout, stderr, timeout, env):
+            def completed_command(cmd, stdout, stderr, timeout, env, **kwargs):
                 stdout.write('Keep the 2kg unit. [end of text]')
-                Path(cmd[0]).unlink()
+                # Simulate losing the opened artifact before the post-run digest.
+                os.close(kwargs['pass_fds'][0])
                 return argparse.Namespace(returncode=0)
             with patch.object(humanizer, 'REFERENCE', reference), patch('pathlib.Path.cwd', return_value=root):
                 with patch.object(humanizer.subprocess, 'run', side_effect=completed_command):
@@ -188,22 +207,23 @@ class PreservationTests(unittest.TestCase):
                 runtime=str(runtime), input=str(draft),
                 tokens=32, require_literal=[], protect_span=[],
                 protect_literals=False, protect_quotes=True)
-            def replace_while_running(cmd, stdout, stderr, timeout, env):
+            def replace_while_running(cmd, stdout, stderr, timeout, env, **kwargs):
+                self.assertTrue(cmd[0].startswith('/proc/self/fd/'))
+                with self.assertRaises(PermissionError):
+                    Path(cmd[0]).write_bytes(b'replacement-runtime')
                 stdout.write('Keep the 2kg unit. [end of text]')
-                Path(cmd[0]).write_bytes(b'replacement-runtime')
                 return argparse.Namespace(returncode=0)
             with patch.object(humanizer, 'REFERENCE', reference), patch('pathlib.Path.cwd', return_value=root):
                 with patch.object(humanizer.subprocess, 'run', side_effect=replace_while_running):
                     with contextlib.redirect_stdout(io.StringIO()):
-                        with self.assertRaises(SystemExit) as exc:
-                            humanizer.run(args)
-            self.assertEqual(exc.exception.code, 1)
+                        humanizer.run(args)
             receipts = list((root / '.crow-trainer' / 'humanizer').glob('*/receipt.json'))
             result = json.loads(receipts[0].read_text())
             self.assertEqual(result['returncode'], 0)
-            self.assertNotEqual(result['runtime_sha256'], result['runtime_sha256_after'])
-            self.assertFalse(result['runtime_integrity_verified'])
-            self.assertEqual(result['verdict'], 'failed')
+            self.assertEqual(result['runtime_sha256'], result['runtime_sha256_after'])
+            self.assertTrue(result['runtime_integrity_verified'])
+            self.assertEqual(result['runtime_execution_binding'], 'linux-sealed-memfd')
+            self.assertEqual(result['verdict'], 'held-for-review')
 
     def test_original_path_swap_cannot_change_executed_snapshot(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -225,11 +245,15 @@ class PreservationTests(unittest.TestCase):
                 runtime=str(runtime), input=str(draft),
                 tokens=32, require_literal=[], protect_span=[],
                 protect_literals=False, protect_quotes=True)
-            def attempted_swap(cmd, stdout, stderr, timeout, env):
+            def attempted_swap(cmd, stdout, stderr, timeout, env, **kwargs):
                 self.assertNotEqual(Path(cmd[0]), runtime)
                 self.assertEqual(Path(cmd[0]).read_bytes(), b'original-runtime')
                 runtime.write_bytes(b'evil-runtime')
                 runtime.write_bytes(b'original-runtime')
+                # Also replace the mutable retained snapshot pathname.
+                snapshot = next((root / '.crow-trainer' / 'humanizer').glob('*/runtime-snapshot'))
+                snapshot.write_bytes(b'evil-snapshot')
+                self.assertEqual(Path(cmd[0]).read_bytes(), b'original-runtime')
                 stdout.write('Keep the 2kg unit. [end of text]')
                 return argparse.Namespace(returncode=0)
             with patch.object(humanizer, 'REFERENCE', reference), patch('pathlib.Path.cwd', return_value=root):
@@ -242,6 +266,7 @@ class PreservationTests(unittest.TestCase):
             self.assertTrue(result['runtime_integrity_verified'])
             self.assertEqual(result['verdict'], 'held-for-review')
             self.assertNotEqual(result['runtime_snapshot'], str(runtime))
+            self.assertEqual(result['runtime_execution_binding'], 'linux-sealed-memfd')
 
     def test_trainer_protects_quotations_by_default(self):
         parser = argparse.ArgumentParser()
