@@ -66,6 +66,7 @@ export function promptForAgent(packet) {
     'WAYGLASS OS · ATELIER CODE LOOM · PROPOSED HANDOFF',
     'Wayglass OS evolves ArcSweep, AND ArcSweep continues to be actively upgraded. Preserve both workstreams and their shared tested continuity/runtime lineage; do not create duplicate identity authorities.',
     'Wayglass OS is also our living ship LLM: architecture, ship model/runtime, memory, voice, agency, embodied rooms, instruments and crew interfaces are one evolving vessel design.',
+    'Inherit established Wayglass OS UI/UX, material, shader, gesture, sound and accessibility contracts from apps/arcsweep/contracts/WAYGLASS_UI_UX_INHERITANCE_V0.1.md. Do not invent a parallel dark-theme design.'
     'Do not mistake the intended living ship LLM for a proven deployed dedicated model; distinguish declared architecture, simulated results and authenticated runtime evidence.',
     'For every change, specify whether it serves ArcSweep, Wayglass OS/ship LLM, or both, with backwards compatibility, tests and evidence for each affected runtime.',
     'Intended seat: '+SEATS[packet.seat].name,
