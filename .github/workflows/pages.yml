@@ -95,7 +95,12 @@ jobs:
           test -d dist/arcsweep/assets
           test -f dist/arcsweep/code-loom/index.html
           test -f dist/arcsweep/pilot-deck/index.html
-          test -f dist/arcsweep/pilot-deck/pilot-deck-ui.js || find dist/arcsweep/assets -name '*.js' | grep -q .
+          if grep -Fq './pilot-deck-ui.js' dist/arcsweep/pilot-deck/index.html; then
+            echo 'Wayglass pilot deck leaked its source module instead of a built asset' >&2
+            exit 1
+          fi
+          grep -Eq '<script[^>]+type="module"[^>]+src="[^"]+assets/[^"]+\.js"' dist/arcsweep/pilot-deck/index.html
+          grep -Eq '<link[^>]+rel="stylesheet"[^>]+href="[^"]+assets/[^"]+\.css"' dist/arcsweep/pilot-deck/index.html
           grep -Fq 'Rarity' dist/arcsweep/code-loom/index.html
           node --test apps/arcsweep/test/code-loom-model.test.js apps/arcsweep/test/pilot-deck-model.test.js apps/arcsweep/test/wayglass-local-event-ledger.test.js apps/arcsweep/test/wayglass-sonic-score.test.js
 
