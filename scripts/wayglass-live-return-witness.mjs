@@ -122,6 +122,11 @@ export function validateEvent(event, binding) {
   if (binding.kind === 'leave') {
     need(event.data.departure && typeof event.data.departure === 'object' &&
       same(event.data.departure, binding.departure), 'leave event departure');
+    need(SHA.test(event.data.project_revision || ''), 'leave lacks stopped project revision');
+    if (binding.project_revision) {
+      need(event.data.project_revision === binding.project_revision,
+        'leave project revision does not match the last accepted work');
+    }
   }
   if (binding.kind === 'enter' && binding.return_from !== undefined) {
     need(event.data.return_from === binding.return_from, 'entry event stop linkage');
@@ -191,7 +196,9 @@ export function verifyReturn(ticket, profile, returned) {
     nonempty(ticket.first_session_id) && nonempty(ticket.stop_receipt_id),
     'incomplete private return ticket');
   need(returned?.participant?.participant_id === 'rarity' &&
-    nonempty(returned.session_id), 'crew seat or session mismatch');
+    nonempty(returned.session_id) &&
+    returned.session_id !== ticket.first_session_id,
+    'crew seat or fresh return session mismatch');
   need(returned.project?.workspace_id === ticket.workspace_id &&
     returned.project?.project_id === ticket.project_id,
     'recovered project identity mismatch');
@@ -233,6 +240,7 @@ export function verifyReturn(ticket, profile, returned) {
     kind: 'leave', workspace_id: ticket.workspace_id,
     project_id: ticket.project_id, session_id: ticket.first_session_id,
     principal_ref: ticket.principal_ref, departure: returned.recovered_departure,
+    project_revision: ticket.write_event_hash,
   });
   return {
     accepted: true,
@@ -300,6 +308,7 @@ async function prepare(client) {
   validateEvent(left.receipt, {
     kind: 'leave', workspace_id: 'builder', project_id, session_id: entered.session_id,
     principal_ref, departure: left.departure,
+    project_revision: written.receipt.event_hash,
   });
   const stopId = left.departure.stop_receipt.receipt_id;
   const ticket = {
