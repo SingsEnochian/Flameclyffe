@@ -17,6 +17,10 @@
 - In architecture diagrams and new UX copy, name **Wayglass OS** as the system. Name **ArcSweep** when identifying heritage components or compatible runtime surfaces.
 - Treat working ArcSweep contributions as ancestors: retain attribution and provenance rather than erasing them during evolution.
 
+## Wayglass UI/UX inheritance
+
+All ship interfaces inherit the established Wayglass material, shader, somatic and accessible interaction grammar. Do not create a parallel visual language for the pilot seats, Code Loom or Harmonic Keyboard. See `WAYGLASS_UI_UX_INHERITANCE_V0.1.md` and the shared fallback material implementation at `apps/arcsweep/ship-ui/`.
+
 ## How to learn and ingest
 
 For every external source, inspect its code, rationale, boundaries, failures and licence. Capture provenance, then derive **original Wayglass OS implementations** where a new direction is valuable. Directly reuse source only under applicable licence obligations. Do not confuse an imported mechanism with a whole imported product.
