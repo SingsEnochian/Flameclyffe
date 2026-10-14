@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1220">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'self'; form-action 'none'">
+<title>Wayglass Harmonic Keyboard · Ship Instrument</title>
+<meta name="description" content="Play ArcSweep world tones using touch, QWERTY and optional MIDI input.">
+<link rel="stylesheet" href="./keyboard.css"></head><body>
+<header class="mast">
+ <div class="brand"><span>💠 WAYGLASS OS · SHIP INSTRUMENT</span><nav aria-label="Ship connections"><a href="../pilot-deck/">Pilot Deck</a><a href="../code-loom/">Code Loom</a><a href="../">ArcSweep</a></nav></div>
+ <h1>Harmonic Keyboard</h1>
+ <p>Touch the world. Play its signature. Listen to the thread that brings us home.</p>
+ <div class="readouts"><span>World: <strong id="world-name">Terra Aeterna</strong></span><span>Root: <strong id="root-readout">220.00 Hz</strong></span><span>Engine: <strong>ArcSweep StorySoundscape</strong></span><span>State: <strong id="engine-state">Silent</strong></span></div>
+</header>
+<main>
+<section class="panel controls">
+<div class="group"><label for="world">World tone</label><select id="world">
+<option value="terra-aeterna">Terra Aeterna · 220 Hz</option>
+<option value="luna">Luna · 432 Hz</option>
+<option value="starsong">Starsong / Equestria · 528 Hz</option>
+<option value="hearthweave-foundation">Hearthweave · 144 Hz</option>
+<option value="kelyran">Kelyran study · 369 Hz</option>
+<option value="custom">Custom world root</option>
+</select></div>
+<div class="group"><label for="root-hz">Root frequency, Hz</label><input id="root-hz" type="number" min="20" max="2000" step="0.01" value="220"></div>
+<div class="group"><label for="mode">Keyboard mapping</label><select id="mode"><option value="chromatic">Chromatic · world-tuned</option><option value="glyph">Glyph · ArcSweep writing notes</option><option value="galdr">Galdr · Kelyran frequency study</option></select></div>
+<div class="group"><label for="volume">Audio ceiling <output id="volume-value">20%</output></label><input id="volume" type="range" min="0" max=".35" step=".01" value=".20"></div>
+<div class="group toggle"><label><input id="haptics" type="checkbox"> Tactile acknowledgement where supported</label></div>
+<div class="actions"><button class="primary" id="arm" type="button">Arm audio</button><button id="midi" type="button">Connect MIDI input</button><button class="feather" id="feather" type="button">✦ Feather Stop</button></div>
+</section>
+<section class="panel instrument">
+<div class="section-title"><div><p class="eyebrow">Playable world instrument</p><h2>Keys answer the ship</h2></div><p id="mode-description">A through K and the upper-row accidentals play one chromatic octave, retuned to the selected world.</p></div>
+<div class="keys" id="keys" role="group" aria-label="Wayglass playable keyboard"></div>
+<p class="legend">Desktop: <kbd>A</kbd> <kbd>W</kbd> <kbd>S</kbd> <kbd>E</kbd> <kbd>D</kbd> <kbd>F</kbd> <kbd>T</kbd> <kbd>G</kbd> <kbd>Y</kbd> <kbd>H</kbd> <kbd>U</kbd> <kbd>J</kbd> <kbd>K</kbd> · Touch: press and hold · MIDI: C4 = world root</p>
+</section>
+<section class="panel duet">
+<div><p class="eyebrow">Voyage performance trace</p><h2>Notes are observations, not navigation authorisations.</h2>
+<p>This sound instrument uses the existing StorySoundscape audio buses. No new audio authority, world registry, Kelyran stroke canon, or identity system. A frequency labels a designed experience; it does not prove a physical destination.</p></div>
+<div><div class="actions"><button id="export" type="button">Export local note trace</button><button id="clear" type="button">Clear trace</button></div>
+<output id="status" role="status" aria-live="polite">Sound is off until you arm it. Feather always stops the local instrument.</output>
+<p class="tiny" id="last-note">No notes yet.</p></div>
+</section>
+</main>
+<footer>💠 Wayglass and ArcSweep · One musical lineage · Distinct worlds · Silence by choice · The ship never mistakes a tone for a crossing.</footer>
+<script type="module" src="./keyboard-ui.js"></script></body></html>
