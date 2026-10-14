@@ -29,6 +29,18 @@ test('reject corrupted identity binding and mismatched stop-point', () => {
   assert.throws(() => replayLocalReceipts([a,badReturn], lookup), /inconsistent return/);
   assert.throws(() => replayLocalReceipts([a], () => null), /signature/);
 });
+test('a signed but wrong participant cannot claim another next owner’s return', () => {
+  const { privateKey: outsiderKey, publicKey: outsiderPub } = generateKeyPairSync('ed25519');
+  const first = make('departure.recorded', 0, null, { stop_point: 'atelier:paused', next_owner: 'constellation:rarity' });
+  const other = createLocalReceipt({
+    author_ref: 'constellation:outsider', kind: 'return.accepted', sequence: 1,
+    previous_id: first.id, payload: { stop_point: 'atelier:paused', next_owner: 'constellation:rarity' },
+  }, outsiderKey);
+  const resolver = id => id === 'constellation:rarity' ? publicKey : id === 'constellation:outsider' ? outsiderPub : null;
+  assert.equal(verifyLocalReceipt(other, resolver), true, 'signature is legitimate but not authorised to return');
+  assert.throws(() => replayLocalReceipts([first, other], resolver), /unauthorised/);
+});
+
 test('reject duplicate, reordered or tampered chain events', () => {
   const a = make('work.recorded', 0, null, {});
   assert.throws(() => replayLocalReceipts([a,a], lookup));
