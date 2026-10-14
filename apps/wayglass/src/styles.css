@@ -797,3 +797,184 @@ button { font: inherit; cursor: pointer; }
 @media (max-width: 860px) { .organ-bay { grid-template-columns:1fr; } .organ-vessel { min-height:0; grid-template-columns:92px 1fr; grid-template-rows:1fr; } .organ-core { width:76px; height:76px; } }
 @media (hover:none) { .organ-vessel { cursor:pointer; } .organ-lineage { opacity:.82; } }
 @media (prefers-reduced-motion:reduce) { .organ-vessel, .organ-core, .organ-core::before, .organ-core::after { transform:none !important; } }
+
+
+/* Wayglass glass-desk design system: Writing Room + shared route controls.
+   Visual match to the October 13 design plate, without an image as UI chrome. */
+:root {
+  color-scheme: dark;
+  --wg-canvas: #040d15;
+  --wg-panel: #071723;
+  --wg-rim: rgba(80, 157, 192, .29);
+  --wg-rim-lit: rgba(55, 216, 243, .65);
+  --wg-ink-muted: #9dabbc;
+  --wg-cyan: #5edaff;
+}
+html, body { background: var(--wg-canvas); }
+#app { width: min(1200px, calc(100% - clamp(24px, 5vw, 72px))); padding-top: 32px; }
+select, option { color-scheme: dark; }
+select option, select optgroup { background-color: #081826; color: #eaf8ff; }
+[hidden] { display: none !important; }
+.glass-panel::before, .glass-panel::after { pointer-events: none; }
+.wg-deck-nav { border-radius: 999px; gap: 6px; padding: 6px; }
+.wg-deck-nav .glass-chip { font-size: .81rem; text-transform: none; letter-spacing: .015em; font-weight: 650; padding: 10px 19px; }
+.wg-deck-nav .glass-chip.active { border-color: rgba(76, 213, 252, .70); box-shadow: 0 0 0 1px rgba(73,181,234,.21), 0 0 24px rgba(35,181,248,.16), inset 0 1px rgba(255,255,255,.12); }
+
+/* Writing Room layout */
+.wg-writing-room { gap: 18px; isolation: isolate; }
+.wg-writing-room > .glass-panel, .wg-writing-room .wg-writing-main, .wg-writing-room .wg-session-sidebar {
+  border: 1px solid var(--wg-rim);
+  background:
+    radial-gradient(ellipse at 58% 0%, rgba(27, 120, 164, .17), transparent 48%),
+    radial-gradient(ellipse at 96% 100%, rgba(40, 40, 127, .10), transparent 45%),
+    linear-gradient(155deg, #081925, #040d16 76%);
+  box-shadow: inset 0 1px rgba(224,252,255,.09), 0 24px 70px rgba(0, 0, 0, .29);
+}
+.wg-writing-room .wg-surface-head {
+  min-height: 260px;
+  border-radius: 28px;
+  grid-template-columns: minmax(0, 1.65fr) minmax(265px, .85fr);
+  align-items: center;
+  padding: clamp(26px, 4vw, 48px);
+  gap: 30px;
+  overflow: visible;
+  z-index: 12;
+}
+.wg-writing-room .wg-surface-head::after { border-radius: inherit; }
+.wg-writing-room .eyebrow { color: #56d1ec; font-size: .7rem; letter-spacing: .24em; font-weight: 800; }
+.wg-writing-room h1 { color: #eaf2f7; font: 500 clamp(3.6rem, 6vw, 5.75rem)/.95 Georgia, serif; letter-spacing: -.055em; text-shadow: 0 10px 35px rgba(0,0,0,.28); }
+.wg-writing-room .lede { color: #c2ccd5; max-width: 39rem; margin-top: 18px; font-size: clamp(.98rem, 1.45vw, 1.13rem); line-height: 1.5; }
+.wg-writing-room .wg-route-block { position: relative; display: grid; grid-template-columns: 64px minmax(0,1fr); gap: 18px; align-items: start; border-left: 1px solid rgba(153,199,228,.14); padding-left: 21px; z-index: 4; }
+.wg-writing-room .route-mineral { grid-column: 1; grid-row: 1; width: 58px; height: 58px; }
+.wg-route-controls { grid-column: 2; display: grid; gap: 10px; min-width: 0; }
+.wg-route-controls > label:first-child { text-transform: uppercase; letter-spacing: .18em; color: #a7b7c8; font-size: .72rem; font-weight: 700; }
+.wg-thinking-toggle { display: flex !important; align-items: center; gap: 9px; min-width: 0; text-transform: uppercase; font-size: .64rem !important; line-height: 1.5; letter-spacing: .06em !important; cursor: pointer; }
+.wg-thinking-toggle input { width: 15px; height: 15px; margin: 0; flex: none; accent-color: #57cae7; }
+.wg-route-controls .tiny { font-size: .70rem; color: #9fb0c3; }
+
+/* Stable, OS-independent route listbox: dark at every phase, including open. */
+.wg-route-picker { position: relative; min-width: 0; z-index: 45; }
+.wg-route-trigger {
+  width: 100%; min-height: 47px; padding: 10px 13px 10px 16px;
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  text-align: left; color: #e7f3fc; background: #061621;
+  border: 1px solid rgba(92, 173, 210, .38); border-radius: 13px;
+  box-shadow: inset 0 1px rgba(244,255,255,.055);
+  cursor: pointer; font-size: .84rem; font-weight: 500;
+}
+.wg-route-trigger:hover, .wg-route-picker.is-open .wg-route-trigger { border-color: var(--wg-rim-lit); background: #0a2030; }
+.wg-route-trigger:disabled { opacity: .65; cursor: not-allowed; }
+.wg-route-current { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wg-route-chevron { font-size: 1.2rem; color: #64d7ee; transition: transform 160ms ease; line-height: 1; }
+.wg-route-picker.is-open .wg-route-chevron { transform: rotate(180deg); }
+.wg-route-menu {
+  position: absolute; z-index: 120; top: calc(100% + 7px); left: 0; right: 0;
+  padding: 6px; max-height: min(360px, 60vh); overflow-y: auto;
+  background: #081825; color: #e4f4fc;
+  border: 1px solid rgba(93, 183, 218, .47); border-radius: 16px;
+  box-shadow: 0 22px 65px rgba(0,0,0,.68), inset 0 1px rgba(255,255,255,.07);
+  scrollbar-color: #356b80 #081825;
+  overscroll-behavior: contain;
+}
+.wg-route-option {
+  display: flex; align-items: center; gap: 12px; padding: 12px 11px;
+  border: 1px solid transparent; border-radius: 10px; cursor: pointer;
+  outline: none; color: #e4f0f6;
+}
+.wg-route-option:hover, .wg-route-option:focus-visible { background: #132d3e; border-color: rgba(60,179,226,.38); }
+.wg-route-option.selected { background: #113044; }
+.wg-route-option.disabled { opacity: .42; cursor: not-allowed; }
+.wg-route-symbol { font-size: 1.2rem; color: #55cfef; flex: none; }
+.wg-route-option-copy { flex: 1; display: grid; gap: 3px; min-width: 0; }
+.wg-route-option-copy strong { font-size: .83rem; font-weight: 630; line-height: 1.3; overflow-wrap: anywhere; }
+.wg-route-option-copy small { color: #91a5b8; font-size: .72rem; }
+.wg-route-check { color: #57d9ef; font-weight: 800; }
+.wg-route-unavailable { padding: 16px; margin: 0; }
+
+/* Constellation identity and route remain different. This is a place label. */
+.wg-constellation-strip { display: flex; gap: 20px; align-items: center; padding: 22px 30px; border-radius: 23px; min-height: 126px; }
+.wg-constellation-symbol { display: grid; place-items: center; flex: 0 0 70px; height: 70px; border: 1px solid rgba(70, 198, 232, .55); border-radius: 50%; color: #9bebf9; font-size: 2rem; box-shadow: inset 0 0 30px rgba(13,108,139,.14); }
+.wg-constellation-place { display: grid; gap: 5px; min-width: 0; }
+.wg-constellation-place .eyebrow { margin-bottom: 2px; }
+.wg-constellation-place strong { font-size: 1rem; font-weight: 650; color: #edf7ff; }
+.wg-writing-workspace { display: grid; grid-template-columns: minmax(0, 2.1fr) minmax(270px, .94fr); gap: 16px; align-items: stretch; }
+.wg-writing-main { min-width: 0; min-height: 590px; display: flex; flex-direction: column; overflow: hidden; border-radius: 26px; position: relative; }
+.wg-writing-room .wg-control-ribbon { z-index: 3; padding: 18px 18px 14px; background: transparent; border: 0; border-radius: 0; box-shadow: none; flex-wrap: wrap; gap: 13px; }
+.wg-writing-room .wg-control-ribbon::before, .wg-writing-room .wg-control-ribbon::after { display: none; }
+.wg-writing-room .glass-chip { font-size: .75rem; letter-spacing: .02em; font-weight: 680; box-shadow: inset 0 1px rgba(255,255,255,.07), 0 6px 14px rgba(0,0,0,.11); }
+.wg-writing-room .glass-chip.active { border-color: rgba(62,218,255,.65); box-shadow: 0 0 16px rgba(21,187,235,.20), inset 0 1px rgba(255,255,255,.10); }
+.wg-writing-room .turn-jewel { padding: 9px 13px; gap: 9px; }
+.wg-writing-room .ownership-drawer { min-width: 0; margin-left: auto; }
+.wg-writing-room .ownership-drawer summary { padding: 8px; }
+.wg-writing-room .ownership-drawer[open] { flex: 1 1 100%; }
+.wg-writing-room .ownership-form { grid-template-columns: repeat(3, minmax(0, 1fr)) auto; }
+.wg-writing-room .wg-thread { min-height: 265px; max-height: none; flex: 1; margin: 0 14px; padding: 10px; overflow: hidden; border: 1px solid rgba(90,139,182,.23); border-radius: 18px; background: rgba(2,11,20,.56); outline: none; transform: none; box-shadow: inset 0 1px rgba(230,254,255,.025); }
+.wg-writing-room .wg-thread-log { max-height: 54vh; min-height: 250px; gap: 12px; padding: 6px; }
+.wg-writing-room .empty-thread { display: flex; flex-direction: column; gap: 11px; align-items: center; justify-content: center; min-height: 245px; text-align: center; }
+.wg-writing-room .empty-thread strong { font: 400 1.18rem/1.4 Georgia, serif; color: #b9c7d9; }
+.wg-writing-room .empty-thread small { color: #8396ad; font: .83rem/1.45 system-ui, sans-serif; }
+.wg-empty-feather { width: 61px; height: 61px; display: grid; place-items: center; border: 1px solid rgba(59,144,181,.26); border-radius: 50%; font-size: 1.7rem; color: #90def2; }
+.wg-writing-room .wg-composer { margin: 11px 14px 14px; padding: 0; border: 1px solid rgba(87,154,199,.24); border-radius: 15px; box-shadow: none; background: rgba(2,10,19,.65); outline: none; }
+.wg-writing-room #wg-input { min-height: 108px; max-height: 230px; padding: 15px 16px; border: 0; border-radius: 14px 14px 0 0; resize: vertical; background: transparent; line-height: 1.52; }
+.wg-writing-room #wg-input::placeholder { color: #8096ae; }
+.wg-writing-room .composer-foot { border-top: 1px solid rgba(89,140,185,.14); margin: 0; padding: 9px 10px 9px 14px; flex-wrap: wrap; }
+.wg-writing-room .send-jewel { background: linear-gradient(105deg, rgba(10,99,139,.50), rgba(28,32,83,.48)); border: 1px solid rgba(72, 205, 249, .67); border-radius: 12px; font-size: .83rem; letter-spacing: 0; padding: 11px 15px; box-shadow: inset 0 1px rgba(255,255,255,.14), 0 0 18px rgba(17,137,228,.10); }
+.wg-writing-room .send-jewel span { margin-right: 8px; color: #7be5fc; }
+.wg-writing-room .send-jewel:hover:not(:disabled) { background: #154163; }
+.wg-writing-room .wg-receipt { padding: 3px 14px 0; color: #88a4b9; }
+
+/* Sidebar replaces the doubled session/checkpoint stacks. */
+.wg-session-sidebar { display: flex; flex-direction: column; min-width: 0; min-height: 590px; border-radius: 26px; padding: 13px; overflow: hidden; }
+.wg-sidebar-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; border-bottom: 1px solid rgba(74,134,179,.18); }
+.wg-sidebar-tabs button { position: relative; padding: 12px 10px 15px; border: none; background: transparent; color: #91a6b8; font-size: .85rem; cursor: pointer; }
+.wg-sidebar-tabs button[aria-selected="true"] { color: #f2f9ff; font-weight: 650; }
+.wg-sidebar-tabs button[aria-selected="true"]::after { content:""; position:absolute; bottom:0; left:13%; width:74%; height:2px; background: #5adaf4; box-shadow: 0 0 11px #32bce6; }
+.wg-sidebar-view { flex: 1; display: flex; flex-direction: column; padding: 18px 6px; gap: 12px; overflow: auto; }
+.wg-copy-session { align-self: flex-start; min-width: 0; text-align: left; font-weight: 500 !important; }
+.wg-session-empty { display: grid; place-items: end center; flex: 1; min-height: 100px; font-size: 3rem; color: #4b7895; opacity: .6; }
+.wg-session-explainer { display: grid; gap: 7px; text-align: center; margin: 0 0 auto; padding: 0 9px; color: #98a9bd; line-height: 1.5; font-size: .81rem; }
+.wg-session-explainer strong { font: 400 1.15rem Georgia, serif; color: #c5cfda; }
+.wg-sidebar-view #wg-receipt { overflow-wrap: anywhere; border-top: 1px solid rgba(80,141,190,.16); padding-top: 13px; }
+.wg-continuity-view h2 { font: 400 1.25rem Georgia, serif; margin: 0; }
+.wg-continuity-view label { display: grid; gap: 6px; color: #a9bbc9; font-size: .78rem; }
+.wg-continuity-view input, .wg-continuity-view textarea { min-height: 38px; padding: 9px 11px; border-radius: 10px; font-size: .82rem; }
+.wg-continuity-view textarea { resize: vertical; }
+.wg-continuity-view button { align-self: start; border-radius: 10px; }
+
+@media (max-width: 1020px) {
+  .wg-writing-room .wg-surface-head { grid-template-columns: minmax(0,1.2fr) minmax(265px,1fr); padding: 28px; }
+  .wg-writing-room .wg-route-block { grid-template-columns: 42px minmax(0,1fr); padding-left: 16px; gap: 13px; }
+  .wg-writing-room .route-mineral { width: 40px; height: 40px; }
+  .wg-writing-workspace { grid-template-columns: minmax(0,1.5fr) minmax(235px,.85fr); }
+}
+@media (max-width: 760px) {
+  #app { width: calc(100% - 24px); padding-top: 15px; }
+  .wg-writing-room .wg-surface-head { display: grid; grid-template-columns: 1fr; gap: 25px; padding: 24px 20px; border-radius: 22px; }
+  .wg-writing-room h1 { font-size: clamp(3rem, 13vw, 4.8rem); }
+  .wg-writing-room .wg-route-block { border-left: 0; border-top: 1px solid rgba(153,199,228,.14); padding: 16px 0 0; }
+  .wg-writing-room .wg-route-block .route-mineral { width: 43px; height: 43px; }
+  .wg-writing-workspace { grid-template-columns: minmax(0,1fr); }
+  .wg-writing-main { min-height: 500px; }
+  .wg-session-sidebar { min-height: 270px; }
+  .wg-writing-room .wg-thread { min-height: 235px; }
+  .wg-writing-room .wg-thread-log { min-height: 220px; max-height: 48vh; }
+  .wg-session-empty { display: none; }
+  .wg-constellation-strip { padding: 18px; min-height: 100px; }
+  .wg-constellation-symbol { flex-basis: 54px; height: 54px; }
+  .wg-deck-nav { flex-wrap: wrap; justify-content: center; position: relative; top: auto; width: 100%; border-radius: 18px; }
+  .wg-deck-nav .glass-chip { padding: 10px 13px; }
+  .wg-writing-room .wg-control-ribbon { padding: 13px; }
+  .wg-writing-room .ownership-form { grid-template-columns: 1fr; }
+}
+@media (max-width: 420px) {
+  .wg-writing-room .wg-route-block { grid-template-columns: minmax(0,1fr); }
+  .wg-writing-room .wg-route-block .route-mineral { display: none; }
+  .wg-route-controls { grid-column: 1; }
+  .wg-writing-room .composer-foot { align-items: stretch; }
+  .wg-writing-room .send-jewel { width: 100%; }
+  .wg-writing-room .wg-control-ribbon { gap: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wg-route-chevron { transition: none; }
+  .wg-writing-room .wg-surface-head, .wg-writing-room .wg-writing-main, .wg-writing-room .wg-session-sidebar { transform: none !important; translate: none !important; }
+}
