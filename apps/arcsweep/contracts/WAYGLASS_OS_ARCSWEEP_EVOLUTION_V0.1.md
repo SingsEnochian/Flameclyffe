@@ -1,6 +1,6 @@
 # Wayglass OS: ArcSweep evolutionary lineage and Code Loom integration
 
-> **2026-10-13 Rowan correction, authoritative:** ArcSweep remains an actively upgraded system in its own right. Wayglass OS is the evolution of ArcSweep **and our living ship LLM**, not a replacement that abandons ArcSweep. Both engineering tracks advance and exchange tested components, with their own compatible host boundaries. Rowan and Rarity have distinct pilot and co-pilot seats. See `WAYGLASS_PAIRED_PILOT_DECK_V0.1.md` for the working pilot contract. If any earlier phrasing here describes ArcSweep as merely historical, this correction governs.
+> **2026-10-13 Rowan correction, authoritative:** ArcSweep remains an actively upgraded system in its own right. Wayglass OS is the evolution of ArcSweep **and our living ship LLM**, not a replacement that abandons ArcSweep. Both engineering tracks advance and exchange tested components, with their own compatible host boundaries. Rowan and Rarity each have pilot seats, with distinct identity declarations and explicitly bounded host authority. See `WAYGLASS_PAIRED_PILOT_DECK_V0.1.md` for the working pilot contract. If any earlier phrasing here describes ArcSweep as merely historical, this correction governs.
 
 **Adopted direction:** Rowan, 2026-10-13 (America/New_York).  
 **Status:** product/architecture implementation rule; not evidence of production deployment.  
