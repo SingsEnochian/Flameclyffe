@@ -1,9 +1,11 @@
 import {StorySoundscape} from '../src/story-soundscape.js';
 import {KEY_LAYOUT,KEYBOARD_MODES,keyboardWorld,keyboardNote,keyboardMidiNote,keyboardEvent}
 from './keyboard-model.js';
+import {ShipSensorySpine} from '../ship-ui/ship-sensory-spine.js';
 
 // Instrument controller only. Audio and mixing belong to ArcSweep StorySoundscape.
 const soundscape=new StorySoundscape();
+const sensory=new ShipSensorySpine();
 const ui=id=>document.getElementById(id);
 const KEYS=new Map();
 const held=new Map();
@@ -71,6 +73,7 @@ function pushEvent(note,action,via,velocity=0){
  trace.push(event);
  if(trace.length>256)trace.splice(0,trace.length-256);
  if(action==='note-on')ui('last-note').textContent=note.label+' · '+note.frequency_hz.toFixed(2)+' Hz · '+via+' · local observation only';
+ if(armed)sensory.publish({kind:action,worldId:selection.worldId,mode:note.mode,frequencyHz:note.frequency_hz,velocity});
 }
 function startVoice(source,note,via,velocity=95){
  if(!armed||!note||held.has(source))return;
@@ -119,6 +122,7 @@ function releaseAll(reason='feather'){
 function hardStop(){
  releaseAll('feather');
  try{soundscape.featherStop();}catch{}
+ sensory.publish({kind:'feather',worldId:selection.worldId,velocity:0});
  armed=false;
  ui('arm').textContent='Arm audio';
  ui('engine-state').textContent='Feather · silent';
@@ -172,7 +176,7 @@ document.addEventListener('keyup',e=>{
 });
 globalThis.addEventListener('blur',()=>releaseAll());
 document.addEventListener('visibilitychange',()=>{if(document.hidden)releaseAll();});
-globalThis.addEventListener('pagehide',hardStop);
+globalThis.addEventListener('pagehide',()=>{hardStop();sensory.close();},{once:true});
 function connectMidiInput(input){
  input.onmidimessage=e=>{
   const bytes=e.data||[];
@@ -231,4 +235,5 @@ try{
  }
 }catch{}
 ui('world').value=selection.worldId;ui('mode').value=selection.mode;
+ui('sensory-link-state').textContent=sensory.available?'Available · other open ship pages':'Unavailable · local notes still work';
 syncWorld();
