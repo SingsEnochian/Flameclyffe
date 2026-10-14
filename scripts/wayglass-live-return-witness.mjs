@@ -152,7 +152,7 @@ function approvedEnvironment() {
   return { url, token };
 }
 
-async function rpc(client, name, args = {}, authenticated = true) {
+export async function rpc(client, name, args = {}, authenticated = true) {
   const headers = { 'content-type': 'application/json' };
   const requestId = randomBytes(12).toString('hex');
   if (authenticated) headers.authorization = 'Bearer ' + client.token;
