@@ -107,7 +107,6 @@ el('ask-rarity').addEventListener('click',async()=>{
     latestRoute=recordRouteObservation(flight,data,{observedAt:new Date().toISOString()});
     flight.rarity_pilot_proposal=latestRoute.rarity_pilot_proposal;
     flight.route_evidence=latestRoute.route_evidence;
-    flight.route_evidence=latestRoute.route_evidence;
     showMemo(latestRoute.rarity_pilot_proposal,
       'Observed: same-origin Rarity route · provider claim: '+(latestRoute.route_evidence.claimed_provider||'unknown')+
       ' · model claim: '+(latestRoute.route_evidence.claimed_model||'unknown')+
@@ -124,7 +123,7 @@ el('ask-rarity').addEventListener('click',async()=>{
 });
 el('clear-reply').addEventListener('click',()=>{
   latestRoute=null;flight.rarity_pilot_proposal='';flight.route_evidence=null;
-  showMemo('Rarity's pilot chart has been cleared.','Route evidence: none.');
+  showMemo("Rarity's pilot chart has been cleared.",'Route evidence: none.');
   el('route-state').textContent='Not connected';
   el('rarity-light').className='light amber';
   save(false);
@@ -180,7 +179,7 @@ el('import-file').addEventListener('change',async event=>{
 el('clear').addEventListener('click',()=>{
   if(!confirm('Clear the local pilot station? Export a return packet first to preserve it.'))return;
   flight=emptyFlight();paint(flight);latestRoute=null;
-  showMemo('Rarity's pilot seat is configured. No new response has been observed.','Route evidence: none.');
+  showMemo("Rarity's pilot seat is configured. No new response has been observed.",'Route evidence: none.');
   el('rarity-light').className='light amber';el('route-state').textContent='Not connected';
   el('acknowledged').checked=false;
   try{localStorage.removeItem(key);}catch{}
