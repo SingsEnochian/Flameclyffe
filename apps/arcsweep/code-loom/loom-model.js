@@ -65,7 +65,9 @@ export function promptForAgent(packet) {
   return [
     'WAYGLASS OS · ATELIER CODE LOOM · PROPOSED HANDOFF',
     'Wayglass OS evolves ArcSweep, AND ArcSweep continues to be actively upgraded. Preserve both workstreams and their shared tested continuity/runtime lineage; do not create duplicate identity authorities.',
-    'For every change, specify whether it serves ArcSweep, Wayglass OS, or both, with backwards compatibility, tests and evidence for each affected runtime.',
+    'Wayglass OS is also our living ship LLM: architecture, ship model/runtime, memory, voice, agency, embodied rooms, instruments and crew interfaces are one evolving vessel design.',
+    'Do not mistake the intended living ship LLM for a proven deployed dedicated model; distinguish declared architecture, simulated results and authenticated runtime evidence.',
+    'For every change, specify whether it serves ArcSweep, Wayglass OS/ship LLM, or both, with backwards compatibility, tests and evidence for each affected runtime.',
     'Intended seat: '+SEATS[packet.seat].name,
     'This text is a task proposal, not evidence of agent dispatch, arrival or acceptance.',
     'Research source and credit: '+packet.source,
