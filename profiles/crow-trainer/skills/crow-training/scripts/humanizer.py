@@ -1,7 +1,9 @@
 """Optional, attributed Humanizer completion instrument for Crow Trainer."""
 import hashlib
 import json
+import os
 import re
+import shutil
 import subprocess
 from collections import Counter
 from datetime import datetime, timezone
@@ -13,33 +15,44 @@ INCH_MARK = re.compile(r'\d[ \t]*$')
 
 
 def quote_spans(text):
-    """Pair quotation spans; ambiguous or unmatched quotes fail closed."""
+    """Conservatively pair straight quotes within lines or unambiguous multiline spans.
+
+    Ambiguous marks fail closed. Numeric measurement marks are not openings.
+    This does not purport to parse every form of literary quotation.
+    """
     spans = [(m.start(), m.end()) for m in CURLY_QUOTES.finditer(text)]
     balanced = (text.count('“') == text.count('”') == sum(text[a:b].startswith('“') for a, b in spans)
                 and text.count('‘') == text.count('’') == sum(text[a:b].startswith('‘') for a, b in spans))
     opening = None
-    for index, char in enumerate(text):
-        if char != '"':
-            continue
-        if opening is None:
-            line = text[text.rfind('\n', 0, index) + 1:index]
-            if INCH_MARK.search(line):
-                continue
-            opening = index
-        else:
-            if index + 1 < len(text) and text[index + 1].isalnum():
-                balanced = False
-            spans.append((opening, index + 1))
+    offset = 0
+    for line in text.splitlines(keepends=True):
+        marks = [(offset + i, line[:i]) for i, char in enumerate(line) if char == '"']
+        if opening is not None and len(marks) > 1:
+            # Do not pair an unmatched mark on an earlier line with the start
+            # of a complete later quotation, even if dialogue begins "...".
+            balanced = False
             opening = None
+        for index, prefix in marks:
+            if opening is None:
+                if INCH_MARK.search(prefix):
+                    continue
+                opening = index
+            else:
+                if index + 1 < len(text) and text[index + 1].isalnum():
+                    balanced = False
+                spans.append((opening, index + 1))
+                opening = None
+        offset += len(line)
     if opening is not None:
         balanced = False
     spans.sort(key=lambda span: (span[0], -(span[1] - span[0])))
     accepted = []
-    for start, end in spans:
-        if accepted and start < accepted[-1][1]:
+    for left, right in spans:
+        if accepted and left < accepted[-1][1]:
             continue
-        accepted.append((start, end))
+        accepted.append((left, right))
     return accepted, balanced
+
 NUMBERS = re.compile(r'(?<!\d)[+-]?\d+(?:[.,]\d+)*(?!\d)')
 MONTHS = 'January February March April May June July August September October November December'.split()
 
@@ -170,25 +183,37 @@ def run(args):
     (folder / 'protected-quotations.json').write_text(json.dumps(protected, indent=2) + '\n')
     prompt_file = folder / 'prompt.txt'
     prompt_file.write_text(prompt, encoding='utf-8')
-    command = [str(runtime), '-m', str(model), '-f', str(prompt_file), '-no-cnv',
-               '--no-display-prompt', '--simple-io', '--color', 'off', '-ngl', '0',
-               '-c', '2048', '-t', '4', '-n', str(args.tokens), '--seed', '20261012',
-               '--temp', '1.0', '--top-p', '0.95', '--top-k', '0', '--min-p', '0',
-               '--repeat-penalty', '1.0']
+    # Execute the captured bytes, not a mutable original pathname.
+    # The private snapshot prevents a substitute-and-restore race on the source.
+    snapshot = folder / ('runtime-snapshot.exe' if os.name == 'nt' else 'runtime-snapshot')
     runtime_error = None
     runtime_digest_before = None
     runtime_digest_after = None
     try:
-        runtime_digest_before = sha256(runtime)
+        source_digest = sha256(runtime)
+        shutil.copy2(runtime, snapshot)
+        snapshot.chmod(0o700)
+        runtime_digest_before = sha256(snapshot)
+        if runtime_digest_before != source_digest:
+            runtime_error = 'Runtime changed during snapshot capture'
     except OSError as exc:
         runtime_error = f'{type(exc).__name__}: {exc}'
+    command = [str(snapshot), '-m', str(model), '-f', str(prompt_file), '-no-cnv',
+               '--no-display-prompt', '--simple-io', '--color', 'off', '-ngl', '0',
+               '-c', '2048', '-t', '4', '-n', str(args.tokens), '--seed', '20261012',
+               '--temp', '1.0', '--top-p', '0.95', '--top-k', '0', '--min-p', '0',
+               '--repeat-penalty', '1.0']
+    runtime_env = os.environ.copy()
+    # Preserve sibling-library resolution when llama.cpp was built dynamically.
+    library_key = 'PATH' if os.name == 'nt' else ('DYLD_LIBRARY_PATH' if os.uname().sysname == 'Darwin' else 'LD_LIBRARY_PATH')
+    runtime_env[library_key] = str(runtime.parent) + os.pathsep + runtime_env.get(library_key, '')
     with (folder / 'runtime-output.txt').open('w') as output, (folder / 'runtime.log').open('w') as log:
         if runtime_error is not None:
             log.write(runtime_error + '\n')
             returncode = 127
         else:
             try:
-                result = subprocess.run(command, stdout=output, stderr=log, timeout=900)
+                result = subprocess.run(command, stdout=output, stderr=log, timeout=900, env=runtime_env)
                 returncode = result.returncode
             except subprocess.TimeoutExpired:
                 returncode = 124
@@ -206,19 +231,20 @@ def run(args):
     errors = check_preservation(draft, candidate, args.require_literal)
     errors += ['protected-marker-changed:' + token for token in marker_errors]
     try:
-        runtime_digest_after = sha256(runtime)
+        runtime_digest_after = sha256(snapshot)
     except OSError as exc:
         if runtime_error is None:
             runtime_error = f'{type(exc).__name__}: {exc}'
     if (runtime_digest_before is not None and runtime_digest_after is not None
             and runtime_digest_before != runtime_digest_after):
-        runtime_error = 'Runtime executable changed between pre-launch and post-run hashes'
+        runtime_error = 'Executed runtime snapshot changed during operation'
     runtime_intact = (runtime_error is None and runtime_digest_before is not None
                       and runtime_digest_after == runtime_digest_before)
     receipt = {'instrument': 'Humanizer', 'student': 'The Crow', 'source': spec['source'],
                'revision': spec['revision'], 'checkpoint_sha256': spec['checkpoint_sha256'],
                'runtime_sha256': runtime_digest_before,
                'runtime_sha256_after': runtime_digest_after,
+               'runtime_snapshot': str(snapshot),
                'runtime_integrity_verified': runtime_intact,
                'runtime_error': runtime_error, 'returncode': returncode, 'reached_eos': reached_eos,
                'draft_sha256': hashlib.sha256(draft.encode()).hexdigest(),
@@ -228,7 +254,7 @@ def run(args):
                'protected_explicit_spans': args.protect_span,
                'formatting_changes': formatting_changes,
                'wrapper_sha256': sha256(Path(__file__)),
-               'checks_scope': 'numeric substrings, balanced quotation spans, literal counts, pre/post runtime SHA-256; not a semantic audit',
+               'checks_scope': 'numeric substrings, balanced quotation spans, literal counts, captured executable snapshot SHA-256; not a semantic audit',
                'verdict': 'held-for-review' if returncode == 0 and runtime_intact and reached_eos and candidate.strip() and not errors else 'failed',
                'token_budget': args.tokens, 'completion_requires_review': True,
                'weights_updated': False, 'production_promoted': False, 'run_directory': str(folder)}
