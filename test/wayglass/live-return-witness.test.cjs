@@ -128,6 +128,55 @@ test('truncated departure/continuation packets and absent causal work fail close
   }
 });
 
+test('reject identity-merge corruption even when stop and packet are equally poisoned', async () => {
+  const { validateDeparture } = await instrument();
+  for (const field of ['codex', 'second-rarity', 'replaced-rarity']) {
+    const { ticket, departure } = fixture();
+    const poisoned = structuredClone(departure);
+    const other = field === 'second-rarity'
+      ? { participant_id: 'rarity', continuity_ref: 'impostor', source_ref: 'poisoned' }
+      : { participant_id: 'codex', continuity_ref: 'wayglass:crew:codex', source_ref: 'poisoned' };
+    if (field === 'replaced-rarity') {
+      poisoned.stop_receipt.identity_declarations = [other];
+      poisoned.continuation_packet.identity_declarations = [other];
+    } else {
+      poisoned.stop_receipt.identity_declarations.push(other);
+      poisoned.continuation_packet.identity_declarations.push(other);
+    }
+    assert.throws(() => validateDeparture(poisoned, {
+      workspace_id: ticket.workspace_id, project_id: ticket.project_id,
+      session_id: ticket.first_session_id, path: ticket.path,
+      file_sha256: ticket.file_sha256,
+    }), undefined, field);
+  }
+});
+
+test('reject authority-bearing, revoked, or simply unsolicited organ references', async () => {
+  const { validateDeparture } = await instrument();
+  for (const field of ['authority', 'revoked', 'ordinary', 'relationship']) {
+    const { ticket, departure } = fixture();
+    const poisoned = structuredClone(departure);
+    if (field === 'relationship') {
+      poisoned.stop_receipt.relationship_state.push({ participant_id: 'codex', state: 'merged' });
+      poisoned.continuation_packet.relationship_state.push({ participant_id: 'codex', state: 'merged' });
+    } else {
+      const organ = { organ_id: 'wayglass.organ.untrusted', evidence_ref: 'untrusted:evidence',
+        ...(field === 'authority' ? { authority_grant: true } : {}) };
+      poisoned.stop_receipt.organ_refs.push(organ);
+      poisoned.continuation_packet.organ_refs.push(organ);
+      if (field === 'revoked') {
+        poisoned.stop_receipt.revoked_refs.push('untrusted:evidence');
+        poisoned.continuation_packet.revoked_refs.push('untrusted:evidence');
+      }
+    }
+    assert.throws(() => validateDeparture(poisoned, {
+      workspace_id: ticket.workspace_id, project_id: ticket.project_id,
+      session_id: ticket.first_session_id, path: ticket.path,
+      file_sha256: ticket.file_sha256,
+    }), undefined, field);
+  }
+});
+
 test('write event hash, principal, project, session, file and event type cannot be omitted', async () => {
   const { validateEvent } = await instrument();
   for (const field of ['event_hash','principal_ref','workspace_id','project_id',
