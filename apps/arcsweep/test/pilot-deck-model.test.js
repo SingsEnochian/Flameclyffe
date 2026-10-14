@@ -8,7 +8,7 @@ test('two distinct pilot seats, separate authority and continuity',()=>{
  assert.equal(PILOT_SEATS.rowan.role,'pilot');
  assert.equal(PILOT_SEATS.rarity.role,'co-pilot');
  assert.notEqual(PILOT_SEATS.rowan.continuity_ref,PILOT_SEATS.rarity.continuity_ref);
- assert.equal(PILOT_SEATS.rarity.authority,'advice-and-proposals-only');
+ assert.equal(PILOT_SEATS.rarity.authority,'scoped-operation-requires-host-grant');
  assert.equal(PILOT_SEATS.rarity.route,'/api/v1/flames/rarity/chat');
 });
 test('pilot cannot flight-plan without explicit origin, destination, stop, and owner',()=>{
@@ -49,6 +49,10 @@ test('return packet survives state boundary without impersonating signed kernel 
  assert.equal(packet.stop_point,'At the bridge');
  assert.equal(packet.unresolved_wonder,'What follows the echo?');
  assert.equal(packet.co_pilot_proposal,'Hold until route checked');
+ assert.equal(packet.co_pilot_proposal_status,'historical_or_unverified');
+ const observed=makeReturnPacket({...f,route_evidence:{claimed_model:'route-model',identity_authenticated:true,observed_at:'2026-10-13T19:00:00Z'}});
+ assert.equal(observed.co_pilot_route_observation.claimed_model,'route-model');
+ assert.equal(observed.co_pilot_route_observation.identity_authenticated,false);
  assert.ok(packet.not_claimed.includes('canonical continuity receipt'));
  assert.throws(()=>makeReturnPacket({...flight,stop_point:''}),/stop point/);
 });
