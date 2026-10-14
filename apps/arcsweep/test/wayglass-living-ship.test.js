@@ -79,12 +79,18 @@ test('snapshot corruption and authority-laundering are rejected or ignored',()=>
  assert.throws(()=>new LivingShipEcology({seed:1}).step(999),RangeError);
 });
 test('the visualiser is the ship UI itself, not a separate decorative room',()=>{
- const pages=['../index.html','../pilot-deck/index.html','../code-loom/index.html','../harmonic-keyboard/index.html'];
+ const pages=['../pilot-deck/index.html','../code-loom/index.html','../harmonic-keyboard/index.html'];
  for(const page of pages){
   const html=content(page);
   assert.match(html,/wayglass-living-ship\.css/);
   assert.match(html,/wayglass-living-ship\.js/);
  }
+ const root=content('../index.html');
+ assert.match(root,/wayglass-living-ship\\.css/);
+ assert.doesNotMatch(root,/src="\\.\\/ship-ui\\/wayglass-living-ship\\.js"/);
+ const bootstrap=content('../src/main-bootstrap.js');
+ assert.match(bootstrap,/import\\('\\.\\.\\/ship-ui\\/wayglass-living-ship\\.js'\\)/);
+ assert.match(bootstrap,/if \\(!safeBoot\\)/);
  const render=content('../ship-ui/wayglass-living-ship.js');
  const css=content('../ship-ui/wayglass-living-ship.css');
  assert.match(render,/new LivingShipEcology/);
