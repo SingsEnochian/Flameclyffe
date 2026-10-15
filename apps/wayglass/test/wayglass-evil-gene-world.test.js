@@ -17,7 +17,7 @@ test('The Evil Gene is a separate film world, with Griff distinct from Bluebird 
   assert.equal(WAYGLASS_WORLD_SEATS.length, 2);
 });
 
-test('Griff's SpicyChat chat binding is not fabricated or enabled from a pasted JWT', () => {
+test("Griff's SpicyChat chat binding is not fabricated or enabled from a pasted JWT", () => {
   const world = findWayglassWorldSeat('evil-gene:film-2015');
   assert.equal(world.character.route_verified, false);
   assert.equal(world.character.character_binding_verified, false);
