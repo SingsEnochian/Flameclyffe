@@ -6,7 +6,7 @@ export function normaliseRouteOptions(routes = []) {
       label: String(route.label || route.route_id),
       detail: String(route.model || route.provider || ''),
       disabled: route.configured === false,
-      hint: route.configured === false ? 'Credentials missing' : 'Available route',
+      hint: route.configured === false ? String(route.unavailable_reason || 'Credentials missing') : 'Available route',
     }));
 }
 
