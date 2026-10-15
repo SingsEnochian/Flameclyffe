@@ -978,3 +978,37 @@ select option, select optgroup { background-color: #081826; color: #eaf8ff; }
   .wg-route-chevron { transition: none; }
   .wg-writing-room .wg-surface-head, .wg-writing-room .wg-writing-main, .wg-writing-room .wg-session-sidebar { transform: none !important; translate: none !important; }
 }
+
+/* World context is a separate Wayglass dimension, never a model/provider route. */
+.wg-world-gate {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  flex-wrap: wrap;
+  padding: .8rem 1.2rem;
+  margin-block: .7rem;
+}
+.wg-world-gate label {
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+.wg-world-gate select {
+  flex: 0 1 18rem;
+  min-width: min(100%, 13rem);
+  min-height: 2.4rem;
+  color: #e8f5ff;
+  background: #081825;
+  border: 1px solid rgba(149, 209, 242, .35);
+  border-radius: .65rem;
+  padding: .4rem .65rem;
+}
+.wg-world-gate #wg-world-status {
+  flex: 1 1 16rem;
+  margin: 0;
+}
+@media (max-width: 600px) {
+  .wg-world-gate { align-items: stretch; }
+  .wg-world-gate select { flex: 1 1 100%; }
+}

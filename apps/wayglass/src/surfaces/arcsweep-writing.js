@@ -1,6 +1,7 @@
 import { createInteractionState } from '../interaction-state.js';
 import { authorizationSession } from '../authorization-session.js';
 import { mountWayglassRoutePicker } from '../route-picker.js';
+import { WAYGLASS_WORLD_SEATS, findWayglassWorldSeat, wayglassWorldStatus } from '../world-seats.js';
 import { consumeObserverContextForWriting, recordWayglassRouteObservation } from '../living-observer-model.js';
 import { emitInteractionCue } from '../interaction-cues.js';
 import { emitMaterialSignal } from '../material-state.js';
@@ -70,6 +71,11 @@ export async function mountArcSweepWritingSurface(root) {
     "      <strong id=\"wg-place-name\">Writing Room</strong>\n",
     "      <span id=\"wg-place-hint\" class=\"tiny\">The place stays itself across route changes.</span>\n",
     "    </div>\n",
+    "  </section>\n",
+    "  <section class=\"wg-world-gate glass-panel\" aria-label=\"World setting\">\n",
+    "    <label for=\"wg-world-seat\">World</label>\n",
+    "    <select id=\"wg-world-seat\" aria-label=\"Wayglass story world\"></select>\n",
+    "    <p class=\"tiny\" id=\"wg-world-status\" role=\"status\">World and provider routes are independent.</p>\n",
     "  </section>\n",
     "  <div class=\"wg-writing-workspace\">\n",
     "    <main class=\"wg-writing-main glass-panel\" aria-label=\"Writing desk\">\n",
@@ -155,6 +161,33 @@ export async function mountArcSweepWritingSurface(root) {
   const status = root.querySelector('#wg-status');
   const send = root.querySelector('#wg-send');
   const cp = name => root.querySelector('#wg-cp-' + name);
+  const worldSelect = root.querySelector('#wg-world-seat');
+  const worldStatus = root.querySelector('#wg-world-status');
+  for (const world of WAYGLASS_WORLD_SEATS) {
+    const option = root.ownerDocument.createElement('option');
+    option.value = world.world_id;
+    option.textContent = world.character ? world.name + ' · ' + world.character.name : world.name;
+    worldSelect.append(option);
+  }
+  function selectWorldSeat(worldId, { resetCheckpoint = true } = {}) {
+    const world = findWayglassWorldSeat(worldId);
+    if (!world) return;
+    const changed = cp('world').value !== world.world_id;
+    worldSelect.value = world.world_id;
+    cp('world').value = world.world_id;
+    root.querySelector('#wg-place-name').textContent = world.name;
+    root.querySelector('#wg-place-hint').textContent = world.character
+      ? world.character.name + ' · fiction/world anchor, not an authenticated reply'
+      : 'The place stays itself across route changes.';
+    worldStatus.textContent = wayglassWorldStatus(world);
+    if (changed && resetCheckpoint) {
+      checkpoint = null;
+      cp('id').value = '';
+      cp('status').textContent = 'World changed. Attach a verified checkpoint for this world before returning.';
+    }
+  }
+  worldSelect.addEventListener('change', () => selectWorldSeat(worldSelect.value));
+  selectWorldSeat(cp('world').value, { resetCheckpoint: false });
   cp('save').addEventListener('click', async () => {
     try {
       const worldId = cp('world').value.trim(), participantId = cp('participant').value.trim();
@@ -175,6 +208,7 @@ export async function mountArcSweepWritingSurface(root) {
       cp('text').value = packet.active_work.map(item => item.description || '').join('\n');
       cp('questions').value = packet.unresolved_wonder_questions.join('\n');
       cp('stop').value = packet.stop_point; cp('owner').value = packet.next_owner;
+      if (findWayglassWorldSeat(candidate.worldId)) selectWorldSeat(candidate.worldId, { resetCheckpoint: false });
       checkpoint = candidate;
       cp('status').textContent = 'Verified stored checkpoint attached to subsequent turns. No canon promotion.';
     } catch(error) { checkpoint = null; cp('status').textContent = 'Checkpoint recovery failed: ' + error.message; }
@@ -251,7 +285,7 @@ export async function mountArcSweepWritingSurface(root) {
     return 'Wayglass session: ' + session + '\nCopied at: ' + new Date().toISOString() +
       '\n\n' + messages.slice(0, end + 1).map(message => {
         const who = message.role === 'user' ? 'Rowan' : (message.route_label || 'Wayglass');
-        return who + ' · ' + (message.channel || 'IC') + ' · ' + (message.content.startsWith('[Route error]') ? 'transport error' : message.role) +
+        return who + ' · ' + (message.channel || 'IC') + ' · world: ' + (message.world_id || 'wayglass:writing-room') + ' · ' + (message.content.startsWith('[Route error]') ? 'transport error' : message.role) +
           '\n' + message.content;
       }).join('\n\n');
   }
@@ -283,6 +317,18 @@ export async function mountArcSweepWritingSurface(root) {
     try {
       const catalogue = await listWayglassRoutes();
       routes = catalogue.routes || [];
+      // A visible placeholder is not a registered/usable provider route.
+      // Never exchange Griff with Bluebird, DeepSeek, or the selected model.
+      const griff = findWayglassWorldSeat('evil-gene:film-2015')?.character;
+      if (griff && !routes.some(route => route.route_id === griff.desired_route_id)) {
+        routes = [...routes, {
+          route_id: griff.desired_route_id,
+          label: griff.name + ' · SpicyChat (not connected)',
+          provider: 'spicychat',
+          configured: false,
+          unavailable_reason: 'Character/chat transport unverified',
+        }];
+      }
       if (!routes.some((route) => route.route_id === selectedRoute && route.configured !== false)) selectedRoute = routes.find(route => route.configured !== false)?.route_id || '';
       selectedRoute = routePicker.setRoutes(routes, selectedRoute);
       routeState.textContent = routes.length + ' registered route' + (routes.length === 1 ? '' : 's');
@@ -316,10 +362,12 @@ export async function mountArcSweepWritingSurface(root) {
     busy = true;
     send.disabled = true;
     input.disabled = true;
+    worldSelect.disabled = true;
 
     const current = interaction.snapshot();
+    const activeWorldId = cp('world').value.trim();
     const history = messages.slice(-12).map((message) => ({ role: message.role, content: message.content }));
-    messages.push({ role: 'user', content: text, channel: current.channel });
+    messages.push({ role: 'user', content: text, channel: current.channel, world_id: activeWorldId });
     input.value = '';
     refreshThread();
 
@@ -342,6 +390,7 @@ export async function mountArcSweepWritingSurface(root) {
       });
       messages.push({
         role: 'assistant',
+        world_id: activeWorldId,
         content: result.output || '[quiet]',
         thinking: result.thinking || '',
         channel: current.channel,
@@ -356,6 +405,7 @@ export async function mountArcSweepWritingSurface(root) {
       recordWayglassRouteObservation({status:'failed',routeId:selectedRoute});
       messages.push({
         role: 'assistant',
+        world_id: activeWorldId,
         content: '[Route error] ' + error.message,
         channel: 'OOC',
         route_label: 'Wayglass',
@@ -366,6 +416,7 @@ export async function mountArcSweepWritingSurface(root) {
       busy = false;
       send.disabled = false;
       input.disabled = false;
+      worldSelect.disabled = false;
       refreshThread();
       refreshState();
       input.focus();
