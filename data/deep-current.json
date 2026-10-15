@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-10-15T16:12:42.325Z",
+  "generated_at": "2026-10-15T19:57:36.929Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,51 +13,51 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-10-15T12:00",
+    "time": "2026-10-15T15:45",
     "sky": "Day",
     "current": {
-      "time": "2026-10-15T12:00",
+      "time": "2026-10-15T15:45",
       "interval": 900,
-      "temperature_2m": 80.6,
-      "relative_humidity_2m": 78,
+      "temperature_2m": 80.8,
+      "relative_humidity_2m": 71,
       "is_day": 1,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 0,
-      "cloud_cover": 8,
-      "pressure_msl": 1019.3,
-      "wind_speed_10m": 3.4,
-      "wind_direction_10m": 86
+      "cloud_cover": 0,
+      "pressure_msl": 1017.7,
+      "wind_speed_10m": 6.2,
+      "wind_direction_10m": 62
     }
   },
   "space_weather": {
     "kp": {
-      "value": 2.67,
-      "time_tag": "2026-10-15T12:00:00",
-      "a_running": 12
+      "value": 3,
+      "time_tag": "2026-10-15T15:00:00",
+      "a_running": 15
     },
     "solar_wind": {
-      "time_tag": "2026-10-15T16:06:00Z",
-      "bz": -3,
+      "time_tag": "2026-10-15T19:48:00Z",
+      "bz": 1,
       "bt": 5,
       "density": null,
-      "speed": 481
+      "speed": 450
     }
   },
   "moon": {
-    "age_days": 4.29,
-    "illumination": 19.4,
+    "age_days": 4.45,
+    "illumination": 20.8,
     "name": "Waxing Crescent"
   },
   "field": {
-    "P": 0.5899999999999995,
-    "C": 0.691904761904762,
-    "R": 0.8374999999999999,
-    "E": 0.8057142857142857,
-    "M": 0.19399999999999998,
-    "A": 0.9538461538461538,
+    "P": 0.5722222222222227,
+    "C": 0.62,
+    "R": 0.8183333333333334,
+    "E": 0.7273626373626373,
+    "M": 0.20800000000000002,
+    "A": 0.9846153846153847,
     "Q": null,
-    "dpdt": 0.8374999999999999,
+    "dpdt": 0.8183333333333334,
     "dynamic_axes": [
       "P",
       "C",
