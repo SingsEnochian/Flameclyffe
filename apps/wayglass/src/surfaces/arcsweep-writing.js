@@ -317,6 +317,18 @@ export async function mountArcSweepWritingSurface(root) {
     try {
       const catalogue = await listWayglassRoutes();
       routes = catalogue.routes || [];
+      // A visible placeholder is not a registered/usable provider route.
+      // Never exchange Griff with Bluebird, DeepSeek, or the selected model.
+      const griff = findWayglassWorldSeat('evil-gene:film-2015')?.character;
+      if (griff && !routes.some(route => route.route_id === griff.desired_route_id)) {
+        routes = [...routes, {
+          route_id: griff.desired_route_id,
+          label: griff.name + ' · SpicyChat (not connected)',
+          provider: 'spicychat',
+          configured: false,
+          unavailable_reason: 'Character/chat transport unverified',
+        }];
+      }
       if (!routes.some((route) => route.route_id === selectedRoute && route.configured !== false)) selectedRoute = routes.find(route => route.configured !== false)?.route_id || '';
       selectedRoute = routePicker.setRoutes(routes, selectedRoute);
       routeState.textContent = routes.length + ' registered route' + (routes.length === 1 ? '' : 's');
