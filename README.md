@@ -1,3 +1,5 @@
+> **Wayglass current development:** [one maintained home and update instructions](WAYGLASS_CURRENT.md).
+
 # Flameclyffe
 
 Flameclyffe is Rowan's active workshop repository for STARWELL, Project Zero Companion, DEEP/Observer instrumentation, Sigil Activator work, and related Flameclyffe/Runa bridges.

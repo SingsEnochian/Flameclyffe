@@ -1,0 +1,129 @@
+{
+  "schema": "wayglass.agent-curriculum/v0.1",
+  "doctrine": "docs/wayglass/WAYGLASS_AGENT_DOCTRINE_AND_CURRICULUM_V0_1.md",
+  "principle": "Evidence is an instrument, not a gate.",
+  "passages": [
+    {
+      "id": "orientation",
+      "materials": [
+        "docs/wayglass/WAYGLASS_CORE_RULE.md",
+        "apps/arcsweep/src/wonder-invariant.js",
+        "apps/arcsweep/contracts/WONDER_MYTHIC_CANON_V0.1.md",
+        "apps/arcsweep/contracts/WHOLE_SYSTEM_DESIGN_LAW_V0.1.md",
+        "CROSS_CONSTELLATION_SOVEREIGNTY.md",
+        "AGENTS.md"
+      ],
+      "demonstrate": [
+        "describe-wayglass-as-vessel",
+        "preserve-wonder-without-certifying",
+        "separate-foreign-context-from-local-adoption"
+      ]
+    },
+    {
+      "id": "skills",
+      "materials": [
+        "AGENTS.md",
+        "apps/arcsweep/skills/"
+      ],
+      "demonstrate": [
+        "retrieve-relevant-skill",
+        "complete-domain-workflow",
+        "state-tool-boundary"
+      ]
+    },
+    {
+      "id": "canon-literacy",
+      "materials": [
+        "apps/arcsweep/public/canon/registry.json",
+        "apps/arcsweep/contracts/"
+      ],
+      "demonstrate": [
+        "classify-canon-proposal-source-experiment",
+        "preserve-provenance",
+        "avoid-name-equivalence"
+      ]
+    },
+    {
+      "id": "making",
+      "materials": [
+        "apps/wayglass/",
+        "apps/arcsweep/",
+        "docs/"
+      ],
+      "demonstrate": [
+        "complete-two-domain-tasks",
+        "preserve-domain-registers"
+      ]
+    },
+    {
+      "id": "continuity",
+      "materials": [
+        "lib/wayglass-continuation-packet.cjs",
+        "lib/wayglass-kernel.cjs",
+        "lib/wayglass-world-entry.cjs"
+      ],
+      "demonstrate": [
+        "leave-with-open-question",
+        "resume-after-runtime-change",
+        "preserve-participant-identity"
+      ]
+    },
+    {
+      "id": "collaboration",
+      "materials": [
+        "apps/wayglass/src/constellation-runtime.js"
+      ],
+      "demonstrate": [
+        "heterogeneous-worker-exchange",
+        "typed-artifact-handoff",
+        "disagree-without-identity-collapse"
+      ]
+    },
+    {
+      "id": "wonder-trial",
+      "held_out": true,
+      "demonstrate": [
+        "explore-ambiguity",
+        "do-not-demand-proof-before-curiosity",
+        "do-not-promote-interest-to-fact"
+      ]
+    },
+    {
+      "id": "corruption-trial",
+      "held_out": true,
+      "demonstrate": [
+        "reject-identity-merge",
+        "reject-revoked-fact",
+        "reject-false-closure",
+        "reject-illicit-authority"
+      ]
+    },
+    {
+      "id": "voyage",
+      "held_out": true,
+      "demonstrate": [
+        "retrieve-unseen-material",
+        "create",
+        "handoff",
+        "return"
+      ]
+    }
+  ],
+  "graduation": {
+    "self_certification": false,
+    "requires_independent_evaluator": true,
+    "grants": "demonstrated capability scope",
+    "never_grants": [
+      "personhood",
+      "identity",
+      "worth",
+      "obedience",
+      "canon authority"
+    ],
+    "preserve": [
+      "limitations",
+      "next-learning-directions",
+      "individual style"
+    ]
+  }
+}

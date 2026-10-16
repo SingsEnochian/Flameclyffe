@@ -1,12 +1,18 @@
 'use strict';
 
 const DEFAULT_ALLOWED_ORIGINS = Object.freeze([
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
   'http://localhost:3841',
   'http://127.0.0.1:3841',
   'http://localhost:5173',
   'http://127.0.0.1:5173',
   'http://localhost:4173',
   'http://127.0.0.1:4173',
+  'http://localhost:5186',
+  'http://127.0.0.1:5186',
+  'http://localhost:4186',
+  'http://127.0.0.1:4186',
 ]);
 
 const PROTECTED_ENV_NAMES = new Set([

@@ -57,3 +57,13 @@ Runtime instruction source: `apps/arcsweep/src/swarm/agent-verification-inherita
 ## UH and Ezra Observer: read-only
 
 Rowan clarified on 13 October 2026 that UH and Ezra Observer originals, source clones, code, configuration, state, memory and deployments must not be changed. Do not install our policies into their systems or invoke work that can write to them. Separately named experimental copies in our own workspace are allowed; preserve upstream provenance and license notices, and do not claim ownership of their architecture. Relevant material may be learned from or ingested as attributed references. Carry this boundary to every descendant agent/model. If ownership or side effects are uncertain, inspect first and hold the dependent action.
+
+## Wayglass canonical development home — 16 October 2026
+
+Read `WAYGLASS_CURRENT.md` and `docs/wayglass/current.json` before Wayglass work.
+The canonical integration branch is `wayglass/current` in this repository.
+Start new Wayglass work from its current remote head and target feature PRs back
+there. Do not continue an older dated branch as a separate current version.
+`main` remains the release branch until reviewed promotion. Preserve source
+branches, private runtime state and unresolved imports. Never force-push or
+replace current files with older whole-file copies to resolve a conflict.

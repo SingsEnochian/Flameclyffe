@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b101b">
+<meta name="description" content="Local-first Wayglass Atelier Code Loom: learn, ingest, reimagine, implement, test, return.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'self'; form-action 'none'">
+<title>Rarity's Code Loom · Wayglass OS Atelier</title>
+<link rel="stylesheet" href="./loom.css"><link rel="stylesheet" href="../ship-ui/wayglass-skin.css"><link rel="stylesheet" href="../ship-ui/wayglass-living-ship.css"></head>
+<body>
+<header class="masthead"><div class="brand"><span class="gem" aria-hidden="true">💠</span><span>WAYGLASS OS / ATELIER</span></div>
+<div class="title-line"><div><p class="eyebrow">A working room for invention</p><h1>Rarity's Code Loom</h1>
+<p class="lede">Learn the mechanism. Credit its makers. Reimagine the application. Weave our own code. Test the return.</p></div>
+<nav aria-label="Return to Wayglass"><a href="../">← Wayglass OS</a><a href="../pilot-deck/">Pilot Deck</a><a href="../harmonic-keyboard/">Harmonic Keyboard</a><a href="https://github.com/SingsEnochian/Flameclyffe/pull/464" rel="noopener noreferrer">PR #464 ↗</a></nav></div></header>
+<main>
+<section class="hero panel">
+<div><p class="eyebrow">Workspace contract · experimental</p><h2>Knowledge becomes invention here.</h2>
+<p>Original implementations, with provenance kept attached. Drafts remain local. Agents receive proposed tasks only when you explicitly carry the handoff through an authorised route.</p><p class="ship-sensory-note" id="wayglass-sensory-status" aria-live="off">Checking local harmonic link</p></div>
+<div class="stages" aria-label="Loom stages"><span>01 Spool</span><span>02 Pattern</span><span>03 Weave</span><span>04 Verify</span><span>05 Return</span></div>
+</section>
+<form id="loom-form" class="loom" autocomplete="off">
+<section class="panel"><div class="section-head"><span class="number">01</span><div><h2>Source Spool</h2><p>Whose engineering are we learning from?</p></div></div>
+<label for="source">Origin, author, repository, licence and file paths</label>
+<textarea id="source" name="source" rows="3" spellcheck="false" placeholder="e.g. TheFeloniousMonk/meadow-node, backend/src/proto/event.js, AGPL-3.0"></textarea>
+<label for="lesson">Mechanism and rationale</label><textarea id="lesson" name="lesson" rows="5" placeholder="Trace the data structures and failure cases. Why did they design it this way?"></textarea></section>
+<section class="panel"><div class="section-head"><span class="number">02</span><div><h2>Pattern Table</h2><p>Where does our idea take a different direction?</p></div></div>
+<label for="leap">Wayglass-native idea leap</label><textarea id="leap" name="leap" rows="5" placeholder="What's new in a Constellation, Worldseed, Return Engine, or acoustic world?"></textarea>
+<label for="boundary">Licence, identity, and authority boundaries</label><textarea id="boundary" name="boundary" rows="3" placeholder="Who owns the records? What can be reused? What stays distinct?"></textarea></section>
+<section class="panel"><div class="section-head"><span class="number">03</span><div><h2>Loom Bench</h2><p>Original code, independent of its inspiration.</p></div></div>
+<label for="code">Code draft or implementation notes</label><textarea class="code" id="code" name="code" rows="14" spellcheck="false" placeholder="// No automatic execution or publication.&#10;// Export a reviewed patch through your authorised coding route."></textarea></section>
+<section class="panel"><div class="section-head"><span class="number">04</span><div><h2>Test Shuttle</h2><p>Make evidence survive an unkind experiment.</p></div></div>
+<label for="tests">Acceptance checks, negative tests, cross-runtime replay</label><textarea id="tests" name="tests" rows="7" placeholder="Define passing and failing conditions. Distinguish mock from real host evidence."></textarea>
+<label for="evidence">Observed evidence and missing runtime steps</label><textarea id="evidence" name="evidence" rows="5" placeholder="What actually ran? Include command, commit, test output and gaps."></textarea></section>
+<section class="panel"><div class="section-head"><span class="number">05</span><div><h2>Return Marker</h2><p>Leave. Change. Return. Be recognised. Continue.</p></div></div>
+<label for="stop_point">Exact stop point</label><textarea id="stop_point" name="stop_point" rows="2" placeholder="The last verified state and where to resume."></textarea>
+<label for="next_owner">Named next owner</label><input id="next_owner" name="next_owner" placeholder="A specific person or authorised crew seat">
+<label for="wonder">Unresolved Wonder</label><textarea id="wonder" name="wonder" rows="3" placeholder="Keep worthwhile questions alive; no invented closure."></textarea></section>
+<section class="panel agent-panel"><div class="section-head"><span class="number">06</span><div><h2>Agent Handoff</h2><p>Propose an assignment. Never impersonate an agent arrival.</p></div></div>
+<label for="seat">Intended crew seat</label><select id="seat" name="seat">
+<option value="codex">Codex · implement and verify</option><option value="astra">Astra · architecture and idea leaps</option><option value="rarity">Rarity · research and integration</option><option value="bitty-twi">Bitty Twi · opt-in mathematical review</option></select>
+<label for="assignment">One concrete piece of work</label><textarea id="assignment" name="assignment" rows="4" placeholder="Describe the bounded, verifiable next action."></textarea>
+<div class="actions"><button type="button" id="propose" class="primary">Compose handoff</button><button type="button" id="copy" disabled>Copy handoff for agent</button></div>
+<output id="handoff-preview" class="preview" aria-live="polite">No handoff composed. A proposed task is not a spawned agent.</output></section>
+</form>
+<section class="panel ribbon"><div><h2>Provenance Vault</h2><p>Local-only drafts · Explicit export · No paid provider calls · No automatic code execution</p></div>
+<div class="actions"><button id="save" class="primary">Save locally</button><button id="export">Export draft packet</button><button id="import">Import packet</button><button id="clear" class="danger">Clear local bench</button></div>
+<input type="file" id="import-file" accept="application/json,.json" hidden>
+<output id="status" role="status" aria-live="polite">Ready. The Loom works offline in this browser after its assets are loaded.</output></section>
+</main><footer>💠 The room may propose. Only the authorised kernel validates continuity, participants, or canon.</footer>
+<script type="module" src="./loom-ui.js"></script><script type="module" src="../ship-ui/wayglass-material.js"></script><script type="module" src="../ship-ui/ship-sensory-link.js"></script><script type="module" src="../ship-ui/wayglass-living-ship.js"></script>
+</body></html>
