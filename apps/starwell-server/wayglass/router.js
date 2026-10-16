@@ -1,6 +1,8 @@
 'use strict';
 
 const { randomUUID } = require('node:crypto');
+const path = require('node:path');
+const { pathToFileURL } = require('node:url');
 const express = require('express');
 const {
   publicWayglassRoutes,
@@ -207,6 +209,20 @@ function spicyChatHeaders(token) {
   };
 }
 
+async function griffStewardAuthorized(req) {
+  // Local host only: do not substitute a route label or a browser-origin header
+  // for a cryptographically validated House session.
+  const modulePath = pathToFileURL(path.join(__dirname, '../wayglass-runtime/house-session.mjs')).href;
+  const { authoriseHouseRequest } = await import(modulePath);
+  const request = new Request('http://localhost/api/v1/wayglass/respond', {
+    headers: {
+      cookie: req.get('cookie') || '',
+      authorization: req.get('authorization') || '',
+    },
+  });
+  return Boolean(authoriseHouseRequest(request, { get: name => process.env[name] }));
+}
+
 async function callSpicyChat(route, payload, compiled = null, fetchImpl = globalThis.fetch) {
   const token = route.api_key?.();
   if (!token) {
@@ -231,17 +247,25 @@ async function callSpicyChat(route, payload, compiled = null, fetchImpl = global
     ? conversationData
     : (Array.isArray(conversationData?.conversations) ? conversationData.conversations : []);
   const pinnedId = cleanText(route.character_id?.(), 180);
+  const pinnedConversationId = cleanText(route.conversation_id?.(), 180);
   const targetName = cleanText(route.character_name?.(), 180).toLowerCase();
+  if (route.route_id === 'flame:griff:spicychat' && (!pinnedId || !pinnedConversationId)) {
+    const error = new Error('Griff requires an exact owner-configured character and conversation binding.');
+    error.status = 503;
+    throw error;
+  }
   const conversation = conversations.find((item) => {
     const characterId = cleanText(item?.character_id || item?.character?.id, 180);
+    if (pinnedConversationId && cleanText(item?.id, 180) !== pinnedConversationId) return false;
     if (pinnedId) return characterId === pinnedId;
     const name = cleanText(item?.character?.name || item?.label, 240).toLowerCase();
     return targetName && name.includes(targetName);
   });
   if (!conversation) {
-    const error = new Error(pinnedId
-      ? 'Pinned SpicyChat Bluebird character has no existing conversation.'
-      : 'SpicyChat Bluebird conversation was not found.');
+    const error = new Error(pinnedConversationId
+      ? 'Pinned SpicyChat character/conversation pair was not found. No message was sent.'
+      : pinnedId ? 'Pinned SpicyChat character has no existing conversation.'
+        : 'SpicyChat conversation was not found.');
     error.status = 404;
     throw error;
   }
@@ -249,7 +273,7 @@ async function callSpicyChat(route, payload, compiled = null, fetchImpl = global
   const characterId = cleanText(conversation.character_id || conversation?.character?.id, 180);
   const conversationId = cleanText(conversation.id, 180);
   if (!characterId || !conversationId) {
-    const error = new Error('SpicyChat Bluebird conversation is missing its character or conversation id.');
+    const error = new Error('SpicyChat conversation is missing its character or conversation id.');
     error.status = 502;
     throw error;
   }
@@ -289,7 +313,7 @@ async function callSpicyChat(route, payload, compiled = null, fetchImpl = global
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const error = new Error(data?.error?.message || data?.error || data?.message || 'SpicyChat Bluebird route failed.');
+    const error = new Error(data?.error?.message || data?.error || data?.message || 'SpicyChat route failed.');
     error.status = response.status || 502;
     throw error;
   }
@@ -298,6 +322,7 @@ async function callSpicyChat(route, payload, compiled = null, fetchImpl = global
     thinking: null,
     returned_model: route.model(),
     response_id: data?.message?.id || null,
+    provider_conversation_id: conversationId,
     usage: null,
   };
 }
@@ -585,6 +610,18 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     const chosen = autoSeat ? preference.find(id => available.some(r => r.route_id === id)) : (payload.route_id || 'openai:gpt');
     const route = resolveWayglassRoute(chosen);
     if (!route) return res.status(404).json({ error: 'No usable Wayglass route.' });
+    if (route.route_id === 'flame:griff:spicychat') {
+      if (!route.configured()) return res.status(503).json({ error: 'Griff requires a private SpicyChat token, character ID and conversation ID on Hearthgate.' });
+      if (payload.world_id !== route.world_id || payload.participant_id !== route.participant_id) {
+        return res.status(409).json({ error: 'Griff route must stay within The Evil Gene and its own participant binding.' });
+      }
+      if (payload.external_provider_consent !== true) {
+        return res.status(403).json({ error: 'Confirm this Griff turn and its permitted context may go to SpicyChat.' });
+      }
+      if (!(await griffStewardAuthorized(req).catch(() => false))) {
+        return res.status(401).json({ error: 'Sign in as House Steward before contacting Griff.' });
+      }
+    }
     if (payload.character_id && !resolveCharacterSeat(payload.character_id)) return res.status(400).json({ error: 'Unknown character seat.' });
     if (!cleanText(payload.input)) return res.status(400).json({ error: 'input required.' });
     // The external StepFun routes are deliberately opt-in for every request.
@@ -644,6 +681,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
           provider: route.provider,
           upstream_provider: null,
           response_id: result.response_id,
+          ...(result.provider_conversation_id ? { provider_conversation_id: result.provider_conversation_id } : {}),
           observation_id: observation.observation_id,
           epistemic_register: observation.epistemic_register,
           canon_commit: false,
