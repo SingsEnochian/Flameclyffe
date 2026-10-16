@@ -221,3 +221,30 @@ test('Wayglass quantum reference stays compatible with the preserved v2 source f
     portableAvoidedCrossing(1.25, 0.75),
   );
 });
+
+
+test('receipt inspection rejects unsupported production meter claims and invalid measurements', () => {
+  const { receipt } = synthesizeSession(stereoSession());
+
+  const fakeMeter = {
+    ...receipt,
+    measurements: {
+      ...receipt.measurements,
+      integrated_lufs: -14,
+    },
+  };
+  const meterInspection = inspectThoughtVibrationReceipt(fakeMeter);
+  assert.equal(meterInspection.receipt_valid, false);
+  assert.ok(meterInspection.blocking.includes('unsupported-integrated-lufs'));
+
+  const badPeak = {
+    ...receipt,
+    measurements: {
+      ...receipt.measurements,
+      sample_peak: [1.5, 0.02],
+    },
+  };
+  const peakInspection = inspectThoughtVibrationReceipt(badPeak);
+  assert.equal(peakInspection.receipt_valid, false);
+  assert.ok(peakInspection.blocking.includes('invalid-measurement-sample_peak'));
+});
