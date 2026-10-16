@@ -6,6 +6,8 @@ const STORAGE_KEY = 'wayglass.living-observer.private-interior.v0.1';
 const MAX_TRACES = 96;
 const MAX_PROPOSALS = 24;
 const MAX_QUESTIONS = 32;
+const MAX_SANDBOX_RUNS = 8;
+export const DREAM_SANDBOX_SCHEMA = 'wayglass.observer-dream-sandbox/v0.1';
 const TAU = Math.PI * 2;
 
 const clamp = value => Math.max(0, Math.min(1, Number(value) || 0));
@@ -80,6 +82,7 @@ function initialInterior(now = new Date().toISOString()) {
       },
     ],
     associations: [],
+    sandbox_runs: [],
     development_backlog: [],
     last_expression: null,
   };
@@ -92,6 +95,7 @@ function parseStored(storage) {
     return {
       ...parsed,
       schema: INTERIOR_SCHEMA,
+      sandbox_runs: Array.isArray(parsed.sandbox_runs) ? parsed.sandbox_runs.slice(-MAX_SANDBOX_RUNS) : [],
       compression_field: parsed.compression_field
         ? complexField(parsed.compression_field.magnitude, parsed.compression_field.phase_radians, parsed.compression_field.spiral_turn)
         : complexField(Math.max(0.18, Number(parsed.energy) || 0.24), 0, 0),
@@ -190,12 +194,15 @@ function developmentCandidate(state, packet, now) {
 }
 
 function maybeDream(state, now) {
-  const questions = state.private_questions.filter(item => !item.surfaced).sort((a,b) => b.strength-a.strength);
+  // Surfaced is not resolved. A previously voiced question remains available
+  // to a local dream experiment until a separate decision actually closes it.
+  const questions = [...state.private_questions].sort((a,b) => b.strength-a.strength);
   const traces = state.traces.slice(-12).sort((a,b) => b.salience-a.salience);
   if (!questions.length || traces.length < 2) return null;
 
   const q = questions[0];
-  const a = traces[0], b = traces.find(item => item.focus !== a.focus) || traces[1];
+  const a = traces[0], b = traces.find(item => item.focus !== a.focus);
+  if (!b) return null; // One lens alone cannot produce a cross-perspective association.
   const association = {
     id: 'assoc:' + hashString([q.id, a.id, b.id, now].join('|')),
     created_at: now,
@@ -285,6 +292,57 @@ export function createObserverInterior({
     return publicSignal();
   }
 
+  // This is an explicitly invoked, bounded *local* experiment. It only writes
+  // hypothesis receipts to the private interior; it cannot alter input packets,
+  // route history, canon, identity, relationships or provider configuration.
+  function runDreamSandbox() {
+    const at = now();
+    const association = maybeDream(state, at);
+    if (!association) {
+      return Object.freeze({
+        schema: DREAM_SANDBOX_SCHEMA, status: 'needs-material',
+        message: 'Choose at least two different Observer lenses to gather distinct traces, then run a dream cycle.',
+      });
+    }
+    const receipt = {
+      schema: DREAM_SANDBOX_SCHEMA,
+      run_id: 'dream-run:' + hashString(association.id + '|' + at),
+      created_at: at,
+      status: 'dream-derived-hypothesis',
+      possibility: 'This could be false. But what if these observations belong in the same question?',
+      association: association.summary,
+      provenance: {
+        question_id: association.question_id,
+        trace_ids: [...association.trace_ids],
+        input_kind: 'local-observer-traces-and-unresolved-question',
+      },
+      boundaries: {
+        evidence_verified: false,
+        external_provider_called: false,
+        canon_commit: false,
+        identity_commit: false,
+        relationship_commit: false,
+        direct_readings_modified: false,
+      },
+      next_step: 'Review the association as a possibility; seek independent evidence before promoting any claim.',
+    };
+    state.associations = [...state.associations, association].slice(-MAX_TRACES);
+    state.sandbox_runs = [...(state.sandbox_runs || []), receipt].slice(-MAX_SANDBOX_RUNS);
+    const proposal = state.development_backlog.find(item => item.key === 'dream-lab' && item.status === 'proposed');
+    if (proposal) {
+      proposal.status = 'implemented-local';
+      proposal.reviewed_at = at;
+      proposal.review_notes = 'Owner-requested Dream Sandbox v0.1 implemented locally; no upstream provider or canon authority.';
+    }
+    persist();
+    return structuredClone(receipt);
+  }
+
+  function dreamSandboxHistory(limit = 5) {
+    const n = Math.min(MAX_SANDBOX_RUNS, Math.max(0, Math.trunc(Number(limit) || 0)));
+    return structuredClone((state.sandbox_runs || []).slice(-n).reverse());
+  }
+
   function publicSignal() {
     const expression = expressionCandidate(state);
     const prior = state.last_expression;
@@ -343,6 +401,8 @@ export function createObserverInterior({
     developmentProposals,
     reviewDevelopment,
     addPrivateQuestion,
+    runDreamSandbox,
+    dreamSandboxHistory,
     schema: INTERIOR_SCHEMA,
   });
 }
