@@ -30,3 +30,29 @@
 **Stop point:** world and participant discovery are staged; SpicyChat character+conversation binding and live provider round trip remain blocked.
 
 **Next owner:** Rowan for private provider authorisation; Wayglass host implementer for adapter and live evidence.
+
+
+## Griff functional binding pass, 2026-10-16 (wayglass/current)
+
+The Griff route is **implemented but not live-authorised or live-turn verified**. This replaces the earlier route placeholder in the canonical branch; the original PR #472 remains an historical feature branch.
+
+Hearthgate now registers `flame:griff:spicychat` as a distinct SpicyChat route, with `participant_id=griff-krenshaw`, `world_id=evil-gene:film-2015`, and `continuity_id=griff:krenshaw:spicychat`. The Writing Room confines Griff-world turns to this route and asks for explicit per-turn transfer consent. No fallback to Bluebird, The Crow, or an unrelated model is permitted.
+
+### Owner-only local host configuration
+
+Set these values **privately on the running Hearthgate host**, not in GitHub, client JavaScript, the lorebook, screenshots, or issue comments:
+
+- `GRIFF_SPICYCHAT_TOKEN`: current authorised SpicyChat credential, from the owner, not inferred from historical prose.
+- `GRIFF_SPICYCHAT_CHARACTER_ID`: actual Griff SpicyChat character ID.
+- `GRIFF_SPICYCHAT_CONVERSATION_ID`: the exact existing Griff conversation ID.
+- `ARCSWEEP_RUNTIME_TOKEN` or an appropriate `HOUSE_SESSION_SECRET` plus a valid Steward credential: required for House-signed session authentication.
+
+Optional host-only overrides: `GRIFF_SPICYCHAT_CHAT_URL`, `GRIFF_SPICYCHAT_API_URL`, and `GRIFF_SPICYCHAT_MODEL`. Defaults reuse the existing SpicyChat transport convention. These upstream endpoints are not an independently certified public SpicyChat API contract.
+
+Restart Hearthgate after configuring environment variables. Sign into the local House session. Select *The Evil Gene* in the Writing Room and press **Check Griff connection**. This check verifies that SpicyChat's authorised conversation list includes **both** the pinned character ID and conversation ID. It performs a read-only provider request, exposes no token or chat content, and reports `preflight_verified` separately from `live_turn_verified`.
+
+If the preflight passes, authorise transfer for a single turn, send one bounded message, inspect the receipt's actual `provider_conversation_id` and `response_id`, and only then attempt the leave/return trial. A successful test fixture or preflight is *not* a genuine live reply. Empty or wrong-character responses fail closed.
+
+The July 18 private HTML export preserves 66 messages but does **not** expose the actual character ID, conversation ID, or provider chat URL. The July token reference alone cannot replace live owner-authorised discovery.
+
+**Verification gate:** owner-authenticated live response with exact provider attribution, followed by continuity across leave/re-enter. Until that gate passes, do not mark this route as a deployed or resident Griff connection.
