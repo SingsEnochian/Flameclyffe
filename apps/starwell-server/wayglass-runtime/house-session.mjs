@@ -75,7 +75,7 @@ export function verifyHouseSessionToken(token, env, now = Date.now()) {
 
 export function authoriseHouseRequest(request, env, now = Date.now()) {
   const cookies = cookiesFrom(request.headers.get('cookie') || '');
-  const claims = verifyHouseSessionToken(cookies[DEV_COOKIE], env, now);
+  const claims = verifyHouseSessionToken(cookies['__Host-hearthgate_session'] || cookies[DEV_COOKIE], env, now);
   if (claims) return { mode: 'session', claims };
   if (secretEqual(bearer(request), env.get('ARCSWEEP_RUNTIME_TOKEN'))) {
     return { mode: 'bearer', claims: { role: 'steward' } };
