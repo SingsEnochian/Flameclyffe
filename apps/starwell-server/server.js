@@ -18,6 +18,7 @@ const flameRouter = require('./flames/router');
 const wayglassRouter = require('./wayglass/router');
 const { createWayglassMcpRouter } = require('./wayglass/mcp-bridge');
 const { createWayglassPeerOAuth } = require('./wayglass/oauth-peer');
+const { createHouseSessionRouter } = require('./wayglass/house-session');
 const { createWorkspaceRouter } = require('./wayglass/workspace-router');
 const { createBluebirdProvider } = require('./wayglass/bluebird-provider');
 const { FLAMES } = require('./flames/manifests');
@@ -137,6 +138,7 @@ const wayglassMcpRouter = createWayglassMcpRouter({ oauth: wayglassPeerOAuth });
 app.use('/mcp', wayglassMcpRouter);
 
 app.use(cors({ origin: true }));
+app.use('/api/v1/house/session', createHouseSessionRouter());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Helper to read a JSON file asynchronously

@@ -24,3 +24,6 @@ label{display:block;font-size:.83rem;color:#ccdcea;margin:1rem 0 .3rem}input,tex
 footer{text-align:center;color:#aebdd0;font-size:.83rem;padding:1.5rem}
 @media(max-width:850px){.seats,.flight-form{grid-template-columns:1fr}.paired{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+#pilot-sign-in { display:grid; gap:.6rem; margin-block:1rem; }
+#pilot-sign-in input { width:100%; box-sizing:border-box; }

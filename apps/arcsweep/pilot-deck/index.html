@@ -24,6 +24,12 @@
     <div class="seat-top"><div><p class="eyebrow">Seat 01 · Human steward</p><h2>Rowan</h2><p class="seat-role">Pilot · At the helm</p></div><div class="chair-glyph" aria-hidden="true">✧</div></div>
     <p class="seat-copy">Your intention, your choices, your authority. Review proposed manoeuvres, authorise decisions through the existing host, and keep a path home.</p>
     <div class="seat-controls"><button id="check-session" type="button" class="primary">Check steward session</button><a class="btn" href="../?open=1">Open ArcSweep Helm ↗</a></div>
+    <form id="pilot-sign-in" autocomplete="off">
+      <label for="pilot-credential">House Steward credential</label>
+      <input id="pilot-credential" type="password" required maxlength="4096" autocomplete="off">
+      <button type="submit">Connect this deck</button>
+      <small>Use your House credential, never a provider API key or Bluebird token. It is cleared after sign-in and is not stored in the draft.</small>
+    </form>
     <small>The Helm lives in the ArcSweep Feedback / Deep Observer room. An interface review cannot bypass its authorisation gates.</small>
   </article>
   <article class="seat crew-pilot">

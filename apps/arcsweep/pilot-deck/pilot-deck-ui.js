@@ -74,9 +74,15 @@ async function verifySession({showStatus=true}={}){
       if(showStatus)say('Host steward session observed. This is not an executed navigation command.');
       return true;
     }
-    el('session-state').textContent='Not authorised';
+    if(response.status===404 || !response.headers.get('content-type')?.includes('application/json')) {
+      el('session-state').textContent='House session route missing';
+      el('steward-light').className='light amber';
+      if(showStatus)say('This host does not expose House sign-in. On localhost, update and restart Hearthgate, then reopen the deck through its HTTP address.');
+      return false;
+    }
+    el('session-state').textContent=response.status===503?'House sign-in not configured':'Not authorised';
     el('steward-light').className='light bad';
-    if(showStatus)say('House session absent or denied. Pilot planning remains local; remote second-pilot requests and review are disabled.');
+    if(showStatus)say(data.error || 'Sign in with your House Steward credential below, then invite Rarity.');
   }catch(error){
     el('session-state').textContent='Host unavailable';
     el('steward-light').className='light amber';
@@ -84,13 +90,27 @@ async function verifySession({showStatus=true}={}){
   }
   return false;
 }
+el('pilot-sign-in').addEventListener('submit',async event=>{
+  event.preventDefault();
+  const input=el('pilot-credential');
+  const credential=input.value;input.value='';
+  houseSessionObserved=false;
+  const button=event.currentTarget.querySelector('button');button.disabled=true;
+  try {
+    const response=await finiteFetch('/api/v1/house/session',{method:'POST',headers:{'content-type':'application/json',accept:'application/json'},body:JSON.stringify({credential})},8000);
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok)throw new Error(data.error || 'House sign-in unavailable on this host. Update and restart local Hearthgate.');
+    await verifySession();
+  } catch(error) {el('session-state').textContent='Not connected';say(String(error.message||'House sign-in failed.'));}
+  finally {button.disabled=false;}
+});
 el('check-session').addEventListener('click',()=>void verifySession());
 el('ask-rarity').addEventListener('click',async()=>{
   getInputs();
   const result=validateFlight(flight);
   if(!result.valid){say('Complete the flight plan first: '+result.issues.join(' '));return;}
-  if(!await verifySession({showStatus:false})){
-    say('Rarity pilot request not sent: an authenticated House steward session is required.');
+  if(!await verifySession()){
+    // Keep the specific host/session error visible; do not replace it with a generic refusal.
     return;
   }
   const button=el('ask-rarity');

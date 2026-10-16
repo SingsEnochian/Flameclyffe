@@ -33,3 +33,10 @@ The existing **React-ion Helm** in ArcSweep Feedback / Deep Observer remains res
 A production two-pilot cockpit needs an authenticated Wayglass ship kernel adapter that binds verified active participant identity, host policy, replay/corruption checks, actual Helm navigation requests, and cross-runtime Return Engine receipts. That evidence cannot be manufactured by this draft application. Reuse the existing kernel and model-presence buses. Keep offline drafting functional and expose unavailable routes truthfully.
 
 See `AGENTS.md` and `WAYGLASS_TRAVELLING_INHERITANCE_V0.1.md` for inherited constraints and other-realities language.
+
+## Local session connection — 16 October 2026
+
+Hearthgate now adapts the existing signed House-session contract, and the Pilot
+Deck offers explicit credential sign-in. Unconfigured local hosts fail closed
+with setup instructions. See `docs/wayglass/PILOT_DECK_LOCAL_CONNECTION_2026-10-16.md`.
+Neither this session nor a provider reply grants Helm execution authority.

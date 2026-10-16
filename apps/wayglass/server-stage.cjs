@@ -31,6 +31,7 @@ async function copyTree(from, to) {
 
   const runtime = path.join(repoRoot, 'apps', 'starwell-server', 'wayglass-runtime');
   await fsp.mkdir(runtime, { recursive: true });
+  await fsp.copyFile(path.join(repoRoot, 'netlify/functions/_shared/house-session.mjs'), path.join(runtime, 'house-session.mjs'));
   for (const name of await fsp.readdir(path.join(repoRoot, 'lib'))) {
     if (name.startsWith('wayglass-') && name.endsWith('.cjs')) {
       await fsp.copyFile(path.join(repoRoot, 'lib', name), path.join(runtime, name));
