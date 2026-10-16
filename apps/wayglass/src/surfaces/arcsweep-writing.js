@@ -87,7 +87,7 @@ export async function mountArcSweepWritingSurface(root) {
     "    <p class=\"tiny\" id=\"wg-world-status\" role=\"status\">World and provider routes are independent.</p>\n",
     "  </section>\n",
           '<div id="wg-stepfun-transfer" class="wg-stepfun-transfer" hidden>',
-            '<label for="wg-stepfun-consent"><input type="checkbox" id="wg-stepfun-consent" /> I approve sending this turn, permitted history, and any included continuity context to StepFun.</label>',
+            '<label for="wg-stepfun-consent"><input type="checkbox" id="wg-stepfun-consent" /> <span id="wg-provider-consent-label">I approve this external provider transfer.</span></label>',
           '</div>',
       '<section id="wg-emergence-interview" class="glass-panel" aria-label="Bitty Twi emergence interview" hidden>',
         '<div class="wg-emergence-invitation">',
@@ -184,6 +184,7 @@ export async function mountArcSweepWritingSurface(root) {
   const embodimentState = root.querySelector('#wg-embodiment-state');
   const externalTransfer = root.querySelector('#wg-stepfun-transfer');
   const externalConsent = root.querySelector('#wg-stepfun-consent');
+  const externalConsentLabel = root.querySelector('#wg-provider-consent-label');
   const channelButtons = [...root.querySelectorAll('[data-channel]')];
   const wonderButtons = [...root.querySelectorAll('[data-wonder-mode]')];
   const turnOwner = root.querySelector('#wg-turn-owner');
@@ -221,7 +222,16 @@ export async function mountArcSweepWritingSurface(root) {
       cp('status').textContent = 'World changed. Attach a verified checkpoint for this world before returning.';
     }
   }
-  worldSelect.addEventListener('change', () => selectWorldSeat(worldSelect.value));
+  worldSelect.addEventListener('change', () => {
+    selectWorldSeat(worldSelect.value);
+    const world = findWayglassWorldSeat(worldSelect.value);
+    // Explicit world selection prepares only that world's own route.
+    selectedRoute = world?.character?.desired_route_id || (authorizationSession.route() || 'local:ollama');
+    selectedCharacter = '';
+    characterSelect.value = '';
+    externalConsent.checked = false;
+    void loadRoutes();
+  });
   selectWorldSeat(cp('world').value, { resetCheckpoint: false });
   cp('save').addEventListener('click', async () => {
     try {
@@ -358,8 +368,12 @@ export async function mountArcSweepWritingSurface(root) {
 
   function refreshExternalTransfer() {
     const isStepFun = selectedRoute.startsWith('stepfun:');
-    externalTransfer.hidden = !isStepFun;
-    if (!isStepFun) externalConsent.checked = false;
+    const isGriff = selectedRoute === 'flame:griff:spicychat';
+    externalTransfer.hidden = !(isStepFun || isGriff);
+    externalConsentLabel.textContent = isGriff
+      ? 'I approve sending this turn and its same-world context to Griff on SpicyChat.'
+      : 'I approve sending this turn, permitted history, and any included continuity context to StepFun.';
+    if (!isStepFun && !isGriff) externalConsent.checked = false;
   }
 
   async function loadRoutes() {
@@ -378,11 +392,16 @@ export async function mountArcSweepWritingSurface(root) {
           unavailable_reason: 'Character/chat transport unverified',
         }];
       }
-      if (selectedCharacter) routes.unshift({route_id: 'auto:character', label: 'Auto · character voice', configured: true});
-      if (!routes.some((route) => route.route_id === selectedRoute && route.configured !== false)) selectedRoute = routes.find(route => route.configured !== false)?.route_id || '';
-      selectedRoute = routePicker.setRoutes(routes, selectedRoute);
+      const isGriffWorld = cp('world').value === 'evil-gene:film-2015';
+      if (selectedCharacter && !isGriffWorld) routes.unshift({route_id: 'auto:character', label: 'Auto · character voice', configured: true});
+      const visibleRoutes = isGriffWorld ? routes.filter(route => route.route_id === 'flame:griff:spicychat') : routes.filter(route => route.route_id !== 'flame:griff:spicychat');
+      if (isGriffWorld) selectedRoute = 'flame:griff:spicychat';
+      if (!visibleRoutes.some(route => route.route_id === selectedRoute && route.configured !== false)) selectedRoute = visibleRoutes.find(route => route.configured !== false)?.route_id || '';
+      selectedRoute = routePicker.setRoutes(visibleRoutes, selectedRoute);
       refreshExternalTransfer();
-      routeState.textContent = routes.length + ' registered route' + (routes.length === 1 ? '' : 's');
+      routeState.textContent = isGriffWorld
+        ? selectedRoute ? 'Griff SpicyChat configured · sign in as Steward; live connection not yet proven' : 'Griff unavailable · configure his exact private character/chat binding'
+        : visibleRoutes.length + ' registered route' + (visibleRoutes.length === 1 ? '' : 's');
     } catch (error) {
       routes = [];
       selectedRoute = '';
@@ -420,8 +439,8 @@ export async function mountArcSweepWritingSurface(root) {
     const text = input.value.trim();
     if (!text || busy) return;
     if (!selectedRoute) { status.textContent = 'No configured route available. Reload the route catalogue.'; return; }
-    if (selectedRoute.startsWith('stepfun:') && !externalConsent.checked) {
-      status.textContent = 'Confirm the external StepFun transfer before passing the turn.';
+    if ((selectedRoute.startsWith('stepfun:') || selectedRoute === 'flame:griff:spicychat') && !externalConsent.checked) {
+      status.textContent = 'Confirm this external provider transfer before passing the turn.';
       externalConsent.focus();
       return;
     }
@@ -432,9 +451,9 @@ export async function mountArcSweepWritingSurface(root) {
 
     const current = interaction.snapshot();
     const activeWorldId = cp('world').value.trim();
-    const history = messages.slice(-12).map((message) => ({ role: message.role, content: message.content }));
-    messages.push({ role: 'user', content: text, channel: current.channel, world_id: activeWorldId });
-    messages.push({ role: 'user', content: text, channel: current.channel, emergence_question_id: emergenceQuestionId });
+    const history = messages.filter(message => message.world_id === activeWorldId && ['user', 'assistant'].includes(message.role) && !message.content.startsWith('[Route error]'))
+      .slice(-12).map(message => ({ role: message.role, content: message.content }));
+    messages.push({ role: 'user', content: text, channel: current.channel, world_id: activeWorldId, emergence_question_id: emergenceQuestionId });
     input.value = '';
     refreshThread();
     refreshEmergenceInterview();
@@ -450,7 +469,9 @@ export async function mountArcSweepWritingSurface(root) {
       recordWayglassRouteObservation({status:'started',routeId:selectedRoute});
       const result = await invokeWayglassRoute({
         routeId: selectedRoute,
-        externalProviderConsent: selectedRoute.startsWith('stepfun:') && externalConsent.checked,
+        externalProviderConsent: (selectedRoute.startsWith('stepfun:') || selectedRoute === 'flame:griff:spicychat') && externalConsent.checked,
+        worldId: activeWorldId,
+        participantId: selectedRoute === 'flame:griff:spicychat' ? 'griff-krenshaw' : null,
         characterId: selectedCharacter || null,
         emergenceQuestionId,
         think: root.querySelector('#wg-think').checked,
