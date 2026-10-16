@@ -64,6 +64,7 @@ export async function leaveWayglassWorld({
   nextOwner,
   alternatives = [],
   revokedRefs = [],
+  thoughtVibrationReceipts = [],
   fetchImpl = fetch,
 } = {}) {
   const response = await fetchImpl('/api/v1/wayglass/kernel/leave', {
@@ -85,6 +86,7 @@ export async function leaveWayglassWorld({
       next_owner: nextOwner,
       alternatives,
       revoked_refs: revokedRefs,
+      thought_vibration_receipts: thoughtVibrationReceipts,
     }),
   });
   return jsonOrThrow(response);
@@ -114,6 +116,59 @@ export async function invokeWayglassRoute({
       surface_id: surfaceId,
       max_output_tokens: maxOutputTokens,
     }),
+  });
+  return jsonOrThrow(response);
+}
+
+
+export async function getThoughtVibrationOperator(fetchImpl = fetch) {
+  const response = await fetchImpl('/api/v1/wayglass/thought-vibration', {
+    cache: 'no-store',
+  });
+  return jsonOrThrow(response);
+}
+
+export async function inspectThoughtVibrationReceipt(receipt, fetchImpl = fetch) {
+  const response = await fetchImpl('/api/v1/wayglass/thought-vibration/receipt/inspect', {
+    method: 'POST',
+    headers: JSON_HEADERS,
+    cache: 'no-store',
+    body: JSON.stringify({ receipt }),
+  });
+  const data = await readJson(response);
+  if (!response.ok && response.status !== 409) {
+    throw new Error(data.error || 'Thought Vibration receipt inspection failed.');
+  }
+  return data;
+}
+
+export async function renderThoughtVibrationSession({
+  session,
+  includeWave = true,
+  fetchImpl = fetch,
+} = {}) {
+  const response = await fetchImpl('/api/v1/wayglass/thought-vibration/render', {
+    method: 'POST',
+    headers: JSON_HEADERS,
+    cache: 'no-store',
+    body: JSON.stringify({
+      session,
+      include_wave: includeWave,
+    }),
+  });
+  return jsonOrThrow(response);
+}
+
+export async function simulateThoughtVibrationQuantum({
+  operation,
+  args = {},
+  fetchImpl = fetch,
+} = {}) {
+  const response = await fetchImpl('/api/v1/wayglass/thought-vibration/quantum', {
+    method: 'POST',
+    headers: JSON_HEADERS,
+    cache: 'no-store',
+    body: JSON.stringify({ operation, args }),
   });
   return jsonOrThrow(response);
 }
