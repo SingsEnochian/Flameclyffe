@@ -33,6 +33,8 @@ jobs:
       - name: Syntax-check Wayglass server ingress
         run: node --check apps/starwell-server/wayglass/router.js
       - run: npm run wayglass:test
+      - name: Verify portable Thought Vibration skill
+        run: npm run wayglass:thought-vibration:skill:test
       - run: npm run wayglass:build
       - run: npm run wayglass:stage:server
       - name: Verify staged host
