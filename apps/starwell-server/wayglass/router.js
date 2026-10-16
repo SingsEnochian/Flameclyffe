@@ -4,6 +4,7 @@ const { randomUUID } = require('node:crypto');
 const path = require('node:path');
 const { pathToFileURL } = require('node:url');
 const express = require('express');
+const { createRequestGate } = require('../security/wayglass-request-gate');
 const {
   publicWayglassRoutes,
   resolveWayglassRoute,
@@ -596,6 +597,58 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
   router.get('/characters', (_req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     return res.json({ schema: 'wayglass.character-seats/v1', characters: publicCharacterSeats() });
+  });
+
+  // A read-only, owner-authenticated verification that checks the actual
+  // provider's existing conversation list. This NEVER sends a character turn.
+  router.get('/griff/status', createRequestGate({ maxRequests: 6, maxConcurrent: 2 }), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in is required to inspect Griff’s provider binding.' });
+    }
+    const route = resolveWayglassRoute('flame:griff:spicychat');
+    const missing = [
+      !route.api_key() && 'GRIFF_SPICYCHAT_TOKEN',
+      !route.character_id() && 'GRIFF_SPICYCHAT_CHARACTER_ID',
+      !route.conversation_id() && 'GRIFF_SPICYCHAT_CONVERSATION_ID',
+    ].filter(Boolean);
+    if (missing.length) {
+      return res.status(503).json({
+        route_id: route.route_id, configured: false, preflight_verified: false,
+        live_turn_verified: false, missing,
+      });
+    }
+    try {
+      const response = await fetchImpl(route.conversation_endpoint(), {
+        method: 'GET',
+        headers: spicyChatHeaders(route.api_key()),
+        signal: AbortSignal.timeout(12000),
+      });
+      if (!response.ok) {
+        return res.status(502).json({
+          route_id: route.route_id, configured: true,
+          preflight_verified: false, live_turn_verified: false,
+          error: 'SpicyChat refused the private provider check. Refresh the host credential if it has expired.',
+        });
+      }
+      const data = await response.json().catch(() => []);
+      const conversations = Array.isArray(data) ? data : Array.isArray(data?.conversations) ? data.conversations : [];
+      const found = conversations.some(item =>
+        cleanText(item?.id, 180) === route.conversation_id()
+        && cleanText(item?.character_id || item?.character?.id, 180) === route.character_id()
+      );
+      return res.status(found ? 200 : 409).json({
+        route_id: route.route_id, configured: true, preflight_verified: found,
+        character_binding_verified: found, conversation_binding_verified: found,
+        live_turn_verified: false,
+        ...(found ? {} : { error: 'That exact Griff character/conversation pair was not returned by SpicyChat. No message was sent.' }),
+      });
+    } catch {
+      return res.status(502).json({
+        route_id: route.route_id, configured: true, preflight_verified: false,
+        live_turn_verified: false, error: 'SpicyChat connection check failed before any message was sent.',
+      });
+    }
   });
 
   router.get('/routes', (_req, res) => {
