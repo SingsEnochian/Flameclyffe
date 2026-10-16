@@ -20,6 +20,8 @@ import {
   evolveBloch,
 } from '../../../lib/wayglass-thought-vibration-quantum.mjs';
 import { createWayglassDeparture } from '../../../lib/wayglass-stop-receipt.js';
+import { createWaygateManifest } from '../../../lib/wayglass-waygate.js';
+import { enterWayglassWorld } from '../../../lib/wayglass-world-entry.js';
 import {
   synthesizeSession as portableSynthesizeSession,
 } from '../../../skills/thought-vibration-ai-v2/src/reference-renderer.mjs';
@@ -247,4 +249,63 @@ test('receipt inspection rejects unsupported production meter claims and invalid
   const peakInspection = inspectThoughtVibrationReceipt(badPeak);
   assert.equal(peakInspection.receipt_valid, false);
   assert.ok(peakInspection.blocking.includes('invalid-measurement-sample_peak'));
+});
+
+
+test('tampering with a pinned Thought Vibration receipt is caught before world re-entry', () => {
+  const { receipt } = synthesizeSession(stereoSession());
+  const domainReceipts = normalizeThoughtVibrationDomainReceipts([receipt]);
+
+  const departure = createWayglassDeparture({
+    receipt_id: 'stop:tv-integrity',
+    packet_id: 'packet:tv-integrity',
+    world_id: 'wayglass:thought-vibration-test',
+    participant_id: 'rowan:tv-integrity',
+    stopped_at: '2026-10-16T21:30:00.000Z',
+    identity_declarations: [
+      { entity_id: 'rowan:tv-integrity', declaration: 'self-declared participant' },
+    ],
+    provenance_refs: [
+      'receipt:tv-integrity-session',
+      domainReceipts[0].receipt_ref,
+    ],
+    stop_point: 'Thought Vibration receipt pinned before return.',
+    next_owner: 'rarity:tv-integrity',
+    domain_receipts: domainReceipts,
+  });
+
+  const tamperedPacket = {
+    ...departure.continuation_packet,
+    domain_receipts: departure.continuation_packet.domain_receipts.map((entry) => ({
+      ...entry,
+      receipt: {
+        ...entry.receipt,
+        claims: [
+          ...entry.receipt.claims,
+          { domain: 'CANON-TRUE', statement: 'Tampered promotion attempt.' },
+        ],
+      },
+    })),
+  };
+
+  const gate = createWaygateManifest({
+    waygate_id: 'waygate:tv-integrity',
+    world_id: 'wayglass:thought-vibration-test',
+    allowed_body_classes: ['host-os'],
+    provenance_refs: ['receipt:tv-integrity-gate'],
+  });
+
+  const result = enterWayglassWorld({
+    world_id: 'wayglass:thought-vibration-test',
+    participant_id: 'rowan:tv-integrity',
+    waygate_manifest: gate,
+    continuation_packet: tamperedPacket,
+    stop_receipt: departure.stop_receipt,
+    embodiment: { body_id: 'desktop-tv-return', body_class: 'host-os' },
+  });
+
+  assert.equal(result.status, 'blocked-stop-integrity');
+  assert.equal(result.entered, false);
+  assert.ok(result.blocked_by.includes('integrity-digest-mismatch'));
+  assert.equal(result.receipt.continuation_content_promoted, false);
 });
