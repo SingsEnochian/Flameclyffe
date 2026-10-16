@@ -175,8 +175,8 @@ test('Dream Sandbox receipts survive a private interior restart and cap at eight
 test('Observer exposes a deliberate dream button without auto-sending dream material', () => {
   const source = readFileSync(new URL('../src/surfaces/living-observer.js', import.meta.url), 'utf8');
   assert.match(source, /data-observer-dream-run/);
-  assert.match(source, /interior\\.runDreamSandbox\\(\\)/);
+  assert.match(source, /interior\.runDreamSandbox\(\)/);
   assert.match(source, /renderDreamHistory/);
   assert.match(source, /Nothing is sent to a model/);
-  assert.doesNotMatch(source, /queueObserverContextForWriting\\(.*dream/i);
+  assert.doesNotMatch(source, /queueObserverContextForWriting\(.*dream/i);
 });
