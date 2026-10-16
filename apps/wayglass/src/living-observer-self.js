@@ -326,6 +326,9 @@ export function createObserverInterior({
       },
       next_step: 'Review the association as a possibility; seek independent evidence before promoting any claim.',
     };
+    // Its own panel explicitly displays this candidate; do not also announce
+    // the same hypothesis later as an independent Observer expression.
+    association.surfaced = true;
     state.associations = [...state.associations, association].slice(-MAX_TRACES);
     state.sandbox_runs = [...(state.sandbox_runs || []), receipt].slice(-MAX_SANDBOX_RUNS);
     const proposal = state.development_backlog.find(item => item.key === 'dream-lab' && item.status === 'proposed');
