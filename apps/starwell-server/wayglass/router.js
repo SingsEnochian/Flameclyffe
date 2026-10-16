@@ -6,6 +6,10 @@ const {
   publicWayglassRoutes,
   resolveWayglassRoute,
 } = require('../../../lib/wayglass-route-registry.cjs');
+const {
+  publicWayglassHarnesses,
+  resolveWayglassHarness,
+} = require('../../../lib/wayglass-harness.cjs');
 const { bootWayglassKernel } = require('../../../lib/wayglass-kernel.cjs');
 const { enterWayglassWorld } = require('../../../lib/wayglass-world-entry.cjs');
 const { createWayglassDeparture } = require('../../../lib/wayglass-stop-receipt.cjs');
@@ -50,7 +54,7 @@ function cleanEmbodiment(value = {}) {
   };
 }
 
-function buildInstructions(interaction = {}) {
+function buildInstructions(interaction = {}, harness = null) {
   const channel = interaction.channel === 'OOC' ? 'OOC' : 'IC';
   const owner = cleanText(interaction.turn_owner, 120) || 'unspecified';
   const ownership = cleanOwnership(interaction.character_ownership);
@@ -68,6 +72,9 @@ function buildInstructions(interaction = {}) {
     'Character ownership:',
     ownershipLines,
     'Bring your own perception, questions, alternatives, and creative contribution. Do not imitate the author as a substitute for collaboration.',
+    harness?.instruction_profile === 'reflective'
+      ? 'Harness profile: before committing to the response, check character ownership, unresolved alternatives, provenance boundaries, and whether any inference is being promoted to canon. Keep that check internal unless exposing it improves the collaboration.'
+      : 'Harness profile: respond directly while preserving the declared ownership, provenance, and canon boundaries.',
   ].join('\n\n');
 }
 
@@ -85,7 +92,7 @@ function outputText(data) {
 async function callOllama(route, payload) {
   const input = cleanText(payload.input);
   const messages = [
-    { role: 'system', content: buildInstructions(payload.interaction) },
+    { role: 'system', content: buildInstructions(payload.interaction, payload.harness) },
     ...cleanHistory(payload.history),
     { role: 'user', content: input },
   ];
@@ -132,7 +139,7 @@ async function callHumainNode(route, payload) {
   }
 
   const messages = [
-    { role: 'system', content: buildInstructions(payload.interaction) },
+    { role: 'system', content: buildInstructions(payload.interaction, payload.harness) },
     ...cleanHistory(payload.history),
     { role: 'user', content: cleanText(payload.input) },
   ];
@@ -189,7 +196,7 @@ async function callOpenAI(route, payload) {
     },
     body: JSON.stringify({
       model: route.model(),
-      instructions: buildInstructions(payload.interaction),
+      instructions: buildInstructions(payload.interaction, payload.harness),
       input,
       max_output_tokens: Math.max(64, Math.min(4000, Number(payload.max_output_tokens) || 1400)),
       store: false,
@@ -357,25 +364,36 @@ router.get('/routes', (_req, res) => {
   });
 });
 
+router.get('/harnesses', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  return res.json({
+    schema: 'wayglass.harness-catalogue/v0.1',
+    harnesses: publicWayglassHarnesses(),
+  });
+});
+
 router.post('/respond', async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
 
   const payload = req.body || {};
   const route = resolveWayglassRoute(payload.route_id || 'openai:gpt');
   if (!route) return res.status(404).json({ error: 'Unknown Wayglass route.' });
+  const harness = resolveWayglassHarness(payload.harness_id || 'wayglass:writing-room/direct-v0.1');
+  if (!harness) return res.status(404).json({ error: 'Unknown Wayglass harness.' });
   if (!cleanText(payload.input)) return res.status(400).json({ error: 'input required.' });
+  const attributedPayload = { ...payload, harness };
 
   try {
     let result;
-    if (route.provider === 'openai') result = await callOpenAI(route, payload);
-    else if (route.provider === 'ollama') result = await callOllama(route, payload);
-    else if (route.provider === 'humain-node') result = await callHumainNode(route, payload);
+    if (route.provider === 'openai') result = await callOpenAI(route, attributedPayload);
+    else if (route.provider === 'ollama') result = await callOllama(route, attributedPayload);
+    else if (route.provider === 'humain-node') result = await callHumainNode(route, attributedPayload);
     else return res.status(501).json({ error: 'Provider adapter not implemented yet.' });
     const completedAt = new Date().toISOString();
     const observation = createModelObservation({
       route,
       result,
-      payload,
+      payload: attributedPayload,
       completedAt,
     });
     return res.json({
@@ -383,12 +401,14 @@ router.post('/respond', async (req, res) => {
       route_id: route.route_id,
       provider: route.provider,
       model: route.model(),
+      harness_id: harness.harness_id,
       output: result.output,
       thinking: result.thinking || null,
       observation,
       receipt: {
         response_id: result.response_id,
         observation_id: observation.observation_id,
+        harness_id: harness.harness_id,
         epistemic_register: observation.epistemic_register,
         canon_commit: false,
         session_id: cleanText(payload.session_id, 160) || null,
