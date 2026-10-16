@@ -89,6 +89,7 @@ test('Griff sends one attributable turn only into the exact pinned SpicyChat cha
     const payload = JSON.parse(options.body);
     assert.equal(payload.character_id, 'griff-character-fixture');
     assert.equal(payload.conversation_id, 'griff-conversation-fixture');
+    assert.equal(payload.inference_settings.max_new_tokens, 1400, 'request should not be truncated to the old 300-token cap');
     assert.equal(payload.message.startsWith('A bounded synthetic test message.'), true);
     return { ok: true, async json() {
       return { message: { id: 'provider-message-fixture', character_id: 'griff-character-fixture',
