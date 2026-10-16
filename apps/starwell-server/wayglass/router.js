@@ -609,8 +609,8 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     const route = resolveWayglassRoute('flame:griff:spicychat');
     const missing = [
       !route.api_key() && 'GRIFF_SPICYCHAT_TOKEN',
-      !route.character_id() && 'GRIFF_SPICYCHAT_CHARACTER_ID',
-      !route.conversation_id() && 'GRIFF_SPICYCHAT_CONVERSATION_ID',
+      !route.character_id() && 'GRIFF_SPICYCHAT_CHAT_LINK or GRIFF_SPICYCHAT_CHARACTER_ID',
+      !route.conversation_id() && 'GRIFF_SPICYCHAT_CHAT_LINK or GRIFF_SPICYCHAT_CONVERSATION_ID',
     ].filter(Boolean);
     if (missing.length) {
       return res.status(503).json({
@@ -676,7 +676,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     const route = resolveWayglassRoute(chosen);
     if (!route) return res.status(404).json({ error: 'No usable Wayglass route.' });
     if (route.route_id === 'flame:griff:spicychat') {
-      if (!route.configured()) return res.status(503).json({ error: 'Griff requires a private SpicyChat token, character ID and conversation ID on Hearthgate.' });
+      if (!route.configured()) return res.status(503).json({ error: 'Griff requires a private SpicyChat credential and an exact character/chat pair from GRIFF_SPICYCHAT_CHAT_LINK or separate private IDs.' });
       if (payload.world_id !== route.world_id || payload.participant_id !== route.participant_id) {
         return res.status(409).json({ error: 'Griff route must stay within The Evil Gene and its own participant binding.' });
       }
