@@ -317,6 +317,18 @@ async function callSpicyChat(route, payload, compiled = null, fetchImpl = global
     error.status = response.status || 502;
     throw error;
   }
+  const returnedCharacter = cleanText(data?.message?.character_id || data?.character_id, 180);
+  const returnedConversation = cleanText(data?.message?.conversation_id || data?.conversation_id, 180);
+  if ((returnedCharacter && returnedCharacter !== characterId) || (returnedConversation && returnedConversation !== conversationId)) {
+    const error = new Error('SpicyChat response did not match the pinned character/conversation.');
+    error.status = 502;
+    throw error;
+  }
+  if (route.route_id === 'flame:griff:spicychat' && !cleanText(data?.message?.content)) {
+    const error = new Error('Griff returned no attributable reply. No success was recorded.');
+    error.status = 502;
+    throw error;
+  }
   return {
     output: cleanText(data?.message?.content || '', MAX_TEXT),
     thinking: null,
@@ -637,7 +649,12 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       if (payload.checkpoint_storage_id) {
         payload._storedCheckpoint = departureStore.read(payload.checkpoint_storage_id, payload.checkpoint_world_id, payload.checkpoint_participant_id).continuation_packet;
       }
-      const wantsInheritance = resolver != null || payload.participant_id != null || payload.world_id != null;
+      // Griff's provider binding is not an inheritance-host dependency. A
+      // signed, owner-approved chat turn must work before any optional bridge.
+      const wantsInheritance = resolver != null || (
+        route.route_id !== 'flame:griff:spicychat'
+        && (payload.participant_id != null || payload.world_id != null)
+      );
       let compiled = null;
       if (wantsInheritance) {
         if (typeof resolver?.resolve !== 'function') {
