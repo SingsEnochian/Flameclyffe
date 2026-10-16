@@ -93,3 +93,31 @@
 .wg-living-observer .observer-wonder-events strong{font-size:.86rem;font-weight:600;color:#e1f2ef}
 .wg-living-observer .observer-wonder-events small{font-size:.75rem;color:#a9bfce;line-height:1.55}
 @media(prefers-reduced-motion:reduce){.wg-living-observer .observer-wonder *{animation:none!important;transition:none!important}}
+
+
+/* Owner-invoked dream experiments: private hypotheses, never a second source of evidence. */
+.wg-living-observer .observer-dream{display:grid;gap:16px;padding:clamp(18px,2.5vw,28px);border-radius:26px;
+  border:1px solid rgba(156,204,229,.19);
+  background:radial-gradient(ellipse at 87% 6%,rgba(159,126,219,.18),transparent 52%),
+    linear-gradient(145deg,rgba(14,31,45,.9),rgba(26,23,55,.83));}
+.wg-living-observer .observer-dream-head{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}
+.wg-living-observer .observer-dream-head>div{max-width:72ch}
+.wg-living-observer .observer-dream-head .eyebrow{color:#a7e4db;text-transform:uppercase;letter-spacing:.16em;font-size:.7rem}
+.wg-living-observer .observer-dream-head h2{font-size:clamp(1.5rem,2.8vw,2.3rem);margin:5px 0 8px}
+.wg-living-observer .observer-dream-head p{line-height:1.6}
+.wg-living-observer .observer-dream-run{min-height:44px;border-color:rgba(171,225,214,.68);
+  background:linear-gradient(120deg,rgba(78,167,164,.2),rgba(139,98,189,.24))}
+.wg-living-observer .observer-dream-result{display:grid;gap:10px;border-radius:19px;padding:17px 20px;
+  border:1px solid rgba(160,210,219,.22);background:rgba(7,20,39,.46);overflow-wrap:anywhere}
+.wg-living-observer .observer-dream-result strong{font-size:.95rem;color:#d3f5ef}
+.wg-living-observer .observer-dream-result p{margin:0;color:#d2ddec;line-height:1.6}
+.wg-living-observer .observer-dream-result small{font-size:.76rem;color:#b6aecf}
+.wg-living-observer .observer-dream-history{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));
+  gap:10px;margin:0;padding:0;list-style:none}
+.wg-living-observer .observer-dream-history li{display:grid;gap:7px;align-content:start;min-width:0;
+  padding:14px 16px;border-radius:16px;border:1px solid rgba(169,203,230,.18);
+  background:linear-gradient(145deg,rgba(85,146,155,.1),rgba(139,101,182,.1));
+  color:#cadce5;font-size:.85rem;line-height:1.55;overflow-wrap:anywhere}
+.wg-living-observer .observer-dream-history strong{color:#e5f4f2;font-weight:600}
+.wg-living-observer .observer-dream-history small{color:#a7b8c8}
+@media(prefers-reduced-motion:reduce){.wg-living-observer .observer-dream *{animation:none!important;transition:none!important}}
