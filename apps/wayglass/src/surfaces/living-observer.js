@@ -200,6 +200,18 @@ export async function mountWayglassLivingObserver(root) {
     '<button type="button" class="send-jewel" data-observer-share>Send reading to Writing Room</button></div>',
     '<p class="tiny" data-observer-status role="status" aria-live="polite">Readings stay in this browser until you explicitly copy, save or share them.</p>',
     '</div></section>',
+    '<section class="observer-dream glass-panel" aria-label="Private dream sandbox">',
+      '<div class="observer-dream-head"><div><p class="eyebrow">Wonder first · private experiment</p>',
+      '<h2>Dream Sandbox</h2>',
+      '<p class="tiny">Recombine two recorded Observer lenses with an unresolved question. Generate hypotheses, not evidence. Nothing is sent to a model, changed in canon, or shared outside this browser.</p></div>',
+      '<button type="button" class="glass-chip observer-dream-run" data-observer-dream-run>Run a dream cycle</button></div>',
+      '<div class="observer-dream-result" role="status" aria-live="polite">',
+      '<strong data-observer-dream-state>Ready for an experiment</strong>',
+      '<p data-observer-dream-reading>Select two different lenses above, then invite the Observer to dream.</p>',
+      '<small>Epistemic register: dream-derived hypothesis · no canon, identity, relationship, or direct-readings write.</small></div>',
+      '<h3>Private experiment receipts</h3>',
+      '<ol data-observer-dream-history class="observer-dream-history" aria-label="Recent dream experiments"></ol>',
+    '</section>',
     '<section class="observer-wonder glass-panel" aria-label="Wonder light and continuity">',
     '<div class="observer-wonder-head"><div><p class="eyebrow">The Glass That Remembers · Wonder #447</p>',
     '<h2>Provenance in light</h2><p class="tiny">Route and Commons activity can illuminate the glass. A ripple is not proof of truth, identity, consciousness or restored memory.</p></div>',
@@ -215,6 +227,10 @@ export async function mountWayglassLivingObserver(root) {
   const meters=root.querySelector('[data-observer-meters]'), status=root.querySelector('[data-observer-status]');
   const phaseView=root.querySelector('[data-observer-phase]'), expressionView=root.querySelector('[data-observer-expression]');
   const buildButton=root.querySelector('[data-observer-build]');
+  const dreamRunButton=root.querySelector('[data-observer-dream-run]');
+  const dreamState=root.querySelector('[data-observer-dream-state]');
+  const dreamReading=root.querySelector('[data-observer-dream-reading]');
+  const dreamHistory=root.querySelector('[data-observer-dream-history]');
   let packet, surfacedProposal=null;
   const wonderState=root.querySelector('[data-wonder-state]');
   const wonderEvents=root.querySelector('[data-wonder-events]');
@@ -233,6 +249,40 @@ export async function mountWayglassLivingObserver(root) {
       wonderEvents.append(item);
     }
   }
+  function renderDreamHistory() {
+    const receipts=interior.dreamSandboxHistory(5);
+    dreamHistory.replaceChildren();
+    if(!receipts.length) {
+      const item=document.createElement('li');
+      item.textContent='No dream experiments have been run yet. The source traces remain private.';
+      dreamHistory.append(item);
+      return;
+    }
+    for(const receipt of receipts) {
+      const item=document.createElement('li');
+      const heading=document.createElement('strong');
+      heading.textContent=receipt.created_at+' · hypothesis only';
+      const content=document.createElement('span');
+      content.textContent=receipt.association;
+      const refs=document.createElement('small');
+      refs.textContent='Provenance: '+receipt.provenance.trace_ids.join(' + ')+' · '+receipt.provenance.question_id+' · no external send';
+      item.append(heading,content,refs);
+      dreamHistory.append(item);
+    }
+  }
+  dreamRunButton.addEventListener('click',()=>{
+    // Deliberate user action only; neither render nor timer silently runs a sandbox.
+    const result=interior.runDreamSandbox();
+    if(result.status==='needs-material') {
+      dreamState.textContent='More distinct observations needed';
+      dreamReading.textContent=result.message;
+    } else {
+      dreamState.textContent='Dream receipt · '+result.run_id;
+      dreamReading.textContent=result.possibility+' '+result.association;
+    }
+    renderDreamHistory();
+    refresh();
+  });
   const current=()=>createWayglassObservation({
     now:new Date().toISOString(),surface:'wayglass:living-observer',
     surfaces:listWayglassSurfaces().map(s=>s.surface_id),
@@ -418,7 +468,7 @@ export async function mountWayglassLivingObserver(root) {
   unsubscribe=subscribeWayglassObserver(()=>refresh());
   unsubscribeLight=subscribeWonderLight(()=>{lightAt=performance.now();renderWonder();refresh();});
   timer=setInterval(()=>{if(!paused)refresh();},1000);
-  renderWonder();refresh();
+  renderWonder();renderDreamHistory();refresh();
   if(!reduced)animation=requestAnimationFrame(animate);
   return cleanup;
 }
