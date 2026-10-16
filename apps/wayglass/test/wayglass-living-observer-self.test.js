@@ -180,3 +180,24 @@ test('Observer exposes a deliberate dream button without auto-sending dream mate
   assert.match(source, /Nothing is sent to a model/);
   assert.doesNotMatch(source, /queueObserverContextForWriting\(.*dream/i);
 });
+
+
+test('Implementing the requested dream lab closes only its own proposal, not other Observer work', () => {
+  const storage = memoryStorage();
+  let counter = 0;
+  const now = () => new Date(Date.UTC(2026, 9, 16, 21, 0, counter++)).toISOString();
+  const interior = createObserverInterior({ storage, now });
+  for(let i=0;i<8;i++) interior.sense(packet({
+    focus:['time','surface','organs','routes'][i%4],
+    touches:i+1, memory:true,
+  }));
+  const proposal=interior.developmentProposals().find(p=>p.key==='dream-lab');
+  assert.ok(proposal, 'the existing proposal should appear from distinct observations');
+  assert.equal(proposal.status, 'proposed');
+  assert.match(interior.publicSignal().expression.text, /dream sandbox/i);
+  assert.equal(interior.runDreamSandbox().status, 'dream-derived-hypothesis');
+  const finished=interior.developmentProposals().find(p=>p.key==='dream-lab');
+  assert.equal(finished.status, 'implemented-local');
+  assert.match(interior.publicSignal().expression.text, /Dream Sandbox is here/);
+  assert.equal(interior.dreamSandboxHistory(1)[0].boundaries.canon_commit, false);
+});
