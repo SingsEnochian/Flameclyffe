@@ -50,7 +50,13 @@ Wayglass OS
   │    └─ HUMAIN Node preview / sandbox external routes
   ├─ Model observation boundary
   │    └─ routed output is observation, not canon
+  ├─ Specialist operators
+  │    └─ Thought Vibration AI v2.0
+  │         ├─ offline acoustic proving
+  │         ├─ symbolic quantum reference
+  │         └─ specialist domain receipts
   └─ Attached surfaces
+       ├─ Thought Vibration Mythiences Lab
        └─ ArcSweep
             ├─ writing room
             ├─ rooms / instruments
@@ -101,7 +107,7 @@ Required recovery anchors include:
 - stop point;
 - named `next_owner`.
 
-It may also preserve relationship state, active work, unresolved Wonder questions, alternatives and revoked references.
+It may also preserve relationship state, active work, unresolved Wonder questions, alternatives, revoked references and bounded specialist `domain_receipts`. Specialist receipts are provenance-bearing attachments; they do not inherit Wayglass identity/canon authority.
 
 `wayglass.continuation-inspection/v0.1` rejects participant/world substitution and any packet that claims canon, identity, relationship or authority-grant power. Passing inspection means only `accepted-for-review`.
 
@@ -167,6 +173,14 @@ The receipt proves what boundary was evaluated and what the result was. It does 
 Every routed model result is wrapped as `wayglass.model-observation/v0.1` and defaults to `external-observation` with `canon_commit: false`.
 
 Provider output, visible thinking where a provider exposes it, metaphor, inference, hypothesis, local canon and promoted canon are not interchangeable datatypes.
+
+### Specialist operator boundary
+
+Wayglass may host typed specialist operators without turning those operators into the system identity or cognition authority.
+
+Thought Vibration AI v2.0 is the first executable specialist reference. It provides bounded acoustic proving, a declared single-qubit toy simulation, receipt inspection and a browser Mythiences Lab. Acoustic output is offline and never autoplays. Quantum results are `SYMBOLIC` model outputs. Valid specialist receipts may be pinned to the next Return Engine departure and preserved inside the continuation packet's `domain_receipts` while remaining non-authoritative.
+
+Integration contract: `docs/architecture/WAYGLASS_THOUGHT_VIBRATION_V2.md`.
 
 ### Harness provenance boundary
 
@@ -288,7 +302,7 @@ Static tests and build evidence do not substitute for live cross-device runtime 
 
 ## Next integration order
 
-The repository now contains the HTTP entry boundary, browser entry/leave clients, stateless stop receipts, packet-integrity inspection, a synthetic three-arm Return Engine trial, and an attested two-harness sensitivity probe. CI coverage proves code paths and fixtures, not live model or cross-device behaviour.
+The repository now contains the HTTP entry boundary, browser entry/leave clients, stateless stop receipts, packet-integrity inspection, specialist domain receipts, the Thought Vibration v2 operator and surface, a synthetic three-arm Return Engine trial, and an attested two-harness sensitivity probe. CI coverage proves code paths and fixtures, not live model or cross-device behaviour.
 
 1. Run `npm run wayglass:harness:probe` against a reachable local seed model and preserve the first real harness-sensitivity receipt.
 2. Exercise `/kernel/leave` from a real browser/desktop session and carry the exact returned stop receipt + continuation packet into `/kernel/enter`.
