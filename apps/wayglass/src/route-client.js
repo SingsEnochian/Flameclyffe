@@ -122,6 +122,8 @@ export async function leaveWayglassWorld({
 export async function invokeWayglassRoute({
   routeId = 'openai:gpt',
   externalProviderConsent = false,
+  worldId = null,
+  participantId = null,
   characterId = null,
   emergenceQuestionId = null,
   input,
@@ -140,6 +142,8 @@ export async function invokeWayglassRoute({
     body: JSON.stringify({
       route_id: routeId,
       external_provider_consent: externalProviderConsent === true,
+      world_id: worldId,
+      participant_id: participantId,
       character_id: characterId,
       emergence_question_id: emergenceQuestionId,
       input,
