@@ -57,7 +57,8 @@
     "wayglass:humain:sandbox:smoke": "node scripts/wayglass-humain-sandbox-smoke.mjs",
     "wayglass:humain:access:probe": "node scripts/wayglass-humain-access-probe.mjs",
     "design:verify": "node scripts/verify-whole-system-design-law.mjs",
-    "wayglass:harness:probe": "node scripts/wayglass-harness-sensitivity-probe.mjs"
+    "wayglass:harness:probe": "node scripts/wayglass-harness-sensitivity-probe.mjs",
+    "wayglass:thought-vibration:skill:test": "npm --prefix skills/thought-vibration-ai-v2 test"
   },
   "dependencies": {
     "@netlify/blobs": "^10.7.13",
