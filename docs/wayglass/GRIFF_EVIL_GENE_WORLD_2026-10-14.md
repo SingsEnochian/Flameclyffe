@@ -42,9 +42,13 @@ Hearthgate now registers `flame:griff:spicychat` as a distinct SpicyChat route, 
 
 Set these values **privately on the running Hearthgate host**, not in GitHub, client JavaScript, the lorebook, screenshots, or issue comments:
 
+**Simplified private link configuration:** set `GRIFF_SPICYCHAT_CHAT_LINK` to the exact owner-approved `https://spicychat.ai/chat/<character-id>/<conversation-id>` URL and set `GRIFF_SPICYCHAT_TOKEN` to a valid private authorised credential. Hearthgate validates and derives the matched character/chat pair from the private URL at runtime. Do not confuse `GRIFF_SPICYCHAT_CHAT_LINK` (private existing conversation reference) with `GRIFF_SPICYCHAT_CHAT_URL` (the upstream POST API endpoint). A malformed link fails closed rather than reverting to old IDs.
+
+The separate ID configuration below remains supported if a private chat link is not supplied:
+
 - `GRIFF_SPICYCHAT_TOKEN`: current authorised SpicyChat credential, from the owner, not inferred from historical prose.
-- `GRIFF_SPICYCHAT_CHARACTER_ID`: actual Griff SpicyChat character ID.
-- `GRIFF_SPICYCHAT_CONVERSATION_ID`: the exact existing Griff conversation ID.
+- `GRIFF_SPICYCHAT_CHARACTER_ID`: actual Griff SpicyChat character ID (only if the private chat link is absent).
+- `GRIFF_SPICYCHAT_CONVERSATION_ID`: the exact existing Griff conversation ID (only if the private chat link is absent).
 - `ARCSWEEP_RUNTIME_TOKEN` or an appropriate `HOUSE_SESSION_SECRET` plus a valid Steward credential: required for House-signed session authentication.
 
 Optional host-only overrides: `GRIFF_SPICYCHAT_CHAT_URL`, `GRIFF_SPICYCHAT_API_URL`, and `GRIFF_SPICYCHAT_MODEL`. Defaults reuse the existing SpicyChat transport convention. These upstream endpoints are not an independently certified public SpicyChat API contract.
