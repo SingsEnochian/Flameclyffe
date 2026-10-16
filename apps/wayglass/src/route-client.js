@@ -20,6 +20,7 @@ export async function enterWayglassWorld({
   participantId,
   waygateManifest,
   continuationPacket = null,
+  stopReceipt = null,
   routeId = null,
   embodiment = {},
   fetchImpl = fetch,
@@ -34,6 +35,7 @@ export async function enterWayglassWorld({
       route_id: routeId,
       waygate_manifest: waygateManifest,
       continuation_packet: continuationPacket,
+      stop_receipt: stopReceipt,
       embodiment,
     }),
   });
