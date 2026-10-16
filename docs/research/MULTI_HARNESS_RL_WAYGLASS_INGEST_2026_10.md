@@ -218,7 +218,17 @@ The reusable abstraction is:
 
 No large training run yet.
 
-The next small, reversible step is to add a **harness attestation contract** to Wayglass evaluation/route receipts and then run one seed model through the same bounded task under two different harness configurations. Measure the delta before deciding what training intervention is justified.
+The first bounded implementation now exists:
+
+- `wayglass.harness-attestation/v0.1` records harness provenance without granting identity/canon authority;
+- two initial Writing Room harness profiles are registered: `direct-v0.1` and `reflective-v0.1`;
+- `wayglass.model-observation/v0.1` now carries the attested harness;
+- `wayglass.harness-sensitivity/v0.1` compares two observations only when route/provider/model are held constant;
+- `scripts/wayglass-harness-sensitivity-probe.mjs` runs one identical bounded task through the two harnesses and reports lexical/output/token deltas.
+
+The contract and deterministic test fixture are CI-covered. A live model probe still requires a reachable Wayglass server/model route and must be reported separately from fixture evidence.
+
+The next step is to run the local seed model through the two profiles, then repeat/interleave enough trials to separate persistent harness-conditioned behaviour from ordinary sampling noise before deciding what training intervention is justified.
 
 That keeps Wayglass continuity-first rather than turning the foundry into a benchmark-chasing furnace.
 
