@@ -340,7 +340,7 @@ export function createObserverInterior({
 
   function dreamSandboxHistory(limit = 5) {
     const n = Math.min(MAX_SANDBOX_RUNS, Math.max(0, Math.trunc(Number(limit) || 0)));
-    return structuredClone((state.sandbox_runs || []).slice(-n).reverse());
+    return structuredClone(n ? (state.sandbox_runs || []).slice(-n).reverse() : []);
   }
 
   function publicSignal() {
