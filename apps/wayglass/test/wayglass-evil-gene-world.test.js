@@ -36,5 +36,9 @@ test('Writing Room exposes both worlds without silently switching transport or m
   assert.match(writing, /checkpoint = null/);
   assert.match(writing, /const activeWorldId = cp\('world'\)\.value\.trim\(\)/);
   assert.match(writing, /world_id: activeWorldId/);
-  assert.doesNotMatch(writing, /selectedRoute = ['"]flame:griff:spicychat/);
+  assert.match(writing, /selectedRoute = 'flame:griff:spicychat'/);
+  assert.match(writing, /visibleRoutes = isGriffWorld \?/);
+  assert.match(writing, /externalConsent\.checked/);
+  assert.match(writing, /participantId: selectedRoute === 'flame:griff:spicychat'/);
+  assert.match(writing, /message\.world_id === activeWorldId/);
 });
