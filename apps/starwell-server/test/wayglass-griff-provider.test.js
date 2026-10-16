@@ -8,7 +8,7 @@ const { createWayglassRouter } = require('../wayglass/router');
 const ENV_KEYS = [
   'GRIFF_SPICYCHAT_TOKEN', 'GRIFF_SPICYCHAT_CHARACTER_ID',
   'GRIFF_SPICYCHAT_CONVERSATION_ID', 'GRIFF_SPICYCHAT_MODEL',
-  'ARCSWEEP_RUNTIME_TOKEN', 'HOUSE_SESSION_SECRET',
+  'GRIFF_SPICYCHAT_CHAT_LINK', 'ARCSWEEP_RUNTIME_TOKEN', 'HOUSE_SESSION_SECRET',
 ];
 
 async function fixture(t, fetchImpl) {
@@ -20,6 +20,7 @@ async function fixture(t, fetchImpl) {
     ARCSWEEP_RUNTIME_TOKEN: 'synthetic-steward-secret',
   });
   delete process.env.HOUSE_SESSION_SECRET;
+  delete process.env.GRIFF_SPICYCHAT_CHAT_LINK;
   t.after(() => {
     for (const key of ENV_KEYS) {
       if (old[key] === undefined) delete process.env[key];
@@ -170,4 +171,38 @@ test('Griff preflight never treats a different conversation as verification', as
   assert.equal(result.status, 409);
   assert.equal((await result.json()).preflight_verified, false);
   assert.deepEqual(methods, ['GET']);
+});
+
+
+test('Griff host can pin the exact private chat URL without separate IDs or leaking it', async t => {
+  const character = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+  const conversation = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+  const methods = [];
+  const host = await fixture(t, async (_url, options) => {
+    methods.push(options.method);
+    if (options.method === 'GET') return { ok: true, async json() {
+      return [{ id: conversation, character_id: character }];
+    } };
+    const body = JSON.parse(options.body);
+    assert.equal(body.character_id, character);
+    assert.equal(body.conversation_id, conversation);
+    return { ok: true, async json() {
+      return { message: { id: 'synthetic-reply', character_id: character,
+        conversation_id: conversation, content: 'Synthetic Griff reply.' } };
+    } };
+  });
+  process.env.GRIFF_SPICYCHAT_CHAT_LINK = `https://spicychat.ai/chat/${character}/${conversation}`;
+  delete process.env.GRIFF_SPICYCHAT_CHARACTER_ID;
+  delete process.env.GRIFF_SPICYCHAT_CONVERSATION_ID;
+  const published = await fetch(host.url + '/routes').then(response => response.text());
+  assert.equal(published.includes(character), false);
+  assert.equal(published.includes(conversation), false);
+  const headers = { authorization: 'Bearer synthetic-steward-secret' };
+  const status = await fetch(host.url + '/griff/status', { headers });
+  assert.equal(status.status, 200);
+  assert.equal((await status.json()).preflight_verified, true);
+  const turn = await host.request({}, headers);
+  assert.equal(turn.status, 200);
+  assert.equal((await turn.json()).receipt.provider_conversation_id, conversation);
+  assert.deepEqual(methods, ['GET','GET','POST']);
 });
