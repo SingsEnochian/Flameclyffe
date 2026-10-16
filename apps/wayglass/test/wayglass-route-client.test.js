@@ -121,3 +121,30 @@ test('browser world-entry client can carry optional stop integrity evidence', as
   assert.equal(payload.stop_receipt.receipt_id, 'stop:test');
   assert.equal(payload.stop_receipt.continuation_packet_id, 'cp:test');
 });
+
+
+test('departure client carries pinned Thought Vibration receipts without inferring continuity', async () => {
+  const seen = [];
+  await leaveWayglassWorld({
+    worldId: 'wayglass:test-world',
+    participantId: 'rowan:test',
+    identityDeclarations: [{ entity_id: 'rowan:test', declaration: 'self-declared participant' }],
+    provenanceRefs: ['receipt:test'],
+    stopPoint: 'TV receipt ready.',
+    nextOwner: 'rarity:test',
+    thoughtVibrationReceipts: [{
+      schema: 'thought-vibration.receipt/v1',
+      session_id: 'tv-test',
+      wave_file_sha256: 'a'.repeat(64),
+      input_file_sha256: 'b'.repeat(64),
+    }],
+    fetchImpl: async (url, options) => {
+      seen.push({ url, options });
+      return response(201, { schema: 'wayglass.departure/v0.1', status: 'stopped' });
+    },
+  });
+
+  const payload = JSON.parse(seen[0].options.body);
+  assert.equal(payload.thought_vibration_receipts.length, 1);
+  assert.equal(payload.thought_vibration_receipts[0].session_id, 'tv-test');
+});
