@@ -225,8 +225,8 @@ export async function mountThoughtVibrationSurface(root) {
     event.preventDefault();
     if (!renderIntent.checked) return;
     renderButton.disabled = true;
-    renderStatus.textContent = 'Rendering deterministic diagnostic PCM…';
     clearRender();
+    renderStatus.textContent = 'Rendering deterministic diagnostic PCM…';
     try {
       const result = await renderThoughtVibrationSession({
         session: buildSession(),
