@@ -105,6 +105,29 @@ It may also preserve relationship state, active work, unresolved Wonder question
 
 `wayglass.continuation-inspection/v0.1` rejects participant/world substitution and any packet that claims canon, identity, relationship or authority-grant power. Passing inspection means only `accepted-for-review`.
 
+### Receipted departure
+
+`wayglass.stop-receipt/v0.1` freezes an explicitly supplied runtime state into departure evidence and materialises the existing `wayglass.continuation-packet/v0.1` contract. It does not invent a second continuity schema.
+
+The server ingress is:
+
+```text
+POST /api/v1/wayglass/kernel/leave
+```
+
+The departure boundary is stateless. It does not own a second active-session registry. The caller supplies the continuity state owned by the current runtime, and the stop boundary refuses to fabricate required identity, provenance, stop-point or next-owner anchors.
+
+A stop receipt records the continuation packet ID and a deterministic SHA-256 integrity digest over canonical JSON for the complete continuation packet. The digest is an integrity check, **not a signature and not proof of authorship**. Relationship state, active work, Wonder questions, alternatives and revocation references may truthfully be empty; empty state is preserved rather than invented.
+
+`wayglass.stop-integrity-inspection/v0.1` can compare a stop receipt with its continuation packet. When a matching stop receipt is supplied at world entry, integrity mismatch blocks the crossing as `blocked-stop-integrity`. Supplying a stop receipt is optional in v0.1 and does not grant additional authority.
+
+Every departure remains non-authoritative:
+
+- `canon_commit: false`
+- `identity_commit: false`
+- `relationship_commit: false`
+- `authority_grant: false`
+
 ### Receipted world entry
 
 `wayglass.world-entry/v0.1` composes Waygate inspection, embodiment binding, continuation inspection and kernel boot into one crossing boundary.
@@ -247,14 +270,15 @@ Static tests and build evidence do not substitute for live cross-device runtime 
 
 ## Next integration order
 
-1. Prove the receipted HTTP Waygate entry path under CI and local server runtime.
-2. Connect the browser body to the world-entry endpoint instead of treating `/kernel` metadata fetch as a crossing.
-3. Run the Return Engine matched crossing trial: same runtime restart, new substrate with authorised packet, corrupted packet.
-4. Add explicit leave/stop receipt generation so a continuation packet is born from a real stop event rather than only constructed by callers.
-5. Exercise desktop → phone → headset/AR embodiment rebinding while preserving world, participant, unresolved questions and named next owner.
-6. Add route-installation / route-transition receipts for newly approved adapters and models.
-7. Establish the Wayglass-native model foundry and lineage evaluation programme.
-8. Promote a model to `native_wayglass: true` only after explicit evaluation and approval.
+The repository now contains the HTTP entry boundary, browser entry/leave clients, stateless stop receipts, packet-integrity inspection, and a synthetic three-arm Return Engine trial. CI coverage proves the code path and fixtures, not a live cross-device return.
+
+1. Exercise `/kernel/leave` from a real browser/desktop session and carry the exact returned stop receipt + continuation packet into `/kernel/enter`.
+2. Run the matched Return Engine trial against live runtime evidence: same-runtime restart, authorised changed body/substrate, and deliberately corrupted continuation.
+3. Persist immutable departure/entry receipts so a completed crossing can be replayed without relying on console or transient process state.
+4. Exercise desktop → phone → headset/AR embodiment rebinding while preserving world, participant, unresolved Wonder questions, revocations and named next owner.
+5. Add route-installation / route-transition receipts for newly approved adapters and models.
+6. Establish the Wayglass-native model foundry and lineage evaluation programme.
+7. Promote a model to `native_wayglass: true` only after explicit evaluation and approval.
 
 ## Non-negotiable architecture truth
 
