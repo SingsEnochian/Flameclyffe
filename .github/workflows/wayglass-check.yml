@@ -8,6 +8,7 @@ on:
       - 'apps/starwell-server/server.js'
       - 'lib/wayglass-*'
       - 'schemas/thought-vibration/**'
+      - 'skills/thought-vibration-ai-v2/**'
       - 'docs/architecture/WAYGLASS_OS_V0_1.md'
       - 'docs/architecture/WAYGLASS_THOUGHT_VIBRATION_V2.md'
       - 'package.json'
