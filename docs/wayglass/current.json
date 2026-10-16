@@ -69,6 +69,11 @@
       "branch": "wayglass/constellation-runtime-001",
       "commit": "4513463a311b55a15ea0d12cb68f0d8e51262ab7",
       "status": "integrated-with-conflict-reconciliation"
+    },
+    {
+      "branch": "codex/wayglass-scoped-live-verification-20261013",
+      "commit": "53321b209b8bbad94a99dc34da24946bc51ad793",
+      "status": "integrated-with-conflict-reconciliation"
     }
   ],
   "outstanding": [

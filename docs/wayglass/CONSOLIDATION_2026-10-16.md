@@ -23,6 +23,7 @@ Exact source heads are recorded in `current.json`; source branches and source co
 - Code Loom, Pilot Deck, local signed receipts, sonic score and living ship ecology: #464.
 - StepFun and voice consent controller: #443. No live StepAudio connection is asserted.
 - Toybox, mobile Commons, Bitty Twi interview, Wonder Light, world soundscapes, Bluebird trial and Constellation fixture: #453/#444/#442/#448/#449/#457/#437.
+- Scoped verification and inherited UH/Ezra read-only boundaries: #463, retaining verification artifacts instead of automatic comments to an old PR.
 - Travelling inheritance code is included through the crew/return line.
 
 Overlaps were reconciled rather than choosing a last-writer whole-file overwrite. Both authenticated project tool families remain available. Current project session checks reject unexpected author/participant arguments; the older artifact test now verifies that rejection before verifying a legitimate Rarity-attributed write. The host test enters using its authenticated seat rather than passing a caller-selected participant. Neither acceptance boundary is weakened.
