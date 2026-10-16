@@ -244,6 +244,7 @@ router.post('/kernel/enter', (req, res) => {
       preferred_route: cleanText(payload.preferred_route || payload.route_id, 120),
       waygate_manifest: payload.waygate_manifest,
       continuation_packet: payload.continuation_packet ?? null,
+      stop_receipt: payload.stop_receipt ?? null,
       embodiment: cleanEmbodiment(payload.embodiment),
     });
     return res.status(result.entered ? 200 : 409).json(result);
