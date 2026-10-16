@@ -85,6 +85,7 @@ export async function mountArcSweepWritingSurface(root) {
     "    <label for=\"wg-world-seat\">World</label>\n",
     "    <select id=\"wg-world-seat\" aria-label=\"Wayglass story world\"></select>\n",
     "    <p class=\"tiny\" id=\"wg-world-status\" role=\"status\">World and provider routes are independent.</p>\n",
+    '<button type="button" id="wg-griff-check" class="glass-chip" hidden>Check Griff connection</button>',
     "  </section>\n",
           '<div id="wg-stepfun-transfer" class="wg-stepfun-transfer" hidden>',
             '<label for="wg-stepfun-consent"><input type="checkbox" id="wg-stepfun-consent" /> <span id="wg-provider-consent-label">I approve this external provider transfer.</span></label>',
@@ -199,6 +200,7 @@ export async function mountArcSweepWritingSurface(root) {
   const cp = name => root.querySelector('#wg-cp-' + name);
   const worldSelect = root.querySelector('#wg-world-seat');
   const worldStatus = root.querySelector('#wg-world-status');
+  const griffCheck = root.querySelector('#wg-griff-check');
   for (const world of WAYGLASS_WORLD_SEATS) {
     const option = root.ownerDocument.createElement('option');
     option.value = world.world_id;
@@ -216,6 +218,7 @@ export async function mountArcSweepWritingSurface(root) {
       ? world.character.name + ' · world anchor; transport status shown separately'
       : 'The place stays itself across route changes.';
     worldStatus.textContent = wayglassWorldStatus(world);
+    griffCheck.hidden = world.world_id !== 'evil-gene:film-2015';
     if (changed && resetCheckpoint) {
       checkpoint = null;
       cp('id').value = '';
@@ -233,6 +236,21 @@ export async function mountArcSweepWritingSurface(root) {
     void loadRoutes();
   });
   selectWorldSeat(cp('world').value, { resetCheckpoint: false });
+  griffCheck.addEventListener('click', async () => {
+    griffCheck.disabled = true;
+    worldStatus.textContent = 'Checking Griff’s exact SpicyChat conversation with the House Steward session…';
+    try {
+      const response = await fetch('/api/v1/wayglass/griff/status', { cache: 'no-store', credentials: 'same-origin' });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || (result.missing?.length
+        ? 'Private Hearthgate configuration missing: ' + result.missing.join(', ') : 'Provider preflight unavailable.'));
+      worldStatus.textContent = result.preflight_verified
+        ? 'Griff’s private character and conversation pair confirmed by SpicyChat. No live reply yet; tick consent and send a turn.'
+        : 'Griff preflight could not confirm the exact conversation. No message sent.';
+    } catch (error) {
+      worldStatus.textContent = 'Griff connection check: ' + error.message;
+    } finally { griffCheck.disabled = false; }
+  });
   cp('save').addEventListener('click', async () => {
     try {
       const worldId = cp('world').value.trim(), participantId = cp('participant').value.trim();
