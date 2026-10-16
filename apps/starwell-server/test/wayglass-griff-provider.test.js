@@ -132,3 +132,41 @@ test('Griff does not record success for a mismatched or empty provider reply', a
   const response = await host.request({}, { authorization: 'Bearer synthetic-steward-secret' });
   assert.equal(response.status, 502);
 });
+
+
+test('Griff connection button preflight checks the real pinned pair without sending a turn', async t => {
+  const methods = [];
+  const host = await fixture(t, async (_url, options) => {
+    methods.push(options.method);
+    return { ok: true, async json() {
+      return [{ id: 'griff-conversation-fixture', character_id: 'griff-character-fixture' }];
+    } };
+  });
+  assert.equal((await fetch(host.url + '/griff/status')).status, 401);
+  const authorized = await fetch(host.url + '/griff/status', {
+    headers: { authorization: 'Bearer synthetic-steward-secret' },
+  });
+  assert.equal(authorized.status, 200);
+  const result = await authorized.json();
+  assert.equal(result.preflight_verified, true);
+  assert.equal(result.character_binding_verified, true);
+  assert.equal(result.conversation_binding_verified, true);
+  assert.equal(result.live_turn_verified, false);
+  assert.deepEqual(methods, ['GET']);
+});
+
+test('Griff preflight never treats a different conversation as verification', async t => {
+  const methods = [];
+  const host = await fixture(t, async (_url, options) => {
+    methods.push(options.method);
+    return { ok: true, async json() {
+      return [{ id: 'some-other-conversation', character_id: 'griff-character-fixture' }];
+    } };
+  });
+  const result = await fetch(host.url + '/griff/status', {
+    headers: { authorization: 'Bearer synthetic-steward-secret' },
+  });
+  assert.equal(result.status, 409);
+  assert.equal((await result.json()).preflight_verified, false);
+  assert.deepEqual(methods, ['GET']);
+});
