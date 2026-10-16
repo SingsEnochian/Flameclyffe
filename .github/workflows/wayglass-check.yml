@@ -7,6 +7,7 @@ on:
     paths:
       - 'apps/wayglass/**'
       - 'apps/starwell-server/wayglass/**'
+      - 'apps/starwell-server/wayglass-runtime/**'
       - 'apps/starwell-server/test/wayglass-*.test.js'
       - 'apps/starwell-server/test/security-boundary.test.js'
       - 'apps/starwell-server/test/bluebird-bridge-trial.test.js'
