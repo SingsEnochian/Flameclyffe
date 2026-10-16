@@ -92,6 +92,7 @@ export async function leaveWayglassWorld({
 
 export async function invokeWayglassRoute({
   routeId = 'openai:gpt',
+  harnessId = 'wayglass:writing-room/direct-v0.1',
   input,
   history = [],
   interaction,
@@ -105,6 +106,7 @@ export async function invokeWayglassRoute({
     headers: JSON_HEADERS,
     body: JSON.stringify({
       route_id: routeId,
+      harness_id: harnessId,
       input,
       history,
       interaction,
