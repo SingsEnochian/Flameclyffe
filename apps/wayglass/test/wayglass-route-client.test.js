@@ -100,3 +100,24 @@ test('browser departure client posts resumable stop state to the server', async 
   assert.equal(payload.next_owner, 'rarity:test');
   assert.deepEqual(payload.unresolved_wonder_questions, ['What survives the crossing?']);
 });
+
+
+test('browser world-entry client can carry optional stop integrity evidence', async () => {
+  const seen = [];
+  const result = await enterWayglassWorld({
+    worldId: 'wayglass:test-world',
+    participantId: 'rowan:test',
+    waygateManifest: { schema: 'wayglass.waygate/v0.1', waygate_id: 'wg:test', world_id: 'wayglass:test-world' },
+    continuationPacket: { schema: 'wayglass.continuation-packet/v0.1', packet_id: 'cp:test' },
+    stopReceipt: { schema: 'wayglass.stop-receipt/v0.1', receipt_id: 'stop:test', continuation_packet_id: 'cp:test' },
+    fetchImpl: async (url, options) => {
+      seen.push({ url, options });
+      return response(200, { schema: 'wayglass.world-entry/v0.1', status: 'entered', entered: true });
+    },
+  });
+
+  assert.equal(result.entered, true);
+  const payload = JSON.parse(seen[0].options.body);
+  assert.equal(payload.stop_receipt.receipt_id, 'stop:test');
+  assert.equal(payload.stop_receipt.continuation_packet_id, 'cp:test');
+});
