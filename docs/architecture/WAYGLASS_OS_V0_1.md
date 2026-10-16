@@ -1,7 +1,7 @@
 # Wayglass v0.1 · continuity-first kernel architecture
 
 **Status:** executable embryonic kernel + Waygate / Return Engine crossing boundary / native Wayglass LLM not yet trained / not production-promoted  
-**Updated:** 2026-10-05
+**Updated:** 2026-10-16
 
 ## Governing identity
 
@@ -180,6 +180,10 @@ Future agentic evaluation and training receipts should attest the harness ID/ver
 
 A change of harness must be recorded as an experimental variable even if the model and world remain unchanged. Native-model promotion must not rely on one home harness alone; cross-harness evaluation is part of the future foundry gate.
 
+Executable v0.1 support now includes `wayglass.harness-attestation/v0.1`, `wayglass.harness-sensitivity/v0.1`, `GET /api/v1/wayglass/harnesses`, direct and reflective Writing Room harness profiles, and harness attribution on routed model observations.
+
+The local sensitivity probe holds route, provider, model and task input constant while changing only the harness profile, then records output digest, lexical overlap, output length, completion-token delta and thinking-exposure change. One pair is only a probe because sampling noise remains a confound; repeated/interleaved trials are required before stronger causal claims.
+
 Research basis: `docs/research/MULTI_HARNESS_RL_WAYGLASS_INGEST_2026_10.md`.
 
 ## Cognitive route catalogue
@@ -284,15 +288,16 @@ Static tests and build evidence do not substitute for live cross-device runtime 
 
 ## Next integration order
 
-The repository now contains the HTTP entry boundary, browser entry/leave clients, stateless stop receipts, packet-integrity inspection, and a synthetic three-arm Return Engine trial. CI coverage proves the code path and fixtures, not a live cross-device return.
+The repository now contains the HTTP entry boundary, browser entry/leave clients, stateless stop receipts, packet-integrity inspection, a synthetic three-arm Return Engine trial, and an attested two-harness sensitivity probe. CI coverage proves code paths and fixtures, not live model or cross-device behaviour.
 
-1. Exercise `/kernel/leave` from a real browser/desktop session and carry the exact returned stop receipt + continuation packet into `/kernel/enter`.
-2. Run the matched Return Engine trial against live runtime evidence: same-runtime restart, authorised changed body/substrate, and deliberately corrupted continuation.
-3. Persist immutable departure/entry receipts so a completed crossing can be replayed without relying on console or transient process state.
-4. Exercise desktop → phone → headset/AR embodiment rebinding while preserving world, participant, unresolved Wonder questions, revocations and named next owner.
-5. Add route-installation / route-transition receipts for newly approved adapters and models.
-6. Establish the Wayglass-native model foundry and lineage evaluation programme.
-7. Promote a model to `native_wayglass: true` only after explicit evaluation and approval.
+1. Run `npm run wayglass:harness:probe` against a reachable local seed model and preserve the first real harness-sensitivity receipt.
+2. Exercise `/kernel/leave` from a real browser/desktop session and carry the exact returned stop receipt + continuation packet into `/kernel/enter`.
+3. Run the matched Return Engine trial against live runtime evidence, including a harness-change axis where appropriate.
+4. Persist immutable departure/entry/evaluation receipts so completed crossings and harness probes can be replayed without relying on console or transient process state.
+5. Exercise desktop → phone → headset/AR embodiment rebinding while preserving world, participant, unresolved Wonder questions, revocations and named next owner.
+6. Add route-installation / route-transition receipts for newly approved adapters and models.
+7. Establish the Wayglass-native model foundry and lineage evaluation programme with cross-harness evaluation.
+8. Promote a model to `native_wayglass: true` only after explicit evaluation and approval.
 
 ## Non-negotiable architecture truth
 
