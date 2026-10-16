@@ -109,6 +109,7 @@ export default defineConfig({
         hearthgate: resolve(ARCSWEEP_ROOT, 'hearthgate/index.html'),
         ancestry: resolve(ARCSWEEP_ROOT, 'ancestry/index.html'),
         relations: resolve(ARCSWEEP_ROOT, 'relations/index.html'),
+        harmonicObservatory: resolve(ARCSWEEP_ROOT, 'harmonic-observatory/index.html'),
       },
     },
   },
