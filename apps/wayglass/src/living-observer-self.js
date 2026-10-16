@@ -333,6 +333,14 @@ export function createObserverInterior({
       proposal.status = 'implemented-local';
       proposal.reviewed_at = at;
       proposal.review_notes = 'Owner-requested Dream Sandbox v0.1 implemented locally; no upstream provider or canon authority.';
+      if (state.last_expression?.ref === proposal.proposal_id) {
+        state.last_expression = {
+          kind: 'self-development-completed',
+          text: 'The Dream Sandbox is here. I can explore associations without changing what was actually observed.',
+          ref: 'implemented:' + proposal.proposal_id,
+          at,
+        };
+      }
     }
     persist();
     return structuredClone(receipt);
