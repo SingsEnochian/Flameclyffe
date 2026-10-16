@@ -1,6 +1,8 @@
 'use strict';
 
 const { randomUUID } = require('node:crypto');
+const { join } = require('node:path');
+const { pathToFileURL } = require('node:url');
 const express = require('express');
 const {
   publicWayglassRoutes,
@@ -14,10 +16,34 @@ const { bootWayglassKernel } = require('../../../lib/wayglass-kernel.cjs');
 const { enterWayglassWorld } = require('../../../lib/wayglass-world-entry.cjs');
 const { createWayglassDeparture } = require('../../../lib/wayglass-stop-receipt.cjs');
 const { createModelObservation } = require('../../../lib/wayglass-model-observation.cjs');
+const {
+  operatorDescriptor: thoughtVibrationOperatorDescriptor,
+  inspectThoughtVibrationReceipt,
+  normalizeThoughtVibrationDomainReceipts,
+} = require('../../../lib/wayglass-thought-vibration.cjs');
 
 const router = express.Router();
 const MAX_HISTORY = 16;
 const MAX_TEXT = 12000;
+
+let thoughtVibrationRendererModule = null;
+let thoughtVibrationQuantumModule = null;
+
+async function loadThoughtVibrationRenderer() {
+  if (!thoughtVibrationRendererModule) {
+    const url = pathToFileURL(join(__dirname, '../../../lib/wayglass-thought-vibration-renderer.mjs')).href;
+    thoughtVibrationRendererModule = await import(url);
+  }
+  return thoughtVibrationRendererModule;
+}
+
+async function loadThoughtVibrationQuantum() {
+  if (!thoughtVibrationQuantumModule) {
+    const url = pathToFileURL(join(__dirname, '../../../lib/wayglass-thought-vibration-quantum.mjs')).href;
+    thoughtVibrationQuantumModule = await import(url);
+  }
+  return thoughtVibrationQuantumModule;
+}
 
 function cleanText(value, max = MAX_TEXT) {
   return String(value || '').trim().slice(0, max);
@@ -273,6 +299,10 @@ router.post('/kernel/leave', (req, res) => {
     const provenance = Array.isArray(payload.provenance_refs)
       ? payload.provenance_refs
       : [];
+    const domainReceipts = normalizeThoughtVibrationDomainReceipts(
+      Array.isArray(payload.thought_vibration_receipts) ? payload.thought_vibration_receipts : [],
+    );
+    const specialistRefs = domainReceipts.map((entry) => entry.receipt_ref);
     const departure = createWayglassDeparture({
       receipt_id: `stop:${id}`,
       packet_id: `continuation:${id}`,
@@ -286,7 +316,8 @@ router.post('/kernel/leave', (req, res) => {
       relationship_state: Array.isArray(payload.relationship_state) ? payload.relationship_state : [],
       active_work: Array.isArray(payload.active_work) ? payload.active_work : [],
       unresolved_wonder_questions: Array.isArray(payload.unresolved_wonder_questions) ? payload.unresolved_wonder_questions : [],
-      provenance_refs: [...provenance, 'wayglass-http:kernel-leave'],
+      provenance_refs: [...provenance, ...specialistRefs, 'wayglass-http:kernel-leave'],
+      domain_receipts: domainReceipts,
       stop_point: cleanText(payload.stop_point, 1000),
       next_owner: cleanText(payload.next_owner, 240),
       alternatives: Array.isArray(payload.alternatives) ? payload.alternatives : [],
@@ -298,6 +329,135 @@ router.post('/kernel/leave', (req, res) => {
     return res.status(badRequest ? 400 : 500).json({
       schema: 'wayglass.departure-error/v0.1',
       error: error?.message || 'Wayglass departure failed.',
+    });
+  }
+});
+
+router.get('/thought-vibration', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  return res.json(thoughtVibrationOperatorDescriptor());
+});
+
+router.post('/thought-vibration/receipt/inspect', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  const inspection = inspectThoughtVibrationReceipt(req.body?.receipt);
+  return res.status(inspection.receipt_valid ? 200 : 409).json(inspection);
+});
+
+router.post('/thought-vibration/render', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  const payload = req.body || {};
+  const session = payload.session;
+  const includeWave = payload.include_wave === true;
+
+  try {
+    const { synthesizeSession } = await loadThoughtVibrationRenderer();
+    const inputBytes = Buffer.from(JSON.stringify(session), 'utf8');
+    const { wav, receipt } = synthesizeSession(session, inputBytes);
+    const inspection = inspectThoughtVibrationReceipt(receipt);
+    if (!inspection.receipt_valid) {
+      return res.status(500).json({
+        schema: 'wayglass.thought-vibration-render-error/v0.1',
+        error: 'Renderer produced an invalid Thought Vibration receipt.',
+        inspection,
+      });
+    }
+    const domainReceipts = normalizeThoughtVibrationDomainReceipts([receipt]);
+    return res.status(201).json({
+      schema: 'wayglass.thought-vibration-render/v0.1',
+      status: 'offline-rendered',
+      operator: thoughtVibrationOperatorDescriptor(),
+      receipt,
+      receipt_ref: domainReceipts[0].receipt_ref,
+      receipt_inspection: inspection,
+      artifact: {
+        kind: 'offline-diagnostic-wav',
+        persisted: false,
+        playback: false,
+        filename: receipt.wave_file,
+        mime_type: 'audio/wav',
+        bytes: wav.length,
+        sha256: receipt.wave_file_sha256,
+        encoding: includeWave ? 'base64' : 'omitted',
+        data: includeWave ? wav.toString('base64') : null,
+      },
+      authority: {
+        scope: 'specialist-render-only',
+        canon_commit: false,
+        identity_commit: false,
+        relationship_commit: false,
+        continuity_commit: false,
+        authority_grant: false,
+        device_activation: false,
+      },
+    });
+  } catch (error) {
+    const badRequest = error instanceof TypeError || error instanceof RangeError;
+    return res.status(badRequest ? 400 : 500).json({
+      schema: 'wayglass.thought-vibration-render-error/v0.1',
+      error: error?.message || 'Thought Vibration render failed.',
+    });
+  }
+});
+
+router.post('/thought-vibration/quantum', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  const payload = req.body || {};
+  const operation = cleanText(payload.operation, 80);
+  const args = payload.args && typeof payload.args === 'object' ? payload.args : {};
+
+  try {
+    const quantum = await loadThoughtVibrationQuantum();
+    let result;
+    if (operation === 'avoided-crossing') {
+      result = quantum.avoidedCrossing(args.lambda, args.g);
+    } else if (operation === 'density-from-bloch') {
+      result = quantum.densityFromBloch(args.vector);
+    } else if (operation === 'measure-z') {
+      result = quantum.measureZ(args.vector);
+    } else if (operation === 'evolve-bloch') {
+      result = quantum.evolveBloch(args.vector, {
+        lambda: args.lambda,
+        g: args.g,
+        time: args.time,
+      });
+    } else {
+      return res.status(400).json({
+        schema: 'wayglass.thought-vibration-quantum-error/v0.1',
+        error: 'Unknown Thought Vibration quantum operation.',
+      });
+    }
+
+    return res.json({
+      schema: 'wayglass.thought-vibration-quantum/v0.1',
+      status: 'simulated',
+      operation,
+      domain: 'SYMBOLIC',
+      model_output: result,
+      claims: [
+        {
+          domain: 'SYMBOLIC',
+          statement: 'Result is a declared dimensionless reference-model computation.',
+        },
+        {
+          domain: 'UNKNOWN',
+          statement: 'No physical participant quantum state, quantum hardware, consciousness effect, or acoustic entrainment is measured.',
+        },
+      ],
+      authority: {
+        scope: 'simulation-observation-only',
+        canon_commit: false,
+        identity_commit: false,
+        relationship_commit: false,
+        continuity_commit: false,
+        authority_grant: false,
+      },
+    });
+  } catch (error) {
+    const badRequest = error instanceof TypeError || error instanceof RangeError;
+    return res.status(badRequest ? 400 : 500).json({
+      schema: 'wayglass.thought-vibration-quantum-error/v0.1',
+      error: error?.message || 'Thought Vibration quantum simulation failed.',
     });
   }
 });
