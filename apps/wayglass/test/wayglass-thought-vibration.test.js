@@ -20,6 +20,12 @@ import {
   evolveBloch,
 } from '../../../lib/wayglass-thought-vibration-quantum.mjs';
 import { createWayglassDeparture } from '../../../lib/wayglass-stop-receipt.js';
+import {
+  synthesizeSession as portableSynthesizeSession,
+} from '../../../skills/thought-vibration-ai-v2/src/reference-renderer.mjs';
+import {
+  avoidedCrossing as portableAvoidedCrossing,
+} from '../../../skills/thought-vibration-ai-v2/src/quantum-model.mjs';
 
 function stereoSession(overrides = {}) {
   return {
@@ -197,4 +203,21 @@ test('quantum reference rejects mythic labels as physical state', () => {
     g: 1,
     time: 1,
   }), /outside unit ball/);
+});
+
+
+test('Wayglass renderer stays byte-for-byte compatible with the preserved v2 source fixture', () => {
+  const session = stereoSession();
+  const integrated = synthesizeSession(session);
+  const portable = portableSynthesizeSession(session);
+
+  assert.ok(integrated.wav.equals(portable.wav));
+  assert.deepEqual(integrated.receipt, portable.receipt);
+});
+
+test('Wayglass quantum reference stays compatible with the preserved v2 source fixture', () => {
+  assert.deepEqual(
+    avoidedCrossing(1.25, 0.75),
+    portableAvoidedCrossing(1.25, 0.75),
+  );
 });
