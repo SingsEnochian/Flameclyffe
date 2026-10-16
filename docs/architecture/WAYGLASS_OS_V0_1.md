@@ -168,6 +168,20 @@ Every routed model result is wrapped as `wayglass.model-observation/v0.1` and de
 
 Provider output, visible thinking where a provider exposes it, metaphor, inference, hypothesis, local canon and promoted canon are not interchangeable datatypes.
 
+### Harness provenance boundary
+
+Agent behaviour is shaped not only by model weights but also by the harness that constructs context, exposes tools, interprets calls, manages retries/compaction and decides when to stop.
+
+Wayglass therefore treats the harness as an attributable causal layer:
+
+> **MODEL != HARNESS != WORLD != BODY != WAYGLASS IDENTITY**
+
+Future agentic evaluation and training receipts should attest the harness ID/version, API dialect, loop owner, tool-schema fingerprint, context/compaction policy, retry policy and termination policy where known. Harness metadata is provenance, never identity authority.
+
+A change of harness must be recorded as an experimental variable even if the model and world remain unchanged. Native-model promotion must not rely on one home harness alone; cross-harness evaluation is part of the future foundry gate.
+
+Research basis: `docs/research/MULTI_HARNESS_RL_WAYGLASS_INGEST_2026_10.md`.
+
 ## Cognitive route catalogue
 
 The current executable route families are:
