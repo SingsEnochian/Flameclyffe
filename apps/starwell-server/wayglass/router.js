@@ -303,7 +303,7 @@ async function callSpicyChat(route, payload, compiled = null, fetchImpl = global
       conversation_id: conversationId,
       inference_model: route.model(),
       inference_settings: {
-        max_new_tokens: Math.max(64, Math.min(300, Number(payload.max_output_tokens) || 180)),
+        max_new_tokens: Math.max(64, Math.min(1600, Number(payload.max_output_tokens) || 1400)),
         temperature: 0.7,
         top_p: 0.7,
         top_k: 90,
