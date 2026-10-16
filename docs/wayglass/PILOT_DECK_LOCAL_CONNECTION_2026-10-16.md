@@ -40,3 +40,13 @@ A Rarity provider error after sign-in means authentication is working and the ne
 - ArcSweep build, server staging and contract verification pass.
 - Packaged router test checks the copied House-session module.
 - Full browser rendering and the actual Windows/provider connection remain unverified.
+
+## Follow-up: controls hang
+
+Acceptance criteria: the complete request (headers and body) has a deadline; all three server-action controls recover after stalled responses; local draft saving remains usable while the host stalls; repeated Invite clicks cannot overlap the preliminary session check. Existing signed-session and explicit-request requirements remain in place.
+
+The old fetch helper cleared its timer as soon as headers arrived. A body that never completed could therefore hold the sign-in or pilot button indefinitely. `pilot-deck-network.js` now owns the entire JSON read and races it against a deadline, also aborting the transport. Session checks use eight seconds; the pilot response uses thirty seconds. Controls are restored in `finally`, including failure during Invite's preliminary session check. The deck mast now reports when its controls have actually finished loading, rather than claiming readiness in static HTML.
+
+Observed verification: 1,630 ArcSweep tests pass, including four transport regression tests; ArcSweep builds successfully. Synthetic DOM checks cover normal sign-in/request, stalled headers, stalled session and pilot response bodies, button recovery, local save during a stall, and duplicate Invite clicks. Synthetic UI deadlines were accelerated to 15 ms; transport tests also cover a fetch implementation that ignores abort. No live provider turn was sent.
+
+The connected Chrome browser became available during this follow-up. Opening the previously used `http://127.0.0.1:3841/arcsweep/pilot-deck/` returned `net::ERR_CONNECTION_REFUSED`. No existing Pilot Deck browser tab was present. This proves no host answered that address at inspection time; it does not establish whether Hearthgate is running at a different address. Starting or inspecting the Windows process still requires the user's local terminal. The source fix is not evidence that the Windows installation has updated.

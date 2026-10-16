@@ -11,13 +11,14 @@
   <h1>Two seats. One helm.</h1>
   <p class="tagline">The ship remembers where we stopped. The crew knows who has the wheel.</p>
   <div class="statusbar" role="group" aria-label="Ship bridge status">
-    <span><i class="light amber"></i><b>Deck</b> Local-first prototype</span>
+    <span><i class="light amber"></i><b>Deck</b> <span id="deck-state">Controls loading… If this remains, reopen the deck through Hearthgate’s HTTP address.</span></span>
     <span><i class="light amber" id="steward-light"></i><b>Steward</b> <span id="session-state">Not checked</span></span>
     <span><i class="light amber" id="rarity-light"></i><b>Rarity pilot</b> <span id="route-state">Not connected</span></span>
     <span><i class="light cool"></i><b>Flight authority</b> Existing ArcSweep Helm</span>
     <span><i class="light cool"></i><b>Harmonic link</b> <span id="wayglass-sensory-status" aria-live="off">Checking local instrument link</span></span>
   </div>
 </header>
+<noscript>The pilot controls need JavaScript. Enable it for your local Hearthgate address, then reload.</noscript>
 <main>
 <section class="seats" aria-label="Paired pilot seats">
   <article class="seat pilot">

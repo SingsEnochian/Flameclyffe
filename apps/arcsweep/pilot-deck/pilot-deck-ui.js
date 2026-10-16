@@ -1,3 +1,4 @@
+import {fetchPilotJSON} from './pilot-deck-network.js';
 import {
   PILOT_DECK_SCHEMA,PILOT_RETURN_SCHEMA,PILOT_SEATS,
   emptyFlight,normaliseFlight,validateFlight,composePilotRequest,
@@ -55,18 +56,11 @@ el('flight-form').addEventListener('input',event=>{
   clearTimeout(saveTimer);
   saveTimer=setTimeout(()=>save(false),500);
 });
-async function finiteFetch(url,options={},ms=13000){
-  const controller=new AbortController();
-  const timeout=setTimeout(()=>controller.abort(),ms);
-  try{return await fetch(url,{credentials:'same-origin',cache:'no-store',...options,signal:controller.signal});}
-  finally{clearTimeout(timeout);}
-}
 async function verifySession({showStatus=true}={}){
   houseSessionObserved=false;
   el('session-state').textContent='Checking…';
   try{
-    const response=await finiteFetch('/api/v1/house/session',{headers:{accept:'application/json'}},8000);
-    const data=await response.json().catch(()=>({}));
+    const {response,data}=await fetchPilotJSON('/api/v1/house/session',{headers:{accept:'application/json'}},8000);
     if(response.ok && data.connected===true && data.role==='steward'){
       houseSessionObserved=true;
       el('session-state').textContent='Steward session observed';
@@ -86,7 +80,7 @@ async function verifySession({showStatus=true}={}){
   }catch(error){
     el('session-state').textContent='Host unavailable';
     el('steward-light').className='light amber';
-    if(showStatus)say('House session endpoint unavailable. This may be a static Pages build. No remote action was attempted.');
+    if(showStatus)say(error.name==='TimeoutError' ? error.message : 'Hearthgate is not answering. Start the local host and open the deck at the address printed by its launcher.');
   }
   return false;
 }
@@ -97,32 +91,33 @@ el('pilot-sign-in').addEventListener('submit',async event=>{
   houseSessionObserved=false;
   const button=event.currentTarget.querySelector('button');button.disabled=true;
   try {
-    const response=await finiteFetch('/api/v1/house/session',{method:'POST',headers:{'content-type':'application/json',accept:'application/json'},body:JSON.stringify({credential})},8000);
-    const data=await response.json().catch(()=>({}));
+    const {response,data}=await fetchPilotJSON('/api/v1/house/session',{method:'POST',headers:{'content-type':'application/json',accept:'application/json'},body:JSON.stringify({credential})},8000);
     if(!response.ok)throw new Error(data.error || 'House sign-in unavailable on this host. Update and restart local Hearthgate.');
     await verifySession();
   } catch(error) {el('session-state').textContent='Not connected';say(String(error.message||'House sign-in failed.'));}
   finally {button.disabled=false;}
 });
-el('check-session').addEventListener('click',()=>void verifySession());
+el('check-session').addEventListener('click',async()=>{
+  const button=el('check-session');
+  if(button.disabled)return;
+  button.disabled=true;
+  try{await verifySession();}finally{button.disabled=false;}
+});
 el('ask-rarity').addEventListener('click',async()=>{
   getInputs();
   const result=validateFlight(flight);
   if(!result.valid){say('Complete the flight plan first: '+result.issues.join(' '));return;}
-  if(!await verifySession()){
-    // Keep the specific host/session error visible; do not replace it with a generic refusal.
-    return;
-  }
   const button=el('ask-rarity');
+  if(button.disabled)return;
   button.disabled=true;
-  el('route-state').textContent='Requesting…';
   try{
-    const response=await finiteFetch(PILOT_SEATS.rarity.route,{
+    if(!await verifySession())return;
+    el('route-state').textContent='Requesting…';
+    const {response,data}=await fetchPilotJSON(PILOT_SEATS.rarity.route,{
       method:'POST',
       headers:{'content-type':'application/json',accept:'application/json'},
       body:JSON.stringify({message:composePilotRequest(flight)}),
     },30000);
-    const data=await response.json().catch(()=>({}));
     if(!response.ok)throw new Error(String(data.error||'Rarity route returned '+response.status).slice(0,200));
     latestRoute=recordRouteObservation(flight,data,{observedAt:new Date().toISOString()});
     flight.rarity_pilot_proposal=latestRoute.rarity_pilot_proposal;
@@ -205,3 +200,5 @@ el('clear').addEventListener('click',()=>{
   try{localStorage.removeItem(key);}catch{}
   say('Local station cleared. No remote navigation, model or authority state changed.');
 });
+
+el('deck-state').textContent='Controls ready · 2026-10-16';
