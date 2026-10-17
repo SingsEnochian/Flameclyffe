@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-10-17T21:12:10.357Z",
+  "generated_at": "2026-10-17T23:17:14.436Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,21 +13,21 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-10-17T17:00",
-    "sky": "Day",
+    "time": "2026-10-17T19:15",
+    "sky": "Night",
     "current": {
-      "time": "2026-10-17T17:00",
+      "time": "2026-10-17T19:15",
       "interval": 900,
-      "temperature_2m": 65.3,
-      "relative_humidity_2m": 65,
-      "is_day": 1,
+      "temperature_2m": 63.2,
+      "relative_humidity_2m": 76,
+      "is_day": 0,
       "precipitation": 0,
       "rain": 0,
-      "weather_code": 0,
-      "cloud_cover": 3,
-      "pressure_msl": 1019.2,
-      "wind_speed_10m": 9.6,
-      "wind_direction_10m": 332
+      "weather_code": 1,
+      "cloud_cover": 28,
+      "pressure_msl": 1020.3,
+      "wind_speed_10m": 8.2,
+      "wind_direction_10m": 359
     }
   },
   "space_weather": {
@@ -37,27 +37,27 @@
       "a_running": 15
     },
     "solar_wind": {
-      "time_tag": "2026-10-17T21:02:00Z",
-      "bz": 4,
-      "bt": 6,
+      "time_tag": "2026-10-17T23:05:00Z",
+      "bz": 2,
+      "bt": 7,
       "density": null,
-      "speed": 476
+      "speed": 474
     }
   },
   "moon": {
-    "age_days": 6.5,
-    "illumination": 40.7,
+    "age_days": 6.59,
+    "illumination": 41.6,
     "name": "First Quarter"
   },
   "field": {
-    "P": 0.5888888888888895,
-    "C": 0.6057142857142858,
-    "R": 0.9566666666666667,
-    "E": 0.7042857142857143,
-    "M": 0.40700000000000003,
-    "A": 0.9730769230769231,
+    "P": 0.5411111111111105,
+    "C": 0.48666666666666675,
+    "R": 0.8916666666666667,
+    "E": 0.7465934065934067,
+    "M": 0.41600000000000004,
+    "A": 0.6569230769230769,
     "Q": null,
-    "dpdt": 0.9566666666666667,
+    "dpdt": 0.8916666666666667,
     "dynamic_axes": [
       "P",
       "C",
