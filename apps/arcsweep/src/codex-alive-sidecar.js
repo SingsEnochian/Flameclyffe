@@ -9,6 +9,8 @@ import { computeCodexSemanticWear, wearCssVariables } from './codex/codex-semant
 import { codexRelationshipResidue } from './codex/codex-relationship-residue.js';
 import { codexAspectSignature } from './codex/codex-aspect-signatures.js';
 import { applyCodexQuietState, codexQuietState } from './codex/codex-quiet-state.js';
+import { CODEX_WISH_STORE_EVENT, getCodexWishStore } from './codex/codex-wish-store.js';
+import { buildWonderTrajectories, selectWonderReturnCandidates } from './codex/codex-wonder-trajectory.js';
 
 export const CODEX_ALIVE_SCHEMA = 'hearthweave.universal-codex-alive/v0.1';
 export const CODEX_ALIVE_EVENT = 'arcsweep:universal-codex-alive-changed';
@@ -22,6 +24,7 @@ let observer = null;
 let queued = false;
 let coalition = null;
 let latest = null;
+let wishStore = null;
 
 function root() {
   return globalThis.document?.getElementById?.(ROOT_ID) || null;
@@ -77,15 +80,22 @@ function runtimeSnapshot() {
   const book = root();
   if (!runtime || !book) return null;
   const pageContext = readCodexPageContext(book);
+  const wishLineage = wishStore?.snapshot?.() || null;
   const projection = projectUniversalCodex({
     messages: runtime.bus?.all?.() || [],
     growthSnapshot: runtime.growthSnapshot?.() || null,
     experimentSnapshot: runtime.experimentSnapshot?.() || null,
     coalition,
+    wishLineage,
   });
   const attention = selectCodexAttention(projection.manifestations, pageContext, { minimumScore: 2, limit: 8, includeLive: true });
   const wear = computeCodexSemanticWear(projection.manifestations, pageContext);
   const relationships = codexRelationshipResidue(runtime.growthSnapshot?.() || {});
+  const wonderTrajectories = wishLineage ? buildWonderTrajectories(wishLineage) : Object.freeze([]);
+  const asOf = new Date().toISOString();
+  const wonderReturnCandidates = wishLineage
+    ? selectWonderReturnCandidates(wishLineage, { asOf, minimumDormantDays: 7, limit: 6 })
+    : Object.freeze([]);
   const quiet = codexQuietState({ manifestations: projection.manifestations, attention });
   return Object.freeze({
     schema: CODEX_ALIVE_SCHEMA,
@@ -94,6 +104,10 @@ function runtimeSnapshot() {
     attention,
     wear,
     relationships,
+    wishLineage,
+    wonderTrajectories,
+    wonderReturnCandidates,
+    wonderAsOf: asOf,
     quiet,
   });
 }
@@ -114,6 +128,9 @@ export function refreshUniversalCodexAlive() {
   book.dataset.codexWear = snapshot.wear.band;
   book.dataset.codexAttentionCount = String(snapshot.attention.length);
   book.dataset.codexRelationshipCount = String(snapshot.relationships.length);
+  book.dataset.codexWishCount = String(snapshot.wishLineage?.wishes?.length || 0);
+  book.dataset.codexOpenQuestionCount = String(snapshot.wishLineage?.openQuestions?.filter((row) => row.status === 'open').length || 0);
+  book.dataset.codexWonderReturnCount = String(snapshot.wonderReturnCandidates.length);
   setCssVariables(book, wearCssVariables(snapshot.wear));
   applyCodexQuietState(book, snapshot.quiet);
   decorateExistingSurfaces(book);
@@ -192,6 +209,7 @@ function installStyles() {
 export function installUniversalCodexAlive() {
   if (installed || typeof document === 'undefined') return;
   installed = true;
+  wishStore = getCodexWishStore({ storage: globalThis.localStorage, target: document });
   installCodexDesignTokens(document);
   installStyles();
   const events = [
@@ -202,6 +220,7 @@ export function installUniversalCodexAlive() {
     ASPECT_MESH_EVENTS.experimentStarted,
     ASPECT_MESH_EVENTS.experimentComplete,
     ASPECT_MESH_EVENTS.experimentReflected,
+    CODEX_WISH_STORE_EVENT,
     'arcsweep:magic-book-ready',
     'arcsweep:magic-book-receipt',
   ];
@@ -218,6 +237,17 @@ export function installUniversalCodexAlive() {
     snapshot: () => latest || runtimeSnapshot(),
     refresh: refreshUniversalCodexAlive,
     aspectName: (id) => aspectNames.get(id) || id,
+    wishes: Object.freeze({
+      snapshot: () => wishStore.snapshot(),
+      create: (input) => wishStore.createWish(input),
+      branch: (wishId, input) => wishStore.branchWish(wishId, input),
+      revise: (wishId, input) => wishStore.reviseWish(wishId, input),
+      transform: (wishId, input) => wishStore.transformWish(wishId, input),
+      createQuestion: (input, options) => wishStore.createQuestion(input, options),
+      revisitQuestion: (questionId, input) => wishStore.revisitQuestion(questionId, input),
+      resolveQuestion: (questionId, input) => wishStore.resolveQuestion(questionId, input),
+      reopenQuestion: (questionId, input) => wishStore.reopenQuestion(questionId, input),
+    }),
   });
   scheduleRefresh();
 }

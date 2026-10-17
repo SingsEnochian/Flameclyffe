@@ -1,0 +1,240 @@
+.wish-grove {
+  display: grid;
+  gap: 1rem;
+}
+
+.wish-grove h2 {
+  margin: .18rem 0 0;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+}
+
+.wish-grove-intro {
+  max-width: 62ch;
+  margin: 0;
+  color: #654f3f;
+  line-height: 1.55;
+}
+
+.wish-grove-create,
+.wish-grove-card form,
+.wish-grove-question form {
+  display: grid;
+  gap: .65rem;
+}
+
+.wish-grove-create {
+  padding: .9rem;
+  border: 1px solid rgba(82,120,98,.34);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 90% 5%, rgba(217,184,107,.13), transparent 11rem),
+    rgba(255,255,255,.22);
+}
+
+.wish-grove label {
+  display: grid;
+  gap: .28rem;
+  color: #604e40;
+  font-size: .8rem;
+  font-weight: 700;
+}
+
+.wish-grove input,
+.wish-grove textarea,
+.wish-grove select {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(93,67,31,.24);
+  border-radius: 10px;
+  padding: .58rem .64rem;
+  color: var(--magic-book-ink);
+  background: rgba(255,255,255,.5);
+  font: inherit;
+}
+
+.wish-grove textarea {
+  resize: vertical;
+}
+
+.wish-grove button {
+  justify-self: start;
+  color: var(--magic-book-ink);
+  border-radius: 12px;
+}
+
+.wish-grove-status {
+  min-height: 1.4em;
+  margin: -.2rem 0 0;
+  color: #735f4e;
+  font-size: .8rem;
+}
+
+.wish-grove-status[data-tone="success"] {
+  color: #315f43;
+  font-weight: 700;
+}
+
+.wish-grove-status[data-tone="error"] {
+  color: #8a332e;
+  font-weight: 700;
+}
+
+.wish-grove-section {
+  display: grid;
+  gap: .7rem;
+  padding-top: .9rem;
+  border-top: 1px solid rgba(82,120,98,.2);
+}
+
+.wish-grove-section > header,
+.wish-grove-card > header,
+.wish-grove-question > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: .8rem;
+}
+
+.wish-grove-section > header > strong {
+  color: #6e5a48;
+  font-size: .78rem;
+  white-space: nowrap;
+}
+
+.wish-grove-list {
+  display: grid;
+  gap: .75rem;
+}
+
+.wish-grove-card,
+.wish-grove-question {
+  display: grid;
+  gap: .65rem;
+  padding: .85rem;
+  border-radius: 14px;
+  border: 1px solid rgba(82,120,98,.25);
+  background: rgba(255,255,255,.18);
+  box-shadow: inset 0 0 20px rgba(82,120,98,.035);
+}
+
+.wish-grove-card {
+  border-inline-start: 3px solid rgba(217,184,107,.62);
+}
+
+.wish-grove-question {
+  border-inline-start: 3px solid rgba(82,120,98,.66);
+}
+
+.wish-grove-card h3,
+.wish-grove-question h3 {
+  margin: .12rem 0 0;
+  font-size: 1.02rem;
+  line-height: 1.35;
+}
+
+.wish-grove-label {
+  margin: 0;
+  color: #775a42;
+  font-size: .68rem;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.wish-grove-state {
+  flex: 0 0 auto;
+  padding: .28rem .48rem;
+  border: 1px solid rgba(82,120,98,.3);
+  border-radius: 999px;
+  color: #315f43;
+  background: rgba(82,120,98,.08);
+  font-size: .68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.wish-grove-why {
+  margin: 0;
+  color: #665242;
+  font-size: .84rem;
+  line-height: 1.45;
+}
+
+.wish-grove-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .36rem;
+}
+
+.wish-grove-facts span {
+  padding: .24rem .42rem;
+  border-radius: 999px;
+  background: rgba(92,72,43,.07);
+  color: #715d4b;
+  font-size: .68rem;
+}
+
+.wish-grove-branches {
+  display: grid;
+  gap: .36rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wish-grove-branches li {
+  display: grid;
+  gap: .14rem;
+  padding: .5rem .6rem;
+  border-inline-start: 2px solid rgba(154,163,196,.62);
+  background: rgba(78,88,122,.045);
+}
+
+.wish-grove-branches strong {
+  color: #4e587a;
+  font-size: .78rem;
+}
+
+.wish-grove-branches span {
+  color: #665747;
+  font-size: .78rem;
+  line-height: 1.4;
+}
+
+.wish-grove-action {
+  border-top: 1px solid rgba(93,67,31,.1);
+  padding-top: .5rem;
+}
+
+.wish-grove-action summary {
+  color: #35584a;
+  cursor: pointer;
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+.wish-grove-action[open] summary {
+  margin-bottom: .55rem;
+}
+
+.wish-grove-empty {
+  margin: 0;
+  padding: .8rem;
+  border: 1px dashed rgba(93,67,31,.25);
+  border-radius: 12px;
+  color: #775f4b;
+  font-size: .82rem;
+}
+
+@media (max-width: 820px) {
+  .wish-grove-section > header,
+  .wish-grove-card > header,
+  .wish-grove-question > header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .wish-grove-state {
+    align-self: flex-start;
+  }
+}
