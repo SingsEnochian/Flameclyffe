@@ -1,0 +1,582 @@
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #eef7f7;
+  background: #071014;
+  font-synthesis: none;
+  --glass-line: rgba(216, 245, 244, .18);
+  --glass-line-hot: rgba(216, 245, 244, .42);
+  --glass-fill: rgba(11, 24, 30, .46);
+  --glass-fill-deep: rgba(7, 16, 20, .70);
+  --glass-text: #eef7f7;
+  --glass-muted: rgba(226, 239, 240, .62);
+  --glass-teal: rgba(83, 213, 211, .72);
+  --glass-violet: rgba(185, 146, 235, .70);
+  --glass-shadow: 0 28px 90px rgba(0,0,0,.34);
+}
+
+* { box-sizing: border-box; }
+html, body, #app { min-height: 100%; margin: 0; }
+body { overflow-x: hidden; background: #071014; color: var(--glass-text); }
+
+.wayglass-field {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -3;
+  pointer-events: none;
+}
+
+#app { width: min(1120px, calc(100% - 28px)); margin: 0 auto; padding: clamp(18px, 3vw, 40px) 0 60px; }
+
+.wg-surface { display: grid; gap: 14px; }
+.glass-panel {
+  position: relative;
+  border: 1px solid var(--glass-line);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.012) 36%, rgba(45,124,132,.035)),
+    var(--glass-fill);
+  box-shadow:
+    var(--glass-shadow),
+    inset 0 1px rgba(255,255,255,.08),
+    inset 0 -18px 54px rgba(0,0,0,.14);
+  backdrop-filter: blur(22px) saturate(1.22);
+  -webkit-backdrop-filter: blur(22px) saturate(1.22);
+}
+
+.glass-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(circle at 18% 0%, rgba(255,255,255,.08), transparent 24rem);
+  opacity: .55;
+}
+
+.wg-surface-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+  gap: 24px;
+  align-items: end;
+  padding: clamp(22px, 5vw, 48px);
+  border-radius: 30px;
+  overflow: hidden;
+}
+
+.eyebrow { margin: 0 0 8px; text-transform: uppercase; letter-spacing: .18em; font-size: .70rem; color: var(--glass-teal); font-weight: 800; }
+h1 { margin: 0; font: 500 clamp(2.7rem, 8vw, 6.4rem)/.88 Georgia, serif; letter-spacing: -.055em; }
+.lede { max-width: 50rem; margin: 18px 0 0; color: var(--glass-muted); font-size: clamp(1rem, 2vw, 1.18rem); line-height: 1.55; }
+
+.wg-route-block { position: relative; display: grid; gap: 8px; z-index: 1; }
+.wg-route-block label { font-size: .72rem; text-transform: uppercase; letter-spacing: .14em; color: var(--glass-muted); }
+select, input, textarea {
+  width: 100%;
+  border: 1px solid var(--glass-line);
+  border-radius: 14px;
+  background: rgba(3, 10, 13, .46);
+  color: var(--glass-text);
+  padding: 11px 13px;
+  font: inherit;
+  outline: none;
+}
+textarea { resize: vertical; min-height: 126px; line-height: 1.55; }
+select:focus-visible, input:focus-visible, textarea:focus-visible, button:focus-visible { outline: 2px solid rgba(132, 232, 229, .82); outline-offset: 3px; }
+
+.wg-control-ribbon {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 22px;
+  z-index: 4;
+}
+
+.glass-segment { display: inline-flex; gap: 5px; padding: 4px; border: 1px solid rgba(255,255,255,.08); border-radius: 999px; background: rgba(0,0,0,.15); }
+button { font: inherit; cursor: pointer; }
+.glass-chip, .send-jewel, .ownership-chip {
+  border: 1px solid var(--glass-line);
+  color: var(--glass-text);
+  background: linear-gradient(145deg, rgba(255,255,255,.07), rgba(255,255,255,.015));
+  box-shadow: inset 0 1px rgba(255,255,255,.07), 0 7px 24px rgba(0,0,0,.16);
+}
+.glass-chip {
+  min-width: 48px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: .76rem;
+  font-weight: 800;
+  letter-spacing: .10em;
+  transition: transform 130ms ease, border-color 130ms ease, background 130ms ease;
+}
+.glass-chip:hover { transform: translateY(-1px); border-color: var(--glass-line-hot); }
+.glass-chip.active {
+  border-color: rgba(150, 239, 237, .62);
+  background: linear-gradient(145deg, rgba(126,232,229,.16), rgba(255,255,255,.045));
+  box-shadow: inset 0 1px rgba(255,255,255,.14), 0 0 24px rgba(69,195,197,.12);
+}
+
+.turn-jewel { display: flex; align-items: baseline; gap: 8px; padding: 8px 12px; border: 1px solid rgba(255,255,255,.09); border-radius: 999px; background: rgba(0,0,0,.12); }
+.turn-jewel span { color: var(--glass-muted); font-size: .70rem; text-transform: uppercase; letter-spacing: .12em; }
+.turn-jewel strong { font-size: .82rem; }
+
+.ownership-drawer { margin-left: auto; position: relative; z-index: 3; }
+.ownership-drawer summary { cursor: pointer; color: var(--glass-muted); font-size: .78rem; }
+.ownership-drawer[open] { width: min(100%, 620px); flex: 1 1 420px; }
+.ownership-form { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 8px; margin-top: 10px; }
+.ownership-list { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 8px; }
+.ownership-chip { display: grid; gap: 1px; text-align: left; border-radius: 13px; padding: 7px 10px; }
+.ownership-chip span { color: var(--glass-muted); font-size: .68rem; }
+
+.wg-thread { min-height: 38vh; max-height: 58vh; overflow: hidden; padding: 12px; border-radius: 28px; }
+.wg-thread-log { display: grid; gap: 10px; height: 100%; max-height: calc(58vh - 24px); overflow: auto; padding: 4px; scrollbar-width: thin; }
+.empty-thread { min-height: 28vh; display: grid; place-items: center; color: var(--glass-muted); font-family: Georgia, serif; font-size: 1.15rem; }
+.turn-card { width: min(86%, 780px); border: 1px solid var(--glass-line); border-radius: 18px; padding: 14px 16px; background: rgba(6,14,18,.42); box-shadow: inset 0 1px rgba(255,255,255,.045); }
+.turn-card.user { justify-self: end; background: rgba(25,49,55,.36); }
+.turn-card.assistant { justify-self: start; }
+.turn-card header { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 8px; color: var(--glass-muted); font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; }
+.turn-text { line-height: 1.62; white-space: normal; }
+
+.wg-composer { padding: 14px; border-radius: 24px; }
+.composer-foot { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 10px; }
+.send-jewel { border-radius: 999px; padding: 10px 16px; font-weight: 780; }
+.send-jewel:hover:not(:disabled) { border-color: var(--glass-line-hot); }
+.send-jewel:disabled { opacity: .45; cursor: wait; }
+
+.tiny { color: var(--glass-muted); font-size: .72rem; line-height: 1.35; }
+.wg-receipt { padding-inline: 8px; }
+
+@media (max-width: 760px) {
+  .wg-surface-head { grid-template-columns: 1fr; }
+  .ownership-drawer { margin-left: 0; width: 100%; }
+  .ownership-form { grid-template-columns: 1fr; }
+  .turn-card { width: 94%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .001ms !important; animation-duration: .001ms !important; animation-iteration-count: 1 !important; }
+}
+
+
+/* Wayglass mineral material pass
+   Reference behaviour: black glass optical mass, labradorite angle-fire,
+   dark stone structure, metal edgework, living ink that wakes on interaction. */
+
+:root {
+  --obsidian: rgba(2, 5, 8, .86);
+  --black-glass: rgba(4, 9, 13, .68);
+  --stone-face: rgba(10, 14, 17, .88);
+  --metal-edge: rgba(162, 182, 190, .22);
+  --lab-cyan: rgba(58, 226, 224, .64);
+  --lab-blue: rgba(62, 111, 241, .50);
+  --lab-violet: rgba(154, 75, 230, .44);
+  --lab-green: rgba(69, 194, 151, .34);
+}
+
+.glass-panel {
+  border-color: rgba(176, 211, 216, .18);
+  background:
+    linear-gradient(116deg, rgba(255,255,255,.045), transparent 19%, rgba(64,210,211,.028) 39%, rgba(104,72,201,.025) 63%, transparent 82%),
+    linear-gradient(180deg, rgba(13,22,27,.68), rgba(2,6,9,.79)),
+    var(--black-glass);
+  box-shadow:
+    0 34px 110px rgba(0,0,0,.48),
+    0 9px 20px rgba(0,0,0,.31),
+    inset 0 1px rgba(230,252,255,.13),
+    inset 0 -2px rgba(0,0,0,.62),
+    inset 10px 0 38px rgba(24,99,106,.035),
+    inset -12px 0 42px rgba(83,41,121,.025);
+  backdrop-filter: blur(28px) saturate(1.38) contrast(1.05);
+  -webkit-backdrop-filter: blur(28px) saturate(1.38) contrast(1.05);
+  transform-style: preserve-3d;
+}
+
+.glass-panel::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: inherit;
+  pointer-events: none;
+  border: 1px solid rgba(217, 246, 247, .055);
+  background:
+    radial-gradient(80% 140% at 4% 12%, rgba(61,221,221,.065), transparent 42%),
+    radial-gradient(65% 130% at 92% 78%, rgba(125,68,221,.05), transparent 47%);
+  mix-blend-mode: screen;
+  opacity: .72;
+}
+
+.wg-surface-head,
+.wg-thread,
+.wg-composer {
+  outline: 1px solid rgba(111, 130, 137, .16);
+  outline-offset: 5px;
+}
+
+.wg-surface-head::before {
+  background:
+    linear-gradient(90deg, transparent, rgba(63,224,221,.10), rgba(78,93,226,.07), rgba(155,72,226,.07), transparent);
+  background-size: 240% 100%;
+  opacity: .34;
+}
+
+.glass-chip,
+.send-jewel,
+.ownership-chip {
+  position: relative;
+  overflow: hidden;
+  border-color: var(--metal-edge);
+  background:
+    linear-gradient(145deg, rgba(225,249,250,.08), transparent 28%),
+    linear-gradient(180deg, rgba(13,23,29,.86), rgba(1,5,8,.88));
+  box-shadow:
+    inset 0 2px rgba(238,255,255,.12),
+    inset 0 -3px 8px rgba(0,0,0,.58),
+    0 5px 0 rgba(1,4,6,.42),
+    0 12px 28px rgba(0,0,0,.28);
+}
+
+.glass-chip.active {
+  border-color: rgba(115, 232, 228, .52);
+  background:
+    radial-gradient(circle at 28% 10%, rgba(89,235,229,.15), transparent 35%),
+    radial-gradient(circle at 78% 88%, rgba(125,69,228,.11), transparent 42%),
+    linear-gradient(180deg, rgba(12,26,31,.92), rgba(1,5,8,.93));
+  box-shadow:
+    inset 0 2px rgba(232,255,255,.16),
+    inset 0 -4px 10px rgba(0,0,0,.66),
+    0 5px 0 rgba(1,4,6,.48),
+    0 0 30px rgba(55,209,207,.10);
+}
+
+.turn-card {
+  border-color: rgba(176, 211, 216, .15);
+  background:
+    linear-gradient(120deg, rgba(255,255,255,.035), transparent 28%),
+    linear-gradient(180deg, rgba(7,14,18,.76), rgba(2,6,9,.72));
+  box-shadow:
+    inset 0 1px rgba(240,255,255,.07),
+    inset 0 -8px 24px rgba(0,0,0,.18),
+    0 11px 28px rgba(0,0,0,.18);
+}
+
+.turn-card.user {
+  background:
+    linear-gradient(115deg, rgba(40,185,183,.055), transparent 30%, rgba(108,67,205,.04)),
+    linear-gradient(180deg, rgba(8,19,23,.78), rgba(2,7,10,.74));
+}
+
+/* Layer separation: a semantic action briefly reveals the wrapper's
+   laminated construction, inspired by levitating/assembling reference forms. */
+#app[data-material-state="handoff"] .wg-surface-head {
+  transform: translate3d(0, -2px, 0) scale(.998);
+}
+#app[data-material-state="handoff"] .wg-control-ribbon {
+  transform: translate3d(0, 3px, 0);
+}
+#app[data-material-state="handoff"] .wg-thread {
+  transform: translate3d(0, 7px, 0) scale(.996);
+}
+#app[data-material-state="handoff"] .wg-composer {
+  transform: translate3d(0, 11px, 0) scale(.992);
+}
+
+.wg-surface-head,
+.wg-control-ribbon,
+.wg-thread,
+.wg-composer {
+  transition:
+    transform 520ms cubic-bezier(.18,.78,.18,1),
+    border-color 420ms ease,
+    box-shadow 520ms ease,
+    background 520ms ease;
+}
+
+#app[data-material-state="channel"] .glass-segment,
+#app[data-material-state="bind"] .ownership-drawer {
+  filter: drop-shadow(0 0 14px rgba(63,221,219,.11));
+}
+
+/* The surface should become quiet again. Motion is an event, not wallpaper. */
+@media (prefers-reduced-motion: no-preference) {
+  #app[data-material-state="handoff"] .glass-panel::before {
+    background-position: 100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #app[data-material-state] .wg-surface-head,
+  #app[data-material-state] .wg-control-ribbon,
+  #app[data-material-state] .wg-thread,
+  #app[data-material-state] .wg-composer {
+    transform: none !important;
+  }
+}
+
+
+/* Route reliquary
+   A route is shown as a contained luminous core, not a flat status badge. */
+.wg-route-block {
+  grid-template-columns: 58px minmax(0, 1fr);
+  column-gap: 12px;
+  align-items: center;
+}
+
+.wg-route-block > label,
+.wg-route-block > select,
+.wg-route-block > .tiny {
+  grid-column: 2;
+}
+
+.route-mineral {
+  grid-column: 1;
+  grid-row: 1 / span 3;
+  position: relative;
+  width: 52px;
+  height: 52px;
+  place-self: center;
+  border: 1px solid rgba(174, 205, 211, .24);
+  border-radius: 16px;
+  background:
+    linear-gradient(145deg, rgba(230,250,251,.07), transparent 23%),
+    linear-gradient(315deg, rgba(48,214,211,.05), rgba(103,62,199,.035) 52%, transparent),
+    rgba(1,5,8,.88);
+  box-shadow:
+    inset 0 2px rgba(241,255,255,.12),
+    inset 0 -4px 12px rgba(0,0,0,.78),
+    0 7px 0 rgba(0,0,0,.24),
+    0 15px 36px rgba(0,0,0,.34);
+  transform: rotate(45deg);
+  overflow: visible;
+}
+
+.route-mineral::before,
+.route-mineral::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgba(94, 220, 218, .18);
+  border-radius: 50%;
+  transform: rotateX(64deg) rotateZ(18deg);
+  box-shadow: 0 0 12px rgba(64,213,211,.055);
+  transition: transform 620ms cubic-bezier(.18,.78,.18,1), opacity 420ms ease;
+}
+
+.route-mineral::after {
+  inset: 12px 4px;
+  border-color: rgba(145, 92, 228, .16);
+  transform: rotateX(67deg) rotateY(52deg) rotateZ(-28deg);
+}
+
+.route-mineral i,
+.route-mineral b,
+.route-mineral span {
+  position: absolute;
+  inset: 16px;
+  display: block;
+  border-radius: 45% 55% 52% 48%;
+  pointer-events: none;
+}
+
+.route-mineral i {
+  background:
+    radial-gradient(circle at 31% 25%, rgba(236,255,255,.94), rgba(71,228,222,.72) 16%, rgba(46,108,237,.38) 43%, rgba(111,53,190,.18) 65%, transparent 72%);
+  filter: blur(.2px) drop-shadow(0 0 8px rgba(73,221,218,.34));
+  transform: rotate(-45deg);
+}
+
+.route-mineral b,
+.route-mineral span {
+  inset: 10px 20px;
+  border: 1px solid rgba(192,224,227,.18);
+  border-radius: 3px;
+  background: linear-gradient(180deg, rgba(13,24,29,.76), rgba(1,5,8,.86));
+  transform-origin: center;
+}
+
+.route-mineral b { transform: rotate(-8deg); }
+.route-mineral span { transform: rotate(82deg); }
+
+#app[data-material-state="route"] .route-mineral::before {
+  transform: rotateX(64deg) rotateZ(148deg) scale(1.16);
+}
+#app[data-material-state="route"] .route-mineral::after {
+  transform: rotateX(67deg) rotateY(52deg) rotateZ(-164deg) scale(1.22);
+}
+#app[data-material-state="route"] .route-mineral b {
+  transform: rotate(-42deg) translateX(-5px);
+}
+#app[data-material-state="route"] .route-mineral span {
+  transform: rotate(118deg) translateY(-5px);
+}
+
+.route-mineral b,
+.route-mineral span {
+  transition: transform 620ms cubic-bezier(.18,.78,.18,1);
+}
+
+@media (max-width: 760px) {
+  .wg-route-block { grid-template-columns: 48px minmax(0, 1fr); }
+  .route-mineral { width: 42px; height: 42px; border-radius: 13px; }
+  .route-mineral i { inset: 13px; }
+}
+
+
+/* Spatial material choreography
+   Pointer movement changes apparent viewing angle, not layout. The interface
+   settles when the hand settles. Semantic events still own the larger motion. */
+:root {
+  --wg-pointer-x: 68%;
+  --wg-pointer-y: 30%;
+  --wg-velocity: 0;
+  --wg-tilt-x: 0deg;
+  --wg-tilt-y: 0deg;
+}
+
+.wg-surface {
+  perspective: 1500px;
+  perspective-origin: var(--wg-pointer-x) var(--wg-pointer-y);
+}
+
+.glass-panel {
+  background:
+    radial-gradient(
+      520px circle at var(--wg-pointer-x) var(--wg-pointer-y),
+      rgba(115, 237, 231, calc(.018 + var(--wg-velocity) * .055)),
+      rgba(92, 103, 231, calc(.010 + var(--wg-velocity) * .025)) 24%,
+      transparent 58%
+    ),
+    linear-gradient(116deg, rgba(255,255,255,.045), transparent 19%, rgba(64,210,211,.028) 39%, rgba(104,72,201,.025) 63%, transparent 82%),
+    linear-gradient(180deg, rgba(13,22,27,.68), rgba(2,6,9,.79)),
+    var(--black-glass);
+}
+
+.wg-surface-head,
+.wg-thread,
+.wg-composer {
+  transform: rotateX(var(--wg-tilt-x)) rotateY(var(--wg-tilt-y));
+  transform-origin: 50% 50%;
+}
+
+/* A thin mineral flash moves locally under the hand instead of lighting the
+   whole panel. This keeps the labradorite rare and angle-dependent. */
+.glass-panel::before {
+  background:
+    radial-gradient(
+      280px circle at var(--wg-pointer-x) var(--wg-pointer-y),
+      rgba(205, 255, 251, calc(.035 + var(--wg-velocity) * .075)),
+      rgba(50, 220, 217, calc(.026 + var(--wg-velocity) * .055)) 18%,
+      rgba(83, 91, 231, calc(.018 + var(--wg-velocity) * .035)) 34%,
+      rgba(159, 75, 226, calc(.012 + var(--wg-velocity) * .025)) 46%,
+      transparent 68%
+    );
+  opacity: .78;
+}
+
+/* The route reliquary exposes contained mechanism on route activity. */
+#app[data-material-state="route"] .route-mineral {
+  box-shadow:
+    inset 0 2px rgba(241,255,255,.15),
+    inset 0 -4px 12px rgba(0,0,0,.78),
+    0 7px 0 rgba(0,0,0,.24),
+    0 16px 42px rgba(0,0,0,.38),
+    0 0 34px rgba(62, 214, 211, .12);
+}
+
+#app[data-material-state="handoff"] .turn-jewel {
+  border-color: rgba(102, 226, 221, .36);
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.10),
+    0 0 0 1px rgba(83, 91, 231, .07),
+    0 0 28px rgba(63, 214, 211, .09);
+}
+
+#app[data-material-state="channel"] .glass-chip.active::after,
+#app[data-material-state="bind"] .ownership-chip::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 22%, rgba(102,231,226,.10), rgba(135,80,225,.08), transparent 76%);
+}
+
+/* Touch devices keep optical depth without relying on hover/pointer travel. */
+@media (hover: none) {
+  .wg-surface-head,
+  .wg-thread,
+  .wg-composer { transform: none; }
+
+  .glass-panel::before {
+    background: radial-gradient(circle at 18% 0%, rgba(255,255,255,.07), transparent 24rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --wg-velocity: 0;
+    --wg-tilt-x: 0deg;
+    --wg-tilt-y: 0deg;
+  }
+
+  .wg-surface-head,
+  .wg-thread,
+  .wg-composer { transform: none !important; }
+}
+
+
+/* Thinking trace
+   Local reasoning routes may expose their own deliberation channel.
+   Keep it inspectable but visually subordinate to the final answer. */
+.turn-thinking {
+  margin: 0 0 10px;
+  border: 1px solid rgba(151, 183, 190, .14);
+  border-radius: 14px;
+  background:
+    linear-gradient(145deg, rgba(113, 82, 188, .045), rgba(39, 177, 177, .025)),
+    rgba(0, 4, 7, .30);
+  overflow: hidden;
+}
+
+.turn-thinking summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  user-select: none;
+  padding: 8px 10px;
+  color: rgba(214, 232, 235, .66);
+  font-size: .72rem;
+  font-weight: 760;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.turn-thinking summary::-webkit-details-marker { display: none; }
+
+.thinking-chevron {
+  display: inline-block;
+  color: var(--glass-teal);
+  transform-origin: 50% 50%;
+  transition: transform 150ms ease;
+}
+
+.turn-thinking[open] .thinking-chevron { transform: rotate(90deg); }
+
+.thinking-trace {
+  max-height: 34vh;
+  overflow: auto;
+  padding: 10px 12px 12px;
+  border-top: 1px solid rgba(151, 183, 190, .10);
+  color: rgba(219, 231, 232, .72);
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: .78rem;
+  line-height: 1.55;
+  background: rgba(1, 5, 8, .24);
+  scrollbar-width: thin;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thinking-chevron { transition: none; }
+}
