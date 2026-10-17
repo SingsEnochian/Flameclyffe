@@ -1,0 +1,220 @@
+.resonance-room {
+  display: grid;
+  gap: 1rem;
+}
+
+.resonance-room-hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 210px;
+  border-color: rgba(142,188,166,.34);
+  background:
+    radial-gradient(circle at 18% 20%, rgba(142,188,166,.16), transparent 34%),
+    radial-gradient(circle at 82% 24%, rgba(216,181,106,.12), transparent 30%),
+    linear-gradient(145deg, rgba(9,20,18,.96), rgba(8,14,18,.92));
+}
+
+.resonance-room-hero h1 {
+  margin-bottom: .45rem;
+}
+
+.resonance-room-hero .lede {
+  max-width: 70ch;
+}
+
+.resonance-room-badges {
+  display: flex;
+  gap: .45rem;
+  flex-wrap: wrap;
+  margin-top: .9rem;
+}
+
+.resonance-room-badges span {
+  padding: .3rem .55rem;
+  border: 1px solid rgba(142,188,166,.28);
+  border-radius: 999px;
+  color: var(--green);
+  background: rgba(7,15,14,.54);
+  font-size: .76rem;
+}
+
+.resonance-room-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(280px, .75fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.resonance-room-stage {
+  position: relative;
+  min-height: 520px;
+  overflow: hidden;
+  border: 1px solid rgba(142,188,166,.28);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(80,165,160,.12), transparent 34%),
+    radial-gradient(circle at 50% 74%, rgba(216,181,106,.08), transparent 26%),
+    linear-gradient(180deg, rgba(3,9,12,.98), rgba(7,15,14,.96));
+  box-shadow: inset 0 0 80px rgba(0,0,0,.38), 0 28px 60px rgba(0,0,0,.22);
+  touch-action: none;
+}
+
+.resonance-room-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.resonance-room-stage-overlay {
+  position: absolute;
+  inset: auto 1rem 1rem 1rem;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: .8rem;
+  pointer-events: none;
+}
+
+.resonance-room-readout {
+  display: grid;
+  gap: .16rem;
+  max-width: 34rem;
+  padding: .7rem .8rem;
+  border: 1px solid rgba(216,181,106,.22);
+  border-radius: 14px;
+  background: rgba(4,10,10,.68);
+  backdrop-filter: blur(12px);
+}
+
+.resonance-room-readout strong {
+  color: var(--gold);
+}
+
+.resonance-room-readout small {
+  color: #b9c9c0;
+}
+
+.resonance-room-mode {
+  padding: .42rem .62rem;
+  border: 1px solid rgba(142,188,166,.26);
+  border-radius: 999px;
+  color: var(--green);
+  background: rgba(4,10,10,.68);
+  font-size: .74rem;
+}
+
+.resonance-room-controls {
+  display: grid;
+  gap: .72rem;
+}
+
+.resonance-room-controls label {
+  display: grid;
+  gap: .28rem;
+  color: var(--muted, #aebcb6);
+  font-size: .82rem;
+}
+
+.resonance-room-controls label span {
+  display: flex;
+  justify-content: space-between;
+  gap: .6rem;
+}
+
+.resonance-room-controls output {
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
+}
+
+.resonance-room-controls input[type="range"] {
+  width: 100%;
+}
+
+.resonance-room-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .55rem;
+  margin-top: .25rem;
+}
+
+.resonance-room-actions button {
+  min-height: 42px;
+}
+
+.resonance-room-actions [data-resonance-pulse] {
+  grid-column: 1 / -1;
+  border-color: rgba(216,181,106,.62);
+  background: linear-gradient(90deg, rgba(216,181,106,.12), rgba(142,188,166,.12));
+}
+
+.resonance-room-trace {
+  margin-top: .85rem;
+  padding-top: .85rem;
+  border-top: 1px solid rgba(142,188,166,.16);
+}
+
+.resonance-room-trace dl {
+  display: grid;
+  gap: .4rem;
+  margin: .55rem 0 0;
+}
+
+.resonance-room-trace dl > div {
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  gap: .6rem;
+}
+
+.resonance-room-trace dt {
+  color: #8fa79d;
+}
+
+.resonance-room-trace dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.resonance-room-receipts {
+  display: grid;
+  gap: .4rem;
+  max-height: 180px;
+  overflow: auto;
+  margin-top: .65rem;
+}
+
+.resonance-room-receipt {
+  padding: .5rem .6rem;
+  border: 1px solid rgba(142,188,166,.14);
+  border-radius: 10px;
+  background: rgba(7,15,14,.34);
+  font-size: .76rem;
+}
+
+.resonance-room-receipt strong,
+.resonance-room-receipt small {
+  display: block;
+}
+
+.resonance-room-receipt small {
+  color: #8fa79d;
+}
+
+@media (max-width: 900px) {
+  .resonance-room-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .resonance-room-stage {
+    min-height: min(64vh, 560px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .resonance-room-canvas {
+    cursor: default;
+  }
+}
