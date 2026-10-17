@@ -50,7 +50,7 @@ function drawWave(preview){
   const canvas=$('wave'),ctx=canvas.getContext('2d');if(!ctx)return;
   const w=canvas.width,h=canvas.height;
   ctx.fillStyle='#071216';ctx.fillRect(0,0,w,h);
-  const colours=['#74d7cb','#e8c679'];
+  const colours=['#67dada','#ad91ec'];
   preview.forEach((channel,ch)=>{
     const centre=(ch+0.5)*h/preview.length;
     ctx.strokeStyle=colours[ch];ctx.lineWidth=1.9;ctx.beginPath();
@@ -127,3 +127,12 @@ $('session-reset').addEventListener('click',()=>{
 });
 window.addEventListener('pagehide',()=>{clearTimers();void context.close();worker?.terminate();worker=null;});
 applyControls();
+document.querySelectorAll('.deck-chip,.rail-link').forEach(link=>link.addEventListener('click',()=>{
+  const target=link.getAttribute('href');
+  document.querySelectorAll('.deck-chip').forEach(item=>{
+    const active=item.getAttribute('href')===target;
+    item.classList.toggle('selected',active);
+    if(active)item.setAttribute('aria-current','location');else item.removeAttribute('aria-current');
+  });
+  document.querySelectorAll('.rail-link').forEach(item=>item.classList.toggle('current',item.getAttribute('href')===target));
+}));
