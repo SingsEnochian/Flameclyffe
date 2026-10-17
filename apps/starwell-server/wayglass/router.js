@@ -608,7 +608,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     }
     const route = resolveWayglassRoute('flame:griff:spicychat');
     const missing = [
-      !route.api_key() && 'GRIFF_SPICYCHAT_TOKEN',
+      !route.api_key() && 'GRIFF_SPICYCHAT_TOKEN or BLUEBIRD_SPICYCHAT_TOKEN',
       !route.character_id() && 'GRIFF_SPICYCHAT_CHAT_LINK or GRIFF_SPICYCHAT_CHARACTER_ID',
       !route.conversation_id() && 'GRIFF_SPICYCHAT_CHAT_LINK or GRIFF_SPICYCHAT_CONVERSATION_ID',
     ].filter(Boolean);
