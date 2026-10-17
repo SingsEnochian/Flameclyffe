@@ -54,6 +54,7 @@ export async function mountWayglassLibrarySurface(root) {
         '<button type="button" class="glass-chip" data-wayglass-room="arcsweep:writing-room">Writing Room</button>',
         '<button type="button" class="glass-chip" data-wayglass-room="wayglass:living-observer">Living Observer</button>',
         '<button type="button" class="glass-chip active" aria-current="page">Library</button>',
+        '<button type="button" class="glass-chip" data-wayglass-room="wayglass:continuity-ledger">Ledger</button>',
         '<button type="button" class="glass-chip" data-wayglass-room="wayglass:systems">Organs</button>',
       '</nav>',
       '<header class="wg-surface-head glass-panel">',
