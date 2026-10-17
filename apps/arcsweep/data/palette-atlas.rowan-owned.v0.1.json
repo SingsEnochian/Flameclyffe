@@ -1,0 +1,80 @@
+{
+  "schema": "hearthweave.palette-atlas-rowan-owned/v0.1",
+  "owner_authorisation": {
+    "declared_by": "Rowan",
+    "declared_at": "2026-10-01",
+    "source_profile": "https://www.colourlovers.com/lover/brilliantrouble",
+    "scope": "Palettes on the identified profile that Rowan states she created may be ingested as owner-authorised project source material. Preserve source provenance and do not infer missing palette values."
+  },
+  "profile_snapshot": {
+    "observed_at": "2026-10-01",
+    "palette_count": 114,
+    "pattern_count": 26,
+    "named_color_count": 58,
+    "template_count": 2
+  },
+  "palettes": [
+    {
+      "id": "rowan-colourlovers-reeses-pieces",
+      "name": "Reese's Pieces",
+      "year": 2008,
+      "colors": ["#302F3D", "#324557", "#878787", "#D4A537", "#B00038"],
+      "source_kind": "rowan-owned",
+      "source_profile": "https://www.colourlovers.com/lover/brilliantrouble",
+      "status": "seeded-from-public-profile"
+    },
+    {
+      "id": "rowan-colourlovers-delicate",
+      "name": "Delicate",
+      "year": 2014,
+      "colors": ["#AFA574", "#A29D73", "#898D6A", "#6D7B62", "#4B644E"],
+      "source_kind": "rowan-owned",
+      "source_profile": "https://www.colourlovers.com/lover/brilliantrouble",
+      "status": "seeded-from-public-profile"
+    },
+    {
+      "id": "rowan-colourlovers-to-the-nines",
+      "name": "To the Nines",
+      "year": 2008,
+      "colors": ["#7A0C2F", "#99123D", "#B31547", "#ED3B41", "#FF9195"],
+      "source_kind": "rowan-owned",
+      "source_profile": "https://www.colourlovers.com/lover/brilliantrouble",
+      "status": "seeded-from-public-profile"
+    },
+    {
+      "id": "rowan-colourlovers-help-is-on-the-way",
+      "name": "Help Is On The Way",
+      "year": 2015,
+      "colors": ["#394FFF", "#0076FF", "#FF833B", "#E0E394", "#A4C400"],
+      "source_kind": "rowan-owned",
+      "source_profile": "https://www.colourlovers.com/lover/brilliantrouble",
+      "status": "seeded-from-public-profile"
+    },
+    {
+      "id": "rowan-colourlovers-babylonian",
+      "name": "Babylonian",
+      "year": 2015,
+      "colors": ["#0585AF", "#0C9D52", "#EA5800", "#B7A8A9", "#635254"],
+      "source_kind": "rowan-owned",
+      "source_profile": "https://www.colourlovers.com/lover/brilliantrouble",
+      "status": "seeded-from-public-profile"
+    },
+    {
+      "id": "rowan-colourlovers-flowers",
+      "name": "Flowers",
+      "year": 2015,
+      "colors": ["#567B84", "#7CC8FA", "#7ADCF7", "#C1E7FC", "#FFF0D7"],
+      "source_kind": "rowan-owned",
+      "source_profile": "https://www.colourlovers.com/lover/brilliantrouble",
+      "status": "seeded-from-public-profile"
+    }
+  ],
+  "pending_named_palettes": [
+    "Bluebird Brick",
+    "Starath",
+    "Epra Map 001",
+    "Pireth - New Design",
+    "Sakisk II",
+    "Cooling Jasper"
+  ]
+}
