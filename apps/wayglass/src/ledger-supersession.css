@@ -1,8 +1,9 @@
 .wg-ledger-room{--ledger-cyan:#84e6e1;--ledger-violet:#bca0ef;color:var(--glass-text,#e9f4f5)}
 .wg-ledger-room .wg-surface-head{grid-template-columns:minmax(0,1fr) 190px}
 .wg-ledger-room .ledger-gem{display:grid;place-items:center;width:160px;height:160px;border:1px solid rgba(119,225,223,.28);border-radius:32px;transform:rotate(45deg);font:normal 5rem Georgia,serif;color:var(--ledger-cyan);background:radial-gradient(circle at 50% 35%,rgba(116,197,230,.18),rgba(5,11,19,.75));box-shadow:inset 0 0 60px rgba(90,85,185,.12),0 18px 50px #0006;justify-self:center}
-.wg-ledger-room .ledger-gem>*{transform:rotate(-45deg)}
-.wg-ledger-room .ledger-gem small{font:600 .6rem Inter,sans-serif;letter-spacing:.12em;color:var(--ledger-violet);grid-area:1/1;margin-top:140px}
+.wg-ledger-room .ledger-gem-wrap{display:grid;justify-items:center;gap:15px}
+.wg-ledger-room .ledger-gem span{transform:rotate(-45deg);display:block}
+.wg-ledger-room .ledger-gem-wrap small{font:650 .66rem Inter,sans-serif;letter-spacing:.12em;color:var(--ledger-violet);white-space:nowrap}
 .wg-ledger-room .ledger-ledger-note{padding:15px 20px;border-radius:19px;color:var(--glass-muted)}
 .wg-ledger-room .ledger-ledger-note b{color:var(--ledger-cyan)}
 .wg-ledger-room .ledger-columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:14px}
@@ -27,6 +28,6 @@
 .wg-ledger-room .ledger-results details,.wg-ledger-room .ledger-form details{margin:14px 0}
 .wg-ledger-room .ledger-results details summary,.wg-ledger-room .ledger-form details summary{cursor:pointer;color:var(--ledger-cyan)}
 .wg-ledger-room .ledger-footer{padding:12px;text-align:center}
-@media(max-width:880px){.wg-ledger-room .ledger-columns{grid-template-columns:1fr}.wg-ledger-room .wg-surface-head{grid-template-columns:1fr}.wg-ledger-room .ledger-gem{width:104px;height:104px;font-size:3rem;justify-self:start;margin:22px}.wg-ledger-room .ledger-gem small{display:none}}
+@media(max-width:880px){.wg-ledger-room .ledger-columns{grid-template-columns:1fr}.wg-ledger-room .wg-surface-head{grid-template-columns:1fr}.wg-ledger-room .ledger-gem{width:104px;height:104px;font-size:3rem;justify-self:start;margin:22px}.wg-ledger-room .ledger-gem-wrap small{display:none}}
 @media(max-width:450px){.wg-ledger-room .ledger-result-grid{grid-template-columns:1fr}.wg-ledger-room .ledger-form,.wg-ledger-room .ledger-results{padding:15px}}
 @media(prefers-reduced-motion:reduce){.wg-ledger-room *, .wg-ledger-room *::before, .wg-ledger-room *::after{animation:none!important;transition:none!important}}
