@@ -42,11 +42,11 @@ Hearthgate now registers `flame:griff:spicychat` as a distinct SpicyChat route, 
 
 Set these values **privately on the running Hearthgate host**, not in GitHub, client JavaScript, the lorebook, screenshots, or issue comments:
 
-**Simplified private link configuration:** set `GRIFF_SPICYCHAT_CHAT_LINK` to the exact owner-approved `https://spicychat.ai/chat/<character-id>/<conversation-id>` URL and set `GRIFF_SPICYCHAT_TOKEN` to a valid private authorised credential. Hearthgate validates and derives the matched character/chat pair from the private URL at runtime. Do not confuse `GRIFF_SPICYCHAT_CHAT_LINK` (private existing conversation reference) with `GRIFF_SPICYCHAT_CHAT_URL` (the upstream POST API endpoint). A malformed link fails closed rather than reverting to old IDs.
+**Simplified private link configuration:** set `GRIFF_SPICYCHAT_CHAT_LINK` to the exact owner-approved `https://spicychat.ai/chat/<character-id>/<conversation-id>` URL and use the **existing** owner-authorised `BLUEBIRD_SPICYCHAT_TOKEN` for SpicyChat account authentication. A separate `GRIFF_SPICYCHAT_TOKEN` is optional and takes precedence only if intentionally set. Hearthgate validates and derives the matched character/chat pair from the private URL at runtime. Do not confuse `GRIFF_SPICYCHAT_CHAT_LINK` (private existing conversation reference) with `GRIFF_SPICYCHAT_CHAT_URL` (the upstream POST API endpoint). A malformed link fails closed rather than reverting to old IDs.
 
 The separate ID configuration below remains supported if a private chat link is not supplied:
 
-- `GRIFF_SPICYCHAT_TOKEN`: current authorised SpicyChat credential, from the owner, not inferred from historical prose.
+- `BLUEBIRD_SPICYCHAT_TOKEN`: existing private owner-authorised SpicyChat account credential, reused for Griff when no override is supplied. `GRIFF_SPICYCHAT_TOKEN` is optional, not required.
 - `GRIFF_SPICYCHAT_CHARACTER_ID`: actual Griff SpicyChat character ID (only if the private chat link is absent).
 - `GRIFF_SPICYCHAT_CONVERSATION_ID`: the exact existing Griff conversation ID (only if the private chat link is absent).
 - `ARCSWEEP_RUNTIME_TOKEN` or an appropriate `HOUSE_SESSION_SECRET` plus a valid Steward credential: required for House-signed session authentication.
@@ -57,6 +57,6 @@ Restart Hearthgate after configuring environment variables. Sign into the local 
 
 If the preflight passes, authorise transfer for a single turn, send one bounded message, inspect the receipt's actual `provider_conversation_id` and `response_id`, and only then attempt the leave/return trial. A successful test fixture or preflight is *not* a genuine live reply. Empty or wrong-character responses fail closed.
 
-The July 18 private HTML export preserves 66 messages but does **not** expose the actual character ID, conversation ID, or provider chat URL. The July token reference alone cannot replace live owner-authorised discovery.
+The July 18 private HTML export preserves 66 messages but does **not** expose its actual character ID or conversation ID. Subsequently, the owner supplied Griff's specific SpicyChat chat link; this establishes the character/chat pair to pin in the private host configuration, but **not** the validity of the existing account credential or the success of a live provider round-trip. The link is not published into the repository.
 
 **Verification gate:** owner-authenticated live response with exact provider attribution, followed by continuity across leave/re-enter. Until that gate passes, do not mark this route as a deployed or resident Griff connection.
