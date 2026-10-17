@@ -13,6 +13,7 @@ import { mountWayglassSystemsSurface } from './surfaces/systems.js';
 import { mountWayglassVideoAtelier } from './surfaces/video-atelier.js';
 import { mountWayglassLivingObserver } from './surfaces/living-observer.js';
 import { mountWayglassLibrarySurface } from './surfaces/library.js';
+import { mountWayglassContinuityLedger } from './surfaces/continuity-ledger.js';
 import { mountWayglassToybox } from './surfaces/toybox.js';
 import { mountWayglassCommonsSurface } from './surfaces/commons.js';
 import { subscribeWayglassObserver } from './living-observer-model.js';
@@ -79,6 +80,12 @@ registerWayglassSurface({
 });
 
 registerWayglassSurface({
+  surface_id: 'wayglass:continuity-ledger',
+  label: 'Wayglass · Continuity Ledger',
+  mount: mountWayglassContinuityLedger,
+});
+
+registerWayglassSurface({
   surface_id: 'wayglass:toybox',
   label: 'Wayglass · Toybox',
   mount: mountWayglassToybox,
@@ -117,6 +124,7 @@ globalThis.__wayglassOS = wayglass;
 
 const roomQuery = new URLSearchParams(globalThis.location?.search || '').get('room');
 const startRoom = roomQuery === 'observer' ? 'wayglass:living-observer'
+  : roomQuery === 'ledger' ? 'wayglass:continuity-ledger'
   : roomQuery === 'library' ? 'wayglass:library'
   : roomQuery === 'toybox' ? 'wayglass:toybox'
   : roomQuery === 'organs' ? 'wayglass:systems'
