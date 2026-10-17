@@ -1,0 +1,139 @@
+/**
+ * Wayglass living-glass visual skin for ArcSweep-born ship instruments.
+ * Inherits the established palette/material rules from
+ * apps/arcsweep/src/codex/codex-design-tokens.js and
+ * apps/arcsweep/src/codex/codex-material-system.js.
+ * A progressive enhancement. DOM owns text, interaction, focus and status.
+ */
+:root {
+  --wg-abyss:#071a24;
+  --wg-ocean:#0d3447;
+  --wg-teal:#2ba59a;
+  --wg-seafoam:#67c6c1;
+  --wg-ice:#e6f2f7;
+  --wg-indigo:#4e587a;
+  --wg-gold:#c7a963;
+  --wg-copper:#b76e48;
+  --wg-crystal-edge:rgba(230,242,247,.38);
+  --wg-labradorite:rgba(118,177,209,.16);
+  --wg-violet:rgba(148,117,208,.16);
+  --wg-deep-matte:rgba(3,11,18,.92);
+}
+body {
+  background:
+    radial-gradient(ellipse at 4% 5%,rgba(85,175,172,.10),transparent 36%),
+    radial-gradient(ellipse at 90% 0%,rgba(128,105,194,.17),transparent 36%),
+    radial-gradient(ellipse at 65% 75%,rgba(39,106,126,.11),transparent 50%),
+    #070d16;
+  color:var(--wg-ice);
+}
+/* Stone and metal remain structure, glass carries state, light shows activity. */
+:is(.panel,.pane,.seat,.hero.panel,.instrument,.masthead,.ship-mast,.mast) {
+  position:relative;
+  isolation:isolate;
+  border-color:rgba(145,199,204,.25);
+  background:
+    linear-gradient(138deg,rgba(184,226,237,.065) 0%,transparent 25%,rgba(89,176,195,.07) 55%,transparent 70%),
+    radial-gradient(ellipse at 92% 0%,var(--wg-violet),transparent 48%),
+    linear-gradient(153deg,rgba(9,27,36,.95),rgba(4,13,22,.96));
+  box-shadow:
+    0 16px 48px rgba(0,0,0,.35),
+    inset 0 1px 0 rgba(222,243,247,.14),
+    inset 1px 0 0 rgba(132,196,216,.04),
+    inset 0 -12px 24px rgba(0,0,0,.16);
+}
+:is(.panel,.pane,.seat,.hero.panel,.instrument)::before {
+  content:'';
+  position:absolute;
+  inset:1px;
+  border-radius:inherit;
+  background:
+    linear-gradient(112deg,transparent 4%,rgba(155,226,235,.045) 29%,transparent 38%),
+    radial-gradient(circle at var(--wg-highlight-x,48%) var(--wg-highlight-y,5%),rgba(135,227,219,.13),transparent 40%),
+    radial-gradient(ellipse at 6% 0%,rgba(197,170,111,.11),transparent 30%);
+  pointer-events:none;
+  z-index:-1;
+}
+:is(.panel,.pane,.seat,.hero.panel,.instrument)::after {
+  content:'';
+  position:absolute;
+  left:9%;
+  right:9%;
+  top:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(128,225,213,.4),rgba(182,151,228,.25),transparent);
+  pointer-events:none;
+}
+:is(.seat.pilot,.seat.crew-pilot) {
+  border-top:2px solid var(--wg-gold);
+}
+.seat.crew-pilot {border-top-color:var(--wg-seafoam)}
+:is(.panel,.pane,.seat,.instrument):focus-within {
+  border-color:rgba(155,230,224,.48);
+}
+:is(h1,h2) {text-shadow:0 2px 18px rgba(18,77,92,.22)}
+:is(.ship-mark,.brand,.eyebrow) {color:#b6dbdf}
+:is(input:not([type='checkbox']):not([type='range']),textarea,select,.answer,.preview,#status) {
+  background:rgba(3,12,19,.82);
+  border-color:rgba(136,195,197,.4);
+  box-shadow:inset 0 1px 10px rgba(0,0,0,.22);
+}
+:is(input,textarea,select):focus-visible {
+  outline:2px solid #a1efe4;
+  outline-offset:3px;
+}
+button:not(.key),.btn {
+  background:
+    linear-gradient(120deg,rgba(181,216,226,.07),transparent 60%),
+    linear-gradient(180deg,#233d49,#132833);
+  border-color:rgba(145,202,201,.55);
+  box-shadow:inset 0 1px 0 rgba(227,248,246,.09);
+}
+button.primary {background:linear-gradient(150deg,#297d7a,#174d56)}
+button.feather,button.danger {background:linear-gradient(150deg,#663954,#422838)}
+/* Honest local instrument activity illuminates the glass only while a note is actually observed. */
+html[data-wayglass-resonance='active'] :is(.ship-mast,.masthead,.hero.panel) {
+  border-color:rgba(131,219,211,.58);
+  box-shadow:0 0 29px rgba(103,198,193,.18),
+    inset 0 1px 0 rgba(212,245,239,.24);
+}
+html[data-wayglass-resonance='active'] :is(.ship-mast,.masthead,.hero.panel)::before {
+  background:radial-gradient(ellipse at 60% 9%,rgba(125,219,223,.23),transparent 47%),
+    radial-gradient(ellipse at 6% 0%,rgba(197,170,111,.11),transparent 30%);
+}
+.ship-sensory-note {
+  margin:.5rem 0 0;
+  font-size:.8rem;
+  line-height:1.45;
+  color:var(--wg-seafoam);
+  width:100%;
+}
+/* Keystrokes provide feedback without moving notes under the performer's hand. */
+.key {
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.12),0 3px 12px rgba(0,0,0,.24);
+}
+.key[aria-pressed='true'] {
+  box-shadow:0 0 12px rgba(103,198,193,.35),inset 0 0 14px rgba(11,76,77,.12);
+}
+@media (prefers-reduced-transparency: reduce) {
+  :is(.panel,.pane,.seat,.hero.panel,.instrument,.masthead,.ship-mast,.mast) {
+    background:var(--wg-deep-matte);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(.panel,.pane,.seat,.hero.panel,.instrument,.masthead,.ship-mast,.mast) {
+    transition:none!important;
+    animation:none!important;
+  }
+  :is(.panel,.pane,.seat,.hero.panel,.instrument)::before {opacity:.35}
+}
+@media (forced-colors: active) {
+  :is(.panel,.pane,.seat,.hero.panel,.instrument,.masthead,.ship-mast,.mast) {
+    border:1px solid CanvasText;
+    background:Canvas;
+    color:CanvasText;
+    box-shadow:none;
+  }
+  :is(.panel,.pane,.seat,.hero.panel,.instrument)::before,
+  :is(.panel,.pane,.seat,.hero.panel,.instrument)::after {display:none}
+}
