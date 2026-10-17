@@ -21,6 +21,7 @@ test('Wonder + mythic canon preserves wonder, mythic meaning, and native languag
   assert.ok(WONDER_CANON.laws.includes('THE EXPERIENCE MAY KEEP ITS NATIVE LANGUAGE.'));
   assert.ok(WONDER_CANON.nativeRegisters.includes('witchy-sense'));
   assert.ok(WONDER_CANON.distinctions.includes('NATIVE LANGUAGE != EXTERNAL CAUSATION CLAIM'));
+  assert.ok(WONDER_CANON.distinctions.includes('MECHANISTIC EXPLANATION != EXHAUSTIVE MEANING'));
   assert.deepEqual(WONDER_CANON.sequence, [
     'attend',
     'preserve',
