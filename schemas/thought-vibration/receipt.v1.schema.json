@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wayglass.local/schemas/thought-vibration/receipt.v1.schema.json",
+  "title": "Thought Vibration offline render receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "session_id", "status", "renderer_id", "source_id", "input_file_sha256", "wave_file_sha256", "wave_file", "format", "measurements", "claims", "continuity"],
+  "properties": {
+    "schema": {"const": "thought-vibration.receipt/v1"},
+    "session_id": {"type": "string", "minLength": 1},
+    "status": {"enum": ["offline-rendered", "stopped", "failed"]},
+    "renderer_id": {"type": "string", "minLength": 1},
+    "source_id": {"type": "string", "minLength": 1},
+    "input_file_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "wave_file_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "wave_file": {"type": "string"},
+    "format": {
+      "type": "object", "additionalProperties": false,
+      "required": ["sample_rate_hz", "channels", "bit_depth", "frames", "endian", "codec"],
+      "properties": {
+        "sample_rate_hz": {"const": 48000}, "channels": {"enum": [1,2]}, "bit_depth": {"const": 16},
+        "frames": {"type": "integer", "minimum": 1}, "endian": {"const": "little"}, "codec": {"const": "pcm"}
+      }
+    },
+    "measurements": {
+      "type": "object", "additionalProperties": false,
+      "required": ["sample_peak", "rms", "dc_offset", "stereo_correlation", "integrated_lufs", "true_peak_dbtp", "roughness"],
+      "properties": {
+        "sample_peak": {"type": "array", "items": {"type": "number", "minimum": 0, "maximum": 1}, "minItems": 1, "maxItems": 2},
+        "rms": {"type": "array", "items": {"type": "number", "minimum": 0, "maximum": 1}, "minItems": 1, "maxItems": 2},
+        "dc_offset": {"type": "array", "items": {"type": "number", "minimum": -1, "maximum": 1}, "minItems": 1, "maxItems": 2},
+        "stereo_correlation": {"type": ["number", "null"], "minimum": -1, "maximum": 1},
+        "integrated_lufs": {"type": "null"},
+        "true_peak_dbtp": {"type": "null"},
+        "roughness": {"type": "null"}
+      }
+    },
+    "claims": {"type": "array", "items": {"type": "object", "required": ["domain", "statement"], "properties": {"domain": {"enum": ["ENGINE-TRUE", "OBSERVATION-TRUE", "CANON-TRUE", "SYMBOLIC", "UNKNOWN", "REJECTED"]}, "statement": {"type": "string"}}, "additionalProperties": false}},
+    "continuity": {"type": "object", "additionalProperties": false, "required": ["stop_point", "next_owner", "unresolved_questions"], "properties": {"stop_point": {"type": ["string", "null"]}, "next_owner": {"type": ["string", "null"]}, "unresolved_questions": {"type": "array", "items": {"type": "string"}}}}
+  }
+}
