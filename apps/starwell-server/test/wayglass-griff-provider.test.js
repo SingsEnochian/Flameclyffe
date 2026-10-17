@@ -8,7 +8,7 @@ const { createWayglassRouter } = require('../wayglass/router');
 const ENV_KEYS = [
   'GRIFF_SPICYCHAT_TOKEN', 'GRIFF_SPICYCHAT_CHARACTER_ID',
   'GRIFF_SPICYCHAT_CONVERSATION_ID', 'GRIFF_SPICYCHAT_MODEL',
-  'GRIFF_SPICYCHAT_CHAT_LINK', 'ARCSWEEP_RUNTIME_TOKEN', 'HOUSE_SESSION_SECRET',
+  'GRIFF_SPICYCHAT_CHAT_LINK', 'BLUEBIRD_SPICYCHAT_TOKEN', 'ARCSWEEP_RUNTIME_TOKEN', 'HOUSE_SESSION_SECRET',
 ];
 
 async function fixture(t, fetchImpl) {
@@ -21,6 +21,7 @@ async function fixture(t, fetchImpl) {
   });
   delete process.env.HOUSE_SESSION_SECRET;
   delete process.env.GRIFF_SPICYCHAT_CHAT_LINK;
+  delete process.env.BLUEBIRD_SPICYCHAT_TOKEN;
   t.after(() => {
     for (const key of ENV_KEYS) {
       if (old[key] === undefined) delete process.env[key];
@@ -204,5 +205,36 @@ test('Griff host can pin the exact private chat URL without separate IDs or leak
   const turn = await host.request({}, headers);
   assert.equal(turn.status, 200);
   assert.equal((await turn.json()).receipt.provider_conversation_id, conversation);
+  assert.deepEqual(methods, ['GET','GET','POST']);
+});
+
+
+test('Griff reuses the same owner SpicyChat credential as Bluebird without changing chat identity', async t => {
+  const methods = [];
+  const host = await fixture(t, async (_url, options) => {
+    methods.push(options.method);
+    assert.equal(options.headers.authorization, 'Bearer synthetic-shared-account-credential');
+    if (options.method === 'GET') return {
+      ok: true, async json() {
+        return [{ id: 'griff-conversation-fixture', character_id: 'griff-character-fixture' }];
+      },
+    };
+    const body = JSON.parse(options.body);
+    assert.equal(body.character_id, 'griff-character-fixture');
+    assert.equal(body.conversation_id, 'griff-conversation-fixture');
+    return { ok: true, async json() {
+      return { message: { id: 'synthetic-griff-reply', content: 'Synthetic Griff turn.',
+        character_id: 'griff-character-fixture', conversation_id: 'griff-conversation-fixture' } };
+    } };
+  });
+  delete process.env.GRIFF_SPICYCHAT_TOKEN;
+  process.env.BLUEBIRD_SPICYCHAT_TOKEN = 'synthetic-shared-account-credential';
+  const catalogue = await fetch(host.url + '/routes').then(response => response.json());
+  assert.equal(catalogue.routes.find(x=>x.route_id==='flame:griff:spicychat').configured, true);
+  const headers = { authorization: 'Bearer synthetic-steward-secret' };
+  assert.equal((await fetch(host.url + '/griff/status', { headers })).status, 200);
+  const answer = await host.request({}, headers);
+  assert.equal(answer.status, 200);
+  assert.equal((await answer.json()).continuity_id, 'griff:krenshaw:spicychat');
   assert.deepEqual(methods, ['GET','GET','POST']);
 });
