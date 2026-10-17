@@ -1,15 +1,16 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#061015"><meta name="description" content="Wayglass Harmonic Observatory: real local harmony and acoustic experiments, measurements and replayable receipts."><title>Wayglass · Harmonic Observatory</title><link rel="stylesheet" href="../src/harmonic-observatory/ui.css"></head>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#061015"><meta name="description" content="Wayglass Harmonic Observatory: local harmonic and SoundFont experiments, measurements and replayable receipts."><title>Wayglass · Harmonic Observatory</title><link rel="stylesheet" href="../src/harmonic-observatory/ui.css"></head>
 <body><div class="app-frame">
 <aside class="wg-rail" aria-label="Instrument navigation"><div class="wg-mark" aria-hidden="true">◈</div><div class="rail-sep"></div>
 <a class="rail-link current" data-tip="Observatory" href="#observatory" aria-label="Go to Observatory">◉</a>
 <a class="rail-link" data-tip="Voice desk" href="#voice-desk" aria-label="Go to voice desk">♫</a>
+<a class="rail-link" data-tip="SoundFont rack" href="#soundfont-rack" aria-label="Go to SoundFont rack">♬</a>
 <a class="rail-link" data-tip="Signal monitor" href="#signal" aria-label="Go to signal monitor">⌁</a>
 <a class="rail-link" data-tip="Return marker" href="#return-marker" aria-label="Go to return marker">↻</a>
 <div class="rail-bottom">TERRA AETERNA · HARMONIC SYSTEMS</div></aside>
 <div class="wg-shell">
 <header class="wg-topbar"><div class="wg-brand"><strong>WAYGLASS</strong><span> / SENSORIUM · HEARTHGATE</span></div><div class="top-state"><i class="state-dot" aria-hidden="true"></i><span>Local instrument</span><span class="top-pill">No provider connection</span><a class="top-link" href="https://github.com/SingsEnochian/Flameclyffe/pull/474" target="_blank" rel="noopener noreferrer">Source ↗</a></div></header>
-<nav class="wg-deck-nav" aria-label="Observatory decks"><a class="deck-chip selected" href="#observatory" aria-current="page">Harmonic Observatory</a><a class="deck-chip" href="#voice-desk">Voice desk</a><a class="deck-chip" href="#signal">Signal field</a><a class="deck-chip" href="#return-marker">Return marker</a><span class="deck-context">✧&nbsp; Wayglass / Runa / Möbius</span></nav>
-
+<nav class="wg-deck-nav" aria-label="Observatory decks"><a class="deck-chip selected" href="#observatory" aria-current="page">Harmonic Observatory</a><a class="deck-chip" href="#voice-desk">Voice desk</a><a class="deck-chip" href="#soundfont-rack">SF2 instruments</a><a class="deck-chip" href="#signal">Signal field</a><a class="deck-chip" href="#return-marker">Return marker</a><span class="deck-context">✧&nbsp; Wayglass / Runa / Möbius</span></nav>
+<div class="offline-note"><span aria-hidden="true">◇</span><div><strong>Offline preview.</strong> This file uses the Harmonic Observatory synthesis locally. It is not the authenticated Wayglass OS host, and it has no provider or network connection.</div></div>
 <main id="observatory">
 <section class="wg-hero hero glass-panel"><div class="hero-copy"><p class="eyebrow">01 / THE SENSORIUM · THOUGHT VIBRATION AI V2</p><h1>Harmonic<br><em>Observatory.</em></h1>
 <p class="lede">Three distinct voices, one shared harmonic field. Compose, audition and inspect their relationship without losing the individuality of each signal.</p>
@@ -25,6 +26,22 @@
 <label>Duration · seconds<input id="duration" type="number" min="0.25" max="30" step="0.25" value="6"></label>
 <label>Master synthesis gain<input id="master" type="range" min="0.01" max="0.35" step="0.01" value="0.22"></label></div><p class="hint">The Osia option makes a mono reference render. It does not change your processor's fitting or Windows output routing.</p></section>
 <section class="card glass-panel" aria-labelledby="voices-title"><h2 id="voices-title"><span class="number">02</span>Independent voices</h2><div id="voices" class="rows three" aria-label="Independent voice stem controls"></div><p class="sub">Three authored oscillator stems. Pitch, level, panning and overtones remain independent; no recorded voice is extracted.</p></section>
+<section class="card full glass-panel soundfont-panel" id="soundfont-rack" aria-labelledby="soundfont-title">
+  <div class="wave-head"><h2 id="soundfont-title"><span class="number">SF2</span>SoundFont instrument rack</h2><span class="tag"><i class="tiny-dot"></i> LOCAL SAMPLE ENGINE</span></div>
+  <p class="sub">Load your own .sf2/.sf3 banks from this computer. Presets play through ArcSweep’s SpessaSynth AudioWorklet, with one independently programmed MIDI channel per voice. File contents never leave the browser. This bank is <em>not</em> included in oscillator WAV exports.</p>
+  <div class="soundfont-load-row"><label class="soundfont-file-label" for="sf2-files">Select local SoundFont files<input id="sf2-files" type="file" accept=".sf2,.sf3,.sfogg,.dls" multiple></label>
+  <label>Selected bank<select id="sf2-bank" aria-label="SoundFont bank to activate" disabled><option value="">Choose files above</option></select></label>
+  <button class="btn" id="sf2-load" type="button" disabled>Load chosen bank</button></div>
+  <div class="sf2-ledger"><p class="sub">Previously catalogued banks, shown as references until you select the actual files:</p><div id="sf2-known" class="sf2-known"></div></div>
+  <p class="sf2-status" id="sf2-status" role="status" aria-live="polite">No SF2 loaded. Select your banks locally to begin.</p>
+  <div class="sf2-voices" aria-label="Independent SoundFont programme assignments">
+    <label>Voice A · instrument<select id="sf2-voice-0" disabled><option>Load a bank</option></select></label>
+    <label>Voice B · instrument<select id="sf2-voice-1" disabled><option>Load a bank</option></select></label>
+    <label>Voice C · instrument<select id="sf2-voice-2" disabled><option>Load a bank</option></select></label>
+  </div>
+  <div class="btnbar sf2-actions"><button class="btn primary" id="sf2-audition" type="button" disabled>▶ Audition SF2 voices</button><button class="btn" id="sf2-blend" type="button" disabled>◈ Blend SF2 + harmonics</button><button class="btn stop" id="sf2-feather" type="button">■ Feather all</button><button class="btn" id="sf2-receipt" type="button" disabled>↓ SF2 take receipt</button></div>
+  <p class="hint">SoundFonts are auditioned live using the browser audio device; the main Render WAV button remains a mathematically reproducible oscillator render. MIDI pitch uses the nearest semitone. To capture an SF2 performance as audio, a separate recorded-audio transport is required. Speaker and Osia 3 output remain listening checks, not inferred results.</p>
+</section>
 <section class="card full glass-panel" id="transport"><h2><span class="number">03</span>Möbius / playback &amp; rendering</h2>
 <div class="wg-transport"><div><p class="sub">A quiet studio until you press Audition. Rendering happens offline and never starts sound.</p><div class="btnbar">
 <button class="btn primary" id="audition">▶ Audition</button><button class="btn stop" id="feather">■ Feather stop</button><button class="btn" id="render">◇ Render WAV + receipt</button><button class="btn" id="wav-download" disabled>↓ WAV</button><button class="btn" id="save-recipe">↓ Recipe</button><button class="btn" id="load-recipe">↑ Import</button><input id="recipe-file" type="file" accept="application/json,.json" hidden>

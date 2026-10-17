@@ -108,3 +108,27 @@ input[type=range]{height:19px;padding:0;accent-color:var(--teal);border:0;backgr
 @media(max-width:930px){.app-frame{grid-template-columns:64px minmax(0,1fr)}.wg-rail{padding:22px 5px}.wg-hero{grid-template-columns:1fr;min-height:0}.hero-field{min-height:160px}.field-orbit{transform:scale(.64) rotate(-20deg)}.field-orbit.o2{transform:scale(.64) rotate(42deg)}.field-orbit.o3{transform:scale(.64) rotate(95deg)}.field-sigil{transform:scale(.78)}.field-sub{bottom:0}.card{grid-column:span 12}.rows.three{grid-template-columns:repeat(3,minmax(0,1fr))}.top-state .top-pill{display:none}}
 @media(max-width:620px){.app-frame{display:block}.wg-rail{position:static;height:auto;width:100%;padding:8px 14px;flex-direction:row;border-right:0;border-bottom:1px solid var(--line);gap:5px}.wg-mark{height:36px;width:36px;margin-right:8px;border-radius:10px}.rail-link{height:39px;width:39px}.rail-link:after,.rail-sep,.rail-bottom{display:none}.wg-shell{padding:0 13px 45px}.wg-topbar{height:65px}.wg-brand span{display:none}.top-state{font-size:.61rem}.top-link{display:none}.wg-deck-nav{margin-top:14px;gap:3px}.deck-chip{padding:9px 10px;font-size:.68rem}.deck-context{width:100%;padding:7px 10px;border-top:1px solid var(--line)}.wg-hero{padding:22px}.hero h1{font-size:clamp(2.55rem,12vw,3.7rem)}.hero-field{min-height:125px;overflow:hidden}.field-sigil{transform:scale(.58)}.field-orbit{transform:scale(.52) rotate(-20deg)}.field-orbit.o2{transform:scale(.52) rotate(42deg)}.field-orbit.o3{transform:scale(.52) rotate(95deg)}.field-sub{font-size:.55rem}.rows,.rows.three{grid-template-columns:1fr}.wg-transport{grid-template-columns:1fr}.meter-stack{border-left:0;border-top:1px solid var(--line);padding:17px 0 0}.return-grid .card{grid-column:span 12}.wave-head{align-items:flex-start;flex-direction:column}.btnbar{gap:8px}.btn{flex:1 1 auto}#wave{height:155px}.glass-panel{border-radius:21px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
+
+
+/* SoundFont organ: same black-glass material and Wayglass mineral geometry. */
+.soundfont-panel{background:linear-gradient(126deg,rgba(5,14,22,.89),rgba(14,20,34,.81) 50%,rgba(20,15,41,.63));border-color:rgba(102,177,206,.29)}
+.soundfont-load-row{display:grid;grid-template-columns:minmax(200px,1.35fr) minmax(180px,1fr) auto;gap:12px;align-items:end;margin:18px 0 16px}
+.soundfont-load-row .btn{min-height:45px;white-space:normal}
+.soundfont-file-label{position:relative;display:grid;gap:9px}
+.soundfont-file-label input{width:100%;padding:10px;color:var(--text);background:rgba(4,14,22,.78);border:1px dashed rgba(116,217,220,.46);border-radius:12px;cursor:pointer}
+.soundfont-file-label input::file-selector-button{background:rgba(71,167,180,.23);border:1px solid rgba(116,217,220,.35);color:#d2fcff;border-radius:20px;padding:6px 10px;margin-right:12px;cursor:pointer}
+.sf2-known{display:flex;flex-wrap:wrap;gap:7px}
+.sf2-known span{font-size:.76rem;padding:6px 9px;border:1px solid rgba(156,191,209,.18);background:rgba(9,18,27,.70);border-radius:999px;color:var(--muted)}
+.sf2-ledger{padding:12px 14px;margin:13px 0;border:1px solid rgba(156,191,209,.13);border-radius:16px;background:rgba(2,8,14,.24)}
+.sf2-ledger p{margin:0 0 9px}
+.sf2-status{padding:13px 15px;margin:15px 0;background:rgba(19,43,52,.53);border:1px solid rgba(118,193,214,.27);border-radius:14px;color:#bfecef;line-height:1.5}
+.sf2-voices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.sf2-voices label{border:1px solid rgba(145,180,200,.20);border-radius:13px;padding:12px;background:linear-gradient(180deg,rgba(21,37,48,.61),rgba(9,17,30,.71));min-width:0}
+.sf2-voices label:nth-child(2){border-color:rgba(167,141,231,.28)}
+.sf2-voices label:nth-child(3){border-color:rgba(97,153,237,.26)}
+.sf2-voices select{width:100%;max-width:100%}
+.sf2-actions{margin-bottom:12px}
+.sf2-actions .btn{min-height:43px}
+.soundfont-panel select:disabled,.soundfont-panel button:disabled{opacity:.48;cursor:not-allowed}
+@media(max-width:880px){.soundfont-load-row{grid-template-columns:repeat(2,minmax(0,1fr))}.soundfont-load-row .btn{grid-column:1/-1}.sf2-voices{grid-template-columns:1fr}}
+@media(max-width:540px){.soundfont-load-row{grid-template-columns:1fr}.sf2-actions .btn{flex:1 1 100%}}

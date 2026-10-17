@@ -1,8 +1,11 @@
 /** Wayglass Harmonic Observatory local UI. Import/export is scoped to explicit user selection. */
 import {createSession,validateSession,copySession,compileArrangement} from './core.js';
 import {HarmonicAudioEngine} from './live-engine.js';
+import {HarmonicSoundfontRack} from './soundfont-rack.js';
+import {KNOWN_BANKS} from './soundfont-contract.js';
 const $=id=>document.getElementById(id);
 const context=new HarmonicAudioEngine();
+const soundfonts=new HarmonicSoundfontRack();
 let session=createSession(),last=null,worker=null,requestNumber=0,meterTimer=null,playTimer=null;
 const val=id=>$(id).value;
 const number=id=>Number(val(id));
@@ -83,6 +86,7 @@ function clearTimers(){
   meterTimer=null;playTimer=null;
 }
 $('audition').addEventListener('click',async()=>{
+  soundfonts.feather();renderSf2Presets();
   try{
     const recipe=collect();
     // RenderSamples validates the same arrangement/PCM as the offline path.
@@ -115,24 +119,97 @@ $('recipe-file').addEventListener('change',async e=>{
   const file=e.target.files?.[0];if(!file)return;
   try{if(file.size>32768)throw new RangeError('recipe exceeds 32 KB');
     const imported=JSON.parse(await file.text());validateSession(imported);
-    context.feather();clearTimers();session=copySession(imported);last=null;applyControls();
+    context.feather();soundfonts.feather();clearTimers();session=copySession(imported);last=null;applyControls();
     $('receipt').textContent='No receipt yet.';$('receipt-download').disabled=true;$('wav-download').disabled=true;
     status('Validated local recipe imported. Playback remains stopped.');
   }catch(error){showError(error);}finally{e.target.value='';}
 });
 $('session-reset').addEventListener('click',()=>{
-  context.feather();clearTimers();session=createSession();applyControls();last=null;
+  context.feather();soundfonts.feather();clearTimers();session=createSession();applyControls();last=null;
   $('receipt').textContent='No receipt yet.';$('receipt-download').disabled=true;$('wav-download').disabled=true;
   status('Session reset. Playback stopped; no previous file was changed.');
 });
-window.addEventListener('pagehide',()=>{clearTimers();void context.close();worker?.terminate();worker=null;});
+window.addEventListener('pagehide',()=>{clearTimers();void context.close();void soundfonts.close();worker?.terminate();worker=null;});
 applyControls();
-document.querySelectorAll('.deck-chip,.rail-link').forEach(link=>link.addEventListener('click',()=>{
-  const target=link.getAttribute('href');
-  document.querySelectorAll('.deck-chip').forEach(item=>{
-    const active=item.getAttribute('href')===target;
-    item.classList.toggle('selected',active);
-    if(active)item.setAttribute('aria-current','location');else item.removeAttribute('aria-current');
-  });
-  document.querySelectorAll('.rail-link').forEach(item=>item.classList.toggle('current',item.getAttribute('href')===target));
+
+
+// SoundFont rack is a real attached ArcSweep organ. It uses the existing
+// StorySoundscape/SpessaSynth runtime only after the steward loads a local bank.
+const sfStatus = message => { $('sf2-status').textContent=message; };
+function replaceOptions(select, items, placeholder){
+  select.replaceChildren();
+  if(!items.length){const o=document.createElement('option');o.value='';o.textContent=placeholder;select.append(o);return;}
+  for(const item of items){const o=document.createElement('option');o.value=String(item.value);o.textContent=String(item.label);select.append(o);}
+}
+function renderBankList(){
+  const snap=soundfonts.snapshot();
+  const selection=$('sf2-bank').value;
+  replaceOptions($('sf2-bank'),snap.files.map((f,i)=>({value:i,label:`${f.name} · ${(f.size/1048576).toFixed(1)} MiB`})),'Choose SoundFont files');
+  if(snap.files.length){$('sf2-bank').value=(selection && Number(selection)<snap.files.length)?selection:'0';}
+  $('sf2-bank').disabled=!snap.files.length;
+  $('sf2-load').disabled=!snap.files.length || soundfonts.loading;
+}
+function renderSf2Presets(){
+  const snap=soundfonts.snapshot();
+  const names=snap.presets.filter(p=>!p.isDrum);
+  for(let i=0;i<3;i++){
+    const select=$(`sf2-voice-${i}`);
+    replaceOptions(select,names.map(p=>({value:p.key,label:`${p.name} · ${p.bankMSB}/${p.bankLSB}/${p.program}`})),'No melodic programmes');
+    select.disabled=!names.length;
+    if(snap.selected_keys[i])select.value=snap.selected_keys[i];
+  }
+  const ready=snap.status==='ready'||snap.status==='auditioning';
+  $('sf2-audition').disabled=!ready;
+  $('sf2-blend').disabled=!ready;
+  $('sf2-receipt').disabled=!snap.has_take;
+}
+function sf2Failure(error){sfStatus(`SoundFont stopped: ${error?.message||String(error)}`);}
+$('sf2-known').replaceChildren(...KNOWN_BANKS.map(bank=>{
+  const e=document.createElement('span');e.textContent=`${bank.name} · historically ${bank.historical_presets} presets`;return e;
 }));
+$('sf2-files').addEventListener('change',event=>{
+  try{
+    const added=soundfonts.addFiles(event.target.files);
+    renderBankList();
+    sfStatus(added.length?`${added.length} bank file(s) selected. Click Load chosen bank to parse the actual presets.`:'No new bank files selected.');
+  }catch(error){sf2Failure(error);}finally{event.target.value='';}
+});
+$('sf2-load').addEventListener('click',async()=>{
+  const index=Number($('sf2-bank').value);
+  const button=$('sf2-load');button.disabled=true;
+  try{
+    sfStatus('Loading the selected local SoundFont into ArcSweep’s bundled AudioWorklet…');
+    const state=await soundfonts.activateBank(index);
+    sfStatus(`${state.bank.name} · ${state.bank.preset_count} actual presets loaded · SHA-256 verified · ready to audition.`);
+  }catch(error){sf2Failure(error);}
+  finally{renderBankList();renderSf2Presets();}
+});
+for(let i=0;i<3;i++)$('sf2-voice-'+i).addEventListener('change',event=>{
+  try{soundfonts.choosePreset(i,event.target.value);sfStatus(`Voice ${'ABC'[i]} now has its own SF2 programme.`);}catch(error){sf2Failure(error);}
+});
+async function auditionSoundfonts({blend=false}={}){
+  try{
+    const recipe=collect();
+    if(blend){
+      // Both output contexts are started from this same explicit user action.
+      await Promise.all([context.audition(recipe),soundfonts.audition(recipe)]);
+      clearTimers();metre();
+      playTimer=setTimeout(()=>{context.feather();soundfonts.feather();clearTimers();renderSf2Presets();sfStatus('Blended audition complete.');},(recipe.duration_seconds+0.25)*1000);
+    }else{
+      context.feather();clearTimers();await soundfonts.audition(recipe);
+    }
+    sfStatus(`${blend?'Blending live SoundFont voices and harmonics':'Auditioning three local SF2 instruments'} for ${recipe.duration_seconds}s via browser default audio. Audio is not uploaded.`);
+    renderSf2Presets();
+  }catch(error){context.feather();soundfonts.feather();clearTimers();sf2Failure(error);renderSf2Presets();}
+}
+$('sf2-audition').addEventListener('click',()=>void auditionSoundfonts());
+$('sf2-blend').addEventListener('click',()=>void auditionSoundfonts({blend:true}));
+$('sf2-feather').addEventListener('click',()=>{
+  soundfonts.feather();context.feather();clearTimers();renderSf2Presets();
+  sfStatus('Feather all · SoundFont MIDI and harmonic oscillators stopped.');status('Feather stop · all active experiment sources released.');
+});
+$('feather').addEventListener('click',()=>{soundfonts.feather();renderSf2Presets();sfStatus('Feather stop · all SF2 notes released.');});
+$('sf2-receipt').addEventListener('click',()=>{
+  if(soundfonts.lastTake)createDownload(JSON.stringify(soundfonts.lastTake,null,2)+'\n',`${soundfonts.lastTake.session_id}.sf2-take.json`,'application/json');
+});
+renderBankList();renderSf2Presets();
