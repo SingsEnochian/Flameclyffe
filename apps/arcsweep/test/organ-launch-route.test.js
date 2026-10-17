@@ -23,6 +23,8 @@ test('Vercel organ links never leak the GitHub Pages repository prefix', () => {
   assert.equal(appletLaunchTarget('haptics', vercel), '/arcsweep/?soundOrgan=haptics');
   assert.equal(appletLaunchTarget('tone-lab', vercel), '/world-tone-approval/');
   assert.equal(appletLaunchTarget('canonical-spine', vercel), '/arcsweep/spine/');
+  assert.equal(appletLaunchTarget('pilot-deck', vercel), '/arcsweep/pilot-deck/');
+  assert.equal(appletLaunchTarget('harmonic-keyboard', vercel), '/arcsweep/harmonic-keyboard/');
 });
 
 test('GitHub Pages organ links retain the repository and lab prefixes', () => {
@@ -30,6 +32,8 @@ test('GitHub Pages organ links retain the repository and lab prefixes', () => {
   assert.equal(appletLaunchTarget('haptics', pages), '/Flameclyffe/apps/arcsweep/?soundOrgan=haptics');
   assert.equal(appletLaunchTarget('tone-lab', pages), '/Flameclyffe/starwell-react-lab/world-tone-approval/');
   assert.equal(appletLaunchTarget('canonical-spine', pages), '/Flameclyffe/apps/arcsweep/spine/');
+  assert.equal(appletLaunchTarget('pilot-deck', pages), '/Flameclyffe/apps/arcsweep/pilot-deck/');
+  assert.equal(appletLaunchTarget('harmonic-keyboard', pages), '/Flameclyffe/apps/arcsweep/harmonic-keyboard/');
 });
 
 test('contextual links preserve instrument and world identity on either host', () => {

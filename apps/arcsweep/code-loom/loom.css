@@ -1,0 +1,25 @@
+:root{color-scheme:dark;font:16px/1.5 system-ui,-apple-system,sans-serif;background:#0b101b;color:#eeeafa}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 80% -15%,#332b51 0%,#0b101b 52%)}
+.masthead{padding:1.2rem clamp(1rem,3vw,3.5rem) 1.6rem;border-bottom:1px solid #454363;background:linear-gradient(120deg,#11182b,#16182a98)}
+.brand{display:flex;gap:.6rem;align-items:center;letter-spacing:.24em;font-size:.78rem;font-weight:650;color:#a4d6ec}.gem{font-size:1.55rem}
+.title-line{display:flex;justify-content:space-between;align-items:end;gap:2rem}.eyebrow{color:#a3bfe5;text-transform:uppercase;font-size:.74rem;letter-spacing:.16em;margin:0 0 .3rem}
+h1,h2{font-family:Georgia,serif;font-weight:400}h1{font-size:clamp(2.1rem,4.1vw,3.5rem);margin:0;color:#e5dafa}h2{font-size:1.5rem;margin:0}
+.lede{color:#c5c3dc;font-size:.98rem;max-width:58rem;margin:.5rem 0 0}.title-line nav{display:flex;flex-wrap:wrap;gap:.7rem}.title-line a{color:#ace4eb;text-decoration:none;white-space:nowrap;padding:.4rem .7rem;border:1px solid #55637e;border-radius:9px}
+main{max-width:1440px;margin:auto;padding:1.6rem clamp(.85rem,3vw,3.5rem);display:grid;gap:1.2rem}
+.panel{padding:1.45rem;border:1px solid #484867;background:linear-gradient(145deg,#171b2de8,#111726e8);border-radius:16px;box-shadow:0 15px 30px #0003}
+.hero{display:flex;justify-content:space-between;align-items:center;gap:2rem}.hero p:not(.eyebrow){color:#c7c3da;max-width:58ch}.stages{display:flex;flex-direction:column;min-width:9rem;gap:.3rem;color:#a8e5db;font-size:.82rem;letter-spacing:.06em}
+.loom{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.2rem}.section-head{display:flex;gap:1rem;align-items:center;border-bottom:1px solid #404260;padding-bottom:.9rem;margin-bottom:.7rem}.section-head p{margin:0;color:#aaabc9;font-size:.85rem}
+.number{flex:0 0 2.3rem;width:2.3rem;height:2.3rem;display:grid;place-items:center;border:1px solid #64808b;color:#ade8ef;border-radius:50%;font:700 .9rem Georgia,serif}
+label{display:block;font-size:.83rem;color:#d8d5ed;margin:.95rem 0 .35rem}
+input,textarea,select{width:100%;min-height:2.9rem;border:1px solid #555779;background:#0d1323;color:#f3edff;border-radius:9px;padding:.7rem .8rem;font:inherit}
+input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid #8de1eb;outline-offset:2px}textarea{resize:vertical;min-height:4.8rem}.code{font:14px/1.45 ui-monospace,SFMono-Regular,Consolas,monospace;tab-size:2}
+.actions{display:flex;flex-wrap:wrap;gap:.55rem;margin-top:1rem}
+button{font:600 .88rem system-ui,sans-serif;background:#333550;border:1px solid #70759a;border-radius:9px;color:#f6f0ff;min-height:2.65rem;padding:.58rem 1rem;cursor:pointer}
+button.primary{background:#246974;border-color:#8ce0e8}button.danger{background:#4a2b42;border-color:#aa789e}
+button:disabled{opacity:.45;cursor:not-allowed}button:not(:disabled):hover{filter:brightness(1.19)}button:focus-visible{outline:2px solid #98e9ef;outline-offset:2px}
+.preview{display:block;white-space:pre-wrap;overflow-wrap:anywhere;max-height:14rem;overflow:auto;border-left:3px solid #7cd7d6;padding:.7rem;margin-top:1rem;background:#0e1e2b;color:#d2efe7;font-size:.85rem}
+.ribbon{display:flex;gap:1rem;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.ribbon p,footer{color:#c2bdd9}.ribbon output{width:100%;color:#a3ece4}
+footer{text-align:center;padding:1.5rem;font-size:.85rem}
+@media(max-width:860px){.hero,.title-line{display:block}.title-line nav{margin-top:1rem}.stages{flex-direction:row;flex-wrap:wrap;margin-top:1rem}.loom{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}

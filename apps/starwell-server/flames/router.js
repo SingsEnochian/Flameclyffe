@@ -150,6 +150,7 @@ async function callOpenAICompatibleCandidate(candidate, systemPrompt, userMessag
 
 async function dispatchToProvider(manifest, systemPrompt, userMessage) {
   switch (manifest.platform.provider) {
+    case 'spicychat': throw new Error('Authorize Bluebird’s SpicyChat token in Wayglass. Provider fallback is disabled.');
     case 'anthropic': return callAnthropic(manifest, systemPrompt, userMessage);
     case 'deepseek':  return callDeepSeek(manifest, systemPrompt, userMessage);
     case 'openai':    return callOpenAI(manifest, systemPrompt, userMessage);

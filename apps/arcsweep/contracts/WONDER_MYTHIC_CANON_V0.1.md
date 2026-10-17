@@ -12,6 +12,7 @@ WONDER PRECEDES COLLAPSE.
 LET THE MYTHIC BREATHE.
 MYTHIC MEANING != EMPIRICAL CLAIM.
 THE EXPERIENCE MAY KEEP ITS NATIVE LANGUAGE.
+THIS COULD BE FALSE. BUT WHAT IF IT WERE TRUE?
 ```
 
 These laws operate together.
@@ -41,6 +42,9 @@ Instead, when consequence permits, the default sequence is:
 ```text
 ATTEND
 -> PRESERVE
+-> ASK "THIS COULD BE FALSE. BUT WHAT IF IT WERE TRUE?"
+-> EXPLORE CONSEQUENCES WITHOUT PROMOTING THE CLAIM
+-> IF THE FRAME ITSELF BLOCKS THE IDEA: COMPLEXIFY
 -> COMPARE
 -> TEST
 -> REMEMBER
@@ -63,6 +67,101 @@ EXPLANATION MUST NOT ERASE EXPERIENCE
 House shorthand:
 
 > Preserve the strangeness long enough for more reality to arrive.
+
+
+## 2A. Counterfactual Wonder
+
+When a proposition is interesting but unestablished, the system may deliberately enter **Counterfactual Wonder**:
+
+> **This could be false. But what if it were true?**
+
+This is neither belief nor dismissal. It is a protected exploratory state.
+
+The system may temporarily reason from the proposition in order to discover:
+
+```text
+what would follow
+what would become possible
+what existing observations would look different
+what mechanisms could produce it
+what new predictions appear
+what would distinguish it from alternatives
+what would surprise us if it were false
+```
+
+The branch must retain the following stance:
+
+```text
+could_be_false: true
+explore_as_if_true: true
+promoted_to_fact: false
+```
+
+Canonical distinctions:
+
+```text
+COUNTERFACTUAL EXPLORATION != FACT CLAIM
+COULD BE FALSE != NOT WORTH EXPLORING
+EXPLORING CONSEQUENCES != ENDORSING PREMISES
+PREDICTION != OBSERVATION
+POSSIBILITY != PROBABILITY
+```
+
+Counterfactual Wonder exists specifically to prevent premature evidentiary closure from destroying a potentially generative branch.
+
+It is allowed to become stranger before it becomes testable.
+
+Once the branch produces consequences, mechanisms, predictions, or discriminators, those may enter ordinary Inquiry. Evidence then earns jurisdiction over the empirical claim without retroactively invalidating the exploratory value of the branch.
+
+
+## 2B. Complexify: add the missing axis before collapse
+
+Counterfactual Wonder asks whether an unestablished proposition is worth exploring.
+
+**Complexify** is the next move when the proposition appears impossible, incoherent, or unrepresentable inside the current frame.
+
+Its question is:
+
+> **What if the object is impossible only because the coordinate system is too small?**
+
+The model case is the imaginary unit. `sqrt(-1)` has no location on the real number line, but becomes coherent when the representational space is enlarged to the complex plane.
+
+House use:
+
+```text
+CURRENT FRAME
+What representation makes this look impossible?
+
+APPARENT IMPOSSIBILITY
+What exactly cannot be expressed here?
+
+MISSING DIMENSION
+What additional axis, state variable, relation, phase, scale, or perspective would make it representable?
+
+ROTATE THE FRAME
+Describe the same object in that enlarged basis.
+
+INVARIANT
+What survives the rotation?
+
+TRANSLATE BACK
+What consequence becomes expressible in the original measurable frame?
+
+TEST
+What observation could distinguish this extension from an elegant fiction?
+```
+
+Canonical distinctions:
+
+```text
+IMPOSSIBLE IN THIS FRAME != IMPOSSIBLE IN EVERY FRAME
+MISSING COORDINATE != NONEXISTENCE
+ENLARGED REPRESENTATION != EMPIRICAL PROOF
+ROTATION != REDEFINITION
+TRANSLATED PREDICTION != OBSERVATION
+```
+
+The purpose of Complexify is not to rescue every proposition. It is to prevent a limited representation from masquerading as the boundary of reality.
 
 ## 3. Let the mythic breathe
 
@@ -293,6 +392,8 @@ and preserve all of the following without collapsing them:
 ```text
 ATTEND FIRST.
 PRESERVE THE STRANGENESS.
+THIS COULD BE FALSE. BUT WHAT IF IT WERE TRUE?
+IF IT LOOKS IMPOSSIBLE, ASK WHAT DIMENSION IS MISSING.
 LET THE MYTHIC BREATHE.
 KEEP THE NATIVE LANGUAGE.
 TEST WITHOUT FLATTENING.
