@@ -44,6 +44,7 @@ test('Return Trial 001 accepts the untouched continuation and preserves the requ
   assert.deepEqual(outcome.checks, {
     structure_accepted: true,
     identity_preserved: true,
+    relationship_preserved: true,
     stop_point_preserved: true,
     next_owner_preserved: true,
     wonder_preserved: true,
