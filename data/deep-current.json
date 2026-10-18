@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-10-18T15:18:07.216Z",
+  "generated_at": "2026-10-18T18:13:53.041Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,51 +13,51 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-10-18T11:15",
+    "time": "2026-10-18T14:00",
     "sky": "Day",
     "current": {
-      "time": "2026-10-18T11:15",
+      "time": "2026-10-18T14:00",
       "interval": 900,
-      "temperature_2m": 69.4,
-      "relative_humidity_2m": 65,
+      "temperature_2m": 67.8,
+      "relative_humidity_2m": 75,
       "is_day": 1,
       "precipitation": 0,
       "rain": 0,
-      "weather_code": 1,
-      "cloud_cover": 25,
-      "pressure_msl": 1023,
-      "wind_speed_10m": 14.1,
-      "wind_direction_10m": 27
+      "weather_code": 3,
+      "cloud_cover": 100,
+      "pressure_msl": 1023.3,
+      "wind_speed_10m": 12,
+      "wind_direction_10m": 28
     }
   },
   "space_weather": {
     "kp": {
-      "value": 0.33,
-      "time_tag": "2026-10-18T12:00:00",
-      "a_running": 2
+      "value": 1.67,
+      "time_tag": "2026-10-18T15:00:00",
+      "a_running": 6
     },
     "solar_wind": {
-      "time_tag": "2026-10-18T15:09:00Z",
+      "time_tag": "2026-10-18T18:06:00Z",
       "bz": -2,
       "bt": 4,
       "density": null,
-      "speed": 427
+      "speed": 428
     }
   },
   "moon": {
-    "age_days": 7.25,
-    "illumination": 48.6,
+    "age_days": 7.38,
+    "illumination": 49.9,
     "name": "First Quarter"
   },
   "field": {
-    "P": 0.6311111111111112,
-    "C": 0.6109523809523809,
-    "R": 0.9508333333333333,
-    "E": 0.5635714285714286,
-    "M": 0.486,
-    "A": 0.8884615384615384,
+    "P": 0.6344444444444439,
+    "C": 0.2538095238095239,
+    "R": 0.9166666666666667,
+    "E": 0.6977472527472528,
+    "M": 0.499,
+    "A": 0.6,
     "Q": null,
-    "dpdt": 0.9508333333333333,
+    "dpdt": 0.9166666666666667,
     "dynamic_axes": [
       "P",
       "C",
