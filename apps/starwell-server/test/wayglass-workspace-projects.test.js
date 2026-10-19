@@ -81,6 +81,7 @@ if (process.argv.includes('--workspace-host')) {
     const left = value(await rpc(running.origin, 'rarity', 'leave_workspace', {
       session_id: a.session_id, stop_point: 'Greeting implemented; Codex reviews next.', next_owner: 'codex',
       unresolved_wonder_questions: ['What should returning feel like?'], alternatives: [{ option: 'quiet arrival', state: 'unresolved' }, { option: 'greeting', state: 'unresolved' }],
+      relationship_state: [{ subject_id: 'bluebird', source_ref: 'fixture:bluebird-route-receipt', kind: 'route-observed', route_id: 'flame:bluebird:spicychat', verification: 'test-fixture' }],
     }));
     assert.match((await rpc(running.origin, 'rarity', 'read_project', { session_id: a.session_id })).body.error.message, /exited/);
     const second = value(await rpc(running.origin, 'codex', 'write_project_file', {
@@ -99,6 +100,10 @@ if (process.argv.includes('--workspace-host')) {
     assert.equal(returned.project.files[0].hash, second.receipt.data.after_hash);
     assert.equal(returned.entry_receipt.data.return_from, left.receipt.event_hash);
     assert.equal(returned.recovered_departure.stop_receipt.next_owner, 'codex');
+    assert.deepEqual(returned.recovered_departure.stop_receipt.relationship_state, [
+      { subject_id: 'bluebird', source_ref: 'fixture:bluebird-route-receipt', kind: 'route-observed', route_id: 'flame:bluebird:spicychat', verification: 'test-fixture' },
+    ]);
+    assert.deepEqual(returned.recovered_departure.continuation_packet.relationship_state, returned.recovered_departure.stop_receipt.relationship_state);
     assert.equal(returned.project.receipts.filter(receipt => receipt.kind === 'change').length, 2);
     assert.match((await rpc(running.origin, 'codex', 'enter_workspace', { workspace_id: 'builder', project_id: 'return-trial', stop_receipt_id: stopId })).body.error.message, /binding mismatch/);
   });
@@ -112,6 +117,7 @@ if (process.argv.includes('--workspace-host')) {
       assert.throws(() => projects.write({ session_id: entry.session_id, path: name, content: 'x', expected_hash: null }, rarity), /path/);
     }
     assert.throws(() => projects.leave({ session_id: entry.session_id, stop_point: 'pause', next_owner: '' }, rarity), /next_owner/);
+    assert.throws(() => projects.leave({ session_id: entry.session_id, stop_point: 'pause', next_owner: 'rarity', relationship_state: [{ subject_id: 'bluebird' }] }, rarity), /relationship_state/);
   });
 
   test('tampered journal or file objects never become recovered project state', t => {

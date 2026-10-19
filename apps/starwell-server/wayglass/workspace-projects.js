@@ -193,9 +193,16 @@ class WorkspaceProjects {
     if (!['rowan', 'rarity', 'codex'].includes(nextOwner)) throw new Error('next_owner must name rowan, rarity or codex.');
     const questions = args.unresolved_wonder_questions || [];
     const alternatives = args.alternatives || [];
+    const relationships = args.relationship_state || [];
     if (!Array.isArray(questions) || questions.length > 32 || questions.some(value => typeof value !== 'string' || !value.trim() || value.length > 1000)
       || !Array.isArray(alternatives) || alternatives.length > 32 || alternatives.some(value => !value || typeof value !== 'object' || Array.isArray(value))
       || Buffer.byteLength(JSON.stringify(alternatives)) > 32000) throw new Error('Invalid unresolved context.');
+    // References are caller-supplied context, not a grant to declare another participant's truth.
+    if (!Array.isArray(relationships) || relationships.length > 32
+      || relationships.some(value => !value || typeof value !== 'object' || Array.isArray(value)
+        || typeof value.subject_id !== 'string' || !value.subject_id.trim() || value.subject_id.length > 240
+        || typeof value.source_ref !== 'string' || !value.source_ref.trim() || value.source_ref.length > 500)
+      || Buffer.byteLength(JSON.stringify(relationships)) > 16000) throw new Error('Invalid relationship_state: source-linked records required.');
     return this.transaction(events => {
       const binding = this.session(events, args.session_id, actor);
       const snapshot = this.snapshot(events, binding);
@@ -207,6 +214,7 @@ class WorkspaceProjects {
         provenance_refs: [snapshot.revision || 'wayglass:empty-project', `wayglass-session:${binding.session_id}`],
         stop_point: stopPoint, next_owner: nextOwner,
         unresolved_wonder_questions: questions, alternatives,
+        relationship_state: relationships,
       });
       const receipt = this.event(events, actor, binding, 'leave', { departure, project_revision: snapshot.revision });
       return { exited: true, receipt, departure };

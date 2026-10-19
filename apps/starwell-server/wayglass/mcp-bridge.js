@@ -254,7 +254,7 @@ function toolCatalogue(participantId = 'rarity') {
     },
     {
       name: 'leave_workspace', description: 'Exit your session with a durable stop receipt, named next owner and unresolved Wonder context.',
-      inputSchema: { type: 'object', properties: { session_id: { type: 'string' }, stop_point: { type: 'string', maxLength: 1000 }, next_owner: { type: 'string', enum: ['rowan', 'rarity', 'codex'] }, unresolved_wonder_questions: { type: 'array', maxItems: 32, items: { type: 'string', maxLength: 1000 } }, alternatives: { type: 'array', maxItems: 32, items: { type: 'object' } } }, required: ['session_id', 'stop_point', 'next_owner'], additionalProperties: false },
+      inputSchema: { type: 'object', properties: { session_id: { type: 'string' }, stop_point: { type: 'string', maxLength: 1000 }, next_owner: { type: 'string', enum: ['rowan', 'rarity', 'codex'] }, unresolved_wonder_questions: { type: 'array', maxItems: 32, items: { type: 'string', maxLength: 1000 } }, alternatives: { type: 'array', maxItems: 32, items: { type: 'object' } }, relationship_state: { type: 'array', maxItems: 32, items: { type: 'object', required: ['subject_id', 'source_ref'], properties: { subject_id: { type: 'string', maxLength: 240, minLength: 1 }, source_ref: { type: 'string', maxLength: 500, minLength: 1 } } } } }, required: ['session_id', 'stop_point', 'next_owner'], additionalProperties: false },
       annotations: writeLocal, securitySchemes: auth,
     },
   ];
