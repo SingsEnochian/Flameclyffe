@@ -1,11 +1,11 @@
 // Read-only discovery projection of the existing ArcSweep world/canon sources.
 // This is not a second canon registry, a live-world entrance, or a data import.
 import { HOUSE_DR_BUNDLE } from '../../arcsweep/src/house-dr-bundle.js';
-import ARC_CANON_REGISTRY from '../../arcsweep/public/canon/registry.json';
-import STEINS_GATE_PACK from '../../arcsweep/public/canon/steins-gate/canon-pack.json';
-import RECREATORS_PACK from '../../arcsweep/public/canon/recreators/canon-pack.json';
-import SUNDANCER_WORLD from '../../arcsweep/worlds/star-trek-sundancer.world.json';
-import STARSONG_WORLD from '../../arcsweep/worlds/equestria-starsong.world.json';
+import ARC_CANON_REGISTRY from '../../arcsweep/public/canon/registry.json' with { type: 'json' };
+import STEINS_GATE_PACK from '../../arcsweep/public/canon/steins-gate/canon-pack.json' with { type: 'json' };
+import RECREATORS_PACK from '../../arcsweep/public/canon/recreators/canon-pack.json' with { type: 'json' };
+import SUNDANCER_WORLD from '../../arcsweep/worlds/star-trek-sundancer.world.json' with { type: 'json' };
+import STARSONG_WORLD from '../../arcsweep/worlds/equestria-starsong.world.json' with { type: 'json' };
 
 export const WAYGLASS_WORLD_ATLAS_SCHEMA = 'wayglass.world-atlas-projection/v0.1';
 const ID = /^[a-z0-9][a-z0-9:._-]{0,127}$/i;
