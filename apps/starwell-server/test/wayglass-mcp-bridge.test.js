@@ -58,7 +58,7 @@ test('MCP bridge exposes profile, Identify, Send, Receive and Remember', async (
   assert.equal(init.capabilities.tools.listChanged, false);
 
   const listed = await bridge.handleRpc({ method: 'tools/list' });
-  assert.deepEqual(listed.tools.map((tool) => tool.name), ['get_profile', 'list_workspaces', 'enter_workspace', 'read_project', 'write_project_file', 'leave_workspace', 'inspect_workspace_project', 'write_workspace_artifact', 'handoff_workspace_project', 'identify', 'send', 'receive', 'remember']);
+  assert.deepEqual(listed.tools.map((tool) => tool.name), ['get_profile', 'list_workspaces', 'enter_workspace', 'read_project', 'write_project_file', 'leave_workspace', 'list_inquiries', 'open_inquiry', 'read_inquiry', 'invite_to_inquiry', 'join_inquiry', 'contribute_to_inquiry', 'pause_inquiry', 'inspect_workspace_project', 'write_workspace_artifact', 'handoff_workspace_project', 'identify', 'send', 'receive', 'remember']);
   assert.deepEqual(toolCatalogue().map((tool) => tool.name), listed.tools.map((tool) => tool.name));
 });
 

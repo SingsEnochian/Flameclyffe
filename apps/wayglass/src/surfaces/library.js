@@ -1,3 +1,4 @@
+import { mountWayglassInquiryLoom } from './inquiry-loom-panel.js';
 import {
   searchWayglassLibrary,
   listWayglassLibraryWonders,
@@ -97,6 +98,7 @@ export async function mountWayglassLibrarySurface(root) {
         '<button id="wg-lib-complexify" type="button" class="send-jewel" disabled>Complexify selected branch</button>',
         '<p id="wg-lib-status" role="status" class="tiny">Wonder first. Evidence earns jurisdiction later.</p>',
       '</section>',
+      '<section id="wg-inquiry-loom" class="glass-panel" aria-label="Living Inquiry Loom"></section>',
       '<footer class="wg-receipt tiny">Wayglass stores the branch, frame rotations, provenance, and return state. External systems may participate only through explicit adapters.</footer>',
     '</section>',
   ].join('');
@@ -204,6 +206,7 @@ export async function mountWayglassLibrarySurface(root) {
   });
 
   await loadWonders();
+  await mountWayglassInquiryLoom(root.querySelector('#wg-inquiry-loom'));
   try {
     const data = await searchWayglassLibrary({ query: '', limit: 10 });
     results.innerHTML = renderRecords(data.records || []);

@@ -2,13 +2,14 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { randomUUID, timingSafeEqual } = require('node:crypto');
+const { createHash, randomUUID, timingSafeEqual } = require('node:crypto');
 const express = require('express');
 const { FLAMES } = require('../flames/manifests');
 const { resolveCanonicalFlameId, contractRegistryProjection } = require('../flames/contracts');
 const { OAUTH_SCOPE } = require('./oauth-peer');
 const { registrySnapshot } = require('./crew-workspaces');
 const { WorkspaceProjects } = require('./workspace-projects');
+const { createInquiryLoom } = require('./inquiry-loom');
 const { createWorkspaceArtifacts } = require('./workspace-artifacts');
 const { verifyReturn } = require('./bluebird-bridge-trial');
 
@@ -300,7 +301,32 @@ function toolCatalogue(participantId = 'rarity') {
       annotations: writeLocal, securitySchemes: auth,
     },
   ];
-  const result = [...catalogue.slice(0, 3), ...workspaceTools, ...catalogue.slice(3)];
+
+  const inquiryTools = [
+    { name:'list_inquiries', description:'List only inquiries joined by your authenticated seat. No source/canon promotion.',
+      inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:readOnly,securitySchemes:auth },
+    { name:'open_inquiry', description:'Preserve an unresolved question as the authenticated crew seat; source refs remain caller-declared.',
+      inputSchema:{type:'object',properties:{
+        question:{type:'string',minLength:1,maxLength:3000},why_interesting:{type:'string',maxLength:3000},world_ref:{type:'string',maxLength:120},
+        source_refs:{type:'array',items:{type:'string'},maxItems:16}
+      },required:['question'],additionalProperties:false},annotations:writeLocal,securitySchemes:auth },
+    { name:'read_inquiry', description:'Read an inquiry you have joined, its immutable history and unsigned return-marker candidate.',
+      inputSchema:{type:'object',properties:{inquiry_id:{type:'string'}},required:['inquiry_id'],additionalProperties:false},annotations:readOnly,securitySchemes:auth },
+    { name:'invite_to_inquiry', description:'Owner-authored invitation, not permission or a provider call; invitee must separately accept.',
+      inputSchema:{type:'object',properties:{inquiry_id:{type:'string'},target_participant_id:{type:'string',enum:['rarity','codex']},note:{type:'string',maxLength:500}},required:['inquiry_id','target_participant_id'],additionalProperties:false},
+      annotations:writeLocal,securitySchemes:auth },
+    { name:'join_inquiry', description:'Explicitly accept an inquiry invitation as the authenticated crew seat.',
+      inputSchema:{type:'object',properties:{inquiry_id:{type:'string'}},required:['inquiry_id'],additionalProperties:false},annotations:writeLocal,securitySchemes:auth },
+    { name:'contribute_to_inquiry', description:'Append a distinct interpretation/challenge/alternative/revision without replacing prior authorship.',
+      inputSchema:{type:'object',properties:{
+        inquiry_id:{type:'string'},kind:{type:'string',enum:['interpretation','alternative','challenge','revision','observation','new-question','experiment','outcome']},
+        text:{type:'string',minLength:1,maxLength:4000},reply_to:{type:'string',maxLength:160},source_refs:{type:'array',items:{type:'string'},maxItems:16}
+      },required:['inquiry_id','kind','text'],additionalProperties:false},annotations:writeLocal,securitySchemes:auth },
+    { name:'pause_inquiry', description:'Record a locally attributable stop point; does not issue a signed kernel departure or act on next owner.',
+      inputSchema:{type:'object',properties:{inquiry_id:{type:'string'},stop_point:{type:'string',minLength:1,maxLength:1000},next_owner:{type:'string',maxLength:80}},
+        required:['inquiry_id','stop_point'],additionalProperties:false},annotations:writeLocal,securitySchemes:auth },
+  ];
+  const result = [...catalogue.slice(0, 3), ...workspaceTools, ...inquiryTools, ...catalogue.slice(3)];
   return participantId === 'codex' ? result.filter(tool => !['identify', 'send', 'receive', 'remember'].includes(tool.name)) : result;
 }
 
@@ -332,9 +358,12 @@ function createWayglassMcpBridge({
   profileProvider = () => ({ id: 'wayglass-profile-local', name: 'Wayglass', nickname: 'Rarity ⇄ Wayglass' }),
   workspaceArtifacts = createWorkspaceArtifacts(),
   workspaceDirectory = process.env.WAYGLASS_WORKSPACE_DIR || path.join(path.dirname(storePath), 'wayglass-workspace-projects'),
+  inquiryDirectory = process.env.WAYGLASS_INQUIRY_DIRECTORY || path.join(__dirname, '..', 'data', 'wayglass-inquiry-loom.local'),
+  inquiryLoom = null,
 } = {}) {
   const roster = contractRegistryProjection();
   const projects = new WorkspaceProjects({ directory: workspaceDirectory });
+  const inquiries = inquiryLoom || createInquiryLoom({ directory: inquiryDirectory });
 
   async function discoverWayglassRoutes() {
     try {
@@ -669,6 +698,25 @@ function createWayglassMcpBridge({
     if (name === 'read_project') return projects.read(args, auth);
     if (name === 'write_project_file') return projects.write(args, auth);
     if (name === 'leave_workspace') return projects.leave(args, auth);
+
+    if (['list_inquiries','open_inquiry','read_inquiry','invite_to_inquiry','join_inquiry','contribute_to_inquiry','pause_inquiry'].includes(name)) {
+      // This host has already validated the OAuth/crew bearer. Profile identity
+      // is never taken from caller arguments or a model-authored message.
+      if (!auth.profile_id || !['rarity','codex'].includes(auth.participant_id)) throw new Error('Authenticated inquiry crew seat required.');
+      const actor = {
+        verified: true,
+        participant_id: auth.participant_id,
+        principal_ref: createHash('sha256').update(String(auth.type) + ':' + String(auth.profile_id)).digest('hex'),
+      };
+      const { inquiry_id, ...payload } = args;
+      if (name === 'list_inquiries') return inquiries.list(actor);
+      if (name === 'open_inquiry') return inquiries.open(actor, args);
+      if (name === 'read_inquiry') return inquiries.get(actor, inquiry_id);
+      if (name === 'invite_to_inquiry') return inquiries.invite(actor, inquiry_id, payload);
+      if (name === 'join_inquiry') return inquiries.join(actor, inquiry_id, payload);
+      if (name === 'contribute_to_inquiry') return inquiries.contribute(actor, inquiry_id, payload);
+      if (name === 'pause_inquiry') return inquiries.pause(actor, inquiry_id, payload);
+    }
     if (name === 'identify') return identify(args);
     if (name === 'send') return send(args);
     if (name === 'receive') return receive(args);
