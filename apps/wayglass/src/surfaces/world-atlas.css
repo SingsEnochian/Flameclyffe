@@ -1,0 +1,28 @@
+.wg-world-atlas{--wg-atlas-mint:#b0eee8;--wg-atlas-violet:#cbb4e9}
+.wg-atlas-arcsweep-link { align-self:center;min-height:44px;display:inline-flex;align-items:center;padding:.7rem 1rem;border:1px solid rgba(131,225,213,.35);border-radius:.75rem;color:#c9f5ef;text-decoration:none;font-weight:700 }
+.wg-atlas-controls { display:grid; gap:.8rem; padding:1.25rem; border-radius:1.1rem; margin:1rem 0 }
+.wg-atlas-controls>label {color:var(--wg-atlas-mint);font-weight:700;font-size:.9rem}
+.wg-atlas-controls input[type=search] {font:inherit;padding:.8rem 1rem;border-radius:.75rem;border:1px solid rgba(194,172,233,.5);color:#f7f2fc;background:rgba(5,14,21,.72);min-height:48px;width:100%;max-width:48rem}
+.wg-atlas-controls .tiny { margin:0;color:var(--glass-muted); }
+.wg-atlas-intake { border-top:1px solid rgba(183,220,224,.16);padding-top:.85rem; }
+.wg-atlas-intake summary { color:#d0b9f6;cursor:pointer;font-weight:700;min-height:44px; }
+.wg-atlas-intake p {font-size:.83rem;line-height:1.5;max-width:65rem}
+.wg-atlas-intake label {display:block;margin:.75rem 0 .35rem}
+.wg-atlas-intake input {max-width:100%}
+.wg-atlas-list { display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:.9rem; margin-bottom:1rem; }
+.wg-atlas-world {padding:1rem 1.2rem;border-radius:1.1rem;display:flex;flex-direction:column;gap:.75rem;min-width:0}
+.wg-atlas-world-heading {display:flex;flex-wrap:wrap;align-items:start;gap:.5rem;justify-content:space-between}
+.wg-atlas-world h2 {font:500 clamp(1.2rem,1.7vw,1.6rem)/1.16 Georgia,serif;margin:.25rem 0}
+.wg-atlas-world .eyebrow { margin:0; }
+.wg-atlas-source { font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;border:1px solid rgba(179,229,224,.33);padding:.35rem .55rem;border-radius:.45rem;color:#b4ece6;max-width:100%;overflow-wrap:anywhere}
+.wg-atlas-description {line-height:1.55;font-size:.85rem;margin:0;flex-grow:1}
+.wg-atlas-world details {font-size:.8rem;color:#c7d5df}
+.wg-atlas-world details summary {color:#dac7f4;cursor:pointer;padding:.45rem 0}
+.wg-atlas-world details p {line-height:1.45;overflow-wrap:anywhere}
+.wg-atlas-world li {margin:.35rem 0}
+.wg-atlas-enter {min-height:48px;align-self:stretch;font-weight:700}
+.wg-atlas-world button:focus-visible,.wg-atlas-arcsweep-link:focus-visible,.wg-atlas-world summary:focus-visible {outline:2px solid #d7c0ff;outline-offset:3px}
+.wg-atlas-footer {padding:1.25rem;border-radius:1rem;margin:0 0 1rem;line-height:1.6}
+.wg-atlas-footer p {margin:.25rem 0 .6rem}
+.wg-atlas-empty {padding:1.2rem;border-radius:.8rem}
+@media(max-width:630px) {.wg-atlas-list {grid-template-columns:1fr}.wg-atlas-world{padding:.95rem} }
