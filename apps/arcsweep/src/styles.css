@@ -567,3 +567,28 @@ html[data-reduce-motion="true"] *, html[data-reduce-motion="true"] *::before, ht
 @media (prefers-reduced-motion: reduce) {
   .worldweave-acoustic-panel { scroll-behavior: auto; }
 }
+
+/* Explicit ArcSweep → Wayglass crossing; a link, not a context transfer. */
+.wayglass-passage-link {
+  display: grid;
+  grid-template-columns: 1.25rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: .65rem;
+  min-height: 48px;
+  margin: .7rem .65rem;
+  padding: .75rem .85rem;
+  border: 1px solid rgba(173, 148, 234, .65);
+  border-radius: .85rem;
+  background: linear-gradient(130deg, rgba(117, 73, 163, .24), rgba(45, 151, 160, .12));
+  color: #efe7ff;
+  text-decoration: none;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.wayglass-passage-link strong,.wayglass-passage-link small { display: block; }
+.wayglass-passage-link small { color: #c1d6d6; margin-top: .2rem; font-size: .72rem; }
+.wayglass-passage-link:hover,.wayglass-passage-link:focus-visible {
+  outline: 2px solid #e0c4ff;
+  outline-offset: 2px;
+  background: linear-gradient(130deg, rgba(117, 73, 163, .38), rgba(45, 151, 160, .22));
+}
