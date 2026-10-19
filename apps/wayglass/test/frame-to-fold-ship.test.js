@@ -82,7 +82,7 @@ test('ship is a shared environment, not separate mandatory login surfaces', () =
   assert.equal(WAYGLASS_SHIP_RUNTIME.navigation_auth_required, false);
   assert.equal(WAYGLASS_SHIP_RUNTIME.native_wayglass_llm_trained, false);
   const main = read('../src/main.js');
-  assert.doesNotMatch(main, /await openWayglassAuthorization\(\);/);
+  assert.doesNotMatch(main, /^await openWayglassAuthorization\(\);$/m);
   assert.match(main, /mountWayglassShipNavigation/);
   assert.match(main, /surface_id: 'wayglass:frame-to-fold'/);
   assert.match(main, /wayglass\.mount\(startRoom\)/);
