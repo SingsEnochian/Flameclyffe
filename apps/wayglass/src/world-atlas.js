@@ -88,6 +88,23 @@ export function projectWayglassWorldAtlas() {
       related_canon:relatedCanon[p.id] || [],
     });
   }
+  // The Notion Science Adventure Atlas is a reference-only comparison index.
+  // Named titles are distinct research nodes; no full canon package is invented.
+  const sciAdv = [
+    ['science-adventure-atlas','Science Adventure Atlas','Franchise comparative index; title-specific canon and adaptation auditing remain open.'],
+    ['sciadv:chaos-head','CHAOS;HEAD / NOAH','Delusion synchro, real-booting and later CHAOS;CHILD connections.'],
+    ['sciadv:robotics-notes','ROBOTICS;NOTES / ELITE','AR, robotics, institutions and explicit character continuity.'],
+    ['sciadv:chaos-child','CHAOS;CHILD','Later Chaos-side ontology and route-specific continuity.'],
+    ['sciadv:occultic-nine','OCCULTIC;NINE','Related title; precise cross-title mechanics need source audit.'],
+    ['sciadv:anonymous-code','ANONYMOUS;CODE','Nested simulation, save/load and observer-layer questions.'],
+  ];
+  for (const [world_id,name,summary] of sciAdv) add({
+    world_id,name,summary,kind:'related-canon-reference',
+    source_status:'source-linked',canon_status:'research-reference-only',
+    source_refs:['notion:Science Adventure Atlas:3a670290-d9c4-818e-aa1d-cd8b00327f05'],
+    related_canon:['Steins;Gate continuity is not silently merged', 'Title-specific source and adaptation audits remain separate'],
+    source_revision:'2026-07-23',
+  });
   // A companion continuity is addressable without being promoted to an
   // independently ingested Steins;Gate 0 canon pack.
   add({
