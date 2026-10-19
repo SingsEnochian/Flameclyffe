@@ -29,14 +29,13 @@ async function copyTree(from, to) {
     throw new Error(`Wayglass web build missing at: ${source}. Run npm run wayglass:build first.`);
   }
 
+  // The canonical CommonJS runtime is checked into Hearthgate alongside the host.
+  // Never copy potentially stale implementations out of root lib/ during staging.
   const runtime = path.join(repoRoot, 'apps', 'starwell-server', 'wayglass-runtime');
-  await fsp.mkdir(runtime, { recursive: true });
-  await fsp.copyFile(path.join(repoRoot, 'netlify/functions/_shared/house-session.mjs'), path.join(runtime, 'house-session.mjs'));
-  for (const name of await fsp.readdir(path.join(repoRoot, 'lib'))) {
-    if (name.startsWith('wayglass-') && name.endsWith('.cjs')) {
-      await fsp.copyFile(path.join(repoRoot, 'lib', name), path.join(runtime, name));
-    }
+  for (const name of ["wayglass-continuation-packet.cjs","wayglass-departure-store.cjs","wayglass-inheritance-context.cjs","wayglass-kernel.cjs","wayglass-model-observation.cjs","wayglass-reasoning-receipt.cjs","wayglass-return-trial.cjs","wayglass-route-registry.cjs","wayglass-stop-receipt.cjs","wayglass-travelling-inheritance.cjs","wayglass-voyage-messages.cjs","wayglass-voyage-runner.cjs","wayglass-waygate.cjs","wayglass-world-entry.cjs"]) {
+    await fsp.access(path.join(runtime, name));
   }
+  await fsp.access(path.join(runtime, 'house-session.mjs'));
 
   await fsp.rm(destination, { recursive: true, force: true });
   await copyTree(source, destination);

@@ -4,7 +4,7 @@ Canonical Wayglass host and client live under `apps/starwell-server/wayglass/`.
 
 - `client/` contains the browser source, Vite configuration, local development scripts, assets and tests.
 - The sibling host modules (`router.js`, `mcp-bridge.js`, `inquiry-loom.js`, etc.) provide authenticated HTTP/MCP entrances and durable local journal boundaries.
-- `../wayglass-runtime/` is the staged CommonJS runtime and House-session bridge; its `wayglass-*.cjs` modules are currently sourced from repository `lib/` by `client/server-stage.cjs` for compatibility with ArcSweep and other importers. This staging dependency remains a separate consolidation follow-up, not a second authoritative implementation.
+- `../wayglass-runtime/` now contains the tracked, canonical CommonJS runtime and House-session bridge. Root `lib/wayglass-*.cjs` paths are thin compatibility exports for ArcSweep and external callers; staging never copies an implementation over these source files.
 
 Run all source commands at the repository root:
 
