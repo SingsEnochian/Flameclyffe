@@ -147,6 +147,7 @@ shipNav = mountWayglassShipNavigation({
   },
 });
 
-const startRoom = resolveWayglassDeck(globalThis.location?.search || '');
+const roomQuery = new URLSearchParams(globalThis.location?.search || '').get('room');
+const startRoom = roomQuery === 'toybox' ? 'wayglass:toybox' : resolveWayglassDeck(globalThis.location?.search || '');
 await wayglass.mount(startRoom);
 installVoyageInbox();
