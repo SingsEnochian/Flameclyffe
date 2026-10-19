@@ -6,6 +6,7 @@ export const WAYGLASS_SHIP_SCHEMA = 'wayglass.ship-environment/v0.1';
 export const WAYGLASS_DEFAULT_ROUTE = 'local:crow';
 export const WAYGLASS_DECKS = Object.freeze([
   Object.freeze({ room_id:'arcsweep:writing-room', slug:'writing', label:'Writing Room', domain:'cognition' }),
+  Object.freeze({ room_id:'wayglass:world-atlas', slug:'worlds', label:'World Atlas', domain:'navigation' }),
   Object.freeze({ room_id:'wayglass:frame-to-fold', slug:'fold', label:'Fold Observatory', domain:'navigation' }),
   Object.freeze({ room_id:'wayglass:living-observer', slug:'observer', label:'Living Observer', domain:'observation' }),
   Object.freeze({ room_id:'wayglass:library', slug:'library', label:'Research Library', domain:'research' }),
