@@ -1,7 +1,6 @@
 import { authorizationSession } from './authorization-session.js';
 
 export function openWayglassAuthorization({ document = globalThis.document, session = authorizationSession } = {}) {
-  session.clear();
   const dialog = document.createElement('dialog');
   dialog.className = 'wayglass-authorization';
   dialog.setAttribute('aria-labelledby', 'wayglass-authorization-title');
@@ -13,16 +12,26 @@ export function openWayglassAuthorization({ document = globalThis.document, sess
     <input id="wayglass-authorization-code" name="code" type="password" required maxlength="4096" autocomplete="off" autocapitalize="none" spellcheck="false" autofocus>
     <p class="wayglass-authorization__privacy">Enter it each time you open Wayglass. Wayglass does not save this token.</p>
     <p class="wayglass-authorization__error" role="alert" aria-live="polite"></p>
-    <button type="submit">Authorize Wayglass</button>
+    <div class="wayglass-authorization__actions"><button type="button" data-wayglass-auth-skip>Not now · enter ship</button><button type="submit">Connect Bluebird</button></div>
   </form>`;
   const form = dialog.querySelector('form');
   const input = dialog.querySelector('input');
-  const button = dialog.querySelector('button');
+  const button = dialog.querySelector('button[type="submit"]');
+  const skip = dialog.querySelector('[data-wayglass-auth-skip]');
   const error = dialog.querySelector('[role="alert"]');
   document.body.append(dialog);
-  dialog.addEventListener('cancel', event => event.preventDefault());
   dialog.showModal();
   return new Promise(resolve => {
+    let finished = false;
+    const finish = result => {
+      if (finished) return;
+      finished = true;
+      if (dialog.open) dialog.close();
+      dialog.remove();
+      resolve(result);
+    };
+    skip.addEventListener('click', () => { session.clear(); finish({ skipped: true }); });
+    dialog.addEventListener('cancel', event => { event.preventDefault(); session.clear(); finish({ skipped: true }); });
     form.addEventListener('submit', async event => {
       event.preventDefault();
       if (button.disabled) return;
@@ -32,10 +41,9 @@ export function openWayglassAuthorization({ document = globalThis.document, sess
       try {
         await session.authorize(input.value);
         input.value = '';
-        dialog.close();
-        dialog.remove();
-        resolve();
+        finish({ authorized: true });
       } catch (failure) {
+        if (finished) return;
         input.value = '';
         error.textContent = failure.message || 'Authorization failed. Try again.';
         input.focus();
