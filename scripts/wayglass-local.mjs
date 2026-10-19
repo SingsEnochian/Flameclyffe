@@ -9,7 +9,8 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const vite = path.join(root, 'node_modules', 'vite', 'bin', 'vite.js');
 const hostDir = path.join(root, 'apps', 'starwell-server');
 const hostEntry = path.join(hostDir, 'server-secure.js');
-const ui = 'http://127.0.0.1:5186/?room=observer';
+const ui = 'http://127.0.0.1:5186/?room=writing';
+const arcsweepUI = 'http://127.0.0.1:5184/';
 const api = 'http://127.0.0.1:3000/api/v1/wayglass/routes';
 const mcp = 'http://127.0.0.1:3000/mcp';
 const oauthMetadata = 'http://127.0.0.1:3000/.well-known/oauth-protected-resource/mcp';
@@ -22,6 +23,11 @@ export function selectLocalModel(names, selected) {
   if (selected) return selected;
   const available = Array.isArray(names) ? names.filter(x => typeof x === 'string' && x.trim()) : [];
   return ['ornith-1.5:9b', 'ornith-1.5', 'codebooga:latest'].find(x => available.includes(x)) || available[0] || null;
+}
+export function selectCrowModel(names, selected) {
+  if (selected && typeof selected === 'string' && selected.trim()) return selected.trim();
+  const available = Array.isArray(names) ? names.filter(name => typeof name === 'string') : [];
+  return available.find(name => /the[-_ ]?crow|crow.*9b/i.test(name)) || null;
 }
 async function get(url, timeout = 1100) {
   try {
@@ -64,15 +70,21 @@ async function main() {
   const payload = tags ? await tags.json().catch(() => ({})) : {};
   const names = Array.isArray(payload.models) ? payload.models.map(x => x.name).filter(Boolean) : [];
   const model = selectLocalModel(names, process.env.WAYGLASS_LOCAL_MODEL);
+  const crow = selectCrowModel(names, process.env.WAYGLASS_CROW_MODEL);
   const hostIsUp = await hasWayglassAPI();
   console.log('[Wayglass] Hearthgate:', hostIsUp ? 'running' : 'offline');
   console.log('[Wayglass] Ollama:', tags ? 'reachable' : 'offline; visualisation still available');
   console.log('[Wayglass] Local model:', model || '(none detected)');
+  console.log('[Wayglass] Preferred Crow model:', crow || '(not detected; disabled on fresh host)');
   if (process.argv.includes('--doctor')) {
     console.log('[Wayglass] Doctor only; no processes started. Open ' + ui + ' once started.');
     return;
   }
-  const env = { ...process.env, ...(model ? { WAYGLASS_LOCAL_MODEL: model } : {}) };
+  const env = {
+    ...process.env,
+    ...(model ? { WAYGLASS_LOCAL_MODEL: model } : {}),
+    ...(crow ? { WAYGLASS_CROW_MODEL: crow, WAYGLASS_CROW_DISABLED: '0' } : { WAYGLASS_CROW_DISABLED: '1' }),
+  };
   if (!hostIsUp) {
     launch(process.execPath, [hostEntry], hostDir, env);
     if (!(await ready(hasWayglassAPI))) throw new Error('Hearthgate did not become ready on 3000. Check its output and port conflicts.');
@@ -83,7 +95,14 @@ async function main() {
   } else {
     console.log('[Wayglass] Port 5186 already responds; verify it is this Wayglass checkout.');
   }
+  if (!(await get(arcsweepUI))) {
+    launch(process.execPath, [vite, '--config', 'apps/arcsweep/vite.config.js'], root, env);
+    if (!(await ready(async () => !!(await get(arcsweepUI))))) throw new Error('ArcSweep Vite did not become ready on 5184.');
+  } else {
+    console.log('[Wayglass] Port 5184 already responds; verify this is the matching ArcSweep checkout.');
+  }
   console.log('\n[Wayglass] OPEN ON THIS WINDOWS COMPUTER:\n' + ui + '\n');
+  console.log('[Wayglass] ArcSweep onboard:', arcsweepUI);
   console.log('Writing Room API: port 3000; Ollama: port 11434.');
   console.log('[Wayglass] ChatGPT MCP local endpoint: ' + mcp);
   console.log('[Wayglass] OAuth metadata: ' + oauthMetadata);
