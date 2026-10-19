@@ -24,6 +24,11 @@ const repositoryLib = path.resolve(packageRoot, '../../lib');
 const runtime = path.join(packageRoot, 'wayglass-runtime');
 
 test('packaged Wayglass runtime is complete and matches canonical lib sources', () => {
+  const router = fs.readFileSync(path.join(packageRoot, 'wayglass/router.js'), 'utf8');
+  const imported = [...router.matchAll(/require\(['"]\.\.\/wayglass-runtime\/([^'"]+)['"]\)/g)];
+  for (const [, name] of imported) {
+    assert.ok(modules.includes(name), 'router imports an unbundled Wayglass runtime module: ' + name);
+  }
   for (const name of modules) {
     const source = fs.readFileSync(path.join(repositoryLib, name), 'utf8');
     const bundled = fs.readFileSync(path.join(runtime, name), 'utf8');
