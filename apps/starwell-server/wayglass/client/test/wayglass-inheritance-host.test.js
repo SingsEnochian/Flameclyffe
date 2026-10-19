@@ -3,11 +3,11 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { once } from 'node:events';
 import { createHash } from 'node:crypto';
-import inheritanceModule from '../../../lib/wayglass-travelling-inheritance.cjs';
-import contextModule from '../../../lib/wayglass-inheritance-context.cjs';
-import messagesModule from '../../../lib/wayglass-voyage-messages.cjs';
+import inheritanceModule from '../../../../../lib/wayglass-travelling-inheritance.cjs';
+import contextModule from '../../../../../lib/wayglass-inheritance-context.cjs';
+import messagesModule from '../../../../../lib/wayglass-voyage-messages.cjs';
 
-const hostRequire = createRequire(new URL('../../../apps/starwell-server/wayglass/router.js', import.meta.url));
+const hostRequire = createRequire(new URL('../../router.js', import.meta.url));
 const express = hostRequire('express');
 const { createWayglassRouter } = hostRequire('./router.js');
 const { TravellingInheritance } = inheritanceModule;

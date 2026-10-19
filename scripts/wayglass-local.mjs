@@ -78,7 +78,7 @@ async function main() {
     if (!(await ready(hasWayglassAPI))) throw new Error('Hearthgate did not become ready on 3000. Check its output and port conflicts.');
   }
   if (!(await get('http://127.0.0.1:5186/'))) {
-    launch(process.execPath, [vite, '--config', 'apps/wayglass/vite.config.js'], root, env);
+    launch(process.execPath, [vite, '--config', 'apps/starwell-server/wayglass/client/vite.config.js'], root, env);
     if (!(await ready(async () => !!(await get('http://127.0.0.1:5186/'))))) throw new Error('Wayglass Vite did not become ready on 5186.');
   } else {
     console.log('[Wayglass] Port 5186 already responds; verify it is this Wayglass checkout.');

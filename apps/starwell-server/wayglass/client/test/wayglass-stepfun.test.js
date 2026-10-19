@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { once } from 'node:events';
 
-const hostRequire = createRequire(new URL('../../../apps/starwell-server/wayglass/router.js', import.meta.url));
+const hostRequire = createRequire(new URL('../../router.js', import.meta.url));
 const express = hostRequire('express');
 const { createWayglassRouter } = hostRequire('./router.js');
 

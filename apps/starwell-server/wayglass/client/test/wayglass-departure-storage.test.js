@@ -6,9 +6,9 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 import { createRequire } from 'node:module';
-import { createWaygateManifest } from '../../../lib/wayglass-waygate.js';
+import { createWaygateManifest } from '../../../../../lib/wayglass-waygate.js';
 const require = createRequire(import.meta.url);
-const { createDepartureStore } = require('../../../lib/wayglass-departure-store.cjs');
+const { createDepartureStore } = require('../../../../../lib/wayglass-departure-store.cjs');
 
 async function host(directory) {
   const script = `const express=require('./apps/starwell-server/node_modules/express'); const {createWayglassRouter}=require('./apps/starwell-server/wayglass/router'); const {createDepartureStore}=require('./lib/wayglass-departure-store.cjs');const app=express();app.use(express.json());app.use('/api/v1/wayglass',createWayglassRouter({fetchImpl:async(url,options)=>Response.json({message:{content:JSON.stringify(JSON.parse(options.body).messages)}}),departureStore:createDepartureStore({directory:process.env.TRIAL_DIRECTORY})}));const server=app.listen(0,'127.0.0.1',()=>console.log(server.address().port));`;

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createWayglassGatewayHandler } from '../../../api/_shared/wayglass-gateway.mjs';
+import { createWayglassGatewayHandler } from '../../../../../api/_shared/wayglass-gateway.mjs';
 
 const env = { get: key => ({ HEARTHGATE_GATEWAY_URL: 'https://host.example', HEARTHGATE_GATEWAY_TOKEN: 'fixture-host-token' })[key] };
 test('gateway authenticates before invoking the host and fails closed without configuration', async () => {

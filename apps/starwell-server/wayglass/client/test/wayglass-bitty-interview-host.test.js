@@ -4,7 +4,7 @@ import { createRequire } from 'node:module';
 import { once } from 'node:events';
 import { EMERGENCE_QUESTIONS, bittyTwiQuestionPrompt } from '../src/emergence-questions.js';
 
-const requireFromHost = createRequire(new URL('../../starwell-server/wayglass/router.js', import.meta.url));
+const requireFromHost = createRequire(new URL('../../router.js', import.meta.url));
 const express = requireFromHost('express');
 const { createWayglassRouter } = requireFromHost('./router.js');
 

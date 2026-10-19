@@ -5,7 +5,7 @@ on:
     branches: ['wayglass/current']
   pull_request:
     paths:
-      - 'apps/wayglass/**'
+      - 'apps/starwell-server/wayglass/client/**'
       - 'apps/starwell-server/wayglass/**'
       - 'apps/starwell-server/wayglass-runtime/**'
       - 'apps/starwell-server/test/wayglass-*.test.js'

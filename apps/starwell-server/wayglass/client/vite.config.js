@@ -1,10 +1,10 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  root: 'apps/wayglass',
+  root: 'apps/starwell-server/wayglass/client',
   base: './',
   build: {
-    outDir: '../../dist/wayglass',
+    outDir: '../../../../dist/wayglass',
     emptyOutDir: true,
   },
   server: {

@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { createWaygateManifest } from '../../../lib/wayglass-waygate.js';
-import { createContinuationPacket } from '../../../lib/wayglass-continuation-packet.js';
-import { enterWayglassWorld } from '../../../lib/wayglass-world-entry.js';
+import { createWaygateManifest } from '../../../../../lib/wayglass-waygate.js';
+import { createContinuationPacket } from '../../../../../lib/wayglass-continuation-packet.js';
+import { enterWayglassWorld } from '../../../../../lib/wayglass-world-entry.js';
 
 function gate(overrides = {}) {
   return createWaygateManifest({

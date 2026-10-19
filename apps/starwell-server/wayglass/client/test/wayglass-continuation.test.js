@@ -4,8 +4,8 @@ import assert from 'node:assert/strict';
 import {
   createContinuationPacket,
   inspectContinuationPacket,
-} from '../../../lib/wayglass-continuation-packet.js';
-import kernelModule from '../../../lib/wayglass-kernel.cjs';
+} from '../../../../../lib/wayglass-continuation-packet.js';
+import kernelModule from '../../../../../lib/wayglass-kernel.cjs';
 
 const { bootWayglassKernel } = kernelModule;
 

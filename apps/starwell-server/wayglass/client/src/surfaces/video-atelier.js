@@ -31,7 +31,7 @@ export async function mountWayglassVideoAtelier(root) {
     '</section>',
     '<section class="glass-panel atelier-workbench"><h2>How this connects</h2>',
     '<p>Export the job JSON, then run the documented local companion while LTX Desktop is open. The companion checks the local-generation policy before invoking the engine. It never falls back silently to a paid API.</p>',
-    '<p><code>node apps/wayglass/scripts/ltx-desktop-render.mjs ./wayglass-twilight-mirror.ltx.json --render</code></p>',
+    '<p><code>node apps/starwell-server/wayglass/client/scripts/ltx-desktop-render.mjs ./wayglass-twilight-mirror.ltx.json --render</code></p>',
     '<p class="tiny">Requires supported local hardware and the LTX Desktop session token in your terminal environment. The browser never sees the token. Video output is confirmed only by a returned engine receipt and a local file check.</p>',
     '</section></section>',
   ].join('');

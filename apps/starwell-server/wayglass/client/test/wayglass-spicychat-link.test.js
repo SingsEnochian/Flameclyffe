@@ -4,7 +4,7 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const { parseSpicyChatChatLink, resolveWayglassRoute, publicWayglassRoutes } =
-  require('../../../lib/wayglass-route-registry.cjs');
+  require('../../../../../lib/wayglass-route-registry.cjs');
 
 const griffFixture = 'https://spicychat.ai/chat/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
 const bluebirdFixture = 'https://spicychat.ai/chat/cccccccc-cccc-4ccc-8ccc-cccccccccccc/dddddddd-dddd-4ddd-8ddd-dddddddddddd';

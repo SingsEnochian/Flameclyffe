@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const fsp = require('node:fs/promises');
 const path = require('node:path');
 
-const repoRoot = path.resolve(__dirname, '../..');
+const repoRoot = path.resolve(__dirname, '../../../..');
 const source = path.join(repoRoot, 'dist', 'wayglass');
 const destination = path.join(repoRoot, 'apps', 'starwell-server', 'public', 'wayglass');
 

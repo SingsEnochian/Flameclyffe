@@ -7,13 +7,13 @@ import {
   createPresenceLineageReceipt,
   PRESENCE_SCHEMA,
   PRESENCE_LINEAGE_RECEIPT_SCHEMA,
-} from '../../arcsweep/src/presence-fabric.js';
+} from '../../../../arcsweep/src/presence-fabric.js';
 import {
   worldseedBraidSnapshot,
   WORLDSEED_BRAID_SCHEMA,
   CANON_CARRY_RECEIPT_SCHEMA,
   CANON_SEED_RECEIPT_SCHEMA,
-} from '../../arcsweep/src/worldseed-braid.js';
+} from '../../../../arcsweep/src/worldseed-braid.js';
 import {
   listSomaticCues,
   getSomaticCue,
@@ -21,7 +21,7 @@ import {
   stopSomaticCue,
   SOMATIC_CUE_SCHEMA,
   SOMATIC_RECEIPT_SCHEMA,
-} from '../../arcsweep/src/somatic-runtime.js';
+} from '../../../../arcsweep/src/somatic-runtime.js';
 
 export const presenceOrgan = createWayglassOrgan({
   organ_id: 'wayglass.organ.presence-nervous-system',
@@ -67,7 +67,7 @@ export const livingObserverOrgan = createWayglassOrgan({
   authority_ceiling: ['observe-local-ui', 'render-local-feedback', 'propose-user-reviewed-model-input', 'propose-self-development'],
   receipt_schemas: ['wayglass.observer-reading/v1','wayglass.observer-projection/v1','wayglass.observer-interior/v0.2','wayglass.observer-self-development/v0.1'],
   embodiment_hooks: ['local-motion-preference','explicit-local-audio'],
-  evidence: ['apps/wayglass/test/wayglass-living-observer.test.js'],
+  evidence: ['apps/starwell-server/wayglass/client/test/wayglass-living-observer.test.js'],
   adapter: { createWayglassObservation },
 });
 
@@ -81,7 +81,7 @@ export const voiceConsentOrgan = createWayglassOrgan({
   authority_ceiling: ['gate-local-audio-transfer', 'halt-local-capture', 'observe-transcript-proposals'],
   receipt_schemas: [WAYGLASS_VOICE_BOUNDARY_SCHEMA, 'wayglass.voice-transcript-observation/v0.1'],
   embodiment_hooks: ['reconfirm-microphone-consent-on-return', 'fall-back-to-text-if-voice-unavailable'],
-  evidence: ['apps/wayglass/test/wayglass-voice-boundary.test.js', 'docs/wayglass/STEPFUN_PROVIDER_AND_AUDIO_2026-10-08.md'],
+  evidence: ['apps/starwell-server/wayglass/client/test/wayglass-voice-boundary.test.js', 'docs/wayglass/STEPFUN_PROVIDER_AND_AUDIO_2026-10-08.md'],
   adapter: { createWayglassVoiceBoundary },
 });
 
