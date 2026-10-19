@@ -9,21 +9,13 @@ const test = require('node:test');
 
 // Electron packages apps/starwell-server independently of repository-root lib/.
 // Keep this list aligned with router.js and its transitive CommonJS dependencies.
-const modules = [
-  "wayglass-route-registry.cjs",
-  "wayglass-kernel.cjs",
-  "wayglass-world-entry.cjs",
-  "wayglass-stop-receipt.cjs",
-  "wayglass-departure-store.cjs",
-  "wayglass-model-observation.cjs",
-  "wayglass-continuation-packet.cjs",
-  "wayglass-waygate.cjs"
-];
+const repositoryLib = path.resolve(__dirname, '../../../lib');
+const modules = fs.readdirSync(repositoryLib).filter(name => /^wayglass-.*\.cjs$/.test(name));
 const packageRoot = path.resolve(__dirname, '..');
-const repositoryLib = path.resolve(packageRoot, '../../lib');
 const runtime = path.join(packageRoot, 'wayglass-runtime');
 
-test('packaged Wayglass runtime is complete and matches canonical lib sources', () => {
+test('staged Wayglass runtime is complete and matches canonical lib sources', () => {
+  assert.ok(fs.existsSync(path.join(packageRoot, 'public/wayglass/index.html')), 'Wayglass UI must be staged before host tests');
   const router = fs.readFileSync(path.join(packageRoot, 'wayglass/router.js'), 'utf8');
   const imported = [...router.matchAll(/require\(['"]\.\.\/wayglass-runtime\/([^'"]+)['"]\)/g)];
   for (const [, name] of imported) {
@@ -43,7 +35,7 @@ test('packaged Wayglass runtime is complete and matches canonical lib sources', 
   }
 });
 
-test('packaged Wayglass runtime loads and retains distinct identities without repository lib/', (t) => {
+test('staged Wayglass runtime loads and retains distinct identities without repository lib/', (t) => {
   const isolated = fs.mkdtempSync(path.join(os.tmpdir(), 'wayglass-runtime-package-'));
   t.after(() => fs.rmSync(isolated, { recursive: true, force: true }));
   for (const name of modules) fs.copyFileSync(path.join(runtime, name), path.join(isolated, name));
