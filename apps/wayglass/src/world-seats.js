@@ -1,4 +1,4 @@
-import { WAYGLASS_SOURCE_WORLDS, listWayglassAtlasWorlds } from './world-atlas.js';
+import { listWayglassAtlasWorlds } from './world-atlas.js';
 // Wayglass-facing world seats are discovery/context records, not provider credentials
 // or self-authored identity declarations. Keep worlds separate from model routes.
 export const WAYGLASS_WORLD_SEATS = Object.freeze([
@@ -34,13 +34,6 @@ export const WAYGLASS_WORLD_SEATS = Object.freeze([
       'owner-request:Wayglass world/participant addition 2026-10-14',
     ]),
   }),
-  ...WAYGLASS_SOURCE_WORLDS.map(world => Object.freeze({
-    world_id:world.world_id, name:world.name, kind:world.kind,
-    description:world.summary, character:null,
-    provenance:world.source_refs, atlas_source_status:world.source_status,
-    canon_status:world.canon_status, transport_status:world.transport_status,
-    related_canon:world.related_canon,
-  })),
 ]);
 
 // A local owner export may add *ephemeral navigation labels* without modifying
