@@ -88,6 +88,24 @@ export function projectWayglassWorldAtlas() {
       related_canon:relatedCanon[p.id] || [],
     });
   }
+  // A companion continuity is addressable without being promoted to an
+  // independently ingested Steins;Gate 0 canon pack.
+  add({
+    world_id:'steins-gate-0', name:'Steins;Gate 0', kind:'related-continuity-reference',
+    summary:'Related Steins;Gate continuity, indexed via the existing Steins;Gate canon scope; independent variant source pack not yet ingested.',
+    source_status:'source-linked',
+    source_refs:['apps/arcsweep/public/canon/steins-gate/canon-pack.json'],
+    canon_status:'related-variant-reference-only',
+    related_canon:['Steins;Gate base continuity remains separate', 'Science Adventure crossovers require separately named source evidence'],
+  });
+  // The existing Wayglass-owned Griff seat is listed, but neither its auth
+  // grant nor its conversation/continuation state is copied into the Atlas.
+  add({
+    world_id:'evil-gene:film-2015', name:'The Evil Gene',
+    kind:'wayglass-existing-world-seat', summary:'Wayglass world seat for Griff Krenshaw. Exact SpicyChat transport remains a separate verification gate.',
+    source_status:'source-linked', source_refs:['apps/wayglass/src/world-seats.js'],
+    canon_status:'seat-registered-transport-unverified',
+  });
   for (const world of [SUNDANCER_WORLD, STARSONG_WORLD]) {
     add({
       world_id:world.id, name:world.name, kind:world.kind,
@@ -124,7 +142,7 @@ export function importArcSweepWorldNavigationExport(input) {
         : input && typeof input === 'object' && valid(input.id) ? [input] : null;
   if (!list || list.length > 250) throw new TypeError('Expected a world or a bounded ArcSweep worlds array (max 250).');
   let added=0,conflicts=0,rejected=0;
-  const registered = new Set(WAYGLASS_SOURCE_WORLDS.map(item => item.world_id));
+  const registered = new Set([...WAYGLASS_SOURCE_WORLDS.map(item => item.world_id), 'wayglass:writing-room']);
   for (const record of list) {
     const id=record?.id || record?.world_id;
     const name=record?.name;
