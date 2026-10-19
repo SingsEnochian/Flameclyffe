@@ -1,3 +1,4 @@
+import { listWayglassAtlasWorlds } from './world-atlas.js';
 // Wayglass-facing world seats are discovery/context records, not provider credentials
 // or self-authored identity declarations. Keep worlds separate from model routes.
 export const WAYGLASS_WORLD_SEATS = Object.freeze([
@@ -35,11 +36,32 @@ export const WAYGLASS_WORLD_SEATS = Object.freeze([
   }),
 ]);
 
+// A local owner export may add *ephemeral navigation labels* without modifying
+// the ArcSweep World Registry or silently importing personal records.
+export function listWayglassWorldSeats() {
+  const existing = new Set(WAYGLASS_WORLD_SEATS.map(world => world.world_id));
+  return Object.freeze([
+    ...WAYGLASS_WORLD_SEATS,
+    ...listWayglassAtlasWorlds()
+      .filter(world => !existing.has(world.world_id))
+      .map(world => Object.freeze({
+        world_id:world.world_id, name:world.name, kind:world.kind,
+        character:null, description:world.summary, provenance:world.source_refs,
+        atlas_source_status:world.source_status, canon_status:world.canon_status,
+        transport_status:world.transport_status,
+      })),
+  ]);
+}
+
 export function findWayglassWorldSeat(worldId) {
-  return WAYGLASS_WORLD_SEATS.find(world => world.world_id === worldId) || null;
+  return listWayglassWorldSeats().find(world => world.world_id === worldId) || null;
 }
 
 export function wayglassWorldStatus(world) {
-  if (!world?.character) return 'Wayglass writing desk · route selection remains independent.';
-  return world.character.name + ' · ' + world.character.provider + ' conversation archived; live character/chat binding unverified. Choose an available route separately. No identity or canon merge.';
+  if (!world) return 'No selected world record.';
+  if (world.character) return world.character.name + ' · ' + world.character.provider + ' conversation archived; live character/chat binding unverified. Choose an available route separately. No identity or canon merge.';
+  if (world.atlas_source_status === 'awaiting-source-reconciliation') return 'Destination indexed by request · original world record and canon not yet reconciled. Navigation only.';
+  if (world.atlas_source_status === 'owner-session-only') return 'Owner-selected navigation label only · local record not imported and not persisted.';
+  if (world.atlas_source_status === 'source-linked') return 'ArcSweep source-linked world · canon scope and provider transport remain independent. Not a verified crossing.';
+  return 'Wayglass writing desk · route selection remains independent.';
 }

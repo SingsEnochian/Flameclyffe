@@ -1,0 +1,88 @@
+/* ArcSweep ↔ Wayglass crossing: deliberate, visible, keyboard and mobile friendly. */
+.wg-passage-board {
+  display: grid;
+  gap: .85rem;
+  padding: clamp(1rem, 3vw, 1.4rem);
+  border-radius: 1.25rem;
+  border-color: rgba(176, 148, 238, .52);
+  background: linear-gradient(125deg, rgba(89, 55, 134, .26), rgba(20, 71, 79, .32)), var(--glass-fill-deep);
+}
+.wg-passage-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1.2rem;
+}
+.wg-passage-intro h2 {
+  margin: 0 0 .45rem;
+  color: #f0e3ff;
+  font: 500 clamp(1.5rem, 3vw, 2rem)/1.15 Georgia, serif;
+}
+.wg-passage-intro p { margin: .3rem 0; }
+.wg-passage-source { color: #d7f7f6; font-weight: 700; overflow-wrap: anywhere; }
+.wg-passage-caution {
+  display: block;
+  margin: .55rem 0;
+  color: #eedec0;
+  font-size: .87rem;
+  line-height: 1.45;
+}
+.wg-passage-return {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: .8rem 1rem;
+  min-height: 48px;
+  border: 1px solid rgba(185, 146, 235, .6);
+  border-radius: .85rem;
+  background: rgba(13, 23, 32, .82);
+  color: #f2e7ff;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.wg-passage-return:hover,.wg-passage-return:focus-visible,
+.wg-passage-notes a:focus-visible {
+  outline: 2px solid #ead6ff;
+  outline-offset: 3px;
+  background: rgba(101, 73, 135, .32);
+}
+.wg-passage-notes {
+  padding-top: .75rem;
+  border-top: 1px solid rgba(185, 146, 235, .32);
+}
+.wg-passage-notes summary {
+  cursor: pointer;
+  font-size: .87rem;
+  font-weight: 700;
+  color: #d6f4f3;
+}
+.wg-passage-date {
+  margin-left: .5rem;
+  font-weight: 400;
+  color: var(--glass-muted);
+}
+.wg-passage-notes ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(min(100%, 235px), 1fr));
+  gap: .5rem;
+  margin: .85rem 0;
+  padding: 0;
+  list-style: none;
+}
+.wg-passage-notes li {
+  padding: .65rem .75rem;
+  background: rgba(4, 14, 21, .55);
+  border: 1px solid rgba(211, 225, 243, .12);
+  border-radius: .7rem;
+}
+.wg-passage-notes a { display: inline-block; color: #d9c3ff; }
+.wg-passage-notes li small { display: block; margin-top: .3rem; color: var(--glass-muted); line-height: 1.35; }
+@media (max-width: 650px) {
+  .wg-passage-intro { grid-template-columns: 1fr; }
+  .wg-passage-return { width: 100%; white-space: normal; }
+  .wg-passage-date { display: block; margin: .25rem 0 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wg-passage-board, .wg-passage-board * { scroll-behavior: auto; transition: none; animation: none; }
+}

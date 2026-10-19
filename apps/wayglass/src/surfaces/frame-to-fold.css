@@ -1,0 +1,31 @@
+.wg-frame-lab { --frame-purple:#cdb1f0; --frame-cyan:#b1f5eb; }
+.wg-frame-evidence { display:grid; gap:.55rem; align-content:center; font-size:.84rem; color:var(--glass-muted); }
+.wg-frame-evidence strong { color:var(--frame-cyan); font-size:1.1rem; }
+.wg-frame-console { display:grid; grid-template-columns:minmax(0, .85fr) minmax(0, 1.15fr); padding:clamp(1rem,2.8vw,2.25rem); gap:clamp(1.5rem,3vw,2.5rem); border-radius:1.5rem; }
+.wg-frame-controls { display:grid; align-content:start; gap:.8rem; }
+.wg-frame-controls label { font-weight:700; font-size:.84rem; color:var(--frame-cyan); }
+.wg-frame-controls input[type=range] { width:100%; accent-color:#bb9ce2; min-height:44px; }
+.wg-frame-controls select { color:#f5eefc; min-height:48px; background:#111923; }
+.wg-frame-action-row { display:flex; flex-wrap:wrap; gap:.5rem; }
+.wg-frame-action-row button,.wg-frame-record button { min-height:48px; white-space:normal; text-align:center; }
+.wg-frame-stop { border-color:#e6be98!important; }
+.wg-frame-stereo { display:flex; gap:.6rem; align-items:center; }
+.wg-frame-stereo input { width:1.15rem; height:1.15rem; accent-color:#bb9ce2; }
+.wg-frame-controls .tiny { color:var(--glass-muted); line-height:1.5; }
+.wg-frame-plane { display:grid; gap:1rem; align-content:start; background:radial-gradient(ellipse at center,rgba(156,112,228,.11),transparent 70%); padding:1.25rem 0; }
+.wg-frame-axis { display:flex; justify-content:space-between; gap:.5rem; color:var(--frame-cyan); font-size:.75rem; }
+.wg-frame-travel { height:100px; position:relative; display:flex; align-items:center; border-top:1px solid rgba(129,218,208,.2); border-bottom:1px solid rgba(129,218,208,.2); background:linear-gradient(90deg,rgba(78,113,164,.08),rgba(197,128,238,.19) 50%,rgba(78,113,164,.08)); overflow:visible; }
+.wg-frame-zero { position:absolute; left:50%; height:100%; width:2px; background:var(--frame-purple); box-shadow:0 0 24px 8px rgba(185,146,235,.30); }
+.wg-frame-cursor { position:absolute; top:50%; width:19px; height:19px; border:2px solid #e4f5ff; border-radius:50%; background:#8266c2; box-shadow:0 0 18px #ad9aea; transform:translate(-50%,-50%); }
+.wg-frame-cursor i { display:block; position:absolute; inset:5px; background:white; border-radius:50%; }
+.wg-frame-plane-state { color:var(--frame-purple); font-weight:700; letter-spacing:.06em; text-transform:uppercase; font-size:.82rem; margin:0; }
+.wg-frame-metrics { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.6rem; margin:0; }
+.wg-frame-metrics div { padding:.75rem; border:1px solid rgba(223,245,252,.16); border-radius:.7rem; background:rgba(4,10,19,.5); overflow-wrap:anywhere; }
+.wg-frame-metrics dt { color:var(--glass-muted); font-size:.76rem; }
+.wg-frame-metrics dd { margin:.35rem 0 0; color:#f8f1ff; font-size:1rem; font-variant-numeric:tabular-nums; font-weight:700; }
+.wg-frame-result { margin:0; color:#f6e3bd; line-height:1.5; }
+.wg-frame-record { display:flex; flex-wrap:wrap; justify-content:space-between; gap:1rem; padding:1.1rem; border-radius:1rem; }
+.wg-frame-record h2 { font:500 1.7rem/1.2 Georgia,serif; margin:0; }
+.wg-frame-record p { max-width:42rem; }
+@media(max-width:760px) { .wg-frame-console { grid-template-columns:1fr; } .wg-frame-evidence { align-content:start; } }
+@media(prefers-reduced-motion:reduce) { .wg-frame-lab *, .wg-frame-lab *::before,.wg-frame-lab *::after { animation:none!important;transition:none!important; } }

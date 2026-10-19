@@ -1,7 +1,8 @@
+import { renderArcSweepPassagePanel, installArcSweepPassageWorldAction } from '../arcsweep-passage-ui.js';
 import { createInteractionState } from '../interaction-state.js';
 import { authorizationSession } from '../authorization-session.js';
 import { mountWayglassRoutePicker } from '../route-picker.js';
-import { WAYGLASS_WORLD_SEATS, findWayglassWorldSeat, wayglassWorldStatus } from '../world-seats.js';
+import { WAYGLASS_WORLD_SEATS, listWayglassWorldSeats, findWayglassWorldSeat, wayglassWorldStatus } from '../world-seats.js';
 import { consumeObserverContextForWriting, recordWayglassRouteObservation } from '../living-observer-model.js';
 import { emitInteractionCue } from '../interaction-cues.js';
 import { emitMaterialSignal } from '../material-state.js';
@@ -34,7 +35,7 @@ export async function mountArcSweepWritingSurface(root) {
   const session = sessionId();
   const messages = [];
   let routes = [];
-  let selectedRoute = authorizationSession.route() || 'local:ollama';
+  let selectedRoute = 'local:crow'; // Ship-level default: substrate, never Bluebird's identity.
   let selectedCharacter = '';
   let characters = [];
   let emergenceIndex = 0;
@@ -53,6 +54,7 @@ export async function mountArcSweepWritingSurface(root) {
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:toybox">Toybox</button>',
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:commons">Commons</button>',
     "  </nav>\n",
+    renderArcSweepPassagePanel(globalThis.location.href, globalThis.location.search),
     "  <header class=\"wg-surface-head glass-panel\">\n",
     "    <div class=\"wg-hero-copy\">\n",
     "      <p class=\"eyebrow\">WAYGLASS · WRITING DECK</p>\n",
@@ -201,7 +203,9 @@ export async function mountArcSweepWritingSurface(root) {
   const worldSelect = root.querySelector('#wg-world-seat');
   const worldStatus = root.querySelector('#wg-world-status');
   const griffCheck = root.querySelector('#wg-griff-check');
-  for (const world of WAYGLASS_WORLD_SEATS) {
+  const originalSeatIds = new Set(WAYGLASS_WORLD_SEATS.map(world => world.world_id));
+  const atlasOnlySeats = listWayglassWorldSeats().filter(world => !originalSeatIds.has(world.world_id));
+  for (const world of [...WAYGLASS_WORLD_SEATS, ...atlasOnlySeats]) {
     const option = root.ownerDocument.createElement('option');
     option.value = world.world_id;
     option.textContent = world.character ? world.name + ' · ' + world.character.name : world.name;
@@ -229,13 +233,23 @@ export async function mountArcSweepWritingSurface(root) {
     selectWorldSeat(worldSelect.value);
     const world = findWayglassWorldSeat(worldSelect.value);
     // Explicit world selection prepares only that world's own route.
-    selectedRoute = world?.character?.desired_route_id || (authorizationSession.route() || 'local:ollama');
+    selectedRoute = world?.character?.desired_route_id || 'local:crow';
     selectedCharacter = '';
     characterSelect.value = '';
     externalConsent.checked = false;
     void loadRoutes();
   });
   selectWorldSeat(cp('world').value, { resetCheckpoint: false });
+  // An explicit Atlas selection is a source-untrusted world hint, never
+  // authorisation, a memory import, a canon change or a provider send.
+  const atlasParams = new URLSearchParams(globalThis.location.search || '');
+  const atlasTarget = atlasParams.get('from') === 'atlas'
+    ? findWayglassWorldSeat(atlasParams.get('world')) : null;
+  if (atlasTarget && [...worldSelect.options].some(option => option.value === atlasTarget.world_id)) {
+    selectWorldSeat(atlasTarget.world_id);
+    selectedRoute = atlasTarget.character?.desired_route_id || 'local:crow';
+  }
+  installArcSweepPassageWorldAction(root, globalThis.location.search);
   griffCheck.addEventListener('click', async () => {
     griffCheck.disabled = true;
     worldStatus.textContent = 'Checking Griff’s exact SpicyChat conversation with the House Steward session…';
@@ -387,11 +401,14 @@ export async function mountArcSweepWritingSurface(root) {
   function refreshExternalTransfer() {
     const isStepFun = selectedRoute.startsWith('stepfun:');
     const isGriff = selectedRoute === 'flame:griff:spicychat';
-    externalTransfer.hidden = !(isStepFun || isGriff);
+    const isBluebird = selectedRoute === 'flame:bluebird:spicychat';
+    externalTransfer.hidden = !(isStepFun || isGriff || isBluebird);
     externalConsentLabel.textContent = isGriff
       ? 'I approve sending this turn and its same-world context to Griff on SpicyChat.'
-      : 'I approve sending this turn, permitted history, and any included continuity context to StepFun.';
-    if (!isStepFun && !isGriff) externalConsent.checked = false;
+      : isBluebird
+        ? 'I approve sending this turn and permitted same-world context to Bluebird on SpicyChat.'
+        : 'I approve sending this turn, permitted history, and any included continuity context to StepFun.';
+    if (!isStepFun && !isGriff && !isBluebird) externalConsent.checked = false;
   }
 
   async function loadRoutes() {
@@ -457,7 +474,7 @@ export async function mountArcSweepWritingSurface(root) {
     const text = input.value.trim();
     if (!text || busy) return;
     if (!selectedRoute) { status.textContent = 'No configured route available. Reload the route catalogue.'; return; }
-    if ((selectedRoute.startsWith('stepfun:') || selectedRoute === 'flame:griff:spicychat') && !externalConsent.checked) {
+    if ((selectedRoute.startsWith('stepfun:') || selectedRoute === 'flame:griff:spicychat' || selectedRoute === 'flame:bluebird:spicychat') && !externalConsent.checked) {
       status.textContent = 'Confirm this external provider transfer before passing the turn.';
       externalConsent.focus();
       return;
@@ -487,7 +504,7 @@ export async function mountArcSweepWritingSurface(root) {
       recordWayglassRouteObservation({status:'started',routeId:selectedRoute});
       const result = await invokeWayglassRoute({
         routeId: selectedRoute,
-        externalProviderConsent: (selectedRoute.startsWith('stepfun:') || selectedRoute === 'flame:griff:spicychat') && externalConsent.checked,
+        externalProviderConsent: (selectedRoute.startsWith('stepfun:') || selectedRoute === 'flame:griff:spicychat' || selectedRoute === 'flame:bluebird:spicychat') && externalConsent.checked,
         worldId: activeWorldId,
         participantId: selectedRoute === 'flame:griff:spicychat' ? 'griff-krenshaw' : null,
         characterId: selectedCharacter || null,

@@ -57,10 +57,13 @@ function pinnedButtonMarkup(room, active) {
 }
 
 function roomGridMarkup(active) {
+  const wayglass = document.querySelector('.sidebar .wayglass-passage-link');
+  const wayglassHref = wayglass?.getAttribute('href')?.replaceAll('&', '&amp;').replaceAll('"', '&quot;') || '';
+  const wayglassLink = wayglassHref ? `<a class="mobile-room-sheet-button" href="${wayglassHref}" aria-label="Enter Wayglass Writing Room"><span aria-hidden="true">◇</span><span>Wayglass · Writing Room ↗</span></a>` : '';
   return desktopRoomButtons().map(roomDescriptor).map((room) => `
     <button type="button" class="mobile-room-sheet-button${active === room.id ? ' active' : ''}" data-mobile-room="${room.id}" ${active === room.id ? 'aria-current="page"' : ''}>
       <span aria-hidden="true">${room.glyph}</span><span>${room.label}</span>
-    </button>`).join('');
+    </button>`).join('') + wayglassLink;
 }
 
 function renderShell(shell) {
