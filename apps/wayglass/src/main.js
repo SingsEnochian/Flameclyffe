@@ -1,4 +1,5 @@
 import './styles.css';
+import './arcsweep-passage.css';
 import './authorization.css';
 import { openWayglassAuthorization } from './authorization.js';
 import { installWayglassField } from './glass-field.js';
