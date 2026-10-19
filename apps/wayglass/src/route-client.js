@@ -31,8 +31,21 @@ export async function listWayglassRoutes(fetchImpl = fetch) {
   const response = await fetchImpl('/api/v1/wayglass/routes', { cache: 'no-store' });
   const catalogue = await jsonOrThrow(response);
   const bluebirdRoute = authorizationSession.route();
-  if (bluebirdRoute && Array.isArray(catalogue.routes) && !catalogue.routes.some(route => route.route_id === bluebirdRoute)) {
-    catalogue.routes.unshift({ route_id: bluebirdRoute, label: 'Bluebird · SpicyChat', provider: 'spicychat', model: 'provider-managed', configured: true, connection_verified: true, capabilities: { text: true, local: false } });
+  // Successful, ephemeral Bluebird authorisation may enable that *one* route
+  // in this browser session. It is not upstream connection verification.
+  if (bluebirdRoute === 'flame:bluebird:spicychat' && Array.isArray(catalogue.routes)) {
+    const index = catalogue.routes.findIndex(route => route.route_id === bluebirdRoute);
+    const currentlyListed = index < 0 ? null : catalogue.routes[index];
+    const authorised = {
+      ...(currentlyListed || { route_id: bluebirdRoute, label:'Bluebird · SpicyChat', provider:'spicychat', model:'provider-managed', capabilities:{text:true,local:false} }),
+      configured: true,
+      session_authorized: true,
+      connection_verified: false,
+      unavailable_reason: null,
+    };
+    catalogue.routes = [...catalogue.routes];
+    if (index >= 0) catalogue.routes[index] = authorised;
+    else catalogue.routes.unshift(authorised);
   }
   return catalogue;
 }
