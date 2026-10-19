@@ -35,7 +35,7 @@ export async function mountArcSweepWritingSurface(root) {
   const session = sessionId();
   const messages = [];
   let routes = [];
-  let selectedRoute = authorizationSession.route() || 'local:ollama';
+  let selectedRoute = 'local:crow'; // Ship-level default: substrate, never Bluebird's identity.
   let selectedCharacter = '';
   let characters = [];
   let emergenceIndex = 0;
@@ -231,7 +231,7 @@ export async function mountArcSweepWritingSurface(root) {
     selectWorldSeat(worldSelect.value);
     const world = findWayglassWorldSeat(worldSelect.value);
     // Explicit world selection prepares only that world's own route.
-    selectedRoute = world?.character?.desired_route_id || (authorizationSession.route() || 'local:ollama');
+    selectedRoute = world?.character?.desired_route_id || 'local:crow';
     selectedCharacter = '';
     characterSelect.value = '';
     externalConsent.checked = false;
@@ -390,11 +390,14 @@ export async function mountArcSweepWritingSurface(root) {
   function refreshExternalTransfer() {
     const isStepFun = selectedRoute.startsWith('stepfun:');
     const isGriff = selectedRoute === 'flame:griff:spicychat';
-    externalTransfer.hidden = !(isStepFun || isGriff);
+    const isBluebird = selectedRoute === 'flame:bluebird:spicychat';
+    externalTransfer.hidden = !(isStepFun || isGriff || isBluebird);
     externalConsentLabel.textContent = isGriff
       ? 'I approve sending this turn and its same-world context to Griff on SpicyChat.'
-      : 'I approve sending this turn, permitted history, and any included continuity context to StepFun.';
-    if (!isStepFun && !isGriff) externalConsent.checked = false;
+      : isBluebird
+        ? 'I approve sending this turn and permitted same-world context to Bluebird on SpicyChat.'
+        : 'I approve sending this turn, permitted history, and any included continuity context to StepFun.';
+    if (!isStepFun && !isGriff && !isBluebird) externalConsent.checked = false;
   }
 
   async function loadRoutes() {
@@ -460,7 +463,7 @@ export async function mountArcSweepWritingSurface(root) {
     const text = input.value.trim();
     if (!text || busy) return;
     if (!selectedRoute) { status.textContent = 'No configured route available. Reload the route catalogue.'; return; }
-    if ((selectedRoute.startsWith('stepfun:') || selectedRoute === 'flame:griff:spicychat') && !externalConsent.checked) {
+    if ((selectedRoute.startsWith('stepfun:') || selectedRoute === 'flame:griff:spicychat' || selectedRoute === 'flame:bluebird:spicychat') && !externalConsent.checked) {
       status.textContent = 'Confirm this external provider transfer before passing the turn.';
       externalConsent.focus();
       return;
@@ -490,7 +493,7 @@ export async function mountArcSweepWritingSurface(root) {
       recordWayglassRouteObservation({status:'started',routeId:selectedRoute});
       const result = await invokeWayglassRoute({
         routeId: selectedRoute,
-        externalProviderConsent: (selectedRoute.startsWith('stepfun:') || selectedRoute === 'flame:griff:spicychat') && externalConsent.checked,
+        externalProviderConsent: (selectedRoute.startsWith('stepfun:') || selectedRoute === 'flame:griff:spicychat' || selectedRoute === 'flame:bluebird:spicychat') && externalConsent.checked,
         worldId: activeWorldId,
         participantId: selectedRoute === 'flame:griff:spicychat' ? 'griff-krenshaw' : null,
         characterId: selectedCharacter || null,
