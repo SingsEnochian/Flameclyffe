@@ -15,7 +15,7 @@ export function renderArcSweepPassagePanel(currentHref, search = '') {
   const arrival = readArcSweepArrival(search);
   const matchingWorld = arrival?.source_world_id ? findWayglassWorldSeat(arrival.source_world_id) : null;
   const sourceMessage = arrival?.source_world_id
-    ? 'ArcSweep offered source world ' + arrival.source_world_id
+    ? 'Unverified navigation hint for ArcSweep world ' + arrival.source_world_id
     : arrival ? 'ArcSweep arrival without a world identifier' : 'ArcSweep connection available';
   const matchMarkup = matchingWorld
     ? '<button type="button" class="glass-chip" id="wg-passage-match-world">Select matching Wayglass world</button>'
