@@ -4,11 +4,11 @@ import assert from 'node:assert/strict';
 import {
   createWaygateManifest,
   inspectWaygateManifest,
-} from '../../../lib/wayglass-waygate.js';
+} from '../../../../../lib/wayglass-waygate.js';
 import {
   createContinuationPacket,
-} from '../../../lib/wayglass-continuation-packet.js';
-import kernelModule from '../../../lib/wayglass-kernel.cjs';
+} from '../../../../../lib/wayglass-continuation-packet.js';
+import kernelModule from '../../../../../lib/wayglass-kernel.cjs';
 
 const { bootWayglassKernel } = kernelModule;
 

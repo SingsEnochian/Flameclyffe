@@ -55,7 +55,7 @@ apps/starwell-server/public/starwell/
 
 # Crow Trainer project-local attempts and instrument outputs
 .crow-trainer/
-/apps/starwell-server/wayglass-runtime/
+# Canonical Wayglass runtime is versioned source. Do not ignore its directory.
 /apps/starwell-server/public/wayglass/
 
 # Wayglass private local MCP/OAuth state

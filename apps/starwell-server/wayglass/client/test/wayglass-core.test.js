@@ -6,9 +6,9 @@ import { normaliseMaterialSignal } from '../src/material-state.js';
 import { pointerMaterialState } from '../src/motion-choreography.js';
 import { commandForKeyboardEvent } from '../src/keyboard-controls.js';
 import { detectEmbodimentCapabilities, detectARSupport } from '../src/embodiment.js';
-import { publicWayglassRoutes, resolveWayglassRoute } from '../../../lib/wayglass-route-registry.js';
-import { createModelObservation } from '../../../lib/wayglass-model-observation.js';
-import kernelModule from '../../../lib/wayglass-kernel.cjs';
+import { publicWayglassRoutes, resolveWayglassRoute } from '../../../../../lib/wayglass-route-registry.js';
+import { createModelObservation } from '../../../../../lib/wayglass-model-observation.js';
+import kernelModule from '../../../../../lib/wayglass-kernel.cjs';
 
 const { bootWayglassKernel } = kernelModule;
 

@@ -5,7 +5,7 @@ import path from 'node:path';
 import { WayglassVideoAtelier, LtxDesktopLocalClient, validateVideoHandoff } from '../src/ltx-desktop-bridge.js';
 
 const USAGE = [
-  'Usage: node apps/wayglass/scripts/ltx-desktop-render.mjs <handoff.json> [--render] [--start <local-image>] [--end <local-image>]',
+  'Usage: node apps/starwell-server/wayglass/client/scripts/ltx-desktop-render.mjs <handoff.json> [--render] [--start <local-image>] [--end <local-image>]',
   'Default is dry-run; --render explicitly authorises a local generation.',
   'Set WAYGLASS_LTX_SESSION_TOKEN from LTX Desktop Logs UI (token changes each launch).',
   'Optional WAYGLASS_LTX_ENDPOINT defaults to http://127.0.0.1:41954.',

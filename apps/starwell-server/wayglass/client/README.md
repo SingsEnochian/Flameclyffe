@@ -1,4 +1,4 @@
-> Current integrated source: [`wayglass/current`](../../WAYGLASS_CURRENT.md). Start all new Wayglass work there.
+> Current integrated source: [`wayglass/current`](../../../../WAYGLASS_CURRENT.md). Start all new Wayglass work there.
 
 # Wayglass v0.1 · embryonic kernel + embodiment shell
 

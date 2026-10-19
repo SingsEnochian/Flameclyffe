@@ -5,8 +5,8 @@ import {
   createWayglassStopReceipt,
   continuationPacketFromStopReceipt,
   createWayglassDeparture,
-} from '../../../lib/wayglass-stop-receipt.js';
-import { inspectContinuationPacket } from '../../../lib/wayglass-continuation-packet.js';
+} from '../../../../../lib/wayglass-stop-receipt.js';
+import { inspectContinuationPacket } from '../../../../../lib/wayglass-continuation-packet.js';
 
 function stopState(overrides = {}) {
   return {

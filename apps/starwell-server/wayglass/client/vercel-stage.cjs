@@ -1,7 +1,7 @@
 'use strict';
 const fs = require('node:fs/promises');
 const path = require('node:path');
-const root = path.resolve(__dirname, '../..');
+const root = path.resolve(__dirname, '../../../..');
 async function stage() {
   const source = path.join(root, 'dist/wayglass');
   const destination = path.join(root, 'dist/starwell/wayglass');
