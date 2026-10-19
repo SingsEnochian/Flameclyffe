@@ -2,7 +2,7 @@ import { renderArcSweepPassagePanel, installArcSweepPassageWorldAction } from '.
 import { createInteractionState } from '../interaction-state.js';
 import { authorizationSession } from '../authorization-session.js';
 import { mountWayglassRoutePicker } from '../route-picker.js';
-import { listWayglassWorldSeats, findWayglassWorldSeat, wayglassWorldStatus } from '../world-seats.js';
+import { WAYGLASS_WORLD_SEATS, listWayglassWorldSeats, findWayglassWorldSeat, wayglassWorldStatus } from '../world-seats.js';
 import { consumeObserverContextForWriting, recordWayglassRouteObservation } from '../living-observer-model.js';
 import { emitInteractionCue } from '../interaction-cues.js';
 import { emitMaterialSignal } from '../material-state.js';
@@ -203,7 +203,9 @@ export async function mountArcSweepWritingSurface(root) {
   const worldSelect = root.querySelector('#wg-world-seat');
   const worldStatus = root.querySelector('#wg-world-status');
   const griffCheck = root.querySelector('#wg-griff-check');
-  for (const world of listWayglassWorldSeats()) {
+  const originalSeatIds = new Set(WAYGLASS_WORLD_SEATS.map(world => world.world_id));
+  const atlasOnlySeats = listWayglassWorldSeats().filter(world => !originalSeatIds.has(world.world_id));
+  for (const world of [...WAYGLASS_WORLD_SEATS, ...atlasOnlySeats]) {
     const option = root.ownerDocument.createElement('option');
     option.value = world.world_id;
     option.textContent = world.character ? world.name + ' · ' + world.character.name : world.name;
