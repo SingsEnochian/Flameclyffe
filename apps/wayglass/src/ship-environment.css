@@ -1,0 +1,40 @@
+/* Wayglass ship frame: one navigation surface above every deck. */
+.wg-ship-chrome {
+  width:min(1200px,calc(100% - 28px));
+  margin:12px auto 0;
+  padding:1rem clamp(.75rem,2vw,1.35rem);
+  border-radius:1.35rem;
+  position:relative;
+  z-index:15;
+  display:grid;
+  gap:.75rem;
+  background:linear-gradient(115deg,rgba(23,38,55,.92),rgba(23,27,46,.91));
+}
+.wg-ship-mast { display:flex; flex-wrap:wrap; align-items:center; gap:.7rem; min-width:0; }
+.wg-ship-glyph { display:grid; place-items:center; width:2.15rem; height:2.15rem; border:1px solid rgba(205,177,240,.48); border-radius:50%; color:#dac5ff; font-size:1.25rem; }
+.wg-ship-mast strong { font-size:.84rem; letter-spacing:.15em; color:#e7dafb; }
+.wg-ship-mast small { display:block; margin-top:.15rem; font-size:.73rem; color:var(--glass-muted); }
+.wg-ship-arcsweep { margin-left:auto; font-weight:700; color:#b2e9e7; padding:.6rem .8rem; text-decoration:none; border:1px solid rgba(83,213,211,.36); border-radius:.75rem; }
+.wg-ship-decks { display:flex; gap:.45rem; flex-wrap:wrap; align-items:center; }
+.wg-ship-deck, .wg-ship-auth {
+  min-height:44px; padding:.55rem .8rem; border-radius:.7rem; cursor:pointer;
+  border:1px solid rgba(185,146,235,.3); color:#e8f2f4; background:rgba(6,20,25,.7);
+  font:600 .78rem/1.3 system-ui,sans-serif;
+}
+.wg-ship-deck:hover,.wg-ship-deck:focus-visible,.wg-ship-arcsweep:hover,.wg-ship-arcsweep:focus-visible,.wg-ship-auth:focus-visible {
+  outline:2px solid #deccff; outline-offset:2px;
+}
+.wg-ship-deck.is-current { color:#fff; background:rgba(102,68,143,.56); border-color:#c3a6f6; }
+.wg-ship-lower { display:flex; flex-wrap:wrap; align-items:center; gap:.65rem 1rem; border-top:1px solid rgba(172,201,213,.16); padding-top:.6rem; }
+.wg-ship-lower p { flex:1; min-width:180px; margin:0; font-size:.74rem; line-height:1.45; color:var(--glass-muted); }
+.wg-ship-lower p strong { color:#cbebe9; }
+.wg-ship-auth { border-color:rgba(83,213,211,.4); color:#d5f6ed; }
+.wg-ship-auth:disabled { opacity:.55; cursor:wait; }
+.wg-ship-status { flex-basis:100%; font-size:.74rem; color:#b6dad7; }
+@media(max-width:580px){
+  .wg-ship-chrome { margin:6px auto 0; padding:.75rem; }
+  .wg-ship-decks { flex-wrap:nowrap; max-width:100%; overflow-x:auto; padding:.2rem .1rem .4rem; scrollbar-width:thin; }
+  .wg-ship-deck { white-space:nowrap; flex:none; }
+  .wg-ship-arcsweep { margin-left:0; }
+}
+@media(prefers-reduced-motion:reduce){ .wg-ship-chrome,.wg-ship-chrome * { scroll-behavior:auto; animation:none; transition:none; }}
