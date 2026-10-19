@@ -1,3 +1,4 @@
+import { renderArcSweepPassagePanel, installArcSweepPassageWorldAction } from '../arcsweep-passage-ui.js';
 import { createInteractionState } from '../interaction-state.js';
 import { authorizationSession } from '../authorization-session.js';
 import { mountWayglassRoutePicker } from '../route-picker.js';
@@ -53,6 +54,7 @@ export async function mountArcSweepWritingSurface(root) {
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:toybox">Toybox</button>',
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:commons">Commons</button>',
     "  </nav>\n",
+    renderArcSweepPassagePanel(globalThis.location.href, globalThis.location.search),
     "  <header class=\"wg-surface-head glass-panel\">\n",
     "    <div class=\"wg-hero-copy\">\n",
     "      <p class=\"eyebrow\">WAYGLASS · WRITING DECK</p>\n",
@@ -236,6 +238,7 @@ export async function mountArcSweepWritingSurface(root) {
     void loadRoutes();
   });
   selectWorldSeat(cp('world').value, { resetCheckpoint: false });
+  installArcSweepPassageWorldAction(root, globalThis.location.search);
   griffCheck.addEventListener('click', async () => {
     griffCheck.disabled = true;
     worldStatus.textContent = 'Checking Griff’s exact SpicyChat conversation with the House Steward session…';
