@@ -71,3 +71,6 @@ apps/starwell-server/data/wayglass-observer-self-development.local.json
 
 # Private/synthetic Wayglass run receipts are runtime output, not public source.
 /artifacts/wayglass/
+
+# Inquiry Loom private host journal, not public source
+apps/starwell-server/data/wayglass-inquiry-loom.local/

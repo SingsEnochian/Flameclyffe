@@ -15,6 +15,7 @@ const { createWayglassDeparture } = require('../wayglass-runtime/wayglass-stop-r
 const { createDepartureStore } = require('../wayglass-runtime/wayglass-departure-store.cjs');
 const { createModelObservation } = require('../wayglass-runtime/wayglass-model-observation.cjs');
 const { createWayglassLibraryRouter } = require('./research-library');
+const { createWayglassInquiryRouter } = require('./inquiry-loom');
 const { createObserverSelfDevelopmentRouter } = require('./observer-self-development');
 
 const { resolveCharacterSeat, publicCharacterSeats, EMERGENCE_QUESTION_IDS } = require('./character-seats.cjs');
@@ -460,6 +461,14 @@ async function humainCatalogueResponse(route, res, fetchImpl = globalThis.fetch)
 function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThis.fetch, departureStore = createDepartureStore() } = {}) {
   const router = express.Router();
   router.use('/library', createWayglassLibraryRouter());
+  router.use('/inquiries', createWayglassInquiryRouter({
+    authenticate: async req => {
+      // The browser entrance is House-Steward only. OAuth/Codex use their
+      // separately authenticated MCP tool entrance; no caller seat selector.
+      if (!(await griffStewardAuthorized(req).catch(() => false))) return null;
+      return { verified: true, participant_id: 'rowan', principal_ref: 'house:steward' };
+    },
+  }));
   router.use('/observer/self-development', createObserverSelfDevelopmentRouter());
   router.get('/kernel/departures/:storageId', (req, res) => {
     res.setHeader('Cache-Control', 'no-store');

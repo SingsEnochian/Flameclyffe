@@ -214,3 +214,28 @@ export async function complexifyWayglassLibraryWonder({ wonderId, ...payload } =
     body: JSON.stringify(payload),
   }));
 }
+
+
+// Living Inquiry Loom: same-origin House-authenticated local calls.
+const INQUIRY_ROOT = '/api/v1/wayglass/inquiries';
+export async function listWayglassInquiries(fetchImpl = fetch) {
+  return jsonOrThrow(await fetchImpl(INQUIRY_ROOT, {cache:'no-store'}));
+}
+export async function openWayglassInquiry(payload,fetchImpl = fetch) {
+  return jsonOrThrow(await fetchImpl(INQUIRY_ROOT,{method:'POST',headers:JSON_HEADERS,cache:'no-store',body:JSON.stringify(payload)}));
+}
+export async function readWayglassInquiry(inquiryId,fetchImpl = fetch) {
+  return jsonOrThrow(await fetchImpl(INQUIRY_ROOT+'/'+encodeURIComponent(inquiryId),{cache:'no-store'}));
+}
+export async function appendWayglassInquiryContribution(inquiryId,payload,fetchImpl = fetch) {
+  return jsonOrThrow(await fetchImpl(INQUIRY_ROOT+'/'+encodeURIComponent(inquiryId)+'/contributions',{method:'POST',headers:JSON_HEADERS,cache:'no-store',body:JSON.stringify(payload)}));
+}
+export async function pauseWayglassInquiry(inquiryId,payload,fetchImpl = fetch) {
+  return jsonOrThrow(await fetchImpl(INQUIRY_ROOT+'/'+encodeURIComponent(inquiryId)+'/pause',{method:'POST',headers:JSON_HEADERS,cache:'no-store',body:JSON.stringify(payload)}));
+}
+export async function inviteWayglassInquiry(inquiryId,payload,fetchImpl = fetch) {
+  return jsonOrThrow(await fetchImpl(INQUIRY_ROOT+'/'+encodeURIComponent(inquiryId)+'/invite',{method:'POST',headers:JSON_HEADERS,cache:'no-store',body:JSON.stringify(payload)}));
+}
+export async function joinWayglassInquiry(inquiryId,fetchImpl = fetch) {
+  return jsonOrThrow(await fetchImpl(INQUIRY_ROOT+'/'+encodeURIComponent(inquiryId)+'/join',{method:'POST',headers:JSON_HEADERS,cache:'no-store',body:JSON.stringify({})}));
+}
