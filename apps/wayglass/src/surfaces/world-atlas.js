@@ -1,6 +1,6 @@
 import { listWayglassAtlasWorlds, importArcSweepWorldNavigationExport } from '../world-atlas.js';
 import { findWayglassWorldSeat } from '../world-seats.js';
-import { buildArcSweepReturnUrl } from '../../../lib/arcsweep-wayglass-passage.js';
+import { buildArcSweepReturnUrl } from '../../../../lib/arcsweep-wayglass-passage.js';
 
 const esc = s => String(s ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
 const sourceOrder = { 'awaiting-source-reconciliation':0, 'source-linked':1, 'owner-session-only':2 };
