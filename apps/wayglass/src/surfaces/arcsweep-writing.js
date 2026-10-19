@@ -2,7 +2,7 @@ import { renderArcSweepPassagePanel, installArcSweepPassageWorldAction } from '.
 import { createInteractionState } from '../interaction-state.js';
 import { authorizationSession } from '../authorization-session.js';
 import { mountWayglassRoutePicker } from '../route-picker.js';
-import { WAYGLASS_WORLD_SEATS, findWayglassWorldSeat, wayglassWorldStatus } from '../world-seats.js';
+import { listWayglassWorldSeats, findWayglassWorldSeat, wayglassWorldStatus } from '../world-seats.js';
 import { consumeObserverContextForWriting, recordWayglassRouteObservation } from '../living-observer-model.js';
 import { emitInteractionCue } from '../interaction-cues.js';
 import { emitMaterialSignal } from '../material-state.js';
@@ -203,7 +203,7 @@ export async function mountArcSweepWritingSurface(root) {
   const worldSelect = root.querySelector('#wg-world-seat');
   const worldStatus = root.querySelector('#wg-world-status');
   const griffCheck = root.querySelector('#wg-griff-check');
-  for (const world of WAYGLASS_WORLD_SEATS) {
+  for (const world of listWayglassWorldSeats()) {
     const option = root.ownerDocument.createElement('option');
     option.value = world.world_id;
     option.textContent = world.character ? world.name + ' · ' + world.character.name : world.name;
@@ -238,6 +238,15 @@ export async function mountArcSweepWritingSurface(root) {
     void loadRoutes();
   });
   selectWorldSeat(cp('world').value, { resetCheckpoint: false });
+  // An explicit Atlas selection is a source-untrusted world hint, never
+  // authorisation, a memory import, a canon change or a provider send.
+  const atlasParams = new URLSearchParams(globalThis.location.search || '');
+  const atlasTarget = atlasParams.get('from') === 'atlas'
+    ? findWayglassWorldSeat(atlasParams.get('world')) : null;
+  if (atlasTarget && [...worldSelect.options].some(option => option.value === atlasTarget.world_id)) {
+    selectWorldSeat(atlasTarget.world_id);
+    selectedRoute = atlasTarget.character?.desired_route_id || 'local:crow';
+  }
   installArcSweepPassageWorldAction(root, globalThis.location.search);
   griffCheck.addEventListener('click', async () => {
     griffCheck.disabled = true;
