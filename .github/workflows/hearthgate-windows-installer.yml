@@ -5,6 +5,7 @@ on:
   pull_request:
     paths:
       - "apps/starwell-server/**"
+      - "lib/wayglass-*.cjs"
       - "apps/starwell/**"
       - "apps/project-zero-companion/**"
       - "starwell/deep-observer/schemas/**"
@@ -21,6 +22,7 @@ on:
       - "hearthgate-v*"
     paths:
       - "apps/starwell-server/**"
+      - "lib/wayglass-*.cjs"
       - "apps/starwell/**"
       - "apps/project-zero-companion/**"
       - "starwell/deep-observer/schemas/**"
