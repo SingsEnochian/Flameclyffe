@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { enterWayglassWorld, leaveWayglassWorld, invokeWayglassRoute } from '../src/route-client.js';
+import { enterWayglassWorld, leaveWayglassWorld, invokeWayglassRoute, reconcileBluebirdSessionRoute } from '../src/route-client.js';
 
 function response(status, data) {
   return {
@@ -114,4 +114,39 @@ test('browser provider request serialises explicit StepFun transfer confirmation
   assert.equal(seen[0].payload.external_provider_consent, false);
   assert.equal(seen[1].payload.external_provider_consent, true);
   assert.equal(seen[1].payload.route_id, 'stepfun:step5');
+});
+
+
+test('host-disabled Bluebird route becomes selectable after this session has an authorised provider grant', () => {
+  const original = { schema:'wayglass.routes/v0.1', routes: [
+    { route_id:'local:ollama', configured:true, label:'Local' },
+    { route_id:'flame:bluebird:spicychat', configured:false, unavailable_reason:'Provider credentials missing in Hearthgate.', connection_verified:false },
+    { route_id:'flame:griff:spicychat', configured:false, unavailable_reason:'Separate character binding required' },
+  ] };
+  const projected = reconcileBluebirdSessionRoute(original, 'flame:bluebird:spicychat');
+  const bluebird = projected.routes.find(item => item.route_id === 'flame:bluebird:spicychat');
+  assert.equal(bluebird.configured, true);
+  assert.equal(bluebird.session_authorized, true);
+  assert.equal(bluebird.unavailable_reason, null);
+  assert.equal(bluebird.connection_verified, false, 'a validated token does not prove a live reply');
+  assert.equal(projected.routes.find(item => item.route_id === 'flame:griff:spicychat').configured, false);
+  assert.equal(original.routes[1].configured, false, 'host catalogue remains unchanged');
+  assert.equal(projected.routes.length, original.routes.length, 'do not duplicate existing route');
+});
+
+test('absent or unrelated session grants never activate the Bluebird route', () => {
+  const original = { routes:[{route_id:'flame:bluebird:spicychat', configured:false}] };
+  assert.strictEqual(reconcileBluebirdSessionRoute(original, null), original);
+  assert.strictEqual(reconcileBluebirdSessionRoute(original, 'flame:griff:spicychat'), original);
+  assert.equal(original.routes[0].configured, false);
+});
+
+test('authorised Bluebird session adds a route only if host catalogue omitted it', () => {
+  const original = { routes:[{route_id:'local:ollama',configured:true}] };
+  const projected = reconcileBluebirdSessionRoute(original, 'flame:bluebird:spicychat');
+  assert.equal(projected.routes[0].route_id,'flame:bluebird:spicychat');
+  assert.equal(projected.routes[0].configured,true);
+  assert.equal(projected.routes[0].session_authorized,true);
+  assert.equal(projected.routes[0].connection_verified,false);
+  assert.equal(original.routes.length,1);
 });
