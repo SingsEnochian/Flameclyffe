@@ -27,14 +27,34 @@ export async function listWayglassCharacters(fetchImpl = fetch) {
   return jsonOrThrow(await fetchImpl('/api/v1/wayglass/characters', { cache: 'no-store' }));
 }
 
+// A verified, browser-private Bluebird session can coexist with a host route
+// catalogue reporting no static BLUEBIRD_SPICYCHAT_TOKEN. The catalogue only
+// describes host credentials; it cannot see the per-session /authorize grant.
+// Never promote unrelated routes, identities or provider-send authority.
+export function reconcileBluebirdSessionRoute(catalogue, sessionRouteId) {
+  if (sessionRouteId !== 'flame:bluebird:spicychat' || !Array.isArray(catalogue?.routes)) return catalogue;
+  const routes = catalogue.routes.map(route => route?.route_id === sessionRouteId
+    ? { ...route, configured: true, unavailable_reason: null, session_authorized: true }
+    : route);
+  if (!routes.some(route => route?.route_id === sessionRouteId)) {
+    routes.unshift({
+      route_id: sessionRouteId,
+      label: 'Bluebird · SpicyChat',
+      provider: 'spicychat',
+      model: 'provider-managed',
+      configured: true,
+      session_authorized: true,
+      connection_verified: false, // A credential check is not a witnessed provider reply.
+      capabilities: { text: true, local: false },
+    });
+  }
+  return { ...catalogue, routes };
+}
+
 export async function listWayglassRoutes(fetchImpl = fetch) {
   const response = await fetchImpl('/api/v1/wayglass/routes', { cache: 'no-store' });
   const catalogue = await jsonOrThrow(response);
-  const bluebirdRoute = authorizationSession.route();
-  if (bluebirdRoute && Array.isArray(catalogue.routes) && !catalogue.routes.some(route => route.route_id === bluebirdRoute)) {
-    catalogue.routes.unshift({ route_id: bluebirdRoute, label: 'Bluebird · SpicyChat', provider: 'spicychat', model: 'provider-managed', configured: true, connection_verified: true, capabilities: { text: true, local: false } });
-  }
-  return catalogue;
+  return reconcileBluebirdSessionRoute(catalogue, authorizationSession.route());
 }
 
 export async function recoverWayglassDeparture({ storageId, worldId, participantId, fetchImpl = fetch } = {}) {
