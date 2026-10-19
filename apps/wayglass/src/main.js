@@ -2,10 +2,12 @@ import './styles.css';
 import './arcsweep-passage.css';
 import './ship-environment.css';
 import './surfaces/frame-to-fold.css';
+import './surfaces/world-atlas.css';
 import './authorization.css';
 import { openWayglassAuthorization } from './authorization.js';
 import { mountWayglassShipNavigation, resolveWayglassDeck, wayglassDeckForRoom, WAYGLASS_SHIP_RUNTIME } from './ship-environment.js';
 import { mountFrameToFoldSurface } from './surfaces/frame-to-fold.js';
+import { mountWayglassWorldAtlas } from './surfaces/world-atlas.js';
 import { installWayglassField } from './glass-field.js';
 import { installMotionChoreography } from './motion-choreography.js';
 import { installKeyboardControls } from './keyboard-controls.js';
@@ -46,6 +48,12 @@ registerWayglassSurface({
   mount: mountArcSweepWritingSurface,
 });
 
+
+registerWayglassSurface({
+  surface_id: 'wayglass:world-atlas',
+  label: 'Wayglass · World Atlas',
+  mount: mountWayglassWorldAtlas,
+});
 
 registerWayglassSurface({
   surface_id: 'wayglass:frame-to-fold',
