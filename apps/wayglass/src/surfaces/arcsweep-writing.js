@@ -88,6 +88,7 @@ export async function mountArcSweepWritingSurface(root) {
     "    <select id=\"wg-world-seat\" aria-label=\"Wayglass story world\"></select>\n",
     "    <p class=\"tiny\" id=\"wg-world-status\" role=\"status\">World and provider routes are independent.</p>\n",
     '<button type="button" id="wg-griff-check" class="glass-chip" hidden>Check Griff connection</button>',
+    '<button type="button" id="wg-bluebird-check" class="glass-chip" hidden>Check Richie connection</button>',
     "  </section>\n",
           '<div id="wg-stepfun-transfer" class="wg-stepfun-transfer" hidden>',
             '<label for="wg-stepfun-consent"><input type="checkbox" id="wg-stepfun-consent" /> <span id="wg-provider-consent-label">I approve this external provider transfer.</span></label>',
@@ -173,6 +174,7 @@ export async function mountArcSweepWritingSurface(root) {
 
   const routePicker = mountWayglassRoutePicker(root.querySelector('#wg-route'), { onChange(value) {
     selectedRoute = value;
+    refreshBluebirdCheck();
     externalConsent.checked = false;
     refreshExternalTransfer();
     wakeMaterial(0.88, 'route');
@@ -203,6 +205,10 @@ export async function mountArcSweepWritingSurface(root) {
   const worldSelect = root.querySelector('#wg-world-seat');
   const worldStatus = root.querySelector('#wg-world-status');
   const griffCheck = root.querySelector('#wg-griff-check');
+  const bluebirdCheck = root.querySelector('#wg-bluebird-check');
+  function refreshBluebirdCheck() {
+    bluebirdCheck.hidden = selectedRoute !== 'flame:bluebird:spicychat';
+  }
   const originalSeatIds = new Set(WAYGLASS_WORLD_SEATS.map(world => world.world_id));
   const atlasOnlySeats = listWayglassWorldSeats().filter(world => !originalSeatIds.has(world.world_id));
   for (const world of [...WAYGLASS_WORLD_SEATS, ...atlasOnlySeats]) {
@@ -223,6 +229,7 @@ export async function mountArcSweepWritingSurface(root) {
       : 'The place stays itself across route changes.';
     worldStatus.textContent = wayglassWorldStatus(world);
     griffCheck.hidden = world.world_id !== 'evil-gene:film-2015';
+    refreshBluebirdCheck();
     if (changed && resetCheckpoint) {
       checkpoint = null;
       cp('id').value = '';
@@ -250,6 +257,29 @@ export async function mountArcSweepWritingSurface(root) {
     selectedRoute = atlasTarget.character?.desired_route_id || 'local:crow';
   }
   installArcSweepPassageWorldAction(root, globalThis.location.search);
+  bluebirdCheck.addEventListener('click', async () => {
+    bluebirdCheck.disabled = true;
+    worldStatus.textContent = 'Checking Richie’s exact SpicyChat conversation with the House Steward session…';
+    try {
+      const response = await fetch('/api/v1/wayglass/bluebird/status', {
+        cache: 'no-store', credentials: 'same-origin',
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(
+        result?.missing?.length
+          ? 'Private Hearthgate configuration missing: ' + result.missing.join(', ')
+          : (result.error || 'Provider preflight unavailable.')
+      );
+      worldStatus.textContent = result.preflight_verified
+        ? 'Richie’s exact SpicyChat character and conversation confirmed. No live reply yet; approve the external turn and send when ready.'
+        : 'Richie’s SpicyChat pairing remains unverified. No message sent.';
+    } catch (error) {
+      worldStatus.textContent = 'Richie connection check: ' + error.message;
+    } finally {
+      bluebirdCheck.disabled = false;
+    }
+  });
+
   griffCheck.addEventListener('click', async () => {
     griffCheck.disabled = true;
     worldStatus.textContent = 'Checking Griff’s exact SpicyChat conversation with the House Steward session…';
@@ -433,6 +463,7 @@ export async function mountArcSweepWritingSurface(root) {
       if (isGriffWorld) selectedRoute = 'flame:griff:spicychat';
       if (!visibleRoutes.some(route => route.route_id === selectedRoute && route.configured !== false)) selectedRoute = visibleRoutes.find(route => route.configured !== false)?.route_id || '';
       selectedRoute = routePicker.setRoutes(visibleRoutes, selectedRoute);
+      refreshBluebirdCheck();
       refreshExternalTransfer();
       routeState.textContent = isGriffWorld
         ? selectedRoute ? 'Griff SpicyChat configured · sign in as Steward; live connection not yet proven' : 'Griff unavailable · configure his exact private character/chat binding'
@@ -441,6 +472,7 @@ export async function mountArcSweepWritingSurface(root) {
       routes = [];
       selectedRoute = '';
       routePicker.setRoutes([]);
+      refreshBluebirdCheck();
       refreshExternalTransfer();
       routeState.textContent = 'Catalogue unavailable · reload to reconnect';
     }

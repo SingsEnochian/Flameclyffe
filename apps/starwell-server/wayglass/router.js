@@ -250,8 +250,8 @@ async function callSpicyChat(route, payload, compiled = null, fetchImpl = global
   const pinnedId = cleanText(route.character_id?.(), 180);
   const pinnedConversationId = cleanText(route.conversation_id?.(), 180);
   const targetName = cleanText(route.character_name?.(), 180).toLowerCase();
-  if (route.route_id === 'flame:griff:spicychat' && (!pinnedId || !pinnedConversationId)) {
-    const error = new Error('Griff requires an exact owner-configured character and conversation binding.');
+  if (['flame:griff:spicychat', 'flame:bluebird:spicychat'].includes(route.route_id) && (!pinnedId || !pinnedConversationId)) {
+    const error = new Error(route.label + ' requires an exact owner-configured character and conversation binding.');
     error.status = 503;
     throw error;
   }
@@ -325,8 +325,8 @@ async function callSpicyChat(route, payload, compiled = null, fetchImpl = global
     error.status = 502;
     throw error;
   }
-  if (route.route_id === 'flame:griff:spicychat' && !cleanText(data?.message?.content)) {
-    const error = new Error('Griff returned no attributable reply. No success was recorded.');
+  if (['flame:griff:spicychat', 'flame:bluebird:spicychat'].includes(route.route_id) && !cleanText(data?.message?.content)) {
+    const error = new Error(route.label + ' returned no attributable reply. No success was recorded.');
     error.status = 502;
     throw error;
   }
@@ -599,6 +599,57 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     return res.json({ schema: 'wayglass.character-seats/v1', characters: publicCharacterSeats() });
   });
 
+  // Owner-authenticated, read-only Bluebird preflight. It checks exactly the
+  // private pinned character/chat pair, never sending or changing a turn.
+  router.get('/bluebird/status', createRequestGate({ maxRequests: 6, maxConcurrent: 2 }), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in is required to inspect Richie’s provider binding.' });
+    }
+    const route = resolveWayglassRoute('flame:bluebird:spicychat');
+    const missing = [
+      !route.api_key() && 'BLUEBIRD_SPICYCHAT_TOKEN',
+      !route.character_id() && 'BLUEBIRD_SPICYCHAT_CHAT_LINK or BLUEBIRD_SPICYCHAT_CHARACTER_ID',
+      !route.conversation_id() && 'BLUEBIRD_SPICYCHAT_CHAT_LINK or BLUEBIRD_SPICYCHAT_CONVERSATION_ID',
+    ].filter(Boolean);
+    if (missing.length) {
+      return res.status(503).json({
+        route_id: route.route_id, configured: false, preflight_verified: false,
+        live_turn_verified: false, missing,
+      });
+    }
+    try {
+      const response = await fetchImpl(route.conversation_endpoint(), {
+        method: 'GET', headers: spicyChatHeaders(route.api_key()),
+        signal: AbortSignal.timeout(12000),
+      });
+      if (!response.ok) {
+        return res.status(502).json({
+          route_id: route.route_id, configured: true, preflight_verified: false,
+          live_turn_verified: false,
+          error: 'SpicyChat refused the private provider check. Refresh the host credential if it has expired.',
+        });
+      }
+      const data = await response.json().catch(() => []);
+      const conversations = Array.isArray(data) ? data : Array.isArray(data?.conversations) ? data.conversations : [];
+      const found = conversations.some(item =>
+        cleanText(item?.id, 180) === route.conversation_id()
+        && cleanText(item?.character_id || item?.character?.id, 180) === route.character_id()
+      );
+      return res.status(found ? 200 : 409).json({
+        route_id: route.route_id, configured: true, preflight_verified: found,
+        character_binding_verified: found, conversation_binding_verified: found,
+        live_turn_verified: false,
+        ...(found ? {} : { error: 'That exact Richie character/conversation pair was not returned by SpicyChat. No message was sent.' }),
+      });
+    } catch {
+      return res.status(502).json({
+        route_id: route.route_id, configured: true, preflight_verified: false,
+        live_turn_verified: false, error: 'SpicyChat connection check failed before any message was sent.',
+      });
+    }
+  });
+
   // A read-only, owner-authenticated verification that checks the actual
   // provider's existing conversation list. This NEVER sends a character turn.
   router.get('/griff/status', createRequestGate({ maxRequests: 6, maxConcurrent: 2 }), async (req, res) => {
@@ -675,6 +726,9 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     const chosen = autoSeat ? preference.find(id => available.some(r => r.route_id === id)) : (payload.route_id || 'openai:gpt');
     const route = resolveWayglassRoute(chosen);
     if (!route) return res.status(404).json({ error: 'No usable Wayglass route.' });
+    if (route.route_id === 'flame:bluebird:spicychat' && !route.configured()) {
+      return res.status(503).json({ error: 'Bluebird needs a private SpicyChat credential and exact Richie character/chat pair. Configure BLUEBIRD_SPICYCHAT_CHAT_LINK or both private IDs.' });
+    }
     if (route.route_id === 'flame:griff:spicychat') {
       if (!route.configured()) return res.status(503).json({ error: 'Griff requires a private SpicyChat credential and an exact character/chat pair from GRIFF_SPICYCHAT_CHAT_LINK or separate private IDs.' });
       if (payload.world_id !== route.world_id || payload.participant_id !== route.participant_id) {
@@ -705,7 +759,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       // Griff's provider binding is not an inheritance-host dependency. A
       // signed, owner-approved chat turn must work before any optional bridge.
       const wantsInheritance = resolver != null || (
-        route.route_id !== 'flame:griff:spicychat'
+        !['flame:griff:spicychat', 'flame:bluebird:spicychat'].includes(route.route_id)
         && (payload.participant_id != null || payload.world_id != null)
       );
       let compiled = null;
