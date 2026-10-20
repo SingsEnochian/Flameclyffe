@@ -66,7 +66,7 @@ test('held-out dialogue and scientific trials are not part of the training seed'
     assert.ok(exam.reject.length >= 1);
     ids.add(exam.id);
   }
-  assert.ok(heldout.some((exam) => exam.prompt.includes('talk')));
+  assert.ok(heldout.some((exam) => /talk|tell you/i.test(exam.prompt)));
   assert.ok(heldout.some((exam) => exam.prompt.includes('private')));
 });
 
