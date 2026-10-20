@@ -259,7 +259,7 @@ export async function mountArcSweepWritingSurface(root) {
   installArcSweepPassageWorldAction(root, globalThis.location.search);
   bluebirdCheck.addEventListener('click', async () => {
     bluebirdCheck.disabled = true;
-    worldStatus.textContent = 'Checking Richie's exact SpicyChat conversation with the House Steward session…';
+    worldStatus.textContent = 'Checking Richie’s exact SpicyChat conversation with the House Steward session…';
     try {
       const response = await fetch('/api/v1/wayglass/bluebird/status', {
         cache: 'no-store', credentials: 'same-origin',
