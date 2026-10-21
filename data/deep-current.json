@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-10-21T09:30:17.277Z",
+  "generated_at": "2026-10-21T14:48:56.901Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,51 +13,51 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-10-21T05:30",
-    "sky": "Night",
+    "time": "2026-10-21T10:45",
+    "sky": "Day",
     "current": {
-      "time": "2026-10-21T05:30",
+      "time": "2026-10-21T10:45",
       "interval": 900,
-      "temperature_2m": 56.2,
-      "relative_humidity_2m": 79,
-      "is_day": 0,
+      "temperature_2m": 72.5,
+      "relative_humidity_2m": 71,
+      "is_day": 1,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 0,
       "cloud_cover": 2,
-      "pressure_msl": 1018.4,
-      "wind_speed_10m": 7.1,
-      "wind_direction_10m": 332
+      "pressure_msl": 1017.4,
+      "wind_speed_10m": 7.2,
+      "wind_direction_10m": 356
     }
   },
   "space_weather": {
     "kp": {
-      "value": 2,
-      "time_tag": "2026-10-21T06:00:00",
-      "a_running": 7
+      "value": 2.33,
+      "time_tag": "2026-10-21T09:00:00",
+      "a_running": 9
     },
     "solar_wind": {
-      "time_tag": "2026-10-21T09:19:00Z",
-      "bz": 1,
-      "bt": 8,
+      "time_tag": "2026-10-21T14:40:00Z",
+      "bz": -2,
+      "bt": 9,
       "density": null,
-      "speed": 389
+      "speed": 527
     }
   },
   "moon": {
-    "age_days": 10.01,
-    "illumination": 76.5,
+    "age_days": 10.23,
+    "illumination": 78.5,
     "name": "Waxing Gibbous"
   },
   "field": {
-    "P": 0.5199999999999997,
+    "P": 0.5688888888888887,
     "C": 0.7204761904761905,
-    "R": 0.7825,
-    "E": 0.6867032967032967,
-    "M": 0.765,
-    "A": 0.7569230769230769,
+    "R": 0.9191666666666667,
+    "E": 0.7295054945054944,
+    "M": 0.785,
+    "A": 0.9769230769230769,
     "Q": null,
-    "dpdt": 0.7825,
+    "dpdt": 0.9191666666666667,
     "dynamic_axes": [
       "P",
       "C",
