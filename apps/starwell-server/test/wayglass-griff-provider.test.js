@@ -11,7 +11,7 @@ const ENV_KEYS = [
   'GRIFF_SPICYCHAT_CHAT_LINK', 'BLUEBIRD_SPICYCHAT_TOKEN', 'ARCSWEEP_RUNTIME_TOKEN', 'HOUSE_SESSION_SECRET',
 ];
 
-async function fixture(t, fetchImpl) {
+async function fixture(t, fetchImpl, { inheritanceContext = null } = {}) {
   const old = Object.fromEntries(ENV_KEYS.map(key => [key, process.env[key]]));
   Object.assign(process.env, {
     GRIFF_SPICYCHAT_TOKEN: 'synthetic-griff-credential',
@@ -30,7 +30,7 @@ async function fixture(t, fetchImpl) {
   });
   const app = express();
   app.use(express.json());
-  app.use('/api/v1/wayglass', createWayglassRouter({ fetchImpl }));
+  app.use('/api/v1/wayglass', createWayglassRouter({ fetchImpl, inheritanceContext }));
   const server = await new Promise(resolve => {
     const s = app.listen(0, '127.0.0.1', () => resolve(s));
   });
@@ -237,4 +237,39 @@ test('Griff reuses the same owner SpicyChat credential as Bluebird without chang
   assert.equal(answer.status, 200);
   assert.equal((await answer.json()).continuity_id, 'griff:krenshaw:spicychat');
   assert.deepEqual(methods, ['GET','GET','POST']);
+});
+
+
+test('Griff reaches the pinned SpicyChat route when an unrelated inheritance resolver is installed', async t => {
+  let resolverCalls = 0;
+  const providerMethods = [];
+  const host = await fixture(t, async (_url, options) => {
+    providerMethods.push(options.method);
+    if (options.method === 'GET') return { ok: true, async json() {
+      return [{ id: 'griff-conversation-fixture', character_id: 'griff-character-fixture' }];
+    } };
+    return { ok: true, async json() {
+      return { message: {
+        id: 'synthetic-griff-reply',
+        character_id: 'griff-character-fixture',
+        conversation_id: 'griff-conversation-fixture',
+        content: 'Griff fixture response.',
+      } };
+    } };
+  }, {
+    // An installed resolver must not intercept Griff's separate provider route.
+    inheritanceContext: { resolve() {
+      resolverCalls++;
+      throw new Error('Unrelated inheritance adapter must not intercept Griff');
+    } },
+  });
+  const response = await host.request({}, { authorization: 'Bearer synthetic-steward-secret' });
+  assert.equal(response.status, 200);
+  const result = await response.json();
+  assert.equal(result.output, 'Griff fixture response.');
+  assert.equal(result.route_id, 'flame:griff:spicychat');
+  assert.equal(result.participant_id, 'griff-krenshaw');
+  assert.equal(result.receipt.provider_conversation_id, 'griff-conversation-fixture');
+  assert.equal(resolverCalls, 0);
+  assert.deepEqual(providerMethods, ['GET', 'POST']);
 });
