@@ -1,0 +1,99 @@
+.magic-book-leaf-handle {
+  position: absolute;
+  z-index: 9;
+  width: 30px;
+  height: 96px;
+  min-height: 0;
+  padding: 0;
+  border: 1px solid rgba(217,184,107,.42);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(217,184,107,.22), rgba(164,95,55,.10)),
+    rgba(12,20,17,.78);
+  color: #eadfc8;
+  box-shadow: 0 9px 28px rgba(0,0,0,.24), inset 0 0 0 1px rgba(255,255,255,.04);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  backdrop-filter: blur(8px);
+}
+
+.magic-book-leaf-handle::before {
+  content: "";
+  position: absolute;
+  inset: 17px 9px;
+  border-left: 1px solid rgba(234,223,200,.6);
+  border-right: 1px solid rgba(234,223,200,.26);
+  border-radius: 999px;
+}
+
+.magic-book-leaf-handle:hover,
+.magic-book-leaf-handle:focus-visible {
+  border-color: rgba(217,184,107,.88);
+  outline: none;
+  box-shadow: 0 9px 28px rgba(0,0,0,.28), 0 0 0 3px rgba(217,184,107,.18);
+}
+
+.magic-book-leaf-handle[data-dragging="true"] {
+  cursor: grabbing;
+  border-color: rgba(217,184,107,.96);
+  background:
+    linear-gradient(180deg, rgba(217,184,107,.30), rgba(164,95,55,.16)),
+    rgba(12,20,17,.90);
+}
+
+.magic-book-leaf-handle[hidden] {
+  display: none !important;
+}
+
+.magic-book-drag-leaf {
+  position: absolute;
+  z-index: 8;
+  margin: 0;
+  pointer-events: none !important;
+  transform-origin: 0 50%;
+  transform-style: preserve-3d;
+  backface-visibility: visible;
+  will-change: transform, filter;
+  overflow: hidden;
+  box-shadow:
+    -22px 0 34px rgba(30,20,10,.16),
+    10px 14px 30px rgba(0,0,0,.20);
+}
+
+.magic-book-drag-leaf::before {
+  content: "";
+  position: absolute;
+  z-index: 100;
+  inset: 0;
+  pointer-events: none;
+  opacity: var(--leaf-back-opacity, 0);
+  background:
+    linear-gradient(90deg, rgba(88,57,28,.18), transparent 14%, transparent 80%, rgba(88,57,28,.08)),
+    linear-gradient(180deg, #efe1c5, #d8c39b);
+  transition: none;
+}
+
+.magic-book-leaf-dragging .magic-book-three {
+  opacity: .18;
+  transition: opacity 120ms ease;
+}
+
+.magic-book-leaf-drag-commit .magic-book-three {
+  opacity: 0;
+}
+
+.magic-book-leaf-dragging .magic-book-right {
+  box-shadow: inset 22px 0 35px rgba(73,50,27,.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .magic-book-leaf-handle {
+    cursor: pointer;
+  }
+
+  .magic-book-drag-leaf {
+    display: none !important;
+  }
+}
