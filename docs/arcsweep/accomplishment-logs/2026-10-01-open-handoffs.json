@@ -1,0 +1,29 @@
+{
+  "schema": "arcsweep.open-handoffs-review/v1",
+  "review_state": "awaiting-rowan-review",
+  "generated_at": "2026-10-01T13:13:00-04:00",
+  "timezone": "America/New_York",
+  "rules": {
+    "silence_is_acknowledgement": false,
+    "infer_owner": false,
+    "allow_system_owner": false
+  },
+  "handoffs": [
+    {"source_receipt":"PR #378","handoff":"Execute WAN-disconnected Crow proof","acknowledgement_status":"not-found","next_owner":null,"owner_status":"missing"},
+    {"source_receipt":"PRs #391-#398","handoff":"Review and runtime-witness physical Codex stack","acknowledgement_status":"not-found","next_owner":null,"owner_status":"missing"},
+    {"source_receipt":"PR #393","handoff":"Build/evaluate Laya calibration corpus","acknowledgement_status":"not-found","next_owner":null,"owner_status":"missing"},
+    {"source_receipt":"PR #400","handoff":"Feed one real Observer/DEEP event through ignition","acknowledgement_status":"not-found","next_owner":null,"owner_status":"missing"},
+    {"source_receipt":"PR #401","handoff":"Review and sequence Wonder stack","acknowledgement_status":"not-found","next_owner":null,"owner_status":"missing"},
+    {"source_receipt":"PR #402","handoff":"Witness authorised real Epra ingest","acknowledgement_status":"not-found","next_owner":null,"owner_status":"missing"},
+    {"source_receipt":"PR #405","handoff":"Witness Nikola interaction and rebind","acknowledgement_status":"not-found","next_owner":null,"owner_status":"missing"},
+    {"source_receipt":"PR #406","handoff":"Continue vessel roadmap implementation","acknowledgement_status":"not-found","next_owner":{"kind":"agent","id":"boxfire","display_name":"Boxxy / Boxfire agent"},"owner_status":"named"},
+    {"source_receipt":"PR #407","handoff":"Confirm disposition of Codex review findings","acknowledgement_status":"not-found","next_owner":null,"owner_status":"missing"},
+    {"source_receipt":"PR #408","handoff":"Implement append-only ledger and sealed broker","acknowledgement_status":"not-found","next_owner":null,"owner_status":"missing"},
+    {"source_receipt":"PR #409","handoff":"Produce genuine Astra lens receipt","acknowledgement_status":"not-found","next_owner":null,"owner_status":"missing"},
+    {"source_receipt":"PR #410","handoff":"Add omitted mechanistic/exhaustive-meaning distinction","acknowledgement_status":"in-progress-on-consolidation-branch","next_owner":{"kind":"agent","id":"rarity","display_name":"Rarity"},"owner_status":"named"},
+    {"source_receipt":"Mainline release receipt 2026-09-30 23:18 EDT","handoff":"Run authenticated and RC8 integration smokes","acknowledgement_status":"not-found","next_owner":null,"owner_status":"missing"},
+    {"source_receipt":"PRs #411-#413","handoff":"Four-gate review and held-out learner evaluation","acknowledgement_status":"partial-review-owner-known","next_owner":{"kind":"human","id":"rowan","display_name":"Rowan"},"owner_status":"named-for-review-only"},
+    {"source_receipt":"PR #414","handoff":"Build Skin Atelier and conduct visual audition","acknowledgement_status":"not-found","next_owner":null,"owner_status":"missing"},
+    {"source_receipt":"PR #415","handoff":"Disposable install and frozen Crow exam","acknowledgement_status":"not-found","next_owner":null,"owner_status":"missing"}
+  ]
+}
