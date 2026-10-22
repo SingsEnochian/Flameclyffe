@@ -154,6 +154,11 @@ async function openCore() {
     finished = true;
     clearTimeout(slowTimer);
     window.dispatchEvent(new CustomEvent('arcsweep:core-ready', { detail: { safeBoot } }));
+    if (!safeBoot) {
+      import('./magic-book-three.js')
+        .then(({ mountMagicBook }) => mountMagicBook({ host: document.body }))
+        .catch((error) => console.error('[Arcsweep] Magic Book surface failed', error));
+    }
 
     if (!safeBoot) {
       setTimeout(() => {
