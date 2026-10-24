@@ -156,6 +156,12 @@ async function openCore() {
     window.dispatchEvent(new CustomEvent('arcsweep:core-ready', { detail: { safeBoot } }));
 
     if (!safeBoot) {
+      // The living Wayglass body is a recoverable, decorative post-core sidecar.
+      // Never let it delay or replace the core/bootstrap/safe-boot boundary.
+      setTimeout(() => {
+        import('../ship-ui/wayglass-living-ship.js')
+          .catch((error) => console.warn('[Wayglass] optional visual ecology unavailable', error));
+      }, 0);
       setTimeout(() => {
         import('./sidecar-bootstrap.js')
           .then(({ mountArcsweepSidecars }) => mountArcsweepSidecars())

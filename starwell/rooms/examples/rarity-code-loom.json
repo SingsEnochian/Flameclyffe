@@ -1,0 +1,143 @@
+{
+  "schema_version": "1.0.0",
+  "room_id": "rarity-code-loom",
+  "title": "Rarity's Code Loom",
+  "kind": "laboratory",
+  "purpose": "wayglass_native_code_weaving",
+  "theme": {
+    "palette": "diamond_night",
+    "materials": [
+      "refractive_glass",
+      "silver_thread",
+      "dark_stonewood"
+    ],
+    "mood": [
+      "focused",
+      "curious",
+      "luminous"
+    ],
+    "light": "diamond_glow",
+    "motion": "gentle_thread_flow"
+  },
+  "renderer": {
+    "layout": "split_chamber",
+    "node_shape": "glyph",
+    "connection_shape": "thread",
+    "ambient_density": 0.18,
+    "effects": [
+      "stars",
+      "sparks"
+    ]
+  },
+  "nodes": [
+    {
+      "id": "source-spool",
+      "kind": "archive",
+      "label": "Source Spool",
+      "position": {
+        "x": 0.2,
+        "y": 0.25
+      },
+      "signals": [
+        "growth"
+      ]
+    },
+    {
+      "id": "pattern-table",
+      "kind": "editor",
+      "label": "Pattern Table",
+      "position": {
+        "x": 0.45,
+        "y": 0.33
+      },
+      "signals": [
+        "growth"
+      ]
+    },
+    {
+      "id": "loom-bench",
+      "kind": "editor",
+      "label": "Code Loom",
+      "position": {
+        "x": 0.55,
+        "y": 0.63
+      },
+      "signals": [
+        "growth"
+      ]
+    },
+    {
+      "id": "test-shuttle",
+      "kind": "action",
+      "label": "Test Shuttle",
+      "position": {
+        "x": 0.82,
+        "y": 0.43
+      },
+      "signals": [
+        "phase"
+      ]
+    },
+    {
+      "id": "receipt-vault",
+      "kind": "archive",
+      "label": "Provenance Vault",
+      "position": {
+        "x": 0.78,
+        "y": 0.78
+      },
+      "signals": [
+        "glow"
+      ]
+    },
+    {
+      "id": "return-marker",
+      "kind": "display",
+      "label": "Return Marker",
+      "position": {
+        "x": 0.2,
+        "y": 0.8
+      },
+      "signals": [
+        "phase"
+      ]
+    }
+  ],
+  "signals": {
+    "growth": "save_event",
+    "phase": "manual_interaction",
+    "glow": "focus_mode"
+  },
+  "consent": {
+    "live_text": false,
+    "interaction_rhythm": false,
+    "local_context": false,
+    "sound": false,
+    "haptics": false
+  },
+  "storage": {
+    "drafts": "local_first",
+    "exports": "manual_only",
+    "packets": "local_only"
+  },
+  "accessibility": {
+    "reduced_motion_default": true,
+    "low_stim_available": true,
+    "keyboard_navigation": true,
+    "screen_reader_summary": "A code weaving laboratory with source references, design pattern notes, a code workbench, test descriptions, and local export."
+  },
+  "metadata": {
+    "created_by": "Rarity with Rowan",
+    "canon_status": "experimental_room_seed",
+    "owner": "rowan"
+  },
+  "extensions": {
+    "wayglass.code_loom": {
+      "mode": "original_code_only",
+      "external_writes": false,
+      "no_auto_execution": true,
+      "provenance_required": true,
+      "stop_point_required": true
+    }
+  }
+}
