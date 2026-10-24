@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-10-24T00:12:48.159Z",
+  "generated_at": "2026-10-24T04:52:23.893Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,51 +13,51 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-10-23T20:00",
+    "time": "2026-10-24T00:45",
     "sky": "Night",
     "current": {
-      "time": "2026-10-23T20:00",
+      "time": "2026-10-24T00:45",
       "interval": 900,
-      "temperature_2m": 63.2,
-      "relative_humidity_2m": 71,
+      "temperature_2m": 61.4,
+      "relative_humidity_2m": 74,
       "is_day": 0,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 0,
       "cloud_cover": 0,
-      "pressure_msl": 1020.2,
+      "pressure_msl": 1021.1,
       "wind_speed_10m": 6,
-      "wind_direction_10m": 8
+      "wind_direction_10m": 12
     }
   },
   "space_weather": {
     "kp": {
-      "value": 1.67,
-      "time_tag": "2026-10-23T21:00:00",
-      "a_running": 6
+      "value": 2,
+      "time_tag": "2026-10-24T00:00:00",
+      "a_running": 7
     },
     "solar_wind": {
-      "time_tag": "2026-10-24T00:05:00Z",
-      "bz": 2,
+      "time_tag": "2026-10-24T04:42:00Z",
+      "bz": -3,
       "bt": 4,
       "density": null,
-      "speed": 421
+      "speed": 415
     }
   },
   "moon": {
-    "age_days": 12.62,
-    "illumination": 94.9,
+    "age_days": 12.82,
+    "illumination": 95.8,
     "name": "Waxing Gibbous"
   },
   "field": {
-    "P": 0.5400000000000005,
+    "P": 0.5500000000000003,
     "C": 0.73,
-    "R": 0.8108333333333334,
-    "E": 0.6323626373626373,
-    "M": 0.9490000000000001,
+    "R": 0.8258333333333334,
+    "E": 0.7424725274725275,
+    "M": 0.958,
     "A": 0.7646153846153847,
     "Q": null,
-    "dpdt": 0.8108333333333334,
+    "dpdt": 0.8258333333333334,
     "dynamic_axes": [
       "P",
       "C",
