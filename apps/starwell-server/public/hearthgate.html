@@ -472,6 +472,7 @@
   <a href="/hearthgate.html" class="active">⬡ Hearthgate</a>
   <span class="sep">·</span>
   <a href="/hearthroom.html">Hearthroom</a>
+  <a href="/wayglass/">Wayglass</a>
   <span class="sep">·</span>
   <a href="/grove.html">Grove</a>
   <span class="sep">·</span>
@@ -1123,7 +1124,7 @@ const togStaff=document.getElementById('tog-staff'),togSnap=document.getElementB
 togStaff.onclick=()=>{gStaffVisible=!gStaffVisible;togStaff.textContent=gStaffVisible?'visible':'hidden';togStaff.classList.toggle('on',gStaffVisible);drawStaff();};
 togSnap.onclick=()=>{gSnapOn=!gSnapOn;togSnap.textContent=gSnapOn?'snap on':'snap off';togSnap.classList.toggle('on',gSnapOn);};
 
-// ── Undo / Clear ──────────────────────────────────────────────────────────────
+// ── Undo / Clear ────────────────────────────────────���─────────────────────────
 document.getElementById('btn-clear').onclick=()=>{gStrokes=[];gLivePts=[];clearFBO(committedFBO);clearFBO(liveFBO);persistGStrokes();redrawCanvas();document.getElementById('stroke-count').textContent='0 strokes';};
 document.getElementById('btn-undo').onclick=()=>{if(gStrokes.length){gStrokes.pop();rebuildCommitted();persistGStrokes();redrawCanvas();document.getElementById('stroke-count').textContent=`${gStrokes.length} stroke${gStrokes.length!==1?'s':''}`;}};
 

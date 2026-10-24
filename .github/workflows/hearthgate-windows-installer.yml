@@ -5,6 +5,7 @@ on:
   pull_request:
     paths:
       - "apps/starwell-server/**"
+      - "lib/wayglass-*.cjs"
       - "apps/starwell/**"
       - "apps/project-zero-companion/**"
       - "starwell/deep-observer/schemas/**"
@@ -21,6 +22,7 @@ on:
       - "hearthgate-v*"
     paths:
       - "apps/starwell-server/**"
+      - "lib/wayglass-*.cjs"
       - "apps/starwell/**"
       - "apps/project-zero-companion/**"
       - "starwell/deep-observer/schemas/**"
@@ -98,6 +100,10 @@ jobs:
 
       - name: Install locked Hearthgate dependencies
         run: npm ci
+
+      - name: Build and stage Wayglass before Hearthgate host tests
+        working-directory: ${{ github.workspace }}
+        run: npm run wayglass:deploy:server
 
       - name: Test local security boundary
         run: npm test

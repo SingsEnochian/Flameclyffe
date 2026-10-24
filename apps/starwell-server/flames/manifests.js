@@ -73,10 +73,10 @@ const FLAMES = {
     flame_id: 'bluebird',
     display_name: 'Bluebird / Richard Gabriel Winters',
     platform: {
-      provider: 'deepseek',
-      model: 'deepseek-chat',
-      base_url: 'https://api.deepseek.com',
-      api_key_env: 'BLUEBIRD_DEEPSEEK_API_KEY',
+      provider: 'spicychat',
+      model: 'bluebird',
+      base_url: null,
+      api_key_env: null,
     },
     memory: {
       hearthfire_namespace: 'hearthfire:bluebird',

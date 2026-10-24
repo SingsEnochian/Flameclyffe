@@ -32,6 +32,32 @@ test('launch-target applets are explicit deployed surfaces rather than fake room
   }
 });
 
+test('Code Loom is a real launchable Atelier instrument, not a phantom room', () => {
+  const applet = APPLET_CATALOGUE.find(item => item.id === 'code-loom');
+  assert.equal(applet?.defaultVisible, true);
+  assert.equal(applet?.category, 'creative-instrument');
+  assert.equal(applet?.pagesHref, '/Flameclyffe/apps/arcsweep/code-loom/');
+  assert.equal(IMPLEMENTED_APPLET_IDS.has('code-loom'), false);
+});
+
+test('Wayglass Pilot Deck has an explicit hosted surface and leaves ArcSweep Helm intact', () => {
+  const applet = APPLET_CATALOGUE.find(item => item.id === 'pilot-deck');
+  assert.equal(applet?.defaultVisible, true);
+  assert.equal(applet?.category, 'ship');
+  assert.equal(applet?.pagesHref, '/Flameclyffe/apps/arcsweep/pilot-deck/');
+  assert.equal(applet?.webHref, '/arcsweep/pilot-deck/');
+  assert.equal(IMPLEMENTED_APPLET_IDS.has('pilot-deck'), false);
+});
+
+test('Harmonic Keyboard launches a real Wayglass audio instrument, not a phantom room', () => {
+  const applet = APPLET_CATALOGUE.find(item => item.id === 'harmonic-keyboard');
+  assert.equal(applet?.defaultVisible,true);
+  assert.equal(applet?.category,'sound');
+  assert.equal(applet?.pagesHref,'/Flameclyffe/apps/arcsweep/harmonic-keyboard/');
+  assert.equal(applet?.webHref,'/arcsweep/harmonic-keyboard/');
+  assert.equal(IMPLEMENTED_APPLET_IDS.has('harmonic-keyboard'),false);
+});
+
 test('Kelyran School is a visible implemented language room', () => {
   const applet = APPLET_CATALOGUE.find((item) => item.id === 'kelyran-school');
   assert.equal(applet?.defaultVisible, true);

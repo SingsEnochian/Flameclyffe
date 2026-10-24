@@ -1,0 +1,97 @@
+name: Wayglass Check
+
+on:
+  push:
+    branches: ['wayglass/current']
+  pull_request:
+    paths:
+      - 'apps/wayglass/**'
+      - 'apps/starwell-server/wayglass/**'
+      - 'apps/starwell-server/wayglass-runtime/**'
+      - 'apps/starwell-server/test/wayglass-*.test.js'
+      - 'apps/starwell-server/test/security-boundary.test.js'
+      - 'apps/starwell-server/test/bluebird-bridge-trial.test.js'
+      - 'apps/starwell-server/server.js'
+      - 'apps/starwell-server/server-secure.js'
+      - 'apps/starwell-server/security/**'
+      - 'netlify/functions/_shared/house-session.mjs'
+      - 'apps/starwell-server/flames/**'
+      - 'scripts/wayglass-*.mjs'
+      - 'lib/wayglass-*'
+      - 'api/_shared/wayglass-gateway.mjs'
+      - 'api/v1/wayglass/**'
+      - 'vercel.json'
+      - 'test/wayglass/**'
+      - 'scripts/wayglass-return-trial-001.mjs'
+      - 'scripts/wayglass-stepfun-smoke.mjs'
+      - 'apps/starwell-server/package*.json'
+      - 'docs/architecture/WAYGLASS_OS_V0_1.md'
+      - 'docs/wayglass/**'
+      - 'apps/arcsweep/**'
+      - 'WAYGLASS_CURRENT.md'
+      - 'AGENTS.md'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/wayglass-check.yml'
+  workflow_dispatch:
+    inputs:
+      stepfun_live:
+        description: 'Make ONE synthetic live StepFun call (requires STEPFUN_API_KEY GitHub secret)'
+        type: boolean
+        default: false
+      stepfun_route:
+        description: 'Explicit StepFun route to probe'
+        type: choice
+        options:
+          - stepfun:flash
+          - stepfun:step5
+        default: stepfun:flash
+
+permissions:
+  contents: read
+
+jobs:
+  wayglass:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Syntax-check Wayglass server ingress
+        run: node --check apps/starwell-server/wayglass/router.js
+      - name: Install host dependencies for HTTP integration tests
+        run: npm ci --prefix apps/starwell-server --omit=dev --ignore-scripts
+      - run: npm run wayglass:test
+      - name: Run Return Trial 001 paired continuation
+        run: node scripts/wayglass-return-trial-001.mjs
+      - name: Preserve Return Trial 001 outcome receipts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayglass-return-trial-001-${{ github.sha }}
+          path: artifacts/wayglass/return-trial-001.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Verify authenticated host, MCP, OAuth and crew workspaces
+        run: npm run wayglass:test:host
+      - name: Verify StepFun synthetic host smoke (captured transport; no credentials)
+        run: node scripts/wayglass-stepfun-smoke.mjs && node scripts/wayglass-stepfun-smoke.mjs --route=stepfun:step5
+      - name: Optional authorised live StepFun smoke (synthetic prompt only)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.stepfun_live == true }}
+        env:
+          STEPFUN_API_KEY: ${{ secrets.STEPFUN_API_KEY }}
+          STEPFUN_ROUTE: ${{ inputs.stepfun_route }}
+        run: node scripts/wayglass-stepfun-smoke.mjs --live --route="$STEPFUN_ROUTE"
+      - name: Verify integrated contracts and ArcSweep instruments
+        run: npm run contracts:verify && npm run arcsweep:test && npm run arcsweep:build
+      - run: npm run wayglass:build
+      - run: npm run wayglass:stage:server
+      - name: Verify staged host
+        run: test -f apps/starwell-server/public/wayglass/index.html
+
+      - run: npm run wayglass:stage:vercel
+      - name: Verify preview browser bundle
+        run: test -f dist/starwell/wayglass/index.html
