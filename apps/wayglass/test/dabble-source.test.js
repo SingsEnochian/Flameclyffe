@@ -35,5 +35,5 @@ test('rejects invalid inputs and never silently broadens excerpt limit',async()=
  assert.throws(()=>selectDabbleExcerpt(src,4));
  assert.throws(()=>selectDabbleExcerpt(src,-1,999999));
  assert.throws(()=>createDabbleReadingTurn(' ',src,{approved:true}));
- assert.throws(()=>createDabbleReadingTurn('Q'.repeat(5000),src,{approved:true}), /turn limit/);
+ assert.throws(()=>createDabbleReadingTurn('Q'.repeat(12000),src,{approved:true}), /turn limit/);
 });
