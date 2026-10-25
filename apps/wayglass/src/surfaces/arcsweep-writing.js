@@ -92,7 +92,7 @@ export async function mountArcSweepWritingSurface(root) {
     '<button type="button" id="wg-griff-check" class="glass-chip" hidden>Check Griff connection</button>',
     '<button type="button" id="wg-bluebird-check" class="glass-chip" hidden>Check Richie connection</button>',
     "  </section>\n",
-          "  <section class=\"glass-panel wg-dabble-source\" aria-label=\"Dabble export reading\">\n    <p class=\"eyebrow\">DABBLE · SOURCE READER</p>\n    <p class=\"tiny\">Sign in directly with Dabble, export a chapter as Markdown, and select it here. No sign-in token or file is automatically accessed by Wayglass.</p>\n    <a class=\"glass-chip\" href=\"https://accounts.dabblewriter.com/auth/login\" target=\"_blank\" rel=\"noopener noreferrer\">Open Dabble sign-in ↗</a>\n    <label for=\"wg-dabble-file\">Choose exported Markdown</label>\n    <input id=\"wg-dabble-file\" type=\"file\" accept=\".md,.markdown,.txt,text/markdown,text/plain\">\n    <label for=\"wg-dabble-section\">Excerpt to discuss</label>\n    <select id=\"wg-dabble-section\" disabled><option value=\"-1\">Beginning of selected export</option></select>\n    <p id=\"wg-dabble-status\" class=\"tiny\" role=\"status\" aria-live=\"polite\">No manuscript selected. Max 512 KB file; at most 12,000 characters per turn.</p>\n    <pre id=\"wg-dabble-preview\" style=\"max-height:9rem;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-size:.83rem\"></pre>\n    <label class=\"tiny\"><input type=\"checkbox\" id=\"wg-dabble-approve\"> Attach this excerpt to my NEXT Writing Room message for the selected route. It may leave this device if the route uses an external provider.</label>\n  </section>",
+          "  <section class=\"glass-panel wg-dabble-source\" aria-label=\"Dabble export reading\">\n    <p class=\"eyebrow\">DABBLE · SOURCE READER</p>\n    <p class=\"tiny\">Sign in directly with Dabble, export a chapter as Markdown, and select it here. No sign-in token or file is automatically accessed by Wayglass.</p>\n    <a class=\"glass-chip\" href=\"https://accounts.dabblewriter.com/auth/login\" target=\"_blank\" rel=\"noopener noreferrer\">Open Dabble sign-in ↗</a>\n    <label for=\"wg-dabble-file\">Choose exported Markdown</label>\n    <input id=\"wg-dabble-file\" type=\"file\" accept=\".md,.markdown,.txt,text/markdown,text/plain\">\n    <label for=\"wg-dabble-section\">Excerpt to discuss</label>\n    <select id=\"wg-dabble-section\" disabled><option value=\"-1\">Beginning of selected export</option></select>\n    <p id=\"wg-dabble-status\" class=\"tiny\" role=\"status\" aria-live=\"polite\">No manuscript selected. Max 512 KB file; at most 8,000 excerpt characters per turn.</p>\n    <pre id=\"wg-dabble-preview\" style=\"max-height:9rem;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-size:.83rem\"></pre>\n    <label class=\"tiny\"><input type=\"checkbox\" id=\"wg-dabble-approve\"> Attach this excerpt to my NEXT Writing Room message for the selected route. It may leave this device if the route uses an external provider.</label>\n  </section>",
     '<div id="wg-stepfun-transfer" class="wg-stepfun-transfer" hidden>',
             '<label for="wg-stepfun-consent"><input type="checkbox" id="wg-stepfun-consent" /> <span id="wg-provider-consent-label">I approve this external provider transfer.</span></label>',
           '</div>',
@@ -210,7 +210,7 @@ export async function mountArcSweepWritingSurface(root) {
   function showDabbleExcerpt() {
     if (!dabbleSource) return;
     const part = selectDabbleExcerpt(dabbleSource, Number(dabbleSection.value));
-    dabblePreview.textContent = part.text.slice(0, 1100) + (part.text.length > 1100 ? '\\n[Preview shortened]' : '');
+    dabblePreview.textContent = part.text.slice(0, 1100) + (part.text.length > 1100 ? '\n[Preview shortened]' : '');
     dabbleStatus.textContent = 'Local-only source: ' + dabbleSource.filename +
       ' · SHA-256 ' + dabbleSource.sha256.slice(0, 16) + '… · ' +
       part.text.length + ' characters' + (part.truncated ? ' (excerpt truncated)' : '') +
@@ -559,9 +559,17 @@ export async function mountArcSweepWritingSurface(root) {
     }
     // Authorisation is explicitly one-turn and bound to the current route and section.
     // The original manuscript is kept in this browser session only.
-    const routedInput = dabbleApprove.checked
-      ? createDabbleReadingTurn(text, dabbleSource, { approved:true, sectionIndex:Number(dabbleSection.value) })
-      : text;
+    let routedInput = text;
+    try {
+      if (dabbleApprove.checked) {
+        routedInput = createDabbleReadingTurn(text, dabbleSource, {
+          approved:true, sectionIndex:Number(dabbleSection.value)
+        });
+      }
+    } catch (error) {
+      status.textContent = 'Dabble reading blocked: ' + error.message;
+      return;
+    }
     const sourceReceipt = dabbleApprove.checked ? dabbleSource.sha256 : null;
     dabbleApprove.checked = false;
     busy = true;
