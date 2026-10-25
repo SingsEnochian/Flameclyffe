@@ -160,17 +160,114 @@ function coalitionManifestation(coalition = null) {
   });
 }
 
+function wishManifestations(lineage = {}) {
+  const rows = [];
+  for (const wish of lineage.wishes || []) {
+    rows.push(createCodexManifestation({
+      kind: 'wish',
+      id: `wish:${wish.wishId}`,
+      traceId: wish.lineageRootId || wish.wishId,
+      text: wish.desire || '',
+      createdAt: wish.createdAt || '',
+      state: {
+        wishId: wish.wishId,
+        status: wish.status || 'open',
+        whyItMatters: wish.whyItMatters || null,
+        worldOrScope: wish.worldOrScope || 'unscoped',
+        origin: wish.origin || null,
+        revision: wish.revision || 1,
+        branchCount: (wish.possibilityBranches || []).length,
+        openQuestionIds: wish.openQuestionIds || [],
+        tags: ['wish', 'possibility'],
+      },
+      provenance: wish.provenance || [],
+    }));
+    for (const branch of wish.possibilityBranches || []) {
+      rows.push(createCodexManifestation({
+        kind: 'wishBranch',
+        id: `wish-branch:${wish.wishId}:${branch.branchId}`,
+        traceId: wish.lineageRootId || wish.wishId,
+        text: branch.possibility || branch.label || '',
+        createdAt: branch.createdAt || wish.createdAt || '',
+        state: {
+          wishId: wish.wishId,
+          branchId: branch.branchId,
+          label: branch.label || null,
+          status: branch.status || 'open',
+          tags: ['wish', 'branch', 'possibility'],
+        },
+        provenance: branch.provenance || [],
+      }));
+    }
+  }
+
+  for (const question of lineage.openQuestions || []) {
+    rows.push(createCodexManifestation({
+      kind: 'openQuestion',
+      id: `open-question:${question.questionId}`,
+      traceId: question.originWishId || question.questionId,
+      text: question.question || '',
+      createdAt: question.createdAt || '',
+      state: {
+        questionId: question.questionId,
+        status: question.status || 'open',
+        originWishId: question.originWishId || null,
+        worldOrScope: question.worldOrScope || 'unscoped',
+        revisitWorthwhile: question.revisitWorthwhile !== false,
+        preserveBelief: question.preserveBelief !== false,
+        tags: ['open-question', 'wonder', 'return'],
+      },
+      provenance: question.provenance || [],
+    }));
+    for (const revisit of question.revisits || []) {
+      rows.push(createCodexManifestation({
+        kind: 'questionRevisited',
+        id: `question-revisit:${question.questionId}:${revisit.revisitId}`,
+        traceId: question.originWishId || question.questionId,
+        text: revisit.note || '',
+        createdAt: revisit.createdAt || question.updatedAt || '',
+        state: {
+          questionId: question.questionId,
+          revisitId: revisit.revisitId,
+          tags: ['open-question', 'revisit', 'wonder'],
+        },
+        provenance: revisit.provenance || [],
+      }));
+    }
+    for (const resolution of question.resolutions || []) {
+      rows.push(createCodexManifestation({
+        kind: 'questionResolved',
+        id: `question-resolution:${question.questionId}:${resolution.resolutionId}`,
+        traceId: question.originWishId || question.questionId,
+        text: resolution.statement || '',
+        createdAt: resolution.createdAt || question.updatedAt || '',
+        state: {
+          questionId: question.questionId,
+          resolutionId: resolution.resolutionId,
+          mode: resolution.mode || 'tentative',
+          confidence: resolution.confidence ?? null,
+          tags: ['open-question', 'resolution', 'lineage'],
+        },
+        provenance: resolution.provenance || [],
+      }));
+    }
+  }
+  return rows;
+}
+
 export function projectUniversalCodex({
   messages = [],
   growthSnapshot = null,
   experimentSnapshot = null,
   coalition = null,
+  wishLineage = null,
 } = {}) {
   const byId = new Map();
   const add = (manifestation) => { if (manifestation?.id) byId.set(manifestation.id, manifestation); };
   for (const message of Array.isArray(messages) ? messages : []) add(manifestationFromEnvelope(message));
   for (const manifestation of growthManifestations(growthSnapshot || {})) add(manifestation);
   for (const manifestation of experimentManifestations(experimentSnapshot || {})) add(manifestation);
+  for (const manifestation of wishManifestations(wishLineage || {})) add(manifestation);
   add(coalitionManifestation(coalition));
 
   const manifestations = [...byId.values()].sort((a, b) => String(a.createdAt || '').localeCompare(String(b.createdAt || '')));

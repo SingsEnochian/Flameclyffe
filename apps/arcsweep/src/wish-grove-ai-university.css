@@ -1,0 +1,102 @@
+.wish-grove-aiu {
+  margin-top: .65rem;
+  padding-top: .6rem;
+  border-top: 1px solid rgba(82,120,98,.18);
+}
+
+.wish-grove-aiu > header,
+.wish-grove-aiu-proposal > header,
+.wish-grove-aiu-result > header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .6rem;
+}
+
+.wish-grove-aiu h5 {
+  margin: .12rem 0;
+  color: #294a3b;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1rem;
+}
+
+.wish-grove-aiu-note {
+  margin: .35rem 0;
+  color: #735f4e;
+  font-size: .75rem;
+}
+
+.wish-grove-aiu-list,
+.wish-grove-aiu-results {
+  display: grid;
+  gap: .5rem;
+  margin-top: .5rem;
+}
+
+.wish-grove-aiu-proposal,
+.wish-grove-aiu-result {
+  padding: .55rem;
+  border: 1px solid rgba(82,120,98,.18);
+  border-radius: 10px;
+  background: rgba(82,120,98,.05);
+}
+
+.wish-grove-aiu-proposal p,
+.wish-grove-aiu-result p {
+  margin: .32rem 0;
+  color: #604e40;
+  font-size: .76rem;
+}
+
+.wish-grove-aiu-proposal header div,
+.wish-grove-aiu-proposal header strong,
+.wish-grove-aiu-proposal header small {
+  display: block;
+}
+
+.wish-grove-aiu-proposal header small {
+  color: #806b57;
+  font-size: .65rem;
+  overflow-wrap: anywhere;
+}
+
+.wish-grove-aiu-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .3rem;
+  margin: .4rem 0;
+}
+
+.wish-grove-aiu-badges span {
+  padding: .16rem .38rem;
+  border: 1px solid rgba(82,120,98,.24);
+  border-radius: 999px;
+  background: rgba(255,255,255,.28);
+  color: #435b4e;
+  font-size: .66rem;
+}
+
+.wish-grove-aiu form {
+  display: grid;
+  gap: .45rem;
+  margin-top: .5rem;
+}
+
+.wish-grove-aiu form label {
+  display: grid;
+  gap: .22rem;
+  color: #604e40;
+  font-size: .76rem;
+}
+
+.wish-grove-aiu input,
+.wish-grove-aiu textarea,
+.wish-grove-aiu select {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(93,67,31,.22);
+  border-radius: 8px;
+  padding: .46rem .54rem;
+  color: #2b221b;
+  background: rgba(255,255,255,.48);
+}
