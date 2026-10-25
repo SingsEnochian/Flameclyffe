@@ -25,6 +25,20 @@
 <article class="panel"><h3>World Notes</h3><div class="field"><label for="worldNotes">Continuity and setting</label><textarea id="worldNotes" placeholder="Place rules, magical or scientific constraints, motifs, objects, timeline notes."></textarea></div></article>
 <article class="panel" id="export-rack"><h3>Export Rack</h3><p>Export the current leaf as Markdown, copy it to clipboard, or download a plain `.md` file for Drive, GitHub, or the next co-writing pass.</p><div class="actions"><button class="action" id="copyMarkdown" type="button">Copy Markdown</button><button class="action" id="downloadMarkdown" type="button">Download .md</button><button class="action" id="clearDraft" type="button">Clear local draft</button></div><pre class="field" id="exportPreview" aria-live="polite" style="white-space:pre-wrap;text-align:left;color:var(--soft);overflow-wrap:anywhere;margin-top:1rem"></pre></article>
 </section>
+<section class="desk" aria-label="Dabble manuscript shelf" id="dabble-shelf">
+<article class="panel" style="grid-column:1/-1">
+<h2>Dabble Manuscript Shelf</h2>
+<p>Read-only local exports you explicitly kept via the <a href="dabble-bridge.html">Dabble Bridge</a>. Dabble sign-in stays at Dabble; the shelf contains only the files you authorise. The documents are stored only in this browser, not in the Wayglass host or an AI model.</p>
+<div class="field"><label for="dabbleSaved">Local manuscript exports</label><select id="dabbleSaved" aria-label="Saved Dabble exports" style="width:100%;background:#061417;color:#eaf4ef;padding:.65rem;border-radius:12px;border:1px solid rgba(231,196,119,.35)"><option value="">Select an export</option></select></div>
+<div class="actions" style="margin-top:.65rem">
+<button class="action" id="dabbleRead" type="button">View unchanged export</button>
+<button class="action" id="dabbleCopyToPad" type="button">Copy into Draft Pad…</button>
+<button class="action" id="dabbleForget" type="button">Forget this local copy…</button>
+<button class="action" id="dabbleRefresh" type="button">Refresh shelf</button>
+</div>
+<p id="dabbleStatus" role="status" aria-live="polite">Local manuscript shelf not opened yet.</p>
+<pre id="dabblePreview" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:24rem;overflow:auto;text-align:left"></pre>
+</article></section>
 <p class="note-strip">The Writing Room is now a full live workspace with local save, scene loom, character shelf, world notes, and export tools. Supabase/Drive persistence comes next.</p>
 </section>
 </main>
@@ -42,6 +56,60 @@ el('copyMarkdown').addEventListener('click',async()=>{try{await navigator.clipbo
 el('downloadMarkdown').addEventListener('click',()=>{const blob=new Blob([markdown()],{type:'text/markdown'});const url=URL.createObjectURL(blob);const a=document.createElement('a');const title=(el('sceneTitle').value||'starwell-scene').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');a.href=url;a.download=title+'.md';a.click();URL.revokeObjectURL(url)});
 el('clearDraft').addEventListener('click',()=>{if(confirm('Clear the local Writing Room draft on this device?')){localStorage.removeItem(key);ids.forEach(id=>el(id).value='');update()}});
 load();
+</script>
+<script type="module">
+import { listManuscripts, readManuscript, forgetManuscript } from './dabble-shelf.mjs';
+const choose=document.getElementById('dabbleSaved');
+const note=document.getElementById('dabbleStatus');
+const preview=document.getElementById('dabblePreview');
+async function refreshShelf() {
+  choose.replaceChildren(new Option('Select an export',''));
+  preview.textContent='';
+  try {
+    const records=await listManuscripts();
+    for(const record of records) {
+      choose.append(new Option(record.filename+' · '+record.sha256.slice(0,12)+'…',record.sha256));
+    }
+    note.textContent=records.length+' saved export'+(records.length===1?'':'s')+' in this browser. No Wayglass server or model connection.';
+  } catch(error) {note.textContent='Local shelf unavailable: '+error.message;}
+}
+async function chosenRecord(){
+  if(!choose.value) {note.textContent='Select an export first.';return null;}
+  try {const record=await readManuscript(choose.value);
+    if(!record) {note.textContent='Export no longer found; refresh the shelf.';return null;}
+    return record;
+  } catch(error){note.textContent=error.message;return null;}
+}
+document.getElementById('dabbleRefresh').addEventListener('click',refreshShelf);
+document.getElementById('dabbleRead').addEventListener('click',async()=>{
+ const record=await chosenRecord();if(!record)return;
+ preview.textContent=record.content;
+ note.textContent='Read-only '+record.filename+' · SHA-256 '+record.sha256+' · original retained.';
+});
+document.getElementById('dabbleCopyToPad').addEventListener('click',async()=>{
+ const record=await chosenRecord();if(!record)return;
+ if(!confirm('Copy '+record.filename+' into the editable Draft Pad? This REPLACES the current local draft. Your original Dabble export stays unchanged in the shelf.'))return;
+ const pad=document.getElementById('draftText');
+ pad.value=record.content;
+ const title=document.getElementById('sceneTitle');
+ title.value=record.filename.replace(/\.(md|markdown|txt)$/i,'');
+ pad.dispatchEvent(new Event('input',{bubbles:true}));
+ // Store a provenance pointer separately. The draft copy may be edited.
+ try {
+   localStorage.setItem('starwell_dabble_draft_source_v1',JSON.stringify({
+      filename:record.filename,sha256:record.sha256,importedAt:record.importedAt,source:'user-supplied-dabble-export'
+   }));
+ } catch {}
+ note.textContent='Copied into editable Draft Pad. Source '+record.sha256.slice(0,16)+'…; saved shelf original is untouched.';
+ document.getElementById('draft-pad').scrollIntoView({behavior:'smooth'});
+});
+document.getElementById('dabbleForget').addEventListener('click',async()=>{
+ const record=await chosenRecord();if(!record)return;
+ if(!confirm('Permanently remove the local shelf copy of '+record.filename+' from this browser? This does not change Dabble or the Draft Pad.'))return;
+ try {await forgetManuscript(record.sha256); await refreshShelf();note.textContent='Local shelf copy removed. Dabble account and export file unchanged.';}
+ catch(error){note.textContent='Could not remove local copy: '+error.message;}
+});
+await refreshShelf();
 </script>
 </body>
 </html>
