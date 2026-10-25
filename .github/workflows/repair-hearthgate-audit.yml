@@ -21,7 +21,8 @@ jobs:
       - name: Repair vulnerable locked production packages
         working-directory: apps/starwell-server
         run: |
-          npm audit fix --package-lock-only --ignore-scripts --no-fund
+          npm update body-parser multer --package-lock-only --ignore-scripts --no-fund
+          npm audit --omit=dev --audit-level=high --package-lock-only
           npm ci --ignore-scripts --no-fund --no-audit
           npm audit --omit=dev --audit-level=high
           npm test
