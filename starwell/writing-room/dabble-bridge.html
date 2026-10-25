@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Writing Room · Dabble Bridge</title>
+<style>
+:root{color-scheme:dark;font:16px/1.55 system-ui;background:#091419;color:#edf3ed}
+body{max-width:940px;margin:auto;padding:1.5rem} h1,h2{font-family:Georgia,serif;color:#e9c785}
+.panel{border:1px solid #43605c;border-radius:18px;padding:1.2rem;margin:1rem 0;background:#14242a}
+button,a.button{display:inline-block;margin:.3rem;padding:.55rem .8rem;background:#214b42;color:#fff;border:1px solid #76bca3;border-radius:10px;cursor:pointer}
+button:disabled{opacity:.45;cursor:default}a{color:#9ce6c8}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:26rem;overflow:auto;background:#071113;padding:1rem;border-radius:12px;text-align:left}
+small{color:#b5c9c1}li{margin:.3rem 0}input{max-width:100%}
+</style></head><body>
+<p><a href="./">← Writing Room</a></p>
+<h1>Dabble · Manuscript Bridge</h1>
+<p>A user-invoked, read-only doorway for Dabble Markdown exports. Nothing is uploaded, sent to an AI model, or written back to Dabble by this page.</p>
+<section class="panel"><h2>1. Choose an export</h2>
+<p>Export your manuscript or chapter as Markdown from Dabble, then select the file here. Maximum 2 MB.</p>
+<label for="file">Local manuscript export</label> <input id="file" type="file" accept=".md,.markdown,.txt,text/markdown,text/plain">
+<p role="status" id="status" aria-live="polite">No manuscript loaded.</p>
+</section>
+<section class="panel"><h2>2. Source receipt</h2><div id="details">Waiting for an authorised file selection.</div>
+<button id="receipt" disabled>Download provenance receipt</button><button id="original" disabled>Download unchanged Markdown</button>
+</section>
+<section class="panel"><h2>3. Read without rewriting</h2><p><small>Headings are indexed, not used to change the original file. Content below is displayed as text, never executed as HTML.</small></p><ol id="sections"></ol><pre id="preview">No text loaded.</pre></section>
+<p><small>Prototype boundary: local browser session only. Restart retention, Rarity/provider access, Drive sync, live Dabble API access, and write-back are not implemented or claimed.</small></p>
+<script type="module">
+import { importMarkdown } from './dabble-import.mjs';
+const $ = id => document.getElementById(id);
+let record = null;
+function download(name, text, type) {
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  const a = document.createElement('a'); a.href = url; a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+$('file').addEventListener('change', async event => {
+  record = null; $('receipt').disabled = $('original').disabled = true;
+  $('preview').textContent = 'No text loaded.'; $('sections').replaceChildren(); $('details').textContent = 'Waiting for an authorised file selection.';
+  const file = event.target.files?.[0]; if (!file) { $('status').textContent = 'No manuscript loaded.'; return; }
+  try {
+    if (file.size > 2_000_000) throw new Error('File exceeds 2 MB');
+    record = await importMarkdown({name:file.name,text:await file.text()});
+    const { content, sections, ...metadata } = record;
+    $('details').textContent = JSON.stringify(metadata,null,2);
+    $('preview').textContent = content;
+    for (const section of sections) { const li=document.createElement('li'); li.textContent = section.title + ' · line ' + section.line; $('sections').append(li); }
+    $('status').textContent = 'Loaded locally. SHA-256 '+record.sha256.slice(0,16)+'…; '+sections.length+' indexed headings.';
+    $('receipt').disabled = $('original').disabled = false;
+  } catch (error) { $('status').textContent = 'Import blocked: '+error.message; }
+});
+$('receipt').addEventListener('click', () => { if (!record) return; const {content,...receipt}=record; download(record.filename+'.receipt.json',JSON.stringify(receipt,null,2),'application/json'); });
+$('original').addEventListener('click', () => { if (record) download(record.filename,record.content,'text/markdown'); });
+</script></body></html>
