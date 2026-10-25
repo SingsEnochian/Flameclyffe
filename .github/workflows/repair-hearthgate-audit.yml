@@ -1,0 +1,45 @@
+name: Repair Hearthgate production audit lockfile
+on:
+  push:
+    branches:
+      - fix/hearthgate-production-audit-20261025
+    paths:
+      - .github/workflows/repair-hearthgate-audit.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  repair-lock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Repair vulnerable locked production packages
+        working-directory: apps/starwell-server
+        run: |
+          npm audit fix --package-lock-only --ignore-scripts --no-fund
+          npm ci --ignore-scripts --no-fund --no-audit
+          npm audit --omit=dev --audit-level=high
+          npm test
+      - name: Limit and commit lockfile repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          changed="$(git diff --name-only)"
+          if [ -z "$changed" ]; then
+            echo "No lockfile change required"
+            exit 0
+          fi
+          if [ "$changed" != "apps/starwell-server/package-lock.json" ]; then
+            echo "Unexpected files modified: $changed" >&2
+            exit 1
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/starwell-server/package-lock.json
+          git commit -m "fix(hearthgate): refresh audited production dependency lock"
+          git push
