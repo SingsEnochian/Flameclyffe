@@ -48,6 +48,18 @@ export const CREATIVE_ORGANS = Object.freeze([
     implementation: 'STARWELL FontForgeDock',
   },
   {
+    id: 'media-foundry',
+    label: 'Media Foundry',
+    glyph: '✦',
+    family: 'media',
+    description: 'Wayglass-native candidate models, route inspection, accountable speech/image research and reversible experiment plans. No provider send or model installation is implied.',
+    pagesHref: '/Flameclyffe/apps/arcsweep/media-foundry/',
+    webHref: '/arcsweep/media-foundry/',
+    deployedPath: 'apps/arcsweep/media-foundry/index.html',
+    sourcePath: 'apps/arcsweep/src/media-foundry/main.js',
+    implementation: 'Wayglass Media Foundry · Candidate and Route Research Deck',
+  },
+  {
     id: 'continuity-gate',
     label: 'Continuity Gate',
     glyph: '⌁',
