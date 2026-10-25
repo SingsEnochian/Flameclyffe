@@ -44,12 +44,13 @@ $('copyHash').addEventListener('click',async()=>{if(!record)return;try{await nav
 function download(name, text, type) {
   const url = URL.createObjectURL(new Blob([text], { type }));
   const a = document.createElement('a'); a.href = url; a.download = name; a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
 $('file').addEventListener('change', async event => {
   clearView();
   const file = event.target.files?.[0]; if (!file) { $('status').textContent = 'No manuscript loaded.'; return; }
   try {
+    $('status').textContent = 'Reading selected file locally…';
     if (file.size > 2_000_000) throw new Error('File exceeds 2 MB');
     record = await importMarkdown({name:file.name,text:await file.text()});
     const { content, sections, ...metadata } = record;
@@ -62,8 +63,9 @@ $('file').addEventListener('change', async event => {
 });
 $('pin').addEventListener('click', async () => {
   if (!record) return;
-  try { await keepManuscript(record); $('shelfStatus').textContent = 'Saved in this browser only. Open the manuscript shelf to read it. No model or external server has been contacted.'; }
+  try { $('pin').disabled = true; await keepManuscript(record); $('shelfStatus').textContent = 'Saved in this browser only. Open the manuscript shelf to read it. No model or external server has been contacted.'; }
   catch(error) { $('shelfStatus').textContent = 'Could not keep a local copy: '+error.message; }
+  finally { $('pin').disabled = !record; }
 });
 $('receipt').addEventListener('click', () => { if (!record) return; const {content,...receipt}=record; download(record.filename+'.receipt.json',JSON.stringify(receipt,null,2),'application/json'); });
 $('original').addEventListener('click', () => { if (record) download(record.filename,record.content,'text/markdown'); });
