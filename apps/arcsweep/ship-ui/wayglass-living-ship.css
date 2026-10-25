@@ -1,0 +1,87 @@
+/*
+ * The entire ship UI is the visualiser, not a separate widget.
+ * These layers are noninteractive and never own the DOM's meaning or actions.
+ */
+.wayglass-living-tissue {
+  position:fixed;
+  inset:0;
+  z-index:0;
+  display:block;
+  width:100vw;
+  height:100vh;
+  pointer-events:none;
+  opacity:.68;
+  mix-blend-mode:screen;
+}
+.wayglass-living-tissue[hidden]{display:none!important}
+body > :not(.wayglass-living-tissue):not(.wayglass-living-control):not(script) {
+  position:relative;
+  z-index:1;
+}
+.wayglass-living-control {
+  position:fixed;
+  z-index:20;
+  bottom:max(1rem,env(safe-area-inset-bottom));
+  right:max(1rem,env(safe-area-inset-right));
+  max-width:min(355px,calc(100vw - 2rem));
+  display:flex;
+  align-items:center;
+  gap:.7rem;
+  padding:.45rem .55rem .45rem .75rem;
+  border:1px solid rgba(117,202,198,.4);
+  border-radius:12px;
+  background:rgba(8,25,33,.96);
+  color:#d8e9e9;
+  box-shadow:0 8px 24px rgba(0,0,0,.3);
+  font:500 .71rem/1.3 system-ui,sans-serif;
+}
+.wayglass-living-caption {min-width:0;color:#b7d4d7}
+button.wayglass-living-toggle {
+  flex-shrink:0;
+  min-height:36px;
+  padding:.43rem .6rem;
+  border:1px solid #78b8b4;
+  border-radius:7px;
+  color:#f5ffff;
+  background:#153d44;
+  font:600 .73rem system-ui,sans-serif;
+}
+button.wayglass-living-toggle:focus-visible {
+  outline:3px solid #c9fff3;
+  outline-offset:3px;
+}
+/* Existing mineral-glass surfaces reflect the same shared ecological model. */
+html[data-wayglass-ship='visual-simulation']
+:is(.seat,.pane,.panel,.mast,.ship-mast,.masthead,.instrument,.hero.panel) {
+  border-color:hsla(var(--wg-ship-hue,185),50%,70%,.30);
+}
+html[data-wayglass-ship='visual-simulation']
+:is(.seat,.pane,.panel,.instrument,.hero.panel)::before {
+  background:
+    radial-gradient(ellipse at 80% 15%,
+      hsla(var(--wg-ship-hue,185),80%,73%,.095),transparent 53%),
+    linear-gradient(110deg,
+      transparent 3%,rgba(158,222,233,.025) 27%,transparent 42%);
+  pointer-events:none;
+}
+@media(max-width:650px) {
+  .wayglass-living-control {
+    right:max(.6rem,env(safe-area-inset-right));
+    bottom:max(4.3rem,env(safe-area-inset-bottom));
+    max-width:calc(100vw - 1.2rem);
+  }
+}
+@media(prefers-reduced-motion:reduce), (forced-colors:active), (prefers-reduced-transparency:reduce) {
+  .wayglass-living-tissue{display:none!important}
+  html[data-wayglass-ship='visual-simulation']
+  :is(.seat,.pane,.panel,.instrument,.hero.panel)::before{background:none}
+}
+@media(forced-colors:active) {
+  .wayglass-living-control {
+    background:Canvas;
+    color:CanvasText;
+    border:1px solid CanvasText;
+  }
+  .wayglass-living-caption{color:CanvasText}
+  button.wayglass-living-toggle{background:ButtonFace;color:ButtonText}
+}
