@@ -29,6 +29,7 @@ import {
 import { CONSTELLATION_VOICES, createInitialPremaqc, invokeConstellationVoices, runFeedbackCycle, syncFeedbackCycle } from './feedback-loop.js';
 import { createEmptyFeedbackQueue, normalizeFeedbackQueue, enqueueFeedbackCycle, acceptFeedbackCycle, archiveFeedbackCycle, discardFeedbackCycle, pendingCycles, feedbackQueueSummary } from './feedback-cycle-queue.js';
 import { StorySoundscape } from './story-soundscape.js';
+import { resolveWorldweaveAcousticProfile } from './worldweave-acoustics.js';
 import { FIELD_AXES, classifyFieldInstrument, createFieldObservationPremaqc, formatFieldAge, isHostedBrowser } from './field-instrument.js';
 import { readCurrentField } from './field-source.js';
 import {
@@ -554,6 +555,8 @@ function renderStorySoundscape(sound = storySoundscape.snapshot()) {
   const mappedVoices = sound.soundfontMap?.voices?.length
     ? `<div class="soundfont-map"><p class="eyebrow">Mapped programme · ${escapeHtml(sound.soundfontMap.title)}</p><ol>${sound.soundfontMap.voices.map((voice) => `<li><b>${escapeHtml(voice.label)}</b> · ${escapeHtml(voice.gmName)} · ${voice.channel === 9 ? `drum notes ${voice.notes.join('/')}` : `bank ${voice.bankMSB}/${voice.bankLSB} · programme ${voice.program} · ch ${voice.channel + 1}`}<br><small>${escapeHtml(voice.purpose)}</small></li>`).join('')}</ol><p class="muted">120 Hz sits 49.4 cents below MIDI B2; preserve the world root with fine tuning when the loaded bank supports it.</p></div>`
     : '';
+  const worldweaveProfile = resolveWorldweaveAcousticProfile(activeWorld());
+  const worldweave = sound.worldweave;
   const heartfield = sound.heartfield;
   const bluebird = sound.bluebird;
   const heartfieldLayers = heartfield.profile.layers.map((layer) => {
@@ -566,6 +569,17 @@ function renderStorySoundscape(sound = storySoundscape.snapshot()) {
   }).join('');
   return `<section class="story-soundscape" data-story-soundscape>
     <div class="soundscape-head"><div><p class="eyebrow">Story → tone → room</p><h3>World Sound Mixer</h3><p class="muted">${sound.armed ? 'Audio armed' : 'Audio waits for a user gesture'} · ${sound.world.rootHz.toFixed(2)} Hz · ${escapeHtml(sound.world.worldName)}</p></div><div class="button-row"><button type="button" data-action="sound-arm">${sound.armed ? 'Re-arm' : 'Arm sound'}</button><button type="button" class="quiet" data-action="sound-toggle-hum">${sound.humActive ? 'Stop hum' : 'Start hum'}</button><button type="button" class="quiet" data-action="sound-world-tone">Strike world tone</button><button type="button" class="quiet" data-action="sound-audition">Hear written events</button></div></div>
+    <section class="worldweave-acoustic-panel" aria-label="Worldweave acoustic identities">
+      <div><p class="eyebrow">Worldweave · acoustic identity</p><h4>${worldweaveProfile ? escapeHtml(worldweaveProfile.name) : "Unmapped world"}</h4>
+        <p class="muted">${worldweaveProfile ? escapeHtml(worldweaveProfile.description) : "This world has no authored atmosphere yet. The existing mixer remains available."}</p>
+        <p class="muted">Three-note Moonmere/Third City/Starsong echo · artistic hypothesis, not committed canon. Procedural listening study; load your own local stems to add field recordings.</p></div>
+      <div class="button-row">
+        <button type="button" data-action="worldweave-toggle" ${worldweaveProfile ? "" : "disabled"}>${worldweave?.active ? "Stop atmosphere" : "Enter atmosphere"}</button>
+        <button type="button" class="quiet" data-action="worldweave-echo" ${worldweaveProfile ? "" : "disabled"}>Hear the shared echo</button>
+      </div>
+      <p class="muted">Audio starts only when you choose it. Returning to Wayglass remembers the last selected acoustic identity without autoplay. Feather Stop silences it.</p>
+      ${worldweave?.receipts?.length ? `<p class="muted">Last cue: ${escapeHtml(worldweave.receipts[0].action)} · ${escapeHtml(worldweave.receipts[0].scene_id)} · ${escapeHtml(worldweave.receipts[0].reason)}</p>` : ""}
+    </section>
     <div class="sound-mixer-grid">
       ${['master','hum','tones','effects','ambience'].map((bus) => `<label>${bus[0].toUpperCase() + bus.slice(1)}<input type="range" min="0" max="1" step="0.01" value="${sound.buses[bus]}" data-sound-bus="${bus}" /></label>`).join('')}
       <label>World root (Hz)<input type="number" min="20" max="20000" step="0.01" value="${sound.world.rootHz}" data-sound-root /></label>
@@ -1239,6 +1253,27 @@ app.addEventListener('click', async (event) => {
 
   if (action === 'open-wrp') { const url = activeWorld()?.arrival?.wrpRunaUrl; if (url) window.open(url, '_blank', 'noopener,noreferrer'); return; }
   if (action === 'refresh-deep') { deepData = null; deepDataFetching = false; fetchDeepData(); return; }
+  if (action === 'worldweave-toggle') {
+    try {
+      if (storySoundscape.worldweave.snapshot().active) {
+        storySoundscape.worldweave.stop();
+        setLiveNotice('Worldweave atmosphere stopped. Your return anchor is preserved.');
+      } else {
+        await storySoundscape.arm(activeWorld());
+        storySoundscape.worldweave.start(activeWorld());
+        setLiveNotice('Worldweave atmosphere sounding. World changes crossfade; no canon was changed.');
+      }
+    } catch (error) { setLiveNotice('Worldweave atmosphere unavailable: ' + error.message); }
+    refreshStorySoundscape(); return;
+  }
+  if (action === 'worldweave-echo') {
+    try {
+      await storySoundscape.arm(activeWorld());
+      storySoundscape.worldweave.playEcho(activeWorld());
+      setLiveNotice('Shared three-note echo sounded in this world. This is an exploratory motif, not established history.');
+    } catch (error) { setLiveNotice('Worldweave echo unavailable: ' + error.message); }
+    refreshStorySoundscape(); return;
+  }
   if (action === 'sound-arm') {
     try { await storySoundscape.arm(activeWorld()); storySoundscape.seedText(app.querySelector('textarea[name="work"]')?.value || ''); setLiveNotice('World Sound Mixer armed. The writing surface can act on the room.'); }
     catch (error) { setLiveNotice(`Sound mixer stopped: ${error.message}`); }

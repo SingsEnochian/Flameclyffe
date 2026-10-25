@@ -1,0 +1,14 @@
+.wg-video-atelier .atelier-refraction { display:grid; place-items:center; min-height:210px; perspective:800px; }
+.wg-video-atelier .atelier-mirror { width:175px; height:220px; border-radius:47% 47% 18% 18%; border:8px ridge rgba(220,225,237,.65); position:relative; overflow:hidden; transform:rotateY(-16deg); box-shadow:inset 0 0 50px #70d8e575, 0 0 44px #a28fed88, 14px 20px 50px #0009; background:linear-gradient(122deg,#110b2b,#4e477c 24%,#8aeeea55 32%,#162847 53%,#dfb0eb99 80%,#1a1030); animation:wg-mirror-breathe 7s ease-in-out infinite alternate; }
+.wg-video-atelier .atelier-mirror:before {content:"";position:absolute;inset:-40%;background:conic-gradient(from 28deg,transparent,#d3ebff49,transparent,#bc90e959,transparent);filter:blur(22px);animation:wg-mirror-turn 9s linear infinite}
+.wg-video-atelier .atelier-mirror span { position:absolute;inset:0;display:grid;place-items:center;color:#d6f9f4;font:900 5rem Georgia,serif;text-shadow:0 0 25px #c8f1ff; }
+.wg-video-atelier .atelier-workbench { padding:clamp(18px,4vw,32px);border-radius:24px;display:grid;gap:13px;min-width:0; }
+.wg-video-atelier .atelier-workbench h2 { margin:0;font:500 clamp(1.4rem,3vw,2.1rem) Georgia,serif; }
+.wg-video-atelier .atelier-workbench p { margin:0;line-height:1.6;overflow-wrap:anywhere }
+.wg-video-atelier .atelier-workbench label {font-weight:700}
+.wg-video-atelier .atelier-actions {display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.wg-video-atelier .atelier-actions .send-jewel {padding:12px 18px;border-radius:999px}
+.wg-video-atelier code {color:#adf4e4;word-break:break-word}
+@keyframes wg-mirror-breathe {to{transform:rotateY(10deg) rotateX(3deg);filter:hue-rotate(12deg)}}
+@keyframes wg-mirror-turn {to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.wg-video-atelier .atelier-mirror,.wg-video-atelier .atelier-mirror:before{animation:none}}

@@ -1,0 +1,59 @@
+.wayglass-authorization {
+  width: min(28rem, calc(100vw - 2rem)); padding: 0;
+  border: 1px solid rgba(166, 212, 234, .35); border-radius: 1.5rem;
+  background: #0b1421; color: #eff6ff;
+  box-shadow: 0 1.5rem 5rem rgba(0, 0, 0, .5); font-family: inherit;
+}
+.wayglass-authorization::backdrop { background: rgba(3, 8, 18, .88); }
+.wayglass-authorization__form { display: grid; gap: .85rem; padding: 2rem; }
+.wayglass-authorization__form h1 { font-size: 1.6rem; margin: 0; line-height: 1.2; }
+.wayglass-authorization__form p { margin: 0; line-height: 1.5; }
+.wayglass-authorization__eyebrow { color: #a6d4ea; letter-spacing: .2em; font-size: .7rem; }
+.wayglass-authorization__form label { font-size: .9rem; margin-top: .5rem; }
+.wayglass-authorization__form input {
+  width: 100%; min-height: 3rem; box-sizing: border-box; padding: .75rem;
+  border: 1px solid #7896b3; border-radius: .6rem;
+  background: #111f31; color: #fff; font: inherit;
+}
+.wayglass-authorization__form input:focus-visible,
+.wayglass-authorization__form button:focus-visible { outline: 2px solid #a6d4ea; outline-offset: 3px; }
+.wayglass-authorization__privacy { font-size: .8rem; color: #becddc; }
+.wayglass-authorization__error { color: #ffb9b9; font-size: .9rem; }
+.wayglass-authorization__form button {
+  min-height: 3rem; padding: .75rem 1rem; border: 0; border-radius: .6rem;
+  background: #b4dcf0; color: #0b1421; font: inherit; font-weight: 600; cursor: pointer;
+}
+.wayglass-authorization__form button:disabled { opacity: .6; cursor: wait; }
+@media (max-width: 420px) { .wayglass-authorization__form { padding: 1.3rem; } }
+
+/* Bluebird's per-opening authorisation uses the same dark glass dialect.
+   Credentials stay inside the existing private session boundary. */
+.wayglass-authorization {
+  color-scheme: dark;
+  border-color: rgba(84, 194, 229, .43);
+  background:
+    radial-gradient(ellipse at 65% 0%, rgba(34, 118, 170, .16), transparent 55%),
+    linear-gradient(155deg, #0d2231, #06111e 80%);
+  box-shadow: inset 0 1px rgba(240,255,255,.10), 0 35px 100px rgba(0,0,0,.72);
+}
+.wayglass-authorization::backdrop {
+  background: rgba(1, 7, 15, .89);
+  backdrop-filter: blur(8px);
+}
+.wayglass-authorization__form { gap: 1rem; }
+.wayglass-authorization__eyebrow { color: #65d9f4; font-weight: 750; }
+.wayglass-authorization__form input {
+  color-scheme: dark;
+  border: 1px solid rgba(103, 195, 229, .44);
+  background: #071624;
+  border-radius: .8rem;
+  color: #eaf7ff;
+}
+.wayglass-authorization__form input:focus-visible { outline-color: #5cd8f4; }
+.wayglass-authorization__form button {
+  border: 1px solid rgba(78,211,255,.70);
+  border-radius: .8rem;
+  color: #eaf7ff;
+  background: linear-gradient(105deg, #145274, #172d5a);
+}
+.wayglass-authorization__form button:hover:not(:disabled) { background: #164d70; }

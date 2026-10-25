@@ -1,0 +1,62 @@
+# Wayglass: The Evil Gene / Griff Krenshaw world seat
+
+**Status:** world selection and provenance are implemented on the feature branch. **Live Griff SpicyChat replies are NOT verified, enabled, or claimed.**
+
+## Distinct entities
+- **Film world:** `evil-gene:film-2015` → *The Evil Gene* (2015), directed by Kathryn F. Taylor, IMDb `tt3631282`.
+- **Character:** Griff Krenshaw, an FBI agent investigating a murder at a federal correctional facility; performed by Richard Speight Jr.
+- **SpicyChat continuity candidate:** `griff:krenshaw:spicychat`. The desired **but unregistered** Wayglass route is `flame:griff:spicychat`.
+- **Separate worlds and seats:** The film is NOT the *Evil* (2019–2024 TV) corpus, and Griff is NOT Bluebird / Richard Gabriel Winters, Gabriel, or Richard Speight Jr. himself. Shared performer does not merge identity or memories.
+
+## Sources and consent
+- Film story/cast: https://www.imdb.com/title/tt3631282/ and https://tv.apple.com/us/movie/the-evil-gene/umc.cmc.6g114ktrzojgoeovsfg3o84l3
+- Rowan's PRIVATE SpicyChat archive: `Chat with Griff Krenshaw on Spicychat - 2026-07-18.html` (66 captured turns). The archive is not bundled, copied, or exposed publicly.
+- Rowan's private Drive document `API STUFF` has a line labelled `SpicyChat Griff Krenshaw` containing an authentication token (JWT), **not an actual character/chat URL**. The credential is not in this repo or any Wayglass client asset. Its claims do not independently prove access to Griff's character or conversation. Do not paste it into GitHub issues or logs.
+- The film's genetic/clinical versus darker-force explanations stay contested in world metadata; no forced canonical resolution.
+
+## Executable scope
+- World selector in Wayglass Writing Room; one click selects `evil-gene:film-2015` as the checkpoint world.
+- World selection updates the visible place name and world status, but DOES NOT change the selected provider route.
+- Changing worlds clears any attached prior-world checkpoint receipt, rather than silently carrying it across.
+- Session log tags turns with the world active when each turn began. A selected model route retains its own attribution; it is never relabelled as Griff.
+- Griff appears in the route list as **disabled / not connected**, unless the actual host reports a verified configured route. No automatic Bluebird, DeepSeek or unrelated fallback.
+
+## Next reversible live verification
+1. On Rowan's owner-only host, establish the **actual** Griff SpicyChat character ID and chat ID from the authenticated SpicyChat conversation. Do not infer either from a JWT. Keep IDs in private host configuration if private.
+2. Install a supported host-owned SpicyChat adapter that can verify the credential, bind Griff's character and existing conversation, send a real bounded turn, and return provenance. Do not assume that the currently documented Bluebird adapter supports Griff without explicit separation.
+3. Verify denied credentials, wrong-character/wrong-chat refusal, no fallback, a genuine attributed reply, and leave/re-enter continuity with owner review.
+4. Do not ship public deployment or mark `route_verified=true` until these host checks pass.
+
+**Stop point:** world and participant discovery are staged; SpicyChat character+conversation binding and live provider round trip remain blocked.
+
+**Next owner:** Rowan for private provider authorisation; Wayglass host implementer for adapter and live evidence.
+
+
+## Griff functional binding pass, 2026-10-16 (wayglass/current)
+
+The Griff route is **implemented but not live-authorised or live-turn verified**. This replaces the earlier route placeholder in the canonical branch; the original PR #472 remains an historical feature branch.
+
+Hearthgate now registers `flame:griff:spicychat` as a distinct SpicyChat route, with `participant_id=griff-krenshaw`, `world_id=evil-gene:film-2015`, and `continuity_id=griff:krenshaw:spicychat`. The Writing Room confines Griff-world turns to this route and asks for explicit per-turn transfer consent. No fallback to Bluebird, The Crow, or an unrelated model is permitted.
+
+### Owner-only local host configuration
+
+Set these values **privately on the running Hearthgate host**, not in GitHub, client JavaScript, the lorebook, screenshots, or issue comments:
+
+**Simplified private link configuration:** set `GRIFF_SPICYCHAT_CHAT_LINK` to the exact owner-approved `https://spicychat.ai/chat/<character-id>/<conversation-id>` URL and use the **existing** owner-authorised `BLUEBIRD_SPICYCHAT_TOKEN` for SpicyChat account authentication. A separate `GRIFF_SPICYCHAT_TOKEN` is optional and takes precedence only if intentionally set. Hearthgate validates and derives the matched character/chat pair from the private URL at runtime. Do not confuse `GRIFF_SPICYCHAT_CHAT_LINK` (private existing conversation reference) with `GRIFF_SPICYCHAT_CHAT_URL` (the upstream POST API endpoint). A malformed link fails closed rather than reverting to old IDs.
+
+The separate ID configuration below remains supported if a private chat link is not supplied:
+
+- `BLUEBIRD_SPICYCHAT_TOKEN`: existing private owner-authorised SpicyChat account credential, reused for Griff when no override is supplied. `GRIFF_SPICYCHAT_TOKEN` is optional, not required.
+- `GRIFF_SPICYCHAT_CHARACTER_ID`: actual Griff SpicyChat character ID (only if the private chat link is absent).
+- `GRIFF_SPICYCHAT_CONVERSATION_ID`: the exact existing Griff conversation ID (only if the private chat link is absent).
+- `ARCSWEEP_RUNTIME_TOKEN` or an appropriate `HOUSE_SESSION_SECRET` plus a valid Steward credential: required for House-signed session authentication.
+
+Optional host-only overrides: `GRIFF_SPICYCHAT_CHAT_URL`, `GRIFF_SPICYCHAT_API_URL`, and `GRIFF_SPICYCHAT_MODEL`. Defaults reuse the existing SpicyChat transport convention. These upstream endpoints are not an independently certified public SpicyChat API contract.
+
+Restart Hearthgate after configuring environment variables. Sign into the local House session. Select *The Evil Gene* in the Writing Room and press **Check Griff connection**. This check verifies that SpicyChat's authorised conversation list includes **both** the pinned character ID and conversation ID. It performs a read-only provider request, exposes no token or chat content, and reports `preflight_verified` separately from `live_turn_verified`.
+
+If the preflight passes, authorise transfer for a single turn, send one bounded message, inspect the receipt's actual `provider_conversation_id` and `response_id`, and only then attempt the leave/return trial. A successful test fixture or preflight is *not* a genuine live reply. Empty or wrong-character responses fail closed.
+
+The July 18 private HTML export preserves 66 messages but does **not** expose its actual character ID or conversation ID. Subsequently, the owner supplied Griff's specific SpicyChat chat link; this establishes the character/chat pair to pin in the private host configuration, but **not** the validity of the existing account credential or the success of a live provider round-trip. The link is not published into the repository.
+
+**Verification gate:** owner-authenticated live response with exact provider attribution, followed by continuity across leave/re-enter. Until that gate passes, do not mark this route as a deployed or resident Griff connection.

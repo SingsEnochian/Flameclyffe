@@ -1,0 +1,90 @@
+{
+  "schema": "wayglass.current/v1",
+  "repository": "SingsEnochian/Flameclyffe",
+  "canonical_branch": "wayglass/current",
+  "release_branch": "main",
+  "source_baseline": "cb36dc93b5d2eab08b13d4daed280f0d90dc7f57",
+  "sources": [
+    {
+      "branch": "rarity/wayglass-live-return-witness-20261014",
+      "commit": "8451b3a29de910fad6f7d211418bbb1b09f05a10",
+      "status": "integrated-with-conflict-reconciliation"
+    },
+    {
+      "branch": "rarity/wayglass-reasoning-receipts-20261014",
+      "commit": "0089c096cf712307ccbed9666b2a29db08f64a79",
+      "status": "integrated-with-conflict-reconciliation"
+    },
+    {
+      "branch": "rarity/wayglass-griff-evil-gene-20261014",
+      "commit": "d94ff0b183bdec6c3ce4b13cc6d9467d0e7ec6b4",
+      "status": "integrated-with-conflict-reconciliation"
+    },
+    {
+      "branch": "rarity/wayglass-wonder-library-v0-1",
+      "commit": "6719378ea607da44939bbaebde9661b3ffad3069",
+      "status": "integrated-with-conflict-reconciliation"
+    },
+    {
+      "branch": "feat/wayglass-local-first-ingest-20261013",
+      "commit": "9fe525f8667c15648c4e41a14d7476f77d2e0d1d",
+      "status": "integrated-with-conflict-reconciliation"
+    },
+    {
+      "branch": "rarity/wayglass-stepfun-20261008",
+      "commit": "d239f04cc251b13445c4473b1c8586d457d61977",
+      "status": "integrated-with-conflict-reconciliation"
+    },
+    {
+      "branch": "rarity/wayglass-toybox-v0-1",
+      "commit": "f22e4f43c090c7fb7b95ce390db7364ef9d19009",
+      "status": "integrated-with-conflict-reconciliation"
+    },
+    {
+      "branch": "rarity/wayglass-commons-phone-first-20261008",
+      "commit": "9b769bf89d4cb511d76bc385253949deab809d47",
+      "status": "integrated-with-conflict-reconciliation"
+    },
+    {
+      "branch": "rarity/bitty-twi-character-voice-v1",
+      "commit": "381997f56e94be8a088e60b6a048d27cfb4e7a76",
+      "status": "integrated-with-conflict-reconciliation"
+    },
+    {
+      "branch": "rarity/wayglass-wonder-light-20261008",
+      "commit": "20bd045b2b28b879c903cb327e3f3fb99fbe58df",
+      "status": "integrated-with-conflict-reconciliation"
+    },
+    {
+      "branch": "codex/worldweave-soundscapes-eira-falka-starsong",
+      "commit": "36f28c9732789747883ddcdc210280e8132d2025",
+      "status": "integrated-with-conflict-reconciliation"
+    },
+    {
+      "branch": "rarity/bluebird-bridge-trial-001-20261012",
+      "commit": "d985b4a54b4898c63facb0f08f663e91b0d14aa2",
+      "status": "integrated-with-conflict-reconciliation"
+    },
+    {
+      "branch": "wayglass/constellation-runtime-001",
+      "commit": "4513463a311b55a15ea0d12cb68f0d8e51262ab7",
+      "status": "integrated-with-conflict-reconciliation"
+    },
+    {
+      "branch": "codex/wayglass-scoped-live-verification-20261013",
+      "commit": "53321b209b8bbad94a99dc34da24946bc51ad793",
+      "status": "integrated-with-conflict-reconciliation"
+    }
+  ],
+  "outstanding": [
+    {
+      "work": "Bluebird 5.5 Hz sound recipe and empty-reply status",
+      "reported_commit": "7ac7beb0",
+      "status": "not-found-in-fetched-remote-history; Windows checkout unavailable; not imported"
+    },
+    {
+      "work": "Live ChatGPT OAuth, SpicyChat transport and production promotion",
+      "status": "not claimed by consolidation"
+    }
+  ]
+}
