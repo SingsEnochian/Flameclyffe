@@ -2,6 +2,7 @@ import {
   listWayglassInquiries, openWayglassInquiry, readWayglassInquiry,
   appendWayglassInquiryContribution, pauseWayglassInquiry, inviteWayglassInquiry,
 } from '../route-client.js';
+import { buildInquiryEvidenceState } from '../inquiry-evidence-state.js';
 
 const escape = input => String(input ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
 const refs = value => String(value || '').split('\n').map(x=>x.trim()).filter(Boolean);
@@ -48,6 +49,9 @@ export async function mountWayglassInquiryLoom(root) {
     <section class="glass-panel" aria-label="Selected inquiry">
       <h3>Continuing inquiry</h3><p id="wg-inquiry-selected" class="tiny">Select an inquiry to see its history.</p>
       <div id="wg-inquiry-timeline" aria-live="polite"></div>
+      <h3>Evidence state · read-only</h3>
+      <p class="tiny">This counts recorded claims, proposals and unresolved questions. It does not verify external facts or anyone's inner experience.</p>
+      <div id="wg-inquiry-evidence-state" aria-live="polite"><p class="tiny">Select an inquiry to inspect its evidence state.</p></div>
       <label>Contribution type<select id="wg-inquiry-kind"><option value="interpretation">Interpretation</option><option value="alternative">Alternative</option><option value="challenge">Challenge</option><option value="observation">Observation</option><option value="experiment">Experiment claim (unverified)</option><option value="outcome">Outcome claim (unverified)</option><option value="new-question">New question</option><option value="revision">Revision (link to earlier contribution)</option></select></label>
       <label>Contribution<textarea id="wg-inquiry-text" rows="3" maxlength="4000"></textarea></label>
       <label>Reply to contribution event ID (required for revision)<input id="wg-inquiry-reply" maxlength="160" placeholder="wgi-event:…"></label>
@@ -74,6 +78,15 @@ export async function mountWayglassInquiryLoom(root) {
     list.innerHTML = renderList(inquiries, selectedId);
     find('wg-inquiry-selected').textContent = selected ? `${selected.question} · ${selected.inquiry_id} · ${selected.stance}` : 'Select an inquiry to see its history.';
     timeline.innerHTML = renderEvents(selected);
+    const evidence = selected ? buildInquiryEvidenceState(selected) : null;
+    find('wg-inquiry-evidence-state').innerHTML = evidence
+      ? `<dl class="tiny">
+          <dt>Recorded (journal only)</dt><dd>${evidence.recorded.event_count} events, ${evidence.recorded.contributed_events} contributions</dd>
+          <dt>Interpretations / alternatives / revisions</dt><dd>${evidence.interpreted.proposal_count} proposed, not adopted as fact</dd>
+          <dt>Unresolved</dt><dd>${evidence.unresolved.open_questions} question(s), ${evidence.unresolved.challenges} challenge(s)</dd>
+          <dt>Awaiting verification</dt><dd>${evidence.awaiting_verification.reported_observations_experiments_outcomes} reported observation/experiment/outcome claims, ${evidence.awaiting_verification.source_references_claimed} contribution(s) with caller-declared source refs</dd>
+        </dl>`
+      : '<p class="tiny">No inquiry selected. Nothing inferred.</p>';
     find('wg-inquiry-contribute').disabled = !selected;
     find('wg-inquiry-pause').disabled = !selected;
     find('wg-inquiry-invite').disabled = !selected;
