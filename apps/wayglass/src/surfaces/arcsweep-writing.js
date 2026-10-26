@@ -51,6 +51,7 @@ export async function mountArcSweepWritingSurface(root) {
     "    <button type=\"button\" class=\"glass-chip\" data-wayglass-room=\"wayglass:living-observer\">Living Observer</button>\n",
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:library">Library</button>',
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:toybox">Toybox</button>',
+    '<button type="button" class="glass-chip" data-wayglass-room="wayglass:nikola-research">Nikola Observatory</button>',
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:commons">Commons</button>',
     "  </nav>\n",
     "  <header class=\"wg-surface-head glass-panel\">\n",

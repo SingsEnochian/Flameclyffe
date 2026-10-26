@@ -14,6 +14,7 @@ import { mountWayglassVideoAtelier } from './surfaces/video-atelier.js';
 import { mountWayglassLivingObserver } from './surfaces/living-observer.js';
 import { mountWayglassLibrarySurface } from './surfaces/library.js';
 import { mountWayglassToybox } from './surfaces/toybox.js';
+import { mountNikolaResearchSurface } from './surfaces/nikola-lab.js';
 import { mountWayglassCommonsSurface } from './surfaces/commons.js';
 import { subscribeWayglassObserver } from './living-observer-model.js';
 import { recordRouteAsWonderLight } from './wonder-light.js';
@@ -84,6 +85,12 @@ registerWayglassSurface({
   mount: mountWayglassToybox,
 });
 
+registerWayglassSurface({
+  surface_id: 'wayglass:nikola-research',
+  label: 'Nikola · Research Observatory',
+  mount: mountNikolaResearchSurface,
+});
+
 const browserEmbodiment = Object.freeze({
   body_id: 'browser-host',
   body_class: 'host-os',
@@ -116,7 +123,8 @@ const wayglass = Object.freeze({
 globalThis.__wayglassOS = wayglass;
 
 const roomQuery = new URLSearchParams(globalThis.location?.search || '').get('room');
-const startRoom = roomQuery === 'observer' ? 'wayglass:living-observer'
+const startRoom = roomQuery === 'nikola' ? 'wayglass:nikola-research'
+  : roomQuery === 'observer' ? 'wayglass:living-observer'
   : roomQuery === 'library' ? 'wayglass:library'
   : roomQuery === 'toybox' ? 'wayglass:toybox'
   : roomQuery === 'organs' ? 'wayglass:systems'
