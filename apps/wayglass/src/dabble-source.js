@@ -29,27 +29,60 @@ export async function openDabbleMarkdown(file, { maxBytes = MAX_DABBLE_BYTES } =
     content, sections, mode:'read-only', canonStatus:'unverified-source' };
 }
 
-export function selectDabbleExcerpt(source, sectionIndex = -1, maxChars = MAX_EXCERPT_CHARS) {
+// Stable line-oriented passages preserve every character when rejoined, including
+// the ending of chapters larger than the single-turn provider context budget.
+export function listDabbleParts(source, sectionIndex = -1, maxChars = MAX_EXCERPT_CHARS) {
   if (!source || source.schema !== DABBLE_SOURCE_SCHEMA || source.mode !== 'read-only' ||
-      typeof source.content !== 'string') throw new Error('No verified local source selected.');
-  if (!Number.isInteger(maxChars) || maxChars < 100 || maxChars > MAX_EXCERPT_CHARS) throw new Error('Invalid excerpt limit.');
-  if (!Number.isInteger(sectionIndex) || sectionIndex < -1 || sectionIndex >= source.sections.length) throw new Error('Invalid chapter or scene selection.');
+      typeof source.content !== 'string' || !Array.isArray(source.sections))
+    throw new Error('No verified local source selected.');
+  if (!Number.isInteger(maxChars) || maxChars < 100 || maxChars > MAX_EXCERPT_CHARS)
+    throw new Error('Invalid excerpt limit.');
+  if (!Number.isInteger(sectionIndex) || sectionIndex < -1 || sectionIndex >= source.sections.length)
+    throw new Error('Invalid chapter or scene selection.');
   const section = sectionIndex === -1 ? null : source.sections[sectionIndex];
-  const raw = section ? source.content.slice(section.start, section.end) : source.content;
-  return { text:raw.slice(0,maxChars), truncated:raw.length > maxChars,
-    label:section?.title || 'Start of selected export', sectionIndex,
-    startLine:section?.line || 1 };
+  const start = section?.start ?? 0;
+  const end = section?.end ?? source.content.length;
+  const raw = source.content.slice(start, end);
+  const parts = [];
+  let cursor = 0;
+  let startLine = section?.line ?? 1;
+  while (cursor < raw.length) {
+    let next = Math.min(cursor + maxChars, raw.length);
+    if (next < raw.length) {
+      const lineBoundary = raw.lastIndexOf('\n', next - 1);
+      if (lineBoundary >= cursor + Math.floor(maxChars / 2)) next = lineBoundary + 1;
+      // Avoid dividing one UTF-16 surrogate pair if the source has a long line.
+      if (next < raw.length && /[\uD800-\uDBFF]/.test(raw[next - 1]) &&
+          /[\uDC00-\uDFFF]/.test(raw[next])) next--;
+    }
+    const text = raw.slice(cursor, next);
+    parts.push({text, startLine, startOffset:start + cursor, endOffset:start + next});
+    startLine += (text.match(/\r\n|\n|\r/g) || []).length;
+    cursor = next;
+  }
+  return parts;
+}
+
+export function selectDabbleExcerpt(source, sectionIndex = -1, maxChars = MAX_EXCERPT_CHARS, partIndex = 0) {
+  const parts = listDabbleParts(source, sectionIndex, maxChars);
+  if (!Number.isInteger(partIndex) || partIndex < 0 || partIndex >= parts.length)
+    throw new Error('Invalid passage selection.');
+  const section = sectionIndex === -1 ? null : source.sections[sectionIndex];
+  const part = parts[partIndex];
+  return {...part, truncated: partIndex < parts.length - 1,
+    label:section?.title || 'Selected export', sectionIndex, partIndex,
+    partCount:parts.length};
 }
 
 export function createDabbleReadingTurn(question, source, {
-  approved = false, sectionIndex = -1, maxChars = MAX_EXCERPT_CHARS
+  approved = false, sectionIndex = -1, partIndex = 0, maxChars = MAX_EXCERPT_CHARS
 } = {}) {
   if (typeof question !== 'string' || !question.trim()) throw new Error('A writing-room question is required.');
   if (!approved) return question;
-  const excerpt = selectDabbleExcerpt(source, sectionIndex, maxChars);
+  const excerpt = selectDabbleExcerpt(source, sectionIndex, maxChars, partIndex);
   const metadata = JSON.stringify({
     schema:DABBLE_SOURCE_SCHEMA, filename:source.filename, sha256:source.sha256,
-    startLine:excerpt.startLine, section:excerpt.label, truncated:excerpt.truncated,
+    startLine:excerpt.startLine, section:excerpt.label, part:excerpt.partIndex + 1, partsTotal:excerpt.partCount, truncated:excerpt.truncated,
     status:'author-selected source, unreviewed, not canon'
   });
   const routed = question + '\n\n' +
