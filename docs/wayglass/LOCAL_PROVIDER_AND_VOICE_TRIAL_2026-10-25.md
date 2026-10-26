@@ -12,6 +12,10 @@ Run: `node scripts/wayglass-local-provider-readiness.mjs --probe` on the Windows
 
 Only after a responsive catalogue: choose one Ollama model and one suitable LocalAI model, use exactly the same synthetic prompt, cap token budget, record total time and first-token delay from actual streamed responses, measure separate GPU/CPU memory counters at the host, confirm stop behaviour, and compare tool-call syntax. No private manuscript, participant history or revoked-memory content in the benchmark. Any LocalAI install must be separately authorised and include the current 4.12.1 URL-handling security fix before allowing rich media URLs.
 
+## Executable synthetic voice preflight
+
+Run: `node scripts/wayglass-voice-synthetic-preflight.mjs --synthetic`. This opens a fake participant/room consent gate, passes four zero-valued bytes to an in-memory mock transport, creates a labelled unreviewed synthetic transcript, and invokes Feather. The report confirms the gate is closed and capture/transport stop hooks are called. It explicitly reports `microphone_used:false`, `external_provider_called:false`, and `osia_output_verified:false`. No speech, device, key or network is used.
+
 ## Voxtral 3 / Wayglass voice experiment
 
 Mistral released Voxtral 3 and a managed Voice Agents SDK on 20 October 2026. Their managed Voice Agents service operates STT, LLM and TTS as a complete pipeline, so it is NOT equivalent to preserving the existing user-selected Crow/Wayglass language-model substrate. For Wayglass, prefer separate, replaceable realtime transcription and speech synthesis stages behind the existing `apps/wayglass/src/voice-boundary.js` session/consent API, not a replacement persona.
@@ -24,4 +28,4 @@ Official docs (as of 25 October 2026): https://docs.mistral.ai/studio/audio/voic
 
 ## Known absence
 
-This draft adds the local model-readiness probe and tests only. It does NOT install LocalAI, benchmark model generation, wire Voxtral to Wayglass, obtain voice credentials, prove microphone capture, or calibrate Osia.
+This draft adds the local model-readiness probe, synthetic voice-boundary preflight and tests only. It does NOT install LocalAI, benchmark model generation, wire Voxtral to Wayglass, obtain voice credentials, prove microphone capture, or calibrate Osia.
