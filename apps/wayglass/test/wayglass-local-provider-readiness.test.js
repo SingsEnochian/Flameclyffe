@@ -44,3 +44,17 @@ test('opt-in CLI defaults to a dry run; no text from Loom or private writings',a
   assert.doesNotMatch(src,/\/api\/v1\/wayglass\/respond/);
   assert.doesNotMatch(src,/MISTRAL_API_KEY|SPICYCHAT_TOKEN|external_provider_consent/);
 });
+
+import { runSyntheticVoicePreflight } from '../../../scripts/wayglass-voice-synthetic-preflight.mjs';
+
+test('voice preflight uses only mock transport, returns unverified labels and closes Feather gate',()=>{
+  const report=runSyntheticVoicePreflight();
+  assert.equal(report.result,'passed');
+  assert.equal(report.synthetic_audio_chunks,1);
+  assert.equal(report.local_stops,1);
+  assert.equal(report.transport_closes,1);
+  assert.equal(report.claims.microphone_used,false);
+  assert.equal(report.claims.external_provider_called,false);
+  assert.equal(report.claims.osia_output_verified,false);
+  assert.equal(report.claims.participant_identity_verified,false);
+});
