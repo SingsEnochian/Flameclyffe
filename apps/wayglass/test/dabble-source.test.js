@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { webcrypto } from 'node:crypto';
-import {openDabbleMarkdown, selectDabbleExcerpt, createDabbleReadingTurn, DABBLE_SOURCE_SCHEMA} from '../src/dabble-source.js';
+import {openDabbleMarkdown, selectDabbleExcerpt, listDabbleParts, createDabbleReadingTurn, DABBLE_SOURCE_SCHEMA} from '../src/dabble-source.js';
 globalThis.crypto ||= webcrypto;
 const sample='# Chapter One\nA copper sky.\n## Scene Two\nThe door opened.';
 function fakeFile(name,text) {return {name,size:Buffer.byteLength(text),text:async()=>text};}
@@ -36,4 +36,21 @@ test('rejects invalid inputs and never silently broadens excerpt limit',async()=
  assert.throws(()=>selectDabbleExcerpt(src,-1,999999));
  assert.throws(()=>createDabbleReadingTurn(' ',src,{approved:true}));
  assert.throws(()=>createDabbleReadingTurn('Q'.repeat(12000),src,{approved:true}), /turn limit/);
+});
+
+test('long chapters remain complete across independently addressable passages',async()=>{
+ const chapter = '# Chapter Long\n' + ('Each line belongs to the author.\n'.repeat(900));
+ const source = await openDabbleMarkdown(fakeFile('long-chapter.md',chapter));
+ const parts = listDabbleParts(source,0);
+ assert.ok(parts.length >= 3);
+ assert.ok(parts.every(part => part.text.length <= 8000));
+ assert.equal(parts.map(part=>part.text).join(''),chapter);
+ const last=selectDabbleExcerpt(source,0,undefined,parts.length-1);
+ assert.equal(last.partCount,parts.length);
+ assert.equal(last.truncated,false);
+ assert.ok(last.startLine > 1);
+ const turn=createDabbleReadingTurn('Examine the ending.',source,{approved:true,sectionIndex:0,partIndex:parts.length-1});
+ assert.match(turn,/partsTotal/);
+ assert.match(turn,/Examine the ending/);
+ assert.throws(()=>selectDabbleExcerpt(source,0,undefined,parts.length),/Invalid passage/);
 });
