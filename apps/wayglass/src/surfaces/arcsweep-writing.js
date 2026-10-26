@@ -7,7 +7,7 @@ import { consumeObserverContextForWriting, recordWayglassRouteObservation } from
 import { emitInteractionCue } from '../interaction-cues.js';
 import { emitMaterialSignal } from '../material-state.js';
 import { invokeWayglassRoute, listWayglassRoutes, listWayglassCharacters, leaveWayglassWorld, recoverWayglassDeparture } from '../route-client.js';
-import { openDabbleMarkdown, selectDabbleExcerpt, createDabbleReadingTurn } from '../dabble-source.js';
+import { openDabbleMarkdown, selectDabbleExcerpt, listDabbleParts, createDabbleReadingTurn } from '../dabble-source.js';
 import { EMERGENCE_QUESTIONS, bittyTwiQuestionPrompt } from '../emergence-questions.js';
 
 function escapeHtml(value = '') {
@@ -92,7 +92,7 @@ export async function mountArcSweepWritingSurface(root) {
     '<button type="button" id="wg-griff-check" class="glass-chip" hidden>Check Griff connection</button>',
     '<button type="button" id="wg-bluebird-check" class="glass-chip" hidden>Check Richie connection</button>',
     "  </section>\n",
-          "  <section class=\"glass-panel wg-dabble-source\" aria-label=\"Dabble export reading\">\n    <p class=\"eyebrow\">DABBLE · SOURCE READER</p>\n    <p class=\"tiny\">Sign in directly with Dabble, export a chapter as Markdown, and select it here. No sign-in token or file is automatically accessed by Wayglass.</p>\n    <a class=\"glass-chip\" href=\"https://accounts.dabblewriter.com/auth/login\" target=\"_blank\" rel=\"noopener noreferrer\">Open Dabble sign-in ↗</a>\n    <label for=\"wg-dabble-file\">Choose exported Markdown</label>\n    <input id=\"wg-dabble-file\" type=\"file\" accept=\".md,.markdown,.txt,text/markdown,text/plain\">\n    <label for=\"wg-dabble-section\">Excerpt to discuss</label>\n    <select id=\"wg-dabble-section\" disabled><option value=\"-1\">Beginning of selected export</option></select>\n    <p id=\"wg-dabble-status\" class=\"tiny\" role=\"status\" aria-live=\"polite\">No manuscript selected. Max 512 KB file; at most 8,000 excerpt characters per turn.</p>\n    <pre id=\"wg-dabble-preview\" style=\"max-height:9rem;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-size:.83rem\"></pre>\n    <label class=\"tiny\"><input type=\"checkbox\" id=\"wg-dabble-approve\"> Attach this excerpt to my NEXT Writing Room message for the selected route. It may leave this device if the route uses an external provider.</label>\n  </section>",
+          "  <section class=\"glass-panel wg-dabble-source\" aria-label=\"Dabble export reading\">\n    <p class=\"eyebrow\">DABBLE · SOURCE READER</p>\n    <p class=\"tiny\">Sign in directly with Dabble, export a chapter as Markdown, and select it here. No sign-in token or file is automatically accessed by Wayglass.</p>\n    <a class=\"glass-chip\" href=\"https://accounts.dabblewriter.com/auth/login\" target=\"_blank\" rel=\"noopener noreferrer\">Open Dabble sign-in ↗</a>\n    <label for=\"wg-dabble-file\">Choose exported Markdown</label>\n    <input id=\"wg-dabble-file\" type=\"file\" accept=\".md,.markdown,.txt,text/markdown,text/plain\">\n    <label for=\"wg-dabble-section\">Excerpt to discuss</label>\n    <select id=\"wg-dabble-section\" disabled><option value=\"-1\">Selected export</option></select>\n    <label for=\"wg-dabble-part\">Passage</label>\n    <select id=\"wg-dabble-part\" disabled><option value=\"0\">Passage 1</option></select>\n    <p id=\"wg-dabble-status\" class=\"tiny\" role=\"status\" aria-live=\"polite\">No manuscript selected. Max 512 KB file; at most 8,000 excerpt characters per turn.</p>\n    <pre id=\"wg-dabble-preview\" style=\"max-height:9rem;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-size:.83rem\"></pre>\n    <label class=\"tiny\"><input type=\"checkbox\" id=\"wg-dabble-approve\"> Attach this excerpt to my NEXT Writing Room message for the selected route. It may leave this device if the route uses an external provider.</label>\n  </section>",
     '<div id="wg-stepfun-transfer" class="wg-stepfun-transfer" hidden>',
             '<label for="wg-stepfun-consent"><input type="checkbox" id="wg-stepfun-consent" /> <span id="wg-provider-consent-label">I approve this external provider transfer.</span></label>',
           '</div>',
@@ -204,22 +204,26 @@ export async function mountArcSweepWritingSurface(root) {
 
   const dabbleFile = root.querySelector('#wg-dabble-file');
   const dabbleSection = root.querySelector('#wg-dabble-section');
+  const dabblePart = root.querySelector('#wg-dabble-part');
   const dabbleStatus = root.querySelector('#wg-dabble-status');
   const dabblePreview = root.querySelector('#wg-dabble-preview');
   const dabbleApprove = root.querySelector('#wg-dabble-approve');
   function showDabbleExcerpt() {
     if (!dabbleSource) return;
-    const part = selectDabbleExcerpt(dabbleSource, Number(dabbleSection.value));
+    const part = selectDabbleExcerpt(dabbleSource, Number(dabbleSection.value), undefined, Number(dabblePart.value));
     dabblePreview.textContent = part.text.slice(0, 1100) + (part.text.length > 1100 ? '\n[Preview shortened]' : '');
     dabbleStatus.textContent = 'Local-only source: ' + dabbleSource.filename +
       ' · SHA-256 ' + dabbleSource.sha256.slice(0, 16) + '… · ' +
-      part.text.length + ' characters' + (part.truncated ? ' (excerpt truncated)' : '') +
+      'Passage ' + (part.partIndex + 1) + '/' + part.partCount + ' · ' +
+      part.text.length + ' characters' + (part.truncated ? ' (more passages available)' : '') +
       '. No text is sent until you approve a turn.';
   }
   dabbleFile.addEventListener('change', async () => {
     dabbleSource = null;
     dabbleApprove.checked = false;
-    dabbleSection.replaceChildren(new Option('Beginning of selected export', '-1'));
+    dabbleSection.replaceChildren(new Option('Selected export', '-1'));
+    dabblePart.replaceChildren(new Option('Passage 1', '0'));
+    dabblePart.disabled = true;
     dabbleSection.disabled = true;
     dabblePreview.textContent = '';
     const file = dabbleFile.files?.[0];
@@ -230,13 +234,21 @@ export async function mountArcSweepWritingSurface(root) {
         dabbleSection.add(new Option(part.title + ' · line ' + part.line, String(index)));
       });
       dabbleSection.disabled = false;
-      showDabbleExcerpt();
+      const firstChapter = dabbleSource.sections.findIndex(part => /^Chapter\\s+\\d+/i.test(part.title));
+      if (firstChapter >= 0) dabbleSection.value = String(firstChapter);
+      refreshDabbleParts();
     } catch(error) { dabbleStatus.textContent = 'Import blocked: ' + error.message; }
   });
-  dabbleSection.addEventListener('change', () => {
+  function refreshDabbleParts() {
+    if (!dabbleSource) return;
+    const parts = listDabbleParts(dabbleSource, Number(dabbleSection.value));
+    dabblePart.replaceChildren(...parts.map((part, i) => new Option('Passage ' + (i + 1) + ' · from line ' + part.startLine, String(i))));
+    dabblePart.disabled = parts.length === 0;
     dabbleApprove.checked = false;
     showDabbleExcerpt();
-  });
+  }
+  dabbleSection.addEventListener('change', refreshDabbleParts);
+  dabblePart.addEventListener('change', () => { dabbleApprove.checked = false; showDabbleExcerpt(); });
 
   const sharedObserverReading = consumeObserverContextForWriting();
   if (sharedObserverReading) input.value = sharedObserverReading + '\n\n[My question about this observation:]\n';
@@ -563,7 +575,7 @@ export async function mountArcSweepWritingSurface(root) {
     try {
       if (dabbleApprove.checked) {
         routedInput = createDabbleReadingTurn(text, dabbleSource, {
-          approved:true, sectionIndex:Number(dabbleSection.value)
+          approved:true, sectionIndex:Number(dabbleSection.value), partIndex:Number(dabblePart.value)
         });
       }
     } catch (error) {
