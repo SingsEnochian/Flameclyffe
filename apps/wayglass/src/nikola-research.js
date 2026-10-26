@@ -19,8 +19,8 @@ export function makeInquiry({ question, hypotheses, prior = null, sources = [] }
   check(Array.isArray(weights) && weights.length === 2 && weights.every((x) => finite(x) && x >= 0) &&
     Math.abs(weights[0] + weights[1] - 1) < 1e-10, 'normalized prior required');
   check(Array.isArray(sources) && sources.length <= 32 && sources.every((s) =>
-    typeof s?.id === 'string' && s.id.length <= 128 && s.id &&
-    typeof s?.family === 'string' && s.family.length <= 128 && s.family &&
+    typeof s?.id === 'string' && /^[a-zA-Z0-9:_./-]{1,128}$/.test(s.id) &&
+    typeof s?.family === 'string' && /^[a-zA-Z0-9:_./-]{1,128}$/.test(s.family) &&
     ['synthetic', 'reference', 'observed'].includes(s.kind) &&
     ['local-only', 'approved-for-model'].includes(s.disclosure)), 'invalid source');
   check(new Set(sources.map((s) => s.id)).size === sources.length, 'source IDs must differ');
