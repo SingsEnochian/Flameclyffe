@@ -122,7 +122,7 @@ export async function runNikolaLocalTrial({
         route_id: NIKOLA_LOCAL_ROUTE,
         provider_reported: typeof result.provider === 'string' ? result.provider.slice(0, 70) : null,
         model_reported: typeof result.model === 'string' ? result.model.slice(0, 120) : null,
-        provider_verified: result.provider === 'ollama' && (result.route_id == null || result.route_id === NIKOLA_LOCAL_ROUTE),
+        provider_reported_local: result.provider === 'ollama' && (result.route_id == null || result.route_id === NIKOLA_LOCAL_ROUTE),
         host_receipt_reported: Boolean(result.receipt && typeof result.receipt === 'object'),
         duration_ms: Math.max(0, clock() - start),
         rubric: assessNikolaReply(answer),
@@ -149,7 +149,7 @@ export async function runNikolaLocalTrial({
     attempts,
     claims: Object.freeze({
       independent_sessions: true,
-      external_provider_called: false,
+      external_route_requested: false,
       evidence_fixture_synthetic: true,
       provider_identity_independently_attested: false,
       model_weight_training_performed: false,
