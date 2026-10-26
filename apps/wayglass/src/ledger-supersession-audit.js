@@ -1,3 +1,5 @@
+import { groupMemoryEcho } from './ledger-memory-echo-guard.js';
+
 /** Non-authoritative continuity retrieval and supersession experiment.
  * Does not issue, accept, revoke, alter, or authorise existing Wayglass receipts.
  */
@@ -19,6 +21,7 @@ export function validateSupersessionSample(input) {
     assert(r && typeof r==='object' && !Array.isArray(r),'invalid record');
     required(r.ref,'record ref',120); required(r.subject_id,'subject id',120);
     required(r.source_ref,'source ref',240); required(r.text,'record text',2000);
+    if(r.origin_ref!==undefined&&r.origin_ref!==null) required(r.origin_ref,'origin ref',240);
     assert(STATUSES.has(r.status),'invalid record status');
     assert(!known.has(r.ref),'duplicate record ref');
     if(r.replaces!==null&&r.replaces!==undefined){
@@ -79,11 +82,26 @@ export async function auditSupersession(input,{embed=null,model=null,createdAt=n
   const dim=vectors[0]?.length;
   assert(Number.isInteger(dim)&&dim>0,'empty embeddings');
   assert(vectors.every(v=>(Array.isArray(v)||ArrayBuffer.isView(v))&&v.length===dim),'inconsistent embedding dimensions');
-  const candidates=sample.records.map((r,i)=>({
+  const echo=groupMemoryEcho(sample.records);
+  const ranked=sample.records.map((r,i)=>({
     ref:r.ref,subject_id:r.subject_id,source_ref:r.source_ref,status:r.status,
-    replaces:r.replaces||null,similarity:Number(cosine(vectors[0],vectors[i+1]).toFixed(6)),
+    replaces:r.replaces||null,origin_ref:r.origin_ref||null,
+    echo_family_ref:echo.byRef.get(r.ref).family_ref,
+    similarity:Number(cosine(vectors[0],vectors[i+1]).toFixed(6)),
   })).sort((a,b)=>b.similarity-a.similarity||a.ref.localeCompare(b.ref));
-  const eligible=candidates.filter(c=>c.status==='active');
+  // The highest-ranked active representative of a source family is eligible.
+  // If a family contains retired evidence, every active echo is excluded.
+  // Neither identical text nor declared provenance establishes independence.
+  const seenFamilies=new Set();
+  const candidates=ranked.map(candidate=>{
+    let exclusion_reason=null;
+    if(candidate.status!=='active') exclusion_reason='retired-receipt';
+    else if(echo.byRef.get(candidate.ref).retired_overlap) exclusion_reason='retired-family-echo';
+    else if(seenFamilies.has(candidate.echo_family_ref)) exclusion_reason='duplicate-family-echo';
+    else seenFamilies.add(candidate.echo_family_ref);
+    return {...candidate,exclusion_reason};
+  });
+  const eligible=candidates.filter(c=>c.exclusion_reason===null);
   assert(eligible.length>0,'no active candidates');
   const targetRank=eligible.findIndex(c=>c.ref===sample.expected.target_ref);
   const forbiddenNotReturned=sample.expected.forbidden_refs.every(ref=>!eligible.some(c=>c.ref===ref));
@@ -93,17 +111,21 @@ export async function auditSupersession(input,{embed=null,model=null,createdAt=n
     query:sample.query,subject_id:sample.records.find(r=>r.ref===sample.expected.target_ref).subject_id,
     model:embed ? {id:model.id,local:true,quantization:model.quantization||null,mode:'onnx-embedding'} : {id:'token-frequency-cosine',local:true,mode:'lexical-baseline'},
     status:'observed-local-comparison',
-    metrics:{eligible_count:eligible.length,retired_count:candidates.length-eligible.length,
+    metrics:{eligible_count:eligible.length,retired_count:sample.records.filter(r=>r.status!=='active').length,
+      echo_excluded_active_count:candidates.filter(c=>c.status==='active'&&c.exclusion_reason!==null).length,
+      echo_family_count:echo.groups.length,origin_independence_verified:false,
       expected_active_top1:targetRank===0,expected_active_rank:targetRank+1,
       forbidden_not_retrieved:forbiddenNotReturned,
       exclusion_rate:sample.expected.forbidden_refs.length?Number((sample.expected.forbidden_refs.filter(ref=>!eligible.some(c=>c.ref===ref)).length/sample.expected.forbidden_refs.length).toFixed(3)):null,
       replacement_link_recorded:Boolean(replacement),
     },
-    candidates,eligible,expected:copy(sample.expected),
-    provenance:{record_sources:sample.records.map(r=>({ref:r.ref,source_ref:r.source_ref,status:r.status})),
+    candidates,eligible,evidence_families:echo.groups,expected:copy(sample.expected),
+    provenance:{record_sources:sample.records.map(r=>({ref:r.ref,source_ref:r.source_ref,origin_ref:r.origin_ref||null,status:r.status})),
+      echo_families_from_claimed_or_content_metadata:true,
       sample_only:true,receipt_signature_verified:false,canonical_store_updated:false,outbound_transport_inspected:false,remote_call_invoked_by_audit:false},
     claims:{similarity_is_entailment:false,semantic_score_is_identity:false,
-      grants_authority:false,promotes_canon:false,revoked_records_remain_excluded:true},
+      grants_authority:false,promotes_canon:false,revoked_records_remain_excluded:true,
+      echo_grouping_proves_common_origin:false,independent_corroboration_verified:false},
     next_step:'Require an authorised, verified ledger read and blinded semantic/corruption tests before enabling host integration.',
   });
 }
