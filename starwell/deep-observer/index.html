@@ -18,6 +18,7 @@
 <link rel="stylesheet" href="deep-observer-astrolabe-organic.css?v=sensor-clearance-1">
 <link rel="stylesheet" href="deep-observer-desktop-fix.css?v=desktop-balance-1">
 <link rel="stylesheet" href="living-observer-atlas.css?v=atlas-v1">
+<link rel="stylesheet" href="living-observer-quantum.css?v=quantum-v1">
 <script src="../../assets/deep-resonance-bus.js" defer></script>
 <script src="observer-viewport.registry.js" defer></script>
 <script src="deep-observer-compat.js" defer></script>
@@ -34,6 +35,7 @@
 <script src="deep-observer-dev-console.js" defer></script>
 <script type="module" src="living-observer-atlas.js?v=atlas-v1"></script>
 <script type="module" src="living-observer-library.js?v=atlas-v1"></script>
+<script type="module" src="living-observer-quantum.js?v=quantum-v1"></script>
 </head>
 <body>
 <main class="page">
@@ -269,6 +271,73 @@
         <a href="https://services.swpc.noaa.gov/products/summary/solar-wind-mag-field.json" target="_blank" rel="noopener noreferrer">Bz</a> ·
         <a href="https://services.swpc.noaa.gov/products/summary/solar-wind-speed.json" target="_blank" rel="noopener noreferrer">solar wind</a> ·
         <a href="https://services.swpc.noaa.gov/products/summary/10cm-flux.json" target="_blank" rel="noopener noreferrer">radio flux</a>
+      </p>
+    </section>
+
+    <section class="observer-quantum" id="observerQuantum" aria-label="Quantum information laboratory">
+      <header class="quantum-heading">
+        <p class="eyebrow">LIVING OBSERVER · QUANTUM INSTRUMENT N-008</p>
+        <h2>Interference · Coherence · Measurement</h2>
+        <p>A mathematically exact two-path density-matrix model. Change phase, which-path population and dephasing to see how the predicted measurement changes. Nothing here claims a quantum device or physical cosmological coupling.</p>
+      </header>
+      <div class="quantum-workbench">
+        <form class="quantum-controls" onsubmit="return false" aria-label="Ideal qubit preparation controls">
+          <label for="quantumP0">Initial path probability P(0) <output id="quantumP0Value" for="quantumP0">50.0%</output></label>
+          <input id="quantumP0" type="range" min="0" max="100" value="50" step="1"/>
+          <label for="quantumPhase">Relative phase φ <output id="quantumPhaseValue" for="quantumPhase">0°</output></label>
+          <input id="quantumPhase" type="range" min="0" max="360" value="0" step="1"/>
+          <label for="quantumDephasing">Computational-basis dephasing λ <output id="quantumDephasingValue" for="quantumDephasing">0.0%</output></label>
+          <input id="quantumDephasing" type="range" min="0" max="100" value="0" step="1"/>
+          <div class="quantum-sample-grid">
+            <label for="quantumShots">Synthetic shots
+              <select id="quantumShots"><option value="128">128</option><option value="512" selected>512</option><option value="2048">2,048</option><option value="8192">8,192</option></select>
+            </label>
+            <label for="quantumSeed">Repeatable PRNG seed
+              <input id="quantumSeed" type="number" min="1" max="4294967295" step="1" value="104729"/>
+            </label>
+          </div>
+          <div class="quantum-actions">
+            <button class="action quantum-primary" type="button" id="quantumSimulate">Simulate detector counts</button>
+            <button class="action" type="button" id="quantumReset">Reset model</button>
+          </div>
+          <p id="quantumTrialStatus" class="quantum-status" role="status" aria-live="polite">Predictions are analytical. No detector trial has been run.</p>
+          <p class="quantum-disclaimer">The seed controls a *classical* pseudorandom generator. These samples are not quantum randomness, laboratory evidence or proof about consciousness.</p>
+        </form>
+        <article class="quantum-figure">
+          <h3>State vector in the Bloch ball</h3>
+          <div id="quantumBloch" class="quantum-bloch" aria-label="Bloch sphere projection"></div>
+          <p class="quantum-figure-note">The radius contracts under dephasing unless the state is already in a path eigenstate. Coordinates are a derived projection of the density matrix.</p>
+        </article>
+        <article class="quantum-figure quantum-fringe-figure">
+          <h3>Phase-dependent fringe</h3>
+          <div id="quantumFringe" class="quantum-fringe" aria-label="Conditional interference probability chart"></div>
+          <p class="quantum-figure-note">Gold: predicted X+ probability. Dashed baseline: completely dephased X+ probability ½. Cyan marker: your selected phase.</p>
+        </article>
+      </div>
+      <div class="quantum-results" aria-label="Computed quantum information and verification">
+        <article>
+          <h3>Born-rule probabilities</h3>
+          <pre id="quantumBorn">Waiting for local analytic evaluation.</pre>
+        </article>
+        <article>
+          <h3>2 × 2 density matrix · ρ</h3>
+          <pre id="quantumMatrix">Waiting for local analytic evaluation.</pre>
+        </article>
+        <article>
+          <h3>Purity · entropy · complementarity</h3>
+          <pre id="quantumIntegrity">Waiting for local analytic evaluation.</pre>
+        </article>
+      </div>
+      <p class="quantum-truth" id="quantumTruth" role="status">Mathematical invariants will be evaluated locally.</p>
+      <details class="quantum-receipt">
+        <summary>Inspect synthetic detector receipts and replay proof</summary>
+        <pre id="quantumReceipts">No detector trial has been invoked.</pre>
+        <button class="action" type="button" id="quantumExport" disabled>Export local JSON receipt</button>
+      </details>
+      <p class="quantum-disclaimer">Observer's quantum predictions are independent of NOAA's measured space weather and of symbolic numerology, ceremonial geometry and the private Witchcraft archive. Mathematical analogies may inspire questions; they are not experimental evidence of causal correspondence.</p>
+      <p class="atlas-citations">Foundational mathematics:
+        <a href="https://learning.quantum.ibm.com/course/general-formulation-of-quantum-information/density-matrices" target="_blank" rel="noopener noreferrer">IBM Quantum · density matrices</a> ·
+        <a href="https://quantum.cloud.ibm.com/learning/en/courses/tools-for-quantum-advantage/noise-and-errors" target="_blank" rel="noopener noreferrer">IBM Quantum · noise and decoherence</a>
       </p>
     </section>
 
