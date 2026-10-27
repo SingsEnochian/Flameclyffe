@@ -145,12 +145,14 @@ export async function inspectThoughtVibrationReceipt(receipt, fetchImpl = fetch)
 export async function renderThoughtVibrationSession({
   session,
   includeWave = true,
+  signal = undefined,
   fetchImpl = fetch,
 } = {}) {
   const response = await fetchImpl('/api/v1/wayglass/thought-vibration/render', {
     method: 'POST',
     headers: JSON_HEADERS,
     cache: 'no-store',
+    signal,
     body: JSON.stringify({
       session,
       include_wave: includeWave,
