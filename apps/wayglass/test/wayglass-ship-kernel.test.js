@@ -130,3 +130,16 @@ test('global Feather bridges into Observer XR shutdown and unsubscribes safely',
  assert.match(hud,/async function endXR\(\)/);
  assert.match(hud,/renderer\?\.setAnimationLoop\(null\)/);
 });
+
+test('voice dictation is browser-permission gated, unsent, and Feather stoppable',()=>{
+ const writing=read('../src/surfaces/arcsweep-writing.js');
+ const speech=read('../src/ship-dictation.js');
+ assert.match(writing,/mountShipDictation\(root\)/);
+ assert.match(writing,/disposeDictation\(\)/);
+ assert.match(speech,/webkitSpeechRecognition/);
+ assert.match(speech,/may process audio through an online service/);
+ assert.match(speech,/control\.addEventListener\('click',click\)/);
+ assert.match(speech,/wayglass:feather/);
+ assert.match(speech,/input\.value\+=/);
+ assert.doesNotMatch(speech,/invokeWayglassRoute|replyToVoyage|localStorage|fetch\(/);
+});
