@@ -1,4 +1,5 @@
 import { mechanicsFixture, recordEvidence, revokeEvidence, evidenceReadout, amplitudeReadout, contextForModel } from '../nikola-research.js';
+import { mountQuantumConsole } from '../quantum-sim.js';
 import { runNikolaLocalTrial, NIKOLA_LOCAL_ROUTE } from '../nikola-trials.js';
 import { invokeWayglassRoute, listWayglassRoutes } from '../route-client.js';
 
@@ -57,6 +58,7 @@ export async function mountNikolaResearchSurface(root) {
       </section>
       <p class="tiny">Bayesian values depend on declared synthetic likelihoods. Amplitude results are formal, not physical quantum measurements or assertions about consciousness. Nikola's research seat has no additional authority.</p>
     </section></section>`;
+  const disposeQuantum=mountQuantumConsole(root);
   const el = (id) => root.querySelector(`#${id}`);
   const set = (id, content) => { el(id).textContent = content; };
   let added = false;
@@ -280,5 +282,5 @@ export async function mountNikolaResearchSurface(root) {
   ];
   actions.forEach(([id, event, fn]) => el(id).addEventListener(event, fn));
   render();
-  return () => { disposed = true; ++run27Version; run27Controller?.abort(); events27.forEach(([name,handler])=>r27(name)?.removeEventListener('click',handler)); spiralActions.forEach(([id,handler])=>n6(id)?.removeEventListener('click',handler)); trialController?.abort(); trialRun.removeEventListener('click', runLocalTrial); trialStop.removeEventListener('click', stopTrial); actions.forEach(([id, event, fn]) => el(id)?.removeEventListener(event, fn)); root.replaceChildren(); };
+  return () => { disposeQuantum(); disposed = true; ++run27Version; run27Controller?.abort(); events27.forEach(([name,handler])=>r27(name)?.removeEventListener('click',handler)); spiralActions.forEach(([id,handler])=>n6(id)?.removeEventListener('click',handler)); trialController?.abort(); trialRun.removeEventListener('click', runLocalTrial); trialStop.removeEventListener('click', stopTrial); actions.forEach(([id, event, fn]) => el(id)?.removeEventListener(event, fn)); root.replaceChildren(); };
 }

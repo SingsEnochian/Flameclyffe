@@ -1,0 +1,481 @@
+/*
+ * Wayglass N-013 · shared cinematic ship environment.
+ * One visual language for Writing Room, Living Observer, Nikola, Organs,
+ * Library, Commons, Video Atelier, and Toybox. Purely presentational.
+ * All routes/permissions/receipts stay in their existing components.
+ */
+:root {
+  --ship-space:#030b13;
+  --ship-depth:#061721;
+  --ship-panel:rgba(8,25,39,.91);
+  --ship-ice:#dffaf6;
+  --ship-mint:#89e6d8;
+  --ship-gold:#dfb984;
+  --ship-soft:#a7c7cf;
+  --ship-rim:rgba(154,240,227,.28);
+  --ship-panel-radius:22px;
+  --ship-optical-shadow:
+    inset 0 1px 0 rgba(230,255,250,.16),
+    inset 0 -24px 40px rgba(0,5,13,.23),
+    0 16px 50px rgba(0,0,0,.26);
+}
+html {
+  background:var(--ship-space);
+  scrollbar-color:rgba(115,191,185,.40) transparent;
+}
+body {
+  color:var(--ship-ice);
+  background:
+    radial-gradient(ellipse at 16% 7%,rgba(37,98,119,.19),transparent 37%),
+    radial-gradient(ellipse at 87% 57%,rgba(64,46,90,.11),transparent 40%),
+    linear-gradient(135deg,#030c14,#040e18 57%,#050d17);
+}
+#app{
+  width:min(1500px,calc(100% - clamp(24px,4vw,80px)));
+  padding-top:clamp(16px,2.2vw,34px);
+  padding-bottom:80px;
+}
+.wg-surface[data-deck-system="n013"]{
+  isolation:isolate;
+  --glass-line:var(--ship-rim);
+  --glass-line-hot:rgba(180,255,243,.73);
+  --glass-text:var(--ship-ice);
+  --glass-muted:rgba(194,224,226,.79);
+  --glass-teal:var(--ship-mint);
+  --wg-rim-lit:rgba(150,241,228,.78);
+  gap:clamp(14px,1.65vw,24px);
+  min-width:0;
+}
+.wg-surface[data-deck-system="n013"] > .glass-panel,
+.wg-surface[data-deck-system="n013"] .wg-writing-main,
+.wg-surface[data-deck-system="n013"] .wg-session-sidebar{
+  border-color:var(--ship-rim);
+  box-shadow:var(--ship-optical-shadow);
+}
+.wg-surface[data-deck-system="n013"] > .glass-panel:not(.wg-ship-deck),
+.wg-surface[data-deck-system="n013"] .wg-writing-main,
+.wg-surface[data-deck-system="n013"] .wg-session-sidebar,
+.wg-surface[data-deck-system="n013"] .wg-world-gate,
+.wg-surface[data-deck-system="n013"] .wg-constellation-strip{
+  background:
+    linear-gradient(134deg,rgba(197,253,245,.043) 0,transparent 29%),
+    radial-gradient(ellipse at 100% 0,rgba(72,145,162,.085),transparent 35%),
+    linear-gradient(150deg,rgba(9,30,43,.93),rgba(7,16,32,.96));
+}
+.wg-surface[data-deck-system="n013"] .wg-surface-head {
+  overflow:hidden;
+  padding:clamp(24px,3.2vw,47px);
+  border-radius:var(--ship-panel-radius);
+  background:
+    radial-gradient(ellipse at 82% 7%,rgba(93,208,200,.14),transparent 32%),
+    linear-gradient(140deg,#081b27,#081322 76%,#141725);
+  box-shadow:var(--ship-optical-shadow);
+}
+.wg-surface[data-deck-system="n013"] .wg-surface-head::after{
+  content:'WAYGLASS / DECK';
+  position:absolute;right:clamp(12px,1.5vw,28px);bottom:11px;
+  color:rgba(163,225,221,.56);pointer-events:none;
+  font:600 9px ui-monospace,Consolas,monospace;letter-spacing:.19em;
+}
+.wg-surface[data-deck-system="n013"] .wg-surface-head h1{
+  font-family:Georgia,serif;
+  letter-spacing:-.054em;
+  font-size:clamp(2.25rem,4.6vw,5rem);
+  line-height:1;
+  color:#ecfaf9;
+  text-shadow:0 2px 20px rgba(153,240,221,.14);
+}
+.wg-surface[data-deck-system="n013"] .lede{
+  max-width:69ch;color:rgba(210,235,232,.83);line-height:1.65;
+}
+.wg-surface[data-deck-system="n013"] .eyebrow{
+  color:#91f3e2;letter-spacing:.22em;font-weight:750;
+  font-size:.69rem;
+}
+.wg-surface[data-deck-system="n013"] h2{
+  letter-spacing:-.025em;
+}
+.wg-surface[data-deck-system="n013"] .glass-panel{
+  border-radius:var(--ship-panel-radius);
+}
+.wg-surface[data-deck-system="n013"] .glass-chip,
+.wg-surface[data-deck-system="n013"] .send-jewel{
+  min-height:38px;
+  border:1px solid rgba(151,220,215,.28);
+  background:linear-gradient(160deg,rgba(24,57,69,.71),rgba(8,20,35,.94));
+  box-shadow:inset 0 1px rgba(213,255,248,.12),0 5px 14px rgba(0,0,0,.14);
+  color:#e1f5f4;
+  font-weight:680;
+  letter-spacing:.025em;
+}
+.wg-surface[data-deck-system="n013"] .glass-chip:hover:not(:disabled),
+.wg-surface[data-deck-system="n013"] .send-jewel:hover:not(:disabled){
+  border-color:rgba(168,250,231,.78);
+  background:linear-gradient(160deg,rgba(32,85,94,.76),rgba(8,30,50,.98));
+  box-shadow:inset 0 1px rgba(230,255,249,.2),0 0 20px rgba(74,200,197,.14);
+}
+.wg-surface[data-deck-system="n013"] .glass-chip.active,
+.wg-surface[data-deck-system="n013"] .glass-chip[aria-pressed="true"],
+.wg-surface[data-deck-system="n013"] .send-jewel:not(:disabled){
+  border-color:rgba(128,231,225,.62);
+}
+.wg-surface[data-deck-system="n013"] :is(button,input,select,textarea,summary):focus-visible{
+  outline:2px solid #a1fff0;
+  outline-offset:3px;
+}
+.wg-surface[data-deck-system="n013"] button:disabled{
+  opacity:.63;cursor:not-allowed;
+}
+.wg-surface[data-deck-system="n013"] :is(select,input,textarea){
+  border:1px solid rgba(155,215,216,.36);
+  background:rgba(3,16,28,.82);
+  color:#eaf9f5;
+  border-radius:11px;
+  accent-color:var(--ship-mint);
+}
+.wg-surface[data-deck-system="n013"] :is(input,textarea)::placeholder{
+  color:rgba(164,195,204,.76);
+}
+.wg-surface[data-deck-system="n013"] pre,
+.wg-surface[data-deck-system="n013"] code,
+.wg-surface[data-deck-system="n013"] .wg-science-reading{
+  overflow-wrap:anywhere;
+}
+.wg-surface[data-deck-system="n013"] .tiny{
+  color:rgba(190,222,224,.81);
+  line-height:1.5;
+}
+/* Route shells: one navigational system, not eight competing layouts. */
+.wg-surface[data-deck-system="n013"] .wg-ship-deck{
+  position:relative;z-index:50;
+  display:flex;flex-wrap:wrap;align-items:center;
+  width:100%;max-width:100%;min-height:60px;
+  gap:10px;padding:9px 13px;border-radius:17px;
+  background:
+    linear-gradient(180deg,rgba(24,51,65,.86),rgba(5,18,33,.95));
+  border:1px solid rgba(146,222,217,.29);
+  box-shadow:inset 0 1px rgba(217,255,251,.15),
+    inset 0 0 0 4px rgba(3,23,32,.28),0 14px 38px rgba(0,0,0,.25);
+  overflow:visible;
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-deck::before{
+  opacity:.35;border-radius:inherit;
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-mark{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 12px 6px 4px;border-right:1px solid rgba(147,211,211,.26);
+  color:#b7f9ef;white-space:nowrap;
+  font:700 .73rem/1 ui-monospace,Consolas,monospace;
+  letter-spacing:.19em;
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-mark>span:first-child{
+  color:#dfe5c3;font:500 1.7rem Georgia,serif;
+  filter:drop-shadow(0 0 7px rgba(96,232,225,.55));
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-rail{
+  display:flex;flex-wrap:wrap;gap:5px;min-width:0;flex:1 1 720px;
+  align-items:center;
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-link{
+  padding:8px 11px;min-height:38px;
+  font-size:clamp(.7rem,.75vw,.83rem);
+  letter-spacing:0;text-transform:none;white-space:nowrap;
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-link[aria-current="page"]{
+  color:#f5fff9;opacity:1;
+  background:linear-gradient(145deg,rgba(26,111,122,.65),rgba(5,35,61,.87));
+  border-color:rgba(133,255,232,.75);
+  box-shadow:inset 0 1px rgba(246,255,249,.26),0 0 22px rgba(91,218,214,.16);
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-crew{
+  position:relative;margin-left:auto;
+  flex:0 0 auto;isolation:isolate;
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-crew summary{
+  list-style:none;cursor:pointer;min-height:38px;
+  display:flex;align-items:center;gap:6px;padding:7px 15px;
+  border:1px solid rgba(199,169,119,.54);
+  border-radius:100px;
+  color:#ffdfa7;background:rgba(64,51,35,.44);
+  font-weight:700;font-size:.78rem;
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-crew summary::-webkit-details-marker{display:none}
+.wg-surface[data-deck-system="n013"] .wg-ship-crew summary::after{content:'⌄';font-size:1.05rem}
+.wg-surface[data-deck-system="n013"] .wg-ship-crew[open] summary{
+  color:#fff2d7;border-color:#f4d5a1;
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-crew-menu{
+  position:absolute;right:0;top:calc(100% + 8px);
+  display:grid;gap:7px;padding:12px;min-width:220px;
+  z-index:100;background:rgba(6,22,33,.98);
+  border:1px solid rgba(161,239,221,.45);
+  border-radius:14px;box-shadow:0 18px 46px rgba(0,0,0,.66);
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-crew-menu .glass-chip{
+  text-align:left;border-radius:10px;
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-crew-menu small{
+  max-width:220px;font-size:.69rem;line-height:1.45;
+  color:#bed1d2;
+}
+.wg-surface[data-deck-system="n013"] .wg-thread,
+.wg-surface[data-deck-system="n013"] .wg-composer{
+  border-color:rgba(132,213,209,.22);
+  background:linear-gradient(145deg,rgba(2,14,25,.83),rgba(7,20,36,.93));
+}
+.wg-surface[data-deck-system="n013"] .wg-thread-log{
+  scrollbar-color:rgba(144,221,213,.36) transparent;
+}
+.wg-surface[data-deck-system="n013"] .turn-card{
+  color:#e9f8f4;border-color:rgba(149,207,210,.24);
+  background:linear-gradient(150deg,rgba(20,48,63,.83),rgba(8,20,34,.91));
+  box-shadow:inset 0 1px rgba(210,255,251,.1);
+  overflow-wrap:anywhere;
+}
+.wg-surface[data-deck-system="n013"] .turn-card.user{
+  background:linear-gradient(145deg,rgba(36,74,75,.79),rgba(13,29,41,.94));
+  border-color:rgba(126,235,208,.3);
+}
+.wg-surface[data-deck-system="n013"] .wg-session-sidebar{
+  border-radius:22px;
+}
+.wg-surface[data-deck-system="n013"] .wg-control-ribbon{
+  border-bottom:1px solid rgba(121,205,199,.18);
+  border-radius:15px;gap:10px;
+}
+.wg-surface[data-deck-system="n013"] .wg-world-gate{
+  border-radius:14px;padding:clamp(10px,1.6vw,18px);
+}
+.wg-surface[data-deck-system="n013"] .organ-vessel,
+.wg-surface[data-deck-system="n013"] .toy-card,
+.wg-surface[data-deck-system="n013"] .atelier-workbench{
+  border-color:rgba(151,222,211,.29);
+  box-shadow:var(--ship-optical-shadow);
+}
+.wg-surface[data-deck-system="n013"] [data-wayglass-library-wonder]{
+  border-radius:17px;
+  transition:border-color .12s ease,background .12s ease;
+}
+.wg-surface[data-deck-system="n013"] [data-wayglass-library-wonder][aria-pressed="true"]{
+  border-color:#9beee1;background:rgba(24,77,81,.47);
+}
+.wg-surface[data-deck-system="n013"] .wg-science-station{
+  position:relative;isolation:isolate;
+  box-shadow:var(--ship-optical-shadow);
+  border-color:rgba(155,227,214,.39);
+  background:linear-gradient(154deg,rgba(9,35,44,.96),rgba(6,15,30,.94) 65%,rgba(22,24,45,.91));
+}
+.wg-surface[data-deck-system="n013"] .wg-science-lens{
+  background:linear-gradient(155deg,rgba(7,24,36,.86),rgba(5,15,28,.96));
+}
+.wg-surface[data-deck-system="n013"] .wg-science-reading{
+  white-space:pre-wrap;
+  font:500 .79rem/1.6 ui-monospace,Consolas,monospace;
+  color:#c9eeeb;
+}
+.wg-surface[data-deck-system="n013"] .wg-receipt{
+  color:rgba(190,221,216,.74);
+  border-top:1px solid rgba(154,227,221,.15);
+  padding:15px 8px 0;
+}
+@media(max-width:1020px){
+  .wg-surface[data-deck-system="n013"] .wg-ship-deck{
+    flex-wrap:wrap;align-items:start;
+  }
+  .wg-surface[data-deck-system="n013"] .wg-ship-rail{
+    flex-basis:100%;order:3;
+  }
+  .wg-surface[data-deck-system="n013"] .wg-ship-crew{
+    margin-left:auto;
+  }
+}
+@media(max-width:700px){
+  #app{width:calc(100% - 22px)}
+  .wg-surface[data-deck-system="n013"] .wg-surface-head{
+    padding:23px 19px;
+  }
+  .wg-surface[data-deck-system="n013"] .wg-ship-rail{
+    flex-wrap:nowrap;overflow-x:auto;
+    overscroll-behavior-x:contain;scrollbar-width:thin;
+    padding-bottom:3px;
+  }
+  .wg-surface[data-deck-system="n013"] .wg-ship-link{
+    flex-shrink:0;min-height:44px;
+  }
+  .wg-surface[data-deck-system="n013"] .wg-ship-crew-menu{
+    right:0;min-width:min(220px,calc(100vw - 46px));
+  }
+  .wg-surface[data-deck-system="n013"] .wg-ship-mark{border:0}
+}
+@media(prefers-reduced-motion:reduce){
+  .wg-surface[data-deck-system="n013"] *,
+  .wg-surface[data-deck-system="n013"] *::before,
+  .wg-surface[data-deck-system="n013"] *::after{
+    animation-duration:.01ms!important;
+    transition-duration:.01ms!important;
+    scroll-behavior:auto!important;
+  }
+}
+
+
+/* Voyage messaging is optional: a compact ship-service drawer, not a second
+   giant visual layer obscuring the provenance/geometry instruments. */
+.wg-voyage-inbox {
+  z-index: 100;
+  background:
+    radial-gradient(ellipse at 92% 0,rgba(70,139,144,.13),transparent 45%),
+    linear-gradient(150deg,rgba(8,32,44,.98),rgba(5,17,31,.99));
+  border:1px solid rgba(153,228,219,.37);
+  border-radius:15px;
+  box-shadow:inset 0 1px rgba(236,255,248,.17),0 16px 48px rgba(0,0,0,.48);
+  color:#e7f9f5;
+  font:500 .83rem/1.55 ui-sans-serif,system-ui,sans-serif;
+  backdrop-filter:blur(15px);
+}
+.wg-voyage-inbox:not([open]){
+  width:max-content;max-width:calc(100vw - 2rem);min-width:170px;
+  max-height:none;padding:.65rem .95rem;
+}
+.wg-voyage-inbox[open] {
+  width:min(26rem,calc(100vw - 2rem));
+  max-height:min(64vh,600px);
+  overscroll-behavior:contain;
+  padding:1rem 1.15rem;
+}
+.wg-voyage-inbox > summary {
+  font:700 .82rem/1.35 ui-monospace,Consolas,monospace;
+  letter-spacing:.04em;color:#b9f7e8;
+  cursor:pointer;
+  list-style:revert;
+}
+.wg-voyage-inbox > summary:focus-visible,
+.wg-voyage-inbox button:focus-visible,
+.wg-voyage-inbox textarea:focus-visible {
+  outline:2px solid #b8fff0;outline-offset:3px;
+}
+.wg-voyage-inbox p[role="status"] {
+  color:#c5dddc;line-height:1.55;font-size:.8rem;
+  padding:9px 10px;border:1px solid rgba(155,216,210,.18);
+  border-radius:10px;background:rgba(4,19,31,.65);
+}
+.wg-voyage-inbox[data-voyage-service="not-configured"] p[role="status"]{
+  border-color:rgba(236,199,135,.35);color:#e6cf9f;
+}
+.wg-voyage-inbox button{
+  min-height:38px;border:1px solid rgba(155,226,213,.40);
+  border-radius:100px;background:linear-gradient(150deg,#174451,#071d31);
+  color:#eafaf4;padding:.48rem .85rem;
+}
+.wg-voyage-inbox button:disabled{opacity:.55;cursor:not-allowed;}
+.wg-voyage-inbox textarea{
+  color:#e9fff7;background:rgba(4,16,29,.93);
+  border:1px solid rgba(163,218,214,.44);
+  border-radius:10px;
+}
+.wg-voyage-inbox article{border-top:1px solid rgba(152,223,219,.27);}
+@media(max-width:700px){
+  .wg-voyage-inbox{bottom:.55rem;right:.55rem;}
+  .wg-voyage-inbox:not([open]){padding:.55rem .75rem;min-width:0;}
+  .wg-voyage-inbox[open]{width:min(24rem,calc(100vw - 1.1rem));max-height:60vh;}
+}
+
+
+/* N-015: one continuous hull, visible focus, quieter motion.
+   Pointer parallax is inherited from Wayglass's own Motion Choreography,
+   not from a second global animation loop. */
+.wg-surface[data-deck-system="n013"] {
+  --ship-film:linear-gradient(132deg,rgba(222,255,247,.049),transparent 24%,transparent 69%,rgba(196,239,244,.029));
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-deck {
+  position:relative;
+  border-radius:19px;
+  box-shadow:0 15px 45px rgba(0,0,0,.36),
+    inset 0 1px 0 rgba(223,255,245,.21),
+    inset 0 0 0 5px rgba(4,21,33,.54);
+  background:
+    var(--ship-film),
+    radial-gradient(ellipse at 12% 0,rgba(89,210,198,.16),transparent 38%),
+    linear-gradient(180deg,rgba(17,45,59,.98),rgba(5,15,30,.98));
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-deck::after{
+  content:"";
+  position:absolute;pointer-events:none;z-index:0;
+  left:17px;right:17px;bottom:2px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(118,226,213,.36),transparent);
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-deck > * {position:relative;z-index:1}
+.wg-surface[data-deck-system="n013"] .wg-ship-mark{
+  font-size:.78rem;letter-spacing:.18em;
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-link{
+  position:relative;isolation:isolate;
+  transition:background-color 160ms ease,border-color 160ms ease,box-shadow 160ms ease,transform 160ms ease;
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-link:hover{
+  transform:translateY(-1px);
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-link[aria-current="page"]{
+  outline:0;
+  border-color:rgba(137,247,223,.89);
+  box-shadow:inset 0 1px rgba(245,255,248,.27),0 0 20px rgba(64,220,219,.18);
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-link[aria-current="page"]::after{
+  content:"";position:absolute;bottom:-1px;left:22%;right:22%;height:2px;
+  border-radius:1px;background:#b3ffed;box-shadow:0 0 9px rgba(152,255,241,.45);
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-crew[open] .wg-ship-crew-menu{
+  animation:wgCrewEntry 160ms cubic-bezier(.25,.7,.35,1) both;
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-crew-menu{
+  box-shadow:inset 0 1px rgba(223,255,246,.17),0 16px 45px rgba(0,0,0,.52);
+  backdrop-filter:blur(18px);
+}
+.wg-surface[data-deck-system="n013"] .wg-surface-head{
+  background:
+    radial-gradient(ellipse at var(--wg-pointer-x,75%) 9%,rgba(78,175,175,.115),transparent 36%),
+    var(--ship-film),
+    linear-gradient(140deg,#071c28,#061626 76%,#161827);
+}
+.wg-surface[data-deck-system="n013"] :is(
+  .wg-world-gate,.wg-constellation-strip,.wg-session-sidebar,
+  .wg-science-station,.observer-dream,.observer-wonder
+){
+  border:1px solid rgba(150,222,215,.3);
+  box-shadow:inset 0 1px rgba(220,255,244,.13),0 16px 48px rgba(0,0,0,.21);
+}
+.wg-surface[data-deck-system="n013"] :is(
+  .wg-session-sidebar,.wg-world-gate,.wg-science-station,.observer-console
+) :is(h2,h3) {
+  text-wrap:balance;
+}
+.wg-surface[data-deck-system="n013"] :is(.wg-writing-main,.wg-session-sidebar,.wg-science-station) {
+  min-width:0;
+}
+.wg-surface[data-deck-system="n013"] .wg-science-tabs{
+  position:relative;overflow-x:auto;
+  scrollbar-width:thin;scrollbar-color:rgba(131,231,208,.44) transparent;
+}
+.wg-surface[data-deck-system="n013"] .wg-science-tabs button{
+  font-size:clamp(.75rem,.78vw,.9rem);
+  min-height:42px;
+}
+.wg-surface[data-deck-system="n013"] :is(button,summary):active:not(:disabled){
+  transform:translateY(1px);
+}
+.wg-surface[data-deck-system="n013"] :is(button,summary):focus-visible{
+  outline:2px solid #c3fff0!important;outline-offset:3px!important;
+  box-shadow:0 0 0 5px rgba(18,86,89,.49);
+}
+@keyframes wgCrewEntry {
+  from{opacity:0;transform:translateY(-6px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@media(prefers-reduced-motion:reduce){
+  .wg-surface[data-deck-system="n013"] .wg-ship-crew[open] .wg-ship-crew-menu{animation:none}
+  .wg-surface[data-deck-system="n013"] .wg-ship-link{transition:none}
+  .wg-surface[data-deck-system="n013"] .wg-ship-link:hover{transform:none}
+}
+.wg-surface[data-low-stim="true"] .wg-ship-crew[open] .wg-ship-crew-menu,
+.wg-surface[data-feather-held="true"] .wg-ship-crew[open] .wg-ship-crew-menu{
+  animation:none!important;
+}

@@ -33,20 +33,26 @@ test('Bluebird Wayglass routes keep identity separate from substrate', () => {
   assert.notEqual(crow.route_id, 'flame:crow');
 });
 
-test('Bluebird SpicyChat route reports credential presence without exposing the token', () => {
-  const previous = process.env.BLUEBIRD_SPICYCHAT_TOKEN;
+test('Bluebird SpicyChat route requires private credential AND exact chat pin, without exposing either', () => {
+  const names = ['BLUEBIRD_SPICYCHAT_TOKEN','SPICYCHAT_ACCOUNT_TOKEN','BLUEBIRD_SPICYCHAT_CHAT_LINK','BLUEBIRD_SPICYCHAT_CHARACTER_ID','BLUEBIRD_SPICYCHAT_CONVERSATION_ID'];
+  const prior = new Map(names.map(name=>[name,process.env[name]]));
   try {
-    delete process.env.BLUEBIRD_SPICYCHAT_TOKEN;
-    assert.equal(publicWayglassRoutes().find((route) => route.route_id === 'flame:bluebird:spicychat').configured, false);
-    process.env.BLUEBIRD_SPICYCHAT_TOKEN = 'private-test-token';
-    const projected = publicWayglassRoutes().find((route) => route.route_id === 'flame:bluebird:spicychat');
-    assert.equal(projected.configured, true);
-    assert.equal(projected.participant_id, 'bluebird');
-    assert.equal(projected.continuity_id, 'bluebird:richard-gabriel-winters');
-    assert.doesNotMatch(JSON.stringify(projected), /private-test-token/);
+    for (const name of names) delete process.env[name];
+    const lookup=()=>publicWayglassRoutes().find(route=>route.route_id==='flame:bluebird:spicychat');
+    assert.equal(lookup().configured,false);
+    process.env.BLUEBIRD_SPICYCHAT_TOKEN='private-test-token';
+    assert.equal(lookup().configured,false, 'token alone must not imply pinned connection');
+    process.env.BLUEBIRD_SPICYCHAT_CHAT_LINK='https://spicychat.ai/chat/11111111-1111-4111-8111-111111111111/22222222-2222-4222-8222-222222222222';
+    const projected=lookup();
+    assert.equal(projected.configured,true);
+    assert.equal(projected.connection_verified,false);
+    assert.equal(projected.participant_id,'bluebird');
+    assert.equal(projected.continuity_id,'bluebird:richard-gabriel-winters');
+    assert.doesNotMatch(JSON.stringify(projected),/private-test-token|11111111-1111|22222222-2222/);
   } finally {
-    if (previous == null) delete process.env.BLUEBIRD_SPICYCHAT_TOKEN;
-    else process.env.BLUEBIRD_SPICYCHAT_TOKEN = previous;
+    for (const [name,value] of prior) {
+      if(value==null)delete process.env[name];else process.env[name]=value;
+    }
   }
 });
 

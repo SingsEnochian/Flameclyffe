@@ -1,7 +1,11 @@
 import { createInteractionState } from '../interaction-state.js';
+import { attachLorebookDock } from '../lorebook-dock.js';
+import { mountShipDictation } from '../ship-dictation.js';
+import { speakExplicitText } from '../ship-sound.js';
 import { authorizationSession } from '../authorization-session.js';
 import { mountWayglassRoutePicker } from '../route-picker.js';
 import { WAYGLASS_WORLD_SEATS, findWayglassWorldSeat, wayglassWorldStatus } from '../world-seats.js';
+import { consumeWayglassCrewRoom } from '../crew-navigation.js';
 import { consumeObserverContextForWriting, recordWayglassRouteObservation } from '../living-observer-model.js';
 import { emitInteractionCue } from '../interaction-cues.js';
 import { emitMaterialSignal } from '../material-state.js';
@@ -86,7 +90,7 @@ export async function mountArcSweepWritingSurface(root) {
     "    <label for=\"wg-world-seat\">World</label>\n",
     "    <select id=\"wg-world-seat\" aria-label=\"Wayglass story world\"></select>\n",
     "    <p class=\"tiny\" id=\"wg-world-status\" role=\"status\">World and provider routes are independent.</p>\n",
-    '<button type="button" id="wg-griff-check" class="glass-chip" hidden>Check Griff connection</button>',
+    '<button type="button" id="wg-griff-check" class="glass-chip" hidden>Check Crew connection</button>',
     "  </section>\n",
           '<div id="wg-stepfun-transfer" class="wg-stepfun-transfer" hidden>',
             '<label for="wg-stepfun-consent"><input type="checkbox" id="wg-stepfun-consent" /> <span id="wg-provider-consent-label">I approve this external provider transfer.</span></label>',
@@ -170,6 +174,8 @@ export async function mountArcSweepWritingSurface(root) {
 
   root.querySelectorAll('[data-wayglass-room]').forEach(button => button.addEventListener('click', () => globalThis.__wayglassOS?.mount(button.dataset.wayglassRoom)));
 
+  const disposeLorebook=attachLorebookDock(root);
+  const disposeDictation=mountShipDictation(root);
   const routePicker = mountWayglassRoutePicker(root.querySelector('#wg-route'), { onChange(value) {
     selectedRoute = value;
     externalConsent.checked = false;
@@ -219,7 +225,8 @@ export async function mountArcSweepWritingSurface(root) {
       ? world.character.name + ' · world anchor; transport status shown separately'
       : 'The place stays itself across route changes.';
     worldStatus.textContent = wayglassWorldStatus(world);
-    griffCheck.hidden = world.world_id !== 'evil-gene:film-2015';
+    griffCheck.hidden = !world.character?.desired_route_id?.endsWith(':spicychat');
+    griffCheck.textContent = world.character ? 'Check ' + world.character.name + ' connection (no message)' : 'Check Crew connection';
     if (changed && resetCheckpoint) {
       checkpoint = null;
       cp('id').value = '';
@@ -236,20 +243,25 @@ export async function mountArcSweepWritingSurface(root) {
     externalConsent.checked = false;
     void loadRoutes();
   });
-  selectWorldSeat(cp('world').value, { resetCheckpoint: false });
+  const requestedCrewWorld = consumeWayglassCrewRoom();
+  selectWorldSeat(requestedCrewWorld || cp('world').value, { resetCheckpoint: false });
+  if (requestedCrewWorld) selectedRoute = findWayglassWorldSeat(requestedCrewWorld)?.character?.desired_route_id || selectedRoute;
   griffCheck.addEventListener('click', async () => {
+    const crewIds = { 'bluebird:spicychat': 'bluebird', 'vethrlauf:spicychat': 'vethrlauf', 'evil-gene:film-2015': 'griff' };
+    const member = crewIds[worldSelect.value];
+    if (!member) return;
     griffCheck.disabled = true;
-    worldStatus.textContent = 'Checking Griff’s exact SpicyChat conversation with the House Steward session…';
+    worldStatus.textContent = 'Read-only ' + member + ' SpicyChat account/room check…';
     try {
-      const response = await fetch('/api/v1/wayglass/griff/status', { cache: 'no-store', credentials: 'same-origin' });
+      const response = await fetch('/api/v1/wayglass/crew/' + member + '/status', { cache:'no-store', credentials:'same-origin' });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.error || (result.missing?.length
-        ? 'Private Hearthgate configuration missing: ' + result.missing.join(', ') : 'Provider preflight unavailable.'));
+        ? 'Private host configuration missing: ' + result.missing.join(', ') : 'No provider match confirmed.'));
       worldStatus.textContent = result.preflight_verified
-        ? 'Griff’s private character and conversation pair confirmed by SpicyChat. No live reply yet; tick consent and send a turn.'
-        : 'Griff preflight could not confirm the exact conversation. No message sent.';
+        ? member + ' exact character and conversation confirmed by provider GET. No message sent and no live reply proven.'
+        : member + ' pair not confirmed. No message sent.';
     } catch (error) {
-      worldStatus.textContent = 'Griff connection check: ' + error.message;
+      worldStatus.textContent = member + ' read-only check: ' + error.message;
     } finally { griffCheck.disabled = false; }
   });
   cp('save').addEventListener('click', async () => {
@@ -347,7 +359,8 @@ export async function mountArcSweepWritingSurface(root) {
         renderThinking(message) +
         '<div class="turn-text">' + escapeHtml(message.content).replaceAll('\n', '<br>') + '</div>' +
         '<footer><button type="button" class="glass-chip" data-copy-reply="' + index + '">Copy reply</button> ' +
-        '<button type="button" class="glass-chip" data-copy-through="' + index + '">Copy log through here</button></footer>' +
+        '<button type="button" class="glass-chip" data-copy-through="' + index + '">Copy log through here</button> ' +
+        (message.role === 'assistant' ? '<button type="button" class="glass-chip" data-speak-reply="' + index + '">Speak reply</button>' : '') + '</footer>' +
         '</article>';
     }).join('');
     thread.scrollTop = thread.scrollHeight;
@@ -376,9 +389,16 @@ export async function mountArcSweepWritingSurface(root) {
 
   root.querySelector('#wg-copy-session').addEventListener('click', event => copyText(sessionLog(), event.currentTarget));
   thread.addEventListener('click', event => {
-    const button = event.target.closest('[data-copy-reply], [data-copy-through]');
+    const button = event.target.closest('[data-copy-reply], [data-copy-through], [data-speak-reply]');
     if (!button) return;
-    if (button.dataset.copyReply !== undefined) {
+    if (button.dataset.speakReply !== undefined) {
+      const message=messages[Number(button.dataset.speakReply)];
+      if(!message || message.role!=='assistant')return;
+      try{
+        const result=speakExplicitText(message.content);
+        status.textContent='Speaking selected reply through browser/OS audio. Output route follows your device settings.';
+      }catch(error){status.textContent='Voice unavailable: '+String(error?.message||error).slice(0,130);}
+    } else if (button.dataset.copyReply !== undefined) {
       copyText(messages[Number(button.dataset.copyReply)].content, button);
     } else {
       copyText(sessionLog(Number(button.dataset.copyThrough)), button);
@@ -387,39 +407,39 @@ export async function mountArcSweepWritingSurface(root) {
 
   function refreshExternalTransfer() {
     const isStepFun = selectedRoute.startsWith('stepfun:');
-    const isGriff = selectedRoute === 'flame:griff:spicychat';
-    externalTransfer.hidden = !(isStepFun || isGriff);
-    externalConsentLabel.textContent = isGriff
-      ? 'I approve sending this turn and its same-world context to Griff on SpicyChat.'
+    const spicyRoute = routes.find(item => item.route_id === selectedRoute && item.provider === 'spicychat');
+    const isSpicy = Boolean(spicyRoute);
+    externalTransfer.hidden = !(isStepFun || isSpicy);
+    externalConsentLabel.textContent = isSpicy
+      ? 'I approve sending this turn and permitted same-world context to ' + spicyRoute.label + ' on SpicyChat.'
       : 'I approve sending this turn, permitted history, and any included continuity context to StepFun.';
-    if (!isStepFun && !isGriff) externalConsent.checked = false;
+    if (!isStepFun && !isSpicy) externalConsent.checked = false;
   }
 
   async function loadRoutes() {
     try {
       const catalogue = await listWayglassRoutes();
       routes = catalogue.routes || [];
-      // A visible placeholder is not a registered/usable provider route.
-      // Never exchange Griff with Bluebird, DeepSeek, or the selected model.
-      const griff = findWayglassWorldSeat('evil-gene:film-2015')?.character;
-      if (griff && !routes.some(route => route.route_id === griff.desired_route_id)) {
-        routes = [...routes, {
-          route_id: griff.desired_route_id,
-          label: griff.name + ' · SpicyChat (not connected)',
-          provider: 'spicychat',
-          configured: false,
-          unavailable_reason: 'Character/chat transport unverified',
-        }];
+      // World seats are not model routes. A named Crew room may ONLY select its exact provider.
+      const targetWorld = findWayglassWorldSeat(cp('world').value);
+      const crewId = targetWorld?.character?.desired_route_id;
+      if (crewId && !routes.some(route => route.route_id === crewId)) {
+        routes = [...routes, { route_id: crewId, label: targetWorld.character.name + ' · SpicyChat (not connected)',
+          provider: 'spicychat', configured: false, unavailable_reason: 'Exact private account/room binding unavailable' }];
       }
-      const isGriffWorld = cp('world').value === 'evil-gene:film-2015';
-      if (selectedCharacter && !isGriffWorld) routes.unshift({route_id: 'auto:character', label: 'Auto · character voice', configured: true});
-      const visibleRoutes = isGriffWorld ? routes.filter(route => route.route_id === 'flame:griff:spicychat') : routes.filter(route => route.route_id !== 'flame:griff:spicychat');
-      if (isGriffWorld) selectedRoute = 'flame:griff:spicychat';
-      if (!visibleRoutes.some(route => route.route_id === selectedRoute && route.configured !== false)) selectedRoute = visibleRoutes.find(route => route.configured !== false)?.route_id || '';
+      if (selectedCharacter && !crewId) routes.unshift({route_id: 'auto:character',label:'Auto · character voice',configured:true});
+      const visibleRoutes = crewId
+        ? routes.filter(route => route.route_id === crewId)
+        : routes.filter(route => route.provider !== 'spicychat' || route.route_id === 'flame:bluebird:crow');
+      if (crewId) selectedRoute = crewId;
+      if (!visibleRoutes.some(route => route.route_id === selectedRoute && route.configured !== false)) {
+        selectedRoute = crewId ? '' : (visibleRoutes.find(route => route.configured !== false)?.route_id || '');
+      }
       selectedRoute = routePicker.setRoutes(visibleRoutes, selectedRoute);
       refreshExternalTransfer();
-      routeState.textContent = isGriffWorld
-        ? selectedRoute ? 'Griff SpicyChat configured · sign in as Steward; live connection not yet proven' : 'Griff unavailable · configure his exact private character/chat binding'
+      routeState.textContent = crewId
+        ? (selectedRoute ? targetWorld.character.name + ' configured; check exact connection and approve each turn. Not live-verified.'
+          : targetWorld.character.name + ' disconnected; add the owner’s account credential and exact chat pin locally.')
         : visibleRoutes.length + ' registered route' + (visibleRoutes.length === 1 ? '' : 's');
     } catch (error) {
       routes = [];
@@ -458,7 +478,8 @@ export async function mountArcSweepWritingSurface(root) {
     const text = input.value.trim();
     if (!text || busy) return;
     if (!selectedRoute) { status.textContent = 'No configured route available. Reload the route catalogue.'; return; }
-    if ((selectedRoute.startsWith('stepfun:') || selectedRoute === 'flame:griff:spicychat') && !externalConsent.checked) {
+    const externalSpicy = routes.some(route => route.route_id === selectedRoute && route.provider === 'spicychat');
+    if ((selectedRoute.startsWith('stepfun:') || externalSpicy) && !externalConsent.checked) {
       status.textContent = 'Confirm this external provider transfer before passing the turn.';
       externalConsent.focus();
       return;
@@ -488,9 +509,9 @@ export async function mountArcSweepWritingSurface(root) {
       recordWayglassRouteObservation({status:'started',routeId:selectedRoute});
       const result = await invokeWayglassRoute({
         routeId: selectedRoute,
-        externalProviderConsent: (selectedRoute.startsWith('stepfun:') || selectedRoute === 'flame:griff:spicychat') && externalConsent.checked,
+        externalProviderConsent: (selectedRoute.startsWith('stepfun:') || externalSpicy) && externalConsent.checked,
         worldId: activeWorldId,
-        participantId: selectedRoute === 'flame:griff:spicychat' ? 'griff-krenshaw' : null,
+        participantId: selectedRoute === 'flame:griff:spicychat' ? 'griff-krenshaw' : selectedRoute === 'flame:bluebird:spicychat' ? 'bluebird' : selectedRoute === 'flame:vethrlauf:spicychat' ? 'vethrlauf' : null,
         characterId: selectedCharacter || null,
         emergenceQuestionId,
         think: root.querySelector('#wg-think').checked,
@@ -662,6 +683,9 @@ export async function mountArcSweepWritingSurface(root) {
     lastReceipt: () => lastReceipt,
     destroy() {
       globalThis.removeEventListener?.('wayglass:command', handleWayglassCommand);
+      disposeLorebook();
+      disposeDictation();
+      globalThis.speechSynthesis?.cancel?.();
       routePicker.destroy();
     },
   });

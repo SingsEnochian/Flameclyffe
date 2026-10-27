@@ -252,8 +252,8 @@ async function callSpicyChat(route, payload, compiled = null, fetchImpl = global
   const pinnedId = cleanText(route.character_id?.(), 180);
   const pinnedConversationId = cleanText(route.conversation_id?.(), 180);
   const targetName = cleanText(route.character_name?.(), 180).toLowerCase();
-  if (route.route_id === 'flame:griff:spicychat' && (!pinnedId || !pinnedConversationId)) {
-    const error = new Error('Griff requires an exact owner-configured character and conversation binding.');
+  if (route.strict_pair && (!pinnedId || !pinnedConversationId)) {
+    const error = new Error(route.label + ' requires an exact owner-configured character and conversation binding.');
     error.status = 503;
     throw error;
   }
@@ -327,8 +327,8 @@ async function callSpicyChat(route, payload, compiled = null, fetchImpl = global
     error.status = 502;
     throw error;
   }
-  if (route.route_id === 'flame:griff:spicychat' && !cleanText(data?.message?.content)) {
-    const error = new Error('Griff returned no attributable reply. No success was recorded.');
+  if (route.strict_pair && !cleanText(data?.message?.content)) {
+    const error = new Error(route.label + ' returned no attributable reply. No success was recorded.');
     error.status = 502;
     throw error;
   }
@@ -472,17 +472,38 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       return res.status(409).json({ error: 'Stored departure could not be verified for this binding.' });
     }
   });
+  // Voyage messaging is an OPTIONAL House host service. Hearthgate can serve
+  // its Living Observer and local writing routes without that service. Never
+  // route a missing inbox through an unconsented provider or invent messages.
+  // A structured, read-only status lets the UI tell 'not configured' apart
+  // from 'the server is offline' without exposing messages or credentials.
+  router.get('/voyage/status', (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    const bridge = req.app.locals.wayglassVoyageMessages;
+    return res.json({
+      schema: 'wayglass.voyage-capability/v1',
+      configured: Boolean(bridge && typeof bridge.read === 'function' && typeof bridge.reply === 'function'),
+      live_transport_verified: false,
+      note: 'Host service presence is not proof of a reachable participant or live message delivery.',
+    });
+  });
   router.get('/voyage/messages', async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     const bridge = req.app.locals.wayglassVoyageMessages;
-    if (!bridge) return res.status(503).json({ error: 'Voyage message host services are not configured.' });
+    if (!bridge || typeof bridge.read !== 'function') return res.status(503).json({
+      code: 'VOYAGE_MESSAGE_SERVICE_NOT_CONFIGURED',
+      error: 'Voyage messages are not configured on this Hearthgate. No participant messaging was attempted.',
+    });
     try { return res.json(await bridge.read(req)); }
     catch (error) { return res.status(error.status || 500).json({ error: error.message }); }
   });
   router.post('/voyage/messages', async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     const bridge = req.app.locals.wayglassVoyageMessages;
-    if (!bridge) return res.status(503).json({ error: 'Voyage message host services are not configured.' });
+    if (!bridge || typeof bridge.reply !== 'function') return res.status(503).json({
+      code: 'VOYAGE_MESSAGE_SERVICE_NOT_CONFIGURED',
+      error: 'Voyage replies are not configured on this Hearthgate. Nothing was sent.',
+    });
     try { return res.status(201).json(await bridge.reply(req, req.body || {})); }
     catch (error) { return res.status(error.status || (error instanceof TypeError ? 400 : 500)).json({ error: error.message }); }
   });
@@ -653,6 +674,41 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     }
   });
 
+  // Read-only, steward-authenticated source binding check for each Crew seat.
+  // An exact conversation/character match is preflight evidence, never a sent turn.
+  router.get('/crew/:member/status', createRequestGate({ maxRequests: 10, maxConcurrent: 2 }), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required for a private Crew connection check.' });
+    }
+    const ids = { bluebird: 'flame:bluebird:spicychat', vethrlauf: 'flame:vethrlauf:spicychat', griff: 'flame:griff:spicychat' };
+    const route = resolveWayglassRoute(ids[req.params.member]);
+    if (!route) return res.status(404).json({ error: 'Unknown Crew connection.' });
+    const missing = [
+      !route.api_key?.() && 'account credential',
+      !route.character_id?.() && 'character binding',
+      !route.conversation_id?.() && 'conversation binding',
+    ].filter(Boolean);
+    if (missing.length) return res.status(503).json({ route_id: route.route_id, configured: false, preflight_verified: false, live_turn_verified: false, missing });
+    try {
+      const upstream = await fetchImpl(route.conversation_endpoint(), {
+        method: 'GET', headers: spicyChatHeaders(route.api_key()), signal: AbortSignal.timeout(12000),
+      });
+      if (!upstream.ok) return res.status(502).json({ route_id: route.route_id, configured: true, preflight_verified: false, live_turn_verified: false, error: 'SpicyChat rejected the account preflight. The credential may have expired or the private endpoint may have changed.' });
+      const data = await upstream.json().catch(() => []);
+      const conversations = Array.isArray(data) ? data : (Array.isArray(data?.conversations) ? data.conversations : []);
+      const pinned = conversations.some(item => cleanText(item?.id,180) === route.conversation_id()
+        && cleanText(item?.character_id || item?.character?.id,180) === route.character_id());
+      return res.status(pinned ? 200 : 409).json({ route_id: route.route_id, configured: true,
+        preflight_verified: pinned, character_binding_verified: pinned, conversation_binding_verified: pinned,
+        live_turn_verified: false,
+        ...(pinned ? {} : { error: 'The pinned character and conversation did not match a returned record. No message sent.' }),
+      });
+    } catch {
+      return res.status(502).json({ route_id: route.route_id, configured: true, preflight_verified: false, live_turn_verified: false, error: 'SpicyChat provider read failed. No message sent.' });
+    }
+  });
+
   router.get('/routes', (_req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     return res.json({
@@ -689,6 +745,15 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
         return res.status(401).json({ error: 'Sign in as House Steward before contacting Griff.' });
       }
     }
+    if (route.provider === 'spicychat') {
+      if (!route.configured()) return res.status(503).json({ error: route.label + ' requires a private credential and exact character/conversation pins.' });
+      if (route.world_id && (payload.world_id !== route.world_id || payload.participant_id !== route.participant_id)) {
+        return res.status(409).json({ error: route.label + ' must remain in its exact world and participant seat.' });
+      }
+      if (payload.external_provider_consent !== true) {
+        return res.status(403).json({ error: 'Confirm external-provider transfer to this specific SpicyChat conversation.' });
+      }
+    }
     if (payload.character_id && !resolveCharacterSeat(payload.character_id)) return res.status(400).json({ error: 'Unknown character seat.' });
     if (!cleanText(payload.input)) return res.status(400).json({ error: 'input required.' });
     // The external StepFun routes are deliberately opt-in for every request.
@@ -705,21 +770,37 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       if (payload.checkpoint_storage_id) {
         payload._storedCheckpoint = departureStore.read(payload.checkpoint_storage_id, payload.checkpoint_world_id, payload.checkpoint_participant_id).continuation_packet;
       }
-      // Griff's provider binding is not an inheritance-host dependency. A
-      // signed, owner-approved chat turn must work before any optional bridge.
-      const wantsInheritance = resolver != null || (
-        route.route_id !== 'flame:griff:spicychat'
-        && (payload.participant_id != null || payload.world_id != null)
-      );
-      let compiled = null;
-      if (wantsInheritance) {
-        if (typeof resolver?.resolve !== 'function') {
-          const error = new Error('Wayglass inheritance host adapters are not configured.');
-          error.status = 503;
-          throw error;
-        }
-        compiled = await resolver.resolve(req, payload);
+      // A world identifier is a ROUTING CONTEXT, not an inheritance request.
+      // Prior versions incorrectly converted ordinary Writing Room messages into
+      // mandatory host-inheritance calls even when no resolver existed.
+      // Never pretend that a checkpoint was inherited if its explicit adapter
+      // is unavailable; preserving truthful continuity is more important than
+      // returning a plausible model response.
+      const adapterAvailable = typeof resolver?.resolve === 'function';
+      const checkpointRequested = Boolean(payload.checkpoint_storage_id);
+      if (resolver != null && !adapterAvailable) {
+        const error = new Error('Wayglass host inheritance adapter is invalid. No context was transferred.');
+        error.status = 503;
+        throw error;
       }
+      // The primary Wayglass Writing Room is an ordinary host container.
+      // Other caller-supplied world/participant bindings are sensitive requests
+      // for inherited context, and MUST remain subject to a trusted resolver.
+      const ordinaryWritingRoom = payload.world_id === 'wayglass:writing-room' && payload.participant_id == null;
+      const explicitForeignBinding = route.provider !== 'spicychat' && (
+        payload.participant_id != null || (payload.world_id != null && !ordinaryWritingRoom)
+      );
+      if (explicitForeignBinding && !adapterAvailable) {
+        const error = new Error('This external world or participant binding requires the trusted Wayglass inheritance host adapter. No provider turn was sent.');
+        error.status = 503;
+        throw error;
+      }
+      // departureStore.read validated the complete owner-bound checkpoint above,
+      // so it may be attached as specifically labelled stored evidence. A valid
+      // local checkpoint is not an unverified foreign-world inheritance claim.
+      const wantsInheritance = adapterAvailable && (checkpointRequested || explicitForeignBinding);
+      let compiled = null;
+      if (wantsInheritance) compiled = await resolver.resolve(req, payload);
       let result;
       if (route.provider === 'openai') result = await callOpenAI(route, payload, compiled, fetchImpl);
       else if (route.provider === 'ollama') result = await callOllama(route, payload, compiled, fetchImpl, scientificTurn);
@@ -780,6 +861,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
           data_policy_verified_on: route.data_policy?.verified_on || null,
           wayglass_persisted: false,
           checkpoint_storage_id: payload.checkpoint_storage_id || null,
+          inheritance_context_status: compiled ? 'host-resolved' : payload._storedCheckpoint ? 'verified-local-checkpoint' : 'not-applied',
           ...(compiled ? { inheritance_context: compiled.reference } : {}),
           thinking_exposed: Boolean(result.thinking),
           ...(scientificTurn ? { scientific_trial: {
