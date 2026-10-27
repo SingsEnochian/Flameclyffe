@@ -2,12 +2,29 @@ import { authorizationSession } from './authorization-session.js';
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
+// A non-2xx Voyage response is not proof that Hearthgate, the Writing Room
+// or SpicyChat is offline. Preserve safe capability error codes for the inbox.
+async function voyageOrThrow(response) {
+  const data = await readJson(response);
+  if (!response.ok) {
+    const error = new Error(data.error || 'Voyage messaging host did not return a message result.');
+    error.status = response.status;
+    error.code = data.code || null;
+    throw error;
+  }
+  return data;
+}
+
+export async function readVoyageStatus(fetchImpl = fetch) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/voyage/status', { cache: 'no-store' }));
+}
+
 export async function readVoyageMessages(fetchImpl = fetch) {
-  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/voyage/messages', { cache: 'no-store' }));
+  return voyageOrThrow(await fetchImpl('/api/v1/wayglass/voyage/messages', { cache: 'no-store' }));
 }
 
 export async function replyToVoyage({ recipientId, voyageRef, text, fetchImpl = fetch } = {}) {
-  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/voyage/messages', {
+  return voyageOrThrow(await fetchImpl('/api/v1/wayglass/voyage/messages', {
     method: 'POST', headers: JSON_HEADERS,
     body: JSON.stringify({ recipient_id: recipientId, voyage_ref: voyageRef, text }),
   }));
