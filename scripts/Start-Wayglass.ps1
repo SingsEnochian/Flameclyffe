@@ -57,6 +57,10 @@ try {
         throw 'Staged Wayglass is missing N-014 truthful Voyage messaging capability diagnostics. Refusing stale UI.'
     }
     Write-Host '[Wayglass] N-014 optional Voyage service status marker verified.'
+    if (-not (Select-String -Path $builtIndex -Pattern 'name="wayglass-ui-motion" content="n015-threejs-spline-docking-optin-bloom-feather"' -SimpleMatch -Quiet)) {
+        throw 'Staged portal is missing N-015 Three.js animation and Feather integration. Refusing stale UI.'
+    }
+    Write-Host '[Wayglass] N-015 spatial motion, optional glow, and shared Feather marker verified.'
     $env:PORT = [string]$Port
     Write-Host ''
     Write-Host '[Wayglass] N-010 HEARTGATE PORTAL (local, no Vercel):'
