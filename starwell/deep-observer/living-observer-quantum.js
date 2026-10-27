@@ -66,6 +66,7 @@ function init(){
   if(!el('observerQuantum'))return;
   const inputs=['quantumP0','quantumPhase','quantumDephasing','quantumShots','quantumSeed'];
   let last=null,busy=false;
+  el('quantumControls')?.addEventListener('submit',event=>event.preventDefault());
   const resetReceipt=()=>{
     last=null;
     el('quantumReceipts').textContent='No detector trial run on these parameters.';
@@ -109,9 +110,12 @@ function init(){
   el('quantumSimulate').addEventListener('click',async()=>{
     if(busy)return;
     busy=true;el('quantumSimulate').disabled=true;
+    const request=readSettings();
+    inputs.forEach(id=>{el(id).disabled=true;});
+    el('quantumReset').disabled=true;
     el('quantumTrialStatus').textContent='Calculating and independently replaying synthetic detector receipts…';
     try{
-      const packet=await makeQuantumReceipt(readSettings());
+      const packet=await makeQuantumReceipt(request);
       const replay=await replayQuantumReceipt(packet);
       if(!replay.matched)throw new Error('Replay was not verified');
       last=packet;
@@ -124,7 +128,10 @@ function init(){
     }catch(e){
       resetReceipt();
       el('quantumTrialStatus').textContent='Cannot claim verified sample: '+e.message;
-    }finally{busy=false;el('quantumSimulate').disabled=false;}
+    }finally{
+      busy=false;el('quantumSimulate').disabled=false;el('quantumReset').disabled=false;
+      inputs.forEach(id=>{el(id).disabled=false;});
+    }
   });
   el('quantumReset').addEventListener('click',()=>{
     if(busy)return;
@@ -137,7 +144,7 @@ function init(){
     const bytes=new Blob([JSON.stringify(last,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(bytes);
     const a=document.createElement('a');a.href=url;a.download='observer-quantum-synthetic-receipt.json';a.click();
-    URL.revokeObjectURL(url);
+    window.setTimeout(()=>URL.revokeObjectURL(url),1000);
   });
   window.LIVING_OBSERVER_QUANTUM={
     schema:NS,has_verified_local_receipt:()=>last!==null,
