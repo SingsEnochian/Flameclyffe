@@ -1,6 +1,7 @@
 import './living-observer.css';
 import './observer-three-hud.css';
 import { mountObserverThreeHUD } from './observer-three-hud.js';
+import { mountObserverMissionDock } from './observer-mission-dock.js';
 import { mountWayglassSciencePanel } from './living-observer-science.js';
 import { listWayglassSurfaces } from '../surface-registry.js';
 import { listWayglassOrgans } from '../organ-registry.js';
@@ -242,6 +243,7 @@ export async function mountWayglassLivingObserver(root) {
     '<footer class="wg-receipt tiny">Direct readings stay inspectable. Private interior dynamics may persist and self-organise locally. Surfaced self-development remains proposal-first and can be handed to Hermes with an explicit acceptance test.</footer></section>'
   ].join('');
   const disposeScience=mountWayglassSciencePanel(root);
+  const disposeMissionDock=mountObserverMissionDock(root);
   root.querySelector('[data-wayglass-crew-doors]')?.addEventListener('click',()=>{
     root.querySelector('[data-wg-science-action="lens-crew"]')?.click();
     root.querySelector('[data-wg-science-host]')?.scrollIntoView({block:'start',behavior:'auto'});
@@ -425,7 +427,7 @@ export async function mountWayglassLivingObserver(root) {
     // this Observer's independent music, haptics or animation.
     if(paused)globalThis.dispatchEvent?.(new CustomEvent('wayglass:feather',{detail:{held:false}}));
     cancelAnimationFrame(animation);clearInterval(timer);unsubscribe();unsubscribeLight();
-    disposeScience();opticalDeck?.dispose();opticalDeck=null;
+    disposeMissionDock();disposeScience();opticalDeck?.dispose();opticalDeck=null;
     globalThis.removeEventListener?.('arcsweep:gesture-feedback', onExternalFeather);
     if(audioContext){audioContext.close().catch(()=>{});audioContext=null;}
   }
