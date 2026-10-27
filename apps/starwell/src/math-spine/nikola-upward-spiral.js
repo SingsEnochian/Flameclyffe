@@ -94,13 +94,38 @@ function originOf({baseline,frequencyRatio,source}) {
 function latestProjection(origin,rounds) {
   const calc=deriveOscillatorInvariant(origin.baseline,origin.frequency_ratio);
   const accepted=rounds.filter(r=>r.status==='admitted');
-  const last=accepted.at(-1);
-  if(!last) return {evidence_state:'frequency-alone-underdetermined',conditional_state:null,calculation:calc};
-  const e=last.measurement;
-  const k=e.kind==='stiffness' ? e.value : e.value*calc.compression.target_stiffness_per_mass;
-  const m=e.kind==='mass' ? e.value : e.value/calc.compression.target_stiffness_per_mass;
-  requireThat([k,m].every(x=>x>0&&Number.isFinite(x)),
-    'updated inference outside physical finite range');
+  if(!accepted.length) return {evidence_state:'frequency-alone-underdetermined',conditional_state:null,calculation:calc};
+  const stiffness=accepted.filter(r=>r.measurement.kind==='stiffness');
+  const mass=accepted.filter(r=>r.measurement.kind==='mass');
+  const kMeasured=stiffness.at(-1)?.measurement.value ?? null;
+  const mMeasured=mass.at(-1)?.measurement.value ?? null;
+  const contradictions=[];
+  if(stiffness.some(r=>!same(r.measurement.value,kMeasured)))
+    contradictions.push('independent stiffness measurements disagree');
+  if(mass.some(r=>!same(r.measurement.value,mMeasured)))
+    contradictions.push('independent mass measurements disagree');
+  if(kMeasured!==null && mMeasured!==null &&
+    !same(kMeasured/mMeasured,calc.compression.target_stiffness_per_mass))
+    contradictions.push('measured k/m disagrees with frequency-derived constraint');
+  const sources=accepted.map(r=>r.source.id);
+  if(contradictions.length) return {
+    evidence_state:'inconsistent-independent-measurements',
+    conditional_state:{
+      classification:'conflicting-under-ideal-model',
+      observed_stiffness_N_per_m:kMeasured,
+      observed_mass_kg:mMeasured,
+      expected_ratio:calc.compression.target_stiffness_per_mass,
+      conflicts:contradictions,
+      measurement_sources:sources,
+      independent_measurement_authenticated:false,
+      verdict:'Do not silently choose a winning reading. Check calibration, errors, units, timing and oscillator assumptions.',
+    },
+    calculation:calc,
+  };
+  const k=kMeasured ?? mMeasured*calc.compression.target_stiffness_per_mass;
+  const m=mMeasured ?? kMeasured/calc.compression.target_stiffness_per_mass;
+  requireThat([k,m].every(x=>x>0&&Number.isFinite(x)&&x<1e12),
+    'updated inference outside physical finite bounded range');
   const k0=calc.baseline.stiffness,m0=calc.baseline.mass;
   const designation=same(m,m0)?'compatible-with-stiffness-only':
     same(k,k0)?'compatible-with-mass-only':'requires-joint-change-under-model';
@@ -108,7 +133,9 @@ function latestProjection(origin,rounds) {
     evidence_state:'conditional-on-caller-declared-independent-measurement',
     conditional_state:{
       stiffness_N_per_m:k,mass_kg:m,classification:designation,
-      measurement_source:last.source.id,
+      stiffness_directly_measured:kMeasured!==null,
+      mass_directly_measured:mMeasured!==null,
+      measurement_sources:sources,
       independent_measurement_authenticated:false,
       remaining_unknown:'model validity, measurement error and causal mechanism',
     },
