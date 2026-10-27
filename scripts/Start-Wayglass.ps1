@@ -53,6 +53,10 @@ try {
         throw 'Staged portal does not have the N-013 shared optical design and route repair marker. Refusing stale startup.'
     }
     Write-Host '[Wayglass] N-013 integrated ship design and host route fix marker verified.'
+    if (-not (Select-String -Path $builtIndex -Pattern 'name="wayglass-ui-voyage-status" content="n014-optional-host-capability-no-fake-messages"' -SimpleMatch -Quiet)) {
+        throw 'Staged Wayglass is missing N-014 truthful Voyage messaging capability diagnostics. Refusing stale UI.'
+    }
+    Write-Host '[Wayglass] N-014 optional Voyage service status marker verified.'
     $env:PORT = [string]$Port
     Write-Host ''
     Write-Host '[Wayglass] N-010 HEARTGATE PORTAL (local, no Vercel):'
