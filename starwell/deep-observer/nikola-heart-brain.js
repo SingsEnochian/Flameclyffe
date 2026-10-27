@@ -126,6 +126,7 @@ export function reasonNikolaBrain(heart,{priorCoherent=0.5}={}){
     engine:'two-model Bayesian experiment design, ideal conditional probabilities',
     prior:{coherent:priorCoherent,dephased:1-priorCoherent,
       source:'declared trial prior, NOT derived from physical observation'},
+    source_parameters:{p0,phaseRad},
     hypotheses:[
       {id:'coherent',meaning:'ideal λ=0 coherence at selected path distribution and phase',
         endpoint_dephasing:0},
@@ -146,7 +147,14 @@ export function updateNikolaBelief(brain,{basis,plus,minus}){
   assert(MEASUREMENTS.includes(basis),'measurement basis must be X, Y or Z');
   assert(Number.isInteger(plus)&&Number.isInteger(minus)&&plus>=0&&minus>=0&&plus+minus>0&&plus+minus<=10000,
     'detector counts must be bounded nonnegative integers');
-  // Do not trust caller-modified prediction likelihoods.
+  // Reconstruct conditional predictions from the original mathematical
+  // source parameters; never admit a tampered likelihood as a valid brain.
+  const {p0,phaseRad}=brain.source_parameters||{};
+  const rebuilt=reasonNikolaBrain(
+    buildNikolaHeart({p0,phaseRad,dephasing:0}),
+    {priorCoherent:brain.prior?.coherent});
+  assert(JSON.stringify(brain)===JSON.stringify(rebuilt),
+    'brain predictions are inconsistent with canonical quantum equations');
   const axis=brain.candidates.find(a=>a.basis===basis);
   assert(axis && axis.p_plus_given_coherent>=0&&axis.p_plus_given_coherent<=1&&
     axis.p_plus_given_dephased>=0&&axis.p_plus_given_dephased<=1,'invalid conditional probabilities');
