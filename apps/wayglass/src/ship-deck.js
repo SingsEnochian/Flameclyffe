@@ -1,5 +1,6 @@
 // Shared Wayglass room shell. Navigation is one route registry, not 8 ad-hoc bars.
 import { prepareWayglassCrewRoom } from './crew-navigation.js';
+import { installShipGestures } from './ship-gestures.js';
 
 export const WAYGLASS_DECK_ROOMS=Object.freeze([
   Object.freeze({id:'arcsweep:writing-room',label:'Writing Room',hint:'Writing and continuity'}),
@@ -89,6 +90,15 @@ export function installShipDeck(root,activeId,mount){
       (index+(event.key==='ArrowRight'?1:-1)+links.length)%links.length;
     links[next]?.focus();
   });
+  // Two-finger coordinated swipe is confined to the navigation rail.
+  // It never sends an LLM turn or modifies external world state.
+  const disposeGestures=installShipGestures(rail,{onNavigate:direction=>{
+    const index=WAYGLASS_DECK_ROOMS.findIndex(room=>room.id===activeId);
+    if(index<0)return;
+    const n=WAYGLASS_DECK_ROOMS.length;
+    const next=WAYGLASS_DECK_ROOMS[(index+(direction==='next'?1:-1)+n)%n];
+    rail.querySelector('[data-wayglass-ship-target="'+next.id+'"]')?.click();
+  }});
   // A single delegated event handler also works after focus/keyboard activation.
   nav.addEventListener('click',event=>{
     const target=event.target.closest?.('[data-wayglass-ship-target]');
@@ -114,4 +124,5 @@ export function installShipDeck(root,activeId,mount){
       void mount('arcsweep:writing-room');
     }
   });
+  return disposeGestures;
 }
