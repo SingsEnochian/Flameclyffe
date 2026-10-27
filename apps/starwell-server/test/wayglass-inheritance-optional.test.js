@@ -56,11 +56,11 @@ test('present host resolver explicitly controls inherited dossier, no fabricated
   const {send,requests}=await fixture(t,{inheritanceContext:{
     async resolve(_req,payload){
       resolverCalls++;
-      assert.equal(payload.world_id,'wayglass:writing-room');
+      assert.equal(payload.world_id,'external:test-world');
       return {reference:'synthetic-resolver-receipt',dossier:{kind:'fictional-fixture',verified:false}};
     },
   }});
-  const response=await send({});
+  const response=await send({world_id:'external:test-world'});
   assert.equal(response.status,200);
   const body=await response.json();
   assert.equal(body.receipt.inheritance_context_status,'host-resolved');
