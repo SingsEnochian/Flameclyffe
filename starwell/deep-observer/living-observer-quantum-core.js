@@ -140,6 +140,32 @@ export function sampleQuantumDetector({p0=0.5,phaseRad=0,dephasing=0,shots=512,s
   });
 }
 
+/**
+ * Generalised synthetic measurement sampler for the X/Y/Z basis.
+ * This is still a classical seeded PRNG; no actual QPU or photon record.
+ */
+export function sampleQuantumBasis({p0=0.5,phaseRad=0,dephasing=0,basis='X',shots=512,seed=104729}={}){
+  if(!['X','Y','Z'].includes(basis))throw new Error('Quantum Observer: invalid measurement basis');
+  if(!Number.isInteger(shots)||shots<16||shots>10000){
+    throw new Error('Quantum Observer: shots must be an integer in [16, 10000]');
+  }
+  if(!Number.isInteger(seed)||seed<1||seed>0xffffffff){
+    throw new Error('Quantum Observer: seed must be nonzero uint32');
+  }
+  const state=quantumDensity({p0,phaseRad,dephasing});
+  const probability=basis==='X'?state.born.xPlus:basis==='Y'?state.born.yPlus:state.born.z0;
+  const rand=xorshift(seed);
+  let plus=0;
+  for(let i=0;i<shots;i++){if(rand()<probability)plus++;}
+  return freeze({
+    schema:'observer.quantum-basis-sample/v1',
+    source:'seeded local xorshift32 Monte Carlo, no independent detector',basis,
+    seed,shots,plus,minus:shots-plus,model_probability_plus:probability,
+    physical_detector_used:false,
+    independence:'Repeated runs with identical seed are exact duplicates, not independent observations',
+  });
+}
+
 /** Canonical hash protects local replay consistency, NOT source authenticity. */
 async function digest(packet){
   const cryptoAPI=globalThis.crypto?.subtle;
