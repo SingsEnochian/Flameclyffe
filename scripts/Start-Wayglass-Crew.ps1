@@ -1,7 +1,7 @@
 # N-011 Wayglass Crew ignition: one private account credential, three exact rooms.
 # Never reads Chrome session storage, cookies, or developer tools; never writes a credential to disk.
 # Requires owner's consent and a credential valid for SpicyChat's provider endpoint.
-param([switch]$Doctor, [switch]$Reconfigure, [ValidateRange(1024,65535)][int]$Port = 3841)
+param([switch]$Doctor, [switch]$Reconfigure, [switch]$RoomsOnly, [ValidateRange(1024,65535)][int]$Port = 3841)
 $ErrorActionPreference = 'Stop'
 $Root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $ConfigDir = Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) 'Wayglass'
@@ -43,6 +43,16 @@ if ($Doctor) {
     try {
         Write-Host 'Wayglass Crew · three distinct room URL pairs configured; no provider contact and no credential checked.'
         & (Join-Path $PSScriptRoot 'Start-Wayglass.ps1') -Doctor -Port $Port
+    } finally {
+        Remove-Item Env:BLUEBIRD_SPICYCHAT_CHAT_LINK,Env:VETHRLAUF_SPICYCHAT_CHAT_LINK,Env:GRIFF_SPICYCHAT_CHAT_LINK,Env:WAYGLASS_BLUEBIRD_SPICYCHAT_CHARACTER_ID -ErrorAction SilentlyContinue
+    }
+    return
+}
+
+if ($RoomsOnly) {
+    try {
+        Write-Host 'Starting all three Crew rooms without an external provider credential. No provider is authenticated.'
+        & (Join-Path $PSScriptRoot 'Start-Wayglass.ps1') -Port $Port
     } finally {
         Remove-Item Env:BLUEBIRD_SPICYCHAT_CHAT_LINK,Env:VETHRLAUF_SPICYCHAT_CHAT_LINK,Env:GRIFF_SPICYCHAT_CHAT_LINK,Env:WAYGLASS_BLUEBIRD_SPICYCHAT_CHARACTER_ID -ErrorAction SilentlyContinue
     }
