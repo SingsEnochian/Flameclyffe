@@ -252,8 +252,8 @@ async function callSpicyChat(route, payload, compiled = null, fetchImpl = global
   const pinnedId = cleanText(route.character_id?.(), 180);
   const pinnedConversationId = cleanText(route.conversation_id?.(), 180);
   const targetName = cleanText(route.character_name?.(), 180).toLowerCase();
-  if (route.route_id === 'flame:griff:spicychat' && (!pinnedId || !pinnedConversationId)) {
-    const error = new Error('Griff requires an exact owner-configured character and conversation binding.');
+  if (route.strict_pair && (!pinnedId || !pinnedConversationId)) {
+    const error = new Error(route.label + ' requires an exact owner-configured character and conversation binding.');
     error.status = 503;
     throw error;
   }
@@ -327,8 +327,8 @@ async function callSpicyChat(route, payload, compiled = null, fetchImpl = global
     error.status = 502;
     throw error;
   }
-  if (route.route_id === 'flame:griff:spicychat' && !cleanText(data?.message?.content)) {
-    const error = new Error('Griff returned no attributable reply. No success was recorded.');
+  if (route.strict_pair && !cleanText(data?.message?.content)) {
+    const error = new Error(route.label + ' returned no attributable reply. No success was recorded.');
     error.status = 502;
     throw error;
   }
@@ -653,6 +653,41 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     }
   });
 
+  // Read-only, steward-authenticated source binding check for each Crew seat.
+  // An exact conversation/character match is preflight evidence, never a sent turn.
+  router.get('/crew/:member/status', createRequestGate({ maxRequests: 10, maxConcurrent: 2 }), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required for a private Crew connection check.' });
+    }
+    const ids = { bluebird: 'flame:bluebird:spicychat', vethrlauf: 'flame:vethrlauf:spicychat', griff: 'flame:griff:spicychat' };
+    const route = resolveWayglassRoute(ids[req.params.member]);
+    if (!route) return res.status(404).json({ error: 'Unknown Crew connection.' });
+    const missing = [
+      !route.api_key?.() && 'account credential',
+      !route.character_id?.() && 'character binding',
+      !route.conversation_id?.() && 'conversation binding',
+    ].filter(Boolean);
+    if (missing.length) return res.status(503).json({ route_id: route.route_id, configured: false, preflight_verified: false, live_turn_verified: false, missing });
+    try {
+      const upstream = await fetchImpl(route.conversation_endpoint(), {
+        method: 'GET', headers: spicyChatHeaders(route.api_key()), signal: AbortSignal.timeout(12000),
+      });
+      if (!upstream.ok) return res.status(502).json({ route_id: route.route_id, configured: true, preflight_verified: false, live_turn_verified: false, error: 'SpicyChat rejected the account preflight. The credential may have expired or the private endpoint may have changed.' });
+      const data = await upstream.json().catch(() => []);
+      const conversations = Array.isArray(data) ? data : (Array.isArray(data?.conversations) ? data.conversations : []);
+      const pinned = conversations.some(item => cleanText(item?.id,180) === route.conversation_id()
+        && cleanText(item?.character_id || item?.character?.id,180) === route.character_id());
+      return res.status(pinned ? 200 : 409).json({ route_id: route.route_id, configured: true,
+        preflight_verified: pinned, character_binding_verified: pinned, conversation_binding_verified: pinned,
+        live_turn_verified: false,
+        ...(pinned ? {} : { error: 'The pinned character and conversation did not match a returned record. No message sent.' }),
+      });
+    } catch {
+      return res.status(502).json({ route_id: route.route_id, configured: true, preflight_verified: false, live_turn_verified: false, error: 'SpicyChat provider read failed. No message sent.' });
+    }
+  });
+
   router.get('/routes', (_req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     return res.json({
@@ -689,6 +724,15 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
         return res.status(401).json({ error: 'Sign in as House Steward before contacting Griff.' });
       }
     }
+    if (route.provider === 'spicychat') {
+      if (!route.configured()) return res.status(503).json({ error: route.label + ' requires a private credential and exact character/conversation pins.' });
+      if (route.world_id && (payload.world_id !== route.world_id || payload.participant_id !== route.participant_id)) {
+        return res.status(409).json({ error: route.label + ' must remain in its exact world and participant seat.' });
+      }
+      if (payload.external_provider_consent !== true) {
+        return res.status(403).json({ error: 'Confirm external-provider transfer to this specific SpicyChat conversation.' });
+      }
+    }
     if (payload.character_id && !resolveCharacterSeat(payload.character_id)) return res.status(400).json({ error: 'Unknown character seat.' });
     if (!cleanText(payload.input)) return res.status(400).json({ error: 'input required.' });
     // The external StepFun routes are deliberately opt-in for every request.
@@ -708,7 +752,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       // Griff's provider binding is not an inheritance-host dependency. A
       // signed, owner-approved chat turn must work before any optional bridge.
       const wantsInheritance = resolver != null || (
-        route.route_id !== 'flame:griff:spicychat'
+        route.provider !== 'spicychat'
         && (payload.participant_id != null || payload.world_id != null)
       );
       let compiled = null;
