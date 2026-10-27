@@ -762,16 +762,22 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
         error.status = 503;
         throw error;
       }
-      if (checkpointRequested && !adapterAvailable) {
-        const error = new Error('Saved checkpoint requested, but the inheritance host adapter is unavailable. No provider turn was sent. Remove the checkpoint or configure an authorised resolver.');
+      // The primary Wayglass Writing Room is an ordinary host container.
+      // Other caller-supplied world/participant bindings are sensitive requests
+      // for inherited context, and MUST remain subject to a trusted resolver.
+      const ordinaryWritingRoom = payload.world_id === 'wayglass:writing-room' && payload.participant_id == null;
+      const explicitForeignBinding = route.provider !== 'spicychat' && (
+        payload.participant_id != null || (payload.world_id != null && !ordinaryWritingRoom)
+      );
+      if (explicitForeignBinding && !adapterAvailable) {
+        const error = new Error('This external world or participant binding requires the trusted Wayglass inheritance host adapter. No provider turn was sent.');
         error.status = 503;
         throw error;
       }
-      const wantsInheritance = adapterAvailable && (
-        checkpointRequested || (route.provider !== 'spicychat' && (
-          payload.participant_id != null || payload.world_id != null
-        ))
-      );
+      // departureStore.read validated the complete owner-bound checkpoint above,
+      // so it may be attached as specifically labelled stored evidence. A valid
+      // local checkpoint is not an unverified foreign-world inheritance claim.
+      const wantsInheritance = adapterAvailable && (checkpointRequested || explicitForeignBinding);
       let compiled = null;
       if (wantsInheritance) compiled = await resolver.resolve(req, payload);
       let result;
@@ -834,7 +840,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
           data_policy_verified_on: route.data_policy?.verified_on || null,
           wayglass_persisted: false,
           checkpoint_storage_id: payload.checkpoint_storage_id || null,
-          inheritance_context_status: compiled ? 'host-resolved' : 'not-applied',
+          inheritance_context_status: compiled ? 'host-resolved' : payload._storedCheckpoint ? 'verified-local-checkpoint' : 'not-applied',
           ...(compiled ? { inheritance_context: compiled.reference } : {}),
           thinking_exposed: Boolean(result.thinking),
           ...(scientificTurn ? { scientific_trial: {
