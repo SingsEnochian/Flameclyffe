@@ -6,6 +6,7 @@
  */
 import './living-observer-science.css';
 import { prepareWayglassCrewRoom } from '../crew-navigation.js';
+import { runGeometryInvariantTrial, replayGeometryInvariantTrial } from '../geometry-invariant-trial.js';
 import {
   deriveNikolaHeartBrain, runNikolaHeartBrainTrial, replayNikolaHeartBrain,
 } from '../../../../starwell/deep-observer/nikola-heart-brain.js';
@@ -17,6 +18,7 @@ export const WAYGLASS_SCIENCE_LENSES=Object.freeze([
   {id:'heart',label:'Heart · Brain'},
   {id:'sky',label:'Measured Sky'},
   {id:'geometry',label:'Sacred Geometry'},
+  {id:'invariants',label:'Invariant Trial'},
   {id:'numbers',label:'Numerology'},
   {id:'crew',label:'Research · Crew'},
 ]);
@@ -223,6 +225,48 @@ export function mountWayglassSciencePanel(root,{navigate=id=>globalThis.__waygla
   };
   on(shape,'change',showGeometry);
   geometry.append(shapeLabel,image,geomExplain);showGeometry();
+
+  // INVARIANTS: controlled comparison of shared geometric constructions, not physical evidence.
+  const invariants=panesById.get('invariants');
+  invariants.append(element('h3',{text:'Geometry · falsifiable invariant trial'}));
+  invariants.append(element('p',{class:'tiny',text:'Compare the inner seven circle centres as drawn by the canonical Flower of Life and Metatron SVG. Their common hexagon comes from shared source code. Agreement is expected, not a discovery.'}));
+  const invariantFields=element('div',{class:'wg-science-fields'});
+  const invariantSeed=control('input',{type:'number',min:1,max:4294967295,step:1,value:104729});
+  const invariantTrials=control('select');
+  for(const count of [99,399,999])invariantTrials.append(control('option',{value:count,text:count+' angular-null comparisons'}));
+  invariantTrials.value='399';
+  field(invariantFields,'Seed',invariantSeed);
+  field(invariantFields,'Negative controls',invariantTrials);
+  const invariantRun=button('Compute and verify · local only','invariant-run');
+  const invariantState=element('p',{class:'tiny',role:'status','aria-live':'polite',text:'No trial run. Results are synthetic geometric calculations.'});
+  const invariantResult=element('pre',{class:'wg-science-reading',text:'Result awaits your explicit test.'});
+  const invariantReceipt=element('pre',{class:'wg-science-reading',text:'No receipt yet.'});
+  const invariantDetails=element('details',{},[element('summary',{text:'Inspect SHA-256 replay receipt and assumptions'}),invariantReceipt]);
+  on(invariantRun,'click',async()=>{
+    if(disposed||invariantRun.disabled)return;
+    invariantRun.disabled=true;
+    invariantState.textContent='Computing locally · no external request…';
+    try{
+      const seed=Number(invariantSeed.value),nullTrials=Number(invariantTrials.value);
+      const receipt=await runGeometryInvariantTrial({seed,nullTrials});
+      const replay=await replayGeometryInvariantTrial(receipt);
+      if(disposed)return;
+      const m=receipt.trial.measurements,v=receipt.trial.verdict;
+      invariantResult.textContent='Cross-drawing mismatch: '+m.observed_mismatch+
+        '\\nPositive transform mismatch: '+m.positive_control_mismatch+
+        '\\nDistorted vertex mismatch: '+m.distorted_control_mismatch+
+        '\\nAngular-null median: '+m.null_median+
+        '\\nNull empirical rank: '+m.null_rank+' ('+m.null_at_least_as_close+'/'+receipt.trial.inputs.null_trials+' as close)'+
+        '\\nMatched: '+v.matched_within_svg_rounding+' · controls discriminate: '+v.controls_discriminate+
+        '\\nIndependently emergent: NO · physical validation: NO'+
+        '\\nExplanation: '+v.source_dependence;
+      invariantReceipt.textContent=JSON.stringify({receipt,replay},null,2);
+      invariantState.textContent=replay.valid?'Replayed SHA-256 receipt verified. Evidence class: constructed symbolic geometry.':'Replay failed: verify source/seed and contact developer.';
+    }catch(error){if(!disposed)invariantState.textContent='Trial refused: '+error.message;}
+    finally{if(!disposed)invariantRun.disabled=false;}
+  });
+  invariants.append(invariantFields,invariantRun,invariantState,invariantResult,invariantDetails,
+    element('p',{class:'tiny',text:'Randomising LABELS is not a valid null: sorted pairwise distances are permutation-invariant. We scramble angles while preserving radii. Null rank is not a probability that an emergent law exists.'}));
 
   // NUMEROLOGY: a reproducible symbolic transformation, not probabilistic physics.
   const numbers=panesById.get('numbers');
