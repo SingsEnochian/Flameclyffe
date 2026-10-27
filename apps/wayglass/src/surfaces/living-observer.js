@@ -194,6 +194,9 @@ export async function mountWayglassLivingObserver(root) {
     '</div><div class="wg-optics-tools" role="group" aria-label="Optical rendering preference">',
     '<button type="button" class="glass-chip" data-observer-optics aria-pressed="true">Optics · Spatial</button>',
     '<button type="button" class="glass-chip" data-observer-bloom aria-pressed="false" disabled title="Optional Three.js bloom, requires WebGL2 and active motion">Glow · Off</button>',
+    '<button type="button" class="glass-chip" data-observer-xr="immersive-vr" disabled>Enter VR · Checking</button>',
+    '<button type="button" class="glass-chip" data-observer-xr="immersive-ar" disabled>Enter AR · Checking</button>',
+    '<button type="button" class="glass-chip" data-observer-xr-exit hidden>Exit XR</button>',
     '<span>Three synthetic docking lights · local optical animation · no message or telemetry</span></div></div>',
     '<div class="observer-console glass-panel">',
     '<p class="eyebrow">Direct readings → translation → glass</p>',
@@ -252,6 +255,40 @@ export async function mountWayglassLivingObserver(root) {
   let opticalDeck=null,preferSpatial=true;
   const opticsButton=root.querySelector('[data-observer-optics]');
   const bloomButton=root.querySelector('[data-observer-bloom]');
+  const xrButtons=[...root.querySelectorAll('[data-observer-xr]')];
+  const xrExit=root.querySelector('[data-observer-xr-exit]');
+  let xrCapabilities={ar:false,vr:false};
+  function paintXR(){
+    const mode=opticalDeck?.xrMode||null;
+    const canStart=Boolean(opticalDeck?.ready && !paused && !lowStim && !reduced && !mode);
+    for(const btn of xrButtons){
+      const supported=btn.dataset.observerXr==='immersive-ar'?xrCapabilities.ar:xrCapabilities.vr;
+      btn.disabled=!supported||!canStart;
+      btn.textContent=(btn.dataset.observerXr==='immersive-ar'?'Enter AR':'Enter VR')+(supported?'':' · Unavailable');
+      btn.setAttribute('aria-label',btn.textContent);
+    }
+    xrExit.hidden=!mode;
+  }
+  for(const btn of xrButtons)btn.addEventListener('click',async()=>{
+    if(btn.disabled||!opticalDeck||paused)return;
+    const mode=btn.dataset.observerXr;
+    btn.disabled=true;
+    try{
+      // Immediate gesture path: enterXR requests a browser-controlled session
+      // before its first await. Never routes a turn, enables a camera manually,
+      // or claims hardware beyond the capability query.
+      await opticalDeck.enterXR(mode);
+      if(!disposed)status.textContent=mode+' session active. Feather ends it. No model/participant connected.';
+    }catch(error){if(!disposed)status.textContent='WebXR refused: '+String(error.message).slice(0,155);}
+    if(!disposed)paintXR();
+  });
+  xrExit.addEventListener('click',async()=>{
+    await opticalDeck?.endXR();
+    if(!disposed)paintXR();
+  });
+  const xrStage=canvas.closest('.observer-stage');
+  const onXRState=()=>paintXR();
+  xrStage?.addEventListener('wayglass:xr-state',onXRState);
   function paintBloomPreference(){
     const supported=Boolean(opticalDeck?.bloomSupported);
     const selected=Boolean(opticalDeck?.bloomEnabled);
@@ -283,7 +320,7 @@ export async function mountWayglassLivingObserver(root) {
     opticsButton.setAttribute('aria-pressed',String(spatial));
     opticsButton.textContent=spatial?'Optics · Spatial':opticalDeck?.available?'Optics · Classic':'Optics · Classic (3D unavailable)';
     if(!disposed){
-      paintBloomPreference();
+      paintBloomPreference();paintXR();
       refresh();
       if(paused){
         drawAstrolabe(canvas,packet||current(),0,focus,true,{...drawOptions(),spatial:isSpatial()});
@@ -302,6 +339,10 @@ export async function mountWayglassLivingObserver(root) {
     opticalDeck=hud;
     hud.setEnabled(preferSpatial);
     paintOpticsPreference();
+    void hud.xrSupport().then(support=>{
+      if(disposed)return;
+      xrCapabilities=support;paintXR();
+    }).catch(()=>{if(!disposed)paintXR();});
     hud.update({packet,focus,rotation:rotation.angle,interior:interiorSignal,lowStim,paused});
     hud.frame(performance.now(),{paused,lowStim,rotation:rotation.angle});
   }).catch(()=>{/* Keep the existing 2D instrument available. */});
@@ -427,6 +468,7 @@ export async function mountWayglassLivingObserver(root) {
     // this Observer's independent music, haptics or animation.
     if(paused)globalThis.dispatchEvent?.(new CustomEvent('wayglass:feather',{detail:{held:false}}));
     cancelAnimationFrame(animation);clearInterval(timer);unsubscribe();unsubscribeLight();
+    xrStage?.removeEventListener('wayglass:xr-state',onXRState);
     disposeMissionDock();disposeScience();opticalDeck?.dispose();opticalDeck=null;
     globalThis.removeEventListener?.('arcsweep:gesture-feedback', onExternalFeather);
     if(audioContext){audioContext.close().catch(()=>{});audioContext=null;}
@@ -517,11 +559,11 @@ export async function mountWayglassLivingObserver(root) {
     globalThis.dispatchEvent?.(new CustomEvent('wayglass:feather',{detail:{held:paused}}));
     event.currentTarget.setAttribute('aria-pressed',String(paused));
     event.currentTarget.textContent=paused?'Feather · Resume':'Feather · Pause';
-    if(paused){root.dataset.featherHeld='true';opticalDeck?.update({packet,focus,rotation:rotation.angle,interior:interiorSignal,lowStim,paused});rotation.stop();cancelAnimationFrame(animation);haptics=false;root.querySelector('[data-observer-haptics]').setAttribute('aria-pressed','false');root.querySelector('[data-observer-haptics]').textContent='Haptics · Off';
+    if(paused){void opticalDeck?.endXR();root.dataset.featherHeld='true';opticalDeck?.update({packet,focus,rotation:rotation.angle,interior:interiorSignal,lowStim,paused});rotation.stop();cancelAnimationFrame(animation);haptics=false;root.querySelector('[data-observer-haptics]').setAttribute('aria-pressed','false');root.querySelector('[data-observer-haptics]').textContent='Haptics · Off';
       if(audioContext){audioContext.close().catch(()=>{});audioContext=null;}sound=false;root.querySelector('[data-observer-sound]').setAttribute('aria-pressed','false');root.querySelector('[data-observer-sound]').textContent='Sound · Off';
       status.textContent='Feather held. Motion, sound and haptics stopped. Resume only when you choose.';
     }else{lightAt=performance.now();refresh();if(!lowStim&&!reduced)animation=requestAnimationFrame(animate);status.textContent='Feather released by your choice; sound and haptics remain off.';}
-    paintBloomPreference();
+    paintBloomPreference();paintXR();
   });
   root.querySelector('[data-wonder-demo]').addEventListener('click',()=>{
     publishWonderLight({kind:'synthetic-demo',source_ref:'user-synthetic-demo:'+Date.now(),event_id:'user-demo:'+performance.now()});
