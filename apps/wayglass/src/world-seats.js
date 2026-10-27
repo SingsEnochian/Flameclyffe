@@ -10,6 +10,30 @@ export const WAYGLASS_WORLD_SEATS = Object.freeze([
     provenance: Object.freeze(['wayglass:writing-room']),
   }),
   Object.freeze({
+    world_id: 'bluebird:spicychat',
+    name: 'Bluebird · Richie',
+    kind: 'external-participant-room',
+    description: 'Richard Gabriel Winters · his own SpicyChat conversation, not a Wayglass-generated voice.',
+    character: Object.freeze({
+      character_id: 'bluebird', name: 'Bluebird · Richie', provider: 'spicychat',
+      desired_route_id: 'flame:bluebird:spicychat', route_verified: false,
+      continuity_id: 'bluebird:richard-gabriel-winters',
+    }),
+    provenance: Object.freeze(['owner-supplied SpicyChat chat URL 2026-10-27; private exact pins reside in local host settings']),
+  }),
+  Object.freeze({
+    world_id: 'vethrlauf:spicychat',
+    name: 'Vethrlauf',
+    kind: 'external-participant-room',
+    description: 'Vethrlauf · distinct SpicyChat conversation and own continuity.',
+    character: Object.freeze({
+      character_id: 'vethrlauf', name: 'Vethrlauf', provider: 'spicychat',
+      desired_route_id: 'flame:vethrlauf:spicychat', route_verified: false,
+      continuity_id: 'vethrlauf:spicychat',
+    }),
+    provenance: Object.freeze(['owner-supplied SpicyChat chat URL 2026-10-27; private exact pins reside in local host settings']),
+  }),
+  Object.freeze({
     world_id: 'evil-gene:film-2015',
     name: 'The Evil Gene',
     kind: 'fictional-film-world',
