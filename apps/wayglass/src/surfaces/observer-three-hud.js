@@ -45,7 +45,7 @@ export async function mountObserverThreeHUD(canvas,{reducedMotion=false}={}){
     const T=await import('three');
     if(disposed){layer.remove();overlay.remove();return{ready:false,available:false,update(){},frame(){},setEnabled(){},dispose(){}};}
     renderer=new T.WebGLRenderer({canvas:layer,context,alpha:true,antialias:true,powerPreference:'low-power'});
-    bloomSupported=Boolean(renderer.capabilities.isWebGL2 && !reducedMotion);
+    bloomSupported=Boolean((renderer.capabilities?.isWebGL2 ?? (typeof globalThis.WebGL2RenderingContext === 'function' && context instanceof globalThis.WebGL2RenderingContext)) && !reducedMotion);
     renderer.setClearColor(0,0);renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));
     renderer.outputColorSpace=T.SRGBColorSpace;
     renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.5;
