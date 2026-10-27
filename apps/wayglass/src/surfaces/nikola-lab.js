@@ -99,7 +99,7 @@ export async function mountNikolaResearchSurface(root) {
       if (!disposed) { trialRun.disabled = false; trialStop.disabled = true; }
     }
   }
-  const stopTrial = () => { trialController?.abort(); trialStatus.textContent = 'Feather stop requested. Cancelling the active local request.'; };
+  const stopTrial = () => { trialController?.abort(); trialStatus.textContent = 'Feather stop: browser request aborted; server-side model cancellation is not yet verified.'; };
   trialRun.addEventListener('click', runLocalTrial);
   trialStop.addEventListener('click', stopTrial);
 
