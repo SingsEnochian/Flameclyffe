@@ -378,3 +378,104 @@ body {
   .wg-voyage-inbox:not([open]){padding:.55rem .75rem;min-width:0;}
   .wg-voyage-inbox[open]{width:min(24rem,calc(100vw - 1.1rem));max-height:60vh;}
 }
+
+
+/* N-015: one continuous hull, visible focus, quieter motion.
+   Pointer parallax is inherited from Wayglass's own Motion Choreography,
+   not from a second global animation loop. */
+.wg-surface[data-deck-system="n013"] {
+  --ship-film:linear-gradient(132deg,rgba(222,255,247,.049),transparent 24%,transparent 69%,rgba(196,239,244,.029));
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-deck {
+  position:relative;
+  border-radius:19px;
+  box-shadow:0 15px 45px rgba(0,0,0,.36),
+    inset 0 1px 0 rgba(223,255,245,.21),
+    inset 0 0 0 5px rgba(4,21,33,.54);
+  background:
+    var(--ship-film),
+    radial-gradient(ellipse at 12% 0,rgba(89,210,198,.16),transparent 38%),
+    linear-gradient(180deg,rgba(17,45,59,.98),rgba(5,15,30,.98));
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-deck::after{
+  content:"";
+  position:absolute;pointer-events:none;z-index:0;
+  left:17px;right:17px;bottom:2px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(118,226,213,.36),transparent);
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-deck > * {position:relative;z-index:1}
+.wg-surface[data-deck-system="n013"] .wg-ship-mark{
+  font-size:.78rem;letter-spacing:.18em;
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-link{
+  position:relative;isolation:isolate;
+  transition:background-color 160ms ease,border-color 160ms ease,box-shadow 160ms ease,transform 160ms ease;
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-link:hover{
+  transform:translateY(-1px);
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-link[aria-current="page"]{
+  outline:0;
+  border-color:rgba(137,247,223,.89);
+  box-shadow:inset 0 1px rgba(245,255,248,.27),0 0 20px rgba(64,220,219,.18);
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-link[aria-current="page"]::after{
+  content:"";position:absolute;bottom:-1px;left:22%;right:22%;height:2px;
+  border-radius:1px;background:#b3ffed;box-shadow:0 0 9px rgba(152,255,241,.45);
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-crew[open] .wg-ship-crew-menu{
+  animation:wgCrewEntry 160ms cubic-bezier(.25,.7,.35,1) both;
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-crew-menu{
+  box-shadow:inset 0 1px rgba(223,255,246,.17),0 16px 45px rgba(0,0,0,.52);
+  backdrop-filter:blur(18px);
+}
+.wg-surface[data-deck-system="n013"] .wg-surface-head{
+  background:
+    radial-gradient(ellipse at var(--wg-pointer-x,75%) 9%,rgba(78,175,175,.115),transparent 36%),
+    var(--ship-film),
+    linear-gradient(140deg,#071c28,#061626 76%,#161827);
+}
+.wg-surface[data-deck-system="n013"] :is(
+  .wg-world-gate,.wg-constellation-strip,.wg-session-sidebar,
+  .wg-science-station,.observer-dream,.observer-wonder
+){
+  border:1px solid rgba(150,222,215,.3);
+  box-shadow:inset 0 1px rgba(220,255,244,.13),0 16px 48px rgba(0,0,0,.21);
+}
+.wg-surface[data-deck-system="n013"] :is(
+  .wg-session-sidebar,.wg-world-gate,.wg-science-station,.observer-console
+) :is(h2,h3) {
+  text-wrap:balance;
+}
+.wg-surface[data-deck-system="n013"] :is(.wg-writing-main,.wg-session-sidebar,.wg-science-station) {
+  min-width:0;
+}
+.wg-surface[data-deck-system="n013"] .wg-science-tabs{
+  position:relative;overflow-x:auto;
+  scrollbar-width:thin;scrollbar-color:rgba(131,231,208,.44) transparent;
+}
+.wg-surface[data-deck-system="n013"] .wg-science-tabs button{
+  font-size:clamp(.75rem,.78vw,.9rem);
+  min-height:42px;
+}
+.wg-surface[data-deck-system="n013"] :is(button,summary):active:not(:disabled){
+  transform:translateY(1px);
+}
+.wg-surface[data-deck-system="n013"] :is(button,summary):focus-visible{
+  outline:2px solid #c3fff0!important;outline-offset:3px!important;
+  box-shadow:0 0 0 5px rgba(18,86,89,.49);
+}
+@keyframes wgCrewEntry {
+  from{opacity:0;transform:translateY(-6px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@media(prefers-reduced-motion:reduce){
+  .wg-surface[data-deck-system="n013"] .wg-ship-crew[open] .wg-ship-crew-menu{animation:none}
+  .wg-surface[data-deck-system="n013"] .wg-ship-link{transition:none}
+  .wg-surface[data-deck-system="n013"] .wg-ship-link:hover{transform:none}
+}
+.wg-surface[data-low-stim="true"] .wg-ship-crew[open] .wg-ship-crew-menu,
+.wg-surface[data-feather-held="true"] .wg-ship-crew[open] .wg-ship-crew-menu{
+  animation:none!important;
+}
