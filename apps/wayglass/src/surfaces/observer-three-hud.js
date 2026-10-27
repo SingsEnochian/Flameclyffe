@@ -10,6 +10,7 @@ export async function mountObserverThreeHUD(canvas,{reducedMotion=false}={}){
   overlay.innerHTML=[
     '<div class="wg-hud-rail wg-hud-top"><span>WG / OPTICAL DECK <b data-hud-quality>INITIALISING</b></span><span>RENDER 3D <b>LOCAL</b></span></div>',
     '<div class="wg-hud-crosshair" aria-hidden="true"><i></i></div>',
+    '<div class="wg-hud-identity" aria-hidden="true"><strong>WAYGLASS</strong><small data-hud-phase>OBSERVING</small></div>',
     '<div class="wg-hud-vertical wg-hud-vertical-left" aria-hidden="true"></div>',
     '<div class="wg-hud-vertical wg-hud-vertical-right" aria-hidden="true"></div>',
     '<div class="wg-hud-rail wg-hud-bottom"><span>CHANNEL <strong data-hud-focus>TIME</strong></span><span>FIELD <strong data-hud-field>0.00</strong></span><span>PROVENANCE <strong>LOCAL</strong></span></div>',
@@ -19,23 +20,65 @@ export async function mountObserverThreeHUD(canvas,{reducedMotion=false}={}){
   const quality=overlay.querySelector('[data-hud-quality]');
   const focusNode=overlay.querySelector('[data-hud-focus]');
   const fieldNode=overlay.querySelector('[data-hud-field]');
-  let renderer=null,scene=null,camera=null,group=null,inner=null,shell=null,torii=[],active=false,disposed=false,last=0;
+  const phaseNode=overlay.querySelector('[data-hud-phase]');
+  let renderer=null,scene=null,camera=null,group=null,inner=null,shell=null,torii=[],active=false,disposed=false,enabled=true,last=0,envTarget=null;
   const layer=document.createElement('canvas');
   layer.className='wg-spatial-three-canvas';
   layer.setAttribute('aria-hidden','true');
   stage.insertBefore(layer,canvas);
-  const mode=label=>{quality.textContent=label;stage.dataset.opticalMode=label.startsWith('WEBGL')?'three':'fallback';};
+  const mode=label=>{
+    quality.textContent=label;
+    stage.dataset.opticalMode=label.startsWith('WEBGL')?'three':label.startsWith('CLASSIC')?'classic':'fallback';
+  };
+  const setEnabled=value=>{
+    if(disposed)return;
+    enabled=Boolean(value);
+    mode(!active?'CANVAS FALLBACK':enabled?'WEBGL · THREE.JS':'CLASSIC · 2D');
+    if(active&&enabled)renderer?.render(scene,camera);
+  };
   try{
     const context=layer.getContext('webgl2',{alpha:true,antialias:true,powerPreference:'low-power'})
       ||layer.getContext('webgl',{alpha:true,antialias:true,powerPreference:'low-power'});
     if(!context)throw Error('WebGL unavailable');
     const T=await import('three');
-    if(disposed)return{ready:false,update(){},frame(){},dispose(){}};
+    if(disposed){layer.remove();overlay.remove();return{ready:false,available:false,update(){},frame(){},setEnabled(){},dispose(){}};}
     renderer=new T.WebGLRenderer({canvas:layer,context,alpha:true,antialias:true,powerPreference:'low-power'});
     renderer.setClearColor(0,0);renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));
     renderer.outputColorSpace=T.SRGBColorSpace;
     renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.5;
     scene=new T.Scene();camera=new T.PerspectiveCamera(36,1,.1,60);
+    // Procedural equirectangular studio light, convolved into an environment map.
+    // Specular highlights now depend on surface normals instead of emissive paint.
+    // Texture is entirely local, authored at runtime, no CDN or telemetry.
+    try{
+      const studio=document.createElement('canvas');studio.width=512;studio.height=256;
+      const c=studio.getContext('2d');
+      if(c){
+        const background=c.createLinearGradient(0,0,0,256);
+        background.addColorStop(0,'#536d7f');background.addColorStop(.4,'#081521');
+        background.addColorStop(.75,'#152839');background.addColorStop(1,'#574332');
+        c.fillStyle=background;c.fillRect(0,0,512,256);
+        for(const [x,y,w,h,color] of [
+          [52,65,36,125,'rgba(220,255,247,.94)'],
+          [126,25,10,155,'rgba(142,226,255,.85)'],
+          [318,68,62,92,'rgba(255,223,172,.84)'],
+          [447,24,18,130,'rgba(176,232,255,.85)'],
+        ]){
+          const strip=c.createLinearGradient(x,0,x+w,0);
+          strip.addColorStop(0,'rgba(255,255,255,0)');
+          strip.addColorStop(.28,color);strip.addColorStop(.7,color);
+          strip.addColorStop(1,'rgba(255,255,255,0)');
+          c.fillStyle=strip;c.fillRect(x,y,w,h);
+        }
+        const map=new T.CanvasTexture(studio);
+        map.mapping=T.EquirectangularReflectionMapping;
+        map.colorSpace=T.SRGBColorSpace;
+        const pmrem=new T.PMREMGenerator(renderer);
+        envTarget=pmrem.fromEquirectangular(map);
+        pmrem.dispose();map.dispose();
+        scene.environment=envTarget.texture;
+      }
+    }catch{envTarget?.dispose();envTarget=null;}
     camera.position.set(0,0,12);camera.lookAt(0,0,0);
     scene.add(new T.AmbientLight(0x93bfd4,1.5));
     const cyan=new T.PointLight(0x60f5e7,26,19);cyan.position.set(-3,3,4);scene.add(cyan);
@@ -81,7 +124,10 @@ export async function mountObserverThreeHUD(canvas,{reducedMotion=false}={}){
     };
     const observer=new ResizeObserver(resize);observer.observe(layer);layer.__wayglassResize=observer;
     resize();renderer.render(scene,camera);active=true;mode('WEBGL · THREE.JS');
-    layer.addEventListener('webglcontextlost',event=>{event.preventDefault();active=false;mode('CANVAS FALLBACK');},{once:true});
+    layer.addEventListener('webglcontextlost',event=>{
+      event.preventDefault();active=false;mode('CANVAS FALLBACK');
+      stage.dispatchEvent(new CustomEvent('wayglass:optics-change'));
+    },{once:true});
   }catch{active=false;mode('CANVAS FALLBACK');}
   function update({packet,focus='time',rotation=0,interior=null,lowStim=false,paused=false}={}){
     if(disposed)return;
@@ -89,15 +135,16 @@ export async function mountObserverThreeHUD(canvas,{reducedMotion=false}={}){
     const vars=packet?.projection?.variables||{};
     const strength=clamp(vars.Q??vars.P??0),energy=clamp(interior?.energy??0);
     fieldNode.textContent=strength.toFixed(2);
+    phaseNode.textContent=String(interior?.phase||'observing').toUpperCase();
     stage.dataset.hudPaused=String(Boolean(paused));
-    if(!active||!inner)return;
+    if(!active||!enabled||!inner)return;
     inner.scale.setScalar(.84+energy*.18+strength*.14);
     inner.material.emissiveIntensity=.16+energy*.40;
     group.rotation.z=rotation*.16;
     if(paused||lowStim||reducedMotion)renderer.render(scene,camera);
   }
   function frame(time,{paused=false,lowStim=false,rotation=0}={}){
-    if(!active||disposed||!renderer||paused)return;
+    if(!active||!enabled||disposed||!renderer||paused)return;
     if(lowStim||reducedMotion){renderer.render(scene,camera);return;}
     if(time-last<28)return;last=time;
     const t=time*.00013;
@@ -112,7 +159,7 @@ export async function mountObserverThreeHUD(canvas,{reducedMotion=false}={}){
     scene?.traverse(obj=>{obj.geometry?.dispose?.();
       if(Array.isArray(obj.material))obj.material.forEach(m=>m.dispose?.());
       else obj.material?.dispose?.();});
-    renderer?.dispose();layer.remove();overlay.remove();
+    envTarget?.dispose();renderer?.dispose();layer.remove();overlay.remove();
   }
-  return{get ready(){return active;},update,frame,dispose};
+  return{get ready(){return active&&enabled;},get available(){return active;},setEnabled,update,frame,dispose};
 }
