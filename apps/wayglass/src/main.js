@@ -1,5 +1,7 @@
 import './styles.css';
 import './authorization.css';
+import './ship-wide-hud.css';
+import { installShipDeck } from './ship-deck.js';
 import { openWayglassAuthorization } from './authorization.js';
 import { installWayglassField } from './glass-field.js';
 import { installMotionChoreography } from './motion-choreography.js';
@@ -105,7 +107,11 @@ const wayglass = Object.freeze({
   schema: 'wayglass.os/v0.1',
   surfaces: listWayglassSurfaces,
   organs: listWayglassOrgans,
-  mount: (surfaceId) => mountWayglassSurface(surfaceId, root),
+  mount: async(surfaceId)=>{
+    const result=await mountWayglassSurface(surfaceId,root);
+    installShipDeck(root,surfaceId,(target)=>wayglass.mount(target));
+    return result;
+  },
   authorizeBluebird: () => openWayglassAuthorization(),
   enter: ({ embodiment: entryEmbodiment = {}, ...entry } = {}) => enterWayglassWorld({
     ...entry,
