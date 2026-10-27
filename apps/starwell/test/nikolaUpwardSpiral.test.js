@@ -87,12 +87,12 @@ test('replay rejects forged observations, changed physics, and rewritten receipt
  await assert.rejects(advanceNikolaSpiral(forged,{measurement:measurement('mass',3),source:source('mass-b')}),/fingerprint mismatch/);
 });
 
-test('bounded recursion is explicit and capped at 12 rounds',async()=>{
+test('bounded recursion is explicit and capped at 27 rounds',async()=>{
  let s=await start();
- for(let i=0;i<12;i++) s=await advanceNikolaSpiral(s,{
+ for(let i=0;i<27;i++) s=await advanceNikolaSpiral(s,{
    measurement:measurement('mass',3+i/100),source:source('source-'+i)});
- assert.equal(s.rounds.length,12);
- await assert.rejects(advanceNikolaSpiral(s,{measurement:measurement('mass',5),source:source('source-13')}),/cycle limit/);
+ assert.equal(s.rounds.length,27);
+ await assert.rejects(advanceNikolaSpiral(s,{measurement:measurement('mass',5),source:source('source-28')}),/cycle limit/);
 });
 
 function component(value,derivative=0){

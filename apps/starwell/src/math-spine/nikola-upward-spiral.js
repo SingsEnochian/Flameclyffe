@@ -12,7 +12,7 @@ import {
 
 export const NIKOLA_SPIRAL_SCHEMA = 'wayglass.nikola-invariant-spiral/v1';
 export const NIKOLA_SPIRAL_RECEIPT_SCHEMA = 'wayglass.nikola-spiral-receipt/v1';
-const MAX_CYCLES = 12;
+export const NIKOLA_SPIRAL_MAX_CYCLES = 27;
 const SOURCE_ID = /^[A-Za-z0-9:./_-]{1,128}$/;
 const BASELINE = Object.freeze({ stiffness: 'N/m', mass: 'kg' });
 
@@ -149,7 +149,7 @@ async function fresh(origin) {
   return freeze(packet);
 }
 async function apply(state,{measurement,source}) {
-  requireThat(state.rounds.length<MAX_CYCLES,'cycle limit reached');
+  requireThat(state.rounds.length<NIKOLA_SPIRAL_MAX_CYCLES,'cycle limit reached');
   const obs=measurementOf(measurement),origin=sourceOf(source);
   const families=[state.origin.source.family,...state.rounds.filter(r=>r.status==='admitted').map(r=>r.source.family)];
   const status=families.includes(origin.family)?'held-shared-source-origin':'admitted';
@@ -170,7 +170,7 @@ export async function createNikolaSpiral({baseline,frequencyRatio,source}) {
 
 export async function replayNikolaSpiral(input) {
   requireThat(input?.schema===NIKOLA_SPIRAL_SCHEMA && Array.isArray(input.rounds) &&
-    input.rounds.length<=MAX_CYCLES,'unsupported or oversized packet');
+    input.rounds.length<=NIKOLA_SPIRAL_MAX_CYCLES,'unsupported or oversized packet');
   const state=await fresh(originOf({
     baseline:input.origin?.baseline,frequencyRatio:input.origin?.frequency_ratio,source:input.origin?.source}));
   let cursor=state;
