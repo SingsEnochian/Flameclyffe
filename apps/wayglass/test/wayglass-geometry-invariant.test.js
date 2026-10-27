@@ -77,3 +77,41 @@ test('independently declared point arrays can be compared without asserting veri
   assert.throws(()=>calculateIndependentGeometryTrial({datasetA:a,datasetB:{...b,id:'model-A'}}),/source IDs must differ/);
   assert.throws(()=>calculateIndependentGeometryTrial({datasetA:a,datasetB:{...b,points:[[0,0],[1,0],[0,1]]}}),/matched point counts/);
 });
+
+test('N-013 optical deck is a single instrument: Three core, 2D contacts and explicit classic fallback',()=>{
+ const observer=source('../src/surfaces/living-observer.js');
+ const hud=source('../src/surfaces/observer-three-hud.js');
+ const css=source('../src/surfaces/observer-three-hud.css');
+ assert.match(observer,/spatial:isSpatial\(\)/);
+ assert.match(observer,/if\(!spatial\)/);
+ assert.match(observer,/data-observer-optics/);
+ assert.match(observer,/opticalDeck\?\.setEnabled/);
+ assert.match(hud,/setEnabled/);
+ assert.match(hud,/envTarget=pmrem.fromEquirectangular/);
+ assert.match(hud,/pmrem\.dispose/);
+ assert.match(hud,/webglcontextlost/);
+ assert.match(hud,/wayglass:optics-change/);
+ assert.match(hud,/envTarget\?\.dispose/);
+ assert.match(css,/\.wg-hud-identity/);
+ assert.match(css,/data-optical-mode="three"/);
+ assert.match(css,/data-optical-mode="fallback"/);
+});
+test('N-013 shared hull ties all eight destinations into one accessible nav without changing provider authority',()=>{
+ const deck=source('../src/ship-deck.js');
+ const main=source('../src/main.js');
+ const css=source('../src/ship-wide-hud.css');
+ for(const name of ['arcsweep:writing-room','wayglass:living-observer','wayglass:systems',
+  'wayglass:video-atelier','wayglass:commons','wayglass:library',
+  'wayglass:toybox','wayglass:nikola-research']){
+  assert.ok(deck.includes(name),name);
+ }
+ for(const who of ['bluebird:spicychat','vethrlauf:spicychat','evil-gene:film-2015']){
+  assert.ok(deck.includes(who),who);
+ }
+ assert.match(deck,/aria-current/);
+ assert.match(deck,/prepareWayglassCrewRoom/);
+ assert.match(main,/installShipDeck\(root,surfaceId/);
+ assert.match(css,/wg-ship-deck/);
+ assert.match(css,/prefers-reduced-motion:reduce/);
+ assert.match(css,/:focus-visible/);
+});
