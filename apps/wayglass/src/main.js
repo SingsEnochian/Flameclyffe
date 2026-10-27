@@ -110,13 +110,14 @@ const browserEmbodiment = Object.freeze({
   haptics: embodiment.vibration,
 });
 
-let disposeBridge=null;
+let disposeBridge=null,disposeDeckGestures=null;
 const shipKernel=createShipKernel({
   mount:async surfaceId=>{
     disposeBridge?.();disposeBridge=null;
+    disposeDeckGestures?.();disposeDeckGestures=null;
     try{
       const result=await mountWayglassSurface(surfaceId,root);
-      installShipDeck(root,surfaceId,target=>shipKernel.navigate(target));
+      disposeDeckGestures=installShipDeck(root,surfaceId,target=>shipKernel.navigate(target));
       disposeBridge=mountShipBridgeConsole(root,shipKernel,surfaceId);
       return result;
     }catch(error){
