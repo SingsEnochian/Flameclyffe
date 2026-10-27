@@ -18,7 +18,7 @@ const TAU = Math.PI * 2;
 const COLOURS = ['#95fff2','#bca3ff','#e8cc8b','#8fa4fb','#82d4ce','#ec9ecd','#cfebe9','#d6c4ff'];
 const channelDescriptions = Object.fromEntries(OBSERVER_CHANNELS.map(([id,label,text])=>[id,{label,text}]));
 
-function drawAstrolabe(canvas, packet, time, focus, lowStim, {rotation = 0, lens = null, interior = null, light = null, lightAge = 0} = {}) {
+function drawAstrolabe(canvas, packet, time, focus, lowStim, {rotation = 0, lens = null, interior = null, light = null, lightAge = 0, spatial = false} = {}) {
   const context = canvas.getContext('2d');
   if (!context) return;
   const g = context, w = canvas.width, h = canvas.height, cx=w/2, cy=h/2;
@@ -35,6 +35,10 @@ function drawAstrolabe(canvas, packet, time, focus, lowStim, {rotation = 0, lens
   // The lens is optically displaced by the actual pointer, not a rotating flat texture.
   const lensX = lens?.x ?? cx, lensY = lens?.y ?? cy;
   const parallaxX = (lensX-cx)*.012, parallaxY = (lensY-cy)*.012;
+  // Keep 2D contact points and labels in spatial mode, but let the Three.js scene
+  // own the core, concentric shells, background glow and moving orbital rings.
+  // This prevents two complete instruments occupying the same optical depth.
+  if(!spatial){
   const well = g.createRadialGradient(lensX,lensY,3,lensX,lensY,220);
   well.addColorStop(0,'rgba(190,244,247,.13)');
   well.addColorStop(.25,'rgba(111,215,224,.08)');
@@ -66,20 +70,24 @@ function drawAstrolabe(canvas, packet, time, focus, lowStim, {rotation = 0, lens
       g.fillRect(x-1,y-1,2,2);g.globalAlpha=1;
     }
   }
+  }
   const nodes=observerNodes(OBSERVER_CHANNELS.map(([id])=>id),rotation).map(node=>({ ...node, ang:node.angle }));
   const selected=nodes.find(n=>n.id===focus)||nodes[0];
   // Connections are architectural pathways, not claims that external readings are causally coupled.
   nodes.forEach((node,i)=>{
-    const end=nodes[(i+3)%nodes.length];
-    const a=.07+v.C*.2+(node.id===focus?.21:0);
-    g.strokeStyle='#9bdbdc';g.globalAlpha=a;g.lineWidth=node.id===focus?2:1;
-    g.beginPath();g.moveTo(node.x,node.y);g.quadraticCurveTo(cx,cy,end.x,end.y);g.stroke();g.globalAlpha=1;
+    if(!spatial){
+      const end=nodes[(i+3)%nodes.length];
+      const a=.07+v.C*.2+(node.id===focus?.21:0);
+      g.strokeStyle='#9bdbdc';g.globalAlpha=a;g.lineWidth=node.id===focus?2:1;
+      g.beginPath();g.moveTo(node.x,node.y);g.quadraticCurveTo(cx,cy,end.x,end.y);g.stroke();g.globalAlpha=1;
+    }
     g.beginPath();g.arc(node.x,node.y,node.id===focus?11:6.2,0,TAU);
     g.fillStyle=COLOURS[i];g.shadowColor=COLOURS[i];g.shadowBlur=node.id===focus?28:10;
     g.fill();g.shadowBlur=0;
     g.textAlign='center';g.textBaseline='middle';
     g.font='600 18px system-ui';g.fillStyle='#d6e5f3';g.fillText(OBSERVER_CHANNELS[i][1],node.x+Math.cos(node.ang)*26,node.y+Math.sin(node.ang)*22);
   });
+  if(!spatial){
   const routeLength=Math.min(1,Math.max(0,v.M));
   for(let i=0;i<Math.round(9+v.P*18);i++){
     const angle=i*2.39996+t*(.6+v.R)+Math.sin(i*6.1)*.11;
@@ -145,6 +153,8 @@ function drawAstrolabe(canvas, packet, time, focus, lowStim, {rotation = 0, lens
   g.ellipse(cx+parallaxX*.5,cy+parallaxY*.5,outer+42,outer+35,rotation*.08,0,TAU);
   g.strokeStyle='#b1ffff';g.globalAlpha=.06+v.Q*.07;g.lineWidth=9;g.stroke();
   g.globalAlpha=1;
+  }
+  // Source-grounded light receipts remain visible in either optical mode.
   drawWonderLight(g,light,lightAge,{reducedMotion:packet.direct.prefers_reduced_motion,lowStim,width:w,height:h,lens});
 }
 function formatClock(value) {
@@ -180,7 +190,9 @@ export async function mountWayglassLivingObserver(root) {
     '<div class="glass-panel observer-stage"><canvas width="820" height="820" role="img" aria-label="Living astrolabe mapping observed application readings to geometric rings, nodes, and pulses. Select a reading using the buttons below."></canvas>',
     '<div class="observer-inputs" role="group" aria-label="Direct-reading channels">',
     OBSERVER_CHANNELS.map(([id,label])=>'<button type="button" class="observer-input" data-observer-focus="'+id+'" aria-pressed="'+(id===focus)+'">'+label+'</button>').join(''),
-    '</div></div>',
+    '</div><div class="wg-optics-tools" role="group" aria-label="Optical rendering preference">',
+    '<button type="button" class="glass-chip" data-observer-optics aria-pressed="true">Optics · Spatial</button>',
+    '<span>Two views, one instrument · 2D controls always remain active</span></div></div>',
     '<div class="observer-console glass-panel">',
     '<p class="eyebrow">Direct readings → translation → glass</p>',
     '<h2 data-observer-title>Time</h2><p data-observer-description></p>',
@@ -234,10 +246,25 @@ export async function mountWayglassLivingObserver(root) {
     root.querySelector('[data-wg-science-host]')?.scrollIntoView({block:'start',behavior:'auto'});
   });
   const canvas=root.querySelector('canvas');
-  let opticalDeck=null;
+  let opticalDeck=null,preferSpatial=true;
+  const opticsButton=root.querySelector('[data-observer-optics]');
+  const isSpatial=()=>Boolean(opticalDeck?.ready && preferSpatial);
+  function paintOpticsPreference(){
+    const spatial=isSpatial();
+    opticsButton.setAttribute('aria-pressed',String(spatial));
+    opticsButton.textContent=spatial?'Optics · Spatial':opticalDeck?.available?'Optics · Classic':'Optics · Classic (3D unavailable)';
+    if(!disposed)refresh();
+  }
+  opticsButton.addEventListener('click',()=>{
+    preferSpatial=!preferSpatial;
+    opticalDeck?.setEnabled(preferSpatial);
+    paintOpticsPreference();
+  });
   void mountObserverThreeHUD(canvas,{reducedMotion:reduced}).then(hud=>{
     if(disposed){hud.dispose();return;}
     opticalDeck=hud;
+    hud.setEnabled(preferSpatial);
+    paintOpticsPreference();
     hud.update({packet,focus,rotation:rotation.angle,interior:interiorSignal,lowStim,paused});
     hud.frame(performance.now(),{paused,lowStim,rotation:rotation.angle});
   }).catch(()=>{/* Keep the existing 2D instrument available. */});
@@ -340,13 +367,13 @@ export async function mountWayglassLivingObserver(root) {
     meters.innerHTML=Object.entries(vars).map(([key,v])=>'<div class="observer-meter"><span>'+key+'</span><meter min="0" max="1" value="'+v+'" aria-label="'+key+' interface visualisation value"></meter><b>'+v.toFixed(2)+'</b></div>').join('');
     packetView.textContent=JSON.stringify(packet,null,2);
     opticalDeck?.update({packet,focus,rotation:rotation.angle,interior:interiorSignal,lowStim,paused});
-    if(!paused){drawAstrolabe(canvas,packet,performance.now(),focus,lowStim||reduced,drawOptions());opticalDeck?.frame(performance.now(),{paused,lowStim,rotation:rotation.angle});}
+    if(!paused){drawAstrolabe(canvas,packet,performance.now(),focus,lowStim||reduced,{...drawOptions(),spatial:isSpatial()});opticalDeck?.frame(performance.now(),{paused,lowStim,rotation:rotation.angle});}
   }
   function animate(time) {
     if(disposed||!canvas.isConnected){cleanup();return;}
     if(paused)return;
     rotation.settle({reducedMotion:reduced,lowStim});
-    drawAstrolabe(canvas,packet||current(),time,focus,lowStim||reduced,drawOptions());
+    drawAstrolabe(canvas,packet||current(),time,focus,lowStim||reduced,{...drawOptions(),spatial:isSpatial()});
     opticalDeck?.frame(time,{paused,lowStim,rotation:rotation.angle});
     if(!reduced&&!lowStim) animation=requestAnimationFrame(animate);
   }
@@ -379,7 +406,7 @@ export async function mountWayglassLivingObserver(root) {
     if(!channelDescriptions[id])return;
     focus=id;touches++;refresh();playNote();
     if(!paused)globalThis.dispatchEvent?.(new CustomEvent('wayglass:material-wake',{detail:{strength:.46,intent:.55}}));
-    if((lowStim||reduced)&&!paused){cancelAnimationFrame(animation);drawAstrolabe(canvas,packet,0,focus,true,drawOptions());}
+    if((lowStim||reduced)&&!paused){cancelAnimationFrame(animation);drawAstrolabe(canvas,packet,0,focus,true,{...drawOptions(),spatial:isSpatial()});}
     try{if(haptics&&!paused&&!lowStim&&!reduced&&globalThis.navigator?.vibrate)globalThis.navigator.vibrate(7);}catch{}
   }
   root.querySelectorAll('[data-observer-focus]').forEach(btn=>btn.addEventListener('click',()=>select(btn.dataset.observerFocus)));
@@ -402,7 +429,7 @@ export async function mountWayglassLivingObserver(root) {
       if(gesture.moved && !reduced && !lowStim) rotation.drag(angularDelta(gesture.point,point));
       gesture.point=point;
     }
-    if((reduced||lowStim)&&!paused) drawAstrolabe(canvas,packet||current(),0,focus,true,drawOptions());
+    if((reduced||lowStim)&&!paused) drawAstrolabe(canvas,packet||current(),0,focus,true,{...drawOptions(),spatial:isSpatial()});
   });
   canvas.addEventListener('pointerup',event=>{
     if(!gesture||gesture.id!==event.pointerId)return;
