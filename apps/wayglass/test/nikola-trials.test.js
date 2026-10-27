@@ -100,3 +100,12 @@ test('cannot use a nonfunction invoker or progress callback',async()=>{
   await assert.rejects(runNikolaLocalTrial({invoke:null}),/invoker/);
   await assert.rejects(runNikolaLocalTrial({invoke:async()=>{},onProgress:'bad'}),/progress/);
 });
+
+test('repeated trials never reuse local session identifiers', async () => {
+  const sessions = [];
+  const invoke=async args=>{sessions.push(args.sessionId); return {output:'synthetic model reply',route_id:args.routeId};};
+  const first=await runNikolaLocalTrial({invoke});
+  const second=await runNikolaLocalTrial({invoke});
+  assert.equal(first.status,'completed');assert.equal(second.status,'completed');
+  assert.equal(new Set(sessions).size,6);
+});
