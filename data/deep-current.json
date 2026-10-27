@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-10-27T07:29:30.017Z",
+  "generated_at": "2026-10-27T13:30:10.132Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,51 +13,51 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-10-27T03:15",
-    "sky": "Night",
+    "time": "2026-10-27T09:30",
+    "sky": "Day",
     "current": {
-      "time": "2026-10-27T03:15",
+      "time": "2026-10-27T09:30",
       "interval": 900,
-      "temperature_2m": 67.9,
-      "relative_humidity_2m": 76,
-      "is_day": 0,
+      "temperature_2m": 71.5,
+      "relative_humidity_2m": 88,
+      "is_day": 1,
       "precipitation": 0,
       "rain": 0,
-      "weather_code": 0,
-      "cloud_cover": 11,
-      "pressure_msl": 1019.1,
-      "wind_speed_10m": 10.7,
-      "wind_direction_10m": 30
+      "weather_code": 2,
+      "cloud_cover": 55,
+      "pressure_msl": 1020.5,
+      "wind_speed_10m": 12.7,
+      "wind_direction_10m": 19
     }
   },
   "space_weather": {
     "kp": {
-      "value": 2.67,
-      "time_tag": "2026-10-27T03:00:00",
-      "a_running": 12
+      "value": 1.33,
+      "time_tag": "2026-10-27T09:00:00",
+      "a_running": 5
     },
     "solar_wind": {
-      "time_tag": "2026-10-27T07:19:00Z",
-      "bz": 1,
-      "bt": 7,
+      "time_tag": "2026-10-27T13:19:00Z",
+      "bz": -2,
+      "bt": 5,
       "density": null,
-      "speed": 387
+      "speed": 426
     }
   },
   "moon": {
-    "age_days": 15.93,
-    "illumination": 98.5,
+    "age_days": 16.18,
+    "illumination": 97.8,
     "name": "Full Moon"
   },
   "field": {
-    "P": 0.527777777777778,
-    "C": 0.6776190476190476,
-    "R": 0.8408333333333333,
-    "E": 0.7230219780219781,
-    "M": 0.985,
-    "A": 0.7223076923076923,
+    "P": 0.6033333333333334,
+    "C": 0.4680952380952381,
+    "R": 0.9266666666666666,
+    "E": 0.7234615384615385,
+    "M": 0.978,
+    "A": 0.773076923076923,
     "Q": null,
-    "dpdt": 0.8408333333333333,
+    "dpdt": 0.9266666666666666,
     "dynamic_axes": [
       "P",
       "C",
