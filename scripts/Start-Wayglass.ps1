@@ -65,6 +65,10 @@ try {
         throw 'Staged portal missing N-016 liquid optics for Wayglass OS and LLM. Refusing stale UI.'
     }
     Write-Host '[Wayglass] N-016 liquid optical OS and LLM material/mission deck verified.'
+    if (-not (Select-String -Path $builtIndex -Pattern 'name="wayglass-ui-ship" content="n017-integrated-kernel-embodied-xr-lore-voice-quantum"' -SimpleMatch -Quiet)) {
+        throw 'Staged Wayglass is missing N-017 integrated ship runtime. Refusing stale UI.'
+    }
+    Write-Host '[Wayglass] N-017 ArcSweep ship kernel, XR, Lorebook, embodiment and quantum station verified.'
     $env:PORT = [string]$Port
     Write-Host ''
     Write-Host '[Wayglass] N-010 HEARTGATE PORTAL (local, no Vercel):'
