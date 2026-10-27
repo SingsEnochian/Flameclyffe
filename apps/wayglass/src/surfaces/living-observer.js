@@ -1,4 +1,6 @@
 import './living-observer.css';
+import './observer-three-hud.css';
+import { mountObserverThreeHUD } from './observer-three-hud.js';
 import { mountWayglassSciencePanel } from './living-observer-science.js';
 import { listWayglassSurfaces } from '../surface-registry.js';
 import { listWayglassOrgans } from '../organ-registry.js';
@@ -232,6 +234,13 @@ export async function mountWayglassLivingObserver(root) {
     root.querySelector('[data-wg-science-host]')?.scrollIntoView({block:'start',behavior:'auto'});
   });
   const canvas=root.querySelector('canvas');
+  let opticalDeck=null;
+  void mountObserverThreeHUD(canvas,{reducedMotion:reduced}).then(hud=>{
+    if(disposed){hud.dispose();return;}
+    opticalDeck=hud;
+    hud.update({packet,focus,rotation:rotation.angle,interior:interiorSignal,lowStim,paused});
+    hud.frame(performance.now(),{paused,lowStim,rotation:rotation.angle});
+  }).catch(()=>{/* Keep the existing 2D instrument available. */});
   const title=root.querySelector('[data-observer-title]'), description=root.querySelector('[data-observer-description]');
   const source=root.querySelector('[data-observer-source]'), packetView=root.querySelector('[data-observer-packet]');
   const meters=root.querySelector('[data-observer-meters]'), status=root.querySelector('[data-observer-status]');
@@ -330,13 +339,15 @@ export async function mountWayglassLivingObserver(root) {
     const vars=packet.projection.variables;
     meters.innerHTML=Object.entries(vars).map(([key,v])=>'<div class="observer-meter"><span>'+key+'</span><meter min="0" max="1" value="'+v+'" aria-label="'+key+' interface visualisation value"></meter><b>'+v.toFixed(2)+'</b></div>').join('');
     packetView.textContent=JSON.stringify(packet,null,2);
-    if(!paused)drawAstrolabe(canvas,packet,performance.now(),focus,lowStim||reduced,drawOptions());
+    opticalDeck?.update({packet,focus,rotation:rotation.angle,interior:interiorSignal,lowStim,paused});
+    if(!paused){drawAstrolabe(canvas,packet,performance.now(),focus,lowStim||reduced,drawOptions());opticalDeck?.frame(performance.now(),{paused,lowStim,rotation:rotation.angle});}
   }
   function animate(time) {
     if(disposed||!canvas.isConnected){cleanup();return;}
     if(paused)return;
     rotation.settle({reducedMotion:reduced,lowStim});
     drawAstrolabe(canvas,packet||current(),time,focus,lowStim||reduced,drawOptions());
+    opticalDeck?.frame(time,{paused,lowStim,rotation:rotation.angle});
     if(!reduced&&!lowStim) animation=requestAnimationFrame(animate);
   }
   let unsubscribe=()=>{}, unsubscribeLight=()=>{};
@@ -344,7 +355,7 @@ export async function mountWayglassLivingObserver(root) {
     if(disposed)return;
     disposed=true;
     cancelAnimationFrame(animation);clearInterval(timer);unsubscribe();unsubscribeLight();
-    disposeScience();
+    disposeScience();opticalDeck?.dispose();opticalDeck=null;
     globalThis.removeEventListener?.('arcsweep:gesture-feedback', onExternalFeather);
     if(audioContext){audioContext.close().catch(()=>{});audioContext=null;}
   }
@@ -432,7 +443,7 @@ export async function mountWayglassLivingObserver(root) {
   featherButton.addEventListener('click',event=>{
     paused=!paused;event.currentTarget.setAttribute('aria-pressed',String(paused));
     event.currentTarget.textContent=paused?'Feather · Resume':'Feather · Pause';
-    if(paused){rotation.stop();cancelAnimationFrame(animation);haptics=false;root.querySelector('[data-observer-haptics]').setAttribute('aria-pressed','false');root.querySelector('[data-observer-haptics]').textContent='Haptics · Off';
+    if(paused){opticalDeck?.update({packet,focus,rotation:rotation.angle,interior:interiorSignal,lowStim,paused});rotation.stop();cancelAnimationFrame(animation);haptics=false;root.querySelector('[data-observer-haptics]').setAttribute('aria-pressed','false');root.querySelector('[data-observer-haptics]').textContent='Haptics · Off';
       if(audioContext){audioContext.close().catch(()=>{});audioContext=null;}sound=false;root.querySelector('[data-observer-sound]').setAttribute('aria-pressed','false');root.querySelector('[data-observer-sound]').textContent='Sound · Off';
       status.textContent='Feather held. Motion, sound and haptics stopped. Resume only when you choose.';
     }else{lightAt=performance.now();refresh();if(!lowStim&&!reduced)animation=requestAnimationFrame(animate);status.textContent='Feather released by your choice; sound and haptics remain off.';}
