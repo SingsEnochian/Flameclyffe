@@ -5,6 +5,8 @@ import './liquid-optical-materials.css';
 import './ship-bridge-console.css';
 import { createShipKernel } from './ship-kernel.js';
 import { mountShipBridgeConsole } from './ship-bridge-console.js';
+import { createShipSoundDesk } from './ship-sound.js';
+import { detectEmbodiedAccess } from './embodiment-guard.js';
 import { installShipDeck } from './ship-deck.js';
 import { openWayglassAuthorization } from './authorization.js';
 import { installWayglassField } from './glass-field.js';
@@ -110,6 +112,8 @@ const browserEmbodiment = Object.freeze({
   haptics: embodiment.vibration,
 });
 
+const soundDesk=createShipSoundDesk();
+const embodiedAccess=detectEmbodiedAccess();
 let disposeBridge=null,disposeDeckGestures=null;
 const shipKernel=createShipKernel({
   mount:async surfaceId=>{
@@ -118,7 +122,7 @@ const shipKernel=createShipKernel({
     try{
       const result=await mountWayglassSurface(surfaceId,root);
       disposeDeckGestures=installShipDeck(root,surfaceId,target=>shipKernel.navigate(target));
-      disposeBridge=mountShipBridgeConsole(root,shipKernel,surfaceId);
+      disposeBridge=mountShipBridgeConsole(root,shipKernel,surfaceId,soundDesk);
       return result;
     }catch(error){
       // Failure is visible. Never silently switch worlds, retry providers,
@@ -146,6 +150,8 @@ const wayglass = Object.freeze({
   get ship(){return shipKernel.state;},
   shipHealth:()=>shipKernel.health(),
   shipTheme:name=>shipKernel.theme(name),
+  get sound(){return soundDesk.snapshot();},
+  get embodiedAccess(){return embodiedAccess;},
   authorizeBluebird: () => openWayglassAuthorization(),
   enter: ({ embodiment: entryEmbodiment = {}, ...entry } = {}) => enterWayglassWorld({
     ...entry,
