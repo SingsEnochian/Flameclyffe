@@ -20,7 +20,6 @@ on:
       - 'lib/wayglass-*'
       - 'api/_shared/wayglass-gateway.mjs'
       - 'api/v1/wayglass/**'
-      - 'vercel.json'
       - 'test/wayglass/**'
       - 'scripts/wayglass-return-trial-001.mjs'
       - 'scripts/wayglass-stepfun-smoke.mjs'
@@ -92,6 +91,7 @@ jobs:
       - name: Verify staged host
         run: test -f apps/starwell-server/public/wayglass/index.html
 
-      - run: npm run wayglass:stage:vercel
-      - name: Verify preview browser bundle
-        run: test -f dist/starwell/wayglass/index.html
+      - name: Verify N-013 staged Hearthgate optical bundle
+        run: |
+          grep -q 'n013-unified-hull-spatial-classic-inheritance-fix' apps/starwell-server/public/wayglass/index.html
+          test -f apps/starwell-server/public/wayglass/index.html
