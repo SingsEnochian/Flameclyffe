@@ -53,8 +53,8 @@ export function formatNikolaPreview(frame){
     brain:'The BRAIN compares coherent (λ=0) with dephased (λ=1).\n'+
       'P(coherent)='+pct(frame.brain.prior.coherent)+
       ', P(dephased)='+pct(frame.brain.prior.dephased)+'.\n'+
-      'Recommended next measurement: '+frame.brain.recommended_basis+
-      ' basis; expected information gain '+fmt(frame.brain.maximum_information_gain_bits)+
+      'Recommended next measurement: '+(frame.brain.recommended_basis||'none for this preparation')+
+      ' · expected information gain '+fmt(frame.brain.maximum_information_gain_bits)+
       ' bits per ideal trial.\n'+
       'Intermediate decoherence, instrumentation errors and alternative explanations remain open.',
     reflection:'PHILOSOPHY · '+frame.heart.philosophy.title+
