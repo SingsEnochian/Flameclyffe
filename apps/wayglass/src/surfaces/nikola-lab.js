@@ -29,6 +29,18 @@ export async function mountNikolaResearchSurface(root) {
         <pre id="nikola-spiral-readout" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:23rem;overflow:auto">Compression awaits an explicit click.</pre>
         <p class="tiny">Distinct from PREMAQC computational probabilities: this oscillator is a dimensional physics example. Replayed hashes validate calculation integrity, not sensor authenticity, consciousness, canon or physical Fold.</p>
       </section>
+      <section class="glass-panel" aria-label="Nikola 27-turn compression release challenge" style="padding:1rem;display:grid;gap:.7rem">
+        <h2>N-007 · UPWARD × 27 🌀</h2>
+        <p>Three arcs × nine explicitly bounded turns. Public synthetic evidence only. Every transition is replayed and fingerprinted. A contradiction remains a contradiction.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:.6rem">
+          <button type="button" class="glass-chip" id="nikola-27-run">Run 27 synthetic turns</button>
+          <button type="button" class="glass-chip" id="nikola-27-stop" disabled>Feather · Stop 27-cycle run</button>
+          <button type="button" class="glass-chip" id="nikola-27-reset">Clear trial display</button>
+        </div>
+        <p role="status" aria-live="polite" id="nikola-27-status">27-cycle experiment not invoked. No model or network calls.</p>
+        <details><summary>Inspect all replayed turn receipts</summary><pre id="nikola-27-receipts" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:24rem;overflow:auto">No synthetic results yet.</pre></details>
+        <p class="tiny">27 recorded computational steps do not certify 27 empirical discoveries. Independent source families are caller-declared; hashes prove computational integrity, not external sensor authenticity.</p>
+      </section>
       <section class="glass-panel" aria-label="Nikola local model trial" style="padding:1rem;display:grid;gap:.7rem">
         <h2>N-004 · Local model comparison</h2>
         <p>Only a public synthetic mechanics problem. Three separate fresh turns through the existing Wayglass host, with no automatic external fallback. This does not train model weights.</p>
@@ -116,8 +128,8 @@ export async function mountNikolaResearchSurface(root) {
       spiralBusy = false;
       if (!disposed) {
         n6('start').disabled = false;
-        n6('advance').disabled = !spiral || spiral.rounds.length >= 12;
-        n6('echo').disabled = !spiral || spiral.rounds.length >= 12;
+        n6('advance').disabled = !spiral || spiral.rounds.length >= 27;
+        n6('echo').disabled = !spiral || spiral.rounds.length >= 27;
       }
     }
   }
@@ -137,6 +149,71 @@ export async function mountNikolaResearchSurface(root) {
     n6(name).addEventListener('click',handler);
     spiralActions.push([name,handler]);
   }
+
+  // N-007 is a deliberately bounded local stress protocol over the N-006
+  // deterministic Math Spine instrument. It never invokes a language model.
+  let run27Controller = null;
+  let run27Busy = false;
+  let run27Version = 0;
+  const r27 = name => el('nikola-27-'+name);
+  async function start27() {
+    if (run27Busy || disposed) return;
+    const version=++run27Version;
+    run27Busy=true;
+    const controller=new AbortController();
+    run27Controller=controller;
+    r27('run').disabled=true;r27('stop').disabled=false;
+    r27('status').textContent='Verifying the fixed three-arc scientific protocol…';
+    r27('receipts').textContent='Preparing the synthetic spiral.';
+    try {
+      const {runNikola27}=await import('../../../starwell/src/math-spine/nikola-spiral-27.js');
+      if(controller.signal.aborted || disposed || version!==run27Version) return;
+      const outcome=await runNikola27({
+        signal:controller.signal,
+        onStep: mark => {
+          if(disposed || version!==run27Version) return;
+          r27('status').textContent='Cycle '+mark.cycle+'/27 · '+mark.arc+
+            ' · '+mark.status+' · replay verified';
+        },
+      });
+      if(disposed || version!==run27Version) return;
+      r27('status').textContent=outcome.status==='completed'
+        ? '27/27 replayed. '+outcome.admitted+' admitted, '+outcome.held+
+          ' shared-origin echoes held. Contradictions '+(outcome.conflicts_present?'preserved':'not observed')+'.'
+        : 'Feather stop after '+outcome.completed+
+          ' verified turns. Partial computational receipts preserved in this display.';
+      r27('receipts').textContent=JSON.stringify({
+        schema:outcome.schema,status:outcome.status,completed:outcome.completed,
+        phase:outcome.phase,admitted:outcome.admitted,held:outcome.held,
+        conflicts_present:outcome.conflicts_present,
+        epistemic_state:outcome.epistemic_state,
+        head_sha256:outcome.final_head_sha256,
+        next_question:outcome.next_question,
+        final_projection:outcome.state.projection,
+        turns:outcome.timeline,
+      },null,2);
+    } catch(error) {
+      if(!disposed && version===run27Version)
+        r27('status').textContent='27-cycle experiment failed validation. No successful run claimed: '+error.message;
+    } finally {
+      if(version===run27Version) {
+        run27Busy=false;run27Controller=null;
+        if(!disposed){r27('run').disabled=false;r27('stop').disabled=true;}
+      }
+    }
+  }
+  function stop27(){
+    run27Controller?.abort();
+    r27('status').textContent='Feather stop requested. Any completed turns remain replay-checkable.';
+  }
+  function clear27(){
+    ++run27Version;run27Controller?.abort();run27Controller=null;run27Busy=false;
+    r27('status').textContent='Trial display cleared; no synthetic receipts persisted.';
+    r27('receipts').textContent='No synthetic results yet.';
+    r27('run').disabled=false;r27('stop').disabled=true;
+  }
+  const events27=[['run',start27],['stop',stop27],['reset',clear27]];
+  events27.forEach(([name,handler])=>r27(name).addEventListener('click',handler));
 
   let trialController = null;
   let trialRunning = false;
@@ -203,5 +280,5 @@ export async function mountNikolaResearchSurface(root) {
   ];
   actions.forEach(([id, event, fn]) => el(id).addEventListener(event, fn));
   render();
-  return () => { disposed = true; spiralActions.forEach(([id,handler])=>n6(id)?.removeEventListener('click',handler)); trialController?.abort(); trialRun.removeEventListener('click', runLocalTrial); trialStop.removeEventListener('click', stopTrial); actions.forEach(([id, event, fn]) => el(id)?.removeEventListener(event, fn)); root.replaceChildren(); };
+  return () => { disposed = true; ++run27Version; run27Controller?.abort(); events27.forEach(([name,handler])=>r27(name)?.removeEventListener('click',handler)); spiralActions.forEach(([id,handler])=>n6(id)?.removeEventListener('click',handler)); trialController?.abort(); trialRun.removeEventListener('click', runLocalTrial); trialStop.removeEventListener('click', stopTrial); actions.forEach(([id, event, fn]) => el(id)?.removeEventListener(event, fn)); root.replaceChildren(); };
 }
