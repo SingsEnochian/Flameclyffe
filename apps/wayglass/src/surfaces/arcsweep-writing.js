@@ -1,5 +1,6 @@
 import { createInteractionState } from '../interaction-state.js';
 import { attachLorebookDock } from '../lorebook-dock.js';
+import { mountShipDictation } from '../ship-dictation.js';
 import { speakExplicitText } from '../ship-sound.js';
 import { authorizationSession } from '../authorization-session.js';
 import { mountWayglassRoutePicker } from '../route-picker.js';
@@ -174,6 +175,7 @@ export async function mountArcSweepWritingSurface(root) {
   root.querySelectorAll('[data-wayglass-room]').forEach(button => button.addEventListener('click', () => globalThis.__wayglassOS?.mount(button.dataset.wayglassRoom)));
 
   const disposeLorebook=attachLorebookDock(root);
+  const disposeDictation=mountShipDictation(root);
   const routePicker = mountWayglassRoutePicker(root.querySelector('#wg-route'), { onChange(value) {
     selectedRoute = value;
     externalConsent.checked = false;
@@ -682,6 +684,7 @@ export async function mountArcSweepWritingSurface(root) {
     destroy() {
       globalThis.removeEventListener?.('wayglass:command', handleWayglassCommand);
       disposeLorebook();
+      disposeDictation();
       globalThis.speechSynthesis?.cancel?.();
       routePicker.destroy();
     },
