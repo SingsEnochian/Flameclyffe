@@ -136,7 +136,11 @@ export function reasonNikolaBrain(heart,{priorCoherent=0.5}={}){
     alternatives:['partial dephasing is an unmodelled intermediate possibility',
       'state preparation/measurement error or wrong ideal assumptions remain possible'],
     candidates:candidateAxes,
-    recommended_basis:candidateAxes[0].basis,
+    recommended_basis:candidateAxes[0].expected_information_gain_bits>1e-12?
+      candidateAxes[0].basis:null,
+    identifiability:candidateAxes[0].expected_information_gain_bits>1e-12?
+      'one of X/Y/Z can conditionally discriminate the two endpoint models':
+      'these models are indistinguishable by X/Y/Z for this preparation; change the preparation or propose a new model',
     maximum_information_gain_bits:candidateAxes[0].expected_information_gain_bits,
     interpretation_boundary:'Probabilities are conditional on the two declared models. Spiritual and philosophical perspectives are NOT given fabricated posterior scores.',
     next_question:'Which basis would distinguish coherent and fully dephased models best, and what independent measurement could challenge both?',
@@ -193,6 +197,7 @@ export async function runNikolaHeartBrainTrial({
   const frame=deriveNikolaHeartBrain({p0,phaseRad,dephasing,priorCoherent,philosophy,spirituality});
   assert(basis==='auto'||MEASUREMENTS.includes(basis),'unsupported measurement basis');
   const selected=basis==='auto'?frame.brain.recommended_basis:basis;
+  assert(selected!==null,'there is no discriminating X/Y/Z measurement for the two candidate models');
   const detector=sampleQuantumBasis({p0,phaseRad,dephasing,basis:selected,shots,seed});
   const update=updateNikolaBelief(frame.brain,{
     basis:selected,plus:detector.plus,minus:detector.minus});
