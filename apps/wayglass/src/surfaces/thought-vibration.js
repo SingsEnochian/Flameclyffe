@@ -36,6 +36,8 @@ export async function mountThoughtVibrationSurface(root) {
   let latestReceipt = null;
   let latestReceiptRef = null;
   let objectUrl = null;
+  let renderController = null;
+  let renderGeneration = 0;
 
   root.innerHTML = [
     '<section class="wg-surface tv-surface" data-surface="thought-vibration">',
@@ -135,6 +137,9 @@ export async function mountThoughtVibrationSurface(root) {
   const quantumResult = root.querySelector('#tv-quantum-result');
 
   function clearRender() {
+    renderGeneration += 1;
+    renderController?.abort();
+    renderController = null;
     if (objectUrl) URL.revokeObjectURL(objectUrl);
     objectUrl = null;
     latestReceipt = null;
@@ -142,7 +147,8 @@ export async function mountThoughtVibrationSurface(root) {
     download.removeAttribute('href');
     renderResult.hidden = true;
     receiptPre.textContent = '';
-    renderStatus.textContent = 'Cleared. Offline output is not playing anywhere.';
+    renderStatus.textContent = 'Feather: pending browser render cancelled; no output is playing.';
+    renderButton.disabled = !renderIntent.checked;
   }
 
   function refreshRecipe() {
@@ -224,14 +230,19 @@ export async function mountThoughtVibrationSurface(root) {
   audioForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     if (!renderIntent.checked) return;
-    renderButton.disabled = true;
     clearRender();
+    renderButton.disabled = true;
+    const generation = renderGeneration;
+    const controller = new AbortController();
+    renderController = controller;
     renderStatus.textContent = 'Rendering deterministic diagnostic PCM…';
     try {
       const result = await renderThoughtVibrationSession({
         session: buildSession(),
         includeWave: true,
+        signal: controller.signal,
       });
+      if (generation !== renderGeneration || controller.signal.aborted) return;
       latestReceipt = result.receipt;
       latestReceiptRef = result.receipt_ref;
       const blob = base64ToBlob(result.artifact.data, result.artifact.mime_type);
@@ -249,9 +260,14 @@ export async function mountThoughtVibrationSurface(root) {
       renderResult.hidden = false;
       renderStatus.textContent = 'Rendered in memory · ' + result.artifact.bytes + ' bytes · no playback · not persisted';
     } catch (error) {
-      renderStatus.textContent = 'Render rejected · ' + error.message;
+      if (generation === renderGeneration && !controller.signal.aborted) {
+        renderStatus.textContent = 'Render rejected · ' + error.message;
+      }
     } finally {
-      renderButton.disabled = !renderIntent.checked;
+      if (generation === renderGeneration) {
+        renderController = null;
+        renderButton.disabled = !renderIntent.checked;
+      }
     }
   });
 
@@ -298,7 +314,7 @@ export async function mountThoughtVibrationSurface(root) {
     surface_id: 'thought-vibration:operator',
     lastReceipt: () => latestReceipt,
     destroy() {
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      clearRender();
     },
   });
 }
