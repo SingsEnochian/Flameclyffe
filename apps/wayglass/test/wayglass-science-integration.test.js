@@ -96,6 +96,7 @@ test('source HTML carries the revision marker required by stale-port launch guar
   assert.match(html,/name="wayglass-ui-voyage-status" content="n014-optional-host-capability-no-fake-messages"/);
   assert.match(html,/name="wayglass-ui-motion" content="n015-threejs-spline-docking-optin-bloom-feather"/);
   assert.match(html,/name="wayglass-ui-materials" content="n016-liquid-optical-os-llm-mission-dock"/);
+  assert.match(html,/name="wayglass-ui-ship" content="n017-integrated-kernel-embodied-xr-lore-voice-quantum"/);
   assert.match(launcher,/if \(existing\.responding && !existing\.current\)/);
   assert.match(launcher,/OLD or unknown Wayglass build/);
 });
@@ -113,6 +114,7 @@ test('default Windows launch enters N-010 through one-origin Hearthgate, never V
   assert.match(launcher,/n014-optional-host-capability-no-fake-messages/);
   assert.match(launcher,/n015-threejs-spline-docking-optin-bloom-feather/);
   assert.match(launcher,/n016-liquid-optical-os-llm-mission-dock/);
+  assert.match(launcher,/n017-integrated-kernel-embodied-xr-lore-voice-quantum/);
   assert.match(launcher,/Refusing to launch stale UI/);
   assert.match(launcher,/Port \$Port is already occupied/);
   const executableLines=launcher.split('\n').filter(line=>!line.trimStart().startsWith('#')).join('\n');
