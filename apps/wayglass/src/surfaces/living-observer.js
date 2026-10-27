@@ -471,6 +471,7 @@ export async function mountWayglassLivingObserver(root) {
     xrStage?.removeEventListener('wayglass:xr-state',onXRState);
     disposeMissionDock();disposeScience();opticalDeck?.dispose();opticalDeck=null;
     globalThis.removeEventListener?.('arcsweep:gesture-feedback', onExternalFeather);
+    globalThis.removeEventListener?.('wayglass:feather',onShipFeather);
     if(audioContext){audioContext.close().catch(()=>{});audioContext=null;}
   }
   function playNote() {
@@ -554,6 +555,13 @@ export async function mountWayglassLivingObserver(root) {
     if(detail?.schema==='arcsweep.gesture-feedback/v1' && detail.status==='stopped' && detail.reason==='Feather' && !paused)featherButton.click();
   };
   globalThis.addEventListener?.('arcsweep:gesture-feedback', onExternalFeather);
+  // The ship-wide Feather control must stop Observer optics, WebXR,
+  // haptics and sound as surely as this deck's own Feather button.
+  const onShipFeather=event=>{
+    const desired=event?.detail?.held===true;
+    if(desired!==paused)featherButton.click();
+  };
+  globalThis.addEventListener?.('wayglass:feather',onShipFeather);
   featherButton.addEventListener('click',event=>{
     paused=!paused;
     globalThis.dispatchEvent?.(new CustomEvent('wayglass:feather',{detail:{held:paused}}));
