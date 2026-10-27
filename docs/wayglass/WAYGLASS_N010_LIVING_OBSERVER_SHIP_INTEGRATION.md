@@ -32,3 +32,12 @@ The controls must not cause automatic remote provider calls. State values and sy
 3. Starwell quantum and Atlas calculations are directly reused, not silently cloned.
 4. No full-page tall replacement; one active compact lens at once.
 5. Independent maths tests, integration verification, security CI and browser signoff. Published links count only if deployed and verified. A draft PR is not an installed Windows update.
+
+
+## Correct local portal: Hearthgate, no Vercel, no 5186
+
+The canonical **Windows launch** is `powershell -ExecutionPolicy Bypass -File .\\scripts\\Start-Wayglass.ps1`, from the N-010 branch. This script builds the current Vite UI as static assets and stages it through `apps/wayglass/server-stage.cjs` into `apps/starwell-server/public/wayglass/`, then runs one local Hearthgate server on **port 3841** (loopback-only). It refuses an already occupied port and refuses a staged page missing the N-010 build marker, rather than reporting stale software as current.
+
+Open **`http://127.0.0.1:3841/wayglass/?room=observer`** on that Windows computer. The UI and the `/api/v1/wayglass/*` host routes share the same origin; neither Vercel nor the legacy dev server on port 5186 participates. The browser tab group labelled “Wayglass awakening” is a browser grouping, not a confirmed public portal; its `127.0.0.1:5197/starwell/writing-room/` page is a separate local Writing Room entry, not proof of the new Observer route.
+
+For direct NPM startup on a different platform, use `npm run wayglass:deploy:server`, then start `npm --prefix apps/starwell-server run start:core` with `PORT=3841` set in that shell. Do not mistake a green GitHub check for an installed or browser-verified Windows build. The Netlify projects currently visible under Flameclyffe may serve other STARWELL artefacts; there is no verified N-010 Netlify release in this change.
