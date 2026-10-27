@@ -142,3 +142,33 @@ test('canonical bridge rejects source mutations and derived change even with int
  await assert.rejects(witnessMathSpine(altered),/source fingerprint mismatch/);
  await assert.rejects(witnessMathSpine({schema:'alternative',packet_id:'x'}),/canonical Math Spine packet/);
 });
+
+test('upward spiral retains compatible independent k and m measurements',async()=>{
+ let p=await start();
+ p=await advanceNikolaSpiral(p,{measurement:measurement('stiffness',24),source:source('ind-k')});
+ p=await advanceNikolaSpiral(p,{measurement:measurement('mass',8/3),source:source('ind-m')});
+ assert.equal(p.projection.evidence_state,'conditional-on-caller-declared-independent-measurement');
+ assert.equal(p.projection.conditional_state.stiffness_directly_measured,true);
+ assert.equal(p.projection.conditional_state.mass_directly_measured,true);
+ assert.deepEqual(p.projection.conditional_state.measurement_sources,['ind-k','ind-m']);
+ assert.equal((await replayNikolaSpiral(p)).matched,true);
+});
+
+test('contradictory independent measurements are never silently superseded',async()=>{
+ let p=await start();
+ p=await advanceNikolaSpiral(p,{measurement:measurement('stiffness',24),source:source('ind-k')});
+ p=await advanceNikolaSpiral(p,{measurement:measurement('mass',3),source:source('ind-m')});
+ assert.equal(p.projection.evidence_state,'inconsistent-independent-measurements');
+ assert.equal(p.projection.conditional_state.classification,'conflicting-under-ideal-model');
+ assert.match(p.projection.conditional_state.conflicts.join(' '),/disagrees/);
+ assert.deepEqual(p.projection.conditional_state.measurement_sources,['ind-k','ind-m']);
+ assert.equal((await replayNikolaSpiral(p)).matched,true);
+});
+
+test('conflicting repeat of same type is retained as disagreement, not replacement',async()=>{
+ let p=await start();
+ p=await advanceNikolaSpiral(p,{measurement:measurement('stiffness',24),source:source('ind-k1')});
+ p=await advanceNikolaSpiral(p,{measurement:measurement('stiffness',27),source:source('ind-k2')});
+ assert.equal(p.projection.evidence_state,'inconsistent-independent-measurements');
+ assert.ok(p.projection.conditional_state.conflicts.some(x=>x.includes('stiffness measurements disagree')));
+});
