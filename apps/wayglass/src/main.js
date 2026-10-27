@@ -2,6 +2,9 @@ import './styles.css';
 import './authorization.css';
 import './ship-wide-hud.css';
 import './liquid-optical-materials.css';
+import './ship-bridge-console.css';
+import { createShipKernel } from './ship-kernel.js';
+import { mountShipBridgeConsole } from './ship-bridge-console.js';
 import { installShipDeck } from './ship-deck.js';
 import { openWayglassAuthorization } from './authorization.js';
 import { installWayglassField } from './glass-field.js';
@@ -69,6 +72,9 @@ registerWayglassSurface({
 });
 
 subscribeWayglassObserver(recordRouteAsWonderLight);
+// Explicit transport observations drive the visible ship comms annunciator;
+// text, private contents and relationships never enter the bridge kernel.
+subscribeWayglassObserver(sample=>shipKernel.route({status:sample.status,routeId:sample.route_id}));
 
 registerWayglassSurface({
   surface_id: 'wayglass:living-observer',
@@ -104,15 +110,41 @@ const browserEmbodiment = Object.freeze({
   haptics: embodiment.vibration,
 });
 
+let disposeBridge=null;
+const shipKernel=createShipKernel({
+  mount:async surfaceId=>{
+    disposeBridge?.();disposeBridge=null;
+    try{
+      const result=await mountWayglassSurface(surfaceId,root);
+      installShipDeck(root,surfaceId,target=>shipKernel.navigate(target));
+      disposeBridge=mountShipBridgeConsole(root,shipKernel,surfaceId);
+      return result;
+    }catch(error){
+      // Failure is visible. Never silently switch worlds, retry providers,
+      // create synthetic messages or reload and lose a draft.
+      root.replaceChildren();
+      const notice=document.createElement('section');
+      notice.className='wg-surface wg-ship-fault';
+      const h=document.createElement('h1');h.textContent='Bridge deck failed to mount';
+      const p=document.createElement('p');
+      p.textContent=String(error?.message||error).slice(0,240);
+      const retry=document.createElement('button');
+      retry.type='button';retry.textContent='Retry this deck';
+      retry.addEventListener('click',()=>{void shipKernel.navigate(surfaceId,{recovery:true}).catch(()=>{});});
+      notice.append(h,p,retry);root.append(notice);
+      throw error;
+    }
+  },
+  storage:globalThis.localStorage
+});
 const wayglass = Object.freeze({
   schema: 'wayglass.os/v0.1',
   surfaces: listWayglassSurfaces,
   organs: listWayglassOrgans,
-  mount: async(surfaceId)=>{
-    const result=await mountWayglassSurface(surfaceId,root);
-    installShipDeck(root,surfaceId,(target)=>wayglass.mount(target));
-    return result;
-  },
+  mount: surfaceId=>shipKernel.navigate(surfaceId),
+  get ship(){return shipKernel.state;},
+  shipHealth:()=>shipKernel.health(),
+  shipTheme:name=>shipKernel.theme(name),
   authorizeBluebird: () => openWayglassAuthorization(),
   enter: ({ embodiment: entryEmbodiment = {}, ...entry } = {}) => enterWayglassWorld({
     ...entry,
