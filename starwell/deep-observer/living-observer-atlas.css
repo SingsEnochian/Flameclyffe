@@ -1,0 +1,72 @@
+/* Living Observer Atlas: grounded signal layers, restrained astronomical glass. */
+.observer-atlas{margin:1.1rem clamp(.9rem,2vw,1.6rem) 2rem;padding:clamp(1rem,2.2vw,1.7rem);text-align:left;
+  border:1px solid rgba(109,224,179,.35);border-radius:26px;isolation:isolate;
+  background:radial-gradient(ellipse at 18% 0%,rgba(29,107,95,.22),transparent 54%),linear-gradient(130deg,rgba(7,18,29,.96),rgba(10,15,24,.97));}
+.atlas-heading{display:flex;justify-content:space-between;gap:1.25rem;align-items:center;flex-wrap:wrap;}
+.atlas-heading .eyebrow{text-align:left;margin:0 0 .35rem}
+.atlas-heading h2{font:clamp(1.3rem,3vw,2rem)/1.2 Georgia,serif;letter-spacing:.01em;color:var(--gold);margin:0 0 .5rem}
+.atlas-heading p{max-width:62ch;font-size:.93rem;color:var(--soft);line-height:1.6;margin:0}
+.atlas-operations{display:flex;gap:.6rem;flex-wrap:wrap}
+.atlas-operations button{color:var(--moon);background:rgba(83,191,165,.12);border-color:rgba(109,224,179,.48);min-height:2.5rem}
+.atlas-operations button:disabled{opacity:.5;cursor:wait}
+.atlas-status{padding:.75rem 1rem;background:rgba(231,196,119,.075);border-left:3px solid var(--gold);
+  border-radius:0 10px 10px 0;color:var(--moon);font-size:.88rem;line-height:1.55}
+.atlas-sensor-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.75rem;margin:1rem 0}
+.atlas-sensor-grid article{border:1px solid rgba(168,204,224,.22);border-radius:14px;padding:.8rem;
+ background:linear-gradient(145deg,rgba(108,221,183,.075),rgba(8,15,26,.65));min-height:112px}
+.atlas-sensor-grid article strong{display:block;color:var(--silver);font-size:.79rem;letter-spacing:.02em}
+.atlas-sensor-grid article output{display:block;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;line-height:1.35;font-size:.85rem;
+ color:var(--moon);font-weight:750;margin:.55rem 0}
+.atlas-sensor-grid article small{color:var(--dim);font-size:.68rem}
+.atlas-panels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem}
+.atlas-panel{min-width:0;border-radius:18px;border:1px solid rgba(168,204,224,.23);padding:1rem;
+ background:linear-gradient(175deg,rgba(14,32,43,.65),rgba(7,13,24,.87));}
+.atlas-panel h3{font-size:1.04rem;font-family:Georgia,serif;font-weight:600;color:var(--gold);margin:.15rem 0 1rem}
+.atlas-panel pre{margin:.4rem 0 1rem;color:#d7e9e7;font: .77rem/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;
+ white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}
+.atlas-panel label{display:block;font-size:.78rem;color:var(--soft);margin:.8rem 0 .3rem}
+.atlas-panel select,.atlas-panel input{display:block;width:100%;padding:.65rem;border-radius:10px;
+ color:var(--moon);background:#07131d;border:1px solid rgba(168,204,224,.38);font:inherit}
+.atlas-panel select:focus-visible,.atlas-panel input:focus-visible{outline:2px solid var(--green);outline-offset:3px}
+.atlas-reference{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.55rem}
+.atlas-reference div{border-top:1px solid rgba(109,224,179,.24);padding:.55rem 0}
+.atlas-reference b{display:block;font-size:1rem;color:#e7c477;font-variant-numeric:tabular-nums}
+.atlas-reference span{display:block;color:var(--dim);font-size:.69rem;line-height:1.5;margin-top:.2rem}
+.atlas-geometry{display:grid;place-items:center;min-height:220px;max-height:300px;border-radius:18px;
+ border:1px solid rgba(231,196,119,.22);margin:.8rem 0;
+ background:radial-gradient(circle,rgba(99,176,164,.17),transparent 65%),rgba(0,0,0,.2);color:#e8d3a4;}
+.atlas-geometry svg{display:block;width:min(100%,280px);height:auto;max-height:290px;filter:drop-shadow(0 0 8px rgba(231,196,119,.18));}
+.atlas-notice,.atlas-provenance,.atlas-citations{font-size:.77rem!important;line-height:1.65!important;color:var(--dim)!important}
+.atlas-citations a{color:#99dfd0;text-decoration:underline;text-underline-offset:2px}
+.atlas-provenance{border-top:1px solid rgba(168,204,224,.23);padding-top:.7rem;margin:1rem 0 .5rem}
+.atlas-trace{border:1px solid rgba(109,224,179,.2);border-radius:12px;padding:.8rem;font-size:.85rem;}
+.atlas-trace summary{cursor:pointer;font-weight:700;color:var(--silver)}
+.atlas-trace pre{white-space:pre-wrap;overflow-wrap:anywhere;font: .73rem/1.5 ui-monospace,monospace;
+ max-height:360px;overflow:auto;color:var(--soft);text-align:left;}
+@media(max-width:1050px){.atlas-panels{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .atlas-panel:first-child{grid-column:span 2}}
+@media(max-width:680px){.atlas-panels,.atlas-sensor-grid{grid-template-columns:1fr}
+  .atlas-panel:first-child{grid-column:auto}
+  .atlas-heading{display:block}.atlas-operations{margin-top:1rem}
+  .atlas-reference{grid-template-columns:1fr 1fr}}
+@media(prefers-reduced-motion:reduce){.atlas-geometry svg{animation:none!important;transition:none!important}}
+
+/* Opt-in reference library never embeds Drive private content in public markup. */
+.atlas-library{margin:1rem 0;padding:1rem;border:1px solid rgba(231,196,119,.28);
+  border-radius:18px;background:linear-gradient(135deg,rgba(231,196,119,.07),rgba(21,41,49,.28))}
+.atlas-library-head{display:flex;justify-content:space-between;gap:1rem;align-items:center;flex-wrap:wrap}
+.atlas-library-head h3{font:1.16rem Georgia,serif;color:var(--gold);margin:.2rem 0 .45rem}
+.atlas-library-head p{font-size:.84rem;color:var(--soft);max-width:70ch;line-height:1.5;margin:0}
+.atlas-library-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem;margin:1rem 0}
+.atlas-library-fields label{color:var(--soft);display:grid;align-content:start;gap:.35rem;font-size:.78rem}
+.atlas-library-fields select,.atlas-library-fields input{width:100%;min-width:0;color:var(--moon);
+ padding:.7rem .6rem;border:1px solid rgba(168,204,224,.35);border-radius:10px;background:#07131d;font:inherit}
+.atlas-library-fields input[type=file]{font-size:.76rem}
+.atlas-library-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem;
+ max-height:480px;overflow:auto;overscroll-behavior:contain}
+.atlas-library-entry{padding:.8rem;border:1px solid rgba(168,204,224,.18);border-radius:12px;
+ background:rgba(3,12,21,.65);min-width:0}
+.atlas-library-entry strong{color:var(--moon);font-size:.9rem}
+.atlas-library-entry p{font-size:.74rem;line-height:1.45;color:var(--dim);overflow-wrap:anywhere}
+.atlas-library-entry a{color:var(--green);font-size:.78rem;text-decoration:underline;text-underline-offset:2px}
+@media(max-width:760px){.atlas-library-fields,.atlas-library-results{grid-template-columns:1fr}}

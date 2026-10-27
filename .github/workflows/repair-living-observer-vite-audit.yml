@@ -1,0 +1,49 @@
+name: Repair Vite production audit for Living Observer
+on:
+  push:
+    branches:
+      - rarity/living-observer-science-cosmos-audit-20261026
+    paths:
+      - .github/workflows/repair-living-observer-vite-audit.yml
+permissions:
+  contents: write
+jobs:
+  update-vite-lock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Refresh only Vite lockfile resolution
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm update vite --package-lock-only --ignore-scripts --no-fund
+          node --input-type=module - <<'JS'
+          import fs from 'node:fs';
+          const lock = JSON.parse(fs.readFileSync('package-lock.json', 'utf8'));
+          const ver = lock.packages['node_modules/vite'].version;
+          if (ver !== '8.3.5') throw new Error('Expected reviewed Vite 8.3.5, got ' + ver);
+          JS
+          npm audit --omit=dev --audit-level=high --package-lock-only
+          npm ci --no-audit --no-fund
+          npm audit --omit=dev --audit-level=high
+          npm run wayglass:test
+          npm run starwell:test
+      - name: Commit audited lockfile without changing other source files
+        shell: bash
+        run: |
+          set -euo pipefail
+          changed="$(git diff --name-only)"
+          if [ "$changed" != "package-lock.json" ]; then
+            echo "Unexpected modification: $changed" >&2
+            exit 1
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          git commit -m "fix(deps): update audited Vite lockfile to 8.3.5"
+          git push
