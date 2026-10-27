@@ -78,12 +78,21 @@ export function mountShipBridgeConsole(root,kernel,activeId,soundDesk=null){
  };
  sound.addEventListener('change',setSound);
  const feather=q('[data-bridge-feather]');
- const globalFeather=()=>{
-  globalThis.dispatchEvent?.(new CustomEvent('wayglass:feather',{detail:{held:true}}));
-  // A global stop does not grant permission to resume another room's audio.
-  sound.value='silence';
-  status.textContent='Feather held. Ambient sound and global glass motion stopped.';
+ let featherHeld=false;
+ const onFeather=event=>{
+  featherHeld=event?.detail?.held===true;
+  feather.textContent=featherHeld?'Feather · Release':'Feather · Stop';
+  if(featherHeld)sound.value='silence';
  };
+ const globalFeather=()=>{
+  const next=!featherHeld;
+  globalThis.dispatchEvent?.(new CustomEvent('wayglass:feather',{detail:{held:next}}));
+  sound.value='silence';
+  status.textContent=next
+    ?'Feather held. Ambient sound and glass motion stopped.'
+    :'Feather released explicitly. Audio stays off until you choose it.';
+ };
+ globalThis.addEventListener?.('wayglass:feather',onFeather);
  feather.addEventListener('click',globalFeather);
  const recover=q('[data-bridge-recover]');
  const recoverNow=async()=>{
@@ -107,6 +116,7 @@ export function mountShipBridgeConsole(root,kernel,activeId,soundDesk=null){
   check.removeEventListener('click',checkNow);
   sound.removeEventListener('change',setSound);
   feather.removeEventListener('click',globalFeather);
+  globalThis.removeEventListener?.('wayglass:feather',onFeather);
   recover.removeEventListener('click',recoverNow);
   bar.remove();
  };
