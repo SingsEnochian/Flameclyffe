@@ -23,10 +23,10 @@ import { FIRST_WAYGLASS_ORGANS } from './organ-donors.js';
 
 const root = document.querySelector('#app');
 
-await openWayglassAuthorization();
-globalThis.addEventListener('pageshow', event => {
-  if (event.persisted) void openWayglassAuthorization();
-});
+// A browser's local/owner-safe Wayglass surfaces must mount without
+// requiring a third-party participant's credential. Bluebird's session is
+// deliberately opt-in and still required by his protected provider actions.
+// A page restored from bfcache has no implicit provider reauthorisation.
 
 installWayglassField({ host: document.body });
 installMotionChoreography({ root: document.documentElement });
@@ -106,6 +106,7 @@ const wayglass = Object.freeze({
   surfaces: listWayglassSurfaces,
   organs: listWayglassOrgans,
   mount: (surfaceId) => mountWayglassSurface(surfaceId, root),
+  authorizeBluebird: () => openWayglassAuthorization(),
   enter: ({ embodiment: entryEmbodiment = {}, ...entry } = {}) => enterWayglassWorld({
     ...entry,
     embodiment: { ...browserEmbodiment, ...entryEmbodiment },
