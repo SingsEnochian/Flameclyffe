@@ -1,0 +1,92 @@
+/* N-017: one operational hull. Existing glass shader remains the skin. */
+:root{
+ --wg-hull-cyan:#92eff0;--wg-hull-metal:rgba(165,226,234,.3);
+ --wg-hull-bg:rgba(7,24,39,.94);--wg-hull-glow:rgba(63,187,195,.15);
+}
+:root[data-wayglass-theme="labradorite"]{
+ --wg-hull-cyan:#b0a8ff;--wg-hull-metal:rgba(178,162,251,.4);
+ --wg-hull-bg:rgba(15,18,44,.94);--wg-hull-glow:rgba(125,88,208,.22);
+}
+:root[data-wayglass-theme="night"]{
+ --wg-hull-cyan:#c5d5e0;--wg-hull-metal:rgba(160,177,185,.27);
+ --wg-hull-bg:rgba(4,12,22,.97);--wg-hull-glow:rgba(46,76,99,.09);
+}
+.wg-surface .wg-bridge-console{
+ position:relative;isolation:isolate;
+ z-index:45;width:100%;min-width:0;
+ display:grid;grid-template-columns:auto minmax(290px,1fr) auto;
+ align-items:center;column-gap:clamp(12px,2vw,24px);row-gap:9px;
+ padding:15px clamp(15px,1.8vw,24px);
+ border:1px solid var(--wg-hull-metal);border-radius:19px;
+ background:linear-gradient(142deg,rgba(235,252,255,.085),transparent 20%),
+    radial-gradient(ellipse at 90% 0%,var(--wg-hull-glow),transparent 34%),
+    var(--wg-hull-bg);
+ box-shadow:inset 0 2px 1px rgba(241,255,255,.19),inset 0 -3px rgba(0,7,23,.46),
+    0 16px 46px rgba(0,0,0,.29);
+ backdrop-filter:blur(17px) saturate(120%);
+ color:#eaf8fa;
+}
+.wg-surface .wg-bridge-brand{display:flex;gap:9px;align-items:center;
+ font:700 .8rem/1.25 ui-monospace,Consolas,monospace;letter-spacing:.16em;white-space:nowrap}
+.wg-surface .wg-bridge-brand small{display:block;font-size:.61rem;letter-spacing:.12em;
+ color:#abc8d2;margin-top:3px}
+.wg-surface .wg-bridge-glyph{font:500 2rem/1 Georgia,serif;color:var(--wg-hull-cyan);
+ text-shadow:0 0 12px var(--wg-hull-glow)}
+.wg-surface .wg-bridge-telemetry{
+ display:flex;gap:clamp(7px,1vw,15px);flex-wrap:wrap;min-width:0;
+ justify-content:space-around;
+}
+.wg-surface .wg-bridge-telemetry span{
+ display:grid;gap:4px;padding:7px 10px;min-width:84px;border-left:1px solid var(--wg-hull-metal);
+ font:600 .61rem/1.1 ui-monospace,Consolas,monospace;letter-spacing:.11em;color:#9ebfca;
+}
+.wg-surface .wg-bridge-telemetry b{
+ font-size:.76rem;line-height:1.3;letter-spacing:.025em;overflow-wrap:anywhere;
+ color:var(--wg-hull-cyan);font-variant-numeric:tabular-nums;
+}
+.wg-surface .wg-bridge-console[data-frame="fault"] [data-bridge-frame],
+.wg-surface .wg-bridge-console[data-host="unavailable"] [data-bridge-host]{
+ color:#ffbf91;
+}
+.wg-surface .wg-bridge-actions{display:flex;gap:8px;align-items:end;flex-wrap:wrap}
+.wg-surface .wg-bridge-actions label{
+ display:grid;gap:4px;white-space:nowrap;
+ font:600 .65rem/1 ui-monospace,Consolas,monospace;letter-spacing:.07em;color:#c2e4e9;
+}
+.wg-surface .wg-bridge-actions :is(select,button){
+ min-height:39px;border-radius:9px;border:1px solid var(--wg-hull-metal);
+ color:#efffff;background:rgba(10,38,55,.87);
+ padding:8px 11px;font:650 .74rem/1.2 ui-monospace,Consolas,monospace;
+}
+.wg-surface .wg-bridge-actions button{cursor:pointer}
+.wg-surface .wg-bridge-actions button:hover:not(:disabled){
+ border-color:var(--wg-hull-cyan);background:rgba(25,82,99,.76)}
+.wg-surface .wg-bridge-actions :is(select,button):focus-visible{
+ outline:2px solid #d0fff6;outline-offset:3px
+}
+.wg-surface .wg-bridge-actions button:disabled{opacity:.52;cursor:not-allowed}
+.wg-surface .wg-bridge-console [data-bridge-note]{
+ margin:0;grid-column:1/-1;padding-top:8px;
+ border-top:1px solid rgba(150,226,230,.2);
+ color:#accad3;font:.72rem/1.5 ui-sans-serif,system-ui,sans-serif;
+}
+.wg-ship-fault{padding:clamp(24px,4vw,60px);background:var(--wg-hull-bg);
+ border:1px solid var(--wg-hull-metal);color:#e7faff;border-radius:20px}
+.wg-ship-fault button{min-height:44px;border-radius:12px;background:#145477;
+ border:1px solid #72d6e9;color:#f5ffff;padding:9px 19px}
+@media(max-width:1190px){
+ .wg-surface .wg-bridge-console{grid-template-columns:1fr auto}
+ .wg-surface .wg-bridge-telemetry{grid-column:1/-1;grid-row:2;justify-content:space-between}
+ .wg-surface .wg-bridge-actions{grid-column:2;grid-row:1}
+}
+@media(max-width:730px){
+ .wg-surface .wg-bridge-console{grid-template-columns:1fr}
+ .wg-surface .wg-bridge-actions{grid-row:auto;grid-column:1/-1}
+ .wg-surface .wg-bridge-telemetry{grid-row:auto;grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr}
+ .wg-surface .wg-bridge-telemetry span{min-width:0}
+ .wg-surface .wg-bridge-brand{padding-bottom:3px}
+ .wg-surface .wg-bridge-actions label{min-width:125px}
+}
+@media(prefers-reduced-motion:reduce){
+ .wg-surface .wg-bridge-console{backdrop-filter:none}
+}
