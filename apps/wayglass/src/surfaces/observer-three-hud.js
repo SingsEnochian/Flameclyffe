@@ -1,4 +1,5 @@
 /* Spatial optical Three.js HUD, visualizes existing Wayglass packets; never a sensor. */
+import { createOpticalDockingRig } from './observer-docking-motion.js';
 export const OBSERVER_THREE_SCHEMA='wayglass.observer-three-hud/v1';
 const clamp=n=>Math.max(0,Math.min(1,Number.isFinite(n)?n:0));
 export async function mountObserverThreeHUD(canvas,{reducedMotion=false}={}){
@@ -22,6 +23,7 @@ export async function mountObserverThreeHUD(canvas,{reducedMotion=false}={}){
   const fieldNode=overlay.querySelector('[data-hud-field]');
   const phaseNode=overlay.querySelector('[data-hud-phase]');
   let renderer=null,scene=null,camera=null,group=null,inner=null,shell=null,torii=[],active=false,disposed=false,enabled=true,last=0,envTarget=null;
+  let docking=null,composer=null,bloom=null,bloomEnabled=false,bloomSupported=false,bloomPending=null;
   const layer=document.createElement('canvas');
   layer.className='wg-spatial-three-canvas';
   layer.setAttribute('aria-hidden','true');
@@ -43,6 +45,7 @@ export async function mountObserverThreeHUD(canvas,{reducedMotion=false}={}){
     const T=await import('three');
     if(disposed){layer.remove();overlay.remove();return{ready:false,available:false,update(){},frame(){},setEnabled(){},dispose(){}};}
     renderer=new T.WebGLRenderer({canvas:layer,context,alpha:true,antialias:true,powerPreference:'low-power'});
+    bloomSupported=Boolean(renderer.capabilities.isWebGL2 && !reducedMotion);
     renderer.setClearColor(0,0);renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));
     renderer.outputColorSpace=T.SRGBColorSpace;
     renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.5;
@@ -84,6 +87,9 @@ export async function mountObserverThreeHUD(canvas,{reducedMotion=false}={}){
     const cyan=new T.PointLight(0x60f5e7,26,19);cyan.position.set(-3,3,4);scene.add(cyan);
     const gold=new T.PointLight(0xe6ae69,16,17);gold.position.set(3,-2,3);scene.add(gold);
     group=new T.Group();scene.add(group);
+    // Official Three.js curve and damping primitives: geometric optical motion
+    // only. No independent RAF, Crew link or provider evidence.
+    docking=createOpticalDockingRig(T,group);
     const glass=new T.MeshPhysicalMaterial({
       color:0x91ebe0,metalness:.35,roughness:.12,transparent:true,opacity:.54,
       depthWrite:false,side:T.DoubleSide,clearcoat:1,clearcoatRoughness:.045,
@@ -120,15 +126,58 @@ export async function mountObserverThreeHUD(canvas,{reducedMotion=false}={}){
       if(disposed||!renderer||!layer.isConnected)return;
       const box=layer.getBoundingClientRect();
       const w=Math.max(1,Math.floor(box.width)),h=Math.max(1,Math.floor(box.height));
-      renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();
+      renderer.setSize(w,h,false);composer?.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();
     };
     const observer=new ResizeObserver(resize);observer.observe(layer);layer.__wayglassResize=observer;
     resize();renderer.render(scene,camera);active=true;mode('WEBGL · THREE.JS');
     layer.addEventListener('webglcontextlost',event=>{
-      event.preventDefault();active=false;mode('CANVAS FALLBACK');
+      event.preventDefault();active=false;bloomEnabled=false;mode('CANVAS FALLBACK');
       stage.dispatchEvent(new CustomEvent('wayglass:optics-change'));
     },{once:true});
   }catch{active=false;mode('CANVAS FALLBACK');}
+  // Three.js official GitHub postprocessing add-ons. Opt-in by direct click,
+  // never loaded on startup or in Low Stim/reduced-motion mode.
+  async function setBloom(on){
+    if(disposed || !active || !bloomSupported || !on){
+      bloomEnabled=false;
+      return false;
+    }
+    if(composer){bloomEnabled=true;return true;}
+    if(bloomPending)return bloomPending;
+    bloomPending=(async()=>{
+      try{
+        const [
+          {EffectComposer},{RenderPass},{UnrealBloomPass},{OutputPass}
+        ]=await Promise.all([
+          import('three/addons/postprocessing/EffectComposer.js'),
+          import('three/addons/postprocessing/RenderPass.js'),
+          import('three/addons/postprocessing/UnrealBloomPass.js'),
+          import('three/addons/postprocessing/OutputPass.js'),
+        ]);
+        if(disposed||!renderer||!active)return false;
+        const THREE=await import('three');
+        const instance=new EffectComposer(renderer);
+        instance.setPixelRatio(Math.min(globalThis.devicePixelRatio||1,1.15));
+        instance.addPass(new RenderPass(scene,camera));
+        const glow=new UnrealBloomPass(new THREE.Vector2(300,300),.26,.22,.86);
+        instance.addPass(glow);
+        instance.addPass(new OutputPass());
+        const box=layer.getBoundingClientRect();
+        instance.setSize(Math.max(1,Math.floor(box.width)),Math.max(1,Math.floor(box.height)));
+        composer=instance;bloom=glow;bloomEnabled=true;
+        return true;
+      }catch{
+        bloomEnabled=false;
+        return false;
+      }finally{bloomPending=null;}
+    })();
+    return bloomPending;
+  }
+  function renderOptics({lowStim=false}={}){
+    if(!renderer||!scene||!camera||!active||!enabled)return;
+    if(bloomEnabled&&composer&&!lowStim&&!reducedMotion)composer.render();
+    else renderer.render(scene,camera);
+  }
   function update({packet,focus='time',rotation=0,interior=null,lowStim=false,paused=false}={}){
     if(disposed)return;
     focusNode.textContent=String(focus).toUpperCase();
@@ -141,17 +190,18 @@ export async function mountObserverThreeHUD(canvas,{reducedMotion=false}={}){
     inner.scale.setScalar(.84+energy*.18+strength*.14);
     inner.material.emissiveIntensity=.16+energy*.40;
     group.rotation.z=rotation*.16;
-    if(paused||lowStim||reducedMotion)renderer.render(scene,camera);
+    if(paused||lowStim||reducedMotion)renderOptics({lowStim});
   }
   function frame(time,{paused=false,lowStim=false,rotation=0}={}){
     if(!active||!enabled||disposed||!renderer||paused)return;
-    if(lowStim||reducedMotion){renderer.render(scene,camera);return;}
+    if(lowStim||reducedMotion){renderOptics({lowStim});return;}
     if(time-last<28)return;last=time;
     const t=time*.00013;
     inner.rotation.set(t*.34,t*.72,.18);shell.rotation.set(-t*.27,t*.45,-t*.32);
     torii.forEach((obj,i)=>{obj.rotation.z=(i%2?-.11:.11)*t+rotation*.18;});
     group.rotation.y=Math.sin(t*.5)*.10;
-    renderer.render(scene,camera);
+    docking?.tick(time,{paused,lowStim,reducedMotion,rotation});
+    renderOptics({lowStim});
   }
   function dispose(){
     if(disposed)return;disposed=true;active=false;
@@ -159,7 +209,9 @@ export async function mountObserverThreeHUD(canvas,{reducedMotion=false}={}){
     scene?.traverse(obj=>{obj.geometry?.dispose?.();
       if(Array.isArray(obj.material))obj.material.forEach(m=>m.dispose?.());
       else obj.material?.dispose?.();});
-    envTarget?.dispose();renderer?.dispose();layer.remove();overlay.remove();
+    docking?.dispose();docking=null;
+    envTarget?.dispose();composer?.dispose();composer=null;bloom=null;
+    renderer?.dispose();layer.remove();overlay.remove();
   }
-  return{get ready(){return active&&enabled;},get available(){return active;},setEnabled,update,frame,dispose};
+  return{get ready(){return active&&enabled;},get available(){return active;},get bloomSupported(){return bloomSupported;},get bloomEnabled(){return bloomEnabled;},setEnabled,setBloom,update,frame,dispose};
 }
