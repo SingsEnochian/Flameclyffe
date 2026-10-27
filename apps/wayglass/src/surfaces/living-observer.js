@@ -398,6 +398,10 @@ export async function mountWayglassLivingObserver(root) {
     root.querySelector('[data-observer-translation]').textContent=explanation.translation;
     root.querySelector('[data-observer-boundary]').textContent=explanation.boundary;
     root.querySelectorAll('[data-observer-focus]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.observerFocus===focus)));
+    // Cosmetic animations obey the same Feather/Low Stim controls as the
+    // canvas and Three.js scene. No independent CSS motion when held.
+    root.dataset.lowStim=String(lowStim||reduced);
+    root.dataset.featherHeld=String(paused);
     const vars=packet.projection.variables;
     meters.innerHTML=Object.entries(vars).map(([key,v])=>'<div class="observer-meter"><span>'+key+'</span><meter min="0" max="1" value="'+v+'" aria-label="'+key+' interface visualisation value"></meter><b>'+v.toFixed(2)+'</b></div>').join('');
     packetView.textContent=JSON.stringify(packet,null,2);
@@ -505,7 +509,7 @@ export async function mountWayglassLivingObserver(root) {
   featherButton.addEventListener('click',event=>{
     paused=!paused;event.currentTarget.setAttribute('aria-pressed',String(paused));
     event.currentTarget.textContent=paused?'Feather · Resume':'Feather · Pause';
-    if(paused){opticalDeck?.update({packet,focus,rotation:rotation.angle,interior:interiorSignal,lowStim,paused});rotation.stop();cancelAnimationFrame(animation);haptics=false;root.querySelector('[data-observer-haptics]').setAttribute('aria-pressed','false');root.querySelector('[data-observer-haptics]').textContent='Haptics · Off';
+    if(paused){root.dataset.featherHeld='true';opticalDeck?.update({packet,focus,rotation:rotation.angle,interior:interiorSignal,lowStim,paused});rotation.stop();cancelAnimationFrame(animation);haptics=false;root.querySelector('[data-observer-haptics]').setAttribute('aria-pressed','false');root.querySelector('[data-observer-haptics]').textContent='Haptics · Off';
       if(audioContext){audioContext.close().catch(()=>{});audioContext=null;}sound=false;root.querySelector('[data-observer-sound]').setAttribute('aria-pressed','false');root.querySelector('[data-observer-sound]').textContent='Sound · Off';
       status.textContent='Feather held. Motion, sound and haptics stopped. Resume only when you choose.';
     }else{lightAt=performance.now();refresh();if(!lowStim&&!reduced)animation=requestAnimationFrame(animate);status.textContent='Feather released by your choice; sound and haptics remain off.';}
