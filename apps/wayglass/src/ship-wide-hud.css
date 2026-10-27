@@ -316,3 +316,65 @@ body {
     scroll-behavior:auto!important;
   }
 }
+
+
+/* Voyage messaging is optional: a compact ship-service drawer, not a second
+   giant visual layer obscuring the provenance/geometry instruments. */
+.wg-voyage-inbox {
+  z-index: 100;
+  background:
+    radial-gradient(ellipse at 92% 0,rgba(70,139,144,.13),transparent 45%),
+    linear-gradient(150deg,rgba(8,32,44,.98),rgba(5,17,31,.99));
+  border:1px solid rgba(153,228,219,.37);
+  border-radius:15px;
+  box-shadow:inset 0 1px rgba(236,255,248,.17),0 16px 48px rgba(0,0,0,.48);
+  color:#e7f9f5;
+  font:500 .83rem/1.55 ui-sans-serif,system-ui,sans-serif;
+  backdrop-filter:blur(15px);
+}
+.wg-voyage-inbox:not([open]){
+  width:max-content;max-width:calc(100vw - 2rem);min-width:170px;
+  max-height:none;padding:.65rem .95rem;
+}
+.wg-voyage-inbox[open] {
+  width:min(26rem,calc(100vw - 2rem));
+  max-height:min(64vh,600px);
+  overscroll-behavior:contain;
+  padding:1rem 1.15rem;
+}
+.wg-voyage-inbox > summary {
+  font:700 .82rem/1.35 ui-monospace,Consolas,monospace;
+  letter-spacing:.04em;color:#b9f7e8;
+  cursor:pointer;
+  list-style:revert;
+}
+.wg-voyage-inbox > summary:focus-visible,
+.wg-voyage-inbox button:focus-visible,
+.wg-voyage-inbox textarea:focus-visible {
+  outline:2px solid #b8fff0;outline-offset:3px;
+}
+.wg-voyage-inbox p[role="status"] {
+  color:#c5dddc;line-height:1.55;font-size:.8rem;
+  padding:9px 10px;border:1px solid rgba(155,216,210,.18);
+  border-radius:10px;background:rgba(4,19,31,.65);
+}
+.wg-voyage-inbox[data-voyage-service="not-configured"] p[role="status"]{
+  border-color:rgba(236,199,135,.35);color:#e6cf9f;
+}
+.wg-voyage-inbox button{
+  min-height:38px;border:1px solid rgba(155,226,213,.40);
+  border-radius:100px;background:linear-gradient(150deg,#174451,#071d31);
+  color:#eafaf4;padding:.48rem .85rem;
+}
+.wg-voyage-inbox button:disabled{opacity:.55;cursor:not-allowed;}
+.wg-voyage-inbox textarea{
+  color:#e9fff7;background:rgba(4,16,29,.93);
+  border:1px solid rgba(163,218,214,.44);
+  border-radius:10px;
+}
+.wg-voyage-inbox article{border-top:1px solid rgba(152,223,219,.27);}
+@media(max-width:700px){
+  .wg-voyage-inbox{bottom:.55rem;right:.55rem;}
+  .wg-voyage-inbox:not([open]){padding:.55rem .75rem;min-width:0;}
+  .wg-voyage-inbox[open]{width:min(24rem,calc(100vw - 1.1rem));max-height:60vh;}
+}
