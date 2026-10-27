@@ -45,6 +45,10 @@ try {
     if (-not (Select-String -Path $builtIndex -Pattern 'name="wayglass-ui-revision" content="living-observer-n010"' -SimpleMatch -Quiet)) {
         throw 'Staged portal does not contain the N-010 revision marker. Refusing to launch a legacy site.'
     }
+    if (-not (Select-String -Path $builtIndex -Pattern 'name="wayglass-ui-capabilities" content="n012-three-hud-geometry-invariants-crew"' -SimpleMatch -Quiet)) {
+        throw 'Staged Wayglass is missing the N-012 Three.js + invariant-trial capability marker. Refusing to launch stale UI.'
+    }
+    Write-Host '[Wayglass] Verified staged N-012 optical deck + geometry invariants + named Crew.'
     $env:PORT = [string]$Port
     Write-Host ''
     Write-Host '[Wayglass] N-010 HEARTGATE PORTAL (local, no Vercel):'
