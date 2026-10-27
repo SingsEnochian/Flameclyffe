@@ -94,3 +94,17 @@ test('source HTML carries the revision marker required by stale-port launch guar
   assert.match(launcher,/if \(existing\.responding && !existing\.current\)/);
   assert.match(launcher,/OLD or unknown Wayglass build/);
 });
+
+test('default Windows launch enters N-010 through one-origin Hearthgate, never Vercel or 5186',()=>{
+  const launcher=file('../../../scripts/Start-Wayglass.ps1');
+  const stage=file('../server-stage.cjs');
+  assert.match(launcher,/Port = 3841/);
+  assert.match(launcher,/wayglass\/\?room=observer/);
+  assert.match(launcher,/npm run wayglass:deploy:server/);
+  assert.match(launcher,/npm --prefix apps\/starwell-server run start:core/);
+  assert.match(launcher,/living-observer-n010/);
+  assert.match(launcher,/Port \$Port is already occupied/);
+  assert.doesNotMatch(launcher,/scripts\/wayglass-local\.mjs|5186|vercel --prod/);
+  assert.match(stage,/public', 'wayglass'/);
+  assert.match(stage,/hearthgate-host\.js/);
+});
