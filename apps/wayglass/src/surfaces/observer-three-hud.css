@@ -129,3 +129,106 @@
   .wg-living-observer .observer-stage>canvas{filter:none!important}
   .wg-living-observer .wg-spatial-hud{animation:none!important}
 }
+
+
+/* N-013 · an integrated optical instrument: depth, hierarchy, control, and relief. */
+.wg-living-observer .observer-stage{
+  --hud-accent:rgba(160,255,241,.78);
+  background:
+    radial-gradient(ellipse at 50% 48%,rgba(22,112,126,.24),transparent 43%),
+    radial-gradient(ellipse at 68% 68%,rgba(121,67,148,.15),transparent 56%),
+    repeating-linear-gradient(0deg,transparent 0 39px,rgba(132,227,218,.017) 40px),
+    linear-gradient(148deg,#06131c 4%,#081f31 52%,#08111d 100%);
+  box-shadow:inset 0 1px 1px rgba(226,255,248,.16),
+    inset 0 0 0 6px rgba(138,221,215,.026),
+    inset 0 0 0 7px rgba(149,216,218,.10),
+    inset 0 -55px 105px rgba(0,0,0,.36),
+    0 20px 85px rgba(0,0,0,.33);
+}
+.wg-living-observer .observer-stage[data-optical-mode="three"]>.wg-spatial-three-canvas{
+  opacity:1;filter:drop-shadow(0 0 33px rgba(74,210,228,.15));
+}
+.wg-living-observer .observer-stage[data-optical-mode="three"]>canvas:not(.wg-spatial-three-canvas){
+  mix-blend-mode:normal;filter:none;
+}
+.wg-living-observer .wg-hud-identity{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  min-width:22%;display:grid;justify-items:center;gap:4px;
+  color:#f2fffb;text-align:center;white-space:nowrap;
+  filter:drop-shadow(0 1px 4px #031621);
+}
+.wg-living-observer .wg-hud-identity strong{
+  font:600 clamp(12px,1.55vw,17px)/1.1 Georgia,serif;
+  letter-spacing:.08em;text-shadow:0 0 15px rgba(123,242,238,.75),0 2px 4px #01121b;
+}
+.wg-living-observer .wg-hud-identity small{
+  color:#bbede1;font:650 clamp(8px,.86vw,10px)/1.1 ui-monospace,Consolas,monospace;
+  letter-spacing:.17em;
+}
+.wg-living-observer .wg-spatial-hud{
+  font-size:clamp(10px,1.08vw,12px);
+  text-shadow:0 1px 4px #011b29;
+}
+.wg-living-observer .wg-hud-boundary{
+  letter-spacing:.08em;color:rgba(199,245,231,.75);
+  text-shadow:0 1px 6px #01111c;
+}
+.wg-living-observer .wg-hud-rail{
+  color:#c3f4ee;background:linear-gradient(90deg,transparent,rgba(8,31,40,.38),transparent);
+}
+.wg-living-observer .wg-optics-tools{
+  z-index:5;display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:10px;width:100%;padding:3px 10px 13px;
+  font:600 .73rem/1.45 ui-monospace,Consolas,monospace;
+  color:rgba(183,227,221,.76);letter-spacing:.025em;
+}
+.wg-living-observer .wg-optics-tools [data-observer-optics]{
+  min-height:36px;padding:6px 14px;border:1px solid rgba(125,225,220,.47);
+  border-radius:50px;color:#e6fef6;background:linear-gradient(155deg,rgba(24,83,94,.62),rgba(5,25,42,.93));
+  box-shadow:inset 0 1px rgba(242,255,248,.15),0 5px 18px rgba(0,0,0,.24);
+  cursor:pointer;
+}
+.wg-living-observer .wg-optics-tools [data-observer-optics][aria-pressed="false"]{
+  color:#d1dddc;border-color:rgba(182,192,203,.29);background:rgba(9,21,34,.75);
+}
+.wg-living-observer .wg-optics-tools [data-observer-optics]:focus-visible{
+  outline:2px solid #c9fdf2;outline-offset:3px;
+}
+.wg-living-observer .observer-stage[data-optical-mode="classic"] .wg-spatial-hud,
+.wg-living-observer .observer-stage[data-optical-mode="fallback"] .wg-spatial-hud{
+  display:none;
+}
+.wg-living-observer .observer-stage[data-optical-mode="classic"]>.wg-spatial-three-canvas{display:none}
+.wg-living-observer .observer-stage[data-optical-mode="fallback"]>.wg-spatial-three-canvas{display:none}
+.wg-living-observer .wg-science-station{
+  position:relative;isolation:isolate;z-index:1;
+  overflow:hidden;
+  border:1px solid rgba(147,227,213,.35);
+  box-shadow:inset 0 1px rgba(233,255,244,.13),0 14px 45px rgba(0,0,0,.2);
+}
+.wg-living-observer .wg-science-panes,
+.wg-living-observer .wg-science-tabs{
+  position:relative;z-index:1;
+}
+.wg-living-observer .wg-science-tabs button{
+  min-height:42px;padding:.55rem .85rem;
+}
+.wg-living-observer .wg-science-field textarea{
+  width:100%;min-width:0;min-height:7rem;
+  background:#081b2a;color:#e8f7f4;border:1px solid rgba(146,204,198,.5);
+  border-radius:9px;padding:.6rem;font:500 .82rem/1.5 ui-monospace,Consolas,monospace;
+  resize:vertical;
+}
+.wg-living-observer .wg-science-field textarea:focus-visible{
+  outline:2px solid #d9c28c;outline-offset:3px;
+}
+@media(max-width:620px){
+  .wg-living-observer .wg-optics-tools{justify-content:center;text-align:center}
+  .wg-living-observer .wg-optics-tools>span{font-size:.65rem}
+  .wg-living-observer .wg-hud-identity strong{font-size:11px}
+  .wg-living-observer .wg-hud-identity small{font-size:7px}
+}
+@media(prefers-reduced-motion:reduce){
+  .wg-living-observer .wg-spatial-hud{transition:none;animation:none}
+}
