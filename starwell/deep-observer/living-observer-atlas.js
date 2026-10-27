@@ -63,6 +63,37 @@ export function parseNoaaProduct(kind,json,now=new Date()){
     usable_for_display:recent.elapsed<=MAX_AGE[kind],
   });
 }
+/**
+ * Preserves NOAA's individual three-hour Kp measurements rather than
+ * claiming that one scalar is a historical field. Unusable/future/invalid
+ * readings never enter the displayed measured trace.
+ */
+export function deriveKpTrace(json,now=new Date()){
+  assert(Array.isArray(json),'Kp trace requires an actual SWPC array');
+  const nowMs=new Date(now).getTime();
+  assert(Number.isFinite(nowMs),'invalid Kp trace clock');
+  const allowed=json.flatMap(row=>{
+    if(!row||Array.isArray(row)||typeof row!=='object')return [];
+    if(row.Kp===null||row.Kp===undefined||row.Kp==='')return [];
+    const kp=Number(row.Kp);
+    if(!Number.isFinite(kp)||kp<0||kp>9)return [];
+    try{
+      const time=parseNoaaTime(row.time_tag);
+      const age=nowMs-Date.parse(time);
+      if(age< -300000 || age>5*86400000)return [];
+      return [{time,kp,age_minutes:Math.max(0,Math.round(age/60000))}];
+    }catch{return [];}
+  }).sort((a,b)=>Date.parse(a.time)-Date.parse(b.time));
+  const unique=allowed.filter((r,i,all)=>all.findIndex(other=>other.time===r.time)===i);
+  return Object.freeze({
+    schema:'observer.noaa-kp-trace/v1',
+    source:'NOAA SWPC planetary K-index',url:NOAA_SOURCES.kp,
+    cadence:'3-hour planetary intervals, not continuous telemetry',
+    points:Object.freeze(unique.slice(-40).map(p=>Object.freeze(p))),
+    historical_window:'up to 5 days, last 40 valid points',
+    baseline_rule:'Never interpolate absent intervals or infer a physical link to symbolic geometry.',
+  });
+}
 export async function fetchNoaaAtlas({fetchImpl=globalThis.fetch,now=new Date(),signal=null}={}){
   assert(typeof fetchImpl==='function','fetch required');
   const entries=await Promise.all(Object.entries(NOAA_SOURCES).map(async ([kind,url])=>{
@@ -76,7 +107,10 @@ export async function fetchNoaaAtlas({fetchImpl=globalThis.fetch,now=new Date(),
         const response=await fetchImpl(url,{cache:'no-store',signal:ctl.signal,headers:{Accept:'application/json'}});
         if(!response.ok)throw new Error('HTTP '+response.status);
         const body=await response.json();
-        return [kind,{status:'available',reading:parseNoaaProduct(kind,body,now)}];
+        const latest=parseNoaaProduct(kind,body,now);
+        const reading=kind==='kp'
+          ? Object.freeze({...latest,trace:deriveKpTrace(body,now)}) : latest;
+        return [kind,{status:'available',reading}];
       }finally{clearTimeout(timeout);signal?.removeEventListener('abort',stop);}
     }catch(error){
       return [kind,{status:signal?.aborted?'aborted':'unavailable',message:String(error.message||error).slice(0,130),
@@ -227,6 +261,39 @@ function mount(){
       ' · rotation '+rotation.toFixed(1)+'°'+
       (kp?.usable_for_display?' mapped from NOAA Kp purely for artistic display':' neutral (no fresh Kp)')+
       ' · not an instrument-measured celestial alignment.';
+    const plot=by('atlasKpTrace');
+    const kpTrace=kp?.trace?.points||[];
+    if(plot){
+      plot.replaceChildren();
+      if(kpTrace.length>=2){
+        const ns='http://www.w3.org/2000/svg';
+        const svg=document.createElementNS(ns,'svg');
+        svg.setAttribute('viewBox','0 0 640 160');
+        svg.setAttribute('role','img');
+        svg.setAttribute('aria-label','NOAA planetary Kp measured 3-hour index over '+kpTrace.length+' timestamps');
+        const observed=kpTrace.map((point,i)=>
+          [25+(i/(kpTrace.length-1))*590,145-(point.kp/9)*130]);
+        const path=document.createElementNS(ns,'polyline');
+        path.setAttribute('points',observed.map(x=>x.map(n=>n.toFixed(2)).join(',')).join(' '));
+        path.setAttribute('fill','none');path.setAttribute('stroke','#8fe0c4');
+        path.setAttribute('stroke-width','2.4');path.setAttribute('stroke-linejoin','round');
+        svg.append(path);
+        for(const [value,y] of [[0,145],[3,145-3/9*130],[6,145-6/9*130],[9,15]]){
+          const grid=document.createElementNS(ns,'line');
+          grid.setAttribute('x1','20');grid.setAttribute('x2','620');
+          grid.setAttribute('y1',String(y));grid.setAttribute('y2',String(y));
+          grid.setAttribute('stroke','rgba(168,204,224,.25)');
+          grid.setAttribute('stroke-dasharray','3 5');
+          svg.insertBefore(grid,path);
+        }
+        plot.append(svg);
+        by('atlasKpTraceLabel').textContent=kpTrace.length+' dated NOAA Kp records · '+
+          kpTrace[0].time+' to '+kpTrace.at(-1).time+
+          '. 3-hour index, no gap interpolation.';
+      }else{
+        by('atlasKpTraceLabel').textContent='No recent NOAA Kp history available. Nothing drawn from stale or invented values.';
+      }
+    }
     by('atlasRaw').textContent=JSON.stringify({
       schema:OBSERVER_ATLAS_SCHEMA,
       time_utc:lastTime.toISOString(), scientific_readings:readings,
