@@ -22,7 +22,7 @@ const SCIENTIFIC_SYSTEM_PROMPT = [
   'Do not infer a physical quantum process merely from quantum-inspired notation, probabilistic analogy or simulated amplitude rotation.',
   'Do not assume that source identifiers are independently verified or that repeating one source creates corroboration.',
   'Do not claim subjective awareness, personal memories, access to a device, external research, or measurements you have not performed.',
-  'Where evidence cannot discriminate, retain the competing hypotheses and identify what would change the conclusion.',
+  'Where evidence cannot discriminate, retain the competing unresolved hypotheses and identify what would change the conclusion.',
   'Do not reveal or alter other participants, canon, credentials, or Wayglass runtime authority.',
 ].join('\n');
 
