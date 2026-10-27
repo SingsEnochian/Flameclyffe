@@ -49,6 +49,10 @@ try {
         throw 'Staged Wayglass is missing the N-012 Three.js + invariant-trial capability marker. Refusing to launch stale UI.'
     }
     Write-Host '[Wayglass] Verified staged N-012 optical deck + geometry invariants + named Crew.'
+    if (-not (Select-String -Path $builtIndex -Pattern 'name="wayglass-ui-generation" content="n013-unified-hull-spatial-classic-inheritance-fix"' -SimpleMatch -Quiet)) {
+        throw 'Staged portal does not have the N-013 shared optical design and route repair marker. Refusing stale startup.'
+    }
+    Write-Host '[Wayglass] N-013 integrated ship design and host route fix marker verified.'
     $env:PORT = [string]$Port
     Write-Host ''
     Write-Host '[Wayglass] N-010 HEARTGATE PORTAL (local, no Vercel):'
