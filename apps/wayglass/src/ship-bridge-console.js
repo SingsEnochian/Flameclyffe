@@ -3,7 +3,7 @@
  * Telemetry is browser/application state, never AI interiority or canon.
  */
 export const BRIDGE_CONSOLE_SCHEMA='wayglass.bridge-console/v1';
-export function mountShipBridgeConsole(root,kernel,activeId){
+export function mountShipBridgeConsole(root,kernel,activeId,soundDesk=null){
  const surface=root?.querySelector('.wg-surface');
  if(!surface)return()=>{};
  let destroyed=false;
@@ -24,6 +24,10 @@ export function mountShipBridgeConsole(root,kernel,activeId){
      '<option value="bridge">Bridge</option><option value="labradorite">Labradorite</option>',
      '<option value="night">Night</option></select></label>',
    '<button type="button" data-bridge-health>Check systems</button>',
+   '<label>Soundscape <select data-bridge-sound aria-label="Local ship soundscape">',
+     '<option value="silence">Silent</option><option value="deep-space">Deep Space</option>',
+     '<option value="rain">Rain</option><option value="starwell">Starwell</option></select></label>',
+   '<button type="button" data-bridge-feather>Feather · Stop</button>',
    '<button type="button" data-bridge-recover>Recover deck</button>',
   '</div>',
   '<p data-bridge-note role="status">Registered systems are not proof of active participants or physical states.</p>'
@@ -59,6 +63,28 @@ export function mountShipBridgeConsole(root,kernel,activeId){
   finally{if(!destroyed)check.disabled=false}
  };
  check.addEventListener('click',checkNow);
+ const sound=q('[data-bridge-sound]');
+ if(soundDesk)sound.value=soundDesk.snapshot().mode;
+ else sound.disabled=true;
+ const setSound=()=>{
+  if(!soundDesk)return;
+  try{
+   const info=soundDesk.start(sound.value);
+   status.textContent=info.active?'Local mono-safe soundscape playing. No voice or external audio transfer.':'Soundscape stopped.';
+  }catch(error){
+   sound.value=soundDesk.snapshot().mode;
+   status.textContent='Sound unavailable: '+String(error?.message||error).slice(0,130);
+  }
+ };
+ sound.addEventListener('change',setSound);
+ const feather=q('[data-bridge-feather]');
+ const globalFeather=()=>{
+  globalThis.dispatchEvent?.(new CustomEvent('wayglass:feather',{detail:{held:true}}));
+  // A global stop does not grant permission to resume another room's audio.
+  sound.value='silence';
+  status.textContent='Feather held. Ambient sound and global glass motion stopped.';
+ };
+ feather.addEventListener('click',globalFeather);
  const recover=q('[data-bridge-recover]');
  const recoverNow=async()=>{
   if(recover.disabled)return;
@@ -79,6 +105,8 @@ export function mountShipBridgeConsole(root,kernel,activeId){
   destroyed=true;unsubscribe();
   theme.removeEventListener('change',setTheme);
   check.removeEventListener('click',checkNow);
+  sound.removeEventListener('change',setSound);
+  feather.removeEventListener('click',globalFeather);
   recover.removeEventListener('click',recoverNow);
   bar.remove();
  };
