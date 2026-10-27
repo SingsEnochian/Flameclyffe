@@ -90,3 +90,57 @@
 @media(prefers-reduced-motion:reduce){
  .wg-surface .wg-bridge-console{backdrop-filter:none}
 }
+
+
+/* N-017 integrated communications and research instruments */
+.wg-surface[data-deck-system="n013"] .wg-lorebook-dock,
+.wg-surface[data-deck-system="n013"] .wg-ship-dictation,
+.wg-surface[data-deck-system="n013"] .wg-quantum-console{
+  min-width:0;padding:clamp(15px,1.8vw,22px);
+  border:1px solid var(--wg-hull-metal);
+  border-radius:19px;
+  background:linear-gradient(137deg,rgba(186,241,255,.08),transparent 22%),
+    var(--wg-hull-bg);
+  box-shadow:inset 0 1px rgba(229,252,255,.16),0 14px 33px rgba(0,0,0,.21);
+  color:#ebf8fa;
+}
+.wg-surface .wg-lorebook-dock summary{cursor:pointer;font-weight:720;
+  padding:7px 0;color:var(--wg-hull-cyan);}
+.wg-surface .wg-lorebook-dock p,
+.wg-surface .wg-ship-dictation p,
+.wg-surface .wg-quantum-console p{color:#c2dce6;line-height:1.6;}
+.wg-surface .wg-lore-entries{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}
+.wg-surface .wg-lorebook-dock input[type=file]{max-width:100%;padding:12px}
+.wg-surface .wg-lorebook-dock button,
+.wg-surface .wg-quantum-console button{
+  min-height:40px;padding:9px 12px;border-radius:11px;
+  border:1px solid var(--wg-hull-metal);background:rgba(23,65,94,.73);
+  color:#ecfbff;cursor:pointer;
+}
+.wg-surface .wg-ship-dictation{
+  display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap;
+}
+.wg-surface .wg-ship-dictation p{margin:0;flex:1 1 270px}
+.wg-surface .wg-ship-dictation button{min-height:42px}
+.wg-surface .wg-ship-dictation span[role=status]{
+  flex-basis:100%;color:#b6d5e2
+}
+.wg-surface .wg-quantum-console{display:grid;gap:12px}
+.wg-surface .wg-quantum-console h2{font:550 clamp(1.15rem,1.5vw,1.6rem) Georgia,serif;margin:0}
+.wg-surface .wg-quantum-console [data-quantum-gates]{
+  display:flex;gap:9px;flex-wrap:wrap;
+}
+.wg-surface .wg-quantum-console pre{
+  overflow:auto;max-height:24rem;white-space:pre-wrap;
+  padding:14px;border-radius:14px;background:rgba(3,16,36,.81);
+  border:1px solid rgba(148,205,227,.2);
+}
+.wg-surface .wg-quantum-console :is(button,select):focus-visible,
+.wg-surface .wg-lorebook-dock button:focus-visible,
+.wg-surface .wg-ship-dictation button:focus-visible{
+  outline:2px solid #dbfff8;outline-offset:3px
+}
+@media(max-width:700px){
+ .wg-surface .wg-ship-dictation{display:grid;grid-template-columns:1fr}
+ .wg-surface .wg-lore-entries{gap:9px}
+}
