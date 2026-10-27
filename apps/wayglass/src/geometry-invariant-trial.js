@@ -148,6 +148,7 @@ export async function replayGeometryInvariantTrial(receipt){
   const independent=receipt.trial?.mode==='independently-declared-sources';
   const verified=await runGeometryInvariantTrial({seed:inputs.seed,nullTrials:inputs.null_trials,
     ...(independent?{datasetA:inputs.sourceA,datasetB:inputs.sourceB,tolerance:inputs.tolerance}:{})});
-  return freeze({valid:verified.sha256===receipt.sha256,expected_digest:verified.sha256,
+  const submittedDigest=await digest(receipt.trial);
+  return freeze({valid:verified.sha256===receipt.sha256 && submittedDigest===receipt.sha256,expected_digest:verified.sha256,
     provided_digest:receipt.sha256,claim:'Same code/source deterministic replay only; does not authenticate independent provenance'});
 }
