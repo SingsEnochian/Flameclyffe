@@ -420,6 +420,10 @@ export async function mountWayglassLivingObserver(root) {
   function cleanup() {
     if(disposed)return;
     disposed=true;
+    // Feather is scoped to the Observer deck. When exiting a held room,
+    // restore the global material pump for the next room without resuming
+    // this Observer's independent music, haptics or animation.
+    if(paused)globalThis.dispatchEvent?.(new CustomEvent('wayglass:feather',{detail:{held:false}}));
     cancelAnimationFrame(animation);clearInterval(timer);unsubscribe();unsubscribeLight();
     disposeScience();opticalDeck?.dispose();opticalDeck=null;
     globalThis.removeEventListener?.('arcsweep:gesture-feedback', onExternalFeather);
@@ -507,7 +511,9 @@ export async function mountWayglassLivingObserver(root) {
   };
   globalThis.addEventListener?.('arcsweep:gesture-feedback', onExternalFeather);
   featherButton.addEventListener('click',event=>{
-    paused=!paused;event.currentTarget.setAttribute('aria-pressed',String(paused));
+    paused=!paused;
+    globalThis.dispatchEvent?.(new CustomEvent('wayglass:feather',{detail:{held:paused}}));
+    event.currentTarget.setAttribute('aria-pressed',String(paused));
     event.currentTarget.textContent=paused?'Feather · Resume':'Feather · Pause';
     if(paused){root.dataset.featherHeld='true';opticalDeck?.update({packet,focus,rotation:rotation.angle,interior:interiorSignal,lowStim,paused});rotation.stop();cancelAnimationFrame(animation);haptics=false;root.querySelector('[data-observer-haptics]').setAttribute('aria-pressed','false');root.querySelector('[data-observer-haptics]').textContent='Haptics · Off';
       if(audioContext){audioContext.close().catch(()=>{});audioContext=null;}sound=false;root.querySelector('[data-observer-sound]').setAttribute('aria-pressed','false');root.querySelector('[data-observer-sound]').textContent='Sound · Off';
