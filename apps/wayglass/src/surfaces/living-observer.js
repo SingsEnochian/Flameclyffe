@@ -38,6 +38,10 @@ function drawAstrolabe(canvas, packet, time, focus, lowStim, {rotation = 0, lens
   // Keep 2D contact points and labels in spatial mode, but let the Three.js scene
   // own the core, concentric shells, background glow and moving orbital rings.
   // This prevents two complete instruments occupying the same optical depth.
+  const strokeCircle=(r,col,alpha=1,width=1,rotation=0,portion=TAU)=>{
+    g.beginPath();g.arc(cx,cy,r,rotation,rotation+portion);
+    g.strokeStyle=col;g.globalAlpha=alpha;g.lineWidth=width;g.stroke();g.globalAlpha=1;
+  };
   if(!spatial){
   const well = g.createRadialGradient(lensX,lensY,3,lensX,lensY,220);
   well.addColorStop(0,'rgba(190,244,247,.13)');
@@ -50,10 +54,6 @@ function drawAstrolabe(canvas, packet, time, focus, lowStim, {rotation = 0, lens
   field.addColorStop(.57,'rgba(27,55,76,.22)');
   field.addColorStop(1,'rgba(10,14,28,0)');
   g.fillStyle=field; g.beginPath();g.arc(cx,cy,390,0,TAU);g.fill();
-  const strokeCircle=(r,col,alpha=1,width=1,rotation=0,portion=TAU)=>{
-    g.beginPath();g.arc(cx,cy,r,rotation,rotation+portion);
-    g.strokeStyle=col;g.globalAlpha=alpha;g.lineWidth=width;g.stroke();g.globalAlpha=1;
-  };
   // Nested optical plates: independently weighted by explicitly mapped variables.
   for(let k=0;k<6;k++){
     const r=inner+28*k+v.E*k*4;
@@ -253,8 +253,15 @@ export async function mountWayglassLivingObserver(root) {
     const spatial=isSpatial();
     opticsButton.setAttribute('aria-pressed',String(spatial));
     opticsButton.textContent=spatial?'Optics · Spatial':opticalDeck?.available?'Optics · Classic':'Optics · Classic (3D unavailable)';
-    if(!disposed)refresh();
+    if(!disposed){
+      refresh();
+      if(paused){
+        drawAstrolabe(canvas,packet||current(),0,focus,true,{...drawOptions(),spatial:isSpatial()});
+        opticalDeck?.update({packet,focus,rotation:rotation.angle,interior:interiorSignal,lowStim,paused});
+      }
+    }
   }
+  canvas.closest('.observer-stage')?.addEventListener('wayglass:optics-change',paintOpticsPreference);
   opticsButton.addEventListener('click',()=>{
     preferSpatial=!preferSpatial;
     opticalDeck?.setEnabled(preferSpatial);
