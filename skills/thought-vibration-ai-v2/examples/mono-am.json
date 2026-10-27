@@ -1,0 +1,23 @@
+{
+  "schema": "thought-vibration.session/v1",
+  "session_id": "mono-5p5-reference",
+  "mode": "acoustic-engineering",
+  "claim_domain": "SYMBOLIC",
+  "source_id": "mythiences.audio.cinematic/reference-mono-1",
+  "render_intent_confirmed": true,
+  "audio": {
+    "kind": "mono-am",
+    "duration_seconds": 2,
+    "sample_rate_hz": 48000,
+    "gain_linear": 0.08,
+    "fade_seconds": 0.02,
+    "carrier_hz": 432,
+    "modulation_hz": 5.5,
+    "modulation_depth": 0.6
+  },
+  "output": {"kind": "offline-diagnostic-wav", "playback": false},
+  "mythic": {"channel_state": "stabilised", "interpretation": "A monaural cue that carries an explicit physical envelope"},
+  "stop_point": "Check vocal masking with a real listening profile",
+  "next_owner": "Wayglass-Mobius-Engineer",
+  "unresolved_questions": ["What does the Osia streaming route preserve perceptually?"]
+}

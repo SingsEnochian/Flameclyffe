@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wayglass.local/schemas/thought-vibration/session.v1.schema.json",
+  "title": "Thought Vibration session v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "session_id", "mode", "claim_domain", "source_id", "render_intent_confirmed", "audio", "output"],
+  "properties": {
+    "schema": {"const": "thought-vibration.session/v1"},
+    "session_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$"},
+    "mode": {"enum": ["mythic-composition", "acoustic-engineering", "quantum-simulation", "combined-experiment"]},
+    "claim_domain": {"enum": ["ENGINE-TRUE", "OBSERVATION-TRUE", "CANON-TRUE", "SYMBOLIC", "UNKNOWN", "REJECTED"]},
+    "source_id": {"type": "string", "minLength": 1, "maxLength": 256},
+    "render_intent_confirmed": {"const": true, "description": "True means this explicit invocation requested the offline diagnostic render; it is not a signed production-tone approval."},
+    "audio": {
+      "type": "object", "additionalProperties": false,
+      "required": ["kind", "duration_seconds", "sample_rate_hz", "gain_linear", "fade_seconds"],
+      "properties": {
+        "kind": {"enum": ["separate-ear-stereo", "mono-am"]},
+        "duration_seconds": {"type": "number", "minimum": 0.05, "maximum": 30},
+        "sample_rate_hz": {"const": 48000},
+        "gain_linear": {"type": "number", "exclusiveMinimum": 0, "maximum": 0.15},
+        "fade_seconds": {"type": "number", "minimum": 0.005, "maximum": 2},
+        "left_hz": {"type": "number", "minimum": 20, "maximum": 10000},
+        "right_hz": {"type": "number", "minimum": 20, "maximum": 10000},
+        "phase_offset_deg": {"type": "number", "minimum": -180, "maximum": 180},
+        "carrier_hz": {"type": "number", "minimum": 20, "maximum": 10000},
+        "modulation_hz": {"type": "number", "exclusiveMinimum": 0, "maximum": 30},
+        "modulation_depth": {"type": "number", "minimum": 0, "maximum": 1}
+      },
+      "oneOf": [
+        {"properties": {"kind": {"const": "separate-ear-stereo"}}, "required": ["left_hz", "right_hz", "phase_offset_deg"], "not": {"anyOf": [{"required": ["carrier_hz"]}, {"required": ["modulation_hz"]}, {"required": ["modulation_depth"]}]}},
+        {"properties": {"kind": {"const": "mono-am"}}, "required": ["carrier_hz", "modulation_hz", "modulation_depth"], "not": {"anyOf": [{"required": ["left_hz"]}, {"required": ["right_hz"]}, {"required": ["phase_offset_deg"]}]}}
+      ]
+    },
+    "output": {
+      "type": "object", "additionalProperties": false,
+      "required": ["kind", "playback"],
+      "properties": {"kind": {"const": "offline-diagnostic-wav"}, "playback": {"const": false}}
+    },
+    "mythic": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "channel_state": {"enum": ["open", "collapsed", "stabilised"]},
+        "rhythm_pattern": {"type": "string", "maxLength": 128},
+        "interpretation": {"type": "string", "maxLength": 512}
+      }
+    },
+    "stop_point": {"type": ["string", "null"], "maxLength": 256},
+    "next_owner": {"type": ["string", "null"], "maxLength": 128},
+    "unresolved_questions": {"type": "array", "items": {"type": "string", "maxLength": 500}, "maxItems": 20}
+  }
+}

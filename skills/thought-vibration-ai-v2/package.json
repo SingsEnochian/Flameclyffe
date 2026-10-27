@@ -1,0 +1,9 @@
+{
+  "name": "thought-vibration-ai-skill-reference",
+  "private": true,
+  "version": "2.0.0",
+  "description": "Portable Wayglass skill and dependency-free offline DSP proving chamber",
+  "type": "module",
+  "engines": {"node": ">=20"},
+  "scripts": {"test": "node --test test/*.test.mjs"}
+}
