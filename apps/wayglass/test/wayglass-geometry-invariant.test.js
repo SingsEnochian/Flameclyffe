@@ -1,0 +1,63 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {
+  extractAtlasLandmarks,distanceSpectrum,mismatch,transformed,
+  calculateGeometryInvariantTrial,runGeometryInvariantTrial,replayGeometryInvariantTrial
+} from '../src/geometry-invariant-trial.js';
+const source=p=>readFileSync(new URL(p,import.meta.url),'utf8');
+test('canonical Flower and Metatron landmarks use explicitly sourced SVG circles',()=>{
+  const flower=extractAtlasLandmarks('flower'),metatron=extractAtlasLandmarks('metatron');
+  assert.equal(flower.points.length,7);assert.equal(metatron.points.length,7);
+  assert.deepEqual(flower.points[0],[0,0]);assert.deepEqual(metatron.points[0],[0,0]);
+  assert.equal(flower.source,metatron.source);
+  assert.match(flower.dependence,/axialPoint/);
+  assert.throws(()=>extractAtlasLandmarks('unknown'),/only canonical/);
+});
+test('distance spectrum is exactly invariant to relabelling, translation, rotation and uniform scale within rounding',()=>{
+  const points=extractAtlasLandmarks('flower').points;
+  assert.equal(distanceSpectrum(points).length,21);
+  assert.ok(mismatch(points,transformed(points))<=1e-9);
+  assert.ok(mismatch(points,points.toReversed())<=1e-9);
+  assert.throws(()=>distanceSpectrum([[0,0],[0,0],[0,0]]),/degenerate/);
+});
+test('positive, negative and angular null controls are separated and deterministic',()=>{
+  const x=calculateGeometryInvariantTrial({seed:104729,nullTrials:399});
+  const y=calculateGeometryInvariantTrial({seed:104729,nullTrials:399});
+  assert.deepEqual(x,y);
+  assert.equal(x.verdict.matched_within_svg_rounding,true);
+  assert.equal(x.verdict.controls_discriminate,true);
+  assert.equal(x.verdict.independent_emergence,false);
+  assert.ok(x.measurements.distorted_control_mismatch>0.01);
+  assert.ok(x.measurements.null_median>x.measurements.observed_mismatch);
+  assert.ok(x.measurements.null_rank>=1/400);
+  assert.match(x.null,/NOT shuffled labels/);
+  assert.throws(()=>calculateGeometryInvariantTrial({seed:0}),/positive 32-bit/);
+  assert.throws(()=>calculateGeometryInvariantTrial({nullTrials:3}),/99–1999/);
+});
+test('SHA-256 replay verifies a deterministic local receipt and rejects tampering',async()=>{
+  const r=await runGeometryInvariantTrial({seed:57,nullTrials:99});
+  assert.match(r.sha256,/^[a-f0-9]{64}$/);
+  assert.equal((await replayGeometryInvariantTrial(r)).valid,true);
+  assert.equal((await replayGeometryInvariantTrial({...r,sha256:'f'.repeat(64)})).valid,false);
+  assert.equal(r.trial.evidence_register.includes('not physical data'),true);
+});
+test('Observer science and spatial HUD are integrated, no remote models and lifecycle cleanup',()=>{
+  const science=source('../src/surfaces/living-observer-science.js');
+  const observer=source('../src/surfaces/living-observer.js');
+  const hud=source('../src/surfaces/observer-three-hud.js');
+  const css=source('../src/surfaces/observer-three-hud.css');
+  assert.match(science,/id:'invariants',label:'Invariant Trial'/);
+  assert.match(science,/runGeometryInvariantTrial/);
+  assert.match(science,/replayGeometryInvariantTrial/);
+  assert.match(observer,/mountObserverThreeHUD/);
+  assert.match(observer,/opticalDeck\?\.dispose/);
+  assert.match(observer,/paused,lowStim,rotation/);
+  assert.match(hud,/import\('three'\)/);
+  assert.match(hud,/MeshPhysicalMaterial/);
+  assert.match(hud,/ResizeObserver/);
+  assert.match(hud,/webglcontextlost/);
+  assert.match(hud,/if\(paused\|\|lowStim\|\|reducedMotion\)/);
+  assert.match(css,/wg-spatial-hud/);
+  assert.match(css,/pointer-events:none/);
+});
