@@ -91,6 +91,7 @@ test('source HTML carries the revision marker required by stale-port launch guar
   const html=file('../index.html');
   const launcher=file('../../../scripts/wayglass-local.mjs');
   assert.match(html,/name="wayglass-ui-revision" content="living-observer-n010"/);
+  assert.match(html,/name="wayglass-ui-capabilities" content="n012-three-hud-geometry-invariants-crew"/);
   assert.match(launcher,/if \(existing\.responding && !existing\.current\)/);
   assert.match(launcher,/OLD or unknown Wayglass build/);
 });
@@ -103,6 +104,8 @@ test('default Windows launch enters N-010 through one-origin Hearthgate, never V
   assert.match(launcher,/npm run wayglass:deploy:server/);
   assert.match(launcher,/npm --prefix apps\/starwell-server run start:core/);
   assert.match(launcher,/living-observer-n010/);
+  assert.match(launcher,/n012-three-hud-geometry-invariants-crew/);
+  assert.match(launcher,/Refusing to launch stale UI/);
   assert.match(launcher,/Port \$Port is already occupied/);
   const executableLines=launcher.split('\n').filter(line=>!line.trimStart().startsWith('#')).join('\n');
   assert.doesNotMatch(executableLines,/scripts\/wayglass-local\.mjs|5186|vercel --prod/);
