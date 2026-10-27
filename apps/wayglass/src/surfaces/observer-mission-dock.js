@@ -68,8 +68,10 @@ export function mountObserverMissionDock(root){
     if(target.tab)section.querySelector(target.tab)?.click();
     section.scrollIntoView?.({behavior:'auto',block:'start'});
     // Visible and accessible return target, no auto run/send.
-    const focusTarget=target.tab?section.querySelector(target.tab):
-      section.querySelector('h2, h3, button, summary');
+    // Sections without a tabbable heading get a temporary programmatic
+    // focus target; keyboard users are not stranded after in-page travel.
+    const focusTarget=target.tab?section.querySelector(target.tab):section;
+    if(!target.tab && !section.hasAttribute('tabindex')) section.setAttribute('tabindex','-1');
     focusTarget?.focus?.({preventScroll:true});
   };
   dock.addEventListener('click',onClick);
