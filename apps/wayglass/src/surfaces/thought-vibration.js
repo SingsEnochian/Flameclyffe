@@ -36,6 +36,7 @@ export async function mountThoughtVibrationSurface(root) {
   let latestReceipt = null;
   let latestReceiptRef = null;
   let objectUrl = null;
+  let receiptUrl = null;
   let renderController = null;
   let renderGeneration = 0;
 
@@ -92,6 +93,7 @@ export async function mountThoughtVibrationSurface(root) {
           '<div id="tv-render-result" class="tv-result" hidden>',
             '<div class="tv-result-actions">',
               '<a id="tv-download" class="glass-chip tv-download" href="#" download>Save WAV</a>',
+              '<a id="tv-save-receipt" class="glass-chip tv-download" href="#" download>Save receipt JSON</a>',
               '<button id="tv-pin" type="button" class="glass-chip">Pin receipt to next Return</button>',
             '</div>',
             '<pre id="tv-receipt"></pre>',
@@ -130,6 +132,7 @@ export async function mountThoughtVibrationSurface(root) {
   const renderResult = root.querySelector('#tv-render-result');
   const receiptPre = root.querySelector('#tv-receipt');
   const download = root.querySelector('#tv-download');
+  const saveReceipt = root.querySelector('#tv-save-receipt');
   const pin = root.querySelector('#tv-pin');
   const feather = root.querySelector('#tv-feather');
   const quantumForm = root.querySelector('#tv-quantum-form');
@@ -141,10 +144,13 @@ export async function mountThoughtVibrationSurface(root) {
     renderController?.abort();
     renderController = null;
     if (objectUrl) URL.revokeObjectURL(objectUrl);
+    if (receiptUrl) URL.revokeObjectURL(receiptUrl);
     objectUrl = null;
+    receiptUrl = null;
     latestReceipt = null;
     latestReceiptRef = null;
     download.removeAttribute('href');
+    saveReceipt.removeAttribute('href');
     renderResult.hidden = true;
     receiptPre.textContent = '';
     renderStatus.textContent = 'Feather: pending browser render cancelled; no output is playing.';
@@ -249,6 +255,25 @@ export async function mountThoughtVibrationSurface(root) {
       objectUrl = URL.createObjectURL(blob);
       download.href = objectUrl;
       download.download = result.artifact.filename;
+      const evidence = {
+        schema: 'wayglass.thought-vibration-evidence/v0.1',
+        receipt_ref: result.receipt_ref,
+        receipt: result.receipt,
+        artifact: {
+          kind: result.artifact.kind,
+          filename: result.artifact.filename,
+          mime_type: result.artifact.mime_type,
+          bytes: result.artifact.bytes,
+          sha256: result.artifact.sha256,
+          persisted: false,
+          playback: false,
+        },
+        inspection: result.receipt_inspection,
+        warning: 'Local exported evidence only. A receipt digest is not proof of authorship or device playback.',
+      };
+      receiptUrl = URL.createObjectURL(new Blob([pretty(evidence) + '\\n'], { type: 'application/json' }));
+      saveReceipt.href = receiptUrl;
+      saveReceipt.download = result.receipt.session_id + '.thought-vibration-receipt.json';
       receiptPre.textContent = pretty({
         receipt_ref: result.receipt_ref,
         measurements: result.receipt.measurements,
