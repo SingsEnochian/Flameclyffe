@@ -21,7 +21,7 @@ Each turn has a fresh session ID, empty history, fixed `maxOutputTokens=500`, fi
 - The trial function accepts no arbitrary uploaded manuscript, other-reality record, or private participant memory. It constructs its contexts exclusively from `mechanicsFixture()`.
 - No SpicyChat, managed LLM, HTTP external URL, account credential, Supabase insert, canon mutation, release or training call.
 - The route checker requires `route_id === 'local:ollama'`, `configured !== false` and `capabilities.local === true`. The host still owns route auth and may reject.
-- A click is required to start. Feather aborts the active fetch and prevents remaining turns. Leaving the surface aborts.
+- A click is required to start. Feather aborts the browser fetch and prevents remaining turns. Leaving the surface also aborts. **The host or Ollama may continue computing after the browser disconnects; server-side cancel acknowledgement is not established.**
 - Any rejected, empty, mismatched, or oversized reply stops the sweep and preserves only completed local results.
 - Local test mocks confirm the request contract, not live execution or source identity.
 - Test order can be reversed, allowing a small order-effect check, but does not constitute statistical inference.
@@ -34,6 +34,10 @@ Each turn has a fresh session ID, empty history, fixed `maxOutputTokens=500`, fi
 4. With a local Ollama model installed, click once and inspect the actual `/api/v1/wayglass/respond` requests and host receipts: exactly three independent responses, correctly pinned to `local:ollama`, with no provider substitution. No test uses private manuscripts.
 5. Repeat with reversed context order; store human-reviewed observations separately from mechanistic rubric scores before making any claims of model benefit.
 6. Independently verify the provider/runtime behind the host if physical model identity matters; response metadata alone is insufficient.
+
+## Host framing confound
+
+The existing Wayglass host currently uses a co-writing system instruction for the shared respond route. The N-004 client explicitly sets OOC, scientific-experiment intent, but this does not remove the inherited host-level instruction. It is a useful transport and qualitative smoke, **not** a controlled model-reasoning benchmark until a reviewed, separately authorised scientific host prompt contract exists. Preserve that confound in any interpretation of results.
 
 ## Remaining boundaries
 
