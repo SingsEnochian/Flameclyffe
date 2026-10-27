@@ -105,6 +105,13 @@ export async function runNikolaLocalTrial({
         participantId: null,
         characterId: null,
         input: entry.input,
+        interaction: {
+          channel: 'OOC',
+          turn_owner: 'Rowan',
+          interaction_mode: 'scientific-experiment',
+          intent: 'Scientific reasoning evaluation using only the supplied synthetic oscillator fixture; preserve uncertainty and propose a measurement.',
+          character_ownership: [],
+        },
         history: [],
         sessionId: entry.session_id + '-' + nonce,
         surfaceId: 'wayglass:nikola-research',
