@@ -90,6 +90,8 @@ export async function runNikolaLocalTrial({
   requireValid(typeof onProgress === 'function', 'progress callback must be a function');
   requireValid(typeof clock === 'function', 'clock must be a function');
   const plan = await prepareNikolaLocalTrial({ order });
+  const nonce = globalThis.crypto?.randomUUID?.();
+  requireValid(typeof nonce === 'string' && nonce.length > 0, 'fresh session IDs unavailable');
   const attempts = [];
   for (const entry of plan.entries) {
     if (signal?.aborted) return Object.freeze({ schema: NIKOLA_TRIAL_SCHEMA, status: 'stopped', route_id: NIKOLA_LOCAL_ROUTE, order, attempts });
@@ -104,7 +106,7 @@ export async function runNikolaLocalTrial({
         characterId: null,
         input: entry.input,
         history: [],
-        sessionId: entry.session_id,
+        sessionId: entry.session_id + '-' + nonce,
         surfaceId: 'wayglass:nikola-research',
         maxOutputTokens: 500,
         think: false,
