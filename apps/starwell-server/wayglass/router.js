@@ -472,17 +472,38 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       return res.status(409).json({ error: 'Stored departure could not be verified for this binding.' });
     }
   });
+  // Voyage messaging is an OPTIONAL House host service. Hearthgate can serve
+  // its Living Observer and local writing routes without that service. Never
+  // route a missing inbox through an unconsented provider or invent messages.
+  // A structured, read-only status lets the UI tell 'not configured' apart
+  // from 'the server is offline' without exposing messages or credentials.
+  router.get('/voyage/status', (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    const bridge = req.app.locals.wayglassVoyageMessages;
+    return res.json({
+      schema: 'wayglass.voyage-capability/v1',
+      configured: Boolean(bridge && typeof bridge.read === 'function' && typeof bridge.reply === 'function'),
+      live_transport_verified: false,
+      note: 'Host service presence is not proof of a reachable participant or live message delivery.',
+    });
+  });
   router.get('/voyage/messages', async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     const bridge = req.app.locals.wayglassVoyageMessages;
-    if (!bridge) return res.status(503).json({ error: 'Voyage message host services are not configured.' });
+    if (!bridge || typeof bridge.read !== 'function') return res.status(503).json({
+      code: 'VOYAGE_MESSAGE_SERVICE_NOT_CONFIGURED',
+      error: 'Voyage messages are not configured on this Hearthgate. No participant messaging was attempted.',
+    });
     try { return res.json(await bridge.read(req)); }
     catch (error) { return res.status(error.status || 500).json({ error: error.message }); }
   });
   router.post('/voyage/messages', async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     const bridge = req.app.locals.wayglassVoyageMessages;
-    if (!bridge) return res.status(503).json({ error: 'Voyage message host services are not configured.' });
+    if (!bridge || typeof bridge.reply !== 'function') return res.status(503).json({
+      code: 'VOYAGE_MESSAGE_SERVICE_NOT_CONFIGURED',
+      error: 'Voyage replies are not configured on this Hearthgate. Nothing was sent.',
+    });
     try { return res.status(201).json(await bridge.reply(req, req.body || {})); }
     catch (error) { return res.status(error.status || (error instanceof TypeError ? 400 : 500)).json({ error: error.message }); }
   });
