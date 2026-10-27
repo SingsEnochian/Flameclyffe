@@ -5,6 +5,7 @@
  * receive these inputs. The one remote action is a deliberate NOAA SWPC read.
  */
 import './living-observer-science.css';
+import { prepareWayglassCrewRoom } from '../crew-navigation.js';
 import {
   deriveNikolaHeartBrain, runNikolaHeartBrainTrial, replayNikolaHeartBrain,
 } from '../../../../starwell/deep-observer/nikola-heart-brain.js';
@@ -257,6 +258,18 @@ export function mountWayglassSciencePanel(root,{navigate=id=>globalThis.__waygla
     on(b,'click',()=>{if(!disposed)navigate(id);});
     doors.append(b);
   }
+  const crewSeats=element('div',{class:'wg-science-doors'});
+  for (const [label,worldId] of [
+    ['Bluebird · Richie','bluebird:spicychat'],
+    ['Vethrlauf','vethrlauf:spicychat'],
+    ['Griff Krenshaw','evil-gene:film-2015'],
+  ]) {
+    const entry=button(label,'crew-'+worldId);
+    on(entry,'click',()=>{ if(disposed)return; prepareWayglassCrewRoom(worldId); navigate('arcsweep:writing-room'); });
+    crewSeats.append(entry);
+  }
+  crew.append(element('h3',{text:'Named Crew · three separate rooms'}),crewSeats,
+    element('p',{class:'tiny',text:'Selecting a person opens only that pinned Writing Room seat; no provider message is sent. Route readiness and optional House Steward preflight are checked there. An active route does not prove a live reply.'}));
   const authorize=button('Connect Bluebird · optional consent','bluebird-connect');
   const bluebirdStatus=element('p',{class:'tiny','role':'status','aria-live':'polite',
     text:'Bluebird disconnected until explicit, verified provider authorisation. The Living Observer itself needs no Bluebird credential.'});
