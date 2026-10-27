@@ -86,3 +86,11 @@ test('Wayglass science CSS is mobile-sized and only one lens appears at a time',
  assert.match(css,/@media\(max-width:700px\)/);
  assert.match(css,/prefers-reduced-motion/);
 });
+
+test('source HTML carries the revision marker required by stale-port launch guard',()=>{
+  const html=file('../index.html');
+  const launcher=file('../../../scripts/wayglass-local.mjs');
+  assert.match(html,/name="wayglass-ui-revision" content="living-observer-n010"/);
+  assert.match(launcher,/if \(existing\.responding && !existing\.current\)/);
+  assert.match(launcher,/OLD or unknown Wayglass build/);
+});
