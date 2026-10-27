@@ -1,6 +1,7 @@
 import './styles.css';
 import './authorization.css';
 import './ship-wide-hud.css';
+import './liquid-optical-materials.css';
 import { installShipDeck } from './ship-deck.js';
 import { openWayglassAuthorization } from './authorization.js';
 import { installWayglassField } from './glass-field.js';
