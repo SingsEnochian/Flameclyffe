@@ -93,11 +93,16 @@ export async function mountNikolaResearchSurface(root) {
         spiralMeasurementCount = 0;
       } else {
         if (!spiral) throw new Error('Compress the observation first.');
-        const index = spiralMeasurementCount++;
+        const index = spiralMeasurementCount;
+        const echo = action === 'echo';
+        const echoFamily = index === 0
+          ? 'synthetic-frequency-family'
+          : 'synthetic-measurement-family-' + (index - 1);
+        if (!echo) spiralMeasurementCount += 1;
         spiral = await spiralModule.advanceNikolaSpiral(spiral,{
           measurement:{kind:'stiffness',value:24,unit:'N/m'},
-          source: action === 'echo'
-            ? {id:'synthetic-k-echo-'+index,family:'synthetic-measurement-family',kind:'synthetic'}
+          source: echo
+            ? {id:'synthetic-k-echo-'+spiral.rounds.length,family:echoFamily,kind:'synthetic'}
             : {id:'synthetic-k-independent-'+index,family:'synthetic-measurement-family-'+index,kind:'synthetic'}
         });
       }
