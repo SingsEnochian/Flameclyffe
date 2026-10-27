@@ -136,6 +136,7 @@ const startRoom = roomQuery === 'nikola' ? 'wayglass:nikola-research'
   : roomQuery === 'toybox' ? 'wayglass:toybox'
   : roomQuery === 'organs' ? 'wayglass:systems'
   : roomQuery === 'video' ? 'wayglass:video-atelier'
+  : roomQuery === 'commons' ? 'wayglass:commons'
   : 'arcsweep:writing-room';
 await wayglass.mount(startRoom);
 installVoyageInbox();
