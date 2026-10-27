@@ -167,6 +167,7 @@ export async function mountWayglassLivingObserver(root) {
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:video-atelier">Video Atelier</button>',
     '<button type="button" class="glass-chip active" aria-current="page">Living Observer</button>',
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:nikola-research">Nikola</button>',
+    '<button type="button" class="glass-chip" data-wayglass-crew-doors>Bluebird · Vethrlauf · Griff</button>',
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:commons">Crew · Commons</button>',
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:library">Library</button>',
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:toybox">Toybox</button></nav>',
@@ -226,6 +227,10 @@ export async function mountWayglassLivingObserver(root) {
     '<footer class="wg-receipt tiny">Direct readings stay inspectable. Private interior dynamics may persist and self-organise locally. Surfaced self-development remains proposal-first and can be handed to Hermes with an explicit acceptance test.</footer></section>'
   ].join('');
   const disposeScience=mountWayglassSciencePanel(root);
+  root.querySelector('[data-wayglass-crew-doors]')?.addEventListener('click',()=>{
+    root.querySelector('[data-wg-science-action="lens-crew"]')?.click();
+    root.querySelector('[data-wg-science-host]')?.scrollIntoView({block:'start',behavior:'auto'});
+  });
   const canvas=root.querySelector('canvas');
   const title=root.querySelector('[data-observer-title]'), description=root.querySelector('[data-observer-description]');
   const source=root.querySelector('[data-observer-source]'), packetView=root.querySelector('[data-observer-packet]');
