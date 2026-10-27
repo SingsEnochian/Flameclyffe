@@ -1,5 +1,6 @@
 /* Spatial optical Three.js HUD, visualizes existing Wayglass packets; never a sensor. */
 import { createOpticalDockingRig } from './observer-docking-motion.js';
+import { createLiquidOpticalElements } from './liquid-optics-geometry.js';
 export const OBSERVER_THREE_SCHEMA='wayglass.observer-three-hud/v1';
 const clamp=n=>Math.max(0,Math.min(1,Number.isFinite(n)?n:0));
 export async function mountObserverThreeHUD(canvas,{reducedMotion=false}={}){
@@ -23,7 +24,7 @@ export async function mountObserverThreeHUD(canvas,{reducedMotion=false}={}){
   const fieldNode=overlay.querySelector('[data-hud-field]');
   const phaseNode=overlay.querySelector('[data-hud-phase]');
   let renderer=null,scene=null,camera=null,group=null,inner=null,shell=null,torii=[],active=false,disposed=false,enabled=true,last=0,envTarget=null;
-  let docking=null,composer=null,bloom=null,bloomEnabled=false,bloomSupported=false,bloomPending=null;
+  let docking=null,liquidOptics=null,composer=null,bloom=null,bloomEnabled=false,bloomSupported=false,bloomPending=null;
   const layer=document.createElement('canvas');
   layer.className='wg-spatial-three-canvas';
   layer.setAttribute('aria-hidden','true');
@@ -90,6 +91,10 @@ export async function mountObserverThreeHUD(canvas,{reducedMotion=false}={}){
     // Official Three.js curve and damping primitives: geometric optical motion
     // only. No independent RAF, Crew link or provider evidence.
     docking=createOpticalDockingRig(T,group);
+    // An optical material is optional decoration, never allowed to disable
+    // the real direct-reading instrument or local routes.
+    try { liquidOptics=createLiquidOpticalElements(T,group); }
+    catch { liquidOptics=null; }
     const glass=new T.MeshPhysicalMaterial({
       color:0x91ebe0,metalness:.35,roughness:.12,transparent:true,opacity:.54,
       depthWrite:false,side:T.DoubleSide,clearcoat:1,clearcoatRoughness:.045,
@@ -201,6 +206,7 @@ export async function mountObserverThreeHUD(canvas,{reducedMotion=false}={}){
     torii.forEach((obj,i)=>{obj.rotation.z=(i%2?-.11:.11)*t+rotation*.18;});
     group.rotation.y=Math.sin(t*.5)*.10;
     docking?.tick(time,{paused,lowStim,reducedMotion,rotation});
+    liquidOptics?.frame(time*.001,{paused,lowStim,reducedMotion});
     renderOptics({lowStim});
   }
   function dispose(){
@@ -210,6 +216,7 @@ export async function mountObserverThreeHUD(canvas,{reducedMotion=false}={}){
       if(Array.isArray(obj.material))obj.material.forEach(m=>m.dispose?.());
       else obj.material?.dispose?.();});
     docking?.dispose();docking=null;
+    liquidOptics?.dispose();liquidOptics=null;
     envTarget?.dispose();composer?.dispose();composer=null;bloom=null;
     renderer?.dispose();layer.remove();overlay.remove();
   }
