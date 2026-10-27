@@ -16,6 +16,19 @@ export async function mountNikolaResearchSurface(root) {
       <label>Simulated dephasing <output id="nikola-dephasing">0%</output> <input type="range" id="nikola-dephasing-input" min="0" max="100" value="0" step="5" /></label>
       <div role="status" aria-live="polite" id="nikola-readout" style="white-space:pre-wrap"></div>
       <details><summary>View model-ready context (no invocation)</summary><pre id="nikola-context" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:18rem;overflow:auto"></pre></details>
+      <section class="glass-panel" aria-label="Nikola upward spiral instrument" style="padding:1rem;display:grid;gap:.7rem">
+        <h2>N-006 · Compression → Release → Next Compression 🌀</h2>
+        <p>Pure, deterministic calculations on public synthetic inputs. Frequency alone leaves infinitely many compatible combinations. Admit one independent measurement and inspect the renewed inference and replay receipt.</p>
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+          <button type="button" class="glass-chip" id="nikola-spiral-start">Compress synthetic frequency</button>
+          <button type="button" class="glass-chip" id="nikola-spiral-advance" disabled>Release independent measurement</button>
+          <button type="button" class="glass-chip" id="nikola-spiral-echo" disabled>Test duplicate-origin echo</button>
+          <button type="button" class="glass-chip" id="nikola-spiral-reset">Reset spiral</button>
+        </div>
+        <p role="status" aria-live="polite" id="nikola-spiral-status">No cycle recorded. No inference sent to a model.</p>
+        <pre id="nikola-spiral-readout" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:23rem;overflow:auto">Compression awaits an explicit click.</pre>
+        <p class="tiny">Distinct from PREMAQC computational probabilities: this oscillator is a dimensional physics example. Replayed hashes validate calculation integrity, not sensor authenticity, consciousness, canon or physical Fold.</p>
+      </section>
       <section class="glass-panel" aria-label="Nikola local model trial" style="padding:1rem;display:grid;gap:.7rem">
         <h2>N-004 · Local model comparison</h2>
         <p>Only a public synthetic mechanics problem. Three separate fresh turns through the existing Wayglass host, with no automatic external fallback. This does not train model weights.</p>
@@ -47,6 +60,84 @@ export async function mountNikolaResearchSurface(root) {
     set('nikola-context', contextForModel(packet, { mode: 'evidence' }).text);
     set('nikola-sources', 'All observations are synthetic fixtures. Stiffness measurement ' + (added ? 'introduced' : 'not introduced') + '. No LLM or external connection.');
   };
+  // N-006 loads the canonical Math Spine companion only when its own
+  // explicit research button is invoked. It does not change N-003 packet state.
+  let spiral = null;
+  let spiralBusy = false;
+  let spiralModule = null;
+  let spiralMeasurementCount = 0;
+  const n6 = id => el('nikola-spiral-'+id);
+  const showSpiral = (label, data) => {
+    n6('status').textContent = label;
+    n6('readout').textContent = typeof data === 'string' ? data : JSON.stringify(data,null,2);
+    n6('advance').disabled = !spiral || spiralBusy;
+    n6('echo').disabled = !spiral || spiralBusy;
+  };
+  const spiralActions = [];
+  async function mutateSpiral(action) {
+    if (spiralBusy || disposed) return;
+    spiralBusy = true;
+    n6('advance').disabled = true;
+    n6('echo').disabled = true;
+    n6('start').disabled = true;
+    n6('status').textContent = 'Replaying the mathematical instrument…';
+    try {
+      spiralModule ??= await import('../../../starwell/src/math-spine/nikola-upward-spiral.js');
+      if (disposed) return;
+      if (action === 'start') {
+        spiral = await spiralModule.createNikolaSpiral({
+          baseline:{stiffness:12,stiffness_unit:'N/m',mass:3,mass_unit:'kg'},
+          frequencyRatio:1.5,
+          source:{id:'synthetic-frequency',family:'synthetic-frequency-family',kind:'synthetic'}
+        });
+        spiralMeasurementCount = 0;
+      } else {
+        if (!spiral) throw new Error('Compress the observation first.');
+        const index = spiralMeasurementCount;
+        const echo = action === 'echo';
+        const echoFamily = index === 0
+          ? 'synthetic-frequency-family'
+          : 'synthetic-measurement-family-' + (index - 1);
+        if (!echo) spiralMeasurementCount += 1;
+        spiral = await spiralModule.advanceNikolaSpiral(spiral,{
+          measurement:{kind:'stiffness',value:24,unit:'N/m'},
+          source: echo
+            ? {id:'synthetic-k-echo-'+spiral.rounds.length,family:echoFamily,kind:'synthetic'}
+            : {id:'synthetic-k-independent-'+index,family:'synthetic-measurement-family-'+index,kind:'synthetic'}
+        });
+      }
+      const replay = await spiralModule.replayNikolaSpiral(spiral);
+      if (disposed) return;
+      showSpiral('Compression/release replay verified. '+spiral.rounds.length+' bounded rounds; all source evidence is synthetic.',
+        {replay,latest_receipt:spiral.rounds.at(-1)||null,next_operation:'compression-of-release'});
+    } catch (error) {
+      if (!disposed) showSpiral('Spiral held: '+error.message, 'No new externally verified observation.');
+    } finally {
+      spiralBusy = false;
+      if (!disposed) {
+        n6('start').disabled = false;
+        n6('advance').disabled = !spiral || spiral.rounds.length >= 12;
+        n6('echo').disabled = !spiral || spiral.rounds.length >= 12;
+      }
+    }
+  }
+  function clearSpiral() {
+    spiral=null;
+    spiralMeasurementCount=0;
+    n6('status').textContent='Spiral reset. No evidence retained or sent.';
+    n6('readout').textContent='Compression awaits an explicit click.';
+    n6('advance').disabled=true;n6('echo').disabled=true;
+  }
+  for (const [name,handler] of [
+    ['start',()=>void mutateSpiral('start')],
+    ['advance',()=>void mutateSpiral('advance')],
+    ['echo',()=>void mutateSpiral('echo')],
+    ['reset',clearSpiral],
+  ]) {
+    n6(name).addEventListener('click',handler);
+    spiralActions.push([name,handler]);
+  }
+
   let trialController = null;
   let trialRunning = false;
   let disposed = false;
@@ -112,5 +203,5 @@ export async function mountNikolaResearchSurface(root) {
   ];
   actions.forEach(([id, event, fn]) => el(id).addEventListener(event, fn));
   render();
-  return () => { disposed = true; trialController?.abort(); trialRun.removeEventListener('click', runLocalTrial); trialStop.removeEventListener('click', stopTrial); actions.forEach(([id, event, fn]) => el(id)?.removeEventListener(event, fn)); root.replaceChildren(); };
+  return () => { disposed = true; spiralActions.forEach(([id,handler])=>n6(id)?.removeEventListener('click',handler)); trialController?.abort(); trialRun.removeEventListener('click', runLocalTrial); trialStop.removeEventListener('click', stopTrial); actions.forEach(([id, event, fn]) => el(id)?.removeEventListener(event, fn)); root.replaceChildren(); };
 }
