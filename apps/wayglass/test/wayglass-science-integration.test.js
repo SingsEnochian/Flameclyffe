@@ -64,7 +64,7 @@ test('five lenses expose source-distinct math, measured sky, symbolic and Crew v
   }
   assert.match(science,/on\(skyUpdate,'click'/);
   assert.match(science,/on\(trial,'click'/);
-  assert.match(science,/synthetic.*QPU/);
+  assert.match(science,/No provider or QPU contacted/);
   assert.match(science,/on\(authorize,'click'/);
   assert.match(science,/provider session was authorised/);
 });
