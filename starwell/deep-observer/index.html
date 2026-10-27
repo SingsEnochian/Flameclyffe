@@ -281,7 +281,7 @@
         <p>A mathematically exact two-path density-matrix model. Change phase, which-path population and dephasing to see how the predicted measurement changes. Nothing here claims a quantum device or physical cosmological coupling.</p>
       </header>
       <div class="quantum-workbench">
-        <form class="quantum-controls" onsubmit="return false" aria-label="Ideal qubit preparation controls">
+        <form class="quantum-controls" id="quantumControls" aria-label="Ideal qubit preparation controls">
           <label for="quantumP0">Initial path probability P(0) <output id="quantumP0Value" for="quantumP0">50.0%</output></label>
           <input id="quantumP0" type="range" min="0" max="100" value="50" step="1"/>
           <label for="quantumPhase">Relative phase φ <output id="quantumPhaseValue" for="quantumPhase">0°</output></label>
