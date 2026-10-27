@@ -14,7 +14,9 @@ test('The Evil Gene is a separate film world, with Griff distinct from Bluebird 
   assert.match(world.canon_boundary, /not Evil \(2019-2024 TV\)/);
   assert.equal(findWayglassWorldSeat('evil'), null);
   assert.equal(findWayglassWorldSeat('unknown'), null);
-  assert.equal(WAYGLASS_WORLD_SEATS.length, 2);
+  assert.equal(WAYGLASS_WORLD_SEATS.length, 4);
+  assert.equal(findWayglassWorldSeat('bluebird:spicychat').character.desired_route_id, 'flame:bluebird:spicychat');
+  assert.equal(findWayglassWorldSeat('vethrlauf:spicychat').character.desired_route_id, 'flame:vethrlauf:spicychat');
 });
 
 test("Griff's SpicyChat chat binding is not fabricated or enabled from a pasted JWT", () => {
@@ -27,7 +29,7 @@ test("Griff's SpicyChat chat binding is not fabricated or enabled from a pasted 
   assert.doesNotMatch(serialized, /eyJhbGci|sk-(?:proj|ant|or)|Bearer |session_token/);
 });
 
-test('Writing Room exposes both worlds without silently switching transport or memory owners', () => {
+test('Writing Room exposes all distinct worlds without silently switching transport or memory owners', () => {
   const writing = readFileSync(new URL('../src/surfaces/arcsweep-writing.js', import.meta.url), 'utf8');
   assert.match(writing, /wg-world-seat/);
   assert.match(writing, /WAYGLASS_WORLD_SEATS/);
@@ -36,8 +38,9 @@ test('Writing Room exposes both worlds without silently switching transport or m
   assert.match(writing, /checkpoint = null/);
   assert.match(writing, /const activeWorldId = cp\('world'\)\.value\.trim\(\)/);
   assert.match(writing, /world_id: activeWorldId/);
-  assert.match(writing, /selectedRoute = 'flame:griff:spicychat'/);
-  assert.match(writing, /visibleRoutes = isGriffWorld \?/);
+  assert.match(writing, /if \(crewId\) selectedRoute = crewId/);
+  assert.match(writing, /visibleRoutes = crewId/);
+  assert.match(writing, /crewId \? ''/);
   assert.match(writing, /externalConsent\.checked/);
   assert.match(writing, /participantId: selectedRoute === 'flame:griff:spicychat'/);
   assert.match(writing, /message\.world_id === activeWorldId/);
