@@ -164,3 +164,16 @@ test('N-015 bloom addon is opt-in and optical motion shares existing Observer an
  assert.match(ship,/ArrowRight/);
  assert.match(ship,/\.focus\(\)/);
 });
+
+test('Feather is a single explicit stop for Observer, shader field and pointer motion',()=>{
+  const observer=source('../src/surfaces/living-observer.js');
+  const shader=source('../src/glass-field.js');
+  const pointer=source('../src/motion-choreography.js');
+  for(const name of ['wayglass:feather','held:paused','held:false'])assert.ok(observer.includes(name));
+  assert.match(shader,/globalThis\.addEventListener\?\.\('wayglass:feather', feather\)/);
+  assert.match(shader,/if \(!alive \|\| featherHeld\) return;/);
+  assert.match(shader,/cancelAnimationFrame\(frame\)/);
+  assert.match(shader,/if \(featherHeld\) return;/);
+  assert.match(pointer,/globalThis\.addEventListener\?\.\('wayglass:feather', feather\)/);
+  assert.match(pointer,/if \(reduced \|\| featherHeld\) return;/);
+});
