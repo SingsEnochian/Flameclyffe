@@ -61,6 +61,10 @@ try {
         throw 'Staged portal is missing N-015 Three.js animation and Feather integration. Refusing stale UI.'
     }
     Write-Host '[Wayglass] N-015 spatial motion, optional glow, and shared Feather marker verified.'
+    if (-not (Select-String -Path $builtIndex -Pattern 'name="wayglass-ui-materials" content="n016-liquid-optical-os-llm-mission-dock"' -SimpleMatch -Quiet)) {
+        throw 'Staged portal missing N-016 liquid optics for Wayglass OS and LLM. Refusing stale UI.'
+    }
+    Write-Host '[Wayglass] N-016 liquid optical OS and LLM material/mission deck verified.'
     $env:PORT = [string]$Port
     Write-Host ''
     Write-Host '[Wayglass] N-010 HEARTGATE PORTAL (local, no Vercel):'
