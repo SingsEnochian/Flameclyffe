@@ -37,6 +37,8 @@ export function installShipDeck(root,activeId,mount){
   }
   // Existing per-page listeners attach to removed nodes; the new nav binds its
   // own events without altering route/input/provider state.
+  // Every deck places navigation first, regardless of its historical template order.
+  if(surface.firstElementChild!==nav)surface.prepend(nav);
   nav.replaceChildren();
   nav.className='wg-deck-nav glass-panel wg-ship-deck';
   nav.setAttribute('aria-label','Wayglass ship decks');
