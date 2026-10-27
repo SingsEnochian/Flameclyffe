@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {
   extractAtlasLandmarks,distanceSpectrum,mismatch,transformed,
-  calculateGeometryInvariantTrial,runGeometryInvariantTrial,replayGeometryInvariantTrial
+  calculateGeometryInvariantTrial,calculateIndependentGeometryTrial,runGeometryInvariantTrial,replayGeometryInvariantTrial
 } from '../src/geometry-invariant-trial.js';
 const source=p=>readFileSync(new URL(p,import.meta.url),'utf8');
 test('canonical Flower and Metatron landmarks use explicitly sourced SVG circles',()=>{
@@ -60,4 +60,20 @@ test('Observer science and spatial HUD are integrated, no remote models and life
   assert.match(hud,/if\(paused\|\|lowStim\|\|reducedMotion\)/);
   assert.match(css,/wg-spatial-hud/);
   assert.match(css,/pointer-events:none/);
+});
+
+test('independently declared point arrays can be compared without asserting verified source independence',async()=>{
+  const a={id:'model-A',provenance:'Independent equation solver A, source v1',points:[[0,0],[1,0],[0,1],[1,1]]};
+  const b={id:'model-B',provenance:'Different derivation by separate investigator',points:[[3,5],[3,7],[1,5],[1,7]]};
+  const trial=calculateIndependentGeometryTrial({datasetA:a,datasetB:b,seed:101,nullTrials:99,tolerance:.0001});
+  assert.equal(trial.verdict.matched_within_registered_tolerance,true);
+  assert.equal(trial.verdict.source_independence_verified,false);
+  assert.equal(trial.verdict.independently_emergent,false);
+  assert.ok(trial.measurements.null_median>trial.measurements.observed_mismatch);
+  const receipt=await runGeometryInvariantTrial({datasetA:a,datasetB:b,seed:101,nullTrials:99});
+  assert.equal((await replayGeometryInvariantTrial(receipt)).valid,true);
+  const altered={...receipt,trial:{...receipt.trial,verdict:{...receipt.trial.verdict,independently_emergent:true}}};
+  assert.equal((await replayGeometryInvariantTrial(altered)).valid,false);
+  assert.throws(()=>calculateIndependentGeometryTrial({datasetA:a,datasetB:{...b,id:'model-A'}}),/source IDs must differ/);
+  assert.throws(()=>calculateIndependentGeometryTrial({datasetA:a,datasetB:{...b,points:[[0,0],[1,0],[0,1]]}}),/matched point counts/);
 });
