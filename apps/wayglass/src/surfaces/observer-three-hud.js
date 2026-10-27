@@ -25,6 +25,7 @@ export async function mountObserverThreeHUD(canvas,{reducedMotion=false}={}){
   const phaseNode=overlay.querySelector('[data-hud-phase]');
   let renderer=null,scene=null,camera=null,group=null,inner=null,shell=null,torii=[],active=false,disposed=false,enabled=true,last=0,envTarget=null;
   let docking=null,liquidOptics=null,composer=null,bloom=null,bloomEnabled=false,bloomSupported=false,bloomPending=null;
+  let xrSession=null,xrMode=null,xrStarting=false;
   const layer=document.createElement('canvas');
   layer.className='wg-spatial-three-canvas';
   layer.setAttribute('aria-hidden','true');
@@ -183,6 +184,75 @@ export async function mountObserverThreeHUD(canvas,{reducedMotion=false}={}){
     if(bloomEnabled&&composer&&!lowStim&&!reducedMotion)composer.render();
     else renderer.render(scene,camera);
   }
+  async function xrSupport(){
+    const xr=globalThis.navigator?.xr;
+    const allowed=globalThis.isSecureContext===true && xr?.isSessionSupported;
+    if(!active||!allowed)return {ar:false,vr:false,reason:'xr-or-secure-context-unavailable'};
+    const supported=async mode=>{try{return await xr.isSessionSupported(mode)===true}catch{return false}};
+    return {ar:await supported('immersive-ar'),vr:await supported('immersive-vr'),
+      reason:'capability-query-only'};
+  }
+  function dispatchXR(status,mode){
+    if(disposed)return;
+    stage.dispatchEvent(new CustomEvent('wayglass:xr-state',{
+      detail:Object.freeze({status,mode})
+    }));
+  }
+  async function enterXR(mode){
+    // requestSession MUST be called synchronously from the click handler,
+    // before the first await. Do not make any network or provider requests.
+    if(!['immersive-ar','immersive-vr'].includes(mode))throw Error('Invalid XR mode');
+    if(disposed||!active||!enabled||!renderer)throw Error('XR requires active Three.js optics');
+    if(globalThis.isSecureContext!==true)throw Error('XR requires HTTPS or trustworthy localhost');
+    const xr=globalThis.navigator?.xr;
+    if(!xr?.requestSession)throw Error('No WebXR device API available');
+    if(xrSession||xrStarting)throw Error('An XR session is already active or starting');
+    xrStarting=true;
+    renderer.xr.enabled=true;
+    let session=null;
+    try{
+      const pending=xr.requestSession(mode,{optionalFeatures:['local-floor','bounded-floor','hand-tracking']});
+      session=await pending;
+      if(disposed){await session.end();throw Error('Observer closed before XR began')}
+      xrSession=session;xrMode=mode;
+      const handleEnd=()=>{
+        xrSession=null;xrMode=null;
+        renderer?.setAnimationLoop(null);
+        dispatchXR('ended',mode);
+      };
+      session.addEventListener('end',handleEnd,{once:true});
+      await renderer.xr.setSession(session);
+      renderer.setAnimationLoop(time=>{
+        if(disposed||!xrSession||!renderer)return;
+        const t=time*.001;
+        if(!reducedMotion){
+          inner.rotation.y=t*.16;
+          liquidOptics?.frame(t,{reducedMotion:false,lowStim:false,paused:false});
+          docking?.tick(time,{paused:false,lowStim:false,reducedMotion:false,rotation:0});
+        }
+        renderer.render(scene,camera);
+      });
+      dispatchXR('active',mode);
+      return true;
+    }catch(error){
+      if(session&&xrSession===session){
+        xrSession=null;xrMode=null;
+        try{await session.end()}catch{}
+      }
+      renderer?.setAnimationLoop(null);
+      dispatchXR('failed',mode);
+      throw error;
+    }finally{xrStarting=false;}
+  }
+  async function endXR(){
+    if(!xrSession)return false;
+    const session=xrSession;
+    xrSession=null;xrMode=null;
+    renderer?.setAnimationLoop(null);
+    try{await session.end()}catch{}
+    dispatchXR('ended',null);
+    return true;
+  }
   function update({packet,focus='time',rotation=0,interior=null,lowStim=false,paused=false}={}){
     if(disposed)return;
     focusNode.textContent=String(focus).toUpperCase();
@@ -198,7 +268,7 @@ export async function mountObserverThreeHUD(canvas,{reducedMotion=false}={}){
     if(paused||lowStim||reducedMotion)renderOptics({lowStim});
   }
   function frame(time,{paused=false,lowStim=false,rotation=0}={}){
-    if(!active||!enabled||disposed||!renderer||paused)return;
+    if(!active||!enabled||disposed||!renderer||paused||xrSession)return;
     if(lowStim||reducedMotion){renderOptics({lowStim});return;}
     if(time-last<28)return;last=time;
     const t=time*.00013;
@@ -211,6 +281,9 @@ export async function mountObserverThreeHUD(canvas,{reducedMotion=false}={}){
   }
   function dispose(){
     if(disposed)return;disposed=true;active=false;
+    const ending=xrSession;xrSession=null;xrMode=null;
+    renderer?.setAnimationLoop(null);
+    if(ending)void ending.end().catch(()=>{});
     layer.__wayglassResize?.disconnect();
     scene?.traverse(obj=>{obj.geometry?.dispose?.();
       if(Array.isArray(obj.material))obj.material.forEach(m=>m.dispose?.());
@@ -220,5 +293,5 @@ export async function mountObserverThreeHUD(canvas,{reducedMotion=false}={}){
     envTarget?.dispose();composer?.dispose();composer=null;bloom=null;
     renderer?.dispose();layer.remove();overlay.remove();
   }
-  return{get ready(){return active&&enabled;},get available(){return active;},get bloomSupported(){return bloomSupported;},get bloomEnabled(){return bloomEnabled;},setEnabled,setBloom,update,frame,dispose};
+  return{get ready(){return active&&enabled;},get available(){return active;},get bloomSupported(){return bloomSupported;},get bloomEnabled(){return bloomEnabled;},get xrMode(){return xrMode;},setEnabled,setBloom,xrSupport,enterXR,endXR,update,frame,dispose};
 }
