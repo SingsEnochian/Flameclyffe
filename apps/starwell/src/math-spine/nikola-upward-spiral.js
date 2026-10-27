@@ -54,14 +54,14 @@ export function deriveOscillatorInvariant({stiffness,mass,stiffness_unit,mass_un
   const k = positive(stiffness, 'stiffness');
   const m = positive(mass, 'mass');
   requireThat(stiffness_unit === 'N/m' && mass_unit === 'kg',
-    'baseline requires N/m and kg');
+    'baseline requires SI units N/m and kg');
   const ratio = positive(frequencyRatio,'frequency ratio');
   const q = ratio * ratio;
   const before = Math.sqrt(k / m) / (2 * Math.PI);
   const stiffnessOnly = k * q;
   const massOnly = m / q;
   const target = k / m * q;
-  requireThat([q,before,stiffnessOnly,massOnly,target,before*ratio].every(Number.isFinite),
+  requireThat([q,before,stiffnessOnly,massOnly,target,before*ratio].every(x => Number.isFinite(x) && x > 0 && x < 1e12),
     'derived values outside finite range');
   requireThat(stiffnessOnly > 0 && massOnly > 0 && target > 0,
     'derived physical values must be positive');
