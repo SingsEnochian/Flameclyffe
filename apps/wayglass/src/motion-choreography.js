@@ -21,10 +21,11 @@ export function installMotionChoreography({ root = document.documentElement } = 
   let lastY = 0;
   let lastAt = performance.now();
   let pending = null;
+  let featherHeld = false;
 
   function commit() {
     frame = 0;
-    if (!pending || reduced) return;
+    if (!pending || reduced || featherHeld) return;
     root.style.setProperty('--wg-pointer-x', (pending.x * 100).toFixed(2) + '%');
     root.style.setProperty('--wg-pointer-y', (pending.y * 100).toFixed(2) + '%');
     root.style.setProperty('--wg-velocity', pending.velocity.toFixed(3));
@@ -33,7 +34,7 @@ export function installMotionChoreography({ root = document.documentElement } = 
   }
 
   function pointer(event) {
-    if (reduced) return;
+    if (reduced || featherHeld) return;
     const now = performance.now();
     const dt = Math.max(8, now - lastAt);
     const dx = event.clientX - lastX;
@@ -52,11 +53,17 @@ export function installMotionChoreography({ root = document.documentElement } = 
     if (!frame) frame = requestAnimationFrame(commit);
   }
 
+  function feather(event) {
+    featherHeld=event?.detail?.held===true;
+    if (featherHeld && frame) { cancelAnimationFrame(frame);frame=0;pending=null; }
+  }
+  globalThis.addEventListener?.('wayglass:feather', feather);
   globalThis.addEventListener?.('pointermove', pointer, { passive: true });
 
   return Object.freeze({
     destroy() {
       globalThis.removeEventListener?.('pointermove', pointer);
+      globalThis.removeEventListener?.('wayglass:feather', feather);
       if (frame) cancelAnimationFrame(frame);
     },
   });
