@@ -55,7 +55,7 @@ export function formatNikolaPreview(frame){
       ', P(dephased)='+pct(frame.brain.prior.dephased)+'.\n'+
       'Recommended next measurement: '+(frame.brain.recommended_basis||'none for this preparation')+
       ' · expected information gain '+fmt(frame.brain.maximum_information_gain_bits)+
-      ' bits per ideal trial.\n'+
+      ' bits per ideal trial.\n'+frame.brain.identifiability+'\n'+
       'Intermediate decoherence, instrumentation errors and alternative explanations remain open.',
     reflection:'PHILOSOPHY · '+frame.heart.philosophy.title+
       '\n'+frame.heart.philosophy.question+
