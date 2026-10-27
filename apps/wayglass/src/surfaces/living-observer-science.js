@@ -237,11 +237,48 @@ export function mountWayglassSciencePanel(root,{navigate=id=>globalThis.__waygla
   invariantTrials.value='399';
   field(invariantFields,'Seed',invariantSeed);
   field(invariantFields,'Negative controls',invariantTrials);
-  const invariantRun=button('Compute and verify · local only','invariant-run');
+  const invariantRun=button('Compute calibration · local only','invariant-run');
+  const invariantIndependentRun=button('Compare two supplied sources · local only','invariant-independent');
+  const invariantDownload=button('Export verified receipt · JSON','invariant-export');
+  invariantDownload.disabled=true;
+  let lastInvariantReceipt=null;
   const invariantState=element('p',{class:'tiny',role:'status','aria-live':'polite',text:'No trial run. Results are synthetic geometric calculations.'});
   const invariantResult=element('pre',{class:'wg-science-reading',text:'Result awaits your explicit test.'});
   const invariantReceipt=element('pre',{class:'wg-science-reading',text:'No receipt yet.'});
   const invariantDetails=element('details',{},[element('summary',{text:'Inspect SHA-256 replay receipt and assumptions'}),invariantReceipt]);
+  const candidateInputs=element('details',{},[
+    element('summary',{text:'Advanced · compare two independently sourced point sets'}),
+    element('p',{class:'tiny',text:'Paste two JSON objects with different source IDs, provenance descriptions (12+ characters) and equally many 2D points. No source data are transmitted. A declared different source is not proven independent.'}),
+  ]);
+  const pointsA=control('textarea',{rows:5,placeholder:'{"id":"model-A","provenance":"independent derivation and source revision","points":[[0,0],[1,0],[0,1]]}',autocomplete:'off'});
+  const pointsB=control('textarea',{rows:5,placeholder:'{"id":"model-B","provenance":"different research method and source revision","points":[[0,0],[2,0],[0,2]]}',autocomplete:'off'});
+  const tolerance=control('input',{type:'number',value:0.0001,min:0.0000001,max:0.05,step:0.0001});
+  const datasets=element('div',{class:'wg-science-fields'});
+  field(datasets,'Source A · JSON',pointsA);field(datasets,'Source B · JSON',pointsB);
+  field(datasets,'Tolerance (preregistered before running)',tolerance);
+  candidateInputs.append(datasets,invariantIndependentRun);
+  async function showInvariantReceipt(receipt){
+    const replay=await replayGeometryInvariantTrial(receipt);
+    if(disposed)return;
+    const m=receipt.trial.measurements,v=receipt.trial.verdict;
+    const matched=v.matched_within_svg_rounding??v.matched_within_registered_tolerance;
+    invariantResult.textContent='Mode: '+(receipt.trial.mode||'calibration: shared source')+
+      '\\nDistance-spectrum mismatch: '+m.observed_mismatch+
+      '\\nPositive transform mismatch: '+m.positive_control_mismatch+
+      '\\nDistorted vertex mismatch: '+m.distorted_control_mismatch+
+      '\\nAngular-null median: '+m.null_median+
+      '\\nNull empirical rank: '+m.null_rank+' ('+m.null_at_least_as_close+'/'+receipt.trial.inputs.null_trials+' as close)'+
+      '\\nNumerical match: '+matched+' · controls discriminate: '+v.controls_discriminate+
+      '\\nIndependently emergent: UNVERIFIED · physical validation: NO'+
+      '\\nProvenance: '+v.source_dependence+
+      '\\nInterpretation: '+v.interpretation;
+    invariantReceipt.textContent=JSON.stringify({receipt,replay},null,2);
+    lastInvariantReceipt=replay.valid?{receipt,replay}:null;
+    invariantDownload.disabled=!lastInvariantReceipt;
+    invariantState.textContent=replay.valid
+      ? 'SHA-256 replay verified. This is a reproducible comparison, not an independently authenticated scientific finding.'
+      : 'Replay failed. Result not exportable.';
+  }
   on(invariantRun,'click',async()=>{
     if(disposed||invariantRun.disabled)return;
     invariantRun.disabled=true;
@@ -249,23 +286,32 @@ export function mountWayglassSciencePanel(root,{navigate=id=>globalThis.__waygla
     try{
       const seed=Number(invariantSeed.value),nullTrials=Number(invariantTrials.value);
       const receipt=await runGeometryInvariantTrial({seed,nullTrials});
-      const replay=await replayGeometryInvariantTrial(receipt);
-      if(disposed)return;
-      const m=receipt.trial.measurements,v=receipt.trial.verdict;
-      invariantResult.textContent='Cross-drawing mismatch: '+m.observed_mismatch+
-        '\\nPositive transform mismatch: '+m.positive_control_mismatch+
-        '\\nDistorted vertex mismatch: '+m.distorted_control_mismatch+
-        '\\nAngular-null median: '+m.null_median+
-        '\\nNull empirical rank: '+m.null_rank+' ('+m.null_at_least_as_close+'/'+receipt.trial.inputs.null_trials+' as close)'+
-        '\\nMatched: '+v.matched_within_svg_rounding+' · controls discriminate: '+v.controls_discriminate+
-        '\\nIndependently emergent: NO · physical validation: NO'+
-        '\\nExplanation: '+v.source_dependence;
-      invariantReceipt.textContent=JSON.stringify({receipt,replay},null,2);
-      invariantState.textContent=replay.valid?'Replayed SHA-256 receipt verified. Evidence class: constructed symbolic geometry.':'Replay failed: verify source/seed and contact developer.';
+      await showInvariantReceipt(receipt);
     }catch(error){if(!disposed)invariantState.textContent='Trial refused: '+error.message;}
     finally{if(!disposed)invariantRun.disabled=false;}
   });
-  invariants.append(invariantFields,invariantRun,invariantState,invariantResult,invariantDetails,
+  on(invariantIndependentRun,'click',async()=>{
+    if(disposed||invariantIndependentRun.disabled)return;
+    invariantIndependentRun.disabled=true;
+    invariantState.textContent='Evaluating supplied geometry in this browser only…';
+    try{
+      const datasetA=JSON.parse(pointsA.value),datasetB=JSON.parse(pointsB.value);
+      const receipt=await runGeometryInvariantTrial({
+        datasetA,datasetB,seed:Number(invariantSeed.value),nullTrials:Number(invariantTrials.value),
+        tolerance:Number(tolerance.value),
+      });
+      await showInvariantReceipt(receipt);
+    }catch(error){if(!disposed)invariantState.textContent='Comparison refused: '+error.message;}
+    finally{if(!disposed)invariantIndependentRun.disabled=false;}
+  });
+  on(invariantDownload,'click',()=>{
+    if(!lastInvariantReceipt||disposed)return;
+    const blob=new Blob([JSON.stringify(lastInvariantReceipt,null,2)+'\\n'],{type:'application/json'});
+    const href=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=href;a.download='wayglass-geometry-invariant-receipt.json';a.click();
+    globalThis.setTimeout(()=>URL.revokeObjectURL(href),1000);
+  });
+  invariants.append(invariantFields,invariantRun,candidateInputs,invariantState,invariantResult,invariantDetails,invariantDownload,
     element('p',{class:'tiny',text:'Randomising LABELS is not a valid null: sorted pairwise distances are permutation-invariant. We scramble angles while preserving radii. Null rank is not a probability that an emergent law exists.'}));
 
   // NUMEROLOGY: a reproducible symbolic transformation, not probabilistic physics.
