@@ -232,6 +232,8 @@ export function installWayglassField({ host = document.body } = {}) {
   const pointerTarget = new THREE.Vector2(0.68, 0.3);
   let frame = 0;
   let alive = true;
+  let featherHeld = false;
+  let frozenTime = 0;
   let energyTarget = 0;
   let lastPointerAt = 0;
   let lastPointerX = 0;
@@ -249,9 +251,10 @@ export function installWayglassField({ host = document.body } = {}) {
 
   function render(time = 0) {
     const seconds = time * 0.001;
-    uniforms.uTime.value = reduceMotion ? 0 : seconds;
+    uniforms.uTime.value = reduceMotion ? 0 : featherHeld ? frozenTime : seconds;
+    if (!featherHeld) frozenTime = seconds;
 
-    if (!reduceMotion) {
+    if (!reduceMotion && !featherHeld) {
       uniforms.uPointer.value.lerp(pointerTarget, 0.065);
       const idleFor = performance.now() - lastPointerAt;
       if (idleFor > 950) energyTarget *= 0.965;
@@ -270,12 +273,13 @@ export function installWayglassField({ host = document.body } = {}) {
   }
 
   function animate(time) {
-    if (!alive) return;
+    if (!alive || featherHeld) return;
     render(time);
     frame = requestAnimationFrame(animate);
   }
 
   function pointer(event) {
+    if (featherHeld) return;
     const width = Math.max(1, globalThis.innerWidth || 1);
     const height = Math.max(1, globalThis.innerHeight || 1);
     pointerTarget.set(event.clientX / width, 1 - (event.clientY / height));
@@ -292,6 +296,7 @@ export function installWayglassField({ host = document.body } = {}) {
   }
 
   function wake(event) {
+    if (featherHeld) return;
     const detail = event?.detail || {};
     const strength = Number(detail.strength);
     const intent = Number(detail.intent);
@@ -309,6 +314,20 @@ export function installWayglassField({ host = document.body } = {}) {
     energyTarget = Math.max(energyTarget, Number.isFinite(strength) ? Math.min(1, Math.max(0, strength)) : 0.72);
   }
 
+  function feather(event) {
+    featherHeld=event?.detail?.held===true;
+    if (featherHeld) {
+      cancelAnimationFrame(frame);
+      frame=0;
+      energyTarget=0;
+      velocityTarget=0;
+      uniforms.uVelocity.value=0;
+      render(frozenTime*1000);
+    } else if (alive && !reduceMotion && !frame) {
+      frame=requestAnimationFrame(animate);
+    }
+  }
+  globalThis.addEventListener?.('wayglass:feather', feather);
   globalThis.addEventListener?.('resize', resize, { passive: true });
   globalThis.addEventListener?.('pointermove', pointer, { passive: true });
   globalThis.addEventListener?.('wayglass:material-wake', wake);
@@ -325,6 +344,7 @@ export function installWayglassField({ host = document.body } = {}) {
       globalThis.removeEventListener?.('resize', resize);
       globalThis.removeEventListener?.('pointermove', pointer);
       globalThis.removeEventListener?.('wayglass:material-wake', wake);
+      globalThis.removeEventListener?.('wayglass:feather', feather);
       geometry.dispose();
       material.dispose();
       renderer.dispose();
