@@ -1,0 +1,131 @@
+/* Wayglass Living Observer / layered spacecraft optical HUD.
+   Entirely CSS and local Three.js materials. No downloaded maps or telemetry.
+   Accessibility: underlying 2D buttons/canvas remain interactive; 3D is aria-hidden.
+*/
+.wg-living-observer{
+  --hud-ice:#affbf4;--hud-copper:#e4ba7b;
+  --hud-ink:#061019;--hud-hair:rgba(139,227,228,.22);
+}
+.wg-living-observer .observer-head{
+  border:1px solid rgba(150,247,235,.17);
+  background:
+    radial-gradient(circle at 86% 10%,rgba(99,216,214,.20),transparent 30%),
+    repeating-linear-gradient(90deg,transparent 0,transparent 27px,rgba(176,234,226,.012) 28px),
+    linear-gradient(135deg,rgba(11,27,39,.96),rgba(7,17,31,.84) 68%,rgba(25,21,38,.90));
+  box-shadow:inset 0 1px rgba(196,255,250,.20),inset 0 -24px 50px rgba(0,5,19,.32),0 22px 80px rgba(0,0,0,.25);
+}
+.wg-living-observer .observer-head::after{
+  content:"WG / 01    ·    OPTICAL INTERFACE";
+  position:absolute;right:18px;bottom:12px;
+  color:rgba(169,239,224,.62);letter-spacing:.24em;font:600 9px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace;
+}
+.wg-living-observer .observer-head h1{
+  font-family:Georgia,serif;letter-spacing:-.052em;
+  text-shadow:0 0 35px rgba(102,205,216,.20);
+}
+.wg-living-observer .observer-stage{
+  isolation:isolate;
+  border:1px solid rgba(157,230,224,.27);
+  background:
+    radial-gradient(ellipse at 50% 38%,rgba(36,105,128,.18),transparent 45%),
+    radial-gradient(ellipse at 65% 70%,rgba(93,59,134,.16),transparent 58%),
+    repeating-linear-gradient(0deg,transparent 0 31px,rgba(134,232,227,.025) 32px),
+    linear-gradient(150deg,#06141f,#0a1b2b 47%,#070e19);
+  box-shadow:inset 0 0 0 5px rgba(129,219,220,.017),
+    inset 0 0 0 6px rgba(151,222,216,.09),
+    inset 0 -45px 85px rgba(0,0,0,.38),
+    0 28px 95px rgba(0,0,0,.30);
+}
+.wg-living-observer .observer-stage::after{
+  content:"";
+  position:absolute;inset:10px;border:1px solid rgba(130,223,219,.10);
+  border-radius:22px;pointer-events:none;
+  background:linear-gradient(124deg,rgba(217,255,248,.045),transparent 20%,transparent 70%,rgba(100,219,210,.02));
+  z-index:0;
+}
+.wg-living-observer .observer-stage>.wg-spatial-three-canvas{
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:min(100%,690px);height:auto;aspect-ratio:1;z-index:1;
+  pointer-events:none;opacity:.90;
+  filter:drop-shadow(0 0 26px rgba(93,210,219,.13));
+}
+.wg-living-observer .observer-stage>canvas:not(.wg-spatial-three-canvas){
+  z-index:2;position:relative;mix-blend-mode:screen;
+  filter:drop-shadow(0 0 12px rgba(124,225,227,.13));
+}
+.wg-living-observer .wg-spatial-hud{
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:min(100%,690px);aspect-ratio:1;z-index:3;pointer-events:none;
+  display:block;color:var(--hud-ice);
+  font:500 clamp(9px,1.1vw,12px)/1.45 ui-monospace,SFMono-Regular,Consolas,monospace;
+  letter-spacing:.075em;text-transform:uppercase;
+}
+.wg-living-observer .wg-hud-rail{
+  position:absolute;left:7%;right:7%;
+  display:flex;justify-content:space-between;gap:8px;
+  border-color:var(--hud-hair);padding:9px 3px;
+  text-shadow:0 0 12px rgba(126,255,241,.23);
+}
+.wg-living-observer .wg-hud-rail span{display:inline-flex;gap:10px;align-items:center}
+.wg-living-observer .wg-hud-rail b{color:var(--hud-copper);font-weight:650;font-size:.87em}
+.wg-living-observer .wg-hud-rail strong{color:#f3fffa;font-weight:650;letter-spacing:.02em}
+.wg-living-observer .wg-hud-top{top:6%;border-top:1px solid var(--hud-hair)}
+.wg-living-observer .wg-hud-bottom{bottom:13%;border-bottom:1px solid var(--hud-hair)}
+.wg-living-observer .wg-hud-crosshair{
+  position:absolute;left:50%;top:50%;width:18%;aspect-ratio:1;
+  transform:translate(-50%,-50%);
+  border-radius:50%;border:1px dotted rgba(188,246,244,.23);
+  box-shadow:0 0 34px rgba(127,246,229,.09),inset 0 0 26px rgba(120,225,219,.06);
+}
+.wg-living-observer .wg-hud-crosshair::before,.wg-living-observer .wg-hud-crosshair::after{
+  content:"";position:absolute;background:rgba(132,238,232,.25);
+}
+.wg-living-observer .wg-hud-crosshair::before{width:138%;height:1px;top:50%;left:-19%}
+.wg-living-observer .wg-hud-crosshair::after{height:138%;width:1px;left:50%;top:-19%}
+.wg-living-observer .wg-hud-crosshair i{
+  position:absolute;inset:30%;border:1px solid rgba(224,191,132,.38);transform:rotate(45deg)
+}
+.wg-living-observer .wg-hud-vertical{
+  position:absolute;top:22%;height:50%;width:16px;
+  opacity:.32;
+  background:repeating-linear-gradient(0deg,rgba(128,240,230,.75) 0 1px,transparent 1px 12px);
+  mask-image:linear-gradient(0deg,transparent,black 18%,black 82%,transparent);
+}
+.wg-living-observer .wg-hud-vertical-left{left:5%;border-left:1px solid var(--hud-hair)}
+.wg-living-observer .wg-hud-vertical-right{right:5%;border-right:1px solid var(--hud-hair)}
+.wg-living-observer .wg-hud-boundary{
+  position:absolute;left:7%;right:7%;bottom:5%;margin:0!important;
+  text-align:center;color:rgba(174,228,224,.60);font-size:.79em;letter-spacing:.09em;
+}
+.wg-living-observer .observer-inputs{z-index:4;position:relative}
+.wg-living-observer .observer-inputs button{
+  background:linear-gradient(155deg,rgba(18,52,65,.78),rgba(8,20,38,.92));
+  border:1px solid rgba(138,218,215,.23);
+  box-shadow:inset 0 1px rgba(210,255,250,.10),0 4px 15px rgba(0,0,0,.23);
+}
+.wg-living-observer .observer-inputs button[aria-pressed="true"]{
+  background:linear-gradient(165deg,rgba(39,120,124,.42),rgba(9,38,56,.95));
+  border-color:#9ce7e0;color:#f8fffe;
+  box-shadow:inset 0 1px rgba(235,255,251,.26),0 0 20px rgba(71,228,210,.17);
+}
+.wg-living-observer .observer-console{
+  border:1px solid rgba(144,219,223,.23);
+  background:linear-gradient(156deg,rgba(8,31,43,.96),rgba(9,17,32,.94) 55%,rgba(24,26,45,.93));
+  box-shadow:inset 0 1px rgba(223,255,250,.17),inset 0 -14px 28px rgba(0,0,0,.23);
+}
+.wg-living-observer .observer-translation{
+  border-left:2px solid rgba(155,245,225,.73);
+}
+.wg-living-observer [data-optical-mode="fallback"] .wg-spatial-three-canvas{display:none}
+.wg-living-observer .observer-stage[data-hud-paused="true"] .wg-spatial-three-canvas{filter:brightness(.6)}
+@media(max-width:560px){
+  .wg-living-observer .wg-hud-rail{left:9%;right:9%;padding:5px 0}
+  .wg-living-observer .wg-hud-rail span{gap:3px}
+  .wg-living-observer .wg-hud-boundary{font-size:7px}
+  .wg-living-observer .wg-spatial-hud{font-size:8px}
+  .wg-living-observer .wg-hud-bottom{bottom:16%}
+}
+@media(prefers-reduced-motion:reduce){
+  .wg-living-observer .observer-stage>canvas{filter:none!important}
+  .wg-living-observer .wg-spatial-hud{animation:none!important}
+}
