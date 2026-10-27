@@ -44,6 +44,7 @@ test('three consecutive simulated host replies have distinct sessions, no histor
   assert.equal(outcome.attempts.length,3);
   assert.deepEqual(seen.map(x=>x.routeId),[NIKOLA_LOCAL_ROUTE,NIKOLA_LOCAL_ROUTE,NIKOLA_LOCAL_ROUTE]);
   assert.ok(seen.every(x=>x.externalProviderConsent === false && x.history.length===0 && x.worldId===null && x.characterId===null && x.think===false));
+  assert.ok(seen.every(x=>x.interaction?.channel==='OOC' && x.interaction?.interaction_mode==='scientific-experiment'));
   assert.equal(new Set(seen.map(x=>x.sessionId)).size,3);
   assert.ok(outcome.attempts.every(x=>x.output_sha256.length===64 && x.rubric.heuristic_only));
   assert.equal(outcome.claims.superiority_established,false);
