@@ -109,3 +109,39 @@ test('default Windows launch enters N-010 through one-origin Hearthgate, never V
   assert.match(stage,/public', 'wayglass'/);
   assert.match(stage,/hearthgate-host\.js/);
 });
+
+
+test('Crew doors preserve three distinct pinned SpicyChat worlds with no implicit send',()=>{
+  const model=file('../src/world-seats.js');
+  const crew=file('../src/crew-navigation.js');
+  const ui=file('../src/surfaces/living-observer-science.js');
+  const writing=file('../src/surfaces/arcsweep-writing.js');
+  for(const id of ['bluebird:spicychat','vethrlauf:spicychat','evil-gene:film-2015']){
+    assert.match(model,new RegExp(id.replaceAll(':','\\:')));
+    assert.ok(crew.includes(id));
+    assert.ok(ui.includes(id));
+  }
+  for(const name of ['Bluebird · Richie','Vethrlauf','Griff Krenshaw'])assert.ok(ui.includes(name));
+  assert.match(writing,/consumeWayglassCrewRoom/);
+  assert.match(writing,/Check Crew connection/);
+  assert.match(writing,/route\.provider !== 'spicychat'/);
+  assert.match(writing,/externalSpicy/);
+  assert.match(writing,/externalProviderConsent/);
+});
+
+test('Crew provider route catalogue requires exact matching pairs and private user credential',()=>{
+  const registry=file('../../../lib/wayglass-route-registry.cjs');
+  const host=file('../../starwell-server/wayglass/router.js');
+  const ignition=file('../../../scripts/Start-Wayglass-Crew.ps1');
+  for(const name of ['BLUEBIRD','VETHRLAUF','GRIFF']) assert.ok(registry.includes("pinnedSpicyChatIds('"+name+"')"));
+  assert.match(registry,/flame:vethrlauf:spicychat/);
+  assert.match(registry,/SPICYCHAT_ACCOUNT_TOKEN/);
+  assert.match(host,/route\.strict_pair/);
+  assert.match(host,/crew\/:member\/status/);
+  assert.match(host,/payload\.external_provider_consent !== true/);
+  assert.match(host,/route\.provider !== 'spicychat'/);
+  assert.match(ignition,/Read-Host 'SpicyChat account credential \(hidden, not saved\)' -AsSecureString/);
+  assert.match(ignition,/ZeroFreeBSTR/);
+  assert.match(ignition,/Start-Wayglass\.ps1/);
+  assert.doesNotMatch(ignition,/SetEnvironmentVariable\(|env:SPICYCHAT_ACCOUNT_TOKEN\s*\|\s*Set-Content/);
+});
