@@ -75,6 +75,12 @@ jobs:
           set -euo pipefail
           test -f dist/starwell/index.html
           test -f dist/starwell/bifrost/index.html
+          test -f dist/starwell/writing-room/index.html
+          test -f dist/starwell/writing-room/dabble-bridge.html
+          test -f dist/starwell/writing-room/dabble-import.mjs
+          test -f dist/starwell/writing-room/dabble-shelf.mjs
+          grep -q 'Dabble Manuscript Shelf' dist/starwell/writing-room/index.html
+          grep -q 'accounts.dabblewriter.com/auth/login' dist/starwell/writing-room/dabble-bridge.html
           test -f dist/starwell/modules/bifrost-arcsweep.module.json
           grep -q "mythframeWavUi" dist/starwell/modules/bifrost-arcsweep.module.json
           grep -q "coil-release-upward-spiral-visual" dist/starwell/modules/bifrost-arcsweep.module.json
