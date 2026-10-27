@@ -749,21 +749,31 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       if (payload.checkpoint_storage_id) {
         payload._storedCheckpoint = departureStore.read(payload.checkpoint_storage_id, payload.checkpoint_world_id, payload.checkpoint_participant_id).continuation_packet;
       }
-      // Griff's provider binding is not an inheritance-host dependency. A
-      // signed, owner-approved chat turn must work before any optional bridge.
-      const wantsInheritance = resolver != null || (
-        route.provider !== 'spicychat'
-        && (payload.participant_id != null || payload.world_id != null)
+      // A world identifier is a ROUTING CONTEXT, not an inheritance request.
+      // Prior versions incorrectly converted ordinary Writing Room messages into
+      // mandatory host-inheritance calls even when no resolver existed.
+      // Never pretend that a checkpoint was inherited if its explicit adapter
+      // is unavailable; preserving truthful continuity is more important than
+      // returning a plausible model response.
+      const adapterAvailable = typeof resolver?.resolve === 'function';
+      const checkpointRequested = Boolean(payload.checkpoint_storage_id);
+      if (resolver != null && !adapterAvailable) {
+        const error = new Error('Wayglass host inheritance adapter is invalid. No context was transferred.');
+        error.status = 503;
+        throw error;
+      }
+      if (checkpointRequested && !adapterAvailable) {
+        const error = new Error('Saved checkpoint requested, but the inheritance host adapter is unavailable. No provider turn was sent. Remove the checkpoint or configure an authorised resolver.');
+        error.status = 503;
+        throw error;
+      }
+      const wantsInheritance = adapterAvailable && (
+        checkpointRequested || (route.provider !== 'spicychat' && (
+          payload.participant_id != null || payload.world_id != null
+        ))
       );
       let compiled = null;
-      if (wantsInheritance) {
-        if (typeof resolver?.resolve !== 'function') {
-          const error = new Error('Wayglass inheritance host adapters are not configured.');
-          error.status = 503;
-          throw error;
-        }
-        compiled = await resolver.resolve(req, payload);
-      }
+      if (wantsInheritance) compiled = await resolver.resolve(req, payload);
       let result;
       if (route.provider === 'openai') result = await callOpenAI(route, payload, compiled, fetchImpl);
       else if (route.provider === 'ollama') result = await callOllama(route, payload, compiled, fetchImpl, scientificTurn);
@@ -824,6 +834,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
           data_policy_verified_on: route.data_policy?.verified_on || null,
           wayglass_persisted: false,
           checkpoint_storage_id: payload.checkpoint_storage_id || null,
+          inheritance_context_status: compiled ? 'host-resolved' : 'not-applied',
           ...(compiled ? { inheritance_context: compiled.reference } : {}),
           thinking_exposed: Boolean(result.thinking),
           ...(scientificTurn ? { scientific_trial: {
