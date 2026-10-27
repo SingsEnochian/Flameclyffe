@@ -59,7 +59,7 @@ export function installShipDeck(root,activeId,mount){
     button.textContent=room.label;
     button.title=room.hint;
     button.dataset.wayglassShipTarget=room.id;
-    if(room.id===activeId){button.setAttribute('aria-current','page');button.disabled=true;}
+    if(room.id===activeId){button.setAttribute('aria-current','page');}
     rail.append(button);
   }
   nav.append(rail);
@@ -77,6 +77,18 @@ export function installShipDeck(root,activeId,mount){
   const note=document.createElement('small');
   note.textContent='Separate rooms. No automatic provider call.';
   menu.append(note);crew.append(summary,menu);nav.append(crew);
+  // Roving keyboard focus without activating another room. This only operates
+  // in the deck rail and never moves focus into the Crew messaging selector.
+  rail.addEventListener('keydown',event=>{
+    if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+    const links=[...rail.querySelectorAll('[data-wayglass-ship-target]')];
+    const index=links.indexOf(document.activeElement);
+    if(index<0)return;
+    event.preventDefault();
+    const next=event.key==='Home'?0:event.key==='End'?links.length-1:
+      (index+(event.key==='ArrowRight'?1:-1)+links.length)%links.length;
+    links[next]?.focus();
+  });
   // A single delegated event handler also works after focus/keyboard activation.
   nav.addEventListener('click',event=>{
     const target=event.target.closest?.('[data-wayglass-ship-target]');
