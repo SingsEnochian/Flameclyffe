@@ -118,3 +118,15 @@ test('ship UI is integrated into all live mounts and preserves protected Crew ro
  assert.match(shipDeck,/prepareWayglassCrewRoom/);
  assert.match(shipDeck,/installShipGestures/);
 });
+
+test('global Feather bridges into Observer XR shutdown and unsubscribes safely',()=>{
+ const observer=read('../src/surfaces/living-observer.js');
+ const hud=read('../src/surfaces/observer-three-hud.js');
+ assert.match(observer,/const onShipFeather=event=>/);
+ assert.match(observer,/featherButton\.click\(\)/);
+ assert.match(observer,/addEventListener\?\.\('wayglass:feather',onShipFeather\)/);
+ assert.match(observer,/removeEventListener\?\.\('wayglass:feather',onShipFeather\)/);
+ assert.match(observer,/void opticalDeck\?\.endXR\(\)/);
+ assert.match(hud,/async function endXR\(\)/);
+ assert.match(hud,/renderer\?\.setAnimationLoop\(null\)/);
+});
