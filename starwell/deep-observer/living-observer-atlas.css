@@ -50,3 +50,23 @@
   .atlas-heading{display:block}.atlas-operations{margin-top:1rem}
   .atlas-reference{grid-template-columns:1fr 1fr}}
 @media(prefers-reduced-motion:reduce){.atlas-geometry svg{animation:none!important;transition:none!important}}
+
+/* Opt-in reference library never embeds Drive private content in public markup. */
+.atlas-library{margin:1rem 0;padding:1rem;border:1px solid rgba(231,196,119,.28);
+  border-radius:18px;background:linear-gradient(135deg,rgba(231,196,119,.07),rgba(21,41,49,.28))}
+.atlas-library-head{display:flex;justify-content:space-between;gap:1rem;align-items:center;flex-wrap:wrap}
+.atlas-library-head h3{font:1.16rem Georgia,serif;color:var(--gold);margin:.2rem 0 .45rem}
+.atlas-library-head p{font-size:.84rem;color:var(--soft);max-width:70ch;line-height:1.5;margin:0}
+.atlas-library-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem;margin:1rem 0}
+.atlas-library-fields label{color:var(--soft);display:grid;align-content:start;gap:.35rem;font-size:.78rem}
+.atlas-library-fields select,.atlas-library-fields input{width:100%;min-width:0;color:var(--moon);
+ padding:.7rem .6rem;border:1px solid rgba(168,204,224,.35);border-radius:10px;background:#07131d;font:inherit}
+.atlas-library-fields input[type=file]{font-size:.76rem}
+.atlas-library-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem;
+ max-height:480px;overflow:auto;overscroll-behavior:contain}
+.atlas-library-entry{padding:.8rem;border:1px solid rgba(168,204,224,.18);border-radius:12px;
+ background:rgba(3,12,21,.65);min-width:0}
+.atlas-library-entry strong{color:var(--moon);font-size:.9rem}
+.atlas-library-entry p{font-size:.74rem;line-height:1.45;color:var(--dim);overflow-wrap:anywhere}
+.atlas-library-entry a{color:var(--green);font-size:.78rem;text-decoration:underline;text-underline-offset:2px}
+@media(max-width:760px){.atlas-library-fields,.atlas-library-results{grid-template-columns:1fr}}
