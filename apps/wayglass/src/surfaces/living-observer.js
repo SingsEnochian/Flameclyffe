@@ -192,7 +192,8 @@ export async function mountWayglassLivingObserver(root) {
     OBSERVER_CHANNELS.map(([id,label])=>'<button type="button" class="observer-input" data-observer-focus="'+id+'" aria-pressed="'+(id===focus)+'">'+label+'</button>').join(''),
     '</div><div class="wg-optics-tools" role="group" aria-label="Optical rendering preference">',
     '<button type="button" class="glass-chip" data-observer-optics aria-pressed="true">Optics · Spatial</button>',
-    '<span>Two views, one instrument · 2D controls always remain active</span></div></div>',
+    '<button type="button" class="glass-chip" data-observer-bloom aria-pressed="false" disabled title="Optional Three.js bloom, requires WebGL2 and active motion">Glow · Off</button>',
+    '<span>Three synthetic docking lights · local optical animation · no message or telemetry</span></div></div>',
     '<div class="observer-console glass-panel">',
     '<p class="eyebrow">Direct readings → translation → glass</p>',
     '<h2 data-observer-title>Time</h2><p data-observer-description></p>',
@@ -248,12 +249,39 @@ export async function mountWayglassLivingObserver(root) {
   const canvas=root.querySelector('canvas');
   let opticalDeck=null,preferSpatial=true;
   const opticsButton=root.querySelector('[data-observer-optics]');
+  const bloomButton=root.querySelector('[data-observer-bloom]');
+  function paintBloomPreference(){
+    const supported=Boolean(opticalDeck?.bloomSupported);
+    const selected=Boolean(opticalDeck?.bloomEnabled);
+    bloomButton.disabled=!supported || !isSpatial() || paused || lowStim || reduced;
+    bloomButton.setAttribute('aria-pressed',String(selected));
+    bloomButton.textContent=selected ? (lowStim || paused ? 'Glow · Suspended' : 'Glow · On') : 'Glow · Off';
+    bloomButton.title=!supported
+      ? 'Glow needs a WebGL2-capable browser, and is optional.'
+      : 'Optional GPU postprocessing. Off by default; Feather and Low Stim stop the effect.';
+  }
+  bloomButton.addEventListener('click',async()=>{
+    if(bloomButton.disabled || !opticalDeck)return;
+    bloomButton.disabled=true;
+    bloomButton.textContent='Glow · Loading';
+    try{
+      const requested=!opticalDeck.bloomEnabled;
+      const active=await opticalDeck.setBloom(requested);
+      if(disposed)return;
+      if(requested&&!active) status.textContent='Optional bloom unavailable; the normal spatial optics remain operational.';
+      else status.textContent=active?'Bloom enabled by your click. Feather and Low Stim suspend it.':'Bloom disabled.';
+      opticalDeck.update({packet,focus,rotation:rotation.angle,interior:interiorSignal,lowStim,paused});
+    }catch{
+      if(!disposed)status.textContent='Glow failed to initialise; ordinary optics remain available.';
+    }finally{if(!disposed)paintBloomPreference();}
+  });
   const isSpatial=()=>Boolean(opticalDeck?.ready && preferSpatial);
   function paintOpticsPreference(){
     const spatial=isSpatial();
     opticsButton.setAttribute('aria-pressed',String(spatial));
     opticsButton.textContent=spatial?'Optics · Spatial':opticalDeck?.available?'Optics · Classic':'Optics · Classic (3D unavailable)';
     if(!disposed){
+      paintBloomPreference();
       refresh();
       if(paused){
         drawAstrolabe(canvas,packet||current(),0,focus,true,{...drawOptions(),spatial:isSpatial()});
@@ -459,7 +487,7 @@ export async function mountWayglassLivingObserver(root) {
   root.querySelector('[data-observer-low]').addEventListener('click',event=>{
     lowStim=!lowStim;event.currentTarget.setAttribute('aria-pressed',String(lowStim));
     event.currentTarget.textContent='Low Stim · '+(lowStim?'On':'Off');
-    rotation.stop();cancelAnimationFrame(animation);refresh();
+    rotation.stop();cancelAnimationFrame(animation);refresh();paintBloomPreference();
     if(!lowStim&&!reduced&&!paused)animation=requestAnimationFrame(animate);
   });
   root.querySelector('[data-observer-haptics]').addEventListener('click',event=>{
@@ -481,6 +509,7 @@ export async function mountWayglassLivingObserver(root) {
       if(audioContext){audioContext.close().catch(()=>{});audioContext=null;}sound=false;root.querySelector('[data-observer-sound]').setAttribute('aria-pressed','false');root.querySelector('[data-observer-sound]').textContent='Sound · Off';
       status.textContent='Feather held. Motion, sound and haptics stopped. Resume only when you choose.';
     }else{lightAt=performance.now();refresh();if(!lowStim&&!reduced)animation=requestAnimationFrame(animate);status.textContent='Feather released by your choice; sound and haptics remain off.';}
+    paintBloomPreference();
   });
   root.querySelector('[data-wonder-demo]').addEventListener('click',()=>{
     publishWonderLight({kind:'synthetic-demo',source_ref:'user-synthetic-demo:'+Date.now(),event_id:'user-demo:'+performance.now()});
