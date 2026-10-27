@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-10-27T01:57:47.242Z",
+  "generated_at": "2026-10-27T07:29:30.017Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,51 +13,51 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-10-26T21:45",
+    "time": "2026-10-27T03:15",
     "sky": "Night",
     "current": {
-      "time": "2026-10-26T21:45",
+      "time": "2026-10-27T03:15",
       "interval": 900,
-      "temperature_2m": 67.7,
-      "relative_humidity_2m": 81,
+      "temperature_2m": 67.9,
+      "relative_humidity_2m": 76,
       "is_day": 0,
       "precipitation": 0,
       "rain": 0,
-      "weather_code": 3,
-      "cloud_cover": 100,
-      "pressure_msl": 1021.1,
-      "wind_speed_10m": 11.9,
+      "weather_code": 0,
+      "cloud_cover": 11,
+      "pressure_msl": 1019.1,
+      "wind_speed_10m": 10.7,
       "wind_direction_10m": 30
     }
   },
   "space_weather": {
     "kp": {
-      "value": 0.67,
-      "time_tag": "2026-10-26T21:00:00",
-      "a_running": 3
+      "value": 2.67,
+      "time_tag": "2026-10-27T03:00:00",
+      "a_running": 12
     },
     "solar_wind": {
-      "time_tag": "2026-10-27T01:48:00Z",
-      "bz": -2,
-      "bt": 8,
+      "time_tag": "2026-10-27T07:19:00Z",
+      "bz": 1,
+      "bt": 7,
       "density": null,
-      "speed": 382
+      "speed": 387
     }
   },
   "moon": {
-    "age_days": 15.7,
-    "illumination": 99,
+    "age_days": 15.93,
+    "illumination": 98.5,
     "name": "Full Moon"
   },
   "field": {
-    "P": 0.5500000000000003,
-    "C": 0.2538095238095239,
-    "R": 0.8766666666666667,
-    "E": 0.6493956043956044,
-    "M": 0.99,
-    "A": 0.38,
+    "P": 0.527777777777778,
+    "C": 0.6776190476190476,
+    "R": 0.8408333333333333,
+    "E": 0.7230219780219781,
+    "M": 0.985,
+    "A": 0.7223076923076923,
     "Q": null,
-    "dpdt": 0.8766666666666667,
+    "dpdt": 0.8408333333333333,
     "dynamic_axes": [
       "P",
       "C",
