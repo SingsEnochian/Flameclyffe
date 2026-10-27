@@ -10,6 +10,11 @@ const vite = path.join(root, 'node_modules', 'vite', 'bin', 'vite.js');
 const hostDir = path.join(root, 'apps', 'starwell-server');
 const hostEntry = path.join(hostDir, 'server-secure.js');
 const ui = 'http://127.0.0.1:5186/?room=observer';
+export const WAYGLASS_EXPECTED_UI_REVISION = 'living-observer-n010';
+export function isCurrentWayglassUI(html) {
+  return typeof html==='string' &&
+    /<meta\s+name="wayglass-ui-revision"\s+content="living-observer-n010"\s*\/>/.test(html);
+}
 const api = 'http://127.0.0.1:3000/api/v1/wayglass/routes';
 const mcp = 'http://127.0.0.1:3000/mcp';
 const oauthMetadata = 'http://127.0.0.1:3000/.well-known/oauth-protected-resource/mcp';
@@ -28,6 +33,12 @@ async function get(url, timeout = 1100) {
     const response = await fetch(url, { signal: AbortSignal.timeout(timeout), cache: 'no-store' });
     return response.ok ? response : null;
   } catch { return null; }
+}
+async function inspectWayglassUI(){
+  const response=await get('http://127.0.0.1:5186/?room=observer');
+  if(!response)return {responding:false,current:false};
+  const html=await response.text().catch(()=>null);
+  return {responding:true,current:isCurrentWayglassUI(html)};
 }
 async function hasWayglassAPI() {
   const response = await get(api);
@@ -77,11 +88,17 @@ async function main() {
     launch(process.execPath, [hostEntry], hostDir, env);
     if (!(await ready(hasWayglassAPI))) throw new Error('Hearthgate did not become ready on 3000. Check its output and port conflicts.');
   }
-  if (!(await get('http://127.0.0.1:5186/'))) {
+  const existing=await inspectWayglassUI();
+  if (existing.responding && !existing.current) {
+    throw new Error('Port 5186 is serving an OLD or unknown Wayglass build. Close the prior Wayglass terminal/server before launching N-010. Do not reuse Bluebird-authenticated legacy UI.');
+  }
+  if (!existing.responding) {
     launch(process.execPath, [vite, '--config', 'apps/wayglass/vite.config.js'], root, env);
-    if (!(await ready(async () => !!(await get('http://127.0.0.1:5186/'))))) throw new Error('Wayglass Vite did not become ready on 5186.');
+    if (!(await ready(async () => (await inspectWayglassUI()).current))) {
+      throw new Error('Current Wayglass N-010 build did not become ready on 5186. Check Vite output and close any stale server.');
+    }
   } else {
-    console.log('[Wayglass] Port 5186 already responds; verify it is this Wayglass checkout.');
+    console.log('[Wayglass] Port 5186 serves the N-010 Living Observer interface; reusing verified matching UI.');
   }
   console.log('\n[Wayglass] OPEN ON THIS WINDOWS COMPUTER:\n' + ui + '\n');
   console.log('Writing Room API: port 3000; Ollama: port 11434.');
