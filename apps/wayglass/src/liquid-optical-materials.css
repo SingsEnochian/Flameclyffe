@@ -1,0 +1,337 @@
+/*
+ * Wayglass N-016 · liquid optical materials, implemented in the OS.
+ *
+ * Owner-supplied liquid-glass swatch reference + owner-selected Wayglass
+ * concept render are VISUAL sources only. No image text/stats are imported.
+ * This makes actual room surfaces refractive-looking and high-contrast; 3D
+ * beveled glass in the Observer is modeled in liquid-optics-geometry.js.
+ */
+:root{
+  --wg-liquid-body:#05101e;
+  --wg-liquid-frost:rgba(30,69,91,.36);
+  --wg-liquid-ice:#d3fbff;
+  --wg-liquid-aqua:#6bdeed;
+  --wg-liquid-violet:#ab9cf8;
+  --wg-liquid-rose:#f6aed8;
+  --wg-liquid-gold:#eac88f;
+  --wg-liquid-rim:rgba(187,235,251,.32);
+  --wg-liquid-radius:26px;
+}
+body{
+  background:
+    radial-gradient(ellipse at 14% 11%,rgba(38,125,174,.25),transparent 32%),
+    radial-gradient(ellipse at 86% 31%,rgba(117,91,166,.14),transparent 40%),
+    linear-gradient(145deg,#04101c,#050e1e 61%,#061525);
+}
+.wg-surface[data-deck-system="n013"]{
+  color:#e6f8fa;
+  --ship-ice:#e5f8fc;--ship-mint:#8ceef0;
+  --ship-rim:var(--wg-liquid-rim);
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-deck{
+  border-radius:22px;
+  background:
+    linear-gradient(115deg,rgba(203,249,255,.16),transparent 8%,transparent 82%,rgba(212,181,254,.10)),
+    linear-gradient(155deg,rgba(27,66,94,.84),rgba(8,24,44,.94));
+  box-shadow:inset 0 2px rgba(235,255,255,.24),inset 0 -3px rgba(4,16,35,.46),
+    inset 0 0 0 5px rgba(162,218,244,.029),0 16px 47px rgba(0,0,0,.39);
+  backdrop-filter:blur(17px) saturate(128%);
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-link[aria-current="page"]{
+  background:
+    linear-gradient(122deg,rgba(228,253,255,.25),transparent 28%,rgba(148,115,246,.20)),
+    linear-gradient(135deg,rgba(43,137,174,.7),rgba(26,53,122,.84));
+  border-color:#a3ecff;
+  box-shadow:0 0 17px rgba(107,198,255,.26),inset 0 1px rgba(242,255,255,.33);
+}
+.wg-surface[data-deck-system="n013"] .wg-ship-link:hover:not([aria-current="page"]){
+  border-color:rgba(170,230,255,.66);
+  box-shadow:inset 0 1px rgba(238,253,255,.23),0 0 17px rgba(69,153,255,.13);
+}
+.wg-surface[data-deck-system="n013"] :is(
+  .wg-surface-head,.observer-head,.wg-world-gate,
+  .wg-constellation-strip,.wg-writing-main,.wg-session-sidebar,
+  .observer-stage,.observer-console,.wg-science-station,
+  .observer-dream,.observer-wonder,.wg-mission-card
+){
+  border:1px solid var(--wg-liquid-rim);
+  box-shadow:
+    inset 0 1px 0 rgba(237,253,255,.24),
+    inset 0 0 0 3px rgba(179,229,255,.025),
+    inset 0 -3px 0 rgba(0,12,35,.35),
+    0 18px 52px rgba(0,0,0,.28),
+    0 0 0 1px rgba(5,25,44,.18);
+}
+.wg-surface[data-deck-system="n013"] :is(
+  .wg-surface-head,.observer-head,.wg-world-gate,.wg-constellation-strip,
+  .wg-writing-main,.wg-session-sidebar,.observer-console,
+  .wg-science-station,.observer-dream,.observer-wonder
+){
+  background:
+    radial-gradient(ellipse at 4% -7%,rgba(224,251,255,.115),transparent 28%),
+    radial-gradient(ellipse at 92% 5%,rgba(145,125,243,.105),transparent 42%),
+    linear-gradient(133deg,rgba(29,71,91,.58),rgba(11,30,55,.89) 55%,rgba(12,17,42,.92));
+}
+.wg-surface[data-deck-system="n013"] :is(.wg-surface-head,.observer-head){
+  border-radius:28px;
+  position:relative;
+  overflow:hidden;
+  background:
+    radial-gradient(ellipse at 72% -2%,rgba(116,183,243,.20),transparent 46%),
+    linear-gradient(120deg,rgba(180,237,255,.12),transparent 22%),
+    linear-gradient(150deg,#0e2e45,#061728 72%,#182342);
+}
+.wg-surface[data-deck-system="n013"] :is(.wg-surface-head,.observer-head)::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(114deg,rgba(238,251,255,.105),transparent 11%,transparent 88%,rgba(215,171,255,.07));
+  z-index:0;
+}
+.wg-surface[data-deck-system="n013"] :is(.wg-surface-head,.observer-head)>*{
+  position:relative;z-index:1;
+}
+.wg-surface[data-deck-system="n013"] :is(.wg-surface-head h1,.observer-head h1){
+  color:#f5ffff;text-shadow:0 2px 29px rgba(133,210,246,.16);
+}
+.wg-surface[data-deck-system="n013"] .eyebrow{
+  color:#95eff8;
+}
+.wg-surface[data-deck-system="n013"] :is(.glass-chip,.send-jewel){
+  border-radius:999px;
+  background:
+    linear-gradient(128deg,rgba(219,249,255,.13),transparent 40%),
+    linear-gradient(154deg,rgba(29,83,118,.69),rgba(11,27,53,.95));
+  border-color:rgba(169,224,244,.40);
+  box-shadow:inset 0 1px rgba(226,252,255,.22),inset 0 -1px rgba(6,17,36,.68),
+    0 6px 18px rgba(0,0,0,.17);
+  color:#e9fcff;
+}
+.wg-surface[data-deck-system="n013"] :is(.glass-chip[aria-pressed="true"],.glass-chip.active,.send-jewel:not(:disabled)){
+  border-color:rgba(144,242,253,.86);
+  background:
+    linear-gradient(120deg,rgba(241,255,255,.19),transparent 25%,rgba(130,112,241,.20)),
+    linear-gradient(160deg,rgba(30,119,147,.82),rgba(16,42,97,.91));
+  box-shadow:inset 0 1px rgba(247,255,255,.31),0 0 23px rgba(67,203,238,.16);
+}
+.wg-surface[data-deck-system="n013"] :is(.glass-chip,button):focus-visible{
+  outline:2px solid #d0faff!important;outline-offset:3px!important;
+}
+.wg-surface[data-deck-system="n013"] :is(input,select,textarea){
+  color:#f1fcff;
+  background:
+    linear-gradient(151deg,rgba(21,51,79,.83),rgba(4,15,35,.95));
+  border:1px solid rgba(164,209,238,.42);
+  border-radius:13px;
+}
+.wg-surface[data-deck-system="n013"] :is(input,select,textarea):focus-visible{
+  border-color:#a7efff;
+  outline:2px solid rgba(187,252,255,.91);
+}
+.wg-surface[data-deck-system="n013"] :is(.observer-translation,.wg-science-reading,.wg-thread,.wg-composer){
+  background:linear-gradient(155deg,rgba(23,66,89,.31),rgba(3,14,33,.85));
+  border:1px solid rgba(151,216,242,.28);
+}
+.wg-surface[data-deck-system="n013"] :is(.observer-details pre,.wg-science-reading,#wg-receipt){
+  scrollbar-color:rgba(140,218,242,.48) rgba(4,18,37,.54);
+}
+
+/* The actual LLM interface: route choice, conversation, and continuity receipts.
+   No pretend agent availability or synthetic activity feed. */
+.wg-surface.wg-writing-room[data-deck-system="n013"] .wg-surface-head{
+  gap:clamp(20px,2vw,34px);
+}
+.wg-surface.wg-writing-room[data-deck-system="n013"] .wg-route-block{
+  border:1px solid rgba(161,225,246,.33);
+  border-radius:24px;
+  background:
+    radial-gradient(ellipse at 92% 0,rgba(105,130,223,.13),transparent 54%),
+    linear-gradient(147deg,rgba(20,57,79,.68),rgba(6,22,45,.79));
+  box-shadow:inset 0 1px rgba(235,255,255,.20),0 8px 23px rgba(0,0,0,.17);
+}
+.wg-surface.wg-writing-room[data-deck-system="n013"] .route-mineral{
+  filter:drop-shadow(0 0 20px rgba(112,235,246,.31));
+}
+.wg-surface.wg-writing-room[data-deck-system="n013"] .wg-route-controls label{
+  letter-spacing:.065em;color:#c5f1fc;
+}
+.wg-surface.wg-writing-room[data-deck-system="n013"] #wg-route-state{
+  display:block;max-width:42ch;
+  padding:10px 12px;border:1px solid rgba(159,221,247,.27);
+  border-radius:11px;background:rgba(7,30,52,.74);
+  color:#d5edf4;line-height:1.45;
+}
+.wg-surface.wg-writing-room[data-deck-system="n013"] .wg-world-gate{
+  border-radius:20px;
+}
+.wg-surface.wg-writing-room[data-deck-system="n013"] .wg-writing-workspace{
+  gap:clamp(13px,1.6vw,25px);align-items:stretch;
+}
+.wg-surface.wg-writing-room[data-deck-system="n013"] .wg-writing-main{
+  border-radius:26px;
+  min-height:min(62vh,720px);
+}
+.wg-surface.wg-writing-room[data-deck-system="n013"] .wg-thread{
+  border:1px solid rgba(139,200,229,.21);
+  border-radius:19px;
+  background:
+    radial-gradient(ellipse at 50% 10%,rgba(53,119,155,.075),transparent 54%),
+    linear-gradient(170deg,rgba(4,21,39,.75),rgba(6,15,36,.89));
+}
+.wg-surface.wg-writing-room[data-deck-system="n013"] .wg-composer{
+  border-radius:19px;overflow:hidden;
+}
+.wg-surface.wg-writing-room[data-deck-system="n013"] #wg-input{
+  padding:18px 19px;line-height:1.6;
+  min-height:126px;border:0;border-radius:0;background:transparent;
+}
+.wg-surface.wg-writing-room[data-deck-system="n013"] .composer-foot{
+  border-top:1px solid rgba(157,217,241,.18);
+}
+.wg-surface.wg-writing-room[data-deck-system="n013"] .wg-session-sidebar{
+  border-radius:26px;
+}
+.wg-surface.wg-writing-room[data-deck-system="n013"] .wg-control-ribbon{
+  gap:11px;padding:6px 3px 14px;
+}
+.wg-surface.wg-writing-room[data-deck-system="n013"] .wg-sidebar-tabs button[aria-selected="true"]{
+  border-bottom:2px solid #87f1ff;color:#f3fbff;
+}
+.wg-surface.wg-writing-room[data-deck-system="n013"] .turn-card{
+  border-radius:18px;border-color:rgba(149,214,243,.28);
+  background:linear-gradient(145deg,rgba(29,76,102,.6),rgba(8,28,54,.8));
+}
+.wg-surface.wg-writing-room[data-deck-system="n013"] .turn-card.user{
+  background:linear-gradient(145deg,rgba(42,91,104,.6),rgba(23,37,76,.86));
+  border-color:rgba(130,229,230,.44);
+}
+
+/* Real Living Observer central lens: cinematic but not a fabricated feed. */
+.wg-living-observer[data-deck-system="n013"] .observer-stage{
+  background:
+    radial-gradient(ellipse at 50% 48%,rgba(26,119,177,.25),transparent 46%),
+    radial-gradient(ellipse at 67% 27%,rgba(117,81,200,.095),transparent 33%),
+    linear-gradient(155deg,#0a2437,#071426 68%,#0c1933);
+}
+.wg-living-observer[data-deck-system="n013"] .wg-spatial-three-canvas{
+  filter:drop-shadow(0 0 28px rgba(120,223,255,.15));
+}
+.wg-living-observer[data-deck-system="n013"] .wg-hud-identity strong{
+  color:#f2ffff;
+  text-shadow:0 0 17px rgba(86,232,245,.75);
+}
+.wg-living-observer[data-deck-system="n013"] .observer-meters{
+  gap:15px;
+}
+.wg-living-observer[data-deck-system="n013"] .observer-meter meter::-webkit-meter-optimum-value{
+  background:linear-gradient(90deg,#2d819f,#76e5ec,#aaa0f3);
+}
+
+/* Working deck shortcuts, based on concept's lower modules but wired to
+   real research, dream and provenance sections. */
+.wg-living-observer .wg-mission-dock{
+  display:grid;gap:19px;
+  padding:clamp(18px,2.1vw,31px);
+  border:1px solid rgba(177,231,246,.29);
+  border-radius:27px;
+  background:
+    linear-gradient(120deg,rgba(231,250,255,.065),transparent 32%),
+    linear-gradient(145deg,rgba(17,51,78,.76),rgba(6,19,42,.91));
+  box-shadow:inset 0 2px rgba(227,253,255,.16),0 15px 44px rgba(0,0,0,.22);
+}
+.wg-living-observer .wg-mission-intro{
+  display:flex;flex-wrap:wrap;align-items:baseline;gap:9px 18px;
+}
+.wg-living-observer .wg-mission-intro .eyebrow{
+  flex-basis:100%;margin:0;
+}
+.wg-living-observer .wg-mission-intro h2{
+  font:500 clamp(1.4rem,2vw,2rem)/1.2 Georgia,serif;margin:0;
+}
+.wg-living-observer .wg-mission-intro .tiny{
+  margin:0;color:#bedee9;line-height:1.5;
+}
+.wg-living-observer .wg-mission-cards{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;
+}
+.wg-living-observer .wg-mission-card{
+  min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:10px;
+  padding:19px 20px 20px;
+  position:relative;overflow:hidden;border-radius:23px;
+  background:
+    radial-gradient(ellipse at 95% 1%,rgba(139,207,253,.15),transparent 59%),
+    linear-gradient(145deg,rgba(29,71,99,.65),rgba(10,31,65,.88));
+}
+.wg-living-observer .wg-mission-card[data-mission="sandbox"]{
+  background:
+    radial-gradient(ellipse at 95% 1%,rgba(173,132,247,.19),transparent 63%),
+    linear-gradient(145deg,rgba(37,58,91,.75),rgba(13,24,61,.88));
+}
+.wg-living-observer .wg-mission-card[data-mission="provenance"]{
+  background:
+    radial-gradient(ellipse at 95% 1%,rgba(105,216,211,.19),transparent 63%),
+    linear-gradient(145deg,rgba(21,75,94,.66),rgba(9,31,55,.9));
+}
+.wg-living-observer .wg-mission-card::before{
+  content:"";position:absolute;inset:0;
+  border-radius:inherit;pointer-events:none;
+  background:linear-gradient(125deg,rgba(245,255,255,.13),transparent 12%,transparent 75%,rgba(190,180,252,.07));
+}
+.wg-living-observer .wg-mission-optic{
+  width:52px;height:52px;flex-shrink:0;
+  border:1px solid rgba(192,250,255,.67);border-radius:16px;
+  background:
+    radial-gradient(circle at 30% 24%,rgba(240,255,255,.83),transparent 14%),
+    conic-gradient(from 110deg,rgba(78,229,238,.28),rgba(197,150,249,.52),rgba(102,204,255,.25),rgba(78,229,238,.28));
+  box-shadow:inset 0 1px 3px rgba(255,255,255,.59),
+    inset -4px -5px 9px rgba(20,38,100,.46),
+    0 8px 18px rgba(32,161,209,.22);
+  transform:rotate(-12deg);
+}
+.wg-living-observer .wg-mission-card[data-mission="sandbox"] .wg-mission-optic{
+  transform:rotate(20deg);border-radius:13px;
+}
+.wg-living-observer .wg-mission-card[data-mission="provenance"] .wg-mission-optic{
+  border-radius:50%;
+}
+.wg-living-observer .wg-mission-eyebrow{
+  color:#b5dcec;font:700 .68rem ui-monospace,Consolas,monospace;
+  letter-spacing:.14em;
+}
+.wg-living-observer .wg-mission-card h3{
+  margin:0;font:550 clamp(1.14rem,1.65vw,1.65rem)/1.2 Georgia,serif;
+  color:#f2fcff;
+}
+.wg-living-observer .wg-mission-card p{
+  color:#cce0ec;line-height:1.55;font-size:.86rem;margin:0;
+}
+.wg-living-observer .wg-mission-card small{
+  color:#a7c7db;line-height:1.4;
+}
+.wg-living-observer .wg-mission-action{
+  margin-top:auto;min-height:44px!important;
+  font-size:.84rem;cursor:pointer;
+}
+.wg-living-observer .wg-mission-action:hover{
+  border-color:#d3f8ff;
+}
+.wg-living-observer .wg-mission-action:focus-visible{
+  outline:2px solid #e8fdff;outline-offset:4px;
+}
+.wg-living-observer :is(.wg-science-station,.observer-dream,.observer-wonder){
+  scroll-margin-top:24px;
+}
+@media(max-width:980px){
+  .wg-living-observer .wg-mission-cards{grid-template-columns:1fr 1fr}
+  .wg-living-observer .wg-mission-card:last-child{grid-column:1/-1}
+}
+@media(max-width:620px){
+  .wg-living-observer .wg-mission-cards{grid-template-columns:1fr}
+  .wg-living-observer .wg-mission-card:last-child{grid-column:auto}
+  .wg-living-observer .wg-mission-card{padding:18px}
+  .wg-living-observer .wg-mission-intro{display:grid;gap:8px}
+  .wg-living-observer .wg-mission-optic{width:46px;height:46px}
+}
+@media(prefers-reduced-motion:reduce){
+  .wg-living-observer .wg-mission-optic{animation:none}
+  .wg-surface[data-deck-system="n013"] .glass-chip{transition:none}
+}
