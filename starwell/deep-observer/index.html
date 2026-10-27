@@ -33,6 +33,7 @@
 <script src="deep-observer-codex.js" defer></script>
 <script src="deep-observer-dev-console.js" defer></script>
 <script type="module" src="living-observer-atlas.js?v=atlas-v1"></script>
+<script type="module" src="living-observer-library.js?v=atlas-v1"></script>
 </head>
 <body>
 <main class="page">
@@ -223,6 +224,34 @@
           <p class="atlas-notice">Pythagorean letter mapping and digital-root reductions are symbolic choices. Correlations do not establish physical coupling, prophecy or cosmological causation.</p>
         </section>
       </div>
+      <section class="atlas-library" aria-label="Private Witchcraft and historical research bookshelf">
+        <div class="atlas-library-head">
+          <div>
+            <h3>Research library · Witchcraft, cosmology, geometry & number</h3>
+            <p>Import a local metadata catalogue from the Steward's Google Drive collection. The public Observer never silently indexes private books or reads their contents.</p>
+          </div>
+          <button type="button" class="action" id="atlasLibraryClear">Clear private index</button>
+        </div>
+        <div class="atlas-library-fields">
+          <label for="atlasLibraryFile">Load private JSON catalogue<input type="file" id="atlasLibraryFile" accept=".json,application/json"></label>
+          <label for="atlasLibrarySubject">Research lens
+            <select id="atlasLibrarySubject">
+              <option value="all">All subjects</option>
+              <option value="historical-ritual">Historical ritual</option>
+              <option value="numerology">Numerology</option>
+              <option value="geometry">Geometry</option>
+              <option value="cosmology">Cosmology</option>
+              <option value="qabalah">Qabalah and gematria</option>
+              <option value="witchcraft">Witchcraft</option>
+              <option value="other">Other</option>
+            </select>
+          </label>
+          <label for="atlasLibrarySearch">Search titles and notes<input type="search" id="atlasLibrarySearch" placeholder="e.g. Agrippa, gematria, 3, 6, 9"></label>
+        </div>
+        <p id="atlasLibraryStatus" role="status" aria-live="polite">No private catalogue loaded. Public page contains no private Drive inventory.</p>
+        <div id="atlasLibraryResults" class="atlas-library-results" aria-label="Local private research titles"></div>
+        <p class="atlas-notice">References remain private until you choose a local JSON file. Title metadata is not a claim to have checked the book's contents. Historical assertions, esoteric interpretations and scientific measurements require distinct provenance.</p>
+      </section>
       <p class="atlas-provenance" id="atlasProvenance">Each source retains its own retrieval time, observation time and freshness state.</p>
       <details class="atlas-trace">
         <summary>Inspect complete evidence and interpretation packet</summary>
