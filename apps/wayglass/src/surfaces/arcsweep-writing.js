@@ -1,4 +1,6 @@
 import { createInteractionState } from '../interaction-state.js';
+import { attachLorebookDock } from '../lorebook-dock.js';
+import { speakExplicitText } from '../ship-sound.js';
 import { authorizationSession } from '../authorization-session.js';
 import { mountWayglassRoutePicker } from '../route-picker.js';
 import { WAYGLASS_WORLD_SEATS, findWayglassWorldSeat, wayglassWorldStatus } from '../world-seats.js';
@@ -171,6 +173,7 @@ export async function mountArcSweepWritingSurface(root) {
 
   root.querySelectorAll('[data-wayglass-room]').forEach(button => button.addEventListener('click', () => globalThis.__wayglassOS?.mount(button.dataset.wayglassRoom)));
 
+  const disposeLorebook=attachLorebookDock(root);
   const routePicker = mountWayglassRoutePicker(root.querySelector('#wg-route'), { onChange(value) {
     selectedRoute = value;
     externalConsent.checked = false;
@@ -354,7 +357,8 @@ export async function mountArcSweepWritingSurface(root) {
         renderThinking(message) +
         '<div class="turn-text">' + escapeHtml(message.content).replaceAll('\n', '<br>') + '</div>' +
         '<footer><button type="button" class="glass-chip" data-copy-reply="' + index + '">Copy reply</button> ' +
-        '<button type="button" class="glass-chip" data-copy-through="' + index + '">Copy log through here</button></footer>' +
+        '<button type="button" class="glass-chip" data-copy-through="' + index + '">Copy log through here</button> ' +
+        (message.role === 'assistant' ? '<button type="button" class="glass-chip" data-speak-reply="' + index + '">Speak reply</button>' : '') + '</footer>' +
         '</article>';
     }).join('');
     thread.scrollTop = thread.scrollHeight;
@@ -383,9 +387,16 @@ export async function mountArcSweepWritingSurface(root) {
 
   root.querySelector('#wg-copy-session').addEventListener('click', event => copyText(sessionLog(), event.currentTarget));
   thread.addEventListener('click', event => {
-    const button = event.target.closest('[data-copy-reply], [data-copy-through]');
+    const button = event.target.closest('[data-copy-reply], [data-copy-through], [data-speak-reply]');
     if (!button) return;
-    if (button.dataset.copyReply !== undefined) {
+    if (button.dataset.speakReply !== undefined) {
+      const message=messages[Number(button.dataset.speakReply)];
+      if(!message || message.role!=='assistant')return;
+      try{
+        const result=speakExplicitText(message.content);
+        status.textContent='Speaking selected reply through browser/OS audio. Output route follows your device settings.';
+      }catch(error){status.textContent='Voice unavailable: '+String(error?.message||error).slice(0,130);}
+    } else if (button.dataset.copyReply !== undefined) {
       copyText(messages[Number(button.dataset.copyReply)].content, button);
     } else {
       copyText(sessionLog(Number(button.dataset.copyThrough)), button);
@@ -670,6 +681,8 @@ export async function mountArcSweepWritingSurface(root) {
     lastReceipt: () => lastReceipt,
     destroy() {
       globalThis.removeEventListener?.('wayglass:command', handleWayglassCommand);
+      disposeLorebook();
+      globalThis.speechSynthesis?.cancel?.();
       routePicker.destroy();
     },
   });
