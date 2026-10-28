@@ -366,10 +366,31 @@ async function main() {
       cdp.close();
     }
   } finally {
-    chrome.kill('SIGTERM');
-    await rm(profileDir, { recursive: true, force: true });
+    if (chrome.exitCode == null && chrome.signalCode == null) {
+      chrome.kill('SIGTERM');
+      await Promise.race([
+        new Promise((resolve) => chrome.once('exit', resolve)),
+        new Promise((resolve) => setTimeout(resolve, 2_000)),
+      ]);
+    }
+
+    let cleanupError = null;
+    for (let attempt = 0; attempt < 8; attempt += 1) {
+      try {
+        await rm(profileDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+        cleanupError = null;
+        break;
+      } catch (error) {
+        cleanupError = error;
+        await new Promise((resolve) => setTimeout(resolve, 150 * (attempt + 1)));
+      }
+    }
+
     if (chrome.exitCode && chrome.exitCode !== 0) {
       process.stderr.write(chromeErr);
+    }
+    if (cleanupError) {
+      console.warn('Wayglass browser smoke cleanup warning:', cleanupError.message);
     }
   }
 }
