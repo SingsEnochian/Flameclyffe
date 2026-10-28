@@ -245,7 +245,7 @@ async function main() {
           departure_schema: departure.schema,
           stop_receipt_id: departure.stop_receipt?.receipt_id || null,
           continuation_packet_id: packet.packet_id,
-          packet_digest: departure.stop_receipt?.continuation_digest || null,
+          packet_digest: departure.stop_receipt?.integrity?.digest || null,
           stop_point: packet.stop_point,
           next_owner: packet.next_owner,
           unresolved_wonder_questions: packet.unresolved_wonder_questions,
@@ -270,6 +270,7 @@ async function main() {
       assert(evidence?.entry_schema === 'wayglass.world-entry/v0.1', 'Unexpected entry schema.');
       assert(evidence?.entry_status === 'entered', 'Runtime Flight 001 did not enter.');
       assert(evidence?.stop_integrity_verified === true, 'Runtime Flight 001 stop integrity was not verified.');
+      assert(typeof evidence?.packet_digest === 'string' && evidence.packet_digest.length > 0, 'Runtime Flight 001 did not expose the continuation digest.');
       assert(
         evidence.requests.some((request) => request.url === '/api/v1/wayglass/kernel/leave' && request.method === 'POST'),
         'Browser did not call the real leave endpoint.',
