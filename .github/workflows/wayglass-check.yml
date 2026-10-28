@@ -99,4 +99,8 @@ jobs:
           fi
 
           curl -fsS http://127.0.0.1:3000/api/v1/wayglass/routes >/dev/null
-          WAYGLASS_RUNTIME_URL=http://127.0.0.1:3000/wayglass/ node scripts/wayglass-runtime-flight.mjs
+          if ! WAYGLASS_RUNTIME_URL=http://127.0.0.1:3000/wayglass/ node scripts/wayglass-runtime-flight.mjs; then
+            echo "---- Hearthgate Runtime Flight server log ----"
+            cat /tmp/hearthgate-wayglass.log
+            exit 1
+          fi
