@@ -9,6 +9,7 @@ on:
       - 'lib/wayglass-*'
       - 'schemas/thought-vibration/**'
       - 'skills/thought-vibration-ai-v2/**'
+      - 'scripts/wayglass-browser-smoke.mjs'
       - 'docs/architecture/WAYGLASS_OS_V0_1.md'
       - 'docs/architecture/WAYGLASS_THOUGHT_VIBRATION_V2.md'
       - 'package.json'
@@ -39,3 +40,29 @@ jobs:
       - run: npm run wayglass:stage:server
       - name: Verify staged host
         run: test -f apps/starwell-server/public/wayglass/index.html
+      - name: Browser smoke · exports, Feather, stop/return
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run wayglass:preview > /tmp/wayglass-preview.log 2>&1 &
+          preview_pid=$!
+          cleanup() {
+            kill "$preview_pid" 2>/dev/null || true
+          }
+          trap cleanup EXIT
+
+          ready=0
+          for attempt in {1..60}; do
+            if curl -fsS http://127.0.0.1:4186/ >/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 0.25
+          done
+
+          if [ "$ready" -ne 1 ]; then
+            cat /tmp/wayglass-preview.log
+            exit 1
+          fi
+
+          node scripts/wayglass-browser-smoke.mjs
