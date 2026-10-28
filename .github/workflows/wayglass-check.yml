@@ -10,6 +10,7 @@ on:
       - 'schemas/thought-vibration/**'
       - 'skills/thought-vibration-ai-v2/**'
       - 'scripts/wayglass-browser-smoke.mjs'
+      - 'scripts/wayglass-runtime-flight.mjs'
       - 'docs/architecture/WAYGLASS_OS_V0_1.md'
       - 'docs/architecture/WAYGLASS_THOUGHT_VIBRATION_V2.md'
       - 'package.json'
@@ -66,3 +67,36 @@ jobs:
           fi
 
           node scripts/wayglass-browser-smoke.mjs
+
+      - name: Install locked Hearthgate runtime dependencies
+        run: npm ci --prefix apps/starwell-server --ignore-scripts --no-audit --no-fund
+
+      - name: Runtime Flight 001 · real browser → Hearthgate leave/enter
+        shell: bash
+        env:
+          ANTHROPIC_API_KEY: runtime-flight-placeholder
+        run: |
+          set -euo pipefail
+          PORT=3000 node apps/starwell-server/server-secure.js > /tmp/hearthgate-wayglass.log 2>&1 &
+          server_pid=$!
+          cleanup() {
+            kill "$server_pid" 2>/dev/null || true
+          }
+          trap cleanup EXIT
+
+          ready=0
+          for attempt in {1..80}; do
+            if curl -fsS http://127.0.0.1:3000/wayglass/ >/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 0.25
+          done
+
+          if [ "$ready" -ne 1 ]; then
+            cat /tmp/hearthgate-wayglass.log
+            exit 1
+          fi
+
+          curl -fsS http://127.0.0.1:3000/api/v1/wayglass/routes >/dev/null
+          WAYGLASS_RUNTIME_URL=http://127.0.0.1:3000/wayglass/ node scripts/wayglass-runtime-flight.mjs
