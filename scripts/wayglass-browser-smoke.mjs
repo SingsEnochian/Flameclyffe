@@ -1,10 +1,10 @@
 import { spawn, spawnSync } from 'node:child_process';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
 const PREVIEW_URL = process.env.WAYGLASS_BROWSER_SMOKE_URL || 'http://127.0.0.1:4186/';
-const DEBUG_PORT = Number(process.env.WAYGLASS_CHROME_DEBUG_PORT || 9222);
+const DEBUG_PORT = Number(process.env.WAYGLASS_CHROME_DEBUG_PORT || 0);
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -89,15 +89,25 @@ async function main() {
   chrome.stderr.on('data', (chunk) => { chromeErr += chunk.toString(); });
 
   try {
+    const activeDebugPort = DEBUG_PORT || await waitFor(async () => {
+      try {
+        const activePort = await readFile(path.join(profileDir, 'DevToolsActivePort'), 'utf8');
+        const port = Number(activePort.split(/\\r?\\n/, 1)[0]);
+        return Number.isInteger(port) && port > 0 ? port : null;
+      } catch {
+        return null;
+      }
+    }, { timeoutMs: 15_000, label: 'Chrome DevTools active port' });
+
     const version = await waitFor(async () => {
-      const response = await fetch(`http://127.0.0.1:${DEBUG_PORT}/json/version`);
+      const response = await fetch(`http://127.0.0.1:${activeDebugPort}/json/version`);
       if (!response.ok) return null;
       return response.json();
-    }, { timeoutMs: 12_000, label: 'Chrome DevTools endpoint' });
+    }, { timeoutMs: 8_000, label: 'Chrome DevTools endpoint' });
 
     assert(version.webSocketDebuggerUrl, 'Chrome DevTools endpoint did not expose a browser websocket.');
 
-    const createTarget = await fetch(`http://127.0.0.1:${DEBUG_PORT}/json/new?${encodeURIComponent(PREVIEW_URL)}`, { method: 'PUT' });
+    const createTarget = await fetch(`http://127.0.0.1:${activeDebugPort}/json/new?${encodeURIComponent(PREVIEW_URL)}`, { method: 'PUT' });
     assert(createTarget.ok, `Could not create Chrome target: HTTP ${createTarget.status}`);
     const target = await createTarget.json();
     assert(target.webSocketDebuggerUrl, 'Chrome target did not expose a websocket.');
