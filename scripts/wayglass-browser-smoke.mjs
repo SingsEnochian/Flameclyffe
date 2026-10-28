@@ -106,8 +106,13 @@ async function main() {
           // DevTools endpoint on stderr without writing DevToolsActivePort.
         }
 
-        const announced = chromeErr.match(/DevTools listening on ws:\\/\\/127\\.0\\.0\\.1:(\\d+)\\//);
-        const announcedPort = announced ? Number(announced[1]) : 0;
+        const marker = 'DevTools listening on ws://127.0.0.1:';
+        const announcedLine = chromeErr
+          .split('\n')
+          .find((line) => line.includes(marker));
+        const announcedPort = announcedLine
+          ? Number(announcedLine.split(marker)[1]?.split('/')[0])
+          : 0;
         return Number.isInteger(announcedPort) && announcedPort > 0 ? announcedPort : null;
       }, { timeoutMs: 15_000, label: 'Chrome DevTools active port' });
     } catch (error) {
