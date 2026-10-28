@@ -295,8 +295,20 @@ async function main() {
   } catch (error) {
     throw new Error(`${error.message}; chrome_stderr=${chromeErr.trim() || '(none)'}`);
   } finally {
-    chrome.kill('SIGTERM');
-    await rm(profileDir, { recursive: true, force: true });
+    if (chrome.exitCode == null) {
+      const exited = new Promise((resolve) => chrome.once('exit', resolve));
+      chrome.kill('SIGTERM');
+      await Promise.race([
+        exited,
+        new Promise((resolve) => setTimeout(resolve, 2_000)),
+      ]);
+    }
+    await rm(profileDir, {
+      recursive: true,
+      force: true,
+      maxRetries: 5,
+      retryDelay: 100,
+    }).catch(() => {});
   }
 }
 
