@@ -1,6 +1,8 @@
 'use strict';
 
 const DEFAULT_ALLOWED_ORIGINS = Object.freeze([
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
   'http://localhost:3841',
   'http://127.0.0.1:3841',
   'http://localhost:5173',
