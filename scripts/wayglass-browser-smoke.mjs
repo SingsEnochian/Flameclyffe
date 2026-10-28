@@ -100,10 +100,15 @@ async function main() {
         try {
           const activePort = await readFile(path.join(profileDir, 'DevToolsActivePort'), 'utf8');
           const port = Number(activePort.split(/\\r?\\n/, 1)[0]);
-          return Number.isInteger(port) && port > 0 ? port : null;
+          if (Number.isInteger(port) && port > 0) return port;
         } catch {
-          return null;
+          // Chrome 155 on GitHub-hosted runners may announce the ephemeral
+          // DevTools endpoint on stderr without writing DevToolsActivePort.
         }
+
+        const announced = chromeErr.match(/DevTools listening on ws:\\/\\/127\\.0\\.0\\.1:(\\d+)\\//);
+        const announcedPort = announced ? Number(announced[1]) : 0;
+        return Number.isInteger(announcedPort) && announcedPort > 0 ? announcedPort : null;
       }, { timeoutMs: 15_000, label: 'Chrome DevTools active port' });
     } catch (error) {
       throw new Error(
