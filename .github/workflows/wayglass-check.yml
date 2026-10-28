@@ -40,7 +40,13 @@ jobs:
       - run: npm run wayglass:build
       - run: npm run wayglass:stage:server
       - name: Verify staged host
-        run: test -f apps/starwell-server/public/wayglass/index.html
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f apps/starwell-server/public/wayglass/index.html
+          test -f apps/starwell-server/public/wayglass/wayglass-host.js
+          grep -Fq 'wayglass-host.js' apps/starwell-server/public/wayglass/index.html
+          grep -Fq '__wayglassHost' apps/starwell-server/public/wayglass/wayglass-host.js
       - name: Browser smoke · exports, Feather, stop/return
         shell: bash
         run: |
