@@ -74,6 +74,8 @@ class CdpClient {
 
 async function main() {
   const chromeBin = findChrome();
+  const chromeVersion = spawnSync(chromeBin, ['--version'], { encoding: 'utf8' });
+  console.log('[Wayglass browser smoke] Chrome:', chromeBin, (chromeVersion.stdout || chromeVersion.stderr || '').trim());
   const profileDir = await mkdtemp(path.join(os.tmpdir(), 'wayglass-chrome-'));
   const chrome = spawn(chromeBin, [
     '--headless=new',
@@ -89,15 +91,25 @@ async function main() {
   chrome.stderr.on('data', (chunk) => { chromeErr += chunk.toString(); });
 
   try {
-    const activeDebugPort = DEBUG_PORT || await waitFor(async () => {
-      try {
-        const activePort = await readFile(path.join(profileDir, 'DevToolsActivePort'), 'utf8');
-        const port = Number(activePort.split(/\\r?\\n/, 1)[0]);
-        return Number.isInteger(port) && port > 0 ? port : null;
-      } catch {
-        return null;
-      }
-    }, { timeoutMs: 15_000, label: 'Chrome DevTools active port' });
+    let activeDebugPort;
+    try {
+      activeDebugPort = DEBUG_PORT || await waitFor(async () => {
+        if (chrome.exitCode != null) {
+          throw new Error(`Chrome exited early with code ${chrome.exitCode}`);
+        }
+        try {
+          const activePort = await readFile(path.join(profileDir, 'DevToolsActivePort'), 'utf8');
+          const port = Number(activePort.split(/\\r?\\n/, 1)[0]);
+          return Number.isInteger(port) && port > 0 ? port : null;
+        } catch {
+          return null;
+        }
+      }, { timeoutMs: 15_000, label: 'Chrome DevTools active port' });
+    } catch (error) {
+      throw new Error(
+        `${error.message}; chrome=${chromeBin}; pid=${chrome.pid ?? 'none'}; exit=${chrome.exitCode ?? 'running'}; stderr=${chromeErr.trim() || '(none)'}`
+      );
+    }
 
     const version = await waitFor(async () => {
       const response = await fetch(`http://127.0.0.1:${activeDebugPort}/json/version`);
