@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-10-29T19:08:49.366Z",
+  "generated_at": "2026-10-29T23:28:18.501Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,51 +13,51 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-10-29T15:00",
-    "sky": "Day",
+    "time": "2026-10-29T19:15",
+    "sky": "Night",
     "current": {
-      "time": "2026-10-29T15:00",
+      "time": "2026-10-29T19:15",
       "interval": 900,
-      "temperature_2m": 73.7,
-      "relative_humidity_2m": 93,
-      "is_day": 1,
+      "temperature_2m": 70.7,
+      "relative_humidity_2m": 91,
+      "is_day": 0,
       "precipitation": 0,
       "rain": 0,
-      "weather_code": 3,
-      "cloud_cover": 97,
-      "pressure_msl": 1018.3,
-      "wind_speed_10m": 12.3,
-      "wind_direction_10m": 22
+      "weather_code": 2,
+      "cloud_cover": 55,
+      "pressure_msl": 1018.2,
+      "wind_speed_10m": 9.9,
+      "wind_direction_10m": 15
     }
   },
   "space_weather": {
     "kp": {
       "value": 0.33,
-      "time_tag": "2026-10-29T15:00:00",
+      "time_tag": "2026-10-29T18:00:00",
       "a_running": 2
     },
     "solar_wind": {
-      "time_tag": "2026-10-29T19:00:00Z",
-      "bz": 2,
+      "time_tag": "2026-10-29T23:20:00Z",
+      "bz": 0,
       "bt": 4,
       "density": null,
-      "speed": 316
+      "speed": 314
     }
   },
   "moon": {
-    "age_days": 18.41,
-    "illumination": 85.7,
+    "age_days": 18.59,
+    "illumination": 84.3,
     "name": "Waning Gibbous"
   },
   "field": {
-    "P": 0.5788888888888885,
-    "C": 0.2680952380952381,
-    "R": 0.8283333333333334,
-    "E": 0.6212637362637363,
-    "M": 0.857,
-    "A": 0.6115384615384615,
+    "P": 0.5177777777777782,
+    "C": 0.4680952380952381,
+    "R": 0.7466666666666666,
+    "E": 0.6135714285714285,
+    "M": 0.843,
+    "A": 0.553076923076923,
     "Q": null,
-    "dpdt": 0.8283333333333334,
+    "dpdt": 0.7466666666666666,
     "dynamic_axes": [
       "P",
       "C",
