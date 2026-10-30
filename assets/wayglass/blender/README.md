@@ -1,17 +1,51 @@
-# Wayglass shipyard — first spatial blockout
+# Wayglass Blender shipyard — v2 geometry proposal (draft)
 
-This is a **draft, not the completed Issue #507 vessel**. It is an editable first study of a single spatial coordinate system, not approved canon or a production-ready model. The proposed visual source is PR #506, and the runtime reference is `docs/wayglass/WAYGLASS_N017_INTEGRATED_SHIP.md`.
+**Stacked on Codex's PR #508; this is not a finished ship or accepted canon.** The source is PR #506 and the implementation request is Issue #507.
 
-On Windows, from the repository root, with Blender 5.2.2:
+The original #508 blockout was executed by Codex using Blender 5.2.2, producing a local `.blend`, three PNGs, and a `.glb`. Those original artifacts **do not validate this subsequent branch's changes**. A Blender run of the v2 script, fresh renders and an export check are **still required**.
+
+## What changed on this review branch
+
+- Revised the single main deck from 112 m × 27 m to **92 m × 24 m**, with a center elevation of -4.1 m.
+- Repositioned eight room markers to X = **-33, -11, +11, +33 m** per port/starboard side, using smaller 21.5 m × 10.2 m room-wall footprints and intact 3 m door openings.
+- Moved and reduced the spherical Observer core from (0,0,3), radius 5 m, to **(0,0,7.8), radius 3.3 m**. This creates a proposed elevated Observer object without blocking ground-level circulation; accessible vertical access is still unimplemented.
+- Added `layout_audit.py` for a **Blender-free** coarse hull-envelope check. It uses the generator's literal hull stations and room centers and compares them with the expected v1/v2 dimensions.
+
+The audit checks all room-volume corners and deck corners against linearly interpolated elliptical sections, plus spherical core-to-corridor overlap. On the original geometry it detects out-of-hull room/deck corners and an obstructed central corridor; v2 passes those **coarse** checks. It does **not** calculate mesh intersections, navigable door paths, accessible clearances, structural strength, or GLB integrity.
+
+## Test without Blender
+
+From repo root:
+
+```powershell
+python assets/wayglass/blender/layout_audit.py
+python assets/wayglass/blender/layout_audit.py assets/wayglass/blender/build_wayglass.py
+```
+
+The first command runs standard-library self-tests and prints `WAYGLASS_LAYOUT_AUDIT_TEST_OK`. The second prints an auditable JSON report. Both have been checked with an independent Python geometry test, but the updated branch has **not** been verified in Blender itself.
+
+## Generate the working scene (Blender 5.2 candidate)
+
+On Windows, from repository root:
 
 ```powershell
 & 'C:\Program Files\Blender Foundation\Blender 5.2\blender.exe' --background --factory-startup --python assets\wayglass\blender\build_wayglass.py
 ```
 
-Output is written to `assets/wayglass/blender/output/`: an editable `.blend`, three PNG renders, a GLB and `atlas.json`. The script regenerates those files and will overwrite them. Run in a fresh background Blender process; it clears that process's scene. It does not modify an already-open Blender session. The generation was tested on Blender 5.2.2 only; 4.x compatibility remains unverified. Rendering uses CPU Cycles, not Eevee.
+The script saves to `assets/wayglass/blender/output/`: an editable `.blend`, three PNG renders, GLB and `atlas.json`. It **overwrites this output directory** and clears its *own fresh background Blender scene*, not your existing GUI document. Blender 4.x, current 5.x build, Eevee and browser/WebGL export performance must be confirmed separately.
 
-Coordinates are meters, +X toward the bow, +Y port, +Z up. Blender's GLB exporter applies its standard glTF Y-up conversion. The physical room names are draft spatial concepts: Library corresponds to N-017 Library, Crew Commons to Commons, Dreaming to the Toybox/Dream Sandbox concepts, and Return is a proposed room for a cross-cutting workflow rather than an asserted N-017 destination. Organs has no dedicated blockout yet. The Dabble object is a placeholder, not an integration.
+Coordinate system: metres, **+X bow, +Y port, +Z up**. GLB exporter applies its normal glTF Y-up transformation.
 
-The render manifest records the generator hash and distinguishes rendered cameras from planned cameras. The generator checks named collections, nonzero room mesh dimensions, coarse coordinate extents and successful GLB output. These do **not** establish actual tapered-hull containment, collision-free connectivity, navigability, GLB performance, web integration or camera quality.
+### Rooms and routes
 
-Known gaps: the opaque envelope hides the core; the silhouette and materials need substantial work against the references; aft propulsion and multiple decks are absent; the central core intersects the corridor; room interiors and lighting are rudimentary; core cutaway is created by hiding the full envelope, not a sectional cut. No viewport inspection, Blender 4.x test, Three.js integration, performance budget or Runway treatment has been performed. Build all of those and replace coarse checks with real containment and connectivity tests before considering #507 complete.
+The eight preliminary room volumes are Living Observer, Nikola Research, ArcSweep Writing Room, Universal Codex Library, Atelier, Crew Commons, Dreaming Toybox and Return. These are proposed *spaces*, not proof that all are live N-017 software routes. The Dabble blockout is **not** a connected Dabble API or manuscript transmission. No owner consent or external partner identity is inferred.
+
+## Still to build and verify
+
+1. Run updated v2 scene in Blender and inspect every camera, wall thickness, doors, hull faces and clipping.
+2. Move from a hidden opaque envelope to an intentional observable core and structurally plausible cutaway/port system.
+3. Test real watertight containment, door clearance and room-to-room navigation. Add multiple decks, accessible lifts and navigation landmarks.
+4. Add actual aft propulsion, distinct room designs, measured materials, lighting, reduced motion and optimized Three.js GLB assets.
+5. Render an entire exterior/interior atlas from **the same Blender model**, preserve camera/file hashes, then use Runway for cinematic colour and mood only after geometric signoff.
+
+**This branch removes two mathematically detectable geometric problems; it does not close #507.** Maintain separate visual identity: Wayglass the ship ≠ Rarity the Atelier alicorn.
