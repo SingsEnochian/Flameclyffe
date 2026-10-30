@@ -10,6 +10,7 @@ The original #508 blockout was executed by Codex using Blender 5.2.2, producing 
 - Repositioned eight room markers to X = **-33, -11, +11, +33 m** per port/starboard side, using smaller 21.5 m × 10.2 m room-wall footprints and intact 3 m door openings.
 - Moved and reduced the spherical Observer core from (0,0,3), radius 5 m, to **(0,0,7.8), radius 3.3 m**. This creates a proposed elevated Observer object without blocking ground-level circulation; accessible vertical access is still unimplemented.
 - Added `layout_audit.py` for a **Blender-free** coarse hull-envelope check. It uses the generator's literal hull stations and room centers and compares them with the expected v1/v2 dimensions.
+- Added distinct **editable geometric fixtures** for all eight room blockouts (Observer plinth/sphere, Nikola armillary, Writing Room table and Dabble placeholder, Codex shelves, Atelier workbench, Commons table/benches, Dreaming orb, Return arch), plus downward-directed interior area lights. These are spatial concept objects, not working software controls or functioning portals.
 
 The audit checks all room-volume corners and deck corners against linearly interpolated elliptical sections, plus spherical core-to-corridor overlap. On the original geometry it detects out-of-hull room/deck corners and an obstructed central corridor; v2 passes those **coarse** checks. It does **not** calculate mesh intersections, navigable door paths, accessible clearances, structural strength, or GLB integrity.
 
