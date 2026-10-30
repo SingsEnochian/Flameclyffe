@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="760" viewBox="0 0 1400 760" role="img" aria-label="Wayglass Blender v2 proposed single deck plan with eight room blockouts, central corridor and elevated Observer core">
+<rect width="1400" height="760" fill="#0e1524"/>
+<rect x="24" y="24" width="1352" height="712" rx="16" fill="none" stroke="#ab7848" stroke-width="2"/>
+<text x="68" y="75" font-family="Georgia,serif" font-size="40" letter-spacing="5" fill="#f7eee0">WAYGLASS</text>
+<text x="70" y="107" font-family="sans-serif" font-size="14" letter-spacing="4" fill="#82dfe3">DECK PLAN · BLENDER BLOCKOUT v2 · METRES</text>
+<text x="1330" y="66" font-family="monospace" font-size="12" fill="#ecc999" text-anchor="end">BOW  +X  →</text>
+<text x="1330" y="90" font-family="monospace" font-size="12" fill="#ecc999" text-anchor="end">PORT +Y  ↑</text>
+<text x="70" y="156" font-family="sans-serif" font-size="15" fill="#d9c19e">Upper core is projected onto main deck (dashed); it is NOT on the walkway.</text>
+<path d="M124 342.8 L181.6 285.2 L304 234.8 L484 206 L700 198.8 L916 220.4 L1117.6 263.6 L1276 342.8 L1276 357.2 L1117.6 436.4 L916 479.6 L700 501.2 L484 494 L304 465.2 L181.6 414.8 L124 357.2 Z" fill="#172c3c" stroke="#d7a56f" stroke-width="4" stroke-linejoin="round"/>
+<path d="M124 342.8 L181.6 285.2 L304 234.8 L484 206 L700 198.8 L916 220.4 L1117.6 263.6 L1276 342.8 L1276 357.2 L1117.6 436.4 L916 479.6 L700 501.2 L484 494 L304 465.2 L181.6 414.8 L124 357.2 Z" fill="none" stroke="#8cdfe2" stroke-width="1" opacity=".55"/>
+<rect x="368.8" y="263.6" width="662.4" height="172.8" rx="8" fill="#cbb89d" fill-opacity=".17" stroke="#bdb9ac" stroke-width="1.7" stroke-dasharray="9 5"/>
+<rect x="383.2" y="336.3" width="633.6" height="27.36" fill="#31595f" stroke="#62d7dc" stroke-width="1.7"/>
+<text x="700" y="354" text-anchor="middle" font-family="monospace" font-size="13" fill="#b6fbf5" letter-spacing="5">CENTRAL CORRIDOR</text>
+<rect x="385" y="262.9" width="154.8" height="73.4" rx="8" fill="#122f3d" fill-opacity=".91" stroke="#c58f61" stroke-width="1.7"/>
+<text x="462.4" y="296.6" text-anchor="middle" font-family="Georgia,serif" font-size="11.5" fill="#f0e9dc">Living Observer</text>
+<text x="462.4" y="313.6" text-anchor="middle" font-family="monospace" font-size="9" fill="#b5dfde">X -33 m</text>
+<path d="M 451.6 336.3 H 473.2" stroke="#72ebe2" stroke-width="4" stroke-linecap="round"/>
+<rect x="543.4" y="262.9" width="154.8" height="73.4" rx="8" fill="#2a2547" fill-opacity=".91" stroke="#c58f61" stroke-width="1.7"/>
+<text x="620.8" y="296.6" text-anchor="middle" font-family="Georgia,serif" font-size="11.5" fill="#f0e9dc">Nikola Research</text>
+<text x="620.8" y="313.6" text-anchor="middle" font-family="monospace" font-size="9" fill="#b5dfde">X -11 m</text>
+<path d="M 610 336.3 H 631.6" stroke="#72ebe2" stroke-width="4" stroke-linecap="round"/>
+<rect x="701.8" y="262.9" width="154.8" height="73.4" rx="8" fill="#312c28" fill-opacity=".91" stroke="#c58f61" stroke-width="1.7"/>
+<text x="779.2" y="296.6" text-anchor="middle" font-family="Georgia,serif" font-size="11.5" fill="#f0e9dc">ArcSweep Writing</text>
+<text x="779.2" y="313.6" text-anchor="middle" font-family="monospace" font-size="9" fill="#b5dfde">X +11 m</text>
+<path d="M 768.4 336.3 H 790" stroke="#72ebe2" stroke-width="4" stroke-linecap="round"/>
+<rect x="860.2" y="262.9" width="154.8" height="73.4" rx="8" fill="#203c40" fill-opacity=".91" stroke="#c58f61" stroke-width="1.7"/>
+<text x="937.6" y="296.6" text-anchor="middle" font-family="Georgia,serif" font-size="11.5" fill="#f0e9dc">Universal Codex</text>
+<text x="937.6" y="313.6" text-anchor="middle" font-family="monospace" font-size="9" fill="#b5dfde">X +33 m</text>
+<path d="M 926.8 336.3 H 948.4" stroke="#72ebe2" stroke-width="4" stroke-linecap="round"/>
+<rect x="385" y="363.7" width="154.8" height="73.4" rx="8" fill="#122f3d" fill-opacity=".91" stroke="#c58f61" stroke-width="1.7"/>
+<text x="462.4" y="397.4" text-anchor="middle" font-family="Georgia,serif" font-size="11.5" fill="#f0e9dc">Atelier</text>
+<text x="462.4" y="414.4" text-anchor="middle" font-family="monospace" font-size="9" fill="#b5dfde">X -33 m</text>
+<path d="M 451.6 363.7 H 473.2" stroke="#72ebe2" stroke-width="4" stroke-linecap="round"/>
+<rect x="543.4" y="363.7" width="154.8" height="73.4" rx="8" fill="#2a2547" fill-opacity=".91" stroke="#c58f61" stroke-width="1.7"/>
+<text x="620.8" y="397.4" text-anchor="middle" font-family="Georgia,serif" font-size="11.5" fill="#f0e9dc">Crew Commons</text>
+<text x="620.8" y="414.4" text-anchor="middle" font-family="monospace" font-size="9" fill="#b5dfde">X -11 m</text>
+<path d="M 610 363.7 H 631.6" stroke="#72ebe2" stroke-width="4" stroke-linecap="round"/>
+<rect x="701.8" y="363.7" width="154.8" height="73.4" rx="8" fill="#312c28" fill-opacity=".91" stroke="#c58f61" stroke-width="1.7"/>
+<text x="779.2" y="397.4" text-anchor="middle" font-family="Georgia,serif" font-size="11.5" fill="#f0e9dc">Dreaming Toybox</text>
+<text x="779.2" y="414.4" text-anchor="middle" font-family="monospace" font-size="9" fill="#b5dfde">X +11 m</text>
+<path d="M 768.4 363.7 H 790" stroke="#72ebe2" stroke-width="4" stroke-linecap="round"/>
+<rect x="860.2" y="363.7" width="154.8" height="73.4" rx="8" fill="#203c40" fill-opacity=".91" stroke="#c58f61" stroke-width="1.7"/>
+<text x="937.6" y="397.4" text-anchor="middle" font-family="Georgia,serif" font-size="11.5" fill="#f0e9dc">Return</text>
+<text x="937.6" y="414.4" text-anchor="middle" font-family="monospace" font-size="9" fill="#b5dfde">X +33 m</text>
+<path d="M 926.8 363.7 H 948.4" stroke="#72ebe2" stroke-width="4" stroke-linecap="round"/>
+<circle cx="700" cy="350" r="23.8" fill="#83dcf0" fill-opacity=".16" stroke="#c3a2fb" stroke-width="2" stroke-dasharray="5 5"/>
+<circle cx="700" cy="350" r="5" fill="#e4cdff"/>
+<path d="M 718 336 L 860 225" fill="none" stroke="#bdabf9" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="865" y="218" font-family="sans-serif" font-size="13" fill="#d4c6ff">OBSERVER CORE</text>
+<text x="865" y="238" font-family="monospace" font-size="11" fill="#c3bde8">Z +7.8 m · radius 3.3 m</text>
+<path d="M 700 150 V 570" stroke="#8aa5b8" stroke-width="1" stroke-dasharray="3 9" opacity=".25"/>
+<path d="M 115 350 H 1290" stroke="#8aa5b8" stroke-width="1" stroke-dasharray="3 9" opacity=".23"/>
+<text x="70" y="603" font-family="sans-serif" font-size="14" fill="#8ee9e7">ROOMS 8 / 8</text>
+<text x="245" y="603" font-family="sans-serif" font-size="14" fill="#cba574">DECK 92 × 24 m</text>
+<text x="460" y="603" font-family="sans-serif" font-size="14" fill="#e0c5a0">DOORS 3 m (draft)</text>
+<text x="690" y="603" font-family="sans-serif" font-size="14" fill="#d1c4f4">CORE: ELEVATED</text>
+<text x="950" y="603" font-family="sans-serif" font-size="14" fill="#d9ded9">+X BOW · +Y PORT · +Z UP</text>
+<line x1="68" y1="638" x2="1332" y2="638" stroke="#9f7c5c" opacity=".65"/>
+<text x="68" y="670" font-family="sans-serif" font-size="13" fill="#ddd5c5">Visual schematic derived from the v2 source dimensions; Blender renders, mesh containment and accessible egress are NOT yet verified.</text>
+<text x="68" y="695" font-family="sans-serif" font-size="12" fill="#9fb4be">Wayglass ship ≠ Rarity alicorn · Dabble reader is a room placeholder · Review branch PR #509 · 2026-10-29</text>
+</svg>
