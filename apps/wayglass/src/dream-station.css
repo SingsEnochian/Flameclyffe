@@ -1,0 +1,18 @@
+.ds-surface { --ds-copper: rgba(229, 173, 110, .7); }
+.ds-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(280px, 1fr); gap: 14px; }
+.ds-panel { border-radius: 26px; padding: clamp(16px, 3vw, 28px); display: grid; gap: 12px; align-content: start; }
+.ds-panel h2 { margin: 0; font: 500 1.7rem/1.15 Georgia, serif; }
+.ds-panel label { font-size: .8rem; color: var(--glass-muted); }
+.ds-panel p { margin: 0; line-height: 1.55; }
+.ds-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.ds-checkbox { display: flex; gap: 10px; align-items: start; }
+.ds-checkbox input { width: auto; margin-top: 3px; }
+.ds-truth { display: grid; gap: 7px; padding: 18px; border-left: 5px solid var(--ds-copper); border-radius: 10px 22px 22px 10px; background: rgba(8,13,17,.5); }
+.ds-truth strong { font-size: .8rem; letter-spacing: .15em; }
+.ds-truth span { color: var(--glass-muted); font-size: .85rem; line-height: 1.5; }
+.ds-boundary { border-left: 3px solid var(--ds-copper); padding: 8px 12px; background: rgba(229,173,110,.05); font-size: .82rem; }
+.ds-log-head { display:flex; justify-content:space-between; align-items:start; flex-wrap:wrap; gap:12px; }
+.ds-receipts { list-style-position: inside; padding: 0; margin: 0; display:grid; gap: 10px; }
+.ds-receipts li { border-top: 1px solid var(--glass-line); padding-top: 9px; overflow-wrap: anywhere; font-size: .86rem; }
+.ds-receipts span { color: var(--glass-muted); }
+@media(max-width:760px) { .ds-grid { grid-template-columns: 1fr; } }
