@@ -100,7 +100,32 @@ for name,x,side in rooms:
     for xx in (x-10.75,x+10.75): cube(name+' end wall',(xx,y,-.8),(.2,10.2,6.4),'Rooms',glass)
     cube(name+' threshold',(x,side*1.9,-3.9),(3,.25,.1),'Rooms',signal)
     marker=cube(name+' marker',(x,y,-3.85),(2,2,.12),'Rooms',copper); marker['room']=name
-    if name=='ArcSweep Writing Room': cube('Dabble export reader blockout',(x,y+side*3,-2.9),(3,1,2),'Rooms',pearl)
+    if name=='ArcSweep Writing Room':
+        cube('Dabble export reader blockout',(x,y+side*3,-2.9),(3,1,2),'Rooms',pearl)
+        cube('Writing Room drafting table',(x,y,-3.05),(4.5,2.5,1.6),'Rooms',copper)
+    elif name=='Living Observer':
+        cube('Living Observer plinth',(x,y,-3.3),(3.8,3.8,1.2),'Rooms',pearl)
+        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2,radius=1.1,location=(x,y,-1.5))
+        finish(bpy.context.object,'Living Observer study sphere','Rooms',signal)
+    elif name=='Nikola Research':
+        cube('Nikola instrument pedestal',(x,y,-3.3),(3,3,1.2),'Rooms',copper)
+        curve('Nikola armillary study',[(x,y+2.1*math.cos(2*math.pi*i/64),-1.1+2.1*math.sin(2*math.pi*i/64)) for i in range(64)],.09,'Rooms',copper,True)
+    elif name=='Universal Codex Library':
+        for j in (-2.5,0,2.5):
+            cube('Codex shelving '+str(j),(x+j,y+side*3,-2.2),(1.9,.75,3.0),'Rooms',pearl)
+    elif name=='Atelier':
+        cube('Atelier fabrication bench',(x,y,-3.1),(5.0,2.4,1.6),'Rooms',copper)
+        cube('Atelier material sample',(x+2.5,y+side*1.2,-2.0),(1.0,1.0,1.0),'Rooms',signal)
+    elif name=='Crew Commons':
+        cube('Commons shared table',(x,y,-3.1),(4.8,3.2,1.6),'Rooms',copper)
+        for dy in (-2.4,2.4):
+            cube('Commons bench '+str(dy),(x,y+dy,-3.35),(4,0.9,1.0),'Rooms',pearl)
+    elif name=='Dreaming Toybox':
+        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2,radius=1.25,location=(x,y,-1.8))
+        finish(bpy.context.object,'Dreaming bounded study orb','Rooms',signal)
+    elif name=='Return':
+        cube('Return threshold plinth',(x,y,-3.3),(4,3.0,1.2),'Rooms',copper)
+        curve('Return non-transit visual arch',[(x,y+2.1*math.cos(math.pi*i/64),-2.7+3.0*math.sin(math.pi*i/64)) for i in range(65)],.16,'Rooms',signal)
 
 def camera(name, loc, target, ortho=None):
     d=bpy.data.cameras.new(name); o=bpy.data.objects.new(name,d); COL['Cameras'].objects.link(o); o.location=loc
@@ -115,10 +140,12 @@ for name,loc,target,scale in [
  ('cutaway',(100,-125,130),(0,0,-2),180),('deck_plan',(0,0,120),(0,0,-3),150)]: cams[name]=camera(name,loc,target,scale)
 for name,x,side in rooms:
     cams['interior_'+name]=camera('interior_'+name,(x-8,side*4,-1.5),(x+3,side*8,-1),None)
-def light(name,location,power,size):
+def light(name,location,power,size,target=(0,0,0)):
     d=bpy.data.lights.new(name,'AREA'); d.energy=power; d.shape='DISK'; d.size=size
-    o=bpy.data.objects.new(name,d); COL['Lighting'].objects.link(o); o.location=location; o.rotation_euler=(Vector((0,0,0))-o.location).to_track_quat('-Z','Y').to_euler()
+    o=bpy.data.objects.new(name,d); COL['Lighting'].objects.link(o); o.location=location; o.rotation_euler=(Vector(target)-o.location).to_track_quat('-Z','Y').to_euler()
 light('Key',(25,-60,100),180000,80); light('Fill',(-60,45,55),120000,70)
+for room_name, room_x, room_side in rooms:
+    light('Interior '+room_name,(room_x,room_side*7.0,2.0),1400,5,(room_x,room_side*7.0,-2))
 scene.camera=cams['hero']
 assert all(COL[n].objects for n in COL)
 assert all(o.dimensions.length > 0 for o in COL['Rooms'].objects if o.type=='MESH')
@@ -126,7 +153,7 @@ assert all(o.dimensions.length > 0 for o in COL['Rooms'].objects if o.type=='MES
 feasibility = audit(sections, rooms, PROPOSED['room'], PROPOSED['deck'], PROPOSED['corridor'], PROPOSED['core'])
 assert feasibility['passes_coarse_geometry'], feasibility
 blend=os.path.join(OUT,'wayglass-master.blend'); bpy.ops.wm.save_as_mainfile(filepath=blend)
-manifest={'status':'architectural blockout, proposed, not visual signoff','generator_sha256':hashlib.sha256(open(__file__,'rb').read()).hexdigest(),'coordinate_frame':'meters; +X bow, +Y port, +Z up', 'sources':['Issue #507','PR #506 proposed visual canon','WAYGLASS_N017_INTEGRATED_SHIP.md'], 'materials':['Pearl #F4F3EA','Copper #B77844','Labradorite #172738','Signal #6DE5DE'], 'images':[]}
+manifest={'status':'architectural blockout, proposed, not visual signoff','generator_sha256':hashlib.sha256(open(__file__,'rb').read()).hexdigest(),'coordinate_frame':'meters; +X bow, +Y port, +Z up', 'sources':['Issue #507','PR #506 proposed visual canon','WAYGLASS_N017_INTEGRATED_SHIP.md'], 'layout_revision':'v2 proposed: audit passes, not Blender-verified', 'layout_audit':feasibility, 'materials':['Pearl #F4F3EA','Copper #B77844','Labradorite #172738','Signal #6DE5DE'], 'images':[]}
 for key in ('hero','cutaway','interior_ArcSweep Writing Room'):
     scene.camera=cams[key]; COL['Hull'].hide_render=(key!='hero'); COL['Structure'].hide_render=(key.startswith('interior'))
     filename=key.replace(' ','_')+'.png'; scene.render.filepath=os.path.join(OUT,filename)
