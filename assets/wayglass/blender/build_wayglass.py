@@ -10,6 +10,9 @@ import os
 from mathutils import Vector
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
+import sys
+sys.path.insert(0, ROOT)
+from layout_audit import audit, PROPOSED
 OUT = os.path.join(ROOT, "output")
 os.makedirs(OUT, exist_ok=True)
 bpy.ops.object.select_all(action='SELECT')
@@ -82,20 +85,20 @@ for offset,phase in [(-3,0),(5,.4)]:
     for i in range(101):
         a=2*math.pi*i/100; pts.append((offset+7*math.sin(a+phase),23*math.cos(a),15*math.sin(a)))
     curve('Offset core arc',pts,.3,'Structure',copper)
-bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=5, location=(0,0,3))
+bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=3.3, location=(0,0,7.8))
 finish(bpy.context.object,'Observer core','Core',signal)
-cube('Main deck', (0,0,-4.2), (112,27,.4),'Decks',floor)
-cube('Corridor guide light',(0,0,-3.95),(108,.12,.04),'Decks',signal)
-rooms=[('Living Observer',-39,1),('Nikola Research',-13,1),('ArcSweep Writing Room',13,1),('Universal Codex Library',39,1),('Atelier',-39,-1),('Crew Commons',-13,-1),('Dreaming Toybox',13,-1),('Return',39,-1)]
+cube('Main deck', (0,0,-4.1), (92,24,.4),'Decks',floor)
+cube('Corridor guide light',(0,0,-3.85),(88,.12,.04),'Decks',signal)
+rooms=[('Living Observer',-33,1),('Nikola Research',-11,1),('ArcSweep Writing Room',11,1),('Universal Codex Library',33,1),('Atelier',-33,-1),('Crew Commons',-11,-1),('Dreaming Toybox',11,-1),('Return',33,-1)]
 for name,x,side in rooms:
-    y=side*7.5
+    y=side*7.0
     # Door is a 3 m opening facing a continuous 4 m central corridor.
-    for yy in (y-side*5.5,y+side*5.5):
+    for yy in (y-side*5.1,y+side*5.1):
         if abs(yy)<3:
-            for dx in (-7.25,7.25): cube(name+' door wall',(x+dx,yy,-.8),(11.5,.2,6.4),'Rooms',glass)
-        else: cube(name+' outer wall',(x,yy,-.8),(26,.2,6.4),'Rooms',glass)
-    for xx in (x-13,x+13): cube(name+' end wall',(xx,y,-.8),(.2,11,6.4),'Rooms',glass)
-    cube(name+' threshold',(x,side*2,-3.9),(3,.25,.1),'Rooms',signal)
+            for dx in (-6.125,6.125): cube(name+' door wall',(x+dx,yy,-.8),(9.25,.2,6.4),'Rooms',glass)
+        else: cube(name+' outer wall',(x,yy,-.8),(21.5,.2,6.4),'Rooms',glass)
+    for xx in (x-10.75,x+10.75): cube(name+' end wall',(xx,y,-.8),(.2,10.2,6.4),'Rooms',glass)
+    cube(name+' threshold',(x,side*1.9,-3.9),(3,.25,.1),'Rooms',signal)
     marker=cube(name+' marker',(x,y,-3.85),(2,2,.12),'Rooms',copper); marker['room']=name
     if name=='ArcSweep Writing Room': cube('Dabble export reader blockout',(x,y+side*3,-2.9),(3,1,2),'Rooms',pearl)
 
@@ -119,8 +122,9 @@ light('Key',(25,-60,100),180000,80); light('Fill',(-60,45,55),120000,70)
 scene.camera=cams['hero']
 assert all(COL[n].objects for n in COL)
 assert all(o.dimensions.length > 0 for o in COL['Rooms'].objects if o.type=='MESH')
-# Coarse extent check only: this does not prove containment in the tapered hull.
-assert all(abs(x)+13 <= 55 and abs(side*13)<=16 for _,x,side in rooms)
+# Coarse tapered-hull feasibility check; still not exact Blender mesh clearance.
+feasibility = audit(sections, rooms, PROPOSED['room'], PROPOSED['deck'], PROPOSED['corridor'], PROPOSED['core'])
+assert feasibility['passes_coarse_geometry'], feasibility
 blend=os.path.join(OUT,'wayglass-master.blend'); bpy.ops.wm.save_as_mainfile(filepath=blend)
 manifest={'status':'architectural blockout, proposed, not visual signoff','generator_sha256':hashlib.sha256(open(__file__,'rb').read()).hexdigest(),'coordinate_frame':'meters; +X bow, +Y port, +Z up', 'sources':['Issue #507','PR #506 proposed visual canon','WAYGLASS_N017_INTEGRATED_SHIP.md'], 'materials':['Pearl #F4F3EA','Copper #B77844','Labradorite #172738','Signal #6DE5DE'], 'images':[]}
 for key in ('hero','cutaway','interior_ArcSweep Writing Room'):
