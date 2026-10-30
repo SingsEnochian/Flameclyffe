@@ -20,8 +20,8 @@ CURRENT_CORRIDOR = {'minimum': (-54, -2, -3.95),
 # Feasibility proposal only! Blender geometry has NOT been modified.
 PROPOSED = {
     'room_x': [-33, -11, 11, 33],
-    'room': {'half_length': 10.75, 'side_min': 1.9,
-             'side_max': 12.1, 'z_min': -3.9, 'z_max': 2.25},
+    'room': {'half_length': 10.85, 'side_min': 1.8,
+             'side_max': 12.2, 'z_min': -4.0, 'z_max': 2.4},
     'deck': {'center': (0, 0, -4.1), 'size': (92, 24, .4)},
     'corridor': {'minimum': (-44, -1.9, -3.9),
                  'maximum': (44, 1.9, 2.4)},
@@ -90,16 +90,22 @@ def audit(sections, rooms, room, deck, corridor, core):
 def evaluate_source(source):
     sections = literal_assignment(source,'sections')
     rooms = literal_assignment(source,'rooms')
-    current = audit(sections,rooms,CURRENT_ROOM,
-        {'center':(0,0,-4.2),'size':(112,27,.4)},
-        CURRENT_CORRIDOR, {'center':(0,0,3),'radius':5})
+    coords = [rooms[i][1] for i in range(4)]
+    is_proposed = coords == PROPOSED['room_x']
+    if not is_proposed and coords != [-39,-13,13,39]:
+        raise ValueError('Unrecognized room grid; update audit dimensions before trusting result.')
+    active = audit(sections,rooms,PROPOSED['room'] if is_proposed else CURRENT_ROOM,
+                   PROPOSED['deck'] if is_proposed else {'center':(0,0,-4.2),'size':(112,27,.4)},
+                   PROPOSED['corridor'] if is_proposed else CURRENT_CORRIDOR,
+                   PROPOSED['core'] if is_proposed else {'center':(0,0,3),'radius':5})
     repositioned = [(name,PROPOSED['room_x'][i%4],side)
                     for i,(name,_x,side) in enumerate(rooms)]
     proposed = audit(sections,repositioned,PROPOSED['room'],
                      PROPOSED['deck'],PROPOSED['corridor'],PROPOSED['core'])
     return {'type':'blender_free_feasibility_audit',
-            'current_script_layout':current,
-            'proposed_NOT_APPLIED':proposed,
+            'active_layout_version':'proposed_v2' if is_proposed else 'original_v1',
+            'active_script_layout':active,
+            'v2_feasibility_reference':proposed,
             'proposal_meters':PROPOSED,
             'limitations':[
               'Room volumes are inferred from original hardcoded wall extents.',
@@ -127,8 +133,9 @@ def self_test():
     assert alternative['passes_coarse_geometry'],alternative
     example='sections='+repr(stations)+'\nrooms='+repr(rooms)+'\n'
     checked=evaluate_source(example)
-    assert checked['current_script_layout']==first
-    assert checked['proposed_NOT_APPLIED']==alternative
+    assert checked['active_script_layout']==first
+    assert checked['v2_feasibility_reference']==alternative
+    assert checked['active_layout_version']=='original_v1'
     assert not sphere_box_intersection({'center':(0,0,20),'radius':1},CURRENT_CORRIDOR)
     print('WAYGLASS_LAYOUT_AUDIT_TEST_OK')
 
