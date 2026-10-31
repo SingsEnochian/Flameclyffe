@@ -4,6 +4,7 @@ import './ship-wide-hud.css';
 import './liquid-optical-materials.css';
 import './ship-bridge-console.css';
 import { createShipKernel } from './ship-kernel.js';
+import { createVesselEcology } from './vessel-ecology.js';
 import { mountShipBridgeConsole } from './ship-bridge-console.js';
 import { createShipSoundDesk } from './ship-sound.js';
 import { detectEmbodiedAccess } from './embodiment-guard.js';
@@ -25,7 +26,7 @@ import { mountWayglassToybox } from './surfaces/toybox.js';
 import { mountNikolaResearchSurface } from './surfaces/nikola-lab.js';
 import { mountWayglassCommonsSurface } from './surfaces/commons.js';
 import { subscribeWayglassObserver } from './living-observer-model.js';
-import { recordRouteAsWonderLight } from './wonder-light.js';
+import { recordRouteAsWonderLight, subscribeWonderLight } from './wonder-light.js';
 import { registerWayglassOrgan, listWayglassOrgans } from './organ-registry.js';
 import { FIRST_WAYGLASS_ORGANS } from './organ-donors.js';
 
@@ -113,6 +114,7 @@ const browserEmbodiment = Object.freeze({
 });
 
 const soundDesk=createShipSoundDesk();
+const vesselEcology=createVesselEcology();
 const embodiedAccess=detectEmbodiedAccess();
 let disposeBridge=null,disposeDeckGestures=null;
 const shipKernel=createShipKernel({
@@ -122,7 +124,7 @@ const shipKernel=createShipKernel({
     try{
       const result=await mountWayglassSurface(surfaceId,root);
       disposeDeckGestures=installShipDeck(root,surfaceId,target=>shipKernel.navigate(target));
-      disposeBridge=mountShipBridgeConsole(root,shipKernel,surfaceId,soundDesk);
+      disposeBridge=mountShipBridgeConsole(root,shipKernel,surfaceId,soundDesk,vesselEcology);
       return result;
     }catch(error){
       // Failure is visible. Never silently switch worlds, retry providers,
@@ -142,12 +144,48 @@ const shipKernel=createShipKernel({
   },
   storage:globalThis.localStorage
 });
+// Vessel-wide process: bounded source events, deterministic local dynamics,
+// no external action, participant inference or cross-session identity claim.
+let lifeSequence=0;
+const lifeObserve=(kind,source_ref,event_id=null)=>vesselEcology.observe({
+  kind,source_ref,event_id:event_id||'ship-event:'+ ++lifeSequence
+});
+let lastLifeDeck=null,lastLifeRoute=null,lastLifeHost='unchecked';
+shipKernel.subscribe(reading=>{
+  if(reading.frame==='settled'&&reading.deck&&reading.deck!==lastLifeDeck){
+    lastLifeDeck=reading.deck;
+    lifeObserve('deck-settled','ship-kernel:deck');
+  }
+  const routeKey=reading.route+':'+reading.route_status;
+  if(['started','completed','failed'].includes(reading.route_status)&&routeKey!==lastLifeRoute){
+    lastLifeRoute=routeKey;
+    lifeObserve('route-'+reading.route_status,'ship-kernel:route');
+  }
+  if(reading.host!==lastLifeHost){
+    lastLifeHost=reading.host;
+    if(reading.host==='responding')lifeObserve('host-responding','ship-kernel:host');
+    if(reading.host==='unavailable')lifeObserve('host-unavailable','ship-kernel:host');
+  }
+});
+subscribeWonderLight(event=>{
+ if(event?.kind==='wonder-open')lifeObserve('wonder-open','wonder-light:question',
+  'wonder-event:'+String(event.event_id).slice(0,100));
+});
+globalThis.addEventListener?.('wayglass:feather',event=>{
+ lifeObserve(event?.detail?.held===true?'feather-held':'feather-released','wayglass-ui:feather');
+});
+// A visible browser can advance the local visual process; inactive tabs do not
+// accumulate invented elapsed time or infer biological sleep.
+globalThis.setInterval?.(()=>{
+ if(document.visibilityState!=='hidden')vesselEcology.step(3);
+},3000);
 const wayglass = Object.freeze({
   schema: 'wayglass.os/v0.1',
   surfaces: listWayglassSurfaces,
   organs: listWayglassOrgans,
   mount: surfaceId=>shipKernel.navigate(surfaceId),
   get ship(){return shipKernel.state;},
+  get vesselDynamics(){return vesselEcology.snapshot();},
   shipHealth:()=>shipKernel.health(),
   shipTheme:name=>shipKernel.theme(name),
   get sound(){return soundDesk.snapshot();},

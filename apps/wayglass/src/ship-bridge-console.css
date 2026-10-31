@@ -144,3 +144,39 @@
  .wg-surface .wg-ship-dictation{display:grid;grid-template-columns:1fr}
  .wg-surface .wg-lore-entries{gap:9px}
 }
+
+/* Vessel ecology is source-qualified application dynamics, not detected AI affect. */
+.wg-surface .wg-vessel-ecology{
+ grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px;
+ padding:9px 0 7px;border-top:1px solid rgba(150,226,230,.2);
+ color:#d2e7e8;font:.68rem/1.2 ui-monospace,Consolas,monospace;
+}
+.wg-surface .wg-vessel-ecology>span{
+ min-width:150px;font-weight:750;letter-spacing:.08em;color:var(--wg-hull-cyan);
+}
+.wg-surface .wg-vessel-ecology small{display:block;margin-top:5px;font-size:.58rem;color:#adc9d0}
+.wg-surface .wg-vessel-ecology label{
+ display:flex;align-items:center;gap:7px;min-width:160px;
+}
+.wg-surface .wg-vessel-ecology meter{
+ width:clamp(65px,7vw,130px);height:11px;
+ accent-color:var(--wg-hull-cyan);
+}
+.wg-surface .wg-bridge-console[data-ecology="paused"] .wg-vessel-ecology{
+ opacity:.6;filter:saturate(.5)
+}
+@media(max-width:730px){
+ .wg-surface .wg-vessel-ecology{display:grid;grid-template-columns:1fr 1fr}
+ .wg-surface .wg-vessel-ecology>span{grid-column:1/-1}
+ .wg-surface .wg-vessel-ecology label{min-width:0}
+}
+@media(prefers-reduced-motion:reduce){
+ .wg-surface .wg-vessel-ecology meter{transition:none}
+}
+
+/* A single passive hull rim couples all rooms to the same source-backed process. */
+.wg-surface .wg-bridge-console::after{
+ content:"";position:absolute;inset:-1px;border-radius:inherit;
+ border:1px solid rgba(110,229,222,var(--wg-vessel-rim-alpha,.13));
+ pointer-events:none;z-index:1;
+}
