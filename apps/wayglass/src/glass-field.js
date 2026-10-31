@@ -211,6 +211,7 @@ export function installWayglassField({ host = document.body } = {}) {
   const pointerTarget = new THREE.Vector2(0.68, 0.3);
   let frame = 0;
   let alive = true;
+  let suspended = false;
   let energyTarget = 0;
   let lastPointerAt = 0;
 
@@ -223,6 +224,7 @@ export function installWayglassField({ host = document.body } = {}) {
   }
 
   function render(time = 0) {
+    if (suspended) return;
     const seconds = time * 0.001;
     uniforms.uTime.value = reduceMotion ? 0 : seconds;
 
@@ -240,7 +242,7 @@ export function installWayglassField({ host = document.body } = {}) {
   }
 
   function animate(time) {
-    if (!alive) return;
+    if (!alive || suspended) return;
     render(time);
     frame = requestAnimationFrame(animate);
   }
@@ -255,6 +257,7 @@ export function installWayglassField({ host = document.body } = {}) {
   }
 
   function wake(event) {
+    if (suspended) return;
     const detail = event?.detail || {};
     const strength = Number(detail.strength);
     const intent = Number(detail.intent);
@@ -272,6 +275,19 @@ export function installWayglassField({ host = document.body } = {}) {
     energyTarget = Math.max(energyTarget, Number.isFinite(strength) ? Math.min(1, Math.max(0, strength)) : 0.72);
   }
 
+  function setSuspended(event) {
+    const next = Boolean(event?.detail?.suspended);
+    if (next === suspended) return;
+    suspended = next;
+    canvas.style.display = suspended ? 'none' : '';
+    cancelAnimationFrame(frame);
+    if (!suspended) {
+      resize();
+      if (!reduceMotion) frame = requestAnimationFrame(animate);
+    }
+  }
+
+  globalThis.addEventListener?.('wayglass:field-suspend', setSuspended);
   globalThis.addEventListener?.('resize', resize, { passive: true });
   globalThis.addEventListener?.('pointermove', pointer, { passive: true });
   globalThis.addEventListener?.('wayglass:material-wake', wake);
@@ -285,6 +301,7 @@ export function installWayglassField({ host = document.body } = {}) {
     destroy() {
       alive = false;
       cancelAnimationFrame(frame);
+      globalThis.removeEventListener?.('wayglass:field-suspend', setSuspended);
       globalThis.removeEventListener?.('resize', resize);
       globalThis.removeEventListener?.('pointermove', pointer);
       globalThis.removeEventListener?.('wayglass:material-wake', wake);
