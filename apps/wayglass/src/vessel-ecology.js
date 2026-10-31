@@ -40,7 +40,7 @@ export function createVesselEcology({ maxEvents=96 }={}){
     authority:'none; visual/state projection; cannot author identity, canon, messages or continuity',
     metrics:Object.freeze({...metrics}),
     feather_held:feather,sequence,elapsed_seconds:round(elapsed),
-    recent_events:journal.map(e=>Object.freeze({...e})),
+    recent_events:Object.freeze(journal.map(e=>Object.freeze({...e}))),
   });}
   function publish(){const state=snapshot();for(const listener of [...listeners]){
     try{listener(state);}catch{/* subscribers are observational only */}
