@@ -178,5 +178,5 @@
 .wg-surface .wg-bridge-console::after{
  content:"";position:absolute;inset:-1px;border-radius:inherit;
  border:1px solid rgba(110,229,222,var(--wg-vessel-rim-alpha,.13));
- pointer-events:none;z-index:-1;
+ pointer-events:none;z-index:1;
 }
