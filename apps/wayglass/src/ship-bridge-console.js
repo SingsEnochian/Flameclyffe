@@ -3,7 +3,7 @@
  * Telemetry is browser/application state, never AI interiority or canon.
  */
 export const BRIDGE_CONSOLE_SCHEMA='wayglass.bridge-console/v1';
-export function mountShipBridgeConsole(root,kernel,activeId,soundDesk=null){
+export function mountShipBridgeConsole(root,kernel,activeId,soundDesk=null,ecology=null){
  const surface=root?.querySelector('.wg-surface');
  if(!surface)return()=>{};
  let destroyed=false;
@@ -18,6 +18,7 @@ export function mountShipBridgeConsole(root,kernel,activeId,soundDesk=null){
    '<span>HOST <b data-bridge-host>UNCHECKED</b></span>',
    '<span>COMMS <b data-bridge-route>UNOBSERVED</b></span>',
    '<span>FRAME <b data-bridge-frame>SETTLED</b></span>',
+   '<span>VESSEL <b data-bridge-ecology>LOCAL PROCESS</b></span>',
   '</div>',
   '<div class="wg-bridge-actions">',
    '<label>Hull theme <select data-bridge-theme aria-label="Wayglass hull theme">',
@@ -30,7 +31,14 @@ export function mountShipBridgeConsole(root,kernel,activeId,soundDesk=null){
    '<button type="button" data-bridge-feather>Feather · Stop</button>',
    '<button type="button" data-bridge-recover>Recover deck</button>',
   '</div>',
-  '<p data-bridge-note role="status">Registered systems are not proof of active participants or physical states.</p>'
+  '<div class="wg-vessel-ecology" aria-label="Wayglass vessel process telemetry, not biological or mental measurements">',
+   '<span>VESSEL DYNAMICS <small>LOCAL APPLICATION PROCESS</small></span>',
+   '<label>Activity <meter data-eco-activity min="0" max="1" value=".12">.12</meter></label>',
+   '<label>Integrity <meter data-eco-integrity min="0" max="1" value=".75">.75</meter></label>',
+   '<label>Adaptation <meter data-eco-adaptation min="0" max="1" value=".12">.12</meter></label>',
+   '<label>Signal <meter data-eco-signal min="0" max="1" value=".1">.1</meter></label>',
+  '</div>',
+  '<p data-bridge-note role="status">Vessel dynamics are source-backed software values. No participant, interior state or consciousness is inferred.</p>'
  ].join('');
  const nav=surface.querySelector('.wg-ship-deck');
  if(nav)nav.after(bar);else surface.prepend(bar);
@@ -46,6 +54,16 @@ export function mountShipBridgeConsole(root,kernel,activeId,soundDesk=null){
   document.documentElement.dataset.wayglassTheme=s.theme;
   bar.dataset.frame=s.frame;bar.dataset.host=s.host;
   if(s.last_error)status.textContent='Ship boundary: '+s.last_error;
+ });
+ const unlistenEcology=ecology?.subscribe?.(reading=>{
+  if(destroyed)return;
+  for(const k of ['activity','integrity','adaptation','signal']){
+   const m=q('[data-eco-'+k+']');
+   if(m){m.value=reading.metrics[k];m.textContent=reading.metrics[k].toFixed(2)}
+  }
+  const statusLabel=q('[data-bridge-ecology]');
+  statusLabel.textContent=reading.feather_held?'PAUSED':'ACTIVE · LOCAL';
+  bar.dataset.ecology=reading.feather_held?'paused':'running';
  });
  const theme=q('[data-bridge-theme]');
  const setTheme=()=>kernel.theme(theme.value);
@@ -111,7 +129,7 @@ export function mountShipBridgeConsole(root,kernel,activeId,soundDesk=null){
  };
  recover.addEventListener('click',recoverNow);
  return()=>{
-  destroyed=true;unsubscribe();
+  destroyed=true;unsubscribe();unlistenEcology?.();
   theme.removeEventListener('change',setTheme);
   check.removeEventListener('click',checkNow);
   sound.removeEventListener('change',setSound);
