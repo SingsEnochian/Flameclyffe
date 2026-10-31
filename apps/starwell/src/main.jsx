@@ -795,6 +795,9 @@ function App() {
             <h1>STARWELL</h1>
             <p className="subtitle">A living manuscript observatory for worlds that have not happened yet.</p>
             <p className="inscription">Plant what you hope to return to.</p>
+            {window.location.pathname.startsWith('/starwell/') && (
+              <a className="inscription" href="/wayglass/" aria-label="Enter Wayglass OS">Enter Wayglass OS</a>
+            )}
           </div>
         </section>
 
