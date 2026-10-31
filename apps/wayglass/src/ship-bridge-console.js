@@ -2,6 +2,7 @@
  * N-017 integrated bridge across every real Wayglass and ArcSweep room.
  * Telemetry is browser/application state, never AI interiority or canon.
  */
+import { projectVesselEmbodiment } from './vessel-embodiment.js';
 export const BRIDGE_CONSOLE_SCHEMA='wayglass.bridge-console/v1';
 export function mountShipBridgeConsole(root,kernel,activeId,soundDesk=null,ecology=null){
  const surface=root?.querySelector('.wg-surface');
@@ -64,6 +65,11 @@ export function mountShipBridgeConsole(root,kernel,activeId,soundDesk=null,ecolo
   const statusLabel=q('[data-bridge-ecology]');
   statusLabel.textContent=reading.feather_held?'PAUSED':'ACTIVE · LOCAL';
   bar.dataset.ecology=reading.feather_held?'paused':'running';
+  const projection=projectVesselEmbodiment(reading,{
+   reducedMotion:globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true
+  });
+  // Source-derived optical mapping; does not affect text legibility or permissions.
+  bar.style.setProperty('--wg-vessel-rim-alpha',String(projection.hull_rim_alpha));
  });
  const theme=q('[data-bridge-theme]');
  const setTheme=()=>kernel.theme(theme.value);
