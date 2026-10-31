@@ -173,3 +173,10 @@
 @media(prefers-reduced-motion:reduce){
  .wg-surface .wg-vessel-ecology meter{transition:none}
 }
+
+/* A single passive hull rim couples all rooms to the same source-backed process. */
+.wg-surface .wg-bridge-console::after{
+ content:"";position:absolute;inset:-1px;border-radius:inherit;
+ border:1px solid rgba(110,229,222,var(--wg-vessel-rim-alpha,.13));
+ pointer-events:none;z-index:-1;
+}
