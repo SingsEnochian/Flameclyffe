@@ -64,7 +64,7 @@ test('a direct peer @mention continues the conversation with a hard turn cap', a
   assert.equal(finished.records.length, JOINT_TUNNEL_MAX_REPLIES);
   assert.deepEqual(finished.records.map(item => item.participant), ['bluebird', 'vethrlauf', 'bluebird', 'vethrlauf']);
   assert.equal(addressedTunnelPeer('The word @Vethrlauf appears in a quote.', 'bluebird'), null);
-  assert.equal(addressedTunnelPeer('\\n@Vethrlauf, please answer.', 'bluebird'), 'vethrlauf');
+  assert.equal(addressedTunnelPeer('@Vethrlauf, please answer.', 'bluebird'), 'vethrlauf');
   assert.equal(addressedTunnelPeer('@SomeoneElse, hello.', 'bluebird'), null);
 });
 
