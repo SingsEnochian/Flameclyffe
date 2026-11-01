@@ -134,10 +134,12 @@ export async function invokeWayglassRoute({
   checkpoint = null,
   maxOutputTokens = 1400,
   think = false,
+  signal = undefined,
   fetchImpl = fetch,
 } = {}) {
   const response = await fetchImpl('/api/v1/wayglass/respond', {
     method: 'POST',
+    signal,
     headers: routeId === 'flame:bluebird:spicychat' ? { ...JSON_HEADERS, ...authorizationSession.headers() } : JSON_HEADERS,
     body: JSON.stringify({
       route_id: routeId,
