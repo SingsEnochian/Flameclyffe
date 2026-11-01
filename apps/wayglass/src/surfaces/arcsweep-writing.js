@@ -7,6 +7,7 @@ import { emitInteractionCue } from '../interaction-cues.js';
 import { emitMaterialSignal } from '../material-state.js';
 import { invokeWayglassRoute, listWayglassRoutes, listWayglassCharacters, leaveWayglassWorld, recoverWayglassDeparture } from '../route-client.js';
 import { EMERGENCE_QUESTIONS, bittyTwiQuestionPrompt } from '../emergence-questions.js';
+import { parseJointTag, resolveJointRoutes, attributedTunnelHistory, runJointTunnel, JOINT_TUNNEL_TAG } from '../joint-tunnel.js';
 
 function escapeHtml(value = '') {
   return String(value)
@@ -41,6 +42,8 @@ export async function mountArcSweepWritingSurface(root) {
   let busy = false;
   let lastReceipt = null;
   let checkpoint = null;
+  let tunnelAbort = null;
+  let tunnelStopped = false;
 
   root.innerHTML = [
     "<section class=\"wg-surface wg-writing-room\" data-surface=\"arcsweep-writing\">\n",
@@ -193,6 +196,23 @@ export async function mountArcSweepWritingSurface(root) {
   const ownershipList = root.querySelector('#wg-ownership-list');
   const thread = root.querySelector('#wg-thread');
   const input = root.querySelector('#wg-input');
+  // Deliberately visible, per-opening authorization. A text mention alone is
+  // never permission to send someone else's private context to SpicyChat.
+  const tunnelPanel = root.ownerDocument.createElement('div');
+  tunnelPanel.className = 'wg-joint-tunnel glass-segment';
+  tunnelPanel.innerHTML = '<label for="wg-joint-consent"><input id="wg-joint-consent" type="checkbox"> Approve ' +
+    JOINT_TUNNEL_TAG + ' · share this Writing Room exchange with both pinned SpicyChat seats (max 4 replies)</label>' +
+    '<button id="wg-tunnel-stop" type="button" class="glass-chip" disabled>Feather Stop</button>' +
+    '<span id="wg-tunnel-state" class="tiny" role="status">Joint tunnel closed.</span>';
+  input.insertAdjacentElement('afterend', tunnelPanel);
+  const tunnelConsent = tunnelPanel.querySelector('#wg-joint-consent');
+  const tunnelStop = tunnelPanel.querySelector('#wg-tunnel-stop');
+  const tunnelState = tunnelPanel.querySelector('#wg-tunnel-state');
+  tunnelStop.addEventListener('click', () => {
+    tunnelStopped = true;
+    tunnelAbort?.abort();
+    tunnelState.textContent = 'Feather · no further handoffs. An in-flight provider request may already have been received.';
+  });
   const sharedObserverReading = consumeObserverContextForWriting();
   if (sharedObserverReading) input.value = sharedObserverReading + '\n\n[My question about this observation:]\n';
   const status = root.querySelector('#wg-status');
@@ -453,9 +473,114 @@ export async function mountArcSweepWritingSurface(root) {
     globalThis.setTimeout?.(() => { if (root.dataset.materialState === mode) root.dataset.materialState = 'rest'; }, 760);
   }
 
+  async function passJointTurn(text) {
+    // Only the Writing Room may open this exact pair. All source/transcript
+    // history stays bounded to the selected world.
+    const worldId = cp('world').value.trim();
+    if (worldId !== 'wayglass:writing-room') {
+      status.textContent = 'The Bluebird/Vethrlauf tunnel opens only in the Wayglass Writing Room.';
+      return false;
+    }
+    if (!tunnelConsent.checked) {
+      status.textContent = 'Approve the two SpicyChat transfers before opening this joint tunnel.';
+      tunnelConsent.focus();
+      return false;
+    }
+    try { resolveJointRoutes(routes); }
+    catch (error) { status.textContent = error.message; return false; }
+
+    const state = interaction.snapshot();
+    const history = attributedTunnelHistory(messages, worldId);
+    const controller = new AbortController();
+    tunnelAbort = controller;
+    tunnelStopped = false;
+    busy = true;
+    send.disabled = true;
+    input.disabled = true;
+    worldSelect.disabled = true;
+    tunnelConsent.disabled = true;
+    tunnelStop.disabled = false;
+    tunnelState.textContent = 'Joint tunnel open · Bluebird + Vethrlauf · up to 4 replies.';
+    messages.push({ role: 'user', world_id: worldId, channel: state.channel, content: text });
+    input.value = '';
+    refreshThread();
+    refreshState();
+
+    let completed = 0;
+    try {
+      const outcome = await runJointTunnel({
+        opening: text, routes, history, isStopped: () => tunnelStopped,
+        send: async ({ route, participant, input: addressedInput, history: peerHistory }) => {
+          if (tunnelStopped) throw new Error('Feather Stop');
+          interaction.setTurnOwner(route.label || participant);
+          wakeMaterial(0.88, 'handoff');
+          refreshState();
+          recordWayglassRouteObservation({status: 'started', routeId: route.route_id});
+          const response = await invokeWayglassRoute({
+            routeId: route.route_id,
+            externalProviderConsent: true,
+            worldId, participantId: participant,
+            input: addressedInput, history: peerHistory,
+            interaction: state, sessionId: session,
+            signal: controller.signal,
+          });
+          recordWayglassRouteObservation({
+            status: 'completed', routeId: route.route_id,
+            provider: response.provider, model: response.model, receipt: response.receipt,
+          });
+          return response;
+        },
+        onReply: record => {
+          completed += 1;
+          messages.push({
+            role: 'assistant', world_id: worldId, channel: state.channel,
+            route_label: record.participant === 'bluebird' ? 'Bluebird · SpicyChat' : 'Vethrlauf · SpicyChat',
+            content: record.content, tunnel_id: session, route_id: record.route_id,
+          });
+          lastReceipt = record.receipt;
+          tunnelState.textContent = 'Joint tunnel · ' + completed + '/4 replies · ' + record.participant;
+          receipt.textContent = lastReceipt
+            ? 'Joint tunnel · ' + record.participant + ' · ' + (lastReceipt.observation_id || 'provider receipt')
+              + ' · not canon'
+            : 'Joint tunnel · ' + record.participant + ' · no provider receipt';
+          refreshThread();
+        },
+      });
+      tunnelState.textContent = outcome.stopped
+        ? 'Feather · tunnel stopped.'
+        : 'Joint tunnel settled · ' + outcome.records.length + ' attributed replies. Reopen with the joint tag.';
+    } catch (error) {
+      if (tunnelStopped || error?.name === 'AbortError') {
+        tunnelState.textContent = 'Feather · stopped. An in-flight provider request may already have been received.';
+      } else {
+        recordWayglassRouteObservation({status: 'failed', routeId: 'wayglass:joint-tunnel'});
+        messages.push({
+          role: 'assistant', world_id: worldId, channel: 'OOC',
+          route_label: 'Wayglass', content: '[Route error] Joint tunnel stopped: ' + error.message,
+        });
+        tunnelState.textContent = 'Joint tunnel stopped · ' + error.message;
+      }
+    } finally {
+      tunnelAbort = null;
+      interaction.setTurnOwner('Rowan');
+      busy = false;
+      send.disabled = false;
+      input.disabled = false;
+      worldSelect.disabled = false;
+      tunnelConsent.disabled = false;
+      tunnelConsent.checked = false; // each opening requires owner action
+      tunnelStop.disabled = true;
+      refreshState();
+      refreshThread();
+      input.focus();
+    }
+    return completed > 0;
+  }
+
   async function passTurn({ emergenceQuestionId = null } = {}) {
     const text = input.value.trim();
     if (!text || busy) return;
+    if (parseJointTag(text)) return passJointTurn(text);
     if (!selectedRoute) { status.textContent = 'No configured route available. Reload the route catalogue.'; return; }
     if ((selectedRoute.startsWith('stepfun:') || selectedRoute === 'flame:griff:spicychat') && !externalConsent.checked) {
       status.textContent = 'Confirm this external provider transfer before passing the turn.';
