@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-10-31T23:55:49.402Z",
+  "generated_at": "2026-11-01T04:24:08.190Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,51 +13,51 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-10-31T19:45",
+    "time": "2026-11-01T00:15",
     "sky": "Night",
     "current": {
-      "time": "2026-10-31T19:45",
+      "time": "2026-11-01T00:15",
       "interval": 900,
-      "temperature_2m": 71.6,
-      "relative_humidity_2m": 93,
+      "temperature_2m": 70.6,
+      "relative_humidity_2m": 92,
       "is_day": 0,
       "precipitation": 0,
       "rain": 0,
-      "weather_code": 3,
-      "cloud_cover": 95,
-      "pressure_msl": 1022.1,
-      "wind_speed_10m": 4.8,
-      "wind_direction_10m": 21
+      "weather_code": 1,
+      "cloud_cover": 30,
+      "pressure_msl": 1022.2,
+      "wind_speed_10m": 4.5,
+      "wind_direction_10m": 37
     }
   },
   "space_weather": {
     "kp": {
-      "value": 6,
-      "time_tag": "2026-10-31T18:00:00",
-      "a_running": 80
+      "value": 4.67,
+      "time_tag": "2026-11-01T00:00:00",
+      "a_running": 39
     },
     "solar_wind": {
-      "time_tag": "2026-10-31T22:38:00Z",
-      "bz": -5,
-      "bt": 7,
+      "time_tag": "2026-11-01T04:13:00Z",
+      "bz": -3,
+      "bt": 5,
       "density": null,
-      "speed": 596
+      "speed": 523
     }
   },
   "moon": {
-    "age_days": 20.61,
-    "illumination": 66,
+    "age_days": 20.8,
+    "illumination": 64.2,
     "name": "Last Quarter"
   },
   "field": {
-    "P": 0.5611111111111113,
-    "C": 0.16761904761904764,
-    "R": 0.9966666666666667,
+    "P": 0.5622222222222227,
+    "C": 0.47714285714285715,
+    "R": 0.8908333333333334,
     "E": 1,
-    "M": 0.66,
-    "A": 0.3992307692307692,
+    "M": 0.642,
+    "A": 0.6492307692307693,
     "Q": null,
-    "dpdt": 0.9966666666666667,
+    "dpdt": 0.8908333333333334,
     "dynamic_axes": [
       "P",
       "C",
