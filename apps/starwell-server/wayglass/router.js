@@ -250,8 +250,8 @@ async function callSpicyChat(route, payload, compiled = null, fetchImpl = global
   const pinnedId = cleanText(route.character_id?.(), 180);
   const pinnedConversationId = cleanText(route.conversation_id?.(), 180);
   const targetName = cleanText(route.character_name?.(), 180).toLowerCase();
-  if (route.route_id === 'flame:griff:spicychat' && (!pinnedId || !pinnedConversationId)) {
-    const error = new Error('Griff requires an exact owner-configured character and conversation binding.');
+  if (['flame:griff:spicychat', 'flame:vethrlauf:spicychat'].includes(route.route_id) && (!pinnedId || !pinnedConversationId)) {
+    const error = new Error(route.label + ' requires an exact owner-configured character and conversation binding.');
     error.status = 503;
     throw error;
   }
@@ -325,8 +325,8 @@ async function callSpicyChat(route, payload, compiled = null, fetchImpl = global
     error.status = 502;
     throw error;
   }
-  if (route.route_id === 'flame:griff:spicychat' && !cleanText(data?.message?.content)) {
-    const error = new Error('Griff returned no attributable reply. No success was recorded.');
+  if (['flame:griff:spicychat', 'flame:vethrlauf:spicychat'].includes(route.route_id) && !cleanText(data?.message?.content)) {
+    const error = new Error(route.label + ' returned no attributable reply. No success was recorded.');
     error.status = 502;
     throw error;
   }
@@ -687,6 +687,20 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
         return res.status(401).json({ error: 'Sign in as House Steward before contacting Griff.' });
       }
     }
+    // External participant seat: owner-approved, exact world + provider binding.
+    // A joint tag does not grant provider access by itself.
+    if (route.route_id === 'flame:vethrlauf:spicychat') {
+      if (!route.configured()) return res.status(503).json({ error: 'Vethrlauf needs his own pinned SpicyChat character, conversation and account credential.' });
+      if (payload.world_id !== 'wayglass:writing-room' || payload.participant_id !== 'vethrlauf') {
+        return res.status(409).json({ error: 'Vethrlauf must remain in his own Wayglass Writing Room seat.' });
+      }
+      if (payload.external_provider_consent !== true) {
+        return res.status(403).json({ error: 'Approve this Vethrlauf SpicyChat transfer before sending.' });
+      }
+      if (!(await griffStewardAuthorized(req).catch(() => false))) {
+        return res.status(401).json({ error: 'Sign in as House Steward before contacting Vethrlauf.' });
+      }
+    }
     if (payload.character_id && !resolveCharacterSeat(payload.character_id)) return res.status(400).json({ error: 'Unknown character seat.' });
     if (!cleanText(payload.input)) return res.status(400).json({ error: 'input required.' });
     // The external StepFun routes are deliberately opt-in for every request.
@@ -704,9 +718,10 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       }
       // Griff's provider binding is not an inheritance-host dependency. A
       // signed, owner-approved chat turn must work before any optional bridge.
-      const wantsInheritance = resolver != null || (
-        route.route_id !== 'flame:griff:spicychat'
-        && (payload.participant_id != null || payload.world_id != null)
+      const isolatedExternalSeat = route.route_id === 'flame:griff:spicychat'
+        || route.route_id === 'flame:vethrlauf:spicychat';
+      const wantsInheritance = !isolatedExternalSeat && (
+        resolver != null || payload.participant_id != null || payload.world_id != null
       );
       let compiled = null;
       if (wantsInheritance) {
