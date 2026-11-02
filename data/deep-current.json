@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-11-02T07:20:58.575Z",
+  "generated_at": "2026-11-02T17:18:54.872Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,51 +13,51 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-11-02T02:15",
-    "sky": "Night",
+    "time": "2026-11-02T12:15",
+    "sky": "Day",
     "current": {
-      "time": "2026-11-02T02:15",
+      "time": "2026-11-02T12:15",
       "interval": 900,
-      "temperature_2m": 71.2,
-      "relative_humidity_2m": 81,
-      "is_day": 0,
+      "temperature_2m": 72.8,
+      "relative_humidity_2m": 86,
+      "is_day": 1,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 3,
       "cloud_cover": 100,
-      "pressure_msl": 1020.1,
-      "wind_speed_10m": 8,
-      "wind_direction_10m": 62
+      "pressure_msl": 1019,
+      "wind_speed_10m": 10.3,
+      "wind_direction_10m": 66
     }
   },
   "space_weather": {
     "kp": {
-      "value": 2,
-      "time_tag": "2026-11-02T03:00:00",
-      "a_running": 7
+      "value": 1.67,
+      "time_tag": "2026-11-02T12:00:00",
+      "a_running": 6
     },
     "solar_wind": {
-      "time_tag": "2026-11-02T07:10:00Z",
+      "time_tag": "2026-11-02T17:08:00Z",
       "bz": 2,
-      "bt": 5,
+      "bt": 4,
       "density": null,
-      "speed": 477
+      "speed": 398
     }
   },
   "moon": {
-    "age_days": 21.92,
-    "illumination": 52.4,
+    "age_days": 22.34,
+    "illumination": 48,
     "name": "Last Quarter"
   },
   "field": {
-    "P": 0.5388888888888891,
+    "P": 0.5866666666666667,
     "C": 0.2538095238095239,
-    "R": 0.8908333333333334,
-    "E": 0.6943956043956043,
-    "M": 0.524,
-    "A": 0.38,
+    "R": 0.8633333333333334,
+    "E": 0.690054945054945,
+    "M": 0.48,
+    "A": 0.6,
     "Q": null,
-    "dpdt": 0.8908333333333334,
+    "dpdt": 0.8633333333333334,
     "dynamic_axes": [
       "P",
       "C",
