@@ -28,6 +28,6 @@ export function deriveResearchQuestions(dossier){
  const found=new Set();
  return (dossier?.entries||[]).filter(e=>e.status==='candidate'&&e.result?.open_question)
    .filter(e=>{const k=e.seat_id+':'+e.result.open_question;if(found.has(k))return false;found.add(k);return true;})
-   .slice(0,5).map(e=>({agentId:e.seat_id,type:'question',text:e.result.open_question,
+   .map(e=>({agentId:e.seat_id,type:'question',text:e.result.open_question,
      sourceIds:e.source_ids,cycle:0}));
 }
