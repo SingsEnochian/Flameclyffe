@@ -1,6 +1,5 @@
 'use strict';
 const { verifyAtHost } = require('../../wayglass/src/presence-host-gate.cjs');
-const { initialPresence, transitionPresence } = require('../../wayglass/src/presence-truth.cjs');
 
 /**
  * Hearthgate integration seam. Not an HTTP route: only host code may call this.
