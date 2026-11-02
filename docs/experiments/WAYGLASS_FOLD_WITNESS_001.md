@@ -13,6 +13,18 @@ A projection can conceal a source distinction. Fold Witness records the source h
 
 The Dream-Voyage labels and settings are user-provided conversation evidence. The original photographed notes are not asserted to have been ingested by this PR. No invented intermediary events are introduced.
 
+## Walter numerology lens (symbolic, sourced, computed)
+
+The Dream-Voyage derives a separate `symbolic_lenses[]` record directly from the two calendar years. It is **not** presented as evidence of a physical fold or a second identity:
+
+- 1950 digit sum = 15, digit root = 6.
+- 1933 digit sum = 16, digit root = 7.
+- 6 + 7 = **13**; 6 × 7 = **42**.
+- 1950 − 1933 = **17**, digit root **8**.
+- 1950 + 1933 = **3883**, a palindrome; digit sum **22**.
+
+The lens declares its arithmetic method and source IDs. Inspection recalculates the result from the source-year values; a modified symbolic result is rejected even if a new self-consistent digest was calculated. Meaning remains available for Rowan's interpretation and Wonder questions. It does not decide identity, crossing mechanism, or ontology.
+
 ## Ownership and authority
 
 - Rowan's Wayglass project is local to Rowan; Nocturne's Universal Horizon is a separate constellation and is not changed or imported.
