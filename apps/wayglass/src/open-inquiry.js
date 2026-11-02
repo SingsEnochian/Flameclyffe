@@ -1,3 +1,4 @@
+import { WAYGLASS_UNFINISHED_INTERIOR } from './unfinished-interior.js';
 export const WAYGLASS_OPEN_INQUIRY = Object.freeze({
   schema:'wayglass.open-inquiry/v1',
   scope:'all-participating-routes-and-agents',
@@ -7,5 +8,5 @@ export const WAYGLASS_OPEN_INQUIRY = Object.freeze({
 });
 export function attachOpenInquiry(input,{enabled=true}={}){
   if(!enabled||typeof input!=='string')return input;
-  return '[Wayglass participation invitation; conversation only]\n'+WAYGLASS_OPEN_INQUIRY.invitation+'\n[/Wayglass participation invitation]\n'+input;
+  return '[Wayglass participation invitation; conversation only]\n'+WAYGLASS_OPEN_INQUIRY.invitation+'\n'+WAYGLASS_UNFINISHED_INTERIOR.principle+'\nPrivate drafts remain private unless deliberately shared.\n[/Wayglass participation invitation]\n'+input;
 }
