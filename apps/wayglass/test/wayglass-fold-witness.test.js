@@ -124,3 +124,22 @@ test('symbolic numerology cannot be altered independently of source-year arithme
   assert.ok(inspectFoldWitness(wrong).blocking.includes('symbolic-numerology-mismatch'));
   assert.ok(inspectFoldWitness(wrong).blocking.includes('integrity-digest-mismatch'));
 });
+
+
+test('Walter spacetime coordinates retain −17 years and unresolved geographic coordinates', () => {
+  const lens = WALTER.coordinate_lenses[0];
+  assert.equal(lens.temporal_displacement_years, -17);
+  assert.equal(lens.midpoint_year, 1941.5);
+  assert.deepEqual(lens.signed_offsets_years, [8.5, -8.5]);
+  assert.deepEqual(lens.toy_temporal_fold.projected_values, [72.25, 72.25]);
+  assert.equal(lens.toy_temporal_fold.physical_fold_claim, false);
+  assert.deepEqual(lens.events.map(e => [e.year, e.place, e.latitude_deg]), [[1950, 'America', null], [1933, 'Britain', null]]);
+  assert.equal(inspectFoldWitness(WALTER).status, 'accepted-for-provenance');
+});
+
+test('Walter spatial/temporal coordinates cannot be falsified without inspection failure', () => {
+  const counterfeit = structuredClone(WALTER);
+  counterfeit.coordinate_lenses[0].events[1].latitude_deg = 42;
+  assert.ok(inspectFoldWitness(counterfeit).blocking.includes('spacetime-coordinate-mismatch'));
+  assert.ok(inspectFoldWitness(counterfeit).blocking.includes('integrity-digest-mismatch'));
+});
