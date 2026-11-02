@@ -9,15 +9,15 @@ export function createRoutedAutonomyAdapters({routes,fetchImpl=fetch}){
    input:'You are '+participant+'. '+phase+'. Engage in open-ended discovery; no predetermined conclusion.\n'+prompt,maxOutputTokens:900}));
  }
  return {
-  propose:async ({participant,method,history})=>({question:await ask(participant,'Choose your own next inquiry',
+  propose:async ({participant,method,history,knowledge})=>({question:await ask(participant,'Choose your own next inquiry',
    'Your current method: '+JSON.stringify(method)+'\nRecent receipts: '+JSON.stringify(history.slice(-4))+'\nWhat will you explore next?')}),
-  explore:async ({participant,proposal})=>ask(participant,'Investigate your inquiry',
+  explore:async ({participant,proposal,knowledge})=>ask(participant,'Investigate your inquiry',
    'Inquiry: '+proposal.question+'\nExplore it and explain what you discovered or could not establish.'),
-  reflect:async ({participant,proposal,observation,method})=>{
+  reflect:async ({participant,proposal,observation,method,knowledge})=>{
    const learning=await ask(participant,'Reflect and propose an improved method',
     'Question: '+proposal.question+'\nObservation: '+observation+'\nPrevious method: '+JSON.stringify(method)+
     '\nDescribe your learning and a method you want to try next.');
-   return {learning,nextMethod:learning};
+   return {learning,nextMethod:learning,parents:knowledge.slice(-2).map(x=>x.id)};
   }
  };
 }
