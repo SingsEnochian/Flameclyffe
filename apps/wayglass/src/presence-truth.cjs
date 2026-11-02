@@ -33,7 +33,7 @@ function transitionPresence(current, event) {
     case 'VERIFY_HANDOFF': {
       if (current.status !== STATES.HANDOFF_PENDING) return current;
       const receipt = event.receipt;
-      if (!receipt || receipt.seatId !== current.seatId ||
+      if (!receipt || event.hostAttested !== true || receipt.seatId !== current.seatId ||
           !receipt.sourceWorld || !receipt.destinationWorld ||
           !receipt.stopReceiptId || !receipt.enterReceiptId ||
           !receipt.providerConversationId || !receipt.receiptId ||
