@@ -17,8 +17,9 @@ test('only consented matched receipt verifies a pending handoff', () => {
   let s = initialPresence('twilight');
   s = move(s, 'CONFIGURE_ROUTE', { ownerAuthorized: true });
   s = move(s, 'BEGIN_HANDOFF', { ownerAuthorized: true });
-  assert.equal(move(s, 'VERIFY_HANDOFF', { receipt: receipt('other') }).status, STATES.UNAVAILABLE);
-  s = move(s, 'VERIFY_HANDOFF', { receipt: receipt('twilight') });
+  assert.equal(move(s, 'VERIFY_HANDOFF', { receipt: receipt('other'), hostAttested: true }).status, STATES.UNAVAILABLE);
+  assert.equal(move(s, 'VERIFY_HANDOFF', { receipt: receipt('twilight') }).status, STATES.UNAVAILABLE);
+  s = move(s, 'VERIFY_HANDOFF', { receipt: receipt('twilight'), hostAttested: true });
   assert.equal(s.status, STATES.VERIFIED_PRESENT);
   assert.equal(s.receiptId, 'r-1');
   assert.equal(JSON.stringify(s).includes('private-id'), false);
