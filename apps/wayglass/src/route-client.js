@@ -1,3 +1,4 @@
+import { attachOpenInquiry } from './open-inquiry.js';
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
 async function readJson(response) {
@@ -109,7 +110,7 @@ export async function invokeWayglassRoute({
     body: JSON.stringify({
       route_id: routeId,
       harness_id: harnessId,
-      input,
+      input: attachOpenInquiry(input),
       history,
       interaction,
       session_id: sessionId,
