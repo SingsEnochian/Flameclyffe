@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
-  buildEightRayControl, buildWalterDreamVoyage, inspectFoldWitness, toDomainReceipt,
+  buildEightRayControl, buildWalterDreamVoyage, inspectFoldWitness, toDomainReceipt, yearNumerology,
 } from '../../../lib/wayglass-fold-witness.js';
 import { createWayglassDeparture } from '../../../lib/wayglass-stop-receipt.js';
 import { createWaygateManifest } from '../../../lib/wayglass-waygate.js';
@@ -101,4 +101,26 @@ test('Wayglass rejects corrupted Walter provenance before re-entry', () => {
   const result = enter(corrupted);
   assert.equal(result.status, 'blocked-stop-integrity');
   assert.ok(result.blocked_by.includes('integrity-digest-mismatch'));
+});
+
+test('Walter numerology lens computes 6, 7, 13, 42, 17→8, and palindromic 3883 from sourced years', () => {
+  const numeric = WALTER.symbolic_lenses[0];
+  assert.deepEqual(numeric.years, [1950, 1933]);
+  assert.deepEqual(numeric.digit_sums, [15, 16]);
+  assert.deepEqual(numeric.digit_roots, [6, 7]);
+  assert.equal(numeric.root_sum, 13);
+  assert.equal(numeric.root_product, 42);
+  assert.equal(numeric.year_interval, 17);
+  assert.equal(numeric.interval_digit_root, 8);
+  assert.equal(numeric.year_sum, 3883);
+  assert.equal(numeric.year_sum_digit_sum, 22);
+  assert.equal(numeric.year_sum_palindrome, true);
+  assert.equal(numeric.interpretation_register, 'symbolic-arithmetic-not-physical-evidence');
+  assert.deepEqual(numeric, yearNumerology(1950, 1933, numeric.source_ids));
+});
+
+test('symbolic numerology cannot be altered independently of source-year arithmetic', () => {
+  const wrong = { ...WALTER, symbolic_lenses: [{ ...WALTER.symbolic_lenses[0], root_product: 43 }] };
+  assert.ok(inspectFoldWitness(wrong).blocking.includes('symbolic-numerology-mismatch'));
+  assert.ok(inspectFoldWitness(wrong).blocking.includes('integrity-digest-mismatch'));
 });
