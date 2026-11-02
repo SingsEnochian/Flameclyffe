@@ -47,3 +47,18 @@ The lens declares its arithmetic method and source IDs. Inspection recalculates 
 - No authority promotion and no claim of live Jacobian measurement.
 
 **Deferred:** Running a real Dream-Voyage session via the live Wayglass host, displaying this diagnostic in its browser, authenticating provenance at ingress, and comparing any measured PREMAQC/Heimdall folds. A green CI test is not a witnessed live world crossing.
+
+## Spacetime coordinate lens: departure and arrival
+
+The Wayglass source records contain **calendar years and country labels**, not full GPS or spacetime coordinates. Fold Witness explicitly holds the latitude, longitude, and altitude as `null` until sourced positions are provided. It does not fabricate a physical displacement vector.
+
+- Departure: **Old Man Walter**, 1950, **America**.
+- Arrival: **Young Walter**, 1933, **Britain**.
+- Directional calendar displacement: **−17 years**.
+- Arithmetic year midpoint: **1941.5**.
+- Signed offsets relative to the midpoint: **+8.5** and **−8.5** years.
+- Chosen toy temporal fold: `g(τ)=τ²`, giving equal outputs `72.25` from both offsets. It has a critical point at `τ=0` by construction.
+
+This demonstrates how a deliberately chosen non-invertible map can lose the sign of temporal displacement while the source receipts keep the dates and geographic labels. It **does not show** that the Dream-Voyage physically passed through a Jacobian fold. The exact month/day, city, latitude/longitude, and crossing mechanism remain unresolved.
+
+The numerology outputs 13 and 42 can be written as `13:42` in clock notation, or as an ordered number pair, but neither is an attested time-of-day or geographical coordinate of the Walter voyage. Such transforms are candidate symbolic encodings, not missing physical source evidence.
