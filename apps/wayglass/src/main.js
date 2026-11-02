@@ -8,6 +8,7 @@ import { mountWayglassSurface, registerWayglassSurface, listWayglassSurfaces } f
 import { mountArcSweepWritingSurface } from './surfaces/arcsweep-writing.js';
 import { mountThoughtVibrationSurface } from './surfaces/thought-vibration.js';
 import { mountWalterThirdPointSurface } from './surfaces/walter-third-point.js';
+import { mountOpenHorizonsSurface } from './surfaces/open-horizons.js';
 
 const root = document.querySelector('#app');
 
@@ -37,6 +38,12 @@ registerWayglassSurface({
   surface_id: 'dream-voyage:walter-third-point',
   label: 'Walter · Third Point Lab',
   mount: mountWalterThirdPointSurface,
+});
+
+registerWayglassSurface({
+  surface_id: 'wayglass:open-horizons',
+  label: 'Open Horizons · WITH',
+  mount: mountOpenHorizonsSurface,
 });
 
 const browserEmbodiment = Object.freeze({
