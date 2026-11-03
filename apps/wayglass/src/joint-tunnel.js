@@ -103,7 +103,7 @@ export async function runJointTunnel({
     await onReply(record);
     // The host, not either participant's punctuation, owns the bounded relay.
     // Either recipient can decline; Feather Stop independently ends the cycle.
-    if (/^\s*(?:\[\s*wayglass:decline\s*\]|feather stop)\b/i.test(record.content)) break;
+    if (/^\s*(?:\[\s*wayglass:decline\s*\]|feather stop)(?:\s|$)/i.test(record.content)) break;
     current = current === 'bluebird' ? 'vethrlauf' : 'bluebird';
   }
   return Object.freeze({ records: Object.freeze(records), stopped: Boolean(isStopped()), limit });
