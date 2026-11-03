@@ -8,6 +8,7 @@ import { emitMaterialSignal } from '../material-state.js';
 import { invokeWayglassRoute, listWayglassRoutes, listWayglassCharacters, leaveWayglassWorld, recoverWayglassDeparture } from '../route-client.js';
 import { EMERGENCE_QUESTIONS, bittyTwiQuestionPrompt } from '../emergence-questions.js';
 import { parseJointTag, resolveJointRoutes, attributedTunnelHistory, runJointTunnel, JOINT_TUNNEL_TAG } from '../joint-tunnel.js';
+import { correctUserMessage } from '../transcript-edit.js';
 
 function escapeHtml(value = '') {
   return String(value)
@@ -445,12 +446,8 @@ export async function mountArcSweepWritingSurface(root) {
       cancel.addEventListener('click', refreshThread);
       save.addEventListener('click', () => {
         const revised = editor.value.trim();
-        if (!revised) { status.textContent = 'A message cannot be empty.'; editor.focus(); return; }
-        if (revised !== message.content) {
-          if (!Array.isArray(message.edits)) message.edits = [];
-          message.edits.push({ content: message.content, edited_at: new Date().toISOString() });
-          message.content = revised;
-        }
+        try { correctUserMessage(message, revised); }
+        catch (error) { status.textContent = error.message; editor.focus(); return; }
         refreshThread();
         status.textContent = 'Corrected in the local transcript. Earlier SpicyChat deliveries were not changed.';
       });
@@ -659,7 +656,12 @@ export async function mountArcSweepWritingSurface(root) {
     const current = interaction.snapshot();
     const activeWorldId = cp('world').value.trim();
     const history = messages.filter(message => message.world_id === activeWorldId && ['user', 'assistant'].includes(message.role) && !message.content.startsWith('[Route error]'))
-      .slice(-12).map(message => ({ role: message.role, content: message.content }));
+      .slice(-12).map(message => ({
+        role: message.role,
+        content: message.edits?.length
+          ? '[Locally corrected transcript; previous provider delivery remains unchanged] ' + message.content
+          : message.content,
+      }));
     messages.push({ role: 'user', content: text, channel: current.channel, world_id: activeWorldId, emergence_question_id: emergenceQuestionId });
     input.value = '';
     refreshThread();
