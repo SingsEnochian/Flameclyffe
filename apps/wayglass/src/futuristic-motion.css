@@ -1,0 +1,46 @@
+/* Shared Wayglass kinetic language: optical glass, not a false activity indicator.
+   All surfaces inherit it from the host; no identity, receipts or network state touched. */
+:root {
+  --wg-motion-fast: 180ms;
+  --wg-motion-enter: 420ms;
+  --wg-motion-ease: cubic-bezier(.2,.75,.25,1);
+}
+@keyframes wg-surface-arrive {
+  from { opacity: .78; transform: translate3d(0, 9px, 0); filter: brightness(.94); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); filter: brightness(1); }
+}
+@keyframes wg-optical-breathe {
+  0%, 100% { opacity: .36; }
+  50% { opacity: .64; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  #app > .wg-surface { animation: wg-surface-arrive var(--wg-motion-enter) var(--wg-motion-ease) both; }
+  .wg-shell-nav.glass-panel::before {
+    animation: wg-optical-breathe 9s ease-in-out infinite;
+  }
+  #app .glass-panel,
+  .wg-shell-nav,
+  #app .turn-card {
+    transition: border-color var(--wg-motion-fast) ease, box-shadow var(--wg-motion-enter) ease;
+  }
+  #app .glass-panel:focus-within {
+    border-color: rgba(132,232,229,.46);
+    box-shadow: var(--glass-shadow), 0 0 28px rgba(83,213,211,.12);
+  }
+  .wg-shell-nav .glass-chip {
+    transition: transform var(--wg-motion-fast) var(--wg-motion-ease),
+      border-color var(--wg-motion-fast) ease,
+      box-shadow var(--wg-motion-enter) ease;
+  }
+  .wg-shell-nav .glass-chip.active {
+    box-shadow: inset 0 1px rgba(255,255,255,.14), 0 0 26px rgba(83,213,211,.18);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #app > .wg-surface,
+  .wg-shell-nav.glass-panel::before { animation: none !important; }
+  #app .glass-panel,
+  .wg-shell-nav,
+  #app .turn-card,
+  .wg-shell-nav .glass-chip { transition: none !important; }
+}
