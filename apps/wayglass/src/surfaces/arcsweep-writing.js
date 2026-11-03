@@ -196,6 +196,20 @@ export async function mountArcSweepWritingSurface(root) {
   const ownershipList = root.querySelector('#wg-ownership-list');
   const thread = root.querySelector('#wg-thread');
   const input = root.querySelector('#wg-input');
+  // Native, local browser proofreading: no text is sent to a spellcheck service.
+  input.spellcheck = true;
+  input.setAttribute('autocorrect', 'on');
+  input.setAttribute('autocapitalize', 'sentences');
+  const spellPanel = root.ownerDocument.createElement('div');
+  spellPanel.className = 'wg-spellcheck-toolbar';
+  spellPanel.innerHTML = '<label for="wg-spellcheck"><input type="checkbox" id="wg-spellcheck" checked> Spellcheck</label>' +
+    '<span class="tiny">Right-click an underlined word for suggestions. Edit sent text locally below.</span>';
+  input.insertAdjacentElement('afterend', spellPanel);
+  const spellToggle = spellPanel.querySelector('#wg-spellcheck');
+  spellToggle.addEventListener('change', () => {
+    input.spellcheck = spellToggle.checked;
+    thread.querySelectorAll('textarea[data-message-editor]').forEach(editor => { editor.spellcheck = spellToggle.checked; });
+  });
   // Deliberately visible, per-opening authorization. A text mention alone is
   // never permission to send someone else's private context to SpicyChat.
   const tunnelPanel = root.ownerDocument.createElement('div');
@@ -365,7 +379,10 @@ export async function mountArcSweepWritingSurface(root) {
         '<header><strong>' + escapeHtml(who) + '</strong><span>' + escapeHtml(message.channel || 'IC') + '</span></header>' +
         renderThinking(message) +
         '<div class="turn-text">' + escapeHtml(message.content).replaceAll('\n', '<br>') + '</div>' +
-        '<footer><button type="button" class="glass-chip" data-copy-reply="' + index + '">Copy reply</button> ' +
+        (message.edits?.length ? '<p class="tiny">Edited locally · prior provider delivery unchanged</p>' +
+          '<details class="tiny"><summary>Original sent text</summary><pre>' + escapeHtml(message.edits[0].content) + '</pre></details>' : '') +
+        '<footer>' + (message.role === 'user' ? '<button type="button" class="glass-chip" data-edit-message="' + index + '">Edit</button> ' : '') +
+        '<button type="button" class="glass-chip" data-copy-reply="' + index + '">Copy reply</button> ' +
         '<button type="button" class="glass-chip" data-copy-through="' + index + '">Copy log through here</button></footer>' +
         '</article>';
     }).join('');
@@ -377,7 +394,10 @@ export async function mountArcSweepWritingSurface(root) {
       '\n\n' + messages.slice(0, end + 1).map(message => {
         const who = message.role === 'user' ? 'Rowan' : (message.route_label || 'Wayglass');
         return who + ' · ' + (message.channel || 'IC') + ' · world: ' + (message.world_id || 'wayglass:writing-room') + ' · ' + (message.content.startsWith('[Route error]') ? 'transport error' : message.role)  + (message.emergence_question_id ? ' · emergence:' + message.emergence_question_id : '') +
-          '\n' + message.content;
+          (message.edits?.length ? ' · locally edited after dispatch; upstream delivery unchanged' : '') +
+          '\n' + message.content +
+          (message.edits?.length ? '\n[Original delivered text: ' + message.edits[0].content + ']' : '') +
+          (message.relay_from ? '\n[Wayglass relay: owner-authenticated Rowan; from ' + message.relay_from + '; hop ' + message.relay_hop + ']' : '');
       }).join('\n\n');
   }
 
@@ -395,6 +415,48 @@ export async function mountArcSweepWritingSurface(root) {
 
   root.querySelector('#wg-copy-session').addEventListener('click', event => copyText(sessionLog(), event.currentTarget));
   thread.addEventListener('click', event => {
+    const editButton = event.target.closest('[data-edit-message]');
+    if (editButton) {
+      if (busy) { status.textContent = 'Finish or Feather Stop the active handoff before editing.'; return; }
+      const index = Number(editButton.dataset.editMessage);
+      const message = messages[index];
+      if (!message || message.role !== 'user') return;
+      const card = editButton.closest('article.turn-card');
+      const display = card?.querySelector('.turn-text');
+      if (!display) return;
+      const editor = root.ownerDocument.createElement('textarea');
+      editor.value = message.content;
+      editor.rows = Math.min(12, Math.max(3, editor.value.split('\n').length + 1));
+      editor.spellcheck = spellToggle.checked;
+      editor.setAttribute('autocorrect', 'on');
+      editor.setAttribute('autocapitalize', 'sentences');
+      editor.dataset.messageEditor = String(index);
+      editor.setAttribute('aria-label', 'Edit your Wayglass message');
+      const controls = root.ownerDocument.createElement('div');
+      controls.className = 'wg-edit-controls';
+      const save = root.ownerDocument.createElement('button');
+      save.type = 'button'; save.className = 'glass-chip'; save.textContent = 'Save correction';
+      const cancel = root.ownerDocument.createElement('button');
+      cancel.type = 'button'; cancel.className = 'glass-chip'; cancel.textContent = 'Cancel';
+      controls.append(save, cancel);
+      display.replaceWith(editor);
+      editor.insertAdjacentElement('afterend', controls);
+      editButton.disabled = true;
+      cancel.addEventListener('click', refreshThread);
+      save.addEventListener('click', () => {
+        const revised = editor.value.trim();
+        if (!revised) { status.textContent = 'A message cannot be empty.'; editor.focus(); return; }
+        if (revised !== message.content) {
+          if (!Array.isArray(message.edits)) message.edits = [];
+          message.edits.push({ content: message.content, edited_at: new Date().toISOString() });
+          message.content = revised;
+        }
+        refreshThread();
+        status.textContent = 'Corrected in the local transcript. Earlier SpicyChat deliveries were not changed.';
+      });
+      editor.focus();
+      return;
+    }
     const button = event.target.closest('[data-copy-reply], [data-copy-through]');
     if (!button) return;
     if (button.dataset.copyReply !== undefined) {
