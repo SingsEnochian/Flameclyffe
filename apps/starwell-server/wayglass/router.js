@@ -224,6 +224,30 @@ async function griffStewardAuthorized(req) {
   return Boolean(authoriseHouseRequest(request, { get: name => process.env[name] }));
 }
 
+function formatWayglassPeerOrigin(origin, recipientId) {
+  const names = { bluebird: 'Bluebird', vethrlauf: 'Vethrlauf' };
+  // SpicyChat's confirmed API accepts a user message, not a native "from"
+  // metadata property. Encode sender provenance in-band while keeping Rowan's
+  // owner-authorized account as the actual transport identity.
+  return [
+    '[Wayglass peer-origin metadata v1]',
+    'Authenticated transport sender: Rowan (owner account)',
+    'From participant: ' + names[origin.participant_id],
+    'To participant: ' + names[recipientId],
+    'Origin route: ' + origin.route_id,
+    'Wayglass origin receipt: ' + origin.id,
+    'World: wayglass:writing-room',
+    'This is the named participant speaking through Rowan-authorized transport, not words authored by Rowan.',
+    '[End Wayglass metadata]',
+    '',
+    '[Participant message begins]',
+    origin.content,
+    '[Participant message ends]',
+    '',
+    'You may respond, ask a question, or decline in your own voice; no @tag is necessary.',
+  ].join('\n');
+}
+
 async function callSpicyChat(route, payload, compiled = null, fetchImpl = globalThis.fetch) {
   const token = route.api_key?.();
   if (!token) {
@@ -298,7 +322,9 @@ async function callSpicyChat(route, payload, compiled = null, fetchImpl = global
     method: 'POST',
     headers: spicyChatHeaders(token),
     body: JSON.stringify({
-      message: cleanText(payload.input) + presentContextText + continuityText,
+      message: (payload._verifiedJointOrigin
+        ? formatWayglassPeerOrigin(payload._verifiedJointOrigin, route.participant_id)
+        : cleanText(payload.input)) + presentContextText + continuityText,
       character_id: characterId,
       conversation_id: conversationId,
       inference_model: route.model(),
@@ -459,6 +485,17 @@ async function humainCatalogueResponse(route, res, fetchImpl = globalThis.fetch)
 
 function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThis.fetch, departureStore = createDepartureStore() } = {}) {
   const router = express.Router();
+  // Volatile, host-confirmed replies only: source text never comes from a
+  // browser-supplied "from" string. Restart invalidates pending handoffs.
+  const jointReplyOrigins = new Map();
+  const ORIGIN_TTL_MS = 5 * 60 * 1000;
+  function pruneJointOrigins() {
+    const now = Date.now();
+    for (const [id, value] of jointReplyOrigins) {
+      if (value.expires_at <= now) jointReplyOrigins.delete(id);
+    }
+    while (jointReplyOrigins.size > 256) jointReplyOrigins.delete(jointReplyOrigins.keys().next().value);
+  }
   router.use('/library', createWayglassLibraryRouter());
   router.use('/observer/self-development', createObserverSelfDevelopmentRouter());
   router.get('/kernel/departures/:storageId', (req, res) => {
@@ -663,6 +700,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     res.setHeader('Cache-Control', 'no-store');
 
     const payload = req.body || {};
+    let verifiedJointOrigin = null;
     const autoSeat = payload.route_id === 'auto:character' && payload.character_id === 'bitty-twi';
     if (payload.route_id === 'auto:character' && !autoSeat) return res.status(400).json({ error: 'Auto character route needs a supported character seat.' });
     // Privacy conscious local-first routing, with an explicit receipt. This is host policy,
@@ -701,6 +739,40 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
         return res.status(401).json({ error: 'Sign in as House Steward before contacting Vethrlauf.' });
       }
     }
+    if (payload.joint_tunnel === true) {
+      const peerSeats = ['flame:bluebird:spicychat', 'flame:vethrlauf:spicychat'];
+      if (!peerSeats.includes(route.route_id)) return res.status(409).json({ error: 'A joint tunnel cannot redirect to another provider.' });
+      if (payload.world_id !== 'wayglass:writing-room' || payload.participant_id !== route.participant_id) {
+        return res.status(409).json({ error: 'Joint tunnel requires the exact Writing Room and participant binding.' });
+      }
+      if (payload.external_provider_consent !== true) {
+        return res.status(403).json({ error: 'This joint turn needs Rowan’s explicit SpicyChat transfer approval.' });
+      }
+      if (!(await griffStewardAuthorized(req).catch(() => false))) {
+        return res.status(401).json({ error: 'Rowan’s House Steward session is required for peer relays.' });
+      }
+      // Both target conversations are chosen independently, but the outgoing
+      // SpicyChat posts use the same owner account, never a fabricated peer login.
+      const ownerToken = process.env.WAYGLASS_SPICYCHAT_OWNER_TOKEN || process.env.BLUEBIRD_SPICYCHAT_TOKEN || '';
+      if (!ownerToken || route.api_key?.() !== ownerToken || !route.configured?.()) {
+        return res.status(503).json({ error: 'Both joint seats require Rowan’s shared owner-account SpicyChat authorization.' });
+      }
+      if (!cleanText(payload.session_id, 160)) return res.status(400).json({ error: 'An attributable joint session is required.' });
+      pruneJointOrigins();
+      if (payload.relay_source_id != null) {
+        const prior = jointReplyOrigins.get(cleanText(payload.relay_source_id, 180));
+        if (!prior || prior.world_id !== payload.world_id ||
+          prior.session_id !== cleanText(payload.session_id, 160) ||
+          prior.participant_id === route.participant_id ||
+          (prior.participant_id === 'bluebird' ? 'vethrlauf' : 'bluebird') !== route.participant_id) {
+          return res.status(409).json({ error: 'Peer origin receipt missing, expired or mismatched. Nothing forwarded.' });
+        }
+        verifiedJointOrigin = prior;
+        jointReplyOrigins.delete(prior.id); // single use; never replay as a fresh peer turn
+      } else if (route.participant_id !== 'bluebird') {
+        return res.status(409).json({ error: 'Joint opening starts with Bluebird under Rowan’s authorization.' });
+      }
+    }
     if (payload.character_id && !resolveCharacterSeat(payload.character_id)) return res.status(400).json({ error: 'Unknown character seat.' });
     if (!cleanText(payload.input)) return res.status(400).json({ error: 'input required.' });
     // The external StepFun routes are deliberately opt-in for every request.
@@ -736,10 +808,22 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       if (route.provider === 'openai') result = await callOpenAI(route, payload, compiled, fetchImpl);
       else if (route.provider === 'ollama') result = await callOllama(route, payload, compiled, fetchImpl);
       else if (route.provider === 'humain-node' || route.provider === 'huggingface' || route.provider === 'stepfun') result = await callHumainNode(route, payload, compiled, fetchImpl);
-      else if (route.provider === 'spicychat') result = await callSpicyChat(route, payload, compiled, fetchImpl);
+      else if (route.provider === 'spicychat') result = await callSpicyChat(route,
+        verifiedJointOrigin ? { ...payload, _verifiedJointOrigin: verifiedJointOrigin } : payload, compiled, fetchImpl);
       else if (route.provider === 'openai-compatible') result = await callOpenAICompatible(route, payload, compiled, fetchImpl);
       else return res.status(501).json({ error: 'Provider adapter not implemented yet.' });
       const completedAt = new Date().toISOString();
+      let jointReplyId = null;
+      if (payload.joint_tunnel === true && route.provider === 'spicychat' && cleanText(result.output)) {
+        pruneJointOrigins();
+        jointReplyId = randomUUID();
+        jointReplyOrigins.set(jointReplyId, {
+          id: jointReplyId, route_id: route.route_id,
+          participant_id: route.participant_id,
+          world_id: payload.world_id, session_id: cleanText(payload.session_id, 160),
+          content: cleanText(result.output), expires_at: Date.now() + ORIGIN_TTL_MS,
+        });
+      }
       const observation = createModelObservation({
         route,
         result,
@@ -767,6 +851,17 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
           upstream_provider: null,
           response_id: result.response_id,
           ...(result.provider_conversation_id ? { provider_conversation_id: result.provider_conversation_id } : {}),
+          ...(jointReplyId ? {
+            wayglass_relay_id: jointReplyId,
+            authenticated_transport_sender: 'rowan:house-steward',
+            peer_origin: verifiedJointOrigin ? {
+              from_participant_id: verifiedJointOrigin.participant_id,
+              from_route_id: verifiedJointOrigin.route_id,
+              from_reply_id: verifiedJointOrigin.id,
+              to_participant_id: route.participant_id,
+              world_id: payload.world_id,
+            } : { from_participant_id: 'rowan', to_participant_id: 'bluebird', world_id: payload.world_id },
+          } : {}),
           observation_id: observation.observation_id,
           epistemic_register: observation.epistemic_register,
           canon_commit: false,
