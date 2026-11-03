@@ -38,7 +38,7 @@ test('owner-opened tunnel sends to both pinned seats, preserves attribution, and
   const received = [];
   const finished = await runJointTunnel({
     opening: '@Bluebird+Vethrlauf, hello you two.',
-    routes,
+    routes, maxReplies: 2,
     send: async request => {
       seen.push(request);
       return { route_id: request.route.route_id, participant_id: request.participant,
