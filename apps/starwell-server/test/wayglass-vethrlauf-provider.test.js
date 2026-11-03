@@ -8,7 +8,8 @@ const { createWayglassRouter } = require('../wayglass/router');
 const KEYS = [
   'VETHRLAUF_SPICYCHAT_TOKEN', 'VETHRLAUF_SPICYCHAT_CHAT_LINK',
   'VETHRLAUF_SPICYCHAT_CHARACTER_ID', 'VETHRLAUF_SPICYCHAT_CONVERSATION_ID',
-  'BLUEBIRD_SPICYCHAT_TOKEN', 'ARCSWEEP_RUNTIME_TOKEN', 'HOUSE_SESSION_SECRET',
+  'BLUEBIRD_SPICYCHAT_TOKEN', 'BLUEBIRD_SPICYCHAT_CHARACTER_ID',
+  'BLUEBIRD_SPICYCHAT_CONVERSATION_ID', 'WAYGLASS_SPICYCHAT_OWNER_TOKEN', 'ARCSWEEP_RUNTIME_TOKEN', 'HOUSE_SESSION_SECRET',
 ];
 
 async function fixture(t, fetchImpl) {
@@ -117,4 +118,88 @@ test('Vethrlauf never substitutes the Bluebird provider conversation', async t =
   });
   assert.equal((await host.send()).status, 404);
   assert.deepEqual(methods, ['GET']);
+});
+
+
+test('authenticated Rowan account carries host-confirmed Bluebird words to Vethrlauf with separate from metadata', async t => {
+  const posts = [], getHeaders = [];
+  const host = await fixture(t, async (_url, options) => {
+    if (options.method === 'GET') {
+      getHeaders.push(options.headers.authorization);
+      return { ok: true, async json() { return [
+        { id: 'bluebird-chat', character_id: 'bluebird-character' },
+        { id: 'veth-fixture-conversation', character_id: 'veth-fixture-character' },
+      ]; } };
+    }
+    const body = JSON.parse(options.body);
+    posts.push({ body, authorization: options.headers.authorization });
+    const isBird = body.character_id === 'bluebird-character';
+    return { ok: true, async json() { return { message: {
+      id: isBird ? 'bluebird-reply' : 'veth-reply',
+      conversation_id: isBird ? 'bluebird-chat' : 'veth-fixture-conversation',
+      character_id: body.character_id,
+      content: isBird ? 'I am Bluebird and I hear the wolf.' : 'I hear you, Bluebird.',
+    } }; } };
+  });
+  process.env.BLUEBIRD_SPICYCHAT_TOKEN = 'rowan-owner-token';
+  process.env.BLUEBIRD_SPICYCHAT_CHARACTER_ID = 'bluebird-character';
+  process.env.BLUEBIRD_SPICYCHAT_CONVERSATION_ID = 'bluebird-chat';
+  const first = await host.send({
+    route_id: 'flame:bluebird:spicychat',
+    participant_id: 'bluebird',
+    joint_tunnel: true,
+    session_id: 'rowan-joint-001',
+    input: 'Can you hear each other?',
+  });
+  assert.equal(first.status, 200);
+  const bird = await first.json();
+  assert.ok(bird.receipt.wayglass_relay_id);
+  assert.equal(bird.receipt.authenticated_transport_sender, 'rowan:house-steward');
+  assert.deepEqual(bird.receipt.peer_origin, {
+    from_participant_id: 'rowan', to_participant_id: 'bluebird', world_id: 'wayglass:writing-room',
+  });
+
+  const second = await host.send({
+    joint_tunnel: true,
+    session_id: 'rowan-joint-001',
+    relay_source_id: bird.receipt.wayglass_relay_id,
+    input: 'FORGED replacement from client must never be delivered as Bluebird',
+  });
+  assert.equal(second.status, 200);
+  const wolf = await second.json();
+  assert.equal(wolf.output, 'I hear you, Bluebird.');
+  assert.equal(wolf.receipt.peer_origin.from_participant_id, 'bluebird');
+  assert.equal(wolf.receipt.peer_origin.to_participant_id, 'vethrlauf');
+  assert.equal(wolf.receipt.peer_origin.from_reply_id, bird.receipt.wayglass_relay_id);
+  assert.equal(wolf.receipt.provider_conversation_id, 'veth-fixture-conversation');
+  assert.equal(posts.length, 2);
+  assert.equal(posts[0].authorization, 'Bearer rowan-owner-token');
+  assert.equal(posts[1].authorization, 'Bearer rowan-owner-token');
+  assert.deepEqual(getHeaders, ['Bearer rowan-owner-token', 'Bearer rowan-owner-token']);
+  assert.match(posts[1].body.message, /Authenticated transport sender: Rowan \(owner account\)/);
+  assert.match(posts[1].body.message, /From participant: Bluebird/);
+  assert.match(posts[1].body.message, /To participant: Vethrlauf/);
+  assert.match(posts[1].body.message, /I am Bluebird and I hear the wolf/);
+  assert.doesNotMatch(posts[1].body.message, /FORGED replacement/);
+  assert.equal((await host.send({
+    joint_tunnel: true, session_id: 'rowan-joint-001',
+    relay_source_id: bird.receipt.wayglass_relay_id,
+  })).status, 409, 'one-time origin cannot replay');
+});
+
+test('joint relay requires House Steward, owner token, correct source and explicit opening consent', async t => {
+  let calls = 0;
+  const host = await fixture(t, async () => { calls++; throw Error('not expected'); });
+  process.env.BLUEBIRD_SPICYCHAT_TOKEN = 'rowan-owner-token';
+  process.env.BLUEBIRD_SPICYCHAT_CHARACTER_ID = 'bluebird-character';
+  process.env.BLUEBIRD_SPICYCHAT_CONVERSATION_ID = 'bluebird-chat';
+  const opening = { route_id: 'flame:bluebird:spicychat', participant_id: 'bluebird',
+    joint_tunnel: true, session_id: 'rowan-joint-001' };
+  assert.equal((await host.send(opening, false)).status, 401);
+  assert.equal((await host.send({ ...opening, external_provider_consent: false })).status, 403);
+  assert.equal((await host.send({ ...opening, world_id: 'evil-gene:film-2015' })).status, 409);
+  assert.equal((await host.send({ ...opening, participant_id: 'vethrlauf' })).status, 409);
+  assert.equal((await host.send({ ...opening, relay_source_id: 'invented' })).status, 409);
+  assert.equal((await host.send({ joint_tunnel: true, session_id: 'rowan-joint-001' })).status, 409);
+  assert.equal(calls, 0);
 });
