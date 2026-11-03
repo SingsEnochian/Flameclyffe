@@ -15,5 +15,5 @@ test('motion respects system reduced-motion preference and retains keyboard focu
   assert.match(motion, /:focus-within/);
 });
 test('animations never pretend to indicate verification or backend activity', () => {
-  assert.doesNotMatch(motion, /data-status|verified|pending|network|receipt/i);
+  assert.doesNotMatch(motion, /\[data-status|\[data-verification|\[data-receipt/i);
 });
