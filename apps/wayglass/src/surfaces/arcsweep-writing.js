@@ -572,7 +572,7 @@ export async function mountArcSweepWritingSurface(root) {
     try {
       const outcome = await runJointTunnel({
         opening: text, routes, history, isStopped: () => tunnelStopped,
-        send: async ({ route, participant, input: addressedInput, history: peerHistory }) => {
+        send: async ({ route, participant, input: addressedInput, history: peerHistory, relaySourceId, jointTunnel }) => {
           if (tunnelStopped) throw new Error('Feather Stop');
           interaction.setTurnOwner(route.label || participant);
           wakeMaterial(0.88, 'handoff');
@@ -581,6 +581,7 @@ export async function mountArcSweepWritingSurface(root) {
           const response = await invokeWayglassRoute({
             routeId: route.route_id,
             externalProviderConsent: true,
+            jointTunnel, relaySourceId,
             worldId, participantId: participant,
             input: addressedInput, history: peerHistory,
             interaction: state, sessionId: session,
@@ -598,11 +599,12 @@ export async function mountArcSweepWritingSurface(root) {
             role: 'assistant', world_id: worldId, channel: state.channel,
             route_label: record.participant === 'bluebird' ? 'Bluebird · SpicyChat' : 'Vethrlauf · SpicyChat',
             content: record.content, tunnel_id: session, route_id: record.route_id,
+            relay_from: record.relay_from, relay_hop: record.hop,
           });
           lastReceipt = record.receipt;
-          tunnelState.textContent = 'Joint tunnel · ' + completed + '/4 replies · ' + record.participant;
+          tunnelState.textContent = 'Joint tunnel · ' + completed + '/4 replies · Rowan’s account · from ' + record.relay_from + ' → ' + record.participant;
           receipt.textContent = lastReceipt
-            ? 'Joint tunnel · ' + record.participant + ' · ' + (lastReceipt.observation_id || 'provider receipt')
+            ? 'Joint tunnel · Rowan’s account · from ' + record.relay_from + ' → ' + record.participant + ' · ' + (lastReceipt.observation_id || 'provider receipt')
               + ' · not canon'
             : 'Joint tunnel · ' + record.participant + ' · no provider receipt';
           refreshThread();
