@@ -78,3 +78,15 @@
   .wg-eightfold { width: 76px; right: 8px; bottom: 8px; padding: 5px; border-radius: 15px; }
   .wg-eightfold-label { font-size: 8px; }
 }
+
+/* Cyber-fae instrument controls: luminous copper and mineral glass. */
+.wg-eightfold { pointer-events: auto; width: min(280px, calc(100vw - 16px)); border-color: rgba(204,151,92,.48); background: linear-gradient(145deg, rgba(9,31,38,.94), rgba(15,10,27,.92)); }
+.wg-eightfold-toggle { width: 100%; border: 1px solid rgba(207,160,98,.55); border-radius: 9px; background: rgba(15,51,59,.7); color: #f0d8b4; padding: 7px; cursor: pointer; }
+.wg-eightfold-panel[hidden] { display: none; }
+.wg-eightfold-panel { padding-top: 9px; }
+.wg-eightfold-tabs { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 5px; }
+.wg-eightfold-tabs button { padding: 6px 3px; border: 1px solid rgba(112,204,193,.32); border-radius: 7px; background: rgba(13,38,45,.8); color: #cceee9; font: 11px system-ui,sans-serif; cursor: pointer; }
+.wg-eightfold-tabs button[aria-pressed="true"] { border-color: #e5b779; color: #ffe2ad; background: rgba(105,65,40,.45); }
+.wg-eightfold-detail { color: #d3e8e4; font: 12px/1.5 system-ui,sans-serif; margin: 9px 2px 0; }
+.wg-eightfold button:focus-visible { outline: 2px solid #ffe2ad; outline-offset: 3px; }
+@media (max-width: 620px) { .wg-eightfold { width: min(220px, calc(100vw - 16px)); } }
