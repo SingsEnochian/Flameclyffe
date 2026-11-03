@@ -7,7 +7,7 @@ export const WAYGLASS_OBSERVER_LIGHT_SCHEMA = 'wayglass.wonder-light/v0.1';
 
 const EVENT_KINDS = new Set(['observer-reading', 'commons-received', 'commons-sent', 'commons-failed', 'return-verified', 'wonder-question']);
 const VERIFICATION = new Set(['verified', 'pending', 'failed', 'unknown', 'hypothesis']);
-const SAFE_ID = /^[a-zA-Z0-9][a-zA-Z0-9:._/-]{0,159}$/;
+const SAFE_ID = /^[a-zA-Z0-9][a-zA-Z0-9:._\/-]{0,159}$/;
 
 function identifier(value) {
   return typeof value === 'string' && SAFE_ID.test(value) ? value : null;
