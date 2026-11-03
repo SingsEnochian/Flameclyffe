@@ -1,3 +1,4 @@
+import { instrumentSnapshot } from './instrument-bus.js';
 // Eightfold observer: a visualization of visible Wayglass turns, never a claim of AI consciousness.
 const NS = 'http://www.w3.org/2000/svg';
 function element(tag, attrs = {}) {
@@ -24,7 +25,7 @@ export const EIGHTFOLD_INSTRUMENTS = Object.freeze([
   ['Numerology', 'Symbolic correspondences are exploratory, not measurements.'],
   ['Wonder', 'Unresolved questions require an admitted source.'],
 ]);
-export function installEightfoldObserver({ root = document.querySelector('#app') } = {}) {
+export function installEightfoldObserver({ root = document.querySelector('#app'), bus = null } = {}) {
   if (!root || typeof document === 'undefined') return null;
   const instrument = document.createElement('aside');
   instrument.className = 'wg-eightfold';
@@ -45,6 +46,12 @@ export function installEightfoldObserver({ root = document.querySelector('#app')
   tabs.className = 'wg-eightfold-tabs';
   const detail = document.createElement('p');
   detail.className = 'wg-eightfold-detail';
+  let selected = 'Observation';
+  function renderDetail() {
+    if (!bus) return;
+    const item = instrumentSnapshot(bus, root.querySelectorAll('.turn-card').length).find(entry => entry.kind === selected);
+    detail.textContent = item.kind + ' · ' + item.status + ' · ' + item.description + ' · source: ' + item.source + (item.reference ? ' · ref: ' + item.reference : '');
+  }
   EIGHTFOLD_INSTRUMENTS.forEach(([name, description], index) => {
     const button = document.createElement('button');
     button.type = 'button';
@@ -52,13 +59,16 @@ export function installEightfoldObserver({ root = document.querySelector('#app')
     button.setAttribute('aria-pressed', String(index === 0));
     button.addEventListener('click', () => {
       tabs.querySelectorAll('button').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
-      detail.textContent = name === 'Observation'
+      selected = name;
+      renderDetail();
+      if (!bus) detail.textContent = name === 'Observation'
         ? description + ' Current count: ' + root.querySelectorAll('.turn-card').length + '.'
         : description;
     });
     tabs.append(button);
   });
   detail.textContent = EIGHTFOLD_INSTRUMENTS[0][1];
+  renderDetail();
   panel.append(tabs, detail);
   toggle.addEventListener('click', () => {
     panel.hidden = !panel.hidden;
@@ -80,10 +90,11 @@ export function installEightfoldObserver({ root = document.querySelector('#app')
     }
     svg.append(element('circle', { cx: 50, cy: 50, r: 5, class: 'wg-eightfold-core' }));
     label.textContent = count ? count + ' visible turn' + (count === 1 ? '' : 's') : 'Awaiting visible turns';
-    if (tabs.querySelector('button')?.getAttribute('aria-pressed') === 'true') detail.textContent = EIGHTFOLD_INSTRUMENTS[0][1] + ' Current count: ' + count + '.';
+    renderDetail();
   }
   const observer = new MutationObserver(refresh);
   observer.observe(root, { childList: true, subtree: true });
+  const unsubscribe = bus?.subscribe(renderDetail) || (() => {});
   refresh();
-  return Object.freeze({ refresh, destroy() { observer.disconnect(); instrument.remove(); } });
+  return Object.freeze({ refresh, destroy() { unsubscribe(); observer.disconnect(); instrument.remove(); } });
 }
