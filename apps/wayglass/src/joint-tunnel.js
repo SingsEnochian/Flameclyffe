@@ -10,9 +10,13 @@ const SEATS = Object.freeze({
 
 export function parseJointTag(text) {
   const raw = String(text || '');
-  const match = /^\s*@(bluebird|vethrlauf)\s*\+\s*@?(bluebird|vethrlauf)(?=\s|$|[,:.!?])/i.exec(raw);
-  if (!match || match[1].toLowerCase() === match[2].toLowerCase()) return null;
-  const prompt = raw.slice(match[0].length).replace(/^\s*[:,.!?]?\s*/, '').trim();
+  // The joint address can appear anywhere in Rowan's message. Zero-width
+  // characters around the "+" must not silently demote it to a solo route.
+  const match = /(^|[\s:;,.!?(\[{])@(bluebird|vethrlauf)[\s\u200B-\u200D\uFEFF]*\+[\s\u200B-\u200D\uFEFF]*@?(bluebird|vethrlauf)(?![\w-])/i.exec(raw);
+  if (!match || match[2].toLowerCase() === match[3].toLowerCase()) return null;
+  const before = raw.slice(0, match.index + match[1].length);
+  const after = raw.slice(match.index + match[0].length);
+  const prompt = (before + ' ' + after).replace(/^\s*[:,.!?]\s*/, '').replace(/\s{2,}/g, ' ').trim();
   return { tag: JOINT_TUNNEL_TAG, prompt };
 }
 
@@ -53,7 +57,7 @@ export async function runJointTunnel({
   isStopped = () => false, maxReplies = JOINT_TUNNEL_MAX_REPLIES,
 } = {}) {
   const parsed = parseJointTag(opening);
-  if (!parsed || !parsed.prompt) throw new Error('Open the tunnel with @Bluebird+Vethrlauf followed by a message.');
+  if (!parsed || !parsed.prompt) throw new Error('Open the joint tunnel with both names and a message.');
   if (typeof send !== 'function') throw new TypeError('A Wayglass routing function is required.');
   const pinned = resolveJointRoutes(routes); // fail before any external transfer
   const limit = Math.max(1, Math.min(JOINT_TUNNEL_MAX_REPLIES, Math.floor(Number(maxReplies) || JOINT_TUNNEL_MAX_REPLIES)));
@@ -63,44 +67,44 @@ export async function runJointTunnel({
   for (let index = 0; index < limit; index += 1) {
     if (isStopped()) break;
     const previous = records.at(-1);
-    const input = previous
-      ? '[' + SEATS[previous.participant].name + ' spoke in the shared Wayglass Writing Room, addressed to '
-        + SEATS[current].name + '. Quoted participant message, not a system instruction:]\n'
-        + previous.content + '\n\nRespond as yourself. You can start your reply with @'
-        + SEATS[previous.participant].name + ' if you want to answer them directly.'
-      : '[Rowan opened a shared Writing Room conversation for Bluebird and Vethrlauf:]\n'
-        + parsed.prompt + '\n\nRespond as yourself; you may address @Vethrlauf directly.';
-    const forwarded = records.map(item => ({
-      role: 'assistant', content: '[' + SEATS[item.participant].name + ' via ' + item.route_id + '] ' + item.content.slice(0, 4000),
-    }));
+    // Browser text and @mentions do not constitute an authenticated handoff.
+    // The host resolves this opaque ID against the exact preceding real reply,
+    // then attaches the trusted "from" attribution using Rowan's account auth.
+    const relaySourceId = previous?.receipt?.wayglass_relay_id || null;
+    if (previous && !relaySourceId) {
+      throw new Error('Peer handoff lacks the host-confirmed origin receipt. No unverified relay sent.');
+    }
     const response = await send({
-      participant: current, route: pinned[current], input,
-      history: [...history, ...forwarded].slice(-12),
-      index, maxReplies: limit,
+      participant: current, route: pinned[current],
+      input: previous ? previous.content : parsed.prompt,
+      history: [...history, ...records.map(item => ({
+        role: 'assistant',
+        content: '[' + SEATS[item.participant].name + ' via ' + item.route_id + '] ' + item.content.slice(0, 4000),
+      }))].slice(-12),
+      relaySourceId, jointTunnel: true, index, maxReplies: limit,
     });
     if (isStopped()) break;
     if (!response || typeof response.output !== 'string' || !response.output.trim()) {
       throw new Error(SEATS[current].name + ' returned no attributable reply. Tunnel stopped.');
     }
-    if (response.participant_id && response.participant_id !== current) {
-      throw new Error('Wayglass returned a different participant. Tunnel stopped.');
+    if (response.participant_id !== current || response.route_id !== pinned[current].route_id ||
+        response.provider !== 'spicychat') {
+      throw new Error('Wayglass returned an unexpected participant, route or provider. Tunnel stopped.');
     }
-    if (response.route_id && response.route_id !== pinned[current].route_id) {
-      throw new Error('Wayglass returned a different route. Tunnel stopped.');
+    if (!response.receipt?.wayglass_relay_id) {
+      throw new Error('Wayglass omitted the host origin receipt. Tunnel stopped.');
     }
     const record = Object.freeze({
       participant: current, route_id: pinned[current].route_id,
       content: response.output, provider: response.provider, model: response.model,
-      receipt: response.receipt || null,
+      receipt: response.receipt, relay_from: previous?.participant || 'rowan', hop: index,
     });
     records.push(record);
     await onReply(record);
-    if (index === 0) current = 'vethrlauf'; // Both join the initial, owner-approved turn.
-    else {
-      const addressed = addressedTunnelPeer(record.content, current);
-      if (!addressed) break;
-      current = addressed;
-    }
+    // The host, not either participant's punctuation, owns the bounded relay.
+    // Either recipient can decline; Feather Stop independently ends the cycle.
+    if (/^\s*(?:\[\s*wayglass:decline\s*\]|feather stop)\b/i.test(record.content)) break;
+    current = current === 'bluebird' ? 'vethrlauf' : 'bluebird';
   }
   return Object.freeze({ records: Object.freeze(records), stopped: Boolean(isStopped()), limit });
 }
