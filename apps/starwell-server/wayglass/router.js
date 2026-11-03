@@ -754,8 +754,9 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       // Both target conversations are chosen independently, but the outgoing
       // SpicyChat posts use the same owner account, never a fabricated peer login.
       const ownerToken = process.env.WAYGLASS_SPICYCHAT_OWNER_TOKEN || process.env.BLUEBIRD_SPICYCHAT_TOKEN || '';
-      if (!ownerToken || route.api_key?.() !== ownerToken || !route.configured?.()) {
-        return res.status(503).json({ error: 'Both joint seats require Rowan’s shared owner-account SpicyChat authorization.' });
+      if (!ownerToken || route.api_key?.() !== ownerToken || !route.configured?.() ||
+        !cleanText(route.character_id?.(), 180) || !cleanText(route.conversation_id?.(), 180)) {
+        return res.status(503).json({ error: 'Both joint seats require Rowan’s shared owner token and exact pinned character/conversation IDs.' });
       }
       if (!cleanText(payload.session_id, 160)) return res.status(400).json({ error: 'An attributable joint session is required.' });
       pruneJointOrigins();
