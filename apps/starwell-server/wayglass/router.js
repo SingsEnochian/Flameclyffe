@@ -791,7 +791,8 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       // Griff's provider binding is not an inheritance-host dependency. A
       // signed, owner-approved chat turn must work before any optional bridge.
       const isolatedExternalSeat = route.route_id === 'flame:griff:spicychat'
-        || route.route_id === 'flame:vethrlauf:spicychat';
+        || route.route_id === 'flame:vethrlauf:spicychat'
+        || (payload.joint_tunnel === true && route.route_id === 'flame:bluebird:spicychat');
       const wantsInheritance = !isolatedExternalSeat && (
         resolver != null || payload.participant_id != null || payload.world_id != null
       );
