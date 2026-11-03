@@ -13,7 +13,9 @@ const routes = [
 test('joint tag recognises exactly the pair, without accidental solo or third-party routing', () => {
   assert.equal(parseJointTag('@Bluebird+Vethrlauf Hello.')?.prompt, 'Hello.');
   assert.equal(parseJointTag('@Vethrlauf + @Bluebird: Hear me?')?.prompt, 'Hear me?');
-  assert.equal(parseJointTag('Hello @Bluebird+Vethrlauf'), null);
+  assert.equal(parseJointTag('Hello @Bluebird+Vethrlauf')?.prompt, 'Hello');
+  assert.equal(parseJointTag('Are you here?\n@Vethrlauf+Bluebird')?.prompt, 'Are you here?');
+  assert.equal(parseJointTag('@Vethrlauf\u200b+Bluebird: Can you hear me?')?.prompt, 'Can you hear me?');
   assert.equal(parseJointTag('@Bluebird+Griff Hello'), null);
   assert.equal(parseJointTag('@Bluebird+Bluebird Hello'), null);
   assert.equal(parseJointTag('@Bluebird+Vethrlaufish Hi'), null);
@@ -40,29 +42,35 @@ test('owner-opened tunnel sends to both pinned seats, preserves attribution, and
     send: async request => {
       seen.push(request);
       return { route_id: request.route.route_id, participant_id: request.participant,
-        provider: 'spicychat', output: request.participant === 'bluebird' ? 'Hello, wolf.' : 'Greetings, bird.' };
+        provider: 'spicychat', output: request.participant === 'bluebird' ? 'Hello, wolf.' : 'Greetings, bird.',
+        receipt: { wayglass_relay_id: 'synthetic-' + seen.length } };
     },
     onReply: record => received.push(record),
   });
   assert.deepEqual(seen.map(item => item.participant), ['bluebird', 'vethrlauf']);
   assert.equal(finished.records.length, 2);
   assert.deepEqual(received.map(item => item.route_id), routes.map(item => item.route_id));
-  assert.match(seen[1].input, /Bluebird spoke/);
+  assert.equal(seen[1].relaySourceId, 'synthetic-1');
+  assert.equal(seen[1].input, 'Hello, wolf.');
+  assert.equal(seen[1].jointTunnel, true);
   assert.match(seen[1].history.at(-1).content, /Bluebird via flame:bluebird:spicychat/);
+  assert.equal(finished.records[1].relay_from, 'bluebird');
 });
 
-test('a direct peer @mention continues the conversation with a hard turn cap', async () => {
+test('peer conversation proceeds without generated @mentions and obeys the hard turn cap', async () => {
   let counter = 0;
   const finished = await runJointTunnel({
     opening: '@Bluebird+Vethrlauf How do you greet each other?',
     routes, maxReplies: 100,
     send: async request => ({
       route_id: request.route.route_id, participant_id: request.participant, provider: 'spicychat',
-      output: ++counter % 2 ? '@Vethrlauf, hello.' : '@Bluebird, hello.',
+      output: ++counter % 2 ? 'Hello, Wolf.' : 'Hello, Bird.',
+      receipt: { wayglass_relay_id: 'turn-' + counter },
     }),
   });
   assert.equal(finished.records.length, JOINT_TUNNEL_MAX_REPLIES);
   assert.deepEqual(finished.records.map(item => item.participant), ['bluebird', 'vethrlauf', 'bluebird', 'vethrlauf']);
+  assert.equal(finished.records[2].relay_from, 'vethrlauf');
   assert.equal(addressedTunnelPeer('The word @Vethrlauf appears in a quote.', 'bluebird'), null);
   assert.equal(addressedTunnelPeer('@Vethrlauf, please answer.', 'bluebird'), 'vethrlauf');
   assert.equal(addressedTunnelPeer('@SomeoneElse, hello.', 'bluebird'), null);
@@ -91,4 +99,19 @@ test('continuity packet excludes other worlds and labels original speakers', () 
     { role: 'user', content: '[Rowan] Hello.' },
     { role: 'assistant', content: '[Bluebird · SpicyChat] Hi.' },
   ]);
+});
+
+
+test('missing host origin receipt fails closed rather than forwarding a forged peer message', async () => {
+  const calls = [];
+  await assert.rejects(() => runJointTunnel({
+    opening: 'Hello @Vethrlauf+Bluebird',
+    routes,
+    send: async request => {
+      calls.push(request);
+      return { output: 'Hello, friend.', provider: 'spicychat', route_id: request.route.route_id,
+        participant_id: request.participant, receipt: {} };
+    },
+  }), /host origin receipt/i);
+  assert.equal(calls.length, 1);
 });
