@@ -1,5 +1,6 @@
 import './styles.css';
 import './futuristic-motion.css';
+import { installEightfoldObserver } from './eightfold-observer.js';
 import { installWayglassField } from './glass-field.js';
 import { installMotionChoreography } from './motion-choreography.js';
 import { installKeyboardControls } from './keyboard-controls.js';
@@ -55,6 +56,7 @@ surfaceNav.innerHTML = listWayglassSurfaces().map((surface) =>
   '</button>'
 ).join('');
 root.before(surfaceNav);
+installEightfoldObserver({ root });
 
 async function mountSurface(surfaceId) {
   mountedSurface?.destroy?.();
