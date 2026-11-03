@@ -122,6 +122,8 @@ export async function leaveWayglassWorld({
 export async function invokeWayglassRoute({
   routeId = 'openai:gpt',
   externalProviderConsent = false,
+  jointTunnel = false,
+  relaySourceId = null,
   worldId = null,
   participantId = null,
   characterId = null,
@@ -134,14 +136,18 @@ export async function invokeWayglassRoute({
   checkpoint = null,
   maxOutputTokens = 1400,
   think = false,
+  signal = undefined,
   fetchImpl = fetch,
 } = {}) {
   const response = await fetchImpl('/api/v1/wayglass/respond', {
     method: 'POST',
+    signal,
     headers: routeId === 'flame:bluebird:spicychat' ? { ...JSON_HEADERS, ...authorizationSession.headers() } : JSON_HEADERS,
     body: JSON.stringify({
       route_id: routeId,
       external_provider_consent: externalProviderConsent === true,
+      joint_tunnel: jointTunnel === true,
+      relay_source_id: relaySourceId || null,
       world_id: worldId,
       participant_id: participantId,
       character_id: characterId,

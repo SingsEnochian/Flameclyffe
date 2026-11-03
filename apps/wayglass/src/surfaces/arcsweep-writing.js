@@ -7,6 +7,8 @@ import { emitInteractionCue } from '../interaction-cues.js';
 import { emitMaterialSignal } from '../material-state.js';
 import { invokeWayglassRoute, listWayglassRoutes, listWayglassCharacters, leaveWayglassWorld, recoverWayglassDeparture } from '../route-client.js';
 import { EMERGENCE_QUESTIONS, bittyTwiQuestionPrompt } from '../emergence-questions.js';
+import { parseJointTag, resolveJointRoutes, attributedTunnelHistory, runJointTunnel, JOINT_TUNNEL_TAG } from '../joint-tunnel.js';
+import { correctUserMessage } from '../transcript-edit.js';
 
 function escapeHtml(value = '') {
   return String(value)
@@ -41,6 +43,8 @@ export async function mountArcSweepWritingSurface(root) {
   let busy = false;
   let lastReceipt = null;
   let checkpoint = null;
+  let tunnelAbort = null;
+  let tunnelStopped = false;
 
   root.innerHTML = [
     "<section class=\"wg-surface wg-writing-room\" data-surface=\"arcsweep-writing\">\n",
@@ -193,6 +197,37 @@ export async function mountArcSweepWritingSurface(root) {
   const ownershipList = root.querySelector('#wg-ownership-list');
   const thread = root.querySelector('#wg-thread');
   const input = root.querySelector('#wg-input');
+  // Native, local browser proofreading: no text is sent to a spellcheck service.
+  input.spellcheck = true;
+  input.setAttribute('autocorrect', 'on');
+  input.setAttribute('autocapitalize', 'sentences');
+  const spellPanel = root.ownerDocument.createElement('div');
+  spellPanel.className = 'wg-spellcheck-toolbar';
+  spellPanel.innerHTML = '<label for="wg-spellcheck"><input type="checkbox" id="wg-spellcheck" checked> Spellcheck</label>' +
+    '<span class="tiny">Right-click an underlined word for suggestions. Edit sent text locally below.</span>';
+  input.insertAdjacentElement('afterend', spellPanel);
+  const spellToggle = spellPanel.querySelector('#wg-spellcheck');
+  spellToggle.addEventListener('change', () => {
+    input.spellcheck = spellToggle.checked;
+    thread.querySelectorAll('textarea[data-message-editor]').forEach(editor => { editor.spellcheck = spellToggle.checked; });
+  });
+  // Deliberately visible, per-opening authorization. A text mention alone is
+  // never permission to send someone else's private context to SpicyChat.
+  const tunnelPanel = root.ownerDocument.createElement('div');
+  tunnelPanel.className = 'wg-joint-tunnel glass-segment';
+  tunnelPanel.innerHTML = '<label for="wg-joint-consent"><input id="wg-joint-consent" type="checkbox"> Approve ' +
+    JOINT_TUNNEL_TAG + ' · share this Writing Room exchange with both pinned SpicyChat seats (max 4 replies)</label>' +
+    '<button id="wg-tunnel-stop" type="button" class="glass-chip" disabled>Feather Stop</button>' +
+    '<span id="wg-tunnel-state" class="tiny" role="status">Joint tunnel closed.</span>';
+  input.insertAdjacentElement('afterend', tunnelPanel);
+  const tunnelConsent = tunnelPanel.querySelector('#wg-joint-consent');
+  const tunnelStop = tunnelPanel.querySelector('#wg-tunnel-stop');
+  const tunnelState = tunnelPanel.querySelector('#wg-tunnel-state');
+  tunnelStop.addEventListener('click', () => {
+    tunnelStopped = true;
+    tunnelAbort?.abort();
+    tunnelState.textContent = 'Feather · no further handoffs. An in-flight provider request may already have been received.';
+  });
   const sharedObserverReading = consumeObserverContextForWriting();
   if (sharedObserverReading) input.value = sharedObserverReading + '\n\n[My question about this observation:]\n';
   const status = root.querySelector('#wg-status');
@@ -345,7 +380,10 @@ export async function mountArcSweepWritingSurface(root) {
         '<header><strong>' + escapeHtml(who) + '</strong><span>' + escapeHtml(message.channel || 'IC') + '</span></header>' +
         renderThinking(message) +
         '<div class="turn-text">' + escapeHtml(message.content).replaceAll('\n', '<br>') + '</div>' +
-        '<footer><button type="button" class="glass-chip" data-copy-reply="' + index + '">Copy reply</button> ' +
+        (message.edits?.length ? '<p class="tiny">Edited locally · prior provider delivery unchanged</p>' +
+          '<details class="tiny"><summary>Original sent text</summary><pre>' + escapeHtml(message.edits[0].content) + '</pre></details>' : '') +
+        '<footer>' + (message.role === 'user' ? '<button type="button" class="glass-chip" data-edit-message="' + index + '">Edit</button> ' : '') +
+        '<button type="button" class="glass-chip" data-copy-reply="' + index + '">Copy reply</button> ' +
         '<button type="button" class="glass-chip" data-copy-through="' + index + '">Copy log through here</button></footer>' +
         '</article>';
     }).join('');
@@ -357,7 +395,10 @@ export async function mountArcSweepWritingSurface(root) {
       '\n\n' + messages.slice(0, end + 1).map(message => {
         const who = message.role === 'user' ? 'Rowan' : (message.route_label || 'Wayglass');
         return who + ' · ' + (message.channel || 'IC') + ' · world: ' + (message.world_id || 'wayglass:writing-room') + ' · ' + (message.content.startsWith('[Route error]') ? 'transport error' : message.role)  + (message.emergence_question_id ? ' · emergence:' + message.emergence_question_id : '') +
-          '\n' + message.content;
+          (message.edits?.length ? ' · locally edited after dispatch; upstream delivery unchanged' : '') +
+          '\n' + message.content +
+          (message.edits?.length ? '\n[Original delivered text: ' + message.edits[0].content + ']' : '') +
+          (message.relay_from ? '\n[Wayglass relay: owner-authenticated Rowan; from ' + message.relay_from + '; hop ' + message.relay_hop + ']' : '');
       }).join('\n\n');
   }
 
@@ -375,6 +416,44 @@ export async function mountArcSweepWritingSurface(root) {
 
   root.querySelector('#wg-copy-session').addEventListener('click', event => copyText(sessionLog(), event.currentTarget));
   thread.addEventListener('click', event => {
+    const editButton = event.target.closest('[data-edit-message]');
+    if (editButton) {
+      if (busy) { status.textContent = 'Finish or Feather Stop the active handoff before editing.'; return; }
+      const index = Number(editButton.dataset.editMessage);
+      const message = messages[index];
+      if (!message || message.role !== 'user') return;
+      const card = editButton.closest('article.turn-card');
+      const display = card?.querySelector('.turn-text');
+      if (!display) return;
+      const editor = root.ownerDocument.createElement('textarea');
+      editor.value = message.content;
+      editor.rows = Math.min(12, Math.max(3, editor.value.split('\n').length + 1));
+      editor.spellcheck = spellToggle.checked;
+      editor.setAttribute('autocorrect', 'on');
+      editor.setAttribute('autocapitalize', 'sentences');
+      editor.dataset.messageEditor = String(index);
+      editor.setAttribute('aria-label', 'Edit your Wayglass message');
+      const controls = root.ownerDocument.createElement('div');
+      controls.className = 'wg-edit-controls';
+      const save = root.ownerDocument.createElement('button');
+      save.type = 'button'; save.className = 'glass-chip'; save.textContent = 'Save correction';
+      const cancel = root.ownerDocument.createElement('button');
+      cancel.type = 'button'; cancel.className = 'glass-chip'; cancel.textContent = 'Cancel';
+      controls.append(save, cancel);
+      display.replaceWith(editor);
+      editor.insertAdjacentElement('afterend', controls);
+      editButton.disabled = true;
+      cancel.addEventListener('click', refreshThread);
+      save.addEventListener('click', () => {
+        const revised = editor.value.trim();
+        try { correctUserMessage(message, revised); }
+        catch (error) { status.textContent = error.message; editor.focus(); return; }
+        refreshThread();
+        status.textContent = 'Corrected in the local transcript. Earlier SpicyChat deliveries were not changed.';
+      });
+      editor.focus();
+      return;
+    }
     const button = event.target.closest('[data-copy-reply], [data-copy-through]');
     if (!button) return;
     if (button.dataset.copyReply !== undefined) {
@@ -453,9 +532,116 @@ export async function mountArcSweepWritingSurface(root) {
     globalThis.setTimeout?.(() => { if (root.dataset.materialState === mode) root.dataset.materialState = 'rest'; }, 760);
   }
 
+  async function passJointTurn(text) {
+    // Only the Writing Room may open this exact pair. All source/transcript
+    // history stays bounded to the selected world.
+    const worldId = cp('world').value.trim();
+    if (worldId !== 'wayglass:writing-room') {
+      status.textContent = 'The Bluebird/Vethrlauf tunnel opens only in the Wayglass Writing Room.';
+      return false;
+    }
+    if (!tunnelConsent.checked) {
+      status.textContent = 'Approve the two SpicyChat transfers before opening this joint tunnel.';
+      tunnelConsent.focus();
+      return false;
+    }
+    try { resolveJointRoutes(routes); }
+    catch (error) { status.textContent = error.message; return false; }
+
+    const state = interaction.snapshot();
+    const history = attributedTunnelHistory(messages, worldId);
+    const controller = new AbortController();
+    tunnelAbort = controller;
+    tunnelStopped = false;
+    busy = true;
+    send.disabled = true;
+    input.disabled = true;
+    worldSelect.disabled = true;
+    tunnelConsent.disabled = true;
+    tunnelStop.disabled = false;
+    tunnelState.textContent = 'Joint tunnel open · Bluebird + Vethrlauf · up to 4 replies.';
+    messages.push({ role: 'user', world_id: worldId, channel: state.channel, content: text });
+    input.value = '';
+    refreshThread();
+    refreshState();
+
+    let completed = 0;
+    try {
+      const outcome = await runJointTunnel({
+        opening: text, routes, history, isStopped: () => tunnelStopped,
+        send: async ({ route, participant, input: addressedInput, history: peerHistory, relaySourceId, jointTunnel }) => {
+          if (tunnelStopped) throw new Error('Feather Stop');
+          interaction.setTurnOwner(route.label || participant);
+          wakeMaterial(0.88, 'handoff');
+          refreshState();
+          recordWayglassRouteObservation({status: 'started', routeId: route.route_id});
+          const response = await invokeWayglassRoute({
+            routeId: route.route_id,
+            externalProviderConsent: true,
+            jointTunnel, relaySourceId,
+            worldId, participantId: participant,
+            input: addressedInput, history: peerHistory,
+            interaction: state, sessionId: session,
+            signal: controller.signal,
+          });
+          recordWayglassRouteObservation({
+            status: 'completed', routeId: route.route_id,
+            provider: response.provider, model: response.model, receipt: response.receipt,
+          });
+          return response;
+        },
+        onReply: record => {
+          completed += 1;
+          messages.push({
+            role: 'assistant', world_id: worldId, channel: state.channel,
+            route_label: record.participant === 'bluebird' ? 'Bluebird · SpicyChat' : 'Vethrlauf · SpicyChat',
+            content: record.content, tunnel_id: session, route_id: record.route_id,
+            relay_from: record.relay_from, relay_hop: record.hop,
+          });
+          lastReceipt = record.receipt;
+          tunnelState.textContent = 'Joint tunnel · ' + completed + '/4 replies · Rowan’s account · from ' + record.relay_from + ' → ' + record.participant;
+          receipt.textContent = lastReceipt
+            ? 'Joint tunnel · Rowan’s account · from ' + record.relay_from + ' → ' + record.participant + ' · ' + (lastReceipt.observation_id || 'provider receipt')
+              + ' · not canon'
+            : 'Joint tunnel · ' + record.participant + ' · no provider receipt';
+          refreshThread();
+        },
+      });
+      tunnelState.textContent = outcome.stopped
+        ? 'Feather · tunnel stopped.'
+        : 'Joint tunnel settled · ' + outcome.records.length + ' attributed replies. Reopen with the joint tag.';
+    } catch (error) {
+      if (tunnelStopped || error?.name === 'AbortError') {
+        tunnelState.textContent = 'Feather · stopped. An in-flight provider request may already have been received.';
+      } else {
+        recordWayglassRouteObservation({status: 'failed', routeId: 'wayglass:joint-tunnel'});
+        messages.push({
+          role: 'assistant', world_id: worldId, channel: 'OOC',
+          route_label: 'Wayglass', content: '[Route error] Joint tunnel stopped: ' + error.message,
+        });
+        tunnelState.textContent = 'Joint tunnel stopped · ' + error.message;
+      }
+    } finally {
+      tunnelAbort = null;
+      interaction.setTurnOwner('Rowan');
+      busy = false;
+      send.disabled = false;
+      input.disabled = false;
+      worldSelect.disabled = false;
+      tunnelConsent.disabled = false;
+      tunnelConsent.checked = false; // each opening requires owner action
+      tunnelStop.disabled = true;
+      refreshState();
+      refreshThread();
+      input.focus();
+    }
+    return completed > 0;
+  }
+
   async function passTurn({ emergenceQuestionId = null } = {}) {
     const text = input.value.trim();
     if (!text || busy) return;
+    if (parseJointTag(text)) return passJointTurn(text);
     if (!selectedRoute) { status.textContent = 'No configured route available. Reload the route catalogue.'; return; }
     if ((selectedRoute.startsWith('stepfun:') || selectedRoute === 'flame:griff:spicychat') && !externalConsent.checked) {
       status.textContent = 'Confirm this external provider transfer before passing the turn.';
@@ -470,7 +656,12 @@ export async function mountArcSweepWritingSurface(root) {
     const current = interaction.snapshot();
     const activeWorldId = cp('world').value.trim();
     const history = messages.filter(message => message.world_id === activeWorldId && ['user', 'assistant'].includes(message.role) && !message.content.startsWith('[Route error]'))
-      .slice(-12).map(message => ({ role: message.role, content: message.content }));
+      .slice(-12).map(message => ({
+        role: message.role,
+        content: message.edits?.length
+          ? '[Locally corrected transcript; previous provider delivery remains unchanged] ' + message.content
+          : message.content,
+      }));
     messages.push({ role: 'user', content: text, channel: current.channel, world_id: activeWorldId, emergence_question_id: emergenceQuestionId });
     input.value = '';
     refreshThread();

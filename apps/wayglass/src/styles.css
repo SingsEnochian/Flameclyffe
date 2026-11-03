@@ -1033,3 +1033,31 @@ select option, select optgroup { background-color: #081826; color: #eaf8ff; }
 .wg-emergence-invitation p { flex-basis: 100%; margin: 0; line-height: 1.55; }
 .wg-emergence-invitation #wg-emergence-progress { flex: 1 1 160px; }
 .wg-emergence-invitation button:disabled { opacity: .55; cursor: not-allowed; }
+
+
+/* Local proofreading and reversible transcript corrections. */
+.wg-spellcheck-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  align-items: center;
+  padding: 8px 4px 2px;
+  font-size: .83rem;
+  color: var(--glass-muted);
+}
+.wg-spellcheck-toolbar label { display: inline-flex; gap: 8px; align-items: center; color: var(--glass-text); }
+.wg-spellcheck-toolbar input[type="checkbox"] { width: auto; min-width: 16px; accent-color: #77cbd2; }
+.wg-writing-room .turn-card textarea[data-message-editor] {
+  display: block;
+  width: 100%;
+  min-height: 7rem;
+  resize: vertical;
+  background: var(--glass-fill-deep);
+  line-height: 1.6;
+}
+.wg-edit-controls { display: flex; flex-wrap: wrap; gap: 8px; margin: 9px 0; }
+.wg-writing-room .turn-card details pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--glass-muted);
+}
