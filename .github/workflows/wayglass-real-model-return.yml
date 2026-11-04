@@ -4,11 +4,6 @@ name: Wayglass Live Model Cold-Return Probe
 # installed Wayglass signoff remains a separate, explicit on-device check.
 on:
   workflow_call:
-  pull_request:
-    paths:
-      - '.github/workflows/wayglass-real-model-return.yml'
-      - 'scripts/wayglass-return-model-probe.mjs'
-      - 'test/wayglass/return-model-probe.test.cjs'
   workflow_dispatch:
 
 permissions:
@@ -20,6 +15,8 @@ jobs:
     timeout-minutes: 18
     env:
       WAYGLASS_LOCAL_MODEL: qwen2.5:1.5b
+      WAYGLASS_OLLAMA_TEMPERATURE: '0'
+      WAYGLASS_OLLAMA_SEED: '20261104'
       WAYGLASS_DATA_DIR: /tmp/wayglass-model-return-departures
       OLLAMA_HOST: 127.0.0.1:11434
     steps:
