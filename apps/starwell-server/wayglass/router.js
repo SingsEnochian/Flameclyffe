@@ -12,6 +12,7 @@ const {
 const { bootWayglassKernel } = require('../wayglass-runtime/wayglass-kernel.cjs');
 const { enterWayglassWorld } = require('../wayglass-runtime/wayglass-world-entry.cjs');
 const { createWayglassDeparture } = require('../wayglass-runtime/wayglass-stop-receipt.cjs');
+const { evaluateReturnAttempt } = require('../wayglass-runtime/wayglass-return-trial.cjs');
 const { createDepartureStore } = require('../wayglass-runtime/wayglass-departure-store.cjs');
 const { createModelObservation } = require('../wayglass-runtime/wayglass-model-observation.cjs');
 const { createWayglassLibraryRouter } = require('./research-library');
@@ -457,6 +458,24 @@ async function humainCatalogueResponse(route, res, fetchImpl = globalThis.fetch)
   }
 }
 
+function verifyStoredReturn(departure) {
+  // Content-addressed custody is checked by departureStore.read. Replay the
+  // existing continuity verifier before the host admits a restored context.
+  const outcome = evaluateReturnAttempt({
+    attempt_id: 'wayglass-host-return-' + randomUUID(),
+    stop_receipt: departure?.stop_receipt,
+    continuation_packet: departure?.continuation_packet,
+  });
+  if (outcome.verdict !== 'accepted') {
+    const error = new Error('Stored Wayglass return lost or changed required context.');
+    error.status = 409;
+    error.code = 'WAYGLASS_RETURN_CONTEXT_MISMATCH';
+    error.blocking = outcome.blocking;
+    throw error;
+  }
+  return outcome;
+}
+
 function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThis.fetch, departureStore = createDepartureStore() } = {}) {
   const router = express.Router();
   router.use('/library', createWayglassLibraryRouter());
@@ -511,6 +530,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
 
     try {
       const stored = payload.storage_id ? departureStore.read(payload.storage_id, payload.world_id, payload.participant_id) : null;
+      if (stored) verifyStoredReturn(stored);
       if (stored && payload.continuation_packet && JSON.stringify(stored.continuation_packet) !== JSON.stringify(payload.continuation_packet)) {
         return res.status(409).json({ error: 'Continuation differs from stored departure evidence.' });
       }
@@ -700,7 +720,9 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       const resolver = inheritanceContext || req.app.locals.wayglassInheritanceContext;
       delete payload._storedCheckpoint;
       if (payload.checkpoint_storage_id) {
-        payload._storedCheckpoint = departureStore.read(payload.checkpoint_storage_id, payload.checkpoint_world_id, payload.checkpoint_participant_id).continuation_packet;
+        const stored = departureStore.read(payload.checkpoint_storage_id, payload.checkpoint_world_id, payload.checkpoint_participant_id);
+        payload._verifiedReturn = verifyStoredReturn(stored);
+        payload._storedCheckpoint = stored.continuation_packet;
       }
       // Griff's provider binding is not an inheritance-host dependency. A
       // signed, owner-approved chat turn must work before any optional bridge.
@@ -777,13 +799,19 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
           data_policy_verified_on: route.data_policy?.verified_on || null,
           wayglass_persisted: false,
           checkpoint_storage_id: payload.checkpoint_storage_id || null,
+          checkpoint_return_verified: payload._verifiedReturn?.verdict === 'accepted',
+          checkpoint_return_outcome_hash: payload._verifiedReturn?.outcome_hash || null,
           ...(compiled ? { inheritance_context: compiled.reference } : {}),
           thinking_exposed: Boolean(result.thinking),
           usage: result.usage,
         },
       });
     } catch (error) {
-      return res.status(error.status || 500).json({ error: error.message || 'Wayglass route failed.' });
+      return res.status(error.status || 500).json({
+        error: error.message || 'Wayglass route failed.',
+        ...(error.code ? { code: error.code } : {}),
+        ...(error.blocking ? { blocking: error.blocking } : {}),
+      });
     }
   });
 
@@ -792,3 +820,4 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
 
 module.exports = createWayglassRouter();
 module.exports.createWayglassRouter = createWayglassRouter;
+module.exports.verifyStoredReturn = verifyStoredReturn;
