@@ -1,0 +1,21 @@
+name: Wayglass MCP contract
+on:
+  pull_request:
+    paths:
+      - 'lib/wayglass-mcp-*.cjs'
+      - 'lib/wayglass-route-registry.cjs'
+      - 'test/wayglass-mcp-*.test.cjs'
+      - '.github/workflows/wayglass-mcp-contract.yml'
+  workflow_dispatch:
+jobs:
+  mcp-contract:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run MCP contract tests
+        run: node --test test/wayglass-mcp-*.test.cjs
