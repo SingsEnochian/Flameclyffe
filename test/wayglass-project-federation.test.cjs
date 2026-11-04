@@ -10,3 +10,12 @@ test('malformed project collections fail closed without throwing',()=>{
   assert.ok(inspectProjectFederation({schema:'wayglass.project-federation/v1',projects}).includes('projects'));
  }
 });
+
+test('rejects ambiguous, absolute and drive-qualified project roots',()=>{
+ const base={id:'sample',mode:'native',role:'test'};
+ for(const root of ['', ' ', '.', './apps/wayglass', 'apps//wayglass', 'apps/./wayglass', 'apps/../secrets', '/etc/passwd', 'C:/secrets', 'C:\\secrets', 'apps\\wayglass']){
+  const errors=inspectProjectFederation({schema:'wayglass.project-federation/v1',projects:[{...base,root}]});
+  assert.ok(errors.includes('unsafe root'),`expected unsafe root rejection for ${JSON.stringify(root)}`);
+ }
+ assert.deepEqual(inspectProjectFederation({schema:'wayglass.project-federation/v1',projects:[{...base,root:'apps/wayglass'}]}),[]);
+});
