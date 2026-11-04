@@ -1,4 +1,4 @@
-import {select, marker, receipt} from "./wayglass-circulation-policy.mjs";
+import {select, marker, receipt, circulationSnapshot} from "./wayglass-circulation-policy.mjs";
 const repo=process.env.GITHUB_REPOSITORY, token=process.env.GITHUB_TOKEN;
 if(!repo||!token)throw Error("GitHub repository and workflow token required");
 const api=async(path,options={})=>{
@@ -22,10 +22,14 @@ async function pages(path) {
 }
 const issues=await pages(root+"/issues?state=open");
 const receipts=new Set();
+const commentsByIssue=new Map();
 for(const issue of issues.filter(x=>!x.pull_request&&/wayglass|arcsweep|return engine/i.test(x.title+" "+(x.body||"")))){
  const comments=await pages(root+"/issues/"+issue.number+"/comments");
+ commentsByIssue.set(issue.number,comments);
  if(comments.some(c=>(c.body||"").includes(marker)))receipts.add(issue.number);
 }
+const states=circulationSnapshot(issues,commentsByIssue);
+console.log("Wayglass cellular circulation states: "+JSON.stringify(states));
 const chosen=select(issues,receipts);
 if(!chosen){console.log("No unreceipted eligible tasks; no mutation.");process.exit(0);}
 const body=receipt(chosen);
