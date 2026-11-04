@@ -143,3 +143,21 @@ test('Walter spatial/temporal coordinates cannot be falsified without inspection
   assert.ok(inspectFoldWitness(counterfeit).blocking.includes('spacetime-coordinate-mismatch'));
   assert.ok(inspectFoldWitness(counterfeit).blocking.includes('integrity-digest-mismatch'));
 });
+
+test('malformed sources and revocation lists reject without throwing or granting authority', () => {
+  for (const receipt of [
+    { ...WALTER, sources: [null, WALTER.sources[1]] },
+    { ...WALTER, sources: [WALTER.sources[0], null] },
+    { ...WALTER, revoked_refs: {} },
+    { ...WALTER, sources: [{}, WALTER.sources[1]] },
+  ]) {
+    const inspected = inspectFoldWitness(receipt);
+    assert.equal(inspected.status, 'rejected');
+    assert.equal(inspected.grants_authority, false);
+    assert.ok(inspected.blocking.length > 0);
+  }
+  const malformedOptions = inspectFoldWitness(WALTER, { revoked_refs: {} });
+  assert.equal(malformedOptions.status, 'rejected');
+  assert.ok(malformedOptions.blocking.includes('invalid-revocation-list'));
+  assert.equal(malformedOptions.grants_authority, false);
+});
