@@ -100,3 +100,33 @@ test('Nikola: changes to order alone do not invent a work-loss failure', () => {
   assert.equal(outcome.verdict, 'accepted');
   assert.equal(outcome.checks.active_work_preserved, true);
 });
+
+test('Nikola: a fresh Node process revalidates serialized work and refuses a compacted-away task', () => {
+  const { execFileSync } = require('node:child_process');
+  const { resolve } = require('node:path');
+  const root = resolve(__dirname, '../..');
+  const { stop_receipt, continuation_packet } = departure();
+  const evaluateCold = (packet, id) => {
+    const script = [
+      "const fs = require('node:fs');",
+      "const {evaluateReturnAttempt}=require('./lib/wayglass-return-trial.cjs');",
+      "const {stop_receipt,continuation_packet,attempt_id}=JSON.parse(fs.readFileSync(0,'utf8'));",
+      "const r=evaluateReturnAttempt({attempt_id,recorded_at:'2026-11-04T05:00:00.000Z',stop_receipt,continuation_packet});",
+      "process.stdout.write(JSON.stringify({verdict:r.verdict,checks:r.checks,blocking:r.blocking}));",
+    ].join('');
+    const bytes = execFileSync(process.execPath, ['-e', script], {
+      cwd: root,
+      input: JSON.stringify({ stop_receipt, continuation_packet: packet, attempt_id: id }),
+      encoding: 'utf8',
+      timeout: 10000,
+    });
+    return JSON.parse(bytes);
+  };
+  const clean = evaluateCold(continuation_packet, 'cold-clean');
+  assert.equal(clean.verdict, 'accepted');
+  assert.equal(clean.checks.active_work_preserved, true);
+  const lost = evaluateCold({ ...structuredClone(continuation_packet), active_work: [] }, 'cold-lost');
+  assert.equal(lost.verdict, 'rejected');
+  assert.equal(lost.checks.active_work_preserved, false);
+  assert.ok(lost.blocking.includes('active-work-mismatch'));
+});
