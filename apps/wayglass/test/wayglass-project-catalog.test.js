@@ -16,7 +16,9 @@ test('catalog fails closed on forged authority, mount and malformed payloads', (
     { ...valid, status: 'mounted' }, { ...valid, projects: null },
     { ...valid, projects: [{ ...valid.projects[0], mounted: true }] },
     { ...valid, projects: [valid.projects[0], valid.projects[0]] },
-    { ...valid, projects: [{ ...valid.projects[0], id: '<script>' }] }]) {
+    { ...valid, projects: [{ ...valid.projects[0], id: '<script>' }] },
+    { ...valid, projects: [{ ...valid.projects[0], role: '   ' }] },
+    { ...valid, projects: [{ ...valid.projects[0], mode: '' }] }]) {
     assert.throws(() => normalizeProjectCatalog(bad));
   }
 });
