@@ -9,7 +9,8 @@ export function normalizeProjectCatalog(payload) {
   return payload.projects.map((project) => {
     if (!project || typeof project.id !== 'string' || !/^[a-z0-9-]+$/.test(project.id) ||
         seen.has(project.id) || typeof project.role !== 'string' ||
-        typeof project.mode !== 'string' || project.mounted !== false) {
+        typeof project.mode !== 'string' || !project.role.trim() || !project.mode.trim() ||
+        project.mounted !== false) {
       throw new Error('Invalid project declaration');
     }
     seen.add(project.id);
