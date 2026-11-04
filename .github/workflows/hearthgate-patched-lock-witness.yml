@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   patched-dependency-audit:
@@ -34,20 +34,18 @@ jobs:
         working-directory: apps/starwell-server
         run: |
           node -e "const p=require('./package-lock.json'); for(const n of ['body-parser','multer','qs']) console.log(n,p.packages['node_modules/'+n]?.version)"
-      - name: Commit the audited lockfile on the same-repository review branch
-        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+      - name: Emit source-audited lockfile chunks for connected repository write
         shell: bash
         run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/starwell-server/package-lock.json
-          if git diff --cached --quiet; then
-            echo "Lockfile unchanged; no commit required."
-          else
-            git commit -m "fix(hearthgate): lock audited patched dependency tree"
-            git push origin "HEAD:refs/heads/${{ github.event.pull_request.head.ref }}"
-          fi
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const lock = fs.readFileSync('apps/starwell-server/package-lock.json', 'utf8');
+          console.log('WAYGLASS_LOCK_BEGIN');
+          for (let i = 0; i < lock.length; i += 200) {
+            console.log('WAYGLASS_LOCK_CHUNK:' + JSON.stringify(lock.slice(i, i + 200)));
+          }
+          console.log('WAYGLASS_LOCK_END:' + lock.length);
+          NODE
       - name: Preserve generated lockfile for source-reviewed commit
         uses: actions/upload-artifact@v4
         with:
