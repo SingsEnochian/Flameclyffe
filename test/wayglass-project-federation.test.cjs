@@ -19,3 +19,28 @@ test('rejects ambiguous, absolute and drive-qualified project roots',()=>{
  }
  assert.deepEqual(inspectProjectFederation({schema:'wayglass.project-federation/v1',projects:[{...base,root:'apps/wayglass'}]}),[]);
 });
+
+test('public federation serialization never exposes manifest paths or authority capabilities',()=>{
+ const catalog=publicProjectFederation();
+ const encoded=JSON.stringify(catalog);
+ assert.deepEqual(Object.keys(catalog).sort(),['authority_grant','projects','schema','status']);
+ assert.equal(catalog.status,'declared-not-runtime-mounted');
+ assert.equal(catalog.authority_grant,false);
+ for(const project of catalog.projects){
+  assert.deepEqual(Object.keys(project).sort(),['id','mode','mounted','role']);
+  assert.equal(project.mounted,false);
+ }
+ for(const forbidden of ['"root"','"credentials"','"token"','"permissions"','"access"','"mayExecute"']){
+  assert.equal(encoded.includes(forbidden),false,`unexpected privileged field: ${forbidden}`);
+ }
+});
+
+test('malformed federation entries and duplicate identities reject without throwing',()=>{
+ const valid={id:'sample',root:'apps/wayglass',mode:'native',role:'test'};
+ for(const entry of [null,false,42,'sample',{}, {...valid,id:'Bad ID'}, {...valid,mode:''}, {...valid,role:'  '}]){
+  const manifest={schema:'wayglass.project-federation/v1',projects:[entry]};
+  assert.doesNotThrow(()=>inspectProjectFederation(manifest));
+  assert.notDeepEqual(inspectProjectFederation(manifest),[],`accepted malformed entry: ${JSON.stringify(entry)}`);
+ }
+ assert.ok(inspectProjectFederation({schema:'wayglass.project-federation/v1',projects:[valid,{...valid}]}).includes('duplicate id'));
+});
