@@ -40,6 +40,7 @@ test('Real provider result must make a source-linked correct selection; not mere
   const f = fixtureFromRoadmap(fixture());
   const manifest = { tasks: f.tasks };
   const accepted = gradeChoice({
+    hostRestartVerified: true,
     manifest,
     output: JSON.stringify({ next_task_id: 'INTEGRATE-525', source_ref: 'WAYGLASS_CURRENT.md', reason: 'The prior verification is complete and the pending integration has no unresolved prerequisites.' }),
     receipt: goodReceipt,
@@ -48,6 +49,9 @@ test('Real provider result must make a source-linked correct selection; not mere
   assert.equal(accepted.verdict, 'pass');
   assert.equal(accepted.checks.task_is_first_unblocked, true);
   assert.equal(accepted.checks.host_checkpoint_verified, true);
+  const noColdReturn = gradeChoice({ manifest, output: accepted.raw_output, receipt: goodReceipt });
+  assert.equal(noColdReturn.verdict, 'fail');
+  assert.equal(noColdReturn.checks.measured_cold_host_restart, false);
 
   for (const output of [
     JSON.stringify({ next_task_id: 'HOST-RETURN-001', source_ref: 'WAYGLASS_CURRENT.md', reason: 'Jumped ahead.' }),
@@ -55,10 +59,10 @@ test('Real provider result must make a source-linked correct selection; not mere
     'The correct task is INTEGRATE-525.',
     JSON.stringify({ tasks: manifest.tasks }),
   ]) {
-    assert.equal(gradeChoice({ manifest, output, receipt: goodReceipt }).verdict, 'fail');
+    assert.equal(gradeChoice({ hostRestartVerified: true, manifest, output, receipt: goodReceipt }).verdict, 'fail');
   }
-  assert.equal(gradeChoice({ manifest, output: accepted.raw_output, receipt: { ...goodReceipt, checkpoint_return_verified: false } }).verdict, 'fail');
-  assert.equal(gradeChoice({ manifest, output: accepted.raw_output, receipt: { ...goodReceipt, provider: 'fake' } }).verdict, 'fail');
+  assert.equal(gradeChoice({ hostRestartVerified: true, manifest, output: accepted.raw_output, receipt: { ...goodReceipt, checkpoint_return_verified: false } }).verdict, 'fail');
+  assert.equal(gradeChoice({ hostRestartVerified: true, manifest, output: accepted.raw_output, receipt: { ...goodReceipt, provider: 'fake' } }).verdict, 'fail');
 });
 
 test('Changing the roadmap preconditions changes expected choice rather than hardcoding the answer', async () => {
@@ -67,7 +71,7 @@ test('Changing the roadmap preconditions changes expected choice rather than har
   const altered = structuredClone(f.tasks);
   altered.find(t => t.task_id === 'INTEGRATE-525').state = 'completed';
   assert.equal(firstReadyTask(altered).task_id, 'HOST-RETURN-001');
-  const result = gradeChoice({ manifest: { tasks: altered }, receipt: goodReceipt, output: JSON.stringify({
+  const result = gradeChoice({ hostRestartVerified: true, manifest: { tasks: altered }, receipt: goodReceipt, output: JSON.stringify({
     next_task_id: 'HOST-RETURN-001', source_ref: 'WAYGLASS_CURRENT.md', reason: 'Integration has been completed.',
   }) });
   assert.equal(result.verdict, 'pass');
