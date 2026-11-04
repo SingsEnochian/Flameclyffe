@@ -21,6 +21,7 @@ export async function mountNikolaResearchSurface(root) {
         <h2>N-006 · Compression → Release → Next Compression 🌀</h2>
         <p>Pure, deterministic calculations on public synthetic inputs. Frequency alone leaves infinitely many compatible combinations. Admit one independent measurement and inspect the renewed inference and replay receipt.</p>
         <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+          <button type="button" class="glass-chip" id="nikola-first-witness">Run one verified Math Spine receipt</button>
           <button type="button" class="glass-chip" id="nikola-spiral-start">Compress synthetic frequency</button>
           <button type="button" class="glass-chip" id="nikola-spiral-advance" disabled>Release independent measurement</button>
           <button type="button" class="glass-chip" id="nikola-spiral-echo" disabled>Test duplicate-origin echo</button>
@@ -28,6 +29,8 @@ export async function mountNikolaResearchSurface(root) {
         </div>
         <p role="status" aria-live="polite" id="nikola-spiral-status">No cycle recorded. No inference sent to a model.</p>
         <pre id="nikola-spiral-readout" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:23rem;overflow:auto">Compression awaits an explicit click.</pre>
+        <p role="status" aria-live="polite" id="nikola-first-witness-status">One-receipt tool witness not invoked.</p>
+        <pre id="nikola-first-witness-result" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:18rem;overflow:auto">No Math Spine receipt yet.</pre>
         <p class="tiny">Distinct from PREMAQC computational probabilities: this oscillator is a dimensional physics example. Replayed hashes validate calculation integrity, not sensor authenticity, consciousness, canon or physical Fold.</p>
       </section>
       <section class="glass-panel" aria-label="Nikola 27-turn compression release challenge" style="padding:1rem;display:grid;gap:.7rem">
@@ -220,6 +223,32 @@ export async function mountNikolaResearchSurface(root) {
   let trialController = null;
   let trialRunning = false;
   let disposed = false;
+  // N-011: one explicit owner click executes the existing canonical Math Spine.
+  // The local adapter verifies replay fingerprints before showing a receipt.
+  const witnessButton = el('nikola-first-witness');
+  async function runFirstWitness() {
+    if (disposed || witnessButton.disabled) return;
+    witnessButton.disabled = true;
+    set('nikola-first-witness-status', 'Executing canonical Math Spine instrument...');
+    set('nikola-first-witness-result', 'Awaiting verified replay.');
+    try {
+      const { runNikolaStationWitness } = await import('../nikola-station-witness.js');
+      if (disposed) return;
+      const outcome = await runNikolaStationWitness();
+      if (disposed) return;
+      set('nikola-first-witness-status',
+        'One canonical tool result and one admitted receipt. Deterministic replay matched. Synthetic input only.');
+      set('nikola-first-witness-result', JSON.stringify(outcome, null, 2));
+    } catch (error) {
+      if (!disposed) {
+        set('nikola-first-witness-status', 'Held: ' + error.message);
+        set('nikola-first-witness-result', 'No verified receipt.');
+      }
+    } finally {
+      if (!disposed) witnessButton.disabled = false;
+    }
+  }
+  witnessButton.addEventListener('click', runFirstWitness);
   const trialStatus = el('nikola-trial-status');
   const trialRun = el('nikola-trial-run');
   const trialStop = el('nikola-trial-stop');
@@ -282,5 +311,5 @@ export async function mountNikolaResearchSurface(root) {
   ];
   actions.forEach(([id, event, fn]) => el(id).addEventListener(event, fn));
   render();
-  return () => { disposeQuantum(); disposed = true; ++run27Version; run27Controller?.abort(); events27.forEach(([name,handler])=>r27(name)?.removeEventListener('click',handler)); spiralActions.forEach(([id,handler])=>n6(id)?.removeEventListener('click',handler)); trialController?.abort(); trialRun.removeEventListener('click', runLocalTrial); trialStop.removeEventListener('click', stopTrial); actions.forEach(([id, event, fn]) => el(id)?.removeEventListener(event, fn)); root.replaceChildren(); };
+  return () => { disposeQuantum(); disposed = true; ++run27Version; run27Controller?.abort(); events27.forEach(([name,handler])=>r27(name)?.removeEventListener('click',handler)); spiralActions.forEach(([id,handler])=>n6(id)?.removeEventListener('click',handler)); trialController?.abort(); trialRun.removeEventListener('click', runLocalTrial); trialStop.removeEventListener('click', stopTrial); witnessButton.removeEventListener('click', runFirstWitness); actions.forEach(([id, event, fn]) => el(id)?.removeEventListener(event, fn)); root.replaceChildren(); };
 }
