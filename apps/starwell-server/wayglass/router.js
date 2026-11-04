@@ -20,7 +20,7 @@ const { createObserverSelfDevelopmentRouter } = require('./observer-self-develop
 
 const { resolveCharacterSeat, publicCharacterSeats, EMERGENCE_QUESTION_IDS } = require('./character-seats.cjs');
 
-const MAX_HISTORY = 16;
+const HOST_INSTANCE_ID = randomUUID(); // ephemeral process witness, never identity or authority\nconst MAX_HISTORY = 16;
 const MAX_TEXT = 12000;
 
 function cleanText(value, max = MAX_TEXT) {
@@ -508,7 +508,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     const ar = req.query.ar === '1';
     const touch = req.query.touch === '1';
     const keyboard = req.query.keyboard !== '0';
-    return res.json(bootWayglassKernel({
+    return res.json({ ...bootWayglassKernel({
       preferred_route: cleanText(req.query.route, 120),
       world_id: cleanText(req.query.world, 180),
       continuity_ref: cleanText(req.query.continuity, 240),
@@ -521,7 +521,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
         ar,
         haptics: req.query.haptics === '1',
       },
-    }));
+    }), host_instance_id: HOST_INSTANCE_ID });
   });
 
   router.post('/kernel/enter', (req, res) => {
