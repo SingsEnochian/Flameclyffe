@@ -31,6 +31,10 @@ test('Nikola reads actual registered roadmap and identifies first unblocked task
   const f = fixtureFromRoadmap(fixture());
   assert.equal(f.roadmap.canonical_branch, 'wayglass/current');
   assert.equal(f.roadmap.integration_register.source, 'docs/wayglass/current.json');
+  assert.ok(f.roadmap.section_text.includes('## Updating the current version'));
+  assert.ok(fixture().current.text.includes(f.roadmap.section_text));
+  assert.ok(fixture().nikola.text.includes(f.roadmap.nikola_driver.section_text));
+  assert.equal(f.roadmap.integration_register.sha256, fixture().register.sha256);
   assert.equal(firstReadyTask(f.tasks).task_id, 'INTEGRATE-525');
   assert.ok(f.tasks.find(t => t.task_id === 'HOST-RETURN-001').requires.includes('INTEGRATE-525'));
 });
