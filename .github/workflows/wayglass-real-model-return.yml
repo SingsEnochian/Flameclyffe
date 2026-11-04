@@ -3,6 +3,7 @@ name: Wayglass Live Model Cold-Return Probe
 # One real local-model inference on an isolated CI runner. The Windows
 # installed Wayglass signoff remains a separate, explicit on-device check.
 on:
+  workflow_call:
   pull_request:
     paths:
       - '.github/workflows/wayglass-real-model-return.yml'
