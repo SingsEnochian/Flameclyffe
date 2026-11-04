@@ -20,7 +20,8 @@ const { createObserverSelfDevelopmentRouter } = require('./observer-self-develop
 
 const { resolveCharacterSeat, publicCharacterSeats, EMERGENCE_QUESTION_IDS } = require('./character-seats.cjs');
 
-const HOST_INSTANCE_ID = randomUUID(); // ephemeral process witness, never identity or authority\nconst MAX_HISTORY = 16;
+const HOST_INSTANCE_ID = randomUUID(); // ephemeral process witness, never identity or authority
+const MAX_HISTORY = 16;
 const MAX_TEXT = 12000;
 
 function cleanText(value, max = MAX_TEXT) {
