@@ -9,7 +9,7 @@ async function withServer(fn) {
   const handler = makeMcpHttpHandler({
     resourceUrl: 'https://wayglass.example/mcp',
     verifyBearer: async token => token === 'good'
-      ? { active: true, scopes: ['wayglass:constellation'] } : null,
+      ? { active: true, ownerAuthorized: true, scopes: ['wayglass:constellation'] } : null,
     listRoutes: () => [{ route_id: 'test:route' }],
   });
   const server = createServer((req, res) => { handler(req, res).catch(() => { res.writeHead(500); res.end(); }); });
@@ -41,3 +41,23 @@ test('blocks foreign browser origins', async () => withServer(async url => {
   const response = await fetch(url, { method: 'POST', headers: { Origin: 'https://attacker.example', Authorization: 'Bearer good' } });
   assert.equal(response.status, 403);
 }));
+
+test('a scoped active token without explicit owner grant cannot access MCP tools', async () => {
+  const handler = makeMcpHttpHandler({
+    resourceUrl: 'https://wayglass.example/mcp',
+    verifyBearer: async () => ({ active: true, scopes: ['wayglass:constellation'] }),
+    listRoutes: () => { throw new Error('must not reach route service'); },
+  });
+  const server = createServer((req, res) => { handler(req, res).catch(() => { res.writeHead(500); res.end(); }); });
+  server.listen(0, '127.0.0.1');
+  await once(server, 'listening');
+  try {
+    const response = await fetch('http://127.0.0.1:' + server.address().port + '/mcp', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer scoped', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list' }),
+    });
+    assert.equal(response.status, 403);
+    assert.equal(response.headers.get('cache-control'), 'no-store');
+  } finally { await new Promise(resolve => server.close(resolve)); }
+});
