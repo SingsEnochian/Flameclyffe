@@ -95,3 +95,11 @@ jobs:
       - run: npm run wayglass:stage:vercel
       - name: Verify preview browser bundle
         run: test -f dist/starwell/wayglass/index.html
+
+  # Scoped only to this scientific PR. Ordinary Wayglass PRs do not download
+  # models or spend extra CI minutes. Runs real inference, never a canned reply.
+  real_model_return:
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'rarity/nikola-harness-lens-return-context-20261104' }}
+    uses: ./.github/workflows/wayglass-real-model-return.yml
+    permissions:
+      contents: read
