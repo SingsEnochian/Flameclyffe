@@ -68,6 +68,9 @@ function publishLegacyObservatoryPages() {
       await mkdir(resolve(OUT_DIR, 'deep-observer'), { recursive: true });
       await cp(resolve(REPO_ROOT, 'starwell', 'deep-observer'), resolve(OUT_DIR, 'deep-observer'), { recursive: true, force: true });
 
+      // Publish the legacy Writing Room and its opt-in Dabble export bridge.
+      await cp(resolve(REPO_ROOT, 'starwell', 'writing-room'), resolve(OUT_DIR, 'writing-room'), { recursive: true, force: true });
+
       await mkdir(resolve(OUT_DIR, 'hearthgate'), { recursive: true });
       await cp(resolve(REPO_ROOT, 'starwell', 'hearthgate'), resolve(OUT_DIR, 'hearthgate'), { recursive: true, force: true });
 
@@ -76,6 +79,8 @@ function publishLegacyObservatoryPages() {
         resolve(OUT_DIR, 'deep-observer/index.html'),
         resolve(OUT_DIR, 'starwell/deep-observer/index.html'),
         resolve(OUT_DIR, 'hearthgate/index.html'),
+        resolve(OUT_DIR, 'writing-room/index.html'),
+        resolve(OUT_DIR, 'writing-room/dabble-bridge.html'),
       ];
       await Promise.all(staticHtmlTargets.map(vestStaticHtml));
     },
