@@ -1,0 +1,90 @@
+name: Wayglass Live Model Cold-Return Probe
+
+# One real local-model inference on an isolated CI runner. The Windows
+# installed Wayglass signoff remains a separate, explicit on-device check.
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/wayglass-real-model-return.yml'
+      - 'scripts/wayglass-return-model-probe.mjs'
+      - 'test/wayglass/return-model-probe.test.cjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-model-return:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    env:
+      WAYGLASS_LOCAL_MODEL: qwen2.5:1.5b
+      WAYGLASS_DATA_DIR: ${{ runner.temp }}/wayglass-model-return-departures
+      OLLAMA_HOST: 127.0.0.1:11434
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install Wayglass and Hearthgate dependencies
+        run: |
+          npm ci --no-audit --no-fund
+          npm ci --prefix apps/starwell-server --omit=dev --ignore-scripts --no-audit --no-fund
+      - name: Stage the real Wayglass host runtime
+        run: |
+          npm run wayglass:build
+          npm run wayglass:stage:server
+      - name: Install local Ollama inference runtime (no external provider keys)
+        run: curl -fsSL https://ollama.com/install.sh | sh
+      - name: Exercise a real model over the staged host, stop, restart and return
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/wayglass-real-model" "$WAYGLASS_DATA_DIR"
+          ollama serve > "$RUNNER_TEMP/wayglass-real-model/ollama.log" 2>&1 &
+          ollama_pid=$!
+          host_pid=''
+          trap '[[ -z "$host_pid" ]] || kill "$host_pid" 2>/dev/null || true; kill "$ollama_pid" 2>/dev/null || true' EXIT
+
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:11434/api/tags >/dev/null; then break; fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:11434/api/tags >/dev/null
+          ollama pull "$WAYGLASS_LOCAL_MODEL"
+
+          start_host() {
+            (
+              cd apps/starwell-server
+              node -e 'const express=require("express"); const {createWayglassRouter}=require("./wayglass/router"); const app=express(); app.use(express.json()); app.use("/api/v1/wayglass",createWayglassRouter()); app.listen(3000,"127.0.0.1",()=>console.log("WAYGLASS_HOST_READY"));'
+            ) > "$RUNNER_TEMP/wayglass-real-model/host.log" 2>&1 &
+            host_pid=$!
+            for i in $(seq 1 40); do
+              if curl -fsS http://127.0.0.1:3000/api/v1/wayglass/routes >/dev/null; then return; fi
+              sleep 1
+            done
+            cat "$RUNNER_TEMP/wayglass-real-model/host.log"
+            return 1
+          }
+
+          start_host
+          node scripts/wayglass-return-model-probe.mjs prepare \
+            --manifest="$RUNNER_TEMP/wayglass-real-model/departure-manifest.json"
+          kill "$host_pid"
+          wait "$host_pid" || true
+          host_pid=''
+          sleep 1
+          start_host
+          node scripts/wayglass-return-model-probe.mjs resume --host-restarted \
+            --manifest="$RUNNER_TEMP/wayglass-real-model/departure-manifest.json" \
+            --out="$RUNNER_TEMP/wayglass-real-model/model-decision-receipt.json"
+      - name: Preserve actual model output and independent grader receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayglass-real-model-return-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/wayglass-real-model/departure-manifest.json
+            ${{ runner.temp }}/wayglass-real-model/model-decision-receipt.json
+          if-no-files-found: warn
+          retention-days: 30
