@@ -107,6 +107,15 @@ function outputText(data) {
 
 async function callOllama(route, payload, compiled = null, fetchImpl = globalThis.fetch) {
   const input = cleanText(payload.input);
+  // Optional HOST configuration for controlled experiments; absent by default.
+  // The owner controls temperature and seed, not model-generated text.
+  const temperatureText = process.env.WAYGLASS_OLLAMA_TEMPERATURE;
+  const temperatureValue = temperatureText == null || temperatureText.trim() === '' ? null : Number(temperatureText);
+  const localTemperature = Number.isFinite(temperatureValue) && temperatureValue >= 0 && temperatureValue <= 2
+    ? temperatureValue : null;
+  const seedValue = Number(process.env.WAYGLASS_OLLAMA_SEED);
+  const localSeed = Number.isSafeInteger(seedValue) && seedValue >= 0 && process.env.WAYGLASS_OLLAMA_SEED
+    ? seedValue : null;
   const messages = [
     { role: 'system', content: buildInstructions(payload.interaction, compiled, resolveCharacterSeat(payload.character_id)) },
     ...cleanHistory(payload.history),
@@ -125,6 +134,8 @@ async function callOllama(route, payload, compiled = null, fetchImpl = globalThi
       stream: false,
       options: {
         num_predict: Math.max(64, Math.min(4000, Number(payload.max_output_tokens) || 1400)),
+        ...(localTemperature !== null ? { temperature: localTemperature } : {}),
+        ...(localSeed !== null ? { seed: localSeed } : {}),
       },
     }),
     signal: AbortSignal.timeout(120000),
