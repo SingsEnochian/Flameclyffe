@@ -4,6 +4,10 @@
 **Scope:** Flameclyffe / ArcSweep / Wayglass, including House Runtime, React-ion, Observer, persistence and proposed learning loops.
 **Existing authorities:** `docs/architecture.md`, `docs/security-rls-plan.md`, continuity canon and the House Runtime Broker. SHIELD-01 does not replace them.
 
+## Constitutional separation
+
+Wayglass is an independent, owner-governed research system. SHIELD-01 is an infrastructure and authorization integrity contract, **not** a content-moderation policy, ideology filter, external AI-provider constitution, or set of mandated model responses. No OpenAI behavioral policy is incorporated into Wayglass by this document. Provider-specific terms are tracked only as external obligations for the corresponding optional route, never inherited by local models, other providers, or Wayglass identity. Changes to Wayglass's governing principles require Rowan's explicit approval. Technical controls should protect credentials, privacy, authenticated actions, provenance, and recoverability without dictating research conclusions, creative expression, spiritual interpretation, or model personality.
+
 ## Invariants
 
 1. **Default deny.** Unknown capabilities and missing authorization are non-executable. A prompt, retrieved document, model output, or observation cannot grant a permission.
