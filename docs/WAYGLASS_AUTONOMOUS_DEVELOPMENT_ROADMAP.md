@@ -78,3 +78,12 @@ Spend money or start subscriptions; expose private data, keys or personal conver
 7. Produce a batched decision packet for merge, private launch and native model promotion, only after evidence is ready.
 
 **Cadence:** progress follows actual verified work, not user check-ins. No automatic background work is implied by this file alone; recurring execution requires a configured automation or connected agent.
+
+## N-011 verified implementation receipt · 2026-11-04
+
+- **Existing ancestry:** Bluebird/Vethrlauf attributed relay PR #515 (`rarity/wayglass-joint-tunnel-20261101`). Nikola driver contract: `profiles/crow-trainer/NIKOLA_DRIVER.md`.
+- **Created:** draft PR #523 (`rarity/nikola-hf-narrative-action-gate-n011-20261104`), commit `51a193a7885648fd73aa93ca02fad43c7baf6e6b`. Two additive files: `apps/wayglass/src/narrative-action-candidates.js` and `apps/wayglass/test/wayglass-narrative-action-candidates.test.js`. No modifications to PR #515 relay source.
+- **What works:** structured narrative-action proposals retain separately confirmed transport provenance; HF-originating model suggestions are treated as untrusted; strict Math Spine dataset/action candidate allowlist; stable candidate IDs and in-memory deduplication; unknown/unsafe/unauthenticated/stopped requests fail closed. Existing joint-tunnel `onReply` callback is exercised synthetically by integration test.
+- **Test evidence:** local isolated gate tests 6/6 pass. GitHub Wayglass Check workflow run 41780385094, job 126410328599: Wayglass tests 205/205, Return Trial tests 75/75, broader ArcSweep/instrument tests 1630/1630. Logs explicitly show HF provenance test and Bluebird/Vethrlauf relay integration test passed. Build/stage steps passed. This is synthetic CI, not live provider or host evidence.
+- **Hugging Face account:** `singsenochian` connected; historic Jobs include completed Crow Writer v0.4 bounded training pilot and private adapter destination, but published model weights were not verified. Later two-day Wayglass pilot failed with Triton missing C compiler (no active training claimed). Jobs are metered; no compute launched, no spend.
+- **NEXT (not done):** select authorized host Math Spine action route, validate capabilities server side; persist idempotent execution receipt across restart; render observed result in Living Observer; run a genuine provider-backed, live host, cold-return crossing after authorized credentials/environment are confirmed. Do not confuse the proposal gate with executed narrative code or merge/deploy PR #523 without integration review.
