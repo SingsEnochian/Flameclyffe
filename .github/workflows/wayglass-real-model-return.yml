@@ -20,7 +20,7 @@ jobs:
     timeout-minutes: 18
     env:
       WAYGLASS_LOCAL_MODEL: qwen2.5:1.5b
-      WAYGLASS_DATA_DIR: ${{ runner.temp }}/wayglass-model-return-departures
+      WAYGLASS_DATA_DIR: /tmp/wayglass-model-return-departures
       OLLAMA_HOST: 127.0.0.1:11434
     steps:
       - uses: actions/checkout@v4
