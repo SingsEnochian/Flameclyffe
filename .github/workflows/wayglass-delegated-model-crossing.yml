@@ -1,0 +1,25 @@
+name: Wayglass Delegated Model Crossing
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+jobs:
+  model-proposal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+      - name: Verify coordinator tests
+        run: node --test test/wayglass-autonomous-circulation.test.mjs
+      - name: Request attributable research proposal
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WAYGLASS_MODEL_ENDPOINT: ${{ vars.WAYGLASS_MODEL_ENDPOINT }}
+          WAYGLASS_MODEL_ID: ${{ vars.WAYGLASS_MODEL_ID }}
+          WAYGLASS_MODEL_API_KEY: ${{ secrets.WAYGLASS_MODEL_API_KEY }}
+          WAYGLASS_APPLY: 'true'
+        run: node scripts/wayglass-model-worker.mjs
