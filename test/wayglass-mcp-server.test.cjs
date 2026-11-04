@@ -41,5 +41,5 @@ test('server refuses to start without real verifier dependency', () => {
   assert.throws(() => createWayglassMcpServer({
     resourceUrl: 'https://wayglass.example/mcp',
     authorizationServerUrl: 'https://auth.wayglass.example',
-  }), /verifier required/i);
+  }), /verified OAuth bearer adapter required/i);
 });
