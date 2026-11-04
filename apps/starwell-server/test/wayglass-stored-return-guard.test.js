@@ -105,8 +105,9 @@ test('Nikola: content-addressed but semantically corrupted work is blocked befor
   assert.equal(result.code, 'WAYGLASS_RETURN_CONTEXT_MISMATCH');
   assert.ok(result.blocking.includes('active-work-mismatch'));
   assert.equal(calls.length, 0);
-  const direct = assert.throws(() => verifyStoredReturn(tampered));
-  assert.equal(direct?.status, 409);
+  assert.throws(() => verifyStoredReturn(tampered), {
+    status: 409, code: 'WAYGLASS_RETURN_CONTEXT_MISMATCH',
+  });
 });
 
 test('Nikola: wrong participant binding is rejected before provider call', async t => {
