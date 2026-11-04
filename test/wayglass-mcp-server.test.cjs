@@ -9,7 +9,7 @@ test('composed server serves discovery, health, protected MCP and rejects unknow
     resourceUrl: 'https://wayglass.example/mcp',
     authorizationServerUrl: 'https://auth.wayglass.example',
     verifyBearer: async token => token === 'valid'
-      ? { active: true, scopes: ['wayglass:constellation'] } : null,
+      ? { active: true, ownerAuthorized: true, scopes: ['wayglass:constellation'] } : null,
     listRoutes: () => [{ route_id: 'test:route' }],
   });
   server.listen(0, '127.0.0.1');
@@ -60,7 +60,8 @@ test('MCP gateway fails closed for revoked, inactive, wrong-scope and invalid be
       if (token === 'revoked') throw new Error('revoked token: secret internal detail');
       if (token === 'inactive') return { active: false, scopes: ['wayglass:constellation'] };
       if (token === 'bluebird') return { active: true, scopes: ['wayglass:bluebird'] };
-      if (token === 'valid') return { active: true, scopes: ['wayglass:constellation'] };
+      if (token === 'nonowner') return { active: true, ownerAuthorized: false, scopes: ['wayglass:constellation'] };
+      if (token === 'valid') return { active: true, ownerAuthorized: true, scopes: ['wayglass:constellation'] };
       return null;
     },
     listRoutes: () => [{ route_id: 'private:test' }],
@@ -74,7 +75,7 @@ test('MCP gateway fails closed for revoked, inactive, wrong-scope and invalid be
     body: JSON.stringify({ jsonrpc: '2.0', id: 7, method: 'tools/call', params: { name: 'wayglass_routes' } }),
   });
   try {
-    for (const token of ['revoked', 'inactive', 'bluebird', 'unknown']) {
+    for (const token of ['revoked', 'inactive', 'bluebird', 'nonowner', 'unknown']) {
       const response = await request(token);
       assert.ok([401, 403].includes(response.status), token);
       assert.equal(response.headers.get('cache-control'), 'no-store');
@@ -83,7 +84,7 @@ test('MCP gateway fails closed for revoked, inactive, wrong-scope and invalid be
     }
     const allowed = await request('valid');
     assert.equal(allowed.status, 200);
-    assert.equal(calls.length, 5);
+    assert.equal(calls.length, 6);
     for (const call of calls) {
       assert.equal(call.context.resource, 'https://wayglass.example/mcp');
       assert.equal(call.context.requiredScope, 'wayglass:constellation');
@@ -98,7 +99,7 @@ test('MCP gateway fails closed for revoked, inactive, wrong-scope and invalid be
       body: JSON.stringify({ jsonrpc: '2.0', id: 8, method: 'tools/list' }),
     });
     assert.equal(wrongOrigin.status, 403);
-    assert.equal(calls.length, 5, 'origin denial precedes token verification');
+    assert.equal(calls.length, 6, 'origin denial precedes token verification');
   } finally {
     await new Promise(resolve => server.close(resolve));
   }
