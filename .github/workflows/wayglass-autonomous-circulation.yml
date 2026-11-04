@@ -3,6 +3,12 @@ on:
   schedule:
     - cron: '17 */3 * * *'
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/wayglass-autonomous-circulation.mjs'
+      - 'scripts/wayglass-circulation-policy.mjs'
+      - 'test/wayglass-autonomous-circulation.test.mjs'
+      - '.github/workflows/wayglass-autonomous-circulation.yml'
 permissions:
   contents: read
   issues: write
@@ -18,7 +24,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24.x'
-      - name: Select verified next task and preserve idempotent receipt
+      - name: Verify selection policy
+        run: node --test test/wayglass-autonomous-circulation.test.mjs
+      - name: Select next task and preserve idempotent receipt
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WAYGLASS_APPLY: 'true'
