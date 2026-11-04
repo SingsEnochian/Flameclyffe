@@ -545,9 +545,11 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       return res.status(result.entered ? 200 : 409).json({ ...result, recovered_storage_id: payload.storage_id || null });
     } catch (error) {
       const badRequest = error instanceof TypeError || /requires|must be an object/i.test(error?.message || '');
-      return res.status(badRequest ? 400 : 500).json({
+      return res.status(error.status || (badRequest ? 400 : 500)).json({
         schema: 'wayglass.world-entry-error/v0.1',
         error: error?.message || 'Wayglass world entry failed.',
+        ...(error.code ? { code: error.code } : {}),
+        ...(error.blocking ? { blocking: error.blocking } : {}),
       });
     }
   });
