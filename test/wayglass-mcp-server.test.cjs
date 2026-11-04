@@ -18,6 +18,11 @@ test('composed server serves discovery, health, protected MCP and rejects unknow
   try {
     const health = await (await fetch(base + '/healthz')).json();
     assert.equal(health.service, 'wayglass-mcp');
+    assert.equal(health.bearerVerifierInjected, true);
+    assert.equal(health.oauthAuthorizationServerVerified, false);
+    assert.equal(health.nativeRouterBound, false);
+    assert.equal(health.durableReceiptsVerified, false);
+    assert.equal(Object.hasOwn(health, 'oauthConfigured'), false);
     const metadata = await (await fetch(base + '/.well-known/oauth-protected-resource/mcp')).json();
     assert.equal(metadata.resource, 'https://wayglass.example/mcp');
     assert.deepEqual(metadata.authorization_servers, ['https://auth.wayglass.example/']);
