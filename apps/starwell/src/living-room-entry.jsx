@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { LivingRoom } from './components/living-room/LivingRoom.jsx';
+import { WayglassAtelierMaterialLab } from './components/living-room/WayglassAtelierMaterialLab.jsx';
 import './starwell.css';
 import './components/living-room/living-room.css';
 import './components/living-room/living-room-sanctuary.css';
@@ -82,7 +83,7 @@ function LivingRoomApp() {
       phase={phase}
       time={timeParts.display}
     >
-      <RoomPreview selected={selected} />
+      {selected.key === 'atelier' ? <WayglassAtelierMaterialLab /> : <RoomPreview selected={selected} />}
     </LivingRoom>
   );
 }
