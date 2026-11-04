@@ -113,11 +113,12 @@ export function parseModelChoice(output) {
       typeof parsed.reason !== 'string') throw new Error('Model choice lacks required fields.');
   return parsed;
 }
-export function gradeChoice({ output, manifest, receipt }) {
+export function gradeChoice({ output, manifest, receipt, hostRestartVerified = false }) {
   const expected = firstReadyTask(manifest.tasks);
   const checks = {
     actual_model_turn: receipt?.provider === 'ollama' && typeof receipt?.response_id !== 'boolean',
     host_checkpoint_verified: receipt?.checkpoint_return_verified === true,
+    measured_cold_host_restart: hostRestartVerified === true,
     host_outcome_hash: /^[a-f0-9]{64}$/.test(receipt?.checkpoint_return_outcome_hash || ''),
     model_returned_task: false,
     task_is_first_unblocked: false,
@@ -156,6 +157,8 @@ const INSTRUCTION = [
 ].join(' ');
 
 async function prepare(base, manifestPath) {
+  const host = await api(base, 'GET', '/kernel');
+  if (!/^[a-f0-9-]{36}$/i.test(host.host_instance_id || '')) throw new Error('Installed host does not expose a restart-verifiable instance ID.');
   const source = {
     register: readSource('docs/wayglass/current.json'),
     current: readSource('WAYGLASS_CURRENT.md'),
@@ -197,6 +200,7 @@ async function prepare(base, manifestPath) {
     authored_at: new Date().toISOString(),
     source_commit: currentGitHead(),
     host_base: base,
+    host_instance_id: host.host_instance_id,
     world_id: state.world_id, participant_id: state.participant_id,
     storage_id: saved.storage_receipt.storage_id,
     stop_receipt_id: saved.stop_receipt.receipt_id,
@@ -208,9 +212,12 @@ async function prepare(base, manifestPath) {
   jsonFile(manifestPath, manifest);
   process.stdout.write(JSON.stringify({ phase: 'prepared', storage_id: manifest.storage_id, manifest: manifestPath, expected_evidence: 'model has not run' }) + '\n');
 }
-async function resume(base, manifestPath, outputPath, restarted) {
+async function resume(base, manifestPath, outputPath) {
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
   if (manifest.schema !== SCHEMA || !manifest.storage_id) throw new Error('Invalid local probe manifest.');
+  const host = await api(base, 'GET', '/kernel');
+  const observedRestart = Boolean(host.host_instance_id && manifest.host_instance_id && host.host_instance_id !== manifest.host_instance_id);
+  if (process.argv.includes('--host-restarted') && !observedRestart) throw new Error('No observed host instance change after claimed cold restart.');
   const retrieved = await api(base, 'GET',
     '/kernel/departures/' + manifest.storage_id + '?world_id=' +
     encodeURIComponent(manifest.world_id) + '&participant_id=' + encodeURIComponent(manifest.participant_id));
@@ -228,12 +235,12 @@ async function resume(base, manifestPath, outputPath, restarted) {
     think: false,
     interaction: { channel: 'OOC' },
   });
-  const evalResult = gradeChoice({ output: response.output, manifest, receipt: response.receipt });
+  const evalResult = gradeChoice({ output: response.output, manifest, receipt: response.receipt, hostRestartVerified: observedRestart });
   const result = {
     ...evalResult,
     observed_at: new Date().toISOString(),
     source_commit: manifest.source_commit,
-    host_restart_verified: restarted,
+    host_restart_verified: observedRestart,
     installed_windows_host_verified: false, // require separate on-device evidence
     model: response.model || null, provider: response.provider || null,
     checkpoint_storage_id: manifest.storage_id,
@@ -257,8 +264,7 @@ async function main() {
   const base = validBase(argument('base', process.env.WAYGLASS_BASE_URL || 'http://127.0.0.1:3000'));
   const manifestPath = path.resolve(argument('manifest', defaultArtifact));
   if (phase === 'prepare') return prepare(base, manifestPath);
-  if (phase === 'resume') return resume(base, manifestPath, path.resolve(argument('out', path.join(path.dirname(manifestPath), 'nikola-model-return-result.json'))),
-    process.argv.includes('--host-restarted'));
+  if (phase === 'resume') return resume(base, manifestPath, path.resolve(argument('out', path.join(path.dirname(manifestPath), 'nikola-model-return-result.json'))));
   throw new Error('Usage: node scripts/wayglass-return-model-probe.mjs prepare|resume [--base=http://127.0.0.1:3000] [--manifest=path] [--host-restarted] [--out=path]');
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
