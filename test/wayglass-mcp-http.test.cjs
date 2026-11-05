@@ -158,3 +158,14 @@ test('rejects oversized declared Content-Length before reading a request body', 
     assert.equal(routeCalls, 0);
   } finally { await new Promise(resolve => server.close(resolve)); }
 });
+
+test('resource URL cannot contain userinfo, query or fragment', () => {
+  const options = { verifyBearer: async () => ({ active: true, ownerAuthorized: true, scopes: ['wayglass:constellation'] }) };
+  for (const resourceUrl of [
+    'https://owner:secret@wayglass.example/mcp',
+    'https://wayglass.example/mcp?token=secret',
+    'https://wayglass.example/mcp#fragment',
+  ]) {
+    assert.throws(() => makeMcpHttpHandler({ ...options, resourceUrl }), /resource URL/);
+  }
+});
