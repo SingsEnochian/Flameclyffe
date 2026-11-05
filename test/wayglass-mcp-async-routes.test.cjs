@@ -43,7 +43,7 @@ test('HTTP awaits asynchronous catalogue and never leaks rejected provider error
     };
     const ok = await send();
     assert.deepEqual(JSON.parse(ok.result.content[0].text), [{ route_id: 'cloud:synthetic' }]);
-    assert.deepEqual(observed, { principalId: 'synthetic-owner', scopes: ['wayglass:constellation'], resource: 'https://wayglass.example/mcp' });
+    assert.deepEqual(observed, { principalId: 'synthetic-owner', scopes: ['wayglass:constellation'], resource: 'https://wayglass.example/mcp', consentRef: null });
     assert.doesNotMatch(JSON.stringify(observed), /synthetic-secret/);
     fail = true;
     const denied = await send();
