@@ -2,6 +2,7 @@ import './styles.css';
 import { installWayglassCloudLogin } from './cloud-login.js';
 import { installWayglassField } from './glass-field.js';
 import { installMotionChoreography } from './motion-choreography.js';
+import { installWayglassMotion } from './motion-anything-adapter.js';
 import { installKeyboardControls } from './keyboard-controls.js';
 import { detectEmbodimentCapabilities, detectARSupport, publishEmbodiment } from './embodiment.js';
 import { enterWayglassWorld, leaveWayglassWorld } from './route-client.js';
@@ -56,6 +57,7 @@ surfaceNav.innerHTML = listWayglassSurfaces().map((surface) =>
   '</button>'
 ).join('');
 root.before(surfaceNav);
+installWayglassMotion({ root: document });
 
 async function mountSurface(surfaceId) {
   mountedSurface?.destroy?.();
