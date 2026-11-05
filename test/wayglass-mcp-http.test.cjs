@@ -169,3 +169,37 @@ test('resource URL cannot contain userinfo, query or fragment', () => {
     assert.throws(() => makeMcpHttpHandler({ ...options, resourceUrl }), /resource URL/);
   }
 });
+
+test('route provider exceptions fail closed without leaking secrets or crashing subsequent requests', async () => {
+  let calls = 0;
+  const handler = makeMcpHttpHandler({
+    resourceUrl: 'https://wayglass.example/mcp',
+    verifyBearer: async () => ({ active: true, ownerAuthorized: true, scopes: ['wayglass:constellation'] }),
+    listRoutes: () => {
+      calls++;
+      if (calls === 1) throw new Error('PRIVATE_PROVIDER_SECRET_DO_NOT_EXPOSE');
+      return [{ route_id: 'recovered' }];
+    },
+  });
+  const server = createServer((req, res) => {
+    handler(req, res).catch(() => { if (!res.headersSent) res.writeHead(500); res.end(); });
+  });
+  server.listen(0, '127.0.0.1');
+  await once(server, 'listening');
+  try {
+    const url = 'http://127.0.0.1:' + server.address().port + '/mcp';
+    const send = () => fetch(url, {
+      method: 'POST',
+      headers: { Authorization: 'Bearer good', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'wayglass_routes' } }),
+    });
+    const failed = await send();
+    assert.equal(failed.status, 500);
+    assert.equal(failed.headers.get('cache-control'), 'no-store');
+    assert.doesNotMatch(await failed.text(), /PRIVATE_PROVIDER_SECRET_DO_NOT_EXPOSE/);
+    const recovered = await send();
+    assert.equal(recovered.status, 200);
+    const result = await recovered.json();
+    assert.deepEqual(JSON.parse(result.result.content[0].text), [{ route_id: 'recovered' }]);
+  } finally { await new Promise(resolve => server.close(resolve)); }
+});
