@@ -16,16 +16,18 @@ export function createQuantumQuad({ observer, bifrost, cognition, continuity } =
     observation: input, provenance_refs: copy(provenanceRefs), status: 'received'
   }));
   const transform = bifrost || runWayglassBifrost;
-  const reason = cognition || (async ({ input, routeId, sessionId, fetchImpl }) =>
-    invokeWayglassRoute({ input, routeId, sessionId, fetchImpl }));
+  const reason = cognition || (async ({ input, routeId, sessionId, history, interaction, surfaceId, fetchImpl }) =>
+    invokeWayglassRoute({ input, routeId, sessionId, history, interaction, surfaceId, fetchImpl }));
   const preserve = continuity || (async ({ receipts }) => ({
     status: 'ephemeral', receipts: copy(receipts)
   }));
   return Object.freeze({
     schema: QUAD_SCHEMA,
     async cycle({ input, worldId, participantId, routeId = 'openai:gpt',
-      sessionId, provenanceRefs = [], revokedRefs = [], premaqPacket = null,
-      evolution = {}, compression = {}, fetchImpl } = {}) {
+      sessionId, history = [], interaction = undefined, surfaceId = 'arcsweep:writing-room',
+      provenanceRefs = [], revokedRefs = [], premaqcPacket = null, premaqPacket = null,
+      jacobian = null, worldProfile = null, foldWasActive = false,
+      evolution = {}, fetchImpl } = {}) {
       requireText(input, 'input');
       requireText(worldId, 'worldId');
       requireText(participantId, 'participantId');
@@ -40,10 +42,16 @@ export function createQuantumQuad({ observer, bifrost, cognition, continuity } =
         input, worldId, participantId, provenanceRefs: allowed
       }));
       const transformation = record('bifrost', await transform({
-        observation, worldId, participantId, premaqPacket, evolution, compression
+        observation, worldId, participantId, premaqcPacket, premaqPacket,
+        jacobian, worldProfile, revokedRefs, foldWasActive, evolution
       }));
+      if (transformation?.status === 'blocked') return {
+        schema: QUAD_SCHEMA, world_id: worldId, participant_id: participantId,
+        status: 'blocked', receipts, result: null, persistence: 'not-attempted'
+      };
       const inference = record('cognition', await reason({
-        input, observation, transformation, routeId, sessionId, fetchImpl
+        input, observation, transformation, routeId, sessionId,
+        history, interaction, surfaceId, fetchImpl
       }));
       const continuityResult = await preserve({
         worldId, participantId, receipts: copy(receipts), revokedRefs: copy(revokedRefs)
