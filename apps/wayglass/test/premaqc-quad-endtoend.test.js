@@ -59,7 +59,7 @@ test('canonical PREMAQC observation traverses real Math Spine v1.8 and replays',
   assert.match(result.packet_fingerprint, /^[a-f0-9]{64}$/);
   assert.equal(result.output.released_state.spiral.cycle, 1);
   assert.equal(Object.hasOwn(result.output.released_state.probabilities, 'Q'), false);
-  assert.equal(result.output.tone_sequence.approved, false);
+  assert.equal(result.output.tone_sequence.render_authority, 'pending-human-calibration');
 });
 
 test('missing measured Jacobian stays unexecuted', async () => {
