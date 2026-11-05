@@ -14,6 +14,11 @@ const DEFAULT_COLORS=Object.freeze({
   'waygate:return':'#8daac6',
   'learning:verified':'#ceb17a',
   'touch:suggestion':'#7bbebd',
+  'journey:chamber':'#78b3c3',
+  'fold:compass':'#ddb982',
+  'fold:witness':'#81c3bd',
+  'fold:hearth':'#bf9a88',
+  'form:morph':'#b9b0dd',
 });
 const KINDS=new Set(Object.keys(DEFAULT_COLORS));
 const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
