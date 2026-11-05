@@ -9,7 +9,7 @@ test('composed server serves discovery, health, protected MCP and rejects unknow
     resourceUrl: 'https://wayglass.example/mcp',
     authorizationServerUrl: 'https://auth.wayglass.example',
     verifyBearer: async token => token === 'valid'
-      ? { active: true, ownerAuthorized: true, scopes: ['wayglass:constellation'] } : null,
+      ? { active: true, ownerAuthorized: true, subject: 'synthetic-owner', scopes: ['wayglass:constellation'] } : null,
     listRoutes: () => [{ route_id: 'test:route' }],
   });
   server.listen(0, '127.0.0.1');
@@ -61,7 +61,7 @@ test('MCP gateway fails closed for revoked, inactive, wrong-scope and invalid be
       if (token === 'inactive') return { active: false, scopes: ['wayglass:constellation'] };
       if (token === 'bluebird') return { active: true, scopes: ['wayglass:bluebird'] };
       if (token === 'nonowner') return { active: true, ownerAuthorized: false, scopes: ['wayglass:constellation'] };
-      if (token === 'valid') return { active: true, ownerAuthorized: true, scopes: ['wayglass:constellation'] };
+      if (token === 'valid') return { active: true, ownerAuthorized: true, subject: 'synthetic-owner', scopes: ['wayglass:constellation'] };
       return null;
     },
     listRoutes: () => [{ route_id: 'private:test' }],
