@@ -32,3 +32,8 @@ test('disabling motion and teardown clear stale magnetic offsets', () => {
   assert.match(adapter, /if \(!enabled\) clearMagnets\(\)/);
   assert.match(adapter, /clearMagnets\(\);\s*toggle\.remove\(\)/);
 });
+
+test('moving between descendants of one control preserves its magnetic position', () => {
+  assert.match(adapter, /event\.relatedTarget && target\.contains\?\.\(event\.relatedTarget\)/);
+  assert.ok(adapter.indexOf('target.contains?.(event.relatedTarget)') < adapter.indexOf("target.style.removeProperty('--wg-magnet-x');", adapter.indexOf('function reset(event)')));
+});
