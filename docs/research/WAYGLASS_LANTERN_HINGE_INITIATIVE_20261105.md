@@ -26,8 +26,13 @@ This is an engineering initiative inspired by the ter'angreal of *The Wheel of T
 | Mirror | Model / Transform | Compare alternatives and simulated change |
 | Bell | Call / Signal | Announce and coordinate |
 | Vessel | Hold / Transfer | Carry scoped context with continuity receipts |
+| **Compass** | **Orient** | Locate bearings among possible paths, preserving why a direction was suggested and leaving the choice with its holder |
 
-Composition is a **future capability proposal**, not implicit permission escalation. Lantern + Stone may reveal memory; Key + Mirror may traverse simulations. Each compound operation needs an explicit contract and independently enforced authorization.
+Composition is a **future capability proposal**, not implicit permission escalation. Lantern + Stone may reveal memory; Key + Mirror may traverse simulations; Lantern + Compass may reveal available paths and help orient toward one without automatically traversing it. Each compound operation needs an explicit contract and independently enforced authorization.
+
+### Eighth artifact: Compass / Orient
+
+**Compass** answers: *Where am I in possibility-space, what directions are open, and what changes if I choose one?* It interprets goals and constraints into inspectable bearings, comparative trajectories, uncertainties, prerequisites, and return routes. It may draw from the Lantern (evidence), Stone (history), and Mirror (simulated futures). It **does not choose or execute a route on the holder's behalf**; the Key owns authorised traversal. A bearing must cite its observations or assumptions and allow the user to reject it or reorient. This separates *finding direction* from *opening a gate*.
 
 ## Lantern v1: Reveal what is present but not presently perceptible
 
