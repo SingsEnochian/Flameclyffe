@@ -77,3 +77,38 @@ export async function inviteWatercolorMode({
     throw error;
   }
 }
+
+
+// Only a constrained declarative palette can be proposed by a model.
+// No executable JavaScript, canvas commands, runtime authority or memory writes.
+export function extractWatercolorProgramProposal(text) {
+  if(typeof text!=='string')return null;
+  const match=text.match(/```wayglass-watercolor\s*([\s\S]{1,2500}?)```/i);
+  if(!match)return null;
+  try {
+    const proposed=JSON.parse(match[1]);
+    if(!proposed||typeof proposed!=='object'||Array.isArray(proposed))return null;
+    const allowed=new Set(['colors','flow','granulation','bloom']);
+    if(Object.keys(proposed).some(key=>!allowed.has(key)))return null;
+    if(proposed.colors!=null){
+      if(!proposed.colors||typeof proposed.colors!=='object'||Array.isArray(proposed.colors))return null;
+      const kinds=new Set([
+        'agent:active','route:pending','route:responded','route:failed',
+        'waygate:return','learning:verified','touch:suggestion',
+      ]);
+      if(Object.entries(proposed.colors).some(([key,color])=>!kinds.has(key)
+        ||typeof color!=='string'||!/^#[0-9a-f]{6}$/i.test(color)))return null;
+    }
+    if(['flow','granulation','bloom'].some(key=>proposed[key]!=null &&
+      (typeof proposed[key]!=='number'||!Number.isFinite(proposed[key])
+       ||proposed[key]<0||proposed[key]>1)))return null;
+    return Object.freeze({
+      schema:'wayglass.watercolor-program-proposal/v1',
+      rules:structuredClone(proposed),
+      status:'unapplied-awaiting-approval',
+      authority:'visualization-only',
+    });
+  }catch{
+    return null;
+  }
+}
