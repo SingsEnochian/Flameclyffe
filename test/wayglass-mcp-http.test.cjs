@@ -194,9 +194,12 @@ test('route provider exceptions fail closed without leaking secrets or crashing 
       body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'wayglass_routes' } }),
     });
     const failed = await send();
-    assert.equal(failed.status, 500);
+    // The MCP core catches provider exceptions and returns a JSON-RPC error in HTTP 200.
+    assert.equal(failed.status, 200);
     assert.equal(failed.headers.get('cache-control'), 'no-store');
-    assert.doesNotMatch(await failed.text(), /PRIVATE_PROVIDER_SECRET_DO_NOT_EXPOSE/);
+    const failedBody = await failed.text();
+    assert.doesNotMatch(failedBody, /PRIVATE_PROVIDER_SECRET_DO_NOT_EXPOSE/);
+    assert.ok(JSON.parse(failedBody).error, 'MCP core must return a protocol error');
     const recovered = await send();
     assert.equal(recovered.status, 200);
     const result = await recovered.json();
