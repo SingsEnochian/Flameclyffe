@@ -72,3 +72,6 @@ export function createJourneyLedger({now=()=>new Date().toISOString()}={}) {
     snapshot,
   });
 }
+
+// One in-memory ledger per mounted browser host. Navigation does not clear it.
+export const journeyLedger=createJourneyLedger();
