@@ -7,6 +7,8 @@ import { enterWayglassWorld, leaveWayglassWorld } from './route-client.js';
 import { mountWayglassSurface, registerWayglassSurface, listWayglassSurfaces } from './surface-registry.js';
 import { mountArcSweepWritingSurface } from './surfaces/arcsweep-writing.js';
 import { mountThoughtVibrationSurface } from './surfaces/thought-vibration.js';
+import { mountLivingWatercolorSurface } from './surfaces/living-watercolor.js';
+import { WAYGLASS_ENTRY_SURFACE, resolveWayglassEntry } from './wayglass-entry.js';
 
 const root = document.querySelector('#app');
 
@@ -19,6 +21,12 @@ const ar = await detectARSupport(globalThis);
 publishEmbodiment(embodiment, ar);
 document.documentElement.dataset.wayglassKeyboard = embodiment.keyboard ? 'ready' : 'unavailable';
 document.documentElement.dataset.wayglassAr = ar.supported ? 'ready' : ar.reason;
+
+registerWayglassSurface({
+  surface_id: WAYGLASS_ENTRY_SURFACE,
+  label: 'Living Watercolor · Wayglass',
+  mount: mountLivingWatercolorSurface,
+});
 
 registerWayglassSurface({
   surface_id: 'arcsweep:writing-room',
@@ -47,17 +55,35 @@ let mountedSurface = null;
 
 const surfaceNav = document.createElement('nav');
 surfaceNav.className = 'wg-shell-nav glass-panel';
-surfaceNav.setAttribute('aria-label', 'Wayglass surfaces');
+surfaceNav.setAttribute('aria-label', 'Explore Wayglass universe');
+surfaceNav.hidden = true;
 surfaceNav.innerHTML = listWayglassSurfaces().map((surface) =>
   '<button type="button" class="glass-chip" data-surface-id="' + surface.surface_id + '">' +
   surface.label +
   '</button>'
 ).join('');
-root.before(surfaceNav);
+root.after(surfaceNav);
+
+const openShip = document.createElement('button');
+openShip.type = 'button';
+openShip.className = 'wg-ship-switch glass-chip';
+openShip.setAttribute('aria-controls', 'wg-shell-nav');
+openShip.setAttribute('aria-expanded', 'false');
+openShip.textContent = 'Explore Wayglass';
+surfaceNav.id = 'wg-shell-nav';
+root.after(openShip);
+openShip.addEventListener('click', () => {
+  surfaceNav.hidden = !surfaceNav.hidden;
+  openShip.setAttribute('aria-expanded', String(!surfaceNav.hidden));
+  openShip.textContent = surfaceNav.hidden ? 'Explore Wayglass' : 'Close ship map';
+});
 
 async function mountSurface(surfaceId) {
   mountedSurface?.destroy?.();
   mountedSurface = await mountWayglassSurface(surfaceId, root);
+  document.documentElement.dataset.wayglassSurface = surfaceId;
+  // A chosen destination remains accessible, but the body remains the first
+  // screen on every fresh visit. No persisted navigation silently skips her.
   surfaceNav.querySelectorAll('[data-surface-id]').forEach((button) => {
     const active = button.dataset.surfaceId === surfaceId;
     button.classList.toggle('active', active);
@@ -114,4 +140,5 @@ const wayglass = Object.freeze({
 
 globalThis.__wayglassOS = wayglass;
 
-await wayglass.mount('arcsweep:writing-room');
+const entry = resolveWayglassEntry({ available: listWayglassSurfaces() });
+await wayglass.mount(entry.surface_id);
