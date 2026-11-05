@@ -4,6 +4,10 @@ export function installWayglassMotion({ root = document } = {}) {
   if (!root?.addEventListener) return null;
   const reduced = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
   let enabled = !reduced?.matches;
+  const onPreferenceChange = (event) => {
+    if (event.matches) { enabled = false; label(); }
+  };
+  reduced?.addEventListener?.('change', onPreferenceChange);
   const toggle = document.createElement('button');
   toggle.type = 'button';
   toggle.className = 'glass-chip wg-motion-toggle';
@@ -36,6 +40,7 @@ export function installWayglassMotion({ root = document } = {}) {
   root.addEventListener('pointermove', move, { passive: true });
   root.addEventListener('pointerout', reset, { passive: true });
   return { destroy() {
+    reduced?.removeEventListener?.('change', onPreferenceChange);
     root.removeEventListener('pointermove', move);
     root.removeEventListener('pointerout', reset);
     toggle.remove();
