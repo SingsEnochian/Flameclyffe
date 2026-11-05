@@ -31,6 +31,12 @@ export function createQuantumQuad({ observer, bifrost, cognition, continuity } =
       requireText(input, 'input');
       requireText(worldId, 'worldId');
       requireText(participantId, 'participantId');
+      if (!Array.isArray(provenanceRefs) || !Array.isArray(revokedRefs)) {
+        throw new TypeError('Provenance and revocation references must be arrays.');
+      }
+      if (premaqcPacket && premaqPacket && premaqcPacket !== premaqPacket) {
+        throw new TypeError('Conflicting canonical PREMAQC and legacy packet aliases.');
+      }
       const allowed = provenanceRefs.filter(ref => !revokedRefs.includes(ref));
       const receipts = [];
       const record = (organ, result) => {
@@ -59,6 +65,7 @@ export function createQuantumQuad({ observer, bifrost, cognition, continuity } =
       record('continuity', continuityResult);
       return { schema: QUAD_SCHEMA, world_id: worldId,
         participant_id: participantId, receipts, result: inference,
+        status: transformation?.status === 'executed' ? 'completed' : 'partial',
         persistence: continuityResult?.status || 'unknown' };
     },
     leave: voyage04Departure,
