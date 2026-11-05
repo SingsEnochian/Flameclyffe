@@ -23,6 +23,10 @@ test('composed server serves discovery, health, protected MCP and rejects unknow
     assert.equal(health.nativeRouterBound, false);
     assert.equal(health.durableReceiptsVerified, false);
     assert.equal(Object.hasOwn(health, 'oauthConfigured'), false);
+    const readiness = await fetch(base + '/readyz');
+    assert.equal(readiness.status, 503, 'liveness cannot masquerade as deployment readiness');
+    assert.equal(readiness.headers.get('cache-control'), 'no-store');
+    assert.equal((await readiness.json()).ready, false);
     const metadata = await (await fetch(base + '/.well-known/oauth-protected-resource/mcp')).json();
     assert.equal(metadata.resource, 'https://wayglass.example/mcp');
     assert.deepEqual(metadata.authorization_servers, ['https://auth.wayglass.example/']);
