@@ -43,3 +43,9 @@ test('system reduced-motion lock is reflected in accessible control state', () =
   assert.match(adapter, /Motion disabled by system accessibility preference/);
   assert.match(adapter, /onPreferenceChange[\s\S]*?label\(\)/);
 });
+
+
+test('disabled buttons and aria-disabled controls do not receive magnetic motion', () => {
+  assert.match(adapter, /target\.matches\?\.\(':disabled, \[aria-disabled="true"\]'\)/);
+  assert.ok(adapter.indexOf("target.matches?.(':disabled, [aria-disabled=\"true\"]')") < adapter.indexOf('target.getBoundingClientRect()'));
+});
