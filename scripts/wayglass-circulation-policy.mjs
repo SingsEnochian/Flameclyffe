@@ -22,3 +22,23 @@ export function receipt(issue) {
     "Next: worker must read task acceptance criteria, inspect evidence, and return a real test receipt.",
     "No permissions, canon, identity or other constellation state changed."].join("\n");
 }
+
+// Selection is not execution. Keep the organism's distinct states visible.
+export const executionMarker = '<!-- wayglass-cell-execution:v1 -->';
+export function circulationState(comments = []) {
+  const bodies = comments.map(c => typeof c === 'string' ? c : (c.body || ''));
+  const selected = bodies.some(body => body.includes(marker));
+  const executions = bodies.filter(body => body.includes(executionMarker));
+  if (!executions.length) return selected ? 'awaiting-execution' : 'unselected';
+  const latest = executions.at(-1);
+  if (/^Result: verified$/m.test(latest) && /^Evidence: \S+/m.test(latest)) return 'verified';
+  if (/^Result: blocked$/m.test(latest)) return 'blocked';
+  if (/^Result: failed$/m.test(latest)) return 'failed';
+  return 'unverified';
+}
+export function circulationSnapshot(issues, commentsByIssue = new Map()) {
+  return issues.filter(eligible).map(issue => ({
+    issue: issue.number, title: issue.title,
+    state: circulationState(commentsByIssue.get(issue.number) || [])
+  }));
+}
