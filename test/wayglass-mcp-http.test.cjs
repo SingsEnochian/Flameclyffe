@@ -123,3 +123,38 @@ test('bounds request body bytes and rejects oversized JSON without invoking rout
     assert.equal(valid.status, 200);
   } finally { await new Promise(resolve => server.close(resolve)); }
 });
+
+test('rejects oversized declared Content-Length before reading a request body', async () => {
+  const { request } = require('node:http');
+  let routeCalls = 0;
+  const handler = makeMcpHttpHandler({
+    resourceUrl: 'https://wayglass.example/mcp',
+    verifyBearer: async () => ({
+      active: true, ownerAuthorized: true, scopes: ['wayglass:constellation'],
+    }),
+    listRoutes: () => { routeCalls++; return []; },
+  });
+  const server = createServer((req, res) => {
+    handler(req, res).catch(() => { if (!res.headersSent) res.writeHead(500); res.end(); });
+  });
+  server.listen(0, '127.0.0.1');
+  await once(server, 'listening');
+  try {
+    const status = await new Promise((resolve, reject) => {
+      const req = request({
+        host: '127.0.0.1', port: server.address().port, path: '/mcp',
+        method: 'POST', headers: {
+          Authorization: 'Bearer good', 'Content-Type': 'application/json',
+          'Content-Length': String(1024 * 1024 + 1),
+        },
+      }, res => {
+        res.resume();
+        res.on('end', () => resolve(res.statusCode));
+      });
+      req.on('error', reject);
+      req.end();
+    });
+    assert.equal(status, 413);
+    assert.equal(routeCalls, 0);
+  } finally { await new Promise(resolve => server.close(resolve)); }
+});
