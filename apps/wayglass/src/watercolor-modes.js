@@ -1,5 +1,4 @@
 import { invokeWayglassRoute } from './route-client.js';
-import { publishWatercolorActivity } from './watercolor-bridge.js';
 
 export const WATERCOLOR_MODES=Object.freeze([
   {id:'dream', label:'Dream', color:'#a8a6df', intent:'Explore possible imagery, unrealized connections, and questions without claiming firsthand dreams.'},
@@ -47,7 +46,6 @@ export async function inviteWatercolorMode({
 }={}){
   const prompt=composeWatercolorPrompt({mode,authorText,activity});
   if(typeof routeId!=='string'||!routeId.trim())throw new TypeError('A registered model route is required');
-  publishWatercolorActivity({kind:'route:pending',actor:'wayglass:route-attempt'});
   try{
     const result=await invoke({
       routeId,input:prompt.input,
@@ -70,10 +68,8 @@ export async function inviteWatercolorMode({
       experience_claimed:false,
       trained_weights_changed:false,
     });
-    publishWatercolorActivity({kind:'route:responded',actor:'wayglass:delegated-route',receipt:observation});
     return response;
   }catch(error){
-    publishWatercolorActivity({kind:'route:failed',actor:'wayglass:route-attempt'});
     throw error;
   }
 }
