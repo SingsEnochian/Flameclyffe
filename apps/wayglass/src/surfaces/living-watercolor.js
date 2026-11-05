@@ -6,6 +6,8 @@ import {
 import { WATERCOLOR_MODES, resolveWatercolorMode, inviteWatercolorMode,
   extractWatercolorProgramProposal } from '../watercolor-modes.js';
 import { listWayglassRoutes } from '../route-client.js';
+import { wayglassSomaticSound, SOUND_EVENTS } from '../somatic-sound.js';
+import { journeyLedger } from '../journey-before-destination.js';
 
 const clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
 const safeText=value=>String(value??'').replaceAll('&','&amp;')
@@ -17,9 +19,10 @@ const modeButton=mode=>'<button type="button" class="wc-mode" data-wc-mode="'+mo
 export async function mountLivingWatercolorSurface(root) {
   const fluid=createWatercolorFluid();
   const drafts=new Map(), responses=new Map();
-  let mode='dream', routeId=null, routes=[], active=false, paused=false, busy=false,
+  let mode='dream', routeId=null, routes=[], paused=false, busy=false,
     stopped=false, pointerId=null, lastPointer=null, lastFrame=0, elapsed=0,
     pendingProgram=null, animationId=0;
+  let featherStopped = journeyLedger.snapshot().feather_stopped || wayglassSomaticSound.snapshot().feather_stopped;
   const reduced=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches??false;
   root.innerHTML=[
     '<section class="wg-surface wc-surface" data-surface="living-watercolor">',
@@ -68,6 +71,11 @@ export async function mountLivingWatercolorSurface(root) {
           '<div class="wc-tool-buttons">',
             '<button id="wc-flow" class="glass-chip active" type="button" aria-pressed="true">Fluid on</button>',
             '<button id="wc-clear-note" class="glass-chip" type="button">New suggestion</button>',
+          '</div>',
+          '<div class="wc-tool-buttons" aria-label="Opt-in sound and touch cues">',
+            '<button id="wc-sound" class="glass-chip" type="button" aria-pressed="false">Sound off</button>',
+            '<button id="wc-haptics" class="glass-chip" type="button" aria-pressed="false">Haptics off</button>',
+            '<button id="wc-feather" class="glass-chip" type="button">Feather Stop</button>',
           '</div>',
           '<label for="wc-note">Offer a direction</label>',
           '<textarea id="wc-note" rows="3" maxlength="300" placeholder="For example: more gold when something is verified…"></textarea>',
@@ -146,6 +154,9 @@ export async function mountLivingWatercolorSurface(root) {
     const x=clamp(.5+.3*Math.cos(angle)),y=clamp(.5+.3*Math.sin(angle));
     addPigment(event,{x,y,dx:Math.cos(angle)*event.texture.rhythm*.55,
       dy:Math.sin(angle)*event.texture.rhythm*.55});
+    if (!featherStopped && SOUND_EVENTS[event.kind]) {
+      wayglassSomaticSound.play(event.kind,{x,energy:event.intensity});
+    }
   });
   function activateMode(next) {
     const selected=resolveWatercolorMode(next);
@@ -179,7 +190,8 @@ export async function mountLivingWatercolorSurface(root) {
   async function loadRoutes() {
     try{
       const catalogue=await listWayglassRoutes();
-      routes=Array.isArray(catalogue.routes)?catalogue.routes.filter(r=>r?.route_id):[];
+      // No implicit OpenAI route in Wayglass's watercolor universe.
+      routes=Array.isArray(catalogue.routes)?catalogue.routes.filter(r=>r?.route_id && r.provider!=='openai'):[];
       route.replaceChildren();
       for(const r of routes){
         const option=document.createElement('option');
@@ -187,7 +199,7 @@ export async function mountLivingWatercolorSurface(root) {
         option.textContent=(r.label||r.route_id)+' / '+(r.model||'server selected');
         route.append(option);
       }
-      routeId=routes[0]?.route_id||null;
+      routeId=routes.find(r=>r.route_id==='local:ollama')?.route_id||routes[0]?.route_id||null;
       invite.disabled=!routeId;
       routeState.textContent=routeId?'Model route available · opt-in':'No model route available';
     }catch(error){
@@ -198,7 +210,7 @@ export async function mountLivingWatercolorSurface(root) {
   }
   route.addEventListener('change',()=>{routeId=route.value||null;});
   invite.addEventListener('click',async()=>{
-    if(busy||!routeId)return;
+    if(busy||!routeId||featherStopped)return;
     busy=true;invite.disabled=true;
     const authorText=prompt.value.trim(),requestedMode=mode;
     feedback.textContent='Requesting an attributable '+activeMode().label.toLowerCase()+' contribution…';
@@ -243,6 +255,58 @@ export async function mountLivingWatercolorSurface(root) {
     feedback.textContent=paused?'Fluid paused by owner':'Fluid released';
     updateInspector();
   });
+  const soundButton=q('wc-sound'),hapticButton=q('wc-haptics'),featherButton=q('wc-feather');
+  function reflectSound(){
+    const state=wayglassSomaticSound.snapshot();
+    soundButton.setAttribute('aria-pressed',String(state.audio_enabled));
+    soundButton.textContent=state.audio_enabled?'Sound on':'Sound off';
+    hapticButton.setAttribute('aria-pressed',String(state.haptics_enabled));
+    hapticButton.textContent=state.haptics_enabled?'Haptics on':'Haptics off';
+    featherButton.textContent=featherStopped?'Release Feather':'Feather Stop';
+    invite.disabled=busy||!routeId||featherStopped;
+  }
+  soundButton.addEventListener('click',async()=>{
+    if(featherStopped)return;
+    try{
+      const before=wayglassSomaticSound.snapshot();
+      const state=await wayglassSomaticSound.enable({
+        audio:!before.audio_enabled,haptics:before.haptics_enabled,
+      });
+      feedback.textContent=state.audio_enabled
+        ?'Sound enabled by your choice. Spatial cues are synthesized at low volume.'
+        :'Sound disabled or unavailable in this browser. Watercolor remains active.';
+    }catch(error){feedback.textContent=error.message;}
+    reflectSound();
+  });
+  hapticButton.disabled=typeof globalThis.navigator?.vibrate!=='function';
+  hapticButton.addEventListener('click',async()=>{
+    if(featherStopped)return;
+    try{
+      const before=wayglassSomaticSound.snapshot();
+      const state=await wayglassSomaticSound.enable({
+        audio:before.audio_enabled,haptics:!before.haptics_enabled,
+      });
+      feedback.textContent=state.haptics_enabled?'Haptics enabled by your choice.':'Haptics disabled.';
+    }catch(error){feedback.textContent=error.message;}
+    reflectSound();
+  });
+  featherButton.addEventListener('click',()=>{
+    try {
+      if(featherStopped){
+        if(journeyLedger.snapshot().feather_stopped)journeyLedger.resume({confirmed:true});
+        wayglassSomaticSound.releaseFeather({confirmed:true});
+        featherStopped=false;
+        feedback.textContent='Feather released by your explicit choice. Sound remains off.';
+      }else{
+        if(!journeyLedger.snapshot().feather_stopped)journeyLedger.supportFold('feather');
+        wayglassSomaticSound.feather();
+        featherStopped=true;paused=true;
+        feedback.textContent='Feather Stop. Motion, sound, haptics and model invitations paused.';
+      }
+    } catch(error){feedback.textContent=error.message;}
+    reflectSound();updateInspector();
+  });
+  reflectSound();
   q('wc-clear-note').addEventListener('click',()=>{
     q('wc-note').focus();
     feedback.textContent='Write a new direction, then place it on the painting.';
@@ -282,7 +346,7 @@ export async function mountLivingWatercolorSurface(root) {
     updateInspector();
   }
   canvas.addEventListener('pointerdown',event=>{
-    if(event.button!==0 && event.pointerType==='mouse')return;
+    if(featherStopped || (event.button!==0 && event.pointerType==='mouse'))return;
     pointerId=event.pointerId;lastPointer=null;
     canvas.setPointerCapture?.(pointerId);
     brush(event);event.preventDefault();
@@ -297,7 +361,7 @@ export async function mountLivingWatercolorSurface(root) {
   canvas.addEventListener('pointerup',endPointer);
   canvas.addEventListener('pointercancel',endPointer);
   canvas.addEventListener('keydown',event=>{
-    if(event.key==='Enter'||event.key===' '){
+    if(!featherStopped&&(event.key==='Enter'||event.key===' ')){
       event.preventDefault();
       const proposal=proposeWatercolorTouch({
         x:.5,y:.5,color:color.value,pressure:Number(pressure.value)/100,
@@ -309,6 +373,12 @@ export async function mountLivingWatercolorSurface(root) {
   // A thin ambient wash signals readiness only. It does not invent agent state.
   fluid.inject({x:.22,y:.24,color:'#405e87',amount:.44,radius:.19});
   fluid.inject({x:.74,y:.63,color:'#736b92',amount:.32,radius:.21});
+  // Reconstitute recent authored activity when returning from another room.
+  // No invented telemetry is used to fill quiet intervals.
+  for(const event of watercolorSnapshot().events.slice(-20)){
+    const angle=event.sequence*2.399963229728653;
+    addPigment(event,{x:clamp(.5+.3*Math.cos(angle)),y:clamp(.5+.3*Math.sin(angle))});
+  }
   paint();updateInspector();void loadRoutes();
   if(!reduced)animationId=globalThis.requestAnimationFrame(frame);
   else feedback.textContent='Reduced motion enabled. Pigment flows only on interaction.';
