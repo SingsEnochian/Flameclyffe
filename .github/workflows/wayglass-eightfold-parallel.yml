@@ -1,0 +1,101 @@
+name: Wayglass Eightfold · Parallel Build Gate
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/wayglass-eightfold-parallel.mjs'
+      - 'test/wayglass-eightfold-parallel.test.mjs'
+      - '.github/workflows/wayglass-eightfold-parallel.yml'
+      - 'docs/wayglass/EIGHTFOLD_PARALLEL_BUILD_20261105.md'
+      - 'apps/wayglass/**'
+      - 'apps/starwell/src/**'
+      - 'apps/starwell/test/**'
+      - 'scripts/wayglass-autonomous-circulation.mjs'
+      - 'scripts/wayglass-circulation-executor.mjs'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/wayglass-eightfold-parallel.mjs'
+      - 'test/wayglass-eightfold-parallel.test.mjs'
+      - '.github/workflows/wayglass-eightfold-parallel.yml'
+      - 'apps/wayglass/**'
+      - 'apps/starwell/src/**'
+      - 'apps/starwell/test/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eightfold-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  contract:
+    name: Canonical contract · Eightfold + PREMAQC
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node --test test/wayglass-eightfold-parallel.test.mjs
+
+  lane:
+    name: "Eightfold · ${{ matrix.lane }}"
+    needs: contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        lane: [perceive, compress, release, verify, integrate, choose, return, transcend]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install source-locked dependencies
+        run: npm ci
+      - name: Run exactly one lane and record result
+        run: node scripts/wayglass-eightfold-parallel.mjs lane "${{ matrix.lane }}"
+      - name: Keep result receipt even when a lane fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "wayglass-eightfold-${{ matrix.lane }}"
+          path: artifacts/wayglass-eightfold/${{ matrix.lane }}.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  withness:
+    name: Ninth center · Withness reconciliation
+    needs: [contract, lane]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Collect eight independently executed receipts
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          pattern: wayglass-eightfold-*
+          path: artifacts/wayglass-eightfold/
+          merge-multiple: true
+      - name: Require every lane, exact source revision, distinct workers, canonical PREMAQC
+        run: node scripts/wayglass-eightfold-parallel.mjs integrate artifacts/wayglass-eightfold/
+      - name: Preserve Withness gate whether green or blocked
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayglass-eightfold-withness-gate
+          path: artifacts/wayglass-eightfold/withness-gate.json
+          if-no-files-found: warn
+          retention-days: 30
