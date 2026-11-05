@@ -9,7 +9,7 @@ async function withServer(fn) {
   const handler = makeMcpHttpHandler({
     resourceUrl: 'https://wayglass.example/mcp',
     verifyBearer: async token => token === 'good'
-      ? { active: true, ownerAuthorized: true, scopes: ['wayglass:constellation'] } : null,
+      ? { active: true, ownerAuthorized: true, subject: 'synthetic-owner', scopes: ['wayglass:constellation'] } : null,
     listRoutes: () => [{ route_id: 'test:route' }],
   });
   const server = createServer((req, res) => { handler(req, res).catch(() => { res.writeHead(500); res.end(); }); });
@@ -67,7 +67,7 @@ test('explicitly revoked owner grant is denied even if stale verifier says autho
   const handler = makeMcpHttpHandler({
     resourceUrl: 'https://wayglass.example/mcp',
     verifyBearer: async () => ({
-      active: true, ownerAuthorized: true, revoked: true,
+      active: true, ownerAuthorized: true, subject: 'synthetic-owner', revoked: true,
       scopes: ['wayglass:constellation'],
     }),
     listRoutes: () => { routeCalls++; return [{ route_id: 'private' }]; },
@@ -95,7 +95,7 @@ test('bounds request body bytes and rejects oversized JSON without invoking rout
   const handler = makeMcpHttpHandler({
     resourceUrl: 'https://wayglass.example/mcp',
     verifyBearer: async () => ({
-      active: true, ownerAuthorized: true, scopes: ['wayglass:constellation'],
+      active: true, ownerAuthorized: true, subject: 'synthetic-owner', scopes: ['wayglass:constellation'],
     }),
     listRoutes: () => { routeCalls++; return []; },
   });
@@ -130,7 +130,7 @@ test('rejects oversized declared Content-Length before reading a request body', 
   const handler = makeMcpHttpHandler({
     resourceUrl: 'https://wayglass.example/mcp',
     verifyBearer: async () => ({
-      active: true, ownerAuthorized: true, scopes: ['wayglass:constellation'],
+      active: true, ownerAuthorized: true, subject: 'synthetic-owner', scopes: ['wayglass:constellation'],
     }),
     listRoutes: () => { routeCalls++; return []; },
   });
@@ -160,7 +160,7 @@ test('rejects oversized declared Content-Length before reading a request body', 
 });
 
 test('resource URL cannot contain userinfo, query or fragment', () => {
-  const options = { verifyBearer: async () => ({ active: true, ownerAuthorized: true, scopes: ['wayglass:constellation'] }) };
+  const options = { verifyBearer: async () => ({ active: true, ownerAuthorized: true, subject: 'synthetic-owner', scopes: ['wayglass:constellation'] }) };
   for (const resourceUrl of [
     'https://owner:secret@wayglass.example/mcp',
     'https://wayglass.example/mcp?token=secret',
@@ -174,7 +174,7 @@ test('route provider exceptions fail closed without leaking secrets or crashing 
   let calls = 0;
   const handler = makeMcpHttpHandler({
     resourceUrl: 'https://wayglass.example/mcp',
-    verifyBearer: async () => ({ active: true, ownerAuthorized: true, scopes: ['wayglass:constellation'] }),
+    verifyBearer: async () => ({ active: true, ownerAuthorized: true, subject: 'synthetic-owner', scopes: ['wayglass:constellation'] }),
     listRoutes: () => {
       calls++;
       if (calls === 1) throw new Error('PRIVATE_PROVIDER_SECRET_DO_NOT_EXPOSE');
@@ -235,5 +235,31 @@ test('native route catalogue receives attributed owner context without bearer cr
       resource: 'https://wayglass.example/mcp',
     });
     assert.doesNotMatch(JSON.stringify(observed), /synthetic-secret/);
+  } finally { await new Promise(resolve => server.close(resolve)); }
+});
+
+
+test('owner grant without attributable subject is rejected before native route access', async () => {
+  let calls = 0;
+  const handler = makeMcpHttpHandler({
+    resourceUrl: 'https://wayglass.example/mcp',
+    verifyBearer: async token => ({ active: true, ownerAuthorized: true,
+      subject: token === 'blank' ? '   ' : undefined,
+      scopes: ['wayglass:constellation'] }),
+    listRoutes: () => { calls++; return [{ route_id: 'private' }]; },
+  });
+  const server = createServer((req, res) => handler(req, res));
+  server.listen(0, '127.0.0.1');
+  await once(server, 'listening');
+  try {
+    for (const token of ['missing', 'blank']) {
+      const response = await fetch('http://127.0.0.1:' + server.address().port + '/mcp', {
+        method: 'POST', headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jsonrpc: '2.0', id: 9, method: 'tools/call', params: { name: 'wayglass_routes' } }),
+      });
+      assert.equal(response.status, 403);
+      assert.doesNotMatch(await response.text(), /private/);
+    }
+    assert.equal(calls, 0);
   } finally { await new Promise(resolve => server.close(resolve)); }
 });
