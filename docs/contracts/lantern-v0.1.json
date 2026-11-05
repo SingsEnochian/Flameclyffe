@@ -1,0 +1,139 @@
+{
+  "contract": "wayglass.artifact.lantern/v0.1",
+  "status": "design-proposal",
+  "origin": "Rowan/Vee conversation 2026-08-27/28; registered 2026-11-05",
+  "artifact_class": "lantern",
+  "verb": "reveal",
+  "world_authority": false,
+  "device_possession_grants_authority": false,
+  "modes": [
+    {
+      "id": "pattern",
+      "meaning": "Reveal recurring structure, clusters, contradictions or anomalies",
+      "read_only": true
+    },
+    {
+      "id": "source",
+      "meaning": "Trace claims and findings to source locators",
+      "read_only": true
+    },
+    {
+      "id": "connection",
+      "meaning": "Reveal attributable relationships between items",
+      "read_only": true
+    }
+  ],
+  "gesture_candidates": [
+    {
+      "id": "wake",
+      "input": "explicit-activation-plus-lift",
+      "intent": "attend"
+    },
+    {
+      "id": "pattern",
+      "input": "hold-plus-clockwise-trace",
+      "intent": "reveal.pattern"
+    },
+    {
+      "id": "source",
+      "input": "hold-plus-downward-trace",
+      "intent": "reveal.source"
+    },
+    {
+      "id": "connection",
+      "input": "hold-plus-branch-trace",
+      "intent": "reveal.connection"
+    },
+    {
+      "id": "clarify",
+      "input": "double-tap",
+      "intent": "clarify"
+    },
+    {
+      "id": "preserve",
+      "input": "long-hold-after-result",
+      "intent": "request-preservation"
+    },
+    {
+      "id": "feather",
+      "input": "dedicated-cancel-or-accessible-equivalent",
+      "intent": "cancel"
+    }
+  ],
+  "states": [
+    "idle",
+    "attentive",
+    "targeted",
+    "armed",
+    "captured",
+    "processing",
+    "presenting",
+    "settled",
+    "cancelled",
+    "blocked",
+    "degraded"
+  ],
+  "request_example": {
+    "contract": "wayglass.artifact.reveal-request/v0.1",
+    "artifact_id": "simulated:lantern-001",
+    "world_id": "example-world",
+    "owner_subject": "opaque-owner-id",
+    "invocation_id": "example-idempotency-key",
+    "mode": "pattern",
+    "ask": "Reveal recurring patterns in this bounded corpus",
+    "context": {
+      "corpus_id": "approved-corpus",
+      "source_snapshot_id": "snapshot-reference"
+    },
+    "capability": "read-only",
+    "preserve_result": false
+  },
+  "receipt_example": {
+    "contract": "wayglass.artifact.reveal-receipt/v0.1",
+    "invocation_id": "example-idempotency-key",
+    "artifact_id": "simulated:lantern-001",
+    "mode": "pattern",
+    "status": "simulated-not-executed",
+    "observed_at": null,
+    "source_locators": [],
+    "source_snapshot_id": null,
+    "route_attestation": null,
+    "output_digest": null,
+    "interpretation_register": "empirical",
+    "authorized_preservation": false
+  },
+  "requirements": [
+    "Host-side authentication and capability authorization precede retrieval or actuation.",
+    "Companion screen never manufactures world, canon, or identity authority.",
+    "Each finding preserves exact source references or states provenance unavailable.",
+    "Physical and external effects require a separate scoped and revocable permission.",
+    "Replays are observational and never silently repeat an external effect.",
+    "Accessible non-gesture equivalent, haptic/text redundancy, no-audio and reduced-motion options.",
+    "Cancellation is effective before external consequence; denied/cancelled states are observable.",
+    "Simulation receipts are never represented as device-execution evidence."
+  ],
+  "research_lenses": [
+    "empirical",
+    "mathematical",
+    "historical",
+    "symbolic",
+    "phenomenological",
+    "speculative"
+  ],
+  "hinge_research": {
+    "window": "2026-2033",
+    "status": "open-question",
+    "themes": [
+      "synthetic-cognition",
+      "embodied-agency",
+      "historical-cycle",
+      "synchronicity",
+      "technology-and-myth"
+    ],
+    "eclipse_20260828": {
+      "claim": "12:12 local maximum, 12:18 full moon, St Augustine FL",
+      "verification": "pending-independent-ephemeris-check"
+    }
+  },
+  "next_gate": "implement simulator, bounded read-only retrieval, attribution tests before physical build"
+}
