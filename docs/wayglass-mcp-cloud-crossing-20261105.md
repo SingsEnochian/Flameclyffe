@@ -5,7 +5,7 @@ Status: **NOT DEPLOYED**. PR #535 implements an HTTP `/mcp` server factory and p
 ## Verified source boundaries
 - `lib/wayglass-mcp-server.cjs`: Node HTTP composition; requires injected `verifyBearer`; serves `/mcp`, protected-resource discovery and `/healthz`.
 - `lib/wayglass-mcp-http.cjs`: POST JSON-RPC, bearer verification, required `wayglass:constellation`, explicit owner authorization, stable subject, revoked/consentRevoked rejection, origin check, 1 MiB body cap. It passes subject/scopes/resource to the route callback.
-- `lib/wayglass-mcp-core.cjs`: `initialize`, `tools/list`, read-only `wayglass_routes`; route callback must currently return a **synchronous array**. Async native route calls are not wired.
+- `lib/wayglass-mcp-core.cjs`: `initialize`, `tools/list`, read-only `wayglass_routes`; route callback now accepts synchronous arrays or asynchronous Promise arrays, with sanitized rejection. This enables a cloud-native route adapter but does not itself bind one.
 - `/healthz` currently reports `oauthAuthorizationServerVerified:false`, `nativeRouterBound:false`, `durableReceiptsVerified:false` by design. A 200 health response proves process liveness only.
 - `wayglass-cloud-circulation` and `wayglass-hosted-relay` are separate Supabase functions; their existence does not prove MCP OAuth, native routing or model invocation.
 - PR #537 is a separate draft frontend workstream. Preserve its Cloudflare direction and existing OpenCode Worker.
@@ -24,4 +24,4 @@ Status: **NOT DEPLOYED**. PR #535 implements an HTTP `/mcp` server factory and p
 On draft PR #537: run Vite and Node tests at the exact head; add real browser/mobile and prefers-reduced-motion coverage; verify pointer cleanup, frame budget, focus/keyboard controls, and route/presence transitions; stage Cloudflare frontend without replacing the existing OpenCode Worker.
 
 ## Ownership and next receipt
-Next owner: Wayglass cloud MCP engineering worker. Next deliverable: trusted verifier adapter with issuer/audience/revocation/consent negative tests, then exact-head CI evidence. Blocker: no verified live OAuth authorization-server binding or cloud-native route adapter yet. Feather and owner stop/revocation retain priority.
+Next owner: Wayglass cloud MCP engineering worker. Completed this pass: async route catalogue support in MCP core and awaited HTTP transport, plus synthetic HTTP attribution and rejection tests (commits `0eea4c3`, `b97f657`, `14ead4a`). Exact-head CI not yet returned at inspection. Next deliverable: trusted verifier adapter with issuer/audience/revocation/consent negative tests, then exact-head CI evidence. Blocker: no verified live OAuth authorization-server binding or cloud-native route adapter yet. Feather and owner stop/revocation retain priority.
