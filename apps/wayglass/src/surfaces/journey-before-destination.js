@@ -12,6 +12,7 @@ export async function mountJourneyBeforeDestinationSurface(root){
       '<header class="wg-surface-head glass-panel"><div>',
       '<p class="eyebrow">Wayglass · Living Universe</p>',
       '<h1>Journey Before Destination</h1>',
+      '<p class="eyebrow">Eightfold · Four chambers + Four supportive folds · Withness at the center</p>',
       '<p class="lede">A voyage begins in the watercolor. Here its paths can be planned, observed, imagined and remembered, without silently declaring a result.</p>',
       '</div></header>',
       '<section class="glass-panel journey-panel" aria-label="Four voyage chambers">',
