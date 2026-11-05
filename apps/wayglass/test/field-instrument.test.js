@@ -42,3 +42,73 @@ test('reject malformed, duplicated, excessive and non-finite sources',()=>{
  assert.throws(()=>validateSources(Array.from({length:17},(_,i)=>({id:String(i),x:0,y:0,mass:1}))));
  assert.throws(()=>jacobian(0,0,[],{derivativeStep:0}));
 });
+
+
+test('every field operation rejects invalid coordinates and numeric model options',()=>{
+ const operations=[potential,gradient,displacement,jacobian];
+ const invalid=[NaN,Infinity,-Infinity,'0.15',null,true,{},1n];
+ for(const operation of operations){
+  for(const value of invalid){
+   assert.throws(()=>operation(value,0,[]),TypeError);
+   assert.throws(()=>operation(0,value,[]),TypeError);
+   for(const key of ['softening','strength','displacementScale','derivativeStep']){
+    assert.throws(()=>operation(0,0,[],{[key]:value}),TypeError,`${operation.name}: ${key}`);
+   }
+  }
+  for(const options of [null,[],1,'options'])assert.throws(()=>operation(0,0,[],options),TypeError);
+  for(const options of [{softening:0},{strength:-1},{displacementScale:2},{derivativeStep:0}]){
+   assert.throws(()=>operation(0,0,[],options),RangeError);
+  }
+ }
+ assert.throws(()=>validateSources(new Array(1)),TypeError);
+ assert.throws(()=>instrumentSnapshot({options:{softening:NaN}}),TypeError);
+});
+
+function referenceJacobian(x,y,sources,{softening,strength,displacementScale}){
+ const result=[[1,0],[0,1]];
+ for(const source of sources){
+  const v=[x-source.x,y-source.y],r=Math.sqrt(v[0]**2+v[1]**2+softening**2);
+  for(let row=0;row<2;row++)for(let column=0;column<2;column++){
+   const hessian=strength*source.mass*((row===column?1:0)/r**3-3*v[row]*v[column]/r**5);
+   result[row][column]-=displacementScale*hessian;
+  }
+ }
+ return result;
+}
+
+test('central-difference Jacobian converges quadratically to independent analytic Hessian',()=>{
+ const sources=[{id:'a',x:0.1,y:-0.2,mass:0.8},{id:'b',x:-0.6,y:0.1,mass:0.3}];
+ const options={softening:0.2,strength:0.7,displacementScale:0.08};
+ const reference=referenceJacobian(0.5,0.4,sources,options);
+ const error=step=>{
+  const measured=jacobian(0.5,0.4,sources,{...options,derivativeStep:step}).matrix;
+  return Math.max(...measured.flatMap((row,i)=>row.map((v,j)=>Math.abs(v-reference[i][j]))));
+ };
+ const coarse=error(0.02),fine=error(0.01);
+ assert.ok(coarse/fine>3.8&&coarse/fine<4.2,`convergence ratio ${coarse/fine}`);
+ assert.ok(error(0.0001)<1e-7);
+});
+
+test('nearly singular Jacobian retains its small singular value and finite condition',()=>{
+ const softening=0.15,displacementScale=0.1,remaining=1e-9;
+ const mass=(1-remaining)*(1+softening**2)**1.5/displacementScale;
+ const options={softening,displacementScale,strength:1,derivativeStep:0.000001};
+ const result=jacobian(1,0,[{id:'near-fold',x:0,y:0,mass}],options);
+ assert.ok(result.singularValues[1]>0);
+ near(result.singularValues[1],remaining,5e-11);
+ assert.ok(Number.isFinite(result.conditionNumber)&&result.conditionNumber>1e9);
+ assert.equal(result.conditionStatus,'finite');
+});
+
+test('singular snapshots survive JSON roundtrip with explicit unbounded condition status',()=>{
+ const softening=0.15,displacementScale=0.1,derivativeStep=0.000001;
+ // Tune the tangential central difference to zero at the declared step.
+ const mass=(1+softening**2+derivativeStep**2)**1.5/displacementScale;
+ const snapshot=instrumentSnapshot({x:1,y:0,sources:[{id:'fold',x:0,y:0,mass}],
+  options:{softening,displacementScale,derivativeStep}});
+ assert.equal(snapshot.jacobian.conditionStatus,'singular-at-instrument-resolution');
+ assert.equal(snapshot.jacobian.conditionNumber,null);
+ assert.equal(snapshot.jacobian.foldIndex,null);
+ assert.deepEqual(JSON.parse(JSON.stringify(snapshot)),snapshot);
+ assert.equal(snapshot.options.strength,1);
+});

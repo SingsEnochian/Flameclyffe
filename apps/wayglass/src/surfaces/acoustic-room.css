@@ -20,3 +20,12 @@
 .acoustic-field-controls{display:flex;gap:12px;align-items:center;justify-content:space-between;color:#b3e9dc;font:600 .8rem ui-monospace,monospace;margin:10px 0}
 .acoustic-field-controls label{display:flex;gap:12px;align-items:center;flex:1}
 .acoustic-field-controls input{width:min(100%,220px);accent-color:#79e5d4}
+
+.acoustic-stage:focus-visible{outline:2px solid #e9c77a;outline-offset:4px}
+.acoustic-stage{cursor:crosshair;touch-action:manipulation}
+.acoustic-snapshot{overflow-wrap:anywhere;font:.72rem/1.6 ui-monospace,monospace;color:#9fcac6;border-left:2px solid #75d9c5;padding-left:12px}
+.acoustic-mirror{margin-top:20px;border-top:1px solid #9bd3ca33;padding-top:16px}
+.acoustic-mirror h2{font-size:1.1rem;color:#e9c77a}.acoustic-mirror label{display:flex;flex-wrap:wrap;gap:12px;align-items:center;font-size:.85rem;color:#cbd8bc}.acoustic-mirror input{accent-color:#e9c77a;max-width:100%}
+.acoustic-mirror .acoustic-readout{font-size:.78rem;overflow-wrap:anywhere}
+.acoustic-inspector{border-top:1px solid #9bd3ca33;padding-top:14px;margin-top:14px}.acoustic-inspector summary{cursor:pointer;color:#d7e8be;font-size:.85rem}.acoustic-inspector pre{max-height:300px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font:.7rem/1.5 ui-monospace,monospace;color:#a3c4ba}.acoustic-inspector button{margin-top:12px}
+
