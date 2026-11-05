@@ -5,7 +5,8 @@ export function installWayglassMotion({ root = document } = {}) {
   const reduced = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
   let enabled = !reduced?.matches;
   const onPreferenceChange = (event) => {
-    if (event.matches) { enabled = false; clearMagnets(); label(); }
+    if (event.matches) { enabled = false; clearMagnets(); }
+    label();
   };
   reduced?.addEventListener?.('change', onPreferenceChange);
   const toggle = document.createElement('button');
@@ -15,6 +16,8 @@ export function installWayglassMotion({ root = document } = {}) {
   function label() {
     toggle.textContent = enabled ? '✧ Motion on' : '✧ Motion off';
     toggle.setAttribute('aria-pressed', String(enabled));
+    toggle.disabled = Boolean(reduced?.matches);
+    toggle.title = reduced?.matches ? 'Motion disabled by system accessibility preference' : 'Toggle Wayglass interactive motion';
     document.documentElement.dataset.wgMotion = enabled ? 'on' : 'off';
   }
   label();
