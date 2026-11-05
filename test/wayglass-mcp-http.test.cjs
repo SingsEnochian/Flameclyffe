@@ -206,3 +206,34 @@ test('route provider exceptions fail closed without leaking secrets or crashing 
     assert.deepEqual(JSON.parse(result.result.content[0].text), [{ route_id: 'recovered' }]);
   } finally { await new Promise(resolve => server.close(resolve)); }
 });
+
+test('native route catalogue receives attributed owner context without bearer credentials', async () => {
+  let observed;
+  const handler = makeMcpHttpHandler({
+    resourceUrl: 'https://wayglass.example/mcp',
+    verifyBearer: async () => ({
+      active: true, ownerAuthorized: true, subject: 'owner-synthetic-001',
+      scopes: ['wayglass:constellation', 'wayglass:bluebird'],
+    }),
+    listRoutes: context => { observed = context; return []; },
+  });
+  const server = createServer((req, res) => {
+    handler(req, res).catch(() => { if (!res.headersSent) res.writeHead(500); res.end(); });
+  });
+  server.listen(0, '127.0.0.1');
+  await once(server, 'listening');
+  try {
+    const response = await fetch('http://127.0.0.1:' + server.address().port + '/mcp', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer synthetic-secret', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'wayglass_routes' } }),
+    });
+    assert.equal(response.status, 200);
+    assert.deepEqual(observed, {
+      principalId: 'owner-synthetic-001',
+      scopes: ['wayglass:constellation', 'wayglass:bluebird'],
+      resource: 'https://wayglass.example/mcp',
+    });
+    assert.doesNotMatch(JSON.stringify(observed), /synthetic-secret/);
+  } finally { await new Promise(resolve => server.close(resolve)); }
+});
