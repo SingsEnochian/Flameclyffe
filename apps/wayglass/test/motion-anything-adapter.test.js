@@ -24,7 +24,7 @@ test('motion styles include reduced-motion and off switches', () => {
 
 test('system reduced-motion preference cannot be overridden by toggle', () => {
   assert.match(adapter, /enabled = !enabled && !reduced\?\.matches/);
-  assert.match(adapter, /if \(event\.matches\) \{ enabled = false; clearMagnets\(\); label\(\); \}/);
+  assert.match(adapter, /if \(event\.matches\) \{ enabled = false; clearMagnets\(\); \}/);
 });
 test('disabling motion and teardown clear stale magnetic offsets', () => {
   assert.match(adapter, /function clearMagnets\(\)/);
@@ -36,4 +36,10 @@ test('disabling motion and teardown clear stale magnetic offsets', () => {
 test('moving between descendants of one control preserves its magnetic position', () => {
   assert.match(adapter, /event\.relatedTarget && target\.contains\?\.\(event\.relatedTarget\)/);
   assert.ok(adapter.indexOf('target.contains?.(event.relatedTarget)') < adapter.indexOf("target.style.removeProperty('--wg-magnet-x');", adapter.indexOf('function reset(event)')));
+});
+
+test('system reduced-motion lock is reflected in accessible control state', () => {
+  assert.match(adapter, /toggle\.disabled = Boolean\(reduced\?\.matches\)/);
+  assert.match(adapter, /Motion disabled by system accessibility preference/);
+  assert.match(adapter, /onPreferenceChange[\s\S]*?label\(\)/);
 });
