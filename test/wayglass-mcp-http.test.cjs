@@ -89,3 +89,37 @@ test('explicitly revoked owner grant is denied even if stale verifier says autho
     assert.doesNotMatch(await response.text(), /private/);
   } finally { await new Promise(resolve => server.close(resolve)); }
 });
+
+test('bounds request body bytes and rejects oversized JSON without invoking routes', async () => {
+  let routeCalls = 0;
+  const handler = makeMcpHttpHandler({
+    resourceUrl: 'https://wayglass.example/mcp',
+    verifyBearer: async () => ({
+      active: true, ownerAuthorized: true, scopes: ['wayglass:constellation'],
+    }),
+    listRoutes: () => { routeCalls++; return []; },
+  });
+  const server = createServer((req, res) => {
+    handler(req, res).catch(() => { if (!res.headersSent) res.writeHead(500); res.end(); });
+  });
+  server.listen(0, '127.0.0.1');
+  await once(server, 'listening');
+  try {
+    const url = 'http://127.0.0.1:' + server.address().port + '/mcp';
+    const oversized = JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list', padding: 'x'.repeat(1024 * 1024) });
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { Authorization: 'Bearer good', 'Content-Type': 'application/json' },
+      body: oversized,
+    });
+    assert.equal(response.status, 413);
+    assert.equal(response.headers.get('cache-control'), 'no-store');
+    assert.equal(routeCalls, 0);
+    const valid = await fetch(url, {
+      method: 'POST',
+      headers: { Authorization: 'Bearer good', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 2, method: 'tools/list' }),
+    });
+    assert.equal(valid.status, 200);
+  } finally { await new Promise(resolve => server.close(resolve)); }
+});
