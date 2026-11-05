@@ -1,7 +1,12 @@
 name: Wayglass MCP contract
 on:
+  push:
+    branches:
+      - 'wayglass/mcp-gateway-contract-20261104'
   pull_request:
     paths:
+      - 'lib/wayglass-co-development.cjs'
+      - 'test/wayglass-co-development.test.cjs'
       - 'lib/wayglass-mcp-*.cjs'
       - 'lib/wayglass-route-registry.cjs'
       - 'test/wayglass-mcp-*.test.cjs'
@@ -18,4 +23,4 @@ jobs:
         with:
           node-version: '22'
       - name: Run MCP contract tests
-        run: node --test test/wayglass-mcp-*.test.cjs
+        run: node --test test/wayglass-mcp-*.test.cjs test/wayglass-co-development.test.cjs
