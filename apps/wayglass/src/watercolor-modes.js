@@ -42,7 +42,7 @@ export function composeWatercolorPrompt({mode,authorText='',activity=[]}={}){
 }
 
 export async function inviteWatercolorMode({
-  mode,authorText='',activity=[],routeId='openai:gpt',
+  mode,authorText='',activity=[],routeId='local:ollama',
   sessionId,fetchImpl=fetch,invoke=invokeWayglassRoute,
 }={}){
   const prompt=composeWatercolorPrompt({mode,authorText,activity});
