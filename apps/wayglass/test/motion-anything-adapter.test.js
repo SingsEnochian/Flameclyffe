@@ -21,3 +21,14 @@ test('motion styles include reduced-motion and off switches', () => {
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
   assert.match(css, /@keyframes wg-arrive/);
 });
+
+test('system reduced-motion preference cannot be overridden by toggle', () => {
+  assert.match(adapter, /enabled = !enabled && !reduced\?\.matches/);
+  assert.match(adapter, /if \(event\.matches\) \{ enabled = false; clearMagnets\(\); label\(\); \}/);
+});
+test('disabling motion and teardown clear stale magnetic offsets', () => {
+  assert.match(adapter, /function clearMagnets\(\)/);
+  assert.match(adapter, /querySelectorAll\('\.glass-chip, \.send-jewel'\)/);
+  assert.match(adapter, /if \(!enabled\) clearMagnets\(\)/);
+  assert.match(adapter, /clearMagnets\(\);\s*toggle\.remove\(\)/);
+});
