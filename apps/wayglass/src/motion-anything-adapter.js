@@ -53,12 +53,12 @@ export function installWayglassMotion({ root = document } = {}) {
   root.addEventListener('pointermove', move, { passive: true });
   root.addEventListener('pointerout', reset, { passive: true });
   // Pointer cancellation (e.g. touch gesture takeover) may skip pointerout.
-  root.addEventListener('pointercancel', reset, { passive: true });
+  root.addEventListener('pointercancel', clearMagnets, { passive: true });
   return { destroy() {
     reduced?.removeEventListener?.('change', onPreferenceChange);
     root.removeEventListener('pointermove', move);
     root.removeEventListener('pointerout', reset);
-    root.removeEventListener('pointercancel', reset);
+    root.removeEventListener('pointercancel', clearMagnets);
     clearMagnets();
     toggle.remove();
     delete document.documentElement.dataset.wgMotion;
