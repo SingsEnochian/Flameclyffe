@@ -25,3 +25,10 @@ test('rejects unknown methods and malformed requests', () => {
   assert.equal(handleMcpMessage({ jsonrpc: '2.0', id: 5, method: 'missing' }, { authenticated: true }).error.code, -32601);
   assert.equal(handleMcpMessage({ id: 6, method: 'initialize' }, { authenticated: true }).error.code, -32600);
 });
+
+test('route provider exceptions fail closed without leaking secrets', () => {
+  const r = handleMcpMessage({ jsonrpc: '2.0', id: 9, method: 'tools/call', params: { name: 'wayglass_routes' } },
+    { authenticated: true, listRoutes: () => { throw new Error('secret-provider-token'); } });
+  assert.equal(r.error.code, -32603);
+  assert.doesNotMatch(JSON.stringify(r), /secret-provider-token/);
+});
