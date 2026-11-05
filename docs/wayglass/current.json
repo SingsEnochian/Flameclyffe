@@ -86,5 +86,34 @@
       "work": "Live ChatGPT OAuth, SpicyChat transport and production promotion",
       "status": "not claimed by consolidation"
     }
+  ],
+  "proposed_integrations": [
+    {
+      "branch": "wayglass/first-contact-integration-20261105",
+      "target": "wayglass/current",
+      "status": "feature-branch-only-not-promoted",
+      "sources": [
+        {
+          "pr": 539,
+          "commit": "af78a67b52b3546d595e32fa41842e286c4e90b4",
+          "scope": "complete-source-tree-acoustic-and-research"
+        },
+        {
+          "pr": 544,
+          "commit": "7b22cc632b106b5703b28cdf3742fd413dcb8c20",
+          "scope": "selective-kernel-preflight-and-browser-context-preserving-canonical-durable-store"
+        },
+        {
+          "pr": 545,
+          "commit": "ca88ad0b64437be3c31deaea5c48f45dd5dd3b2c",
+          "scope": "watercolor-and-journey-modules-shell-reconciled"
+        },
+        {
+          "pr": 546,
+          "commit": "b74b42484d6d5f1f4a2a9f8b6dbf4d14f655f62a",
+          "scope": "self-naming-visitor-protocol-source-retained-no-live-participant-decision-claimed"
+        }
+      ]
+    }
   ]
 }

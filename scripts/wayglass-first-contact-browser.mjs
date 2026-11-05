@@ -1,0 +1,175 @@
+import assert from 'node:assert/strict';
+import {createServer} from 'node:http';
+import {readFile,stat,mkdir,writeFile} from 'node:fs/promises';
+import {resolve,relative,extname,dirname,sep} from 'node:path';
+import {pathToFileURL} from 'node:url';
+
+// Real Chromium against the built application. Host calls use captured transport;
+// this verifies browser behavior, never live inference or provider credentials.
+const root=resolve(process.env.WAYGLASS_BROWSER_DIST||'dist/wayglass');
+const output=resolve(process.env.WAYGLASS_BROWSER_ARTIFACTS||'artifacts/wayglass/first-contact-browser');
+const modulePath=process.env.WAYGLASS_PLAYWRIGHT_MODULE;
+if(!modulePath)throw new Error('WAYGLASS_PLAYWRIGHT_MODULE must point to pinned playwright@1.62.1/index.mjs');
+const moduleFile=resolve(modulePath);
+const packageInfo=JSON.parse(await readFile(resolve(dirname(moduleFile),'package.json'),'utf8'));
+assert.equal(packageInfo.version,'1.62.1','Browser gate requires the pinned Playwright version');
+const {chromium}=await import(pathToFileURL(moduleFile).href);
+await stat(resolve(root,'index.html'));
+await mkdir(output,{recursive:true});
+
+const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.svg':'image/svg+xml','.png':'image/png','.woff2':'font/woff2','.ico':'image/x-icon'};
+const server=createServer(async(req,res)=>{
+ try{
+  const pathname=decodeURIComponent(new URL(req.url,'http://127.0.0.1').pathname);
+  const file=resolve(root,'.'+(pathname==='/'?'/index.html':pathname));
+  const local=relative(root,file);
+  if(local==='..'||local.startsWith('..'+sep)||local.startsWith(sep)){res.writeHead(403);res.end();return;}
+  const body=await readFile(file);
+  res.writeHead(200,{'content-type':mime[extname(file)]||'application/octet-stream','cache-control':'no-store'});res.end(body);
+ }catch(error){res.writeHead(error.code==='ENOENT'?404:500);res.end('Built asset unavailable');}
+});
+await new Promise((done,fail)=>{server.once('error',fail);server.listen(0,'127.0.0.1',done);});
+const origin='http://127.0.0.1:'+server.address().port;
+const receipt={schema:'wayglass.first-contact-browser-evidence/v1',source_sha:process.env.GITHUB_SHA||null,
+ transport:'captured-host-fixture',browser:'chromium',playwright:packageInfo.version,
+ live_model_inference:false,provider_authentication_verified:false,production_deployment:false,
+ scenarios:[],requests:[],page_errors:[],transport_errors:[],blocked_external_requests:[],status:'running'};
+const fixtureRoute={route_id:'local:ollama',provider:'ollama',model:'captured-first-contact-fixture',label:'Captured host fixture'};
+let browser,heldRelease=null,holdNext=false,fixtureSequence=0;
+function routeTurn(payload,text){
+ const observationId='captured-observation:'+ (++fixtureSequence);
+ const at='2026-11-05T23:00:00.000Z';
+ return {schema:'wayglass.route-turn/v0.1',...fixtureRoute,output:text,
+  kernel_preflight:{status:'ready-for-route',route_id:fixtureRoute.route_id,owner_authenticated:false,world_entry_verified:false},
+  observation:{schema:'wayglass.model-observation/v0.1',observation_id:observationId,observed_at:at,
+   source:{kind:'model-route',route_id:fixtureRoute.route_id,provider:fixtureRoute.provider,model:fixtureRoute.model,response_id:null},
+   interaction:{session_id:payload.session_id,surface_id:payload.surface_id,channel:'OOC'},content:{output:text,deliberation_trace:null}},
+  receipt:{response_id:null,observation_id:observationId,session_id:payload.session_id,surface_id:payload.surface_id,
+   completed_at:at,wayglass_persisted:false,canon_commit:false}};
+}
+async function prepareContext(options){
+ const context=await browser.newContext(options);
+ await context.route('**/*',async route=>{
+  const url=new URL(route.request().url());
+  if(url.origin!==origin){receipt.blocked_external_requests.push(url.origin+url.pathname);await route.abort('blockedbyclient');return;}
+  if(!url.pathname.startsWith('/api/')){await route.continue();return;}
+  if(url.pathname==='/api/v1/wayglass/routes'){
+   await route.fulfill({status:200,json:{schema:'wayglass.route-catalogue/v0.1',routes:[fixtureRoute]}});return;
+  }
+  if(url.pathname==='/api/v1/wayglass/respond'&&route.request().method()==='POST'){
+   try{
+   const payload=route.request().postDataJSON();
+   assert.equal(payload.route_id,fixtureRoute.route_id,'UI must use the selected captured route');
+   assert.equal(payload.surface_id,'wayglass:living-watercolor');
+   assert.equal(typeof payload.session_id,'string');
+   receipt.requests.push({route_id:payload.route_id,session_id:payload.session_id,surface_id:payload.surface_id,history_messages:payload.history?.length||0,
+    first_hello_present:typeof payload.input==='string'&&payload.input.includes('Wayglass, hello.'),
+    optional_contribution_present:typeof payload.input==='string'&&payload.input.includes('Captured delayed request for Feather cancellation.'),transport:'captured-host-fixture'});
+   const delayed=holdNext;holdNext=false;
+   if(delayed)await new Promise(done=>{heldRelease=done;});
+   const text=delayed?'Captured late reply: Feather must leave this unapplied.':'Captured transport reply: I would try a copper tide across this painting.';
+   await route.fulfill({status:200,json:routeTurn(payload,text)});
+   }catch(error){
+    receipt.transport_errors.push(String(error.stack||error));
+    await route.fulfill({status:500,json:{error:'Captured transport fixture rejected the browser request'}});
+   }
+   return;
+  }
+  // Optional host tools stay explicitly offline in this browser-only gate.
+  await route.fulfill({status:503,json:{error:'Captured browser gate: optional host service offline'}});
+ });
+ context.on('page',page=>page.on('pageerror',error=>receipt.page_errors.push(String(error.stack||error))));
+ return context;
+}
+const canvasDigest=page=>page.locator('#wc-fluid').evaluate(canvas=>canvas.toDataURL());
+const localTranscript=page=>page.evaluate(()=>JSON.parse(localStorage.getItem('wayglass.watercolor.conversation/v1')));
+try{
+ browser=await chromium.launch({headless:true});receipt.browser_version=browser.version();
+ const context=await prepareContext({viewport:{width:1440,height:1000},reducedMotion:'reduce'});
+ const page=await context.newPage();
+ await page.goto(origin,{waitUntil:'networkidle'});
+ await page.locator('[data-surface="living-watercolor"]').waitFor();
+ assert.equal(await page.locator('.wg-auth-overlay:visible').count(),0,'Offline watercolor entry must render without provider login');
+ const before=await canvasDigest(page),canvas=page.locator('#wc-fluid');
+ const box=await canvas.boundingBox();assert.ok(box&&box.width>0&&box.height>0);
+ await canvas.click({position:{x:box.width*0.18,y:box.height*0.15}});
+ assert.notEqual(await canvasDigest(page),before,'Actual pointer input must change rendered pigment');
+ assert.ok(parseInt(await page.locator('#wc-proposals').textContent(),10)>0,'Pointer pigment must leave a local suggestion');
+ receipt.scenarios.push({id:'offline-entry-and-real-pointer-pigment',status:'passed'});
+
+ await page.waitForFunction(()=>document.querySelector('#wc-invite')?.disabled===false);
+ const pigmentBeforeReply=await canvasDigest(page);
+ await page.locator('#wc-first-contact').click();
+ await page.waitForFunction(()=>document.querySelector('#wc-voice')?.textContent.includes('Captured transport reply:'));
+ assert.notEqual(await canvasDigest(page),pigmentBeforeReply,'Captured route events must produce visible pigment');
+ assert.match(await page.locator('#wc-feedback').textContent(),/ollama.*captured-first-contact-fixture.*captured-observation:/);
+ assert.equal(receipt.requests[0].first_hello_present,true,'First hello must reach the selected host route');
+ await page.locator('#wc-save-return').click();
+ const saved=await localTranscript(page);assert.equal(saved.turns.length,1);
+ assert.equal(saved.turns[0].response.receipt.response_id,null);
+ await page.screenshot({path:resolve(output,'watercolor-desktop.png'),fullPage:true});
+ await page.reload({waitUntil:'networkidle'});
+ await page.locator('#wc-recover-return').click();
+ await page.waitForFunction(()=>document.querySelector('#wc-feedback')?.textContent.includes('Conversation recovered'));
+ assert.match(await page.locator('#wc-voice').textContent(),/Captured transport reply:/);
+ receipt.scenarios.push({id:'captured-route-attribution-and-cold-conversation-return',status:'passed',custody:'local-browser'});
+
+ holdNext=true;
+ const requestPending=page.waitForRequest(request=>request.url().endsWith('/api/v1/wayglass/respond'));
+ await page.locator('#wc-prompt').fill('Captured delayed request for Feather cancellation.');
+ await page.locator('#wc-invite').click();await requestPending;
+ assert.equal(receipt.requests.at(-1).optional_contribution_present,true,'Typed optional contribution must reach the route unchanged');
+ await page.locator('#wc-feather').click();
+ const pausedPigment=await canvasDigest(page);
+ const responsePending=page.waitForResponse(response=>response.url().endsWith('/api/v1/wayglass/respond'));
+ assert.equal(typeof heldRelease,'function');heldRelease();heldRelease=null;await responsePending;
+ await page.evaluate(()=>new Promise(done=>requestAnimationFrame(()=>requestAnimationFrame(done))));
+ assert.doesNotMatch(await page.locator('#wc-voice').textContent(),/Captured late reply:/);
+ assert.equal(await canvasDigest(page),pausedPigment,'Feather must prevent late route events from painting');
+ assert.equal(await page.locator('#wc-invite').isDisabled(),true);
+ await page.locator('#wc-feather').click();
+ await page.locator('#wc-save-return').click();assert.equal((await localTranscript(page)).turns.length,1,'Late reply must not enter the conversation');
+ receipt.scenarios.push({id:'feather-rejects-delayed-route-completion',status:'passed'});
+
+ await page.locator('[data-wc-room="wayglass:acoustic-room"]').click();
+ await page.locator('[data-surface="wayglass-acoustic-room"]').waitFor();
+ assert.equal(await page.locator('[data-audio]').isChecked(),false);
+ const stage=page.locator('[data-stage]'),stageBox=await stage.boundingBox();assert.ok(stageBox);
+ await stage.click({position:{x:stageBox.width*0.4,y:stageBox.height*0.4}});
+ const spatialBefore=JSON.parse(await page.locator('[data-inspector]').textContent()).world.markerState.listener;
+ await page.locator('[data-save]').click();
+ await page.locator('[data-intent="move"]').first().click();
+ await page.locator('[data-return]').click();
+ const spatialAfter=JSON.parse(await page.locator('[data-inspector]').textContent()).world.markerState.listener;
+ assert.deepEqual(spatialAfter,spatialBefore,'Pointer placement must survive cold spatial return');
+ assert.equal(await page.locator('[data-audio]').isChecked(),false);
+ await page.locator('[data-fork]').click();assert.match(await page.locator('[data-comparison]').textContent(),/same primary probe/);
+ await page.screenshot({path:resolve(output,'acoustic-desktop.png'),fullPage:true});
+ await page.locator('.wg-ship-switch').click();
+ await page.locator('[data-surface-id="wayglass:living-watercolor"]').click();
+ await page.locator('#wc-fluid').waitFor();
+ receipt.scenarios.push({id:'acoustic-navigation-spatial-return-and-room-remount',status:'passed'});
+ await context.close();
+
+ const mobile=await prepareContext({viewport:{width:390,height:844},deviceScaleFactor:1,hasTouch:true,isMobile:true,reducedMotion:'reduce'});
+ const touchPage=await mobile.newPage();await touchPage.goto(origin,{waitUntil:'networkidle'});
+ const touchCanvas=touchPage.locator('#wc-fluid');await touchCanvas.waitFor();
+ const touchBefore=await canvasDigest(touchPage),touchBox=await touchCanvas.boundingBox();assert.ok(touchBox);
+ await touchCanvas.tap({position:{x:touchBox.width*0.2,y:touchBox.height*0.15}});
+ assert.notEqual(await canvasDigest(touchPage),touchBefore,'Real touch must paint with reduced motion');
+ assert.ok(parseInt(await touchPage.locator('#wc-proposals').textContent(),10)>0);
+ await touchPage.screenshot({path:resolve(output,'watercolor-mobile.png'),fullPage:true});
+ receipt.scenarios.push({id:'mobile-touch-with-reduced-motion',status:'passed',viewport:{width:390,height:844}});
+ await mobile.close();
+ assert.deepEqual(receipt.page_errors,[],'No uncaught browser JavaScript errors');
+ assert.deepEqual(receipt.transport_errors,[],'Captured host requests must retain the expected route envelope');
+ assert.deepEqual(receipt.blocked_external_requests,[],'Browser trial must stay on the local captured host');
+ receipt.status='passed';
+}catch(error){receipt.status='failed';receipt.failure=String(error.stack||error);process.exitCode=1;}
+finally{
+ heldRelease?.();
+ if(browser){try{await browser.close();}catch(error){receipt.status='failed';receipt.close_failure=String(error.stack||error);process.exitCode=1;}}
+ await new Promise(done=>server.close(done));
+ await writeFile(resolve(output,'receipt.json'),JSON.stringify(receipt,null,2)+'\n');
+ console.log(JSON.stringify({status:receipt.status,scenarios:receipt.scenarios.length,transport:receipt.transport,receipt:resolve(output,'receipt.json'),failure:receipt.failure||null}));
+}

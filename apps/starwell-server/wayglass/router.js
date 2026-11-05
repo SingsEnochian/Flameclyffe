@@ -9,7 +9,7 @@ const {
   publicWayglassRoutes,
   resolveWayglassRoute,
 } = require('../wayglass-runtime/wayglass-route-registry.cjs');
-const { bootWayglassKernel } = require('../wayglass-runtime/wayglass-kernel.cjs');
+const { bootWayglassKernel, inspectWayglassCognitionPreflight } = require('../wayglass-runtime/wayglass-kernel.cjs');
 const { enterWayglassWorld } = require('../wayglass-runtime/wayglass-world-entry.cjs');
 const { createWayglassDeparture } = require('../wayglass-runtime/wayglass-stop-receipt.cjs');
 const { createDepartureStore } = require('../wayglass-runtime/wayglass-departure-store.cjs');
@@ -675,6 +675,25 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     const chosen = autoSeat ? preference.find(id => available.some(r => r.route_id === id)) : (payload.route_id || 'openai:gpt');
     const route = resolveWayglassRoute(chosen);
     if (!route) return res.status(404).json({ error: 'No usable Wayglass route.' });
+    let kernelPreflight;
+    try {
+      kernelPreflight = inspectWayglassCognitionPreflight({
+        route_id: route.route_id,
+        world_id: cleanText(payload.world_id, 180) || 'wayglass:home',
+        participant_id: cleanText(payload.participant_id, 180) || null,
+        waygate_manifest: payload.waygate_manifest ?? null,
+        continuation_packet: payload.continuation_packet ?? null,
+        stop_receipt: payload.stop_receipt ?? null,
+        embodiment: cleanEmbodiment(payload.embodiment),
+      });
+    } catch (error) {
+      return res.status(400).json({schema:'wayglass.kernel-cognition-error/v0.1',error:error.message});
+    }
+    if (kernelPreflight.status !== 'ready-for-route') {
+      return res.status(kernelPreflight.status === 'blocked-route' ? 400 : 409).json({
+        schema:'wayglass.kernel-cognition-blocked/v0.1',error:kernelPreflight.reason,kernel_preflight:kernelPreflight,
+      });
+    }
     if (route.route_id === 'flame:griff:spicychat') {
       if (!route.configured()) return res.status(503).json({ error: 'Griff requires a private SpicyChat credential and an exact character/chat pair from GRIFF_SPICYCHAT_CHAT_LINK or separate private IDs.' });
       if (payload.world_id !== route.world_id || payload.participant_id !== route.participant_id) {
@@ -733,6 +752,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       });
       return res.json({
         schema: 'wayglass.route-turn/v0.1',
+        kernel_preflight: kernelPreflight,
         route_id: route.route_id,
         provider: route.provider,
         model: route.model(),
@@ -792,3 +812,4 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
 
 module.exports = createWayglassRouter();
 module.exports.createWayglassRouter = createWayglassRouter;
+
