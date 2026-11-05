@@ -100,7 +100,7 @@ test('MCP gateway fails closed for revoked, inactive, wrong-scope and invalid be
       body: JSON.stringify({ jsonrpc: '2.0', id: 8, method: 'tools/list' }),
     });
     assert.equal(wrongOrigin.status, 403);
-    assert.equal(calls.length, 6, 'origin denial precedes token verification');
+    assert.equal(calls.length, 7, 'origin denial precedes token verification and makes no additional verifier call');
   } finally {
     await new Promise(resolve => server.close(resolve));
   }
