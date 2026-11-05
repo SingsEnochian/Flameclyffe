@@ -1,3 +1,4 @@
+import { runWayglassBifrost } from './bifrost-quad-adapter.js';
 import { invokeWayglassRoute } from './route-client.js';
 import { voyage04Departure, voyage04Return } from './voyage-04.js';
 
@@ -14,9 +15,7 @@ export function createQuantumQuad({ observer, bifrost, cognition, continuity } =
   const observe = observer || (async ({ input, provenanceRefs }) => ({
     observation: input, provenance_refs: copy(provenanceRefs), status: 'received'
   }));
-  const transform = bifrost || (async ({ observation }) => ({
-    status: 'not-executed', reason: 'Bifröst backend not connected', observation
-  }));
+  const transform = bifrost || runWayglassBifrost;
   const reason = cognition || (async ({ input, routeId, sessionId, fetchImpl }) =>
     invokeWayglassRoute({ input, routeId, sessionId, fetchImpl }));
   const preserve = continuity || (async ({ receipts }) => ({
@@ -25,7 +24,8 @@ export function createQuantumQuad({ observer, bifrost, cognition, continuity } =
   return Object.freeze({
     schema: QUAD_SCHEMA,
     async cycle({ input, worldId, participantId, routeId = 'openai:gpt',
-      sessionId, provenanceRefs = [], revokedRefs = [], fetchImpl } = {}) {
+      sessionId, provenanceRefs = [], revokedRefs = [], premaqPacket = null,
+      evolution = {}, compression = {}, fetchImpl } = {}) {
       requireText(input, 'input');
       requireText(worldId, 'worldId');
       requireText(participantId, 'participantId');
@@ -40,7 +40,7 @@ export function createQuantumQuad({ observer, bifrost, cognition, continuity } =
         input, worldId, participantId, provenanceRefs: allowed
       }));
       const transformation = record('bifrost', await transform({
-        observation, worldId, participantId
+        observation, worldId, participantId, premaqPacket, evolution, compression
       }));
       const inference = record('cognition', await reason({
         input, observation, transformation, routeId, sessionId, fetchImpl
