@@ -1,4 +1,19 @@
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
+// Cloud mode uses a serverless relay. Authentication is supplied by the host
+// through an explicit callback, never through a committed credential.
+let cloudAuthProvider = null;
+export function configureWayglassCloudAuth(provider) {
+  cloudAuthProvider = typeof provider === 'function' ? provider : null;
+}
+async function hostedFetch(path, options = {}, fetchImpl = fetch) {
+  const base = import.meta.env?.VITE_WAYGLASS_CLOUD_FUNCTION_URL;
+  if (!base || !cloudAuthProvider || !path.endsWith('/respond')) return fetchImpl(path, options);
+  const token = await cloudAuthProvider();
+  if (!token) throw new Error('Sign in to use the hosted Wayglass route.');
+  return fetchImpl(base, { ...options, headers: {
+    ...options.headers, Authorization: 'Bearer ' + token
+  } });
+}
 
 async function readJson(response) {
   return response.json().catch(() => ({}));
@@ -103,7 +118,7 @@ export async function invokeWayglassRoute({
   maxOutputTokens = 1400,
   fetchImpl = fetch,
 } = {}) {
-  const response = await fetchImpl('/api/v1/wayglass/respond', {
+  const response = await hostedFetch('/api/v1/wayglass/respond', {
     method: 'POST',
     headers: JSON_HEADERS,
     body: JSON.stringify({
@@ -116,7 +131,7 @@ export async function invokeWayglassRoute({
       surface_id: surfaceId,
       max_output_tokens: maxOutputTokens,
     }),
-  });
+  }, fetchImpl);
   return jsonOrThrow(response);
 }
 
