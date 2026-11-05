@@ -263,3 +263,31 @@ test('owner grant without attributable subject is rejected before native route a
     assert.equal(calls, 0);
   } finally { await new Promise(resolve => server.close(resolve)); }
 });
+
+test('rejects query variants before invoking the bearer verifier or native routes', async () => {
+  let verifications = 0;
+  let routes = 0;
+  const handler = makeMcpHttpHandler({
+    resourceUrl: 'https://wayglass.example/mcp',
+    verifyBearer: async () => { verifications++; return { active: true, ownerAuthorized: true, subject: 'synthetic-owner', scopes: ['wayglass:constellation'] }; },
+    listRoutes: () => { routes++; return []; },
+  });
+  const server = createServer((req, res) => handler(req, res));
+  server.listen(0, '127.0.0.1');
+  await once(server, 'listening');
+  try {
+    const base = 'http://127.0.0.1:' + server.address().port;
+    for (const suffix of ['/mcp?access_token=synthetic-secret', '/mcp?']) {
+      const response = await fetch(base + suffix, {
+        method: 'POST',
+        headers: { Authorization: 'Bearer synthetic-secret', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list' }),
+      });
+      assert.equal(response.status, 400);
+      assert.equal(response.headers.get('cache-control'), 'no-store');
+      assert.doesNotMatch(await response.text(), /synthetic-secret/);
+    }
+    assert.equal(verifications, 0);
+    assert.equal(routes, 0);
+  } finally { await new Promise(resolve => server.close(resolve)); }
+});
