@@ -210,7 +210,19 @@ export async function mountArcSweepWritingSurface(root) {
     refreshState();
 
     try {
-      const result = await invokeWayglassRoute({
+      // The Writing Room now executes the live selected route through the
+      // shared Quantum Quad. A missing PREMAQC packet stays explicitly unmeasured.
+      const quad = globalThis.__wayglassOS?.quantumQuad;
+      const quadCycle = quad ? await quad.cycle({
+        input: text,
+        worldId: 'wayglass:writing-room',
+        participantId: 'wayglass:writing-room/local-client',
+        routeId: selectedRoute,
+        history,
+        interaction: current,
+        sessionId: session,
+      }) : null;
+      const result = quadCycle ? quadCycle.result : await invokeWayglassRoute({
         routeId: selectedRoute,
         input: text,
         history,
@@ -228,6 +240,11 @@ export async function mountArcSweepWritingSurface(root) {
       receipt.textContent = lastReceipt
         ? 'Observation · not canon · ' + (result.provider || 'route') + ' / ' + (result.model || 'model') + ' · ' + (lastReceipt.epistemic_register || 'external-observation') + ' · ' + (lastReceipt.completed_at || '')
         : 'Turn completed without a receipt payload.';
+      if (quadCycle) {
+        const math = quadCycle.receipts.find(item => item.organ === 'bifrost');
+        receipt.textContent += ' · Quad: ' + (math?.status || 'unknown') +
+          ' · continuity: ' + quadCycle.persistence;
+      }
     } catch (error) {
       messages.push({
         role: 'assistant',
