@@ -111,6 +111,8 @@ test('Journey retains four chambers and Feather blocks unapproved movement',()=>
     ['pre-flight','journey','dream-journey','voyage']);
   assert.deepEqual(SUPPORT_FOLDS.map(x=>x.id),
     ['compass','witness','feather','hearth']);
+  assert.equal(JOURNEY_CHAMBERS.length + SUPPORT_FOLDS.length, 8,
+    'Four voyage chambers plus four support folds complete the Eightfold');
   journey.selectChamber('dream-journey');
   journey.supportFold('witness',{sourceRef:'receipt:1'});
   journey.supportFold('feather');
