@@ -95,6 +95,7 @@ export function extractWatercolorProgramProposal(text) {
       const kinds=new Set([
         'agent:active','route:pending','route:responded','route:failed',
         'waygate:return','learning:verified','touch:suggestion',
+        'journey:chamber','fold:compass','fold:witness','fold:hearth','form:morph',
       ]);
       if(Object.entries(proposed.colors).some(([key,color])=>!kinds.has(key)
         ||typeof color!=='string'||!/^#[0-9a-f]{6}$/i.test(color)))return null;
