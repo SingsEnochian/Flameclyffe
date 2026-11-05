@@ -83,6 +83,7 @@ export function aggregateEightfold(receipts, { revision, runId, attempt = '1' } 
       || receipt.status !== 'passed'
       || receipt.source_sha !== revision
       || receipt.test !== expected.test
+      || receipt.test_source_sha256 !== sha256(readFileSync(resolve(expected.test)))
       || receipt.worker_id !== 'github-actions/' + runId + '/' + attempt + '/' + receipt.lane
       || receipt.worker_kind !== 'isolated-ci-test-process'
       || receipt.participant_id !== null || receipt.model_inference !== false
