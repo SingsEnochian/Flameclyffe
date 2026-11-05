@@ -1,3 +1,5 @@
+import { publishWatercolorActivity } from './watercolor-bridge.js';
+
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
 async function readJson(response) {
@@ -93,7 +95,7 @@ export async function leaveWayglassWorld({
 }
 
 export async function invokeWayglassRoute({
-  routeId = 'openai:gpt',
+  routeId = 'local:ollama',
   harnessId = 'wayglass:writing-room/direct-v0.1',
   input,
   history = [],
@@ -103,21 +105,42 @@ export async function invokeWayglassRoute({
   maxOutputTokens = 1400,
   fetchImpl = fetch,
 } = {}) {
-  const response = await fetchImpl('/api/v1/wayglass/respond', {
-    method: 'POST',
-    headers: JSON_HEADERS,
-    body: JSON.stringify({
-      route_id: routeId,
-      harness_id: harnessId,
-      input,
-      history,
-      interaction,
-      session_id: sessionId,
-      surface_id: surfaceId,
-      max_output_tokens: maxOutputTokens,
-    }),
+  publishWatercolorActivity({
+    kind: 'route:pending', actor: 'wayglass:route-client',
+    intensity: 0.48,
   });
-  return jsonOrThrow(response);
+  try {
+    const response = await fetchImpl('/api/v1/wayglass/respond', {
+      method: 'POST',
+      headers: JSON_HEADERS,
+      body: JSON.stringify({
+        route_id: routeId,
+        harness_id: harnessId,
+        input,
+        history,
+        interaction,
+        session_id: sessionId,
+        surface_id: surfaceId,
+        max_output_tokens: maxOutputTokens,
+      }),
+    });
+    const data = await jsonOrThrow(response);
+    if (data?.schema === 'wayglass.route-turn/v0.1') {
+      publishWatercolorActivity({
+        kind: 'route:responded',
+        actor: 'wayglass:route-client',
+        receipt: data.receipt || null,
+        intensity: 0.72,
+      });
+    }
+    return data;
+  } catch (error) {
+    publishWatercolorActivity({
+      kind: 'route:failed', actor: 'wayglass:route-client',
+      intensity: 0.44,
+    });
+    throw error;
+  }
 }
 
 
