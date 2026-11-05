@@ -1,0 +1,118 @@
+name: Wayglass Eightfold · Generation Two Convergence
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/wayglass-eightfold-generations.mjs'
+      - 'test/wayglass-eightfold-generations.test.mjs'
+      - 'docs/wayglass/EIGHTFOLD_GENERATION_TWO_20261105.md'
+      - '.github/workflows/wayglass-eightfold-generations.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/wayglass-eightfold-generations.mjs'
+      - 'test/wayglass-eightfold-generations.test.mjs'
+      - '.github/workflows/wayglass-eightfold-generations.yml'
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: wayglass-eightfold-g2-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    name: Canonical PREMAQC · generation inheritance
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node --test test/wayglass-eightfold-generations.test.mjs
+
+  reconnaissance:
+    name: Live source reconciliation · read-only
+    needs: contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Inspect active PR heads and exact shared-file conflicts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/wayglass-eightfold-generations.mjs collect
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wayglass-g2-inventory
+          path: artifacts/wayglass-eightfold-generation-two/inventory.json
+          retention-days: 30
+          if-no-files-found: error
+
+  generation:
+    name: "Source-bound generation · ${{ matrix.lane }}"
+    needs: reconnaissance
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        lane: [perceive, compress, release, verify, integrate, choose, return, transcend]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: actions/download-artifact@v4
+        with:
+          name: wayglass-g2-inventory
+          path: artifacts/wayglass-eightfold-generation-two
+      - name: Generate one descendant instruction packet from verified source
+        run: node scripts/wayglass-eightfold-generations.mjs lane "${{ matrix.lane }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: "wayglass-g2-lane-${{ matrix.lane }}"
+          path: artifacts/wayglass-eightfold-generation-two/lane-${{ matrix.lane }}.json
+          retention-days: 30
+          if-no-files-found: error
+
+  withness:
+    name: Withness · exact-head generation reconciliation
+    needs: [reconnaissance, generation]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: wayglass-g2-inventory
+          path: artifacts/wayglass-eightfold-generation-two
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          pattern: wayglass-g2-lane-*
+          path: artifacts/wayglass-eightfold-generation-two
+          merge-multiple: true
+      - name: Verify eight inherited packets and expose unresolved integration conflicts
+        run: node scripts/wayglass-eightfold-generations.mjs withness
+      - name: Preserve truthful generation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayglass-g2-withness
+          path: artifacts/wayglass-eightfold-generation-two/withness.json
+          if-no-files-found: warn
+          retention-days: 30
