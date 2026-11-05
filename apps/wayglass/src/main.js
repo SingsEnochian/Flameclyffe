@@ -1,4 +1,5 @@
 import './styles.css';
+import { installWayglassCloudLogin } from './cloud-login.js';
 import { installWayglassField } from './glass-field.js';
 import { installMotionChoreography } from './motion-choreography.js';
 import { installKeyboardControls } from './keyboard-controls.js';
@@ -9,6 +10,7 @@ import { mountArcSweepWritingSurface } from './surfaces/arcsweep-writing.js';
 import { mountThoughtVibrationSurface } from './surfaces/thought-vibration.js';
 
 const root = document.querySelector('#app');
+installWayglassCloudLogin(document.body);
 
 installWayglassField({ host: document.body });
 installMotionChoreography({ root: document.documentElement });
