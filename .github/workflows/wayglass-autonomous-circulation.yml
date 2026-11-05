@@ -7,6 +7,8 @@ on:
     paths:
       - 'scripts/wayglass-autonomous-circulation.mjs'
       - 'scripts/wayglass-circulation-policy.mjs'
+      - 'scripts/wayglass-circulation-executor.mjs'
+      - 'test/wayglass-circulation-executor.test.mjs'
       - 'test/wayglass-autonomous-circulation.test.mjs'
       - '.github/workflows/wayglass-autonomous-circulation.yml'
 permissions:
@@ -18,17 +20,25 @@ concurrency:
 jobs:
   choose-and-receipt:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '24.x'
       - name: Verify selection policy
-        run: node --test test/wayglass-autonomous-circulation.test.mjs
-      - name: Select next task and preserve idempotent receipt
+        run: node --test test/wayglass-autonomous-circulation.test.mjs test/wayglass-circulation-executor.test.mjs
+      - name: Execute next bounded diagnostic and preserve idempotent receipt
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WAYGLASS_APPLY: 'true'
         run: node scripts/wayglass-autonomous-circulation.mjs
+      - name: Preserve autonomous execution report
+        if: always() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayglass-autonomous-diagnostic
+          path: .wayglass-artifacts/circulation-execution.json
+          if-no-files-found: ignore
+          retention-days: 30
