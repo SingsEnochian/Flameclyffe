@@ -135,5 +135,41 @@
       "verification": "pending-independent-ephemeris-check"
     }
   },
-  "next_gate": "implement simulator, bounded read-only retrieval, attribution tests before physical build"
+  "next_gate": "implement simulator, bounded read-only retrieval, attribution tests before physical build",
+  "artifact_family": [
+    {
+      "id": "lantern",
+      "verb": "reveal"
+    },
+    {
+      "id": "stone",
+      "verb": "remember"
+    },
+    {
+      "id": "key",
+      "verb": "open/traverse"
+    },
+    {
+      "id": "loom",
+      "verb": "connect/weave"
+    },
+    {
+      "id": "mirror",
+      "verb": "model/transform"
+    },
+    {
+      "id": "bell",
+      "verb": "call/signal"
+    },
+    {
+      "id": "vessel",
+      "verb": "hold/transfer"
+    },
+    {
+      "id": "compass",
+      "verb": "orient",
+      "meaning": "Produce inspectable bearings and options through possibility-space without choosing or traversing them",
+      "execution_authority": false
+    }
+  ]
 }
