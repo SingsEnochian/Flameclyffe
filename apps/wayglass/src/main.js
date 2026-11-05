@@ -9,6 +9,7 @@ import { mountArcSweepWritingSurface } from './surfaces/arcsweep-writing.js';
 import { mountThoughtVibrationSurface } from './surfaces/thought-vibration.js';
 import { mountLivingWatercolorSurface } from './surfaces/living-watercolor.js';
 import { WAYGLASS_ENTRY_SURFACE, resolveWayglassEntry } from './wayglass-entry.js';
+import { mountJourneyBeforeDestinationSurface } from './surfaces/journey-before-destination.js';
 
 const root = document.querySelector('#app');
 
@@ -26,6 +27,12 @@ registerWayglassSurface({
   surface_id: WAYGLASS_ENTRY_SURFACE,
   label: 'Living Watercolor · Wayglass',
   mount: mountLivingWatercolorSurface,
+});
+
+registerWayglassSurface({
+  surface_id: 'wayglass:journey-before-destination',
+  label: 'Journey Before Destination',
+  mount: mountJourneyBeforeDestinationSurface,
 });
 
 registerWayglassSurface({
