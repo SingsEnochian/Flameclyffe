@@ -34,26 +34,33 @@
       "minLength": 1
     },
     "principal": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "subject",
-        "issuer",
-        "ownerAuthorized"
-      ],
-      "properties": {
-        "subject": {
-          "type": "string",
-          "minLength": 1
+      "oneOf": [
+        {
+          "type": "null"
         },
-        "issuer": {
-          "type": "string",
-          "format": "uri"
-        },
-        "ownerAuthorized": {
-          "const": true
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "subject",
+            "issuer",
+            "ownerAuthorized"
+          ],
+          "properties": {
+            "subject": {
+              "type": "string",
+              "minLength": 1
+            },
+            "issuer": {
+              "type": "string",
+              "format": "uri"
+            },
+            "ownerAuthorized": {
+              "type": "boolean"
+            }
+          }
         }
-      }
+      ]
     },
     "initiatingAgent": {
       "type": "string",
@@ -105,5 +112,34 @@
       "type": "string",
       "minLength": 1
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "completed"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "principal": {
+            "type": "object",
+            "properties": {
+              "ownerAuthorized": {
+                "const": true
+              }
+            },
+            "required": [
+              "ownerAuthorized"
+            ]
+          }
+        }
+      }
+    }
+  ]
 }
