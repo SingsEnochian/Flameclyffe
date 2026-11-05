@@ -5,7 +5,7 @@ import { installMotionChoreography } from './motion-choreography.js';
 import { installWayglassMotion } from './motion-anything-adapter.js';
 import { installKeyboardControls } from './keyboard-controls.js';
 import { detectEmbodimentCapabilities, detectARSupport, publishEmbodiment } from './embodiment.js';
-import { enterWayglassWorld, leaveWayglassWorld } from './route-client.js';
+import { enterWayglassWorld, leaveWayglassWorld, requestWayglassCloudCirculation } from './route-client.js';
 import { inspectWayglassLantern } from './lantern-diagnostic.js';
 import { createQuantumQuad } from './quantum-quad.js';
 import { voyage04Departure, voyage04Return, VOYAGE_04 } from './voyage-04.js';
@@ -82,6 +82,7 @@ surfaceNav.addEventListener('click', (event) => {
 const wayglass = Object.freeze({
   schema: 'wayglass.os/v0.1',
   quantumQuad: createQuantumQuad(),
+  cloud: Object.freeze({ pulse: requestWayglassCloudCirculation }),
   lantern: () => inspectWayglassLantern({ quad: wayglass.quantumQuad, surfaces: listWayglassSurfaces() }),
   voyages: Object.freeze({ [VOYAGE_04]: Object.freeze({ leave: voyage04Departure, enter: voyage04Return }) }),
   surfaces: listWayglassSurfaces,
