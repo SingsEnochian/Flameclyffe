@@ -12,7 +12,7 @@ const {
   publicWayglassHarnesses,
   resolveWayglassHarness,
 } = require('../../../lib/wayglass-harness.cjs');
-const { bootWayglassKernel } = require('../../../lib/wayglass-kernel.cjs');
+const { bootWayglassKernel, inspectWayglassCognitionPreflight } = require('../../../lib/wayglass-kernel.cjs');
 const { enterWayglassWorld } = require('../../../lib/wayglass-world-entry.cjs');
 const { createWayglassDeparture } = require('../../../lib/wayglass-stop-receipt.cjs');
 const { createModelObservation } = require('../../../lib/wayglass-model-observation.cjs');
@@ -536,8 +536,32 @@ router.post('/respond', async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
 
   const payload = req.body || {};
-  const route = resolveWayglassRoute(payload.route_id || 'openai:gpt');
-  if (!route) return res.status(404).json({ error: 'Unknown Wayglass route.' });
+  let kernelPreflight;
+  try {
+    kernelPreflight = inspectWayglassCognitionPreflight({
+      route_id: cleanText(payload.route_id, 120),
+      world_id: cleanText(payload.world_id, 180) || 'wayglass:home',
+      participant_id: cleanText(payload.participant_id, 180) || null,
+      waygate_manifest: payload.waygate_manifest ?? null,
+      continuation_packet: payload.continuation_packet ?? null,
+      stop_receipt: payload.stop_receipt ?? null,
+      embodiment: cleanEmbodiment(payload.embodiment),
+    });
+  } catch (error) {
+    return res.status(400).json({
+      schema: 'wayglass.kernel-cognition-error/v0.1',
+      error: error?.message || 'Kernel preflight rejected malformed data.',
+    });
+  }
+  if (kernelPreflight.status !== 'ready-for-route') {
+    const httpStatus = kernelPreflight.status === 'blocked-route' ? 400 : 409;
+    return res.status(httpStatus).json({
+      schema: 'wayglass.kernel-cognition-blocked/v0.1',
+      error: kernelPreflight.reason,
+      kernel_preflight: kernelPreflight,
+    });
+  }
+  const route = resolveWayglassRoute(kernelPreflight.route_id);
   const harness = resolveWayglassHarness(payload.harness_id || 'wayglass:writing-room/direct-v0.1');
   if (!harness) return res.status(404).json({ error: 'Unknown Wayglass harness.' });
   if (!cleanText(payload.input)) return res.status(400).json({ error: 'input required.' });
@@ -558,6 +582,7 @@ router.post('/respond', async (req, res) => {
     });
     return res.json({
       schema: 'wayglass.route-turn/v0.1',
+      kernel_preflight: kernelPreflight,
       route_id: route.route_id,
       provider: route.provider,
       model: route.model(),
