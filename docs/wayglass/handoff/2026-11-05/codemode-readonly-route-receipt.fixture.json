@@ -1,0 +1,22 @@
+{
+  "schema": "wayglass.codemode.readonly-route-receipt/v0.1",
+  "executionId": "fixture-exec-0001",
+  "requestId": "fixture-request-0001",
+  "principal": {
+    "subject": "fixture-owner",
+    "issuer": "https://issuer.example.test/",
+    "ownerAuthorized": true
+  },
+  "initiatingAgent": "fixture-agent",
+  "connector": "wayglass",
+  "operation": "list_wayglass_routes",
+  "capabilities": [
+    "wayglass.routes.read"
+  ],
+  "target": "native-route-catalogue",
+  "inputDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "resultDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "status": "completed",
+  "startedAt": "2026-11-05T12:00:00Z",
+  "completedAt": "2026-11-05T12:00:01Z"
+}
