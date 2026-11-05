@@ -61,14 +61,14 @@ export function mountWayglassAcousticRoom(root){
   try{
    if(!audio)audio=new Context({latencyHint:'interactive'});
    await audio.resume();if(disposed||state.muted)return;
-   if(!osc){osc=audio.createOscillator();gain=audio.createGain();pan=audio.createStereoPanner();osc.type='sine';osc.frequency.value=176;gain.gain.value=0;osc.connect(gain);gain.connect(pan);pan.connect(audio.destination);osc.start();}
+   if(!osc){osc=audio.createOscillator();gain=audio.createGain();pan=typeof audio.createStereoPanner==='function'?audio.createStereoPanner():null;osc.type='sine';osc.frequency.value=176;gain.gain.value=0;osc.connect(gain);if(pan){gain.connect(pan);pan.connect(audio.destination);}else gain.connect(audio.destination);osc.start();}
    updateAudio();
   }catch{stopAudio();}
  }
  function updateAudio(){
-  if(!audio||!gain||!pan)return;
+  if(!audio||!gain||!osc)return;
   const b=bearing(state),t=audio.currentTime;
-  pan.pan.setTargetAtTime(state.mono?0:b.pan,t,0.08);
+  pan?.pan.setTargetAtTime(state.mono?0:b.pan,t,0.08);
   gain.gain.setTargetAtTime(state.muted?0:Math.min(0.045,0.035*b.gain),t,0.09);
   osc.frequency.setTargetAtTime(176+(state.ambience?22:0)+(b.distance<0.25?44:0),t,0.12);
  }
@@ -110,8 +110,8 @@ export function mountWayglassAcousticRoom(root){
  function onClick(e){
   const b=e.target.closest('[data-intent]');
   if(b&&root.contains(b)){act({type:b.dataset.intent,value:b.dataset.value});return;}
-  if(e.target.closest('[data-save]')){try{globalThis.localStorage?.setItem(STORAGE_KEY,JSON.stringify(receipt(state)));$('[data-receipt]').textContent='Return saved · revision '+state.revision;}catch{$('[data-receipt]').textContent='Storage unavailable; return not saved.';}}
-  if(e.target.closest('[data-return]')){try{const saved=globalThis.localStorage?.getItem(STORAGE_KEY);if(!saved)throw Error('No return');state=recover(JSON.parse(saved));stopAudio();render();$('[data-receipt]').textContent='Returned to saved coordinates · revision '+state.revision;}catch{$('[data-receipt]').textContent='No valid saved return found.';}}
+  if(e.target.closest('[data-save]')){try{globalThis.localStorage?.setItem(STORAGE_KEY,JSON.stringify({...receipt(state),field_model:'illustrative-softened-potential/v0.1',field_mass:fieldMass}));$('[data-receipt]').textContent='Return saved · revision '+state.revision;}catch{$('[data-receipt]').textContent='Storage unavailable; return not saved.';}}
+  if(e.target.closest('[data-return]')){try{const saved=globalThis.localStorage?.getItem(STORAGE_KEY);if(!saved)throw Error('No return');const savedReceipt=JSON.parse(saved);state=recover(savedReceipt);fieldMass=Number.isFinite(savedReceipt.field_mass)&&savedReceipt.field_mass>=0&&savedReceipt.field_mass<=2?savedReceipt.field_mass:0.7;$('[data-field-mass]').value=String(fieldMass);stopAudio();render();$('[data-receipt]').textContent='Returned to saved coordinates · revision '+state.revision;}catch{$('[data-receipt]').textContent='No valid saved return found.';}}
  }
  function onChange(e){
   if(e.target.matches('[data-audio]')){act({type:'mute',value:!e.target.checked});if(e.target.checked)void startAudio();}
@@ -121,7 +121,9 @@ export function mountWayglassAcousticRoom(root){
   if(e.target.matches('[data-field-mass]')){fieldMass=Number(e.target.value);render();}
  }
  function onKey(e){if(e.target.closest('input,button,textarea'))return;if(e.key==='ArrowLeft'){e.preventDefault();act({type:'turn',value:-Math.PI/12});}if(e.key==='ArrowRight'){e.preventDefault();act({type:'turn',value:Math.PI/12});}if(e.key==='ArrowUp'){e.preventDefault();act({type:'move',value:0.1});}if(e.key==='ArrowDown'){e.preventDefault();act({type:'move',value:-0.1});}}
+ const onResize=()=>{if(!disposed)drawField();};
+ globalThis.addEventListener?.('resize',onResize);
  root.addEventListener('click',onClick);root.addEventListener('change',onChange);root.addEventListener('keydown',onKey);
  root.tabIndex=0;render();
- return ()=>{disposed=true;root.removeEventListener('click',onClick);root.removeEventListener('change',onChange);root.removeEventListener('keydown',onKey);stopAudio();void audio?.close().catch(()=>{});};
+ return ()=>{disposed=true;root.removeEventListener('click',onClick);root.removeEventListener('change',onChange);root.removeEventListener('keydown',onKey);globalThis.removeEventListener?.('resize',onResize);stopAudio();void audio?.close().catch(()=>{});};
 }
