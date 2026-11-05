@@ -93,13 +93,19 @@ export async function leaveWayglassWorld({
 }
 
 export async function invokeWayglassRoute({
-  routeId = 'openai:gpt',
+  routeId = 'local:ollama',
   harnessId = 'wayglass:writing-room/direct-v0.1',
   input,
   history = [],
   interaction,
   sessionId,
   surfaceId = 'arcsweep:writing-room',
+  worldId = 'wayglass:home',
+  participantId = null,
+  waygateManifest = null,
+  continuationPacket = null,
+  stopReceipt = null,
+  embodiment = {},
   maxOutputTokens = 1400,
   fetchImpl = fetch,
 } = {}) {
@@ -108,6 +114,12 @@ export async function invokeWayglassRoute({
     headers: JSON_HEADERS,
     body: JSON.stringify({
       route_id: routeId,
+      world_id: worldId,
+      participant_id: participantId,
+      waygate_manifest: waygateManifest,
+      continuation_packet: continuationPacket,
+      stop_receipt: stopReceipt,
+      embodiment,
       harness_id: harnessId,
       input,
       history,
@@ -173,4 +185,39 @@ export async function simulateThoughtVibrationQuantum({
     body: JSON.stringify({ operation, args }),
   });
   return jsonOrThrow(response);
+}
+
+/**
+ * Read-only kernel contract probe. It does not establish a Waygate session,
+ * identify the owner, or replace an integrity-verified /kernel/enter crossing.
+ */
+export async function inspectWayglassKernel({
+  routeId = 'local:ollama',
+  worldId = 'wayglass:home',
+  embodiment = {},
+  fetchImpl = fetch,
+} = {}) {
+  const params = new URLSearchParams({
+    route: routeId,
+    world: worldId,
+    body: embodiment.body_id || 'browser-host',
+    body_class: embodiment.body_class || 'host-os',
+    keyboard: embodiment.keyboard === false ? '0' : '1',
+    touch: embodiment.touch ? '1' : '0',
+    ar: embodiment.ar ? '1' : '0',
+    haptics: embodiment.haptics ? '1' : '0',
+  });
+  const response = await fetchImpl('/api/v1/wayglass/kernel?' + params.toString(), {
+    cache: 'no-store',
+  });
+  const data = await jsonOrThrow(response);
+  if (data?.schema !== 'wayglass.kernel/v0.1' || data.status !== 'boot-contract') {
+    throw new Error('Kernel returned an unavailable or blocked boot contract.');
+  }
+  // A route snapshot is only metadata. The response endpoint separately
+  // verifies that the same registered route survives kernel preflight.
+  if (data.cognition?.route_id !== routeId) {
+    throw new Error('Kernel route differs from requested cognitive route.');
+  }
+  return data;
 }
