@@ -212,7 +212,7 @@ test('native route catalogue receives attributed owner context without bearer cr
   const handler = makeMcpHttpHandler({
     resourceUrl: 'https://wayglass.example/mcp',
     verifyBearer: async () => ({
-      active: true, ownerAuthorized: true, subject: 'owner-synthetic-001',
+      active: true, ownerAuthorized: true, subject: 'owner-synthetic-001', consentRef: 'consent-synthetic-001',
       scopes: ['wayglass:constellation', 'wayglass:bluebird'],
     }),
     listRoutes: context => { observed = context; return []; },
@@ -233,6 +233,7 @@ test('native route catalogue receives attributed owner context without bearer cr
       principalId: 'owner-synthetic-001',
       scopes: ['wayglass:constellation', 'wayglass:bluebird'],
       resource: 'https://wayglass.example/mcp',
+      consentRef: 'consent-synthetic-001',
     });
     assert.doesNotMatch(JSON.stringify(observed), /synthetic-secret/);
   } finally { await new Promise(resolve => server.close(resolve)); }
