@@ -12,6 +12,7 @@ Canonical base: `wayglass/current` at `8bb0e3b5938f694e56028d54a2f092102bcd4b96`
 | PR544 kernel cognition | 7b22cc632b106b5703b28cdf3742fd413dcb8c20 | additive preflight in canonical kernel/router; browser context and probe; canonical durable departure APIs retained |
 | PR545 Living Watercolor | ca88ad0b64437be3c31deaea5c48f45dd5dd3b2c | new watercolor/Journey modules retained and hardened; shell/navigation/styles reconciled with current source |
 | PR546 optional names/visits | b74b42484d6d5f1f4a2a9f8b6dbf4d14f655f62a | protocols and tests retained; separate source-bound structured response adapter added |
+| PR527 production audit repair | f03825b065566e94dcf218b8fcd70517b11383da | exact previously verified host production manifest/lockfile; audit gate unchanged |
 
 Source branches stay intact. This feature branch does not promote itself to canonical or release. `current.json` records proposed integration separately.
 
@@ -46,5 +47,7 @@ Repaired numerical/lifecycle issues: extreme finite morphology seeds producing N
 Focused Node suites exercise real production modules and mounted handlers using captured transport/audio/DOM fixtures. The browser workflow separately installs pinned Chromium tooling, builds the integrated application and executes the complete shell in a real browser with explicitly captured host responses. Neither evidence class claims a live model response or physical-device output.
 
 Record implementation SHA, exact workflow run IDs and browser artifact results in the PR. Keep later documentation-only revisions distinct. Existing Wayglass Check covers full host tests, stored Return Trial, contracts, ArcSweep, frontend build and staging; the Windows installer workflow builds reviewable artifacts without release publication on a pull request.
+
+Initial integrated head `2ab480cf6695d42c6ef4adebb4a1ff40fd3f619f` preserved these failures: Wayglass Check `42123445794` ran 319 tests, 318 passed, and a legacy Toybox test rejected relocated deep-link code by regex. The repaired test invokes the actual resolver, verifies Toybox selection, and rejects a missing registration. Chromium run `42123445804` completed three scenarios, then identified the Voyage inbox intercepting the ship-map control; fix the actual dock layout rather than force-clicking. Windows run `42123446044` reached the unchanged production audit and stopped on old body-parser/multer/qs dependencies. Import the previously verified PR527 manifest and lockfile, preserving that audit. Earlier artifact and failure receipts remain available.
 
 The live owner-installed host and its selected model remain the final place to verify real First Contact and Osia playback. This branch supplies one reconciled build and reproducible launch verification; it does not claim a remote service or local device session it has not observed.

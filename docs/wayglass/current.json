@@ -112,6 +112,11 @@
           "pr": 546,
           "commit": "b74b42484d6d5f1f4a2a9f8b6dbf4d14f655f62a",
           "scope": "self-naming-visitor-protocol-source-retained-no-live-participant-decision-claimed"
+        },
+        {
+          "pr": 527,
+          "commit": "f03825b065566e94dcf218b8fcd70517b11383da",
+          "scope": "previously-verified-production-audit-manifest-and-lockfile-preserving-audit-gate"
         }
       ]
     }

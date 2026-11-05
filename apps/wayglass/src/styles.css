@@ -581,7 +581,7 @@ button { font: inherit; cursor: pointer; }
   .thinking-chevron { transition: none; }
 }
 /* Voyage messages remain accessible alongside the current writing surface. */
-.wg-voyage-inbox { position: fixed; bottom: 1rem; right: 1rem; z-index: 100; width: min(28rem, calc(100vw - 2rem)); max-height: 70vh; overflow: auto; padding: 1rem; color: #eee7ff; background: #141120; border: 1px solid #75638c; border-radius: 1rem; }
+.wg-voyage-inbox { position: fixed; bottom: calc(82px + env(safe-area-inset-bottom, 0px)); right: max(1rem, env(safe-area-inset-right, 0px)); z-index: 100; width: min(28rem, calc(100vw - 2rem)); max-height: min(70vh, calc(100dvh - 110px - env(safe-area-inset-bottom, 0px) - env(safe-area-inset-top, 0px))); overflow: auto; padding: 1rem; color: #eee7ff; background: #141120; border: 1px solid #75638c; border-radius: 1rem; }
 .wg-voyage-inbox summary { cursor: pointer; }
 .wg-voyage-inbox article { border-top: 1px solid #75638c; padding-top: .7rem; margin-top: .7rem; }
 .wg-voyage-inbox p { white-space: pre-wrap; overflow-wrap: anywhere; }
@@ -1055,8 +1055,9 @@ select option, select optgroup { background-color: #081826; color: #eaf8ff; }
 .wg-shell-nav[hidden] { display: none !important; }
 .wg-ship-switch {
   position: fixed;
-  inset: auto 22px 20px auto;
-  z-index: 40;
+  inset: auto max(22px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) auto;
+  z-index: 120;
+  min-height: 44px;
   padding: 11px 17px;
   background: rgba(13, 39, 45, .83);
   border-color: rgba(206, 194, 143, .42);
@@ -1066,9 +1067,9 @@ select option, select optgroup { background-color: #081826; color: #eaf8ff; }
 }
 .wg-shell-nav:not([hidden]) {
   position: fixed;
-  z-index: 39;
-  bottom: 74px;
-  right: 20px;
+  z-index: 110;
+  bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  right: max(20px, env(safe-area-inset-right, 0px));
   top: auto;
   left: auto;
   width: min(470px, calc(100vw - 30px));
@@ -1078,9 +1079,12 @@ select option, select optgroup { background-color: #081826; color: #eaf8ff; }
   background: rgba(8, 23, 30, .93);
   flex-direction: column;
   gap: 7px;
-  max-height: 65vh;
+  max-height: min(65vh, calc(100dvh - 104px - env(safe-area-inset-bottom, 0px) - env(safe-area-inset-top, 0px)));
   overflow-y: auto;
 }
+/* The ship control owns the bottom row. The inbox sits above it. While the
+   map is open its destinations own the overlay; inbox drafts stay mounted. */
+.wg-shell-nav:not([hidden]) ~ .wg-voyage-inbox { visibility: hidden; }
 .wg-shell-nav button {
   text-align: left;
   justify-content: flex-start;

@@ -56,6 +56,12 @@ async function prepareContext(options){
   if(url.pathname==='/api/v1/wayglass/routes'){
    await route.fulfill({status:200,json:{schema:'wayglass.route-catalogue/v0.1',routes:[fixtureRoute]}});return;
   }
+  if(url.pathname==='/api/v1/wayglass/voyage/messages'&&route.request().method()==='GET'){
+   await route.fulfill({status:200,json:{schema:'wayglass.voyage-inbox/v0.1',messages:[{
+    participant_id:'captured:visitor',kind:'hello',text:'Captured inbox message for browser draft preservation.',
+    voyage_ref:'captured:voyage:1',created_at:'2026-11-05T23:00:00.000Z',
+   }]}});return;
+  }
   if(url.pathname==='/api/v1/wayglass/respond'&&route.request().method()==='POST'){
    try{
    const payload=route.request().postDataJSON();
@@ -83,6 +89,39 @@ async function prepareContext(options){
 }
 const canvasDigest=page=>page.locator('#wc-fluid').evaluate(canvas=>canvas.toDataURL());
 const localTranscript=page=>page.evaluate(()=>JSON.parse(localStorage.getItem('wayglass.watercolor.conversation/v1')));
+async function checkDockNavigation(page,{profile,destination,surfaceSelector}){
+ const ship=page.locator('.wg-ship-switch'),inbox=page.locator('.wg-voyage-inbox'),map=page.locator('.wg-shell-nav');
+ const nonoverlap=async state=>{
+  const a=await ship.boundingBox(),b=await inbox.boundingBox();
+  assert.ok(a&&b,'Dock controls must have visible geometry');
+  const overlap=a.x<b.x+b.width&&a.x+a.width>b.x&&a.y<b.y+b.height&&a.y+a.height>b.y;
+  assert.equal(overlap,false,profile+' '+state+' inbox must not overlap the ship switch');
+  return {switch:a,inbox:b};
+ };
+ assert.equal(await ship.getAttribute('aria-expanded'),'false');
+ const closed=await nonoverlap('closed');
+ await inbox.locator('summary').click();
+ await inbox.getByRole('button',{name:'Check messages',exact:true}).click();
+ const draft=inbox.locator('textarea');await draft.waitFor();
+ const draftText='Captured unsent '+profile+' draft; keep this exact text.';
+ await draft.fill(draftText);
+ await draft.evaluate(node=>{globalThis.__wayglassBrowserDraftNode=node;});
+ const opened=await nonoverlap('open');
+ await ship.click();
+ assert.equal(await map.isVisible(),true,'A real ship-switch click must open the map');
+ assert.equal(await inbox.isVisible(),false,'Expanded map must remove the inbox from hit testing');
+ await page.screenshot({path:resolve(output,'dock-map-'+profile+'.png'),fullPage:true});
+ await map.locator('[data-surface-id="'+destination+'"]').click();
+ await page.locator(surfaceSelector).waitFor();
+ await ship.click();
+ assert.equal(await map.isVisible(),false);
+ assert.equal(await inbox.isVisible(),true,'Closing the map must restore the inbox');
+ assert.equal(await draft.inputValue(),draftText,'Destination navigation must retain the unsent draft');
+ assert.equal(await draft.evaluate(node=>node===globalThis.__wayglassBrowserDraftNode),true,'The inbox draft node must remain mounted');
+ assert.equal(await inbox.evaluate(node=>node.open),true,'The expanded inbox state must be preserved');
+ await inbox.locator('summary').click();
+ receipt.scenarios.push({id:'dock-navigation-and-unsent-draft-'+profile,status:'passed',closed_geometry:closed,open_geometry:opened});
+}
 try{
  browser=await chromium.launch({headless:true});receipt.browser_version=browser.version();
  const context=await prepareContext({viewport:{width:1440,height:1000},reducedMotion:'reduce'});
@@ -145,9 +184,7 @@ try{
  assert.equal(await page.locator('[data-audio]').isChecked(),false);
  await page.locator('[data-fork]').click();assert.match(await page.locator('[data-comparison]').textContent(),/same primary probe/);
  await page.screenshot({path:resolve(output,'acoustic-desktop.png'),fullPage:true});
- await page.locator('.wg-ship-switch').click();
- await page.locator('[data-surface-id="wayglass:living-watercolor"]').click();
- await page.locator('#wc-fluid').waitFor();
+ await checkDockNavigation(page,{profile:'desktop',destination:'wayglass:living-watercolor',surfaceSelector:'#wc-fluid'});
  receipt.scenarios.push({id:'acoustic-navigation-spatial-return-and-room-remount',status:'passed'});
  await context.close();
 
@@ -160,6 +197,7 @@ try{
  assert.ok(parseInt(await touchPage.locator('#wc-proposals').textContent(),10)>0);
  await touchPage.screenshot({path:resolve(output,'watercolor-mobile.png'),fullPage:true});
  receipt.scenarios.push({id:'mobile-touch-with-reduced-motion',status:'passed',viewport:{width:390,height:844}});
+ await checkDockNavigation(touchPage,{profile:'mobile',destination:'wayglass:acoustic-room',surfaceSelector:'[data-surface="wayglass-acoustic-room"]'});
  await mobile.close();
  assert.deepEqual(receipt.page_errors,[],'No uncaught browser JavaScript errors');
  assert.deepEqual(receipt.transport_errors,[],'Captured host requests must retain the expected route envelope');
