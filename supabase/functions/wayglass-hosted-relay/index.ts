@@ -1,8 +1,16 @@
 // Hosted Wayglass model relay. Requires a Supabase JWT and an owner allowlist.
+// CORS only enables browser transport; authorization remains JWT + exact owner ID.
+const CORS_HEADERS = {
+  "access-control-allow-origin": "*",
+  "access-control-allow-methods": "POST, OPTIONS",
+  "access-control-allow-headers": "authorization, content-type, apikey, x-client-info",
+  "access-control-max-age": "600",
+};
 const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), {
-  status, headers: { "content-type": "application/json", "cache-control": "no-store" }
+  status, headers: { ...CORS_HEADERS, "content-type": "application/json", "cache-control": "no-store" }
 });
 Deno.serve(async (request) => {
+  if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS_HEADERS });
   if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
   const bearer = request.headers.get("authorization") || "";
   const jwt = bearer.startsWith("Bearer ") ? bearer.slice(7) : "";
