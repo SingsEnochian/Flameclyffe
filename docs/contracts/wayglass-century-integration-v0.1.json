@@ -1,0 +1,138 @@
+{
+  "schema": "wayglass.century-integration/v0.1",
+  "status": "proposed",
+  "construction": "concurrent",
+  "worldSnapshot": {
+    "required": [
+      "world_id",
+      "room_id",
+      "branch_id",
+      "snapshot_id",
+      "parent_snapshot_id",
+      "tick",
+      "frame",
+      "model",
+      "sources",
+      "event_cursor"
+    ],
+    "frame": {
+      "required": [
+        "id",
+        "units",
+        "handedness",
+        "origin",
+        "transform_lineage"
+      ]
+    },
+    "model": {
+      "required": [
+        "id",
+        "version",
+        "digest",
+        "parameters",
+        "seed",
+        "step",
+        "tolerance"
+      ]
+    }
+  },
+  "worldEvent": {
+    "required": [
+      "event_id",
+      "snapshot_id",
+      "causal_parent",
+      "simulation_tick",
+      "presentation_deadline",
+      "source_revision",
+      "actor_ref"
+    ],
+    "latePolicy": "expire-presentation-and-record-missed-event",
+    "duplicatePolicy": "deduplicate-by-event-id"
+  },
+  "acoustic": {
+    "buses": [
+      "ambience",
+      "voice",
+      "navigation",
+      "status",
+      "event"
+    ],
+    "outputModes": [
+      "stereo",
+      "mono",
+      "text"
+    ],
+    "optionalAdapters": [
+      "hrtf",
+      "head-tracking",
+      "haptic"
+    ],
+    "restoreMuted": true,
+    "feather": "cancel-pending-presentations-and-silence-active-output",
+    "monoNavigation": "bearing-text-and-ordered-cues",
+    "ambienceMutePreserves": [
+      "status",
+      "voice",
+      "navigation"
+    ]
+  },
+  "returnCapsule": {
+    "required": [
+      "snapshot_id",
+      "content_manifest",
+      "event_cursor",
+      "listener_pose",
+      "selection",
+      "unresolved_questions",
+      "named_continuation"
+    ],
+    "recovery": [
+      "verify-hashes",
+      "check-schema",
+      "refresh-host-permission",
+      "restore-available-projections-muted",
+      "report-missing-adapters"
+    ],
+    "replayConsequentialActions": false
+  },
+  "lanes": [
+    "field-space",
+    "acoustic",
+    "living-observer",
+    "octet",
+    "return-engine",
+    "mission-operations"
+  ],
+  "integratedScenarios": [
+    "shared-snapshot-source-move",
+    "mono-navigation",
+    "mirror-branch-comparison",
+    "feather-during-pending-event",
+    "out-of-order-and-duplicate-event",
+    "stale-source",
+    "audio-suspension",
+    "renderer-loss",
+    "cold-return",
+    "incompatible-frame-transfer",
+    "authorization-revoked-before-crossing"
+  ],
+  "evidence": {
+    "required": [
+      "commit_sha",
+      "scenario_id",
+      "target_profile",
+      "result",
+      "measurements",
+      "limitations"
+    ],
+    "metrics": [
+      "model-error",
+      "event-order-integrity",
+      "restoration-success",
+      "per-bus-peak",
+      "input-output-p50",
+      "input-output-p95",
+      "frame-time-distribution"
+    ]
+  }
+}
