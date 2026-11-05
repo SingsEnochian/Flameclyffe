@@ -61,3 +61,31 @@ test('a scoped active token without explicit owner grant cannot access MCP tools
     assert.equal(response.headers.get('cache-control'), 'no-store');
   } finally { await new Promise(resolve => server.close(resolve)); }
 });
+
+test('explicitly revoked owner grant is denied even if stale verifier says authorized', async () => {
+  let routeCalls = 0;
+  const handler = makeMcpHttpHandler({
+    resourceUrl: 'https://wayglass.example/mcp',
+    verifyBearer: async () => ({
+      active: true, ownerAuthorized: true, revoked: true,
+      scopes: ['wayglass:constellation'],
+    }),
+    listRoutes: () => { routeCalls++; return [{ route_id: 'private' }]; },
+  });
+  const server = createServer((req, res) => {
+    handler(req, res).catch(() => { if (!res.headersSent) res.writeHead(500); res.end(); });
+  });
+  server.listen(0, '127.0.0.1');
+  await once(server, 'listening');
+  try {
+    const response = await fetch('http://127.0.0.1:' + server.address().port + '/mcp', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer stale', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'wayglass_routes' } }),
+    });
+    assert.equal(response.status, 403);
+    assert.equal(response.headers.get('cache-control'), 'no-store');
+    assert.equal(routeCalls, 0);
+    assert.doesNotMatch(await response.text(), /private/);
+  } finally { await new Promise(resolve => server.close(resolve)); }
+});
