@@ -58,6 +58,7 @@ test('MCP gateway fails closed for revoked, inactive, wrong-scope and invalid be
     verifyBearer: async (token, context) => {
       calls.push({ token, context });
       if (token === 'revoked') throw new Error('revoked token: secret internal detail');
+      if (token === 'consent-revoked') return { active: true, ownerAuthorized: true, subject: 'synthetic-owner', consentRevoked: true, scopes: ['wayglass:constellation'] };
       if (token === 'inactive') return { active: false, scopes: ['wayglass:constellation'] };
       if (token === 'bluebird') return { active: true, scopes: ['wayglass:bluebird'] };
       if (token === 'nonowner') return { active: true, ownerAuthorized: false, scopes: ['wayglass:constellation'] };
@@ -75,7 +76,7 @@ test('MCP gateway fails closed for revoked, inactive, wrong-scope and invalid be
     body: JSON.stringify({ jsonrpc: '2.0', id: 7, method: 'tools/call', params: { name: 'wayglass_routes' } }),
   });
   try {
-    for (const token of ['revoked', 'inactive', 'bluebird', 'nonowner', 'unknown']) {
+    for (const token of ['revoked', 'consent-revoked', 'inactive', 'bluebird', 'nonowner', 'unknown']) {
       const response = await request(token);
       assert.ok([401, 403].includes(response.status), token);
       assert.equal(response.headers.get('cache-control'), 'no-store');
@@ -84,7 +85,7 @@ test('MCP gateway fails closed for revoked, inactive, wrong-scope and invalid be
     }
     const allowed = await request('valid');
     assert.equal(allowed.status, 200);
-    assert.equal(calls.length, 6);
+    assert.equal(calls.length, 7);
     for (const call of calls) {
       assert.equal(call.context.resource, 'https://wayglass.example/mcp');
       assert.equal(call.context.requiredScope, 'wayglass:constellation');
