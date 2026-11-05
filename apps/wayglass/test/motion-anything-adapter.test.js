@@ -49,3 +49,8 @@ test('disabled buttons and aria-disabled controls do not receive magnetic motion
   assert.match(adapter, /target\.matches\?\.\(':disabled, \[aria-disabled="true"\]'\)/);
   assert.ok(adapter.indexOf("target.matches?.(':disabled, [aria-disabled=\"true\"]')") < adapter.indexOf('target.getBoundingClientRect()'));
 });
+
+test('pointer cancellation clears every magnet and unregisters its handler', () => {
+  assert.match(adapter, /addEventListener\('pointercancel', clearMagnets/);
+  assert.match(adapter, /removeEventListener\('pointercancel', clearMagnets/);
+});
