@@ -276,16 +276,28 @@ test('rejects query variants before invoking the bearer verifier or native route
   server.listen(0, '127.0.0.1');
   await once(server, 'listening');
   try {
-    const base = 'http://127.0.0.1:' + server.address().port;
     for (const suffix of ['/mcp?access_token=synthetic-secret', '/mcp?']) {
-      const response = await fetch(base + suffix, {
-        method: 'POST',
-        headers: { Authorization: 'Bearer synthetic-secret', 'Content-Type': 'application/json' },
-        body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list' }),
+      // fetch() normalizes a trailing '?' away. Preserve the exact HTTP
+      // request target so the empty-query case actually reaches the server.
+      const response = await new Promise((resolve, reject) => {
+        const outbound = request({
+          host: '127.0.0.1', port: server.address().port, path: suffix,
+          method: 'POST',
+          headers: { Authorization: 'Bearer synthetic-secret', 'Content-Type': 'application/json' },
+        }, inbound => {
+          const chunks = [];
+          inbound.on('data', chunk => chunks.push(chunk));
+          inbound.on('end', () => resolve({
+            status: inbound.statusCode, headers: inbound.headers,
+            body: Buffer.concat(chunks).toString('utf8'),
+          }));
+        });
+        outbound.on('error', reject);
+        outbound.end(JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list' }));
       });
       assert.equal(response.status, 400);
-      assert.equal(response.headers.get('cache-control'), 'no-store');
-      assert.doesNotMatch(await response.text(), /synthetic-secret/);
+      assert.equal(response.headers['cache-control'], 'no-store');
+      assert.doesNotMatch(response.body, /synthetic-secret/);
     }
     assert.equal(verifications, 0);
     assert.equal(routes, 0);
