@@ -40,6 +40,9 @@ export function installWayglassMotion({ root = document } = {}) {
   function reset(event) {
     const target = event.target?.closest?.('.glass-chip, .send-jewel');
     if (!target) return;
+    // pointerout bubbles when moving between children of one control.
+    // Keep its magnetic offset until the pointer actually leaves the control.
+    if (event.relatedTarget && target.contains?.(event.relatedTarget)) return;
     target.style.removeProperty('--wg-magnet-x');
     target.style.removeProperty('--wg-magnet-y');
   }
