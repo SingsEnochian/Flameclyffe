@@ -1,7 +1,7 @@
 'use strict';
 const assert = require('node:assert/strict');
 const { test } = require('node:test');
-const { createServer } = require('node:http');
+const { createServer, request } = require('node:http');
 const { once } = require('node:events');
 const { makeMcpHttpHandler } = require('../lib/wayglass-mcp-http.cjs');
 
