@@ -1151,6 +1151,8 @@ html[data-wayglass-surface="wayglass:living-watercolor"] #app {
   pointer-events: none;
 }
 .wc-deck {
+  box-sizing: border-box;
+  min-width: 0;
   position: absolute;
   bottom: 14px;
   left: 14px;
@@ -1169,7 +1171,11 @@ html[data-wayglass-surface="wayglass:living-watercolor"] #app {
   box-shadow: 0 20px 70px rgba(0,0,0,.3);
   scrollbar-width: thin;
 }
-.wc-deck-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.wc-deck > * { min-width: 0; }
+.wc-deck-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; }
+.wc-compose-actions { flex-wrap: wrap; }
+.wc-compose-actions select { min-width: 0; max-width: 100%; flex: 1 1 220px; }
+.wc-compose-actions button { flex: 1 1 auto; }
 .wc-deck h2, .wc-controls h2 { margin: 0; font: 400 clamp(1.5rem, 2.4vw, 2.05rem)/1 Georgia, serif; }
 .wc-deck .eyebrow, .wc-controls .eyebrow { font-size: .61rem; }
 .wc-model-state {

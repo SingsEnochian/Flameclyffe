@@ -140,6 +140,7 @@ try{
  const pigmentBeforeReply=await canvasDigest(page);
  await page.locator('#wc-first-contact').click();
  await page.waitForFunction(()=>document.querySelector('#wc-voice')?.textContent.includes('Captured transport reply:'));
+ assert.equal(await page.locator('.wc-deck').evaluate(el=>el.scrollWidth<=el.clientWidth+1),true,'Desktop contribution controls must fit without horizontal clipping');
  assert.notEqual(await canvasDigest(page),pigmentBeforeReply,'Captured route events must produce visible pigment');
  assert.match(await page.locator('#wc-feedback').textContent(),/ollama.*captured-first-contact-fixture.*captured-observation:/);
  assert.equal(receipt.requests[0].first_hello_present,true,'First hello must reach the selected host route');
@@ -191,6 +192,7 @@ try{
  const mobile=await prepareContext({viewport:{width:390,height:844},deviceScaleFactor:1,hasTouch:true,isMobile:true,reducedMotion:'reduce'});
  const touchPage=await mobile.newPage();await touchPage.goto(origin,{waitUntil:'networkidle'});
  const touchCanvas=touchPage.locator('#wc-fluid');await touchCanvas.waitFor();
+ assert.equal(await touchPage.locator('.wc-deck').evaluate(el=>el.scrollWidth<=el.clientWidth+1),true,'Mobile contribution controls must fit without horizontal clipping');
  const touchBefore=await canvasDigest(touchPage),touchBox=await touchCanvas.boundingBox();assert.ok(touchBox);
  await touchCanvas.tap({position:{x:touchBox.width*0.2,y:touchBox.height*0.15}});
  assert.notEqual(await canvasDigest(touchPage),touchBefore,'Real touch must paint with reduced motion');
