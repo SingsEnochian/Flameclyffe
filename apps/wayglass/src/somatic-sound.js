@@ -106,3 +106,6 @@ export function createSomaticSoundscape({
   }
   return Object.freeze({enable,play,feather,releaseFeather,snapshot,dispose});
 }
+
+// Shared by Journey and Living Watercolor so Feather stops the same audio bus.
+export const wayglassSomaticSound=createSomaticSoundscape();
