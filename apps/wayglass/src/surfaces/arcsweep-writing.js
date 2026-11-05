@@ -32,6 +32,8 @@ export async function mountArcSweepWritingSurface(root) {
   let selectedRoute = 'openai:gpt';
   let busy = false;
   let lastReceipt = null;
+  let draftRevision = 0;
+  let needsBusy = false;
 
   root.innerHTML = [
     '<section class="wg-surface" data-surface="arcsweep-writing">',
@@ -72,6 +74,11 @@ export async function mountArcSweepWritingSurface(root) {
         '</details>',
       '</section>',
 
+      '<section class="wg-control-ribbon glass-panel" aria-label="System communication">',
+        '<div><strong>Wayglass · System Needs</strong><p class="tiny">Ask the connected route to inspect its capabilities and report actionable needs. The response is attributable to that route.</p></div>',
+        '<button type="button" id="wg-needs" class="glass-chip">Ask what she needs</button>',
+        '<span id="wg-needs-state" class="tiny" role="status">Awaiting request</span>',
+      '</section>',
       '<section class="wg-thread glass-panel" aria-live="polite">',
         '<div id="wg-thread" class="wg-thread-log">',
           '<div class="empty-thread">The room is quiet. Start anywhere.</div>',
@@ -102,6 +109,9 @@ export async function mountArcSweepWritingSurface(root) {
   const status = root.querySelector('#wg-status');
   const send = root.querySelector('#wg-send');
   const receipt = root.querySelector('#wg-receipt');
+  const needsButton = root.querySelector('#wg-needs');
+  const needsState = root.querySelector('#wg-needs-state');
+  input.addEventListener('input', () => { draftRevision += 1; });
 
   const arState = document.documentElement.dataset.wayglassAr || 'unknown';
   embodimentState.textContent = 'Keyboard ready · AR ' + (arState === 'ready' ? 'ready' : arState.replaceAll('-', ' '));
@@ -185,12 +195,12 @@ export async function mountArcSweepWritingSurface(root) {
     if (!text || busy) return;
     busy = true;
     send.disabled = true;
-    input.disabled = true;
+    const submittedRevision = draftRevision;
 
     const current = interaction.snapshot();
     const history = messages.slice(-12).map((message) => ({ role: message.role, content: message.content }));
     messages.push({ role: 'user', content: text, channel: current.channel });
-    input.value = '';
+    if (draftRevision === submittedRevision) input.value = '';
     refreshThread();
 
     const routeLabel = selectedRouteLabel();
@@ -230,7 +240,7 @@ export async function mountArcSweepWritingSurface(root) {
       interaction.setTurnOwner('Rowan');
       busy = false;
       send.disabled = false;
-      input.disabled = false;
+      // The composer remains editable during model requests; never erase newer drafts.
       refreshThread();
       refreshState();
       input.focus();
@@ -301,6 +311,41 @@ export async function mountArcSweepWritingSurface(root) {
   }
 
   globalThis.addEventListener?.('wayglass:command', handleWayglassCommand);
+
+  needsButton.addEventListener('click', async () => {
+    if (needsBusy || busy) return;
+    needsBusy = true;
+    needsButton.disabled = true;
+    needsState.textContent = 'Contacting ' + selectedRouteLabel() + '…';
+    const routeId = selectedRoute;
+    const routeLabel = selectedRouteLabel();
+    const prompt = [
+      'System Needs report for Wayglass Writing Room. You are the selected model route, not a native Wayglass model.',
+      'Describe what you can actually observe in this conversation, which tools or runtime capabilities are unavailable,',
+      'and what concrete system information or capability you need next to improve Wayglass.',
+      'Distinguish verified observations from requests. Do not invent runtime checks or claim access to private systems.',
+      'Respond with: Observed, Needed, Proposed next action, Evidence needed.'
+    ].join(' ');
+    try {
+      const result = await invokeWayglassRoute({
+        routeId, input: prompt, history: [], sessionId: session,
+        interaction: { ...interaction.snapshot(), channel: 'OOC', turn_owner: 'Rowan' },
+      });
+      messages.push({ role: 'assistant', content: result.output || '[No report returned]',
+        channel: 'OOC', route_label: routeLabel + ' · System Needs' });
+      lastReceipt = result.receipt || null;
+      needsState.textContent = 'Report received from ' + routeLabel;
+      receipt.textContent = lastReceipt
+        ? 'System Needs · ' + routeId + ' · ' + (lastReceipt.completed_at || 'receipt received')
+        : 'System Needs response received without a route receipt';
+      refreshThread();
+    } catch (error) {
+      needsState.textContent = 'Delivery failed: ' + error.message;
+    } finally {
+      needsBusy = false;
+      needsButton.disabled = false;
+    }
+  });
 
   send.addEventListener('click', passTurn);
   input.addEventListener('keydown', (event) => {
