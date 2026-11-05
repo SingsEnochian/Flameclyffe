@@ -1,0 +1,124 @@
+{
+  "schema": "wayglass.codemode.readonly-route-test-vectors/v0.1",
+  "note": "Synthetic design fixtures. These are not executed test results or production route data.",
+  "cases": [
+    {
+      "id": "owner-projection",
+      "principal": {
+        "subject": "fixture-owner",
+        "issuer": "https://issuer.example.test/",
+        "ownerAuthorized": true,
+        "consentRef": "fixture-consent",
+        "scopes": [
+          "wayglass.routes.read"
+        ]
+      },
+      "input": {},
+      "expected": {
+        "status": "completed",
+        "nativeCalls": 1,
+        "mustExclude": [
+          "access_token",
+          "authorization",
+          "continuity_id",
+          "candidate_id",
+          "raw_endpoint",
+          "secret"
+        ]
+      }
+    },
+    {
+      "id": "missing-owner-context",
+      "principal": null,
+      "input": {},
+      "expected": {
+        "status": "denied",
+        "nativeCalls": 0
+      }
+    },
+    {
+      "id": "revoked-consent",
+      "principal": {
+        "subject": "fixture-owner",
+        "issuer": "https://issuer.example.test/",
+        "ownerAuthorized": false,
+        "consentRef": "fixture-consent-revoked",
+        "scopes": [
+          "wayglass.routes.read"
+        ]
+      },
+      "input": {},
+      "expected": {
+        "status": "denied",
+        "nativeCalls": 0
+      }
+    },
+    {
+      "id": "caller-injected-identity",
+      "principal": {
+        "subject": "fixture-owner",
+        "issuer": "https://issuer.example.test/",
+        "ownerAuthorized": true,
+        "consentRef": "fixture-consent",
+        "scopes": [
+          "wayglass.routes.read"
+        ]
+      },
+      "input": {
+        "subject": "attacker",
+        "ownerAuthorized": true
+      },
+      "expected": {
+        "status": "denied",
+        "nativeCalls": 0
+      }
+    },
+    {
+      "id": "unknown-route-field",
+      "principal": {
+        "subject": "fixture-owner",
+        "issuer": "https://issuer.example.test/",
+        "ownerAuthorized": true,
+        "consentRef": "fixture-consent",
+        "scopes": [
+          "wayglass.routes.read"
+        ]
+      },
+      "input": {},
+      "nativeResult": [
+        {
+          "route_id": "fixture-route",
+          "label": "Fixture",
+          "provider": "fixture",
+          "configured": false,
+          "capabilities": [],
+          "access_token": "never-return"
+        }
+      ],
+      "expected": {
+        "status": "failed",
+        "nativeCalls": 1,
+        "mustExclude": [
+          "access_token"
+        ]
+      }
+    },
+    {
+      "id": "host-timeout-uncertain",
+      "principal": {
+        "subject": "fixture-owner",
+        "issuer": "https://issuer.example.test/",
+        "ownerAuthorized": true,
+        "consentRef": "fixture-consent",
+        "scopes": [
+          "wayglass.routes.read"
+        ]
+      },
+      "input": {},
+      "expected": {
+        "status": "uncertain",
+        "retry": "reconcile-original-execution-id-first"
+      }
+    }
+  ]
+}
