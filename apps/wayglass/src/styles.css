@@ -710,3 +710,242 @@ button { font: inherit; cursor: pointer; }
   .tv-fields.three-col { grid-template-columns: 1fr; }
   .wg-shell-nav { border-radius: 22px; }
 }
+
+
+/* WAYGLASS / LIVING WATERCOLOR ENTRYWAY
+   The fluid body arrives first. Every panel is an optional overlay on her
+   expression, not a replacement home screen or a model-execution claim. */
+.wg-shell-nav[hidden] { display: none !important; }
+.wg-ship-switch {
+  position: fixed;
+  inset: auto 22px 20px auto;
+  z-index: 40;
+  padding: 11px 17px;
+  background: rgba(13, 39, 45, .83);
+  border-color: rgba(206, 194, 143, .42);
+  box-shadow: 0 10px 36px rgba(0,0,0,.5);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+.wg-shell-nav:not([hidden]) {
+  position: fixed;
+  z-index: 39;
+  bottom: 74px;
+  right: 20px;
+  top: auto;
+  left: auto;
+  width: min(470px, calc(100vw - 30px));
+  margin: 0;
+  padding: 12px;
+  border-radius: 20px;
+  background: rgba(8, 23, 30, .93);
+  flex-direction: column;
+  gap: 7px;
+  max-height: 65vh;
+  overflow-y: auto;
+}
+.wg-shell-nav button {
+  text-align: left;
+  justify-content: flex-start;
+}
+html[data-wayglass-surface="wayglass:living-watercolor"] #app {
+  width: min(1500px, calc(100% - 28px));
+  padding-top: 14px;
+}
+.wc-surface { --wc-line: rgba(210, 223, 215, .20); gap: 12px; }
+.wc-head {
+  padding: clamp(16px, 2.6vw, 26px);
+  border-radius: 22px;
+  background: rgba(9, 30, 36, .42);
+  grid-template-columns: 1fr minmax(150px, 240px);
+  align-items: center;
+}
+.wc-head h1 {
+  font-size: clamp(2rem, 4.5vw, 3.65rem);
+  line-height: .96;
+  font-weight: 400;
+}
+.wc-head .lede { font-size: clamp(.79rem, 1.2vw, .97rem); margin-top: 8px; max-width: 60rem; }
+.wc-head-signal { display: grid; gap: 6px; align-content: center; justify-items: start; font-size: .77rem; color: rgba(225,239,231,.86); }
+.wc-status-light { height: 8px; width: 8px; border-radius: 50%; background: #a8c4bb; box-shadow: 0 0 16px rgba(144,222,210,.52); }
+.wc-composition {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(236px, 295px);
+  align-items: start;
+  gap: 12px;
+}
+.wc-stage {
+  position: relative;
+  min-height: min(790px, 84vh);
+  overflow: hidden;
+  border-radius: 32px;
+  isolation: isolate;
+  background: #12232e;
+}
+.wc-stage::before {
+  z-index: 1;
+  background:
+    radial-gradient(ellipse at 35% 4%, rgba(250,216,149,.10), transparent 56%),
+    linear-gradient(180deg, rgba(6,23,31,.08), transparent 30%, rgba(4,19,30,.24));
+}
+.wc-fluid {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+  touch-action: none;
+  outline: none;
+}
+.wc-fluid:focus-visible { box-shadow: inset 0 0 0 3px #e9c993; }
+.wc-stage-meta {
+  position: absolute;
+  top: 19px;
+  left: 21px;
+  z-index: 2;
+  color: rgba(229,228,207,.55);
+  letter-spacing: .18em;
+  font: 600 .64rem/1.3 ui-monospace, SFMono-Regular, Consolas, monospace;
+  pointer-events: none;
+}
+.wc-deck {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  z-index: 3;
+  width: min(700px, calc(100% - 28px));
+  max-height: min(69vh, 540px);
+  overflow-y: auto;
+  padding: clamp(13px, 1.8vw, 22px);
+  display: grid;
+  gap: 10px;
+  border-radius: 24px;
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.075),transparent 45%),
+    rgba(8, 27, 35, .57);
+  border: 1px solid rgba(210,229,221,.24);
+  box-shadow: 0 20px 70px rgba(0,0,0,.3);
+  scrollbar-width: thin;
+}
+.wc-deck-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.wc-deck h2, .wc-controls h2 { margin: 0; font: 400 clamp(1.5rem, 2.4vw, 2.05rem)/1 Georgia, serif; }
+.wc-deck .eyebrow, .wc-controls .eyebrow { font-size: .61rem; }
+.wc-model-state {
+  padding: 7px 10px;
+  border: 1px solid rgba(181,208,206,.2);
+  border-radius: 999px;
+  font-size: .68rem;
+  color: rgba(212,228,225,.83);
+}
+.wc-modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.wc-mode {
+  cursor: pointer;
+  color: #e8f0eb;
+  font: 600 .69rem/1.2 Inter, system-ui, sans-serif;
+  border: 1px solid rgba(206,230,222,.21);
+  border-radius: 999px;
+  padding: 8px 10px;
+  background: rgba(54,102,108,.19);
+  transition: background 150ms ease, border-color 150ms ease;
+}
+.wc-mode:hover { background: rgba(89,137,135,.33); }
+.wc-mode.active {
+  border-color: rgba(237,210,162,.75);
+  background: rgba(165,132,75,.28);
+  color: #ffebca;
+}
+.wc-mode-intent { margin: 0; color: rgba(220,235,232,.7); font-size: .72rem; line-height: 1.5; }
+.wc-voice {
+  min-height: 64px;
+  max-height: 148px;
+  overflow-y: auto;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  border-radius: 16px;
+  background: rgba(4,18,26,.30);
+  padding: 12px;
+  color: #f0f0e6;
+  font-size: .88rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.wc-voice strong { color: #f7ddb0; font-size: .7rem; }
+.wc-voice p { margin: 0; }
+.wc-voice-empty { color: rgba(224,236,235,.67); font-style: italic; font-family: Georgia, serif; }
+.wc-input-label { font-size: .68rem; color: rgba(226,236,231,.84); }
+.wc-deck textarea, .wc-controls textarea, .wc-compose-actions select {
+  font: inherit;
+  color: #eef5f1;
+  border: 1px solid rgba(189,215,208,.24);
+  border-radius: 11px;
+  background: rgba(2,15,22,.37);
+  padding: 10px 11px;
+  resize: vertical;
+  min-width: 0;
+  width: 100%;
+}
+.wc-deck textarea:focus-visible, .wc-controls textarea:focus-visible,
+.wc-compose-actions select:focus-visible { outline: 2px solid #f0c88b; outline-offset: 2px; }
+.wc-compose-actions { display: flex; align-items: center; gap: 8px; }
+.wc-compose-actions select { flex: 1; min-width: 110px; width: auto; }
+.wc-compose-actions button { white-space: nowrap; flex-shrink: 0; }
+.wc-feedback { min-height: 2.2em; line-height: 1.4; color: rgba(227,233,224,.76); }
+.wc-program { padding: 10px 12px; border: 1px solid rgba(244,207,139,.3); border-radius: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+.wc-program[hidden] { display: none !important; }
+.wc-program p { margin: 0; flex-basis: 100%; }
+.wc-controls {
+  position: relative;
+  padding: 20px;
+  display: grid;
+  gap: 14px;
+  border-radius: 26px;
+  background: rgba(10, 28, 34, .66);
+}
+.wc-controls > div, .wc-controls > p, .wc-controls > label, .wc-controls > button { position: relative; z-index: 1; }
+.wc-controls p { line-height: 1.55; margin: 8px 0 0; }
+.wc-controls label { display: grid; gap: 8px; font-size: .76rem; color: rgba(229,238,229,.84); }
+.wc-color-label { grid-template-columns: 1fr auto; align-items: center; }
+.wc-controls input[type=color] {
+  width: 46px;
+  height: 42px;
+  border: 1px solid rgba(255,255,255,.28);
+  border-radius: 10px;
+  padding: 3px;
+  background: rgba(8,26,34,.65);
+  cursor: pointer;
+}
+.wc-controls input[type=range] { width: 100%; accent-color: #ddbd87; }
+.wc-controls output { float: right; color: #f2dcae; }
+.wc-tool-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+.wc-inspector { border-top: 1px solid rgba(235,237,216,.17); padding-top: 12px; }
+.wc-inspector dl { display: grid; gap: 8px; margin: 10px 0 0; }
+.wc-inspector dl > div { display: flex; justify-content: space-between; gap: 12px; font-size: .75rem; }
+.wc-inspector dt { color: rgba(225,238,231,.65); }
+.wc-inspector dd { margin: 0; text-align: right; color: #e2d1b7; }
+.wc-surface button:focus-visible { outline: 2px solid #f2d29a; outline-offset: 3px; }
+@media (max-width: 1050px) {
+  .wc-composition { grid-template-columns: minmax(0,1fr) minmax(210px,255px); }
+  .wc-head { grid-template-columns: 1fr; }
+  .wc-stage { min-height: 750px; }
+}
+@media (max-width: 760px) {
+  .wc-composition { grid-template-columns: 1fr; }
+  .wc-stage { min-height: max(710px, 87svh); border-radius: 23px; }
+  .wc-deck { max-height: 54%; bottom: 8px; left: 8px; width: calc(100% - 16px); padding: 14px; }
+  .wc-controls { border-radius: 22px; padding: 18px; }
+  .wc-head { border-radius: 22px; }
+  .wc-deck h2 { font-size: 1.6rem; }
+  .wc-compose-actions { flex-wrap: wrap; }
+  .wc-compose-actions select { flex-basis: 100%; }
+  .wc-compose-actions button { flex: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wc-mode { transition: none; }
+}
