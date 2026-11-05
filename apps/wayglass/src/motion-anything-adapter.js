@@ -5,7 +5,7 @@ export function installWayglassMotion({ root = document } = {}) {
   const reduced = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
   let enabled = !reduced?.matches;
   const onPreferenceChange = (event) => {
-    if (event.matches) { enabled = false; label(); }
+    if (event.matches) { enabled = false; clearMagnets(); label(); }
   };
   reduced?.addEventListener?.('change', onPreferenceChange);
   const toggle = document.createElement('button');
@@ -20,7 +20,13 @@ export function installWayglassMotion({ root = document } = {}) {
   label();
   const nav = document.querySelector('.wg-shell-nav');
   (nav || document.body).append(toggle);
-  toggle.addEventListener('click', () => { enabled = !enabled; label(); });
+  toggle.addEventListener('click', () => { enabled = !enabled && !reduced?.matches; if (!enabled) clearMagnets(); label(); });
+  function clearMagnets() {
+    document.querySelectorAll('.glass-chip, .send-jewel').forEach((target) => {
+      target.style.removeProperty('--wg-magnet-x');
+      target.style.removeProperty('--wg-magnet-y');
+    });
+  }
   function move(event) {
     if (!enabled || event.pointerType === 'touch') return;
     const target = event.target?.closest?.('.glass-chip, .send-jewel');
@@ -43,6 +49,7 @@ export function installWayglassMotion({ root = document } = {}) {
     reduced?.removeEventListener?.('change', onPreferenceChange);
     root.removeEventListener('pointermove', move);
     root.removeEventListener('pointerout', reset);
+    clearMagnets();
     toggle.remove();
     delete document.documentElement.dataset.wgMotion;
   } };
