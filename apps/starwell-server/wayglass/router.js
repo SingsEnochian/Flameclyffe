@@ -22,6 +22,8 @@ const {
   normalizeThoughtVibrationDomainReceipts,
 } = require('../../../lib/wayglass-thought-vibration.cjs');
 
+const { publicProjectFederation } = require('../../../lib/wayglass-project-federation.cjs');
+
 const router = express.Router();
 const MAX_HISTORY = 16;
 const MAX_TEXT = 12000;
@@ -244,6 +246,13 @@ async function callOpenAI(route, payload) {
     usage: data.usage || null,
   };
 }
+
+// Inventory is informational only. Never treat it as a permission or mounting grant.
+router.get('/projects', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  try { return res.json(publicProjectFederation()); }
+  catch (_error) { return res.status(503).json({ schema: 'wayglass.project-federation-error/v1', error: 'Project inventory unavailable.' }); }
+});
 
 router.get('/kernel', (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
