@@ -1,0 +1,66 @@
+{
+  "schema": "wayglass.gestalt-01.calibration/v1",
+  "preregistration_sha256": "e947b1d97ee6ce21851ec6ea2a45d341753085eabc679c466771f49d694c7dca",
+  "rule_satisfied": true,
+  "grid": [
+    {
+      "k": 5,
+      "rounds": 4,
+      "tasks": 60,
+      "success": 0
+    },
+    {
+      "k": 5,
+      "rounds": 8,
+      "tasks": 60,
+      "success": 0
+    },
+    {
+      "k": 6,
+      "rounds": 4,
+      "tasks": 60,
+      "success": 0.26666666666666666
+    },
+    {
+      "k": 6,
+      "rounds": 8,
+      "tasks": 60,
+      "success": 0.26666666666666666
+    },
+    {
+      "k": 7,
+      "rounds": 4,
+      "tasks": 60,
+      "success": 0.5833333333333334
+    },
+    {
+      "k": 7,
+      "rounds": 8,
+      "tasks": 60,
+      "success": 0.5833333333333334
+    },
+    {
+      "k": 8,
+      "rounds": 4,
+      "tasks": 60,
+      "success": 0.7833333333333333
+    },
+    {
+      "k": 8,
+      "rounds": 8,
+      "tasks": 60,
+      "success": 0.7833333333333333
+    }
+  ],
+  "selected": {
+    "k": 7,
+    "rounds": 4,
+    "success": 0.5833333333333334
+  },
+  "apparatus": {
+    "commit": "17e9d2bdd489f7394f8ec8f12a858852a65811a3",
+    "dirty_tree": false,
+    "node": "v22.23.4",
+    "at": "2026-11-06T20:03:34.416Z"
+  }
+}
