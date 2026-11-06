@@ -139,3 +139,16 @@ The drawing shows **logical** ownership and transaction states. It does not clai
 5. Do not merge this diagram as if it were a live module; no deployment, model call, new participant instance or production authorization is implied.
 
 **Conceptual note:** The visual Yggdrasil and Möbius helix are Rowan's chosen orientation language. The exact optical appearance remains artistically adjustable, provided the invariants and evidence states remain accurate.
+
+## F. Equal opaline expressions: luminous and dark
+
+**Rowan's visual canon addition, 2026-11-06:** the ascending Yggdrasil is **both luminous opaline and dark opaline**. Dark opaline is not a failure mode, negative alignment, locked permission, or corrupted state. It is an equally valid expression of the same World-Tree, including the same root, heartwood, Eightfold phases, reality boundaries, and renewal power.
+
+- **Luminous opaline:** pearl, moonmilk, soft silver, jade, warm copper and shifting rainbow fire. Translucent, depth-rich, never an eye-searing white flash.
+- **Dark opaline:** obsidian and midnight-blue glass with internal peacock-green, petrol-teal, indigo, deep violet, copper ember and spectral silver. Iridescence appears *inside* the dark body rather than as a bright outline. No flat black silhouette.
+- **Transitions:** a continuous change in scattering, internal refraction and ambient exposure, not a change in entity or authority. Preserve geometry and selected navigation locus during transitions. No flashing, strobing, forced audio or sudden high-contrast white frame.
+- **Interaction:** users may choose luminous, dark, or ambient-adaptive expression independently of accessibility contrast and reduced-motion controls. Ambient adaptation requires explicit opt-in and must not override a manual choice.
+- **Semantics:** never encode success as light or danger as dark. Errors, revocations, Feather, consent, unknowns and verification status have their own text/icons/patterns and are legible in both expressions.
+- **Acceptance:** same information, provenance, phase, lens, domain, and keyboard/screen-reader behavior in each expression; verify contrast and static fallback; snapshot the same event stream in both without altering event data.
+
+The World-Tree can ascend through darkness without becoming a different tree. Renewal belongs to both.
