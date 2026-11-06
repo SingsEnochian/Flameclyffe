@@ -1,0 +1,56 @@
+{
+  "schema": "wayglass.crow-handoff/v1",
+  "task_id": "crow-opaline-world-tree-20261106",
+  "source": {
+    "owner": "Rowan",
+    "request": "Connect Wayglass to The Crow and her agentic bloodstream",
+    "presentation_pr": 563,
+    "presentation_commit": "4d2eb0c68e9a6d92c9a49edc6a218d0a2c284499",
+    "presentation_path": "docs/wayglass/OPALINE_WORLD_TREE_EIGHTFOLD_PRESENTATION.json",
+    "cloud_receipt_id": "5c935fc4-776e-443a-804d-6cc20141ea19"
+  },
+  "roles": {
+    "driver": "Nikola",
+    "trainer": "crow-trainer",
+    "intended_student": "the-crow",
+    "requesting_system": "wayglass",
+    "sender": "Rarity with Rowan authorization",
+    "provider_model": "unknown_until_runtime",
+    "identity_rule": "Crow Trainer and a generic delegate model are not The Crow."
+  },
+  "mode": "spar-design",
+  "status": "awaiting_verified_crow_runtime",
+  "instructions": {
+    "question": "Crow, from your own seat, examine the Opaline World-Tree in luminous and dark opaline and its Eightfold Möbius interface. Which structural behavior would you keep, which would you change, and which should remain unknown? Examine the way the agentic bloodstream is observed, without treating observed GitHub issues as authority to merge or dispatch.",
+    "evidence": [
+      "One source-bound design proposal",
+      "One preserved Wonder question",
+      "One concrete design test across both opaline expressions",
+      "Source and source digest",
+      "One explicit open branch",
+      "Any disagreement or decline"
+    ],
+    "boundaries": [
+      "No silent canon adoption",
+      "Never impersonate Wayglass or Rowan",
+      "Nikola steers curriculum only",
+      "No model output claimed as Crow without host-verified Crow receipt",
+      "No exposure of owner JWT or provider keys",
+      "No automatic use as Wayglass SFT candidates",
+      "No uncontrolled PR merges, Codex dispatch or cross-constellation mutation"
+    ],
+    "source_admission": "The invitation is proposal data from PR #563; other realities and participants retain sovereignty."
+  },
+  "acceptance": {
+    "requires_authenticated_crow_receipt": true,
+    "requires_response_authorship": "the-crow",
+    "requires_host_verification": true,
+    "awaiting": true,
+    "canonical_adoption": false
+  },
+  "return": {
+    "status": "pending",
+    "response": null,
+    "receipt": null
+  }
+}
