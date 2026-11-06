@@ -1,0 +1,12 @@
+{
+  "schema": "wayglass.gestalt-01.amendment/v1",
+  "amends": "PREREGISTRATION.json as amended by AMENDMENT-1.json",
+  "registered_by": "Faer Uial, 2026-11-06",
+  "timing": "after three apparatus smoke trials (held_out seeds 1001-1003) under amendment 1, before main data collection",
+  "observation_that_prompted_it": "Seed 1002 recorded a joint success for 'solo', which by definition has no crossing. Diagnosis: the scoring step intersected the two quads' private candidate sets itself, so the harness, not the protocol, combined information across quads. The scorer must govern, never think.",
+  "change": "Each quad proposes independently: its proposal is its sole remaining candidate, or none. A joint answer exists only when both quads' proposals agree. The harness compares proposals and never combines private sets. A single-quad proposal is recorded but is not a joint answer. There is no guessing.",
+  "primary_outcome_restated": "P = fraction of tasks whose joint answer (both proposals agreeing) equals the secret, with valid integrity",
+  "applies_to": "all protocols identically",
+  "unchanged": "hypotheses, budgets, task sets, seeds, encoding (amendment 1), analysis, invalidation rule, interpretation limits",
+  "smoke_trial_status": "not counted; seeds 1001-1003 are rerun with every other task"
+}
