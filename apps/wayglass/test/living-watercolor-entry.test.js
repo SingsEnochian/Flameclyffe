@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { WAYGLASS_ENTRY_SURFACE, resolveWayglassEntry } from '../src/wayglass-entry.js';
 import { createWatercolorFluid } from '../src/watercolor-fluid.js';
@@ -120,4 +121,20 @@ test('Journey retains four chambers and Feather blocks unapproved movement',()=>
   assert.throws(()=>journey.resume(),/Owner confirmation/);
   journey.resume({confirmed:true});
   assert.equal(journey.snapshot().feather_stopped,false);
+});
+
+
+test('watercolor desk gives conversation an expandable viewport without claiming model connectivity',()=>{
+  const ui=readFileSync('apps/wayglass/src/surfaces/living-watercolor.js','utf8');
+  const styles=readFileSync('apps/wayglass/src/styles.css','utf8');
+  assert.match(ui,/id="wc-expand"/);
+  assert.match(ui,/aria-controls="wc-deck"/);
+  assert.match(ui,/rows="5"/);
+  assert.match(ui,/setDeskExpanded\(!deskExpanded\)/);
+  assert.match(ui,/event\.key==='Escape'/);
+  assert.match(ui,/root\.removeEventListener\('keydown',onDeskKeyDown\)/);
+  assert.match(ui,/Registered route · live connection unverified/);
+  assert.match(styles,/\.wc-deck\.is-expanded\s*\{[\s\S]*?position:\s*fixed/);
+  assert.match(styles,/\.wc-deck\.is-expanded\s+\.wc-voice/);
+  assert.match(styles,/\.wc-deck\s+#wc-prompt/);
 });
