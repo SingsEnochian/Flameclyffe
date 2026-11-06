@@ -710,3 +710,15 @@ button { font: inherit; cursor: pointer; }
   .tv-fields.three-col { grid-template-columns: 1fr; }
   .wg-shell-nav { border-radius: 22px; }
 }
+
+
+/* Shipwide console remains mounted when the Writing Room or lab changes. */
+.wg-ship-presence{position:fixed;right:16px;bottom:16px;z-index:80;width:min(360px,calc(100vw - 32px));padding:12px;border-radius:20px;max-height:78vh;overflow:auto}
+.wg-presence-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.wg-ship-presence [data-presence-body]:not([hidden]){display:grid;gap:9px;margin-top:12px}
+.wg-ship-presence [hidden]{display:none!important}
+.wg-ship-presence label{font-size:.72rem;color:var(--glass-muted);letter-spacing:.06em}
+.wg-ship-presence textarea{min-height:76px}
+.wg-ship-presence [data-presence-status]{font-size:.72rem;color:var(--glass-muted);overflow-wrap:anywhere}
+.wg-ship-presence [data-presence-log]{max-height:210px;overflow:auto;font-size:.82rem;line-height:1.5;overflow-wrap:anywhere}
+.wg-ship-presence [data-presence-log] p{border-top:1px solid var(--glass-line);padding-top:7px}

@@ -1,4 +1,5 @@
 import './styles.css';
+import { installShipwidePresence } from './shipwide-presence.js';
 import { installWayglassField } from './glass-field.js';
 import { installMotionChoreography } from './motion-choreography.js';
 import { installKeyboardControls } from './keyboard-controls.js';
@@ -112,6 +113,8 @@ const wayglass = Object.freeze({
   embodiment: Object.freeze({ ...embodiment, ar }),
 });
 
+const shipPresence = installShipwidePresence({ host: document.body, getSurface: () => mountedSurface });
+globalThis.__wayglassShipPresence = shipPresence;
 globalThis.__wayglassOS = wayglass;
 
 await wayglass.mount('arcsweep:writing-room');
