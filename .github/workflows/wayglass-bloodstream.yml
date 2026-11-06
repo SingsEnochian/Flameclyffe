@@ -1,0 +1,58 @@
+name: Wayglass Bloodstream
+# Autonomous repair/reconciliation pulse. Kernel-gated (lib/wayglass-kernel.cjs
+# inspectCirculationAction). Merges only into wayglass/current, never main.
+# Stop everything: set repository variable WAYGLASS_FEATHER=stopped, or open
+# any issue labelled `wayglass:feather`.
+on:
+  schedule:
+    - cron: '41 1-23/3 * * *'
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: 'Apply actions (false = dry run with receipts in the run summary only)'
+        type: boolean
+        default: false
+  pull_request:
+    paths:
+      - 'lib/wayglass-bloodstream.cjs'
+      - 'lib/wayglass-kernel.cjs'
+      - 'scripts/wayglass-bloodstream.mjs'
+      - 'test/wayglass-bloodstream.test.mjs'
+      - '.github/workflows/wayglass-bloodstream.yml'
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  checks: read
+  statuses: read
+concurrency:
+  group: wayglass-bloodstream
+  cancel-in-progress: false
+jobs:
+  pulse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+      - name: Verify kernel gate and reconciliation analysis
+        run: node --test test/wayglass-bloodstream.test.mjs
+      - name: Pulse
+        if: github.event_name != 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WAYGLASS_CODEX_DISPATCH_TOKEN: ${{ secrets.WAYGLASS_CODEX_DISPATCH_TOKEN }}
+          WAYGLASS_FEATHER: ${{ vars.WAYGLASS_FEATHER }}
+          WAYGLASS_CODEX_DAILY_BUDGET: ${{ vars.WAYGLASS_CODEX_DAILY_BUDGET }}
+          WAYGLASS_APPLY: ${{ github.event_name == 'schedule' && vars.WAYGLASS_BLOODSTREAM_APPLY == 'true' || github.event_name == 'workflow_dispatch' && inputs.apply && 'true' || 'false' }}
+        run: node scripts/wayglass-bloodstream.mjs
+      - name: Preserve pulse report
+        if: always() && github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayglass-bloodstream-pulse
+          path: .wayglass-artifacts/bloodstream-pulse.json
+          if-no-files-found: ignore
+          retention-days: 30
