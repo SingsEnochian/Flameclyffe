@@ -109,6 +109,7 @@ export async function mountLivingWatercolorSurface(root) {
   function setDeskExpanded(next){
     deskExpanded=Boolean(next);
     deck.classList.toggle('is-expanded',deskExpanded);
+    stage.classList.toggle('wc-stage-expanded',deskExpanded);
     expandButton.setAttribute('aria-expanded',String(deskExpanded));
     expandButton.textContent=deskExpanded?'Restore painting view':'Expand desk';
     expandButton.title=deskExpanded?'Return to painting-focused view':'Expand writing and reading space';
@@ -220,7 +221,7 @@ export async function mountLivingWatercolorSurface(root) {
       }
       routeId=routes.find(r=>r.route_id==='local:ollama')?.route_id||routes[0]?.route_id||null;
       invite.disabled=!routeId;
-      routeState.textContent=routeId?'Model route available · opt-in':'No model route available';
+      routeState.textContent=routeId?'Registered route · live connection unverified':'No model route available';
     }catch(error){
       routeId=null;route.replaceChildren();invite.disabled=true;
       routeState.textContent='Model route offline';
