@@ -41,3 +41,14 @@ test('MCP tool exposes only receipt; unauthenticated call is denied',async()=>{
  const receipt=JSON.parse(result.result.content[0].text);
  assert.equal(receipt.status,'queued_for_review');assert.equal(receipt.wayglass_reply,null);
 });
+
+test('presentation tool is not advertised until the trusted host binds ingress',async()=>{
+ const list={jsonrpc:'2.0',id:8,method:'tools/list'};
+ const without=await handleMcpMessage(list,{authenticated:true});
+ assert.deepEqual(without.result.tools.map(t=>t.name),['wayglass_routes']);
+ const withBound=await handleMcpMessage(list,{authenticated:true,present:fixture().present});
+ assert.deepEqual(withBound.result.tools.map(t=>t.name),['wayglass_routes','wayglass_present']);
+ const call={jsonrpc:'2.0',id:9,method:'tools/call',params:{name:'wayglass_present',arguments:payload}};
+ const unbound=await handleMcpMessage(call,{authenticated:true});
+ assert.equal(unbound.error.code,-32603);
+});
