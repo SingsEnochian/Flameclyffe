@@ -38,6 +38,13 @@ Wayglass owns its kernel, route ecology, world/continuity orchestration, embodim
 
 Training completion does not imply promotion to a live route.
 
+### Wayglass Tone Studio
+
+The canonical tone namespace is `wayglass-tone`, not `arkfire-tone`. The connected database exposes reference-only `wayglass_tone_profiles` and `wayglass_tone_journeys` views. They preserve Arkfire's original source records, authorship, and historical routes. Runa may learn from permissioned references, but cannot inherit Arkfire's name, canon, or source ownership.
+
+See [Wayglass Tone provenance and sovereignty boundary](../../docs/architecture/WAYGLASS_TONE_SOURCE_BOUNDARY_V0_1.md). A runnable Wayglass Tone screen and production audio calibration are **not** claimed by the read-only rename.
+
+
 
 ## Hosting boundary
 
