@@ -7,7 +7,8 @@ const M = require('../lib/wayglass-mobius.cjs');
 const K = require('../lib/wayglass-kernel.cjs');
 const { digest } = require('../lib/wyrdrune/canonical.cjs');
 
-const sleep = ms => new Promise(r => setTimeout(r, ms));
+// FR-09: deterministic scheduling — `delay` counts event-loop turns, never wall-clock milliseconds.
+const sleep = turns => new Promise(r => { let n = turns; const step = () => (--n > 0 ? setImmediate(step) : r()); setImmediate(step); });
 // A small doubling system: emits its value as a staged effect, carries value * 2.
 function doubling({ log = [], verifyOk = v => v > 0, delay = 0, transcend } = {}) {
   const wait = () => (delay ? sleep(delay) : null);

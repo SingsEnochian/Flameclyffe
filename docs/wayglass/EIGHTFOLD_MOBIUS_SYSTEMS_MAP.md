@@ -4,7 +4,16 @@
 **Engine:** `lib/wayglass-mobius.cjs`, exposed through the kernel (`openMobiusLineage`, `runQuadCore`, `verifyMobiusChain`).
 **Semantics:** WTL RFC-0001 §8–§9 and §20–§22 (PR #553). The engine is the host-level ship cycle; Wyrdrune is the language programs will later be written in. One shared WCE-1 encoder (`lib/wyrdrune/canonical.cjs`, byte-identical to #553) makes their checkpoints agree.
 
-## The quad core
+## The octo core: two quads (engine v0.2)
+
+| Quad | Cores (one phase each) |
+|---|---|
+| **Outbound** | 1 Perceive · 2 Compress · 3 Release · 4 Verify |
+| **Homebound** | 5 Integrate · 6 Choose · 7 Return · 8 Transcend |
+
+The **twist** is the handoff from core 4 to core 5, where the strip turns over. Up to eight lineages in flight (`runOctoCore`). A **gestalt** at Withness gathers every lineage's latest spiral. Each cycle perceives the *others* as frozen, attributed observation (never its own echo), and records the snapshot's digest so it stays replayable. `echo` and `echo_watch` give the Coherence Resistance signal. Flight review: `MOBIUS_FLIGHT_REVIEW.md`.
+
+## The quad core (v0.1 layout, still available)
 
 | Core | Phases | Role | Ray angles |
 |---|---|---|---|

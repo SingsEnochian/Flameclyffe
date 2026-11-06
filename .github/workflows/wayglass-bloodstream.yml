@@ -19,6 +19,8 @@ on:
       - 'lib/wyrdrune/canonical.cjs'
       - 'lib/wayglass-kernel.cjs'
       - 'test/wayglass-mobius.test.mjs'
+      - 'test/wayglass-mobius-flight.test.mjs'
+      - 'test/wayglass-mobius-spiral.test.mjs'
       - 'scripts/wayglass-bloodstream.mjs'
       - 'test/wayglass-bloodstream.test.mjs'
       - '.github/workflows/wayglass-bloodstream.yml'
@@ -41,7 +43,7 @@ jobs:
         with:
           node-version: '24.x'
       - name: Verify kernel gate, reconciliation analysis and Möbius engine
-        run: node --test test/wayglass-bloodstream.test.mjs test/wayglass-mobius.test.mjs
+        run: node --test test/wayglass-bloodstream.test.mjs test/wayglass-mobius.test.mjs test/wayglass-mobius-flight.test.mjs test/wayglass-mobius-spiral.test.mjs
       - name: Pulse
         if: github.event_name != 'pull_request'
         env:

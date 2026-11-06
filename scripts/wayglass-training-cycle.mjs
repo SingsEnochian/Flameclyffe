@@ -9,7 +9,9 @@ import { join, resolve, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
 import { runTrainingCycle } from '../lib/wayglass-mobius-training.mjs';
+const { featherStopped } = createRequire(import.meta.url)('../lib/wayglass-bloodstream.cjs');
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(here, '..');
@@ -41,7 +43,7 @@ function trainer(args) {
   return r.stdout ? JSON.parse(r.stdout) : null;
 }
 
-const files = { checkpoints: 'checkpoints.jsonl', results: 'results.jsonl', 'sft-candidates': 'sft-candidates.jsonl', 'spot-check': 'spot-check.jsonl' };
+const files = { journal: 'journal.jsonl', checkpoints: 'checkpoints.jsonl', results: 'results.jsonl', 'sft-candidates': 'sft-candidates.jsonl', 'spot-check': 'spot-check.jsonl' };
 const ledger = {
   async read(name) {
     const p = join(ledgerDir, files[name]);
@@ -113,7 +115,8 @@ const io = {
 
 const mobiusDrills = readFileSync(join(repoRoot, 'training/wayglass/MOBIUS_DRILLS.jsonl'), 'utf8').split('\n').filter(Boolean).map(l => JSON.parse(l));
 const { result, concept } = await runTrainingCycle(io, { apply, answerModel, judgeModel, mobiusDrills,
-  feather: () => /^stop/i.test(process.env.WAYGLASS_FEATHER || '') });
+  feather: () => featherStopped({ variable: process.env.WAYGLASS_FEATHER || '' }) });
+if (result.journal_error) { console.log('JOURNAL: ' + result.journal_error); process.exitCode = 1; }
 
 const lines = [
   `Wayglass training · Möbius cycle ${result.cycle} (${result.face} face) · ${result.status} · ${apply ? 'APPLY' : 'dry-run'}`,
