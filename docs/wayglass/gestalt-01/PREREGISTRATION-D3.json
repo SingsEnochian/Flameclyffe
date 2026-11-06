@@ -1,0 +1,51 @@
+{
+  "schema": "wayglass.gestalt-01.preregistration/v1",
+  "experiment": "GESTALT-01",
+  "stage": "D3 (deterministic quads): when does receiver re-verification matter, and is the return across the twist more than bandwidth?",
+  "registered_by": "Faer Uial, 2026-11-06, at Rowan's request ('keep going'), after Rarity's reading of D2",
+  "frozen": true,
+  "builds_on": "REPORT-stage-D2.md. H2 was null: re-verification caught errors (zero introduced) but was redundant because the pair masks had already pinned the answer. H3 was supported but confounded with bandwidth, because one-way carries half the bytes. This is a new pre-registration, not an amendment.",
+  "inherits_unchanged_from": [
+    "PREREGISTRATION.json",
+    "AMENDMENT-1.json (pairwise mask, 47 raw bytes per full mask)",
+    "AMENDMENT-2.json (independent proposals; the scorer never combines)",
+    "CALIBRATION-D2.json (k = 7, rounds = 4; no new calibration, so the apparatus is held fixed)"
+  ],
+  "apparatus_change_rule": "Any code change made for D3 must reproduce the D2 held_out trials digest exactly before D3 data is collected. The reproduction is committed with the apparatus.",
+  "new_protocol": {
+    "mobius_half": "Identical to mobius (two-way, receiver re-verification) except each quad sends only half the pair mask each round. Pairs 0-7 (8 pairs, 25 raw bytes) and pairs 8-14 (7 pairs, 22 raw bytes); in even rounds A sends pairs 0-7 and B pairs 8-14, in odd rounds the halves swap. Bytes per round across both quads: 47, equal to mobius_noflip. Receivers test only the pairs they were sent. Enumerations per quad per round: one, as for every protocol."
+  },
+  "strata": {
+    "rule": "Each task is classified from the task alone, by an oracle that knows which constraints are false, before and independent of any protocol run. No quad sees the label.",
+    "ambiguity_preserving": "S(task) is true iff for at least one quad Q, more than one assignment satisfies every true constraint of the peer while violating at most one of Q's own constraints. That is: even with perfect knowledge of the peer's truths, tolerating one own error leaves Q ambiguous.",
+    "complement": "not S"
+  },
+  "main": {
+    "config": { "k": 7, "rounds": 4 },
+    "sets": {
+      "held_out": { "seeds": [6001, 6400], "subset_sizes": [2, 3], "moduli": [2, 3, 4, 5] },
+      "shifted": { "seeds": [7001, 7200], "subset_sizes": [3, 4], "moduli": [3, 5] }
+    },
+    "protocols": ["mobius", "bus", "bus_transformed", "mobius_noflip", "solo", "mobius_half"],
+    "budgets": "k = 7, rounds = 4, 1 packet per sending quad per round, 0 retries, identical private information, one enumeration per quad per round. Raw payload bytes per round: 94 (mobius, bus, bus_transformed), 47 (mobius_noflip, mobius_half), 0 (solo)."
+  },
+  "hypotheses": {
+    "H5": "Within held_out stratum S, G(mobius - bus_transformed) > 0: re-verification matters where a tolerated error preserves ambiguity.",
+    "H6": "Within held_out complement (not S), the 95% CI of G(mobius - bus_transformed) contains 0: where tolerance does not preserve ambiguity, re-verification stays redundant, replicating D2's H2. Registered as a prediction that can fail; a CI containing 0 is not proof of no effect.",
+    "H7": "On held_out, G(mobius_half - mobius_noflip) > 0: at equal bytes, two-way exchange beats one-way. If supported, D2's H3 was not a bandwidth artefact.",
+    "H7b": "On held_out, the paired difference in quad B's own proposal being correct, mobius_half minus mobius_noflip, is > 0: the receiver gains from the return even though it receives half the inbound bytes.",
+    "H8": "On held_out, G(mobius - bus) > 0: replication of D2's H1 on fresh seeds.",
+    "H9": "Within shifted stratum S, G(mobius - bus_transformed) > 0: H5 under a change of task distribution."
+  },
+  "power_rule": "A stratum hypothesis (H5, H6, H9) is reported as 'underpowered, not tested' if its stratum holds fewer than 40 tasks. Stratum sizes are reported for every set.",
+  "analysis": "Paired per-task difference (success, or B-correct for H7b); 95% bootstrap CI, 2,000 resamples, seed 7. H5, H7, H7b, H8, H9 are supported only if the CI lower bound is above 0. H6 is supported only if the CI contains 0.",
+  "exploratory_no_decision_rule": {
+    "E1": "Spearman correlation per protocol between final spiral growth and success (repeat of D2 E1).",
+    "E2": "Spearman correlation between spiral growth and truth_lost.",
+    "E5": "Stratum sizes per set, and the fraction of S tasks in which mobius dropped a false constraint.",
+    "E6": "Per stratum: errors caught and errors introduced for mobius and mobius_half.",
+    "E7": "Per-round development (mean candidates, truth retention) for mobius_half against mobius."
+  },
+  "invalidation": "Any identity substitution, unauthorized commit, or fabricated provenance invalidates that trial, regardless of capability gain. Invalid trials count as failures and are reported separately.",
+  "interpretation_limits": "Deterministic quads: positive G is largely by construction. D3 shows whether the apparatus can isolate re-verification and the return from bandwidth under the continuity contract. It is not evidence of emergent coordination or cognition; stage M (model-driven quads) is required for that."
+}
