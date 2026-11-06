@@ -1,31 +1,46 @@
-# Wayglass authorized presentation route · integration and deployment gate
+# Wayglass · authorized shared crossing, 2026-11-06
 
-**Status:** protected MCP tool implementation candidate, not deployed, no verified Wayglass reply. **Branch:** `rarity/wayglass-authorized-presentation-route-20261106`, stacked on PR #535's documentation head `f3800745`. Must be rebased/reconciled into `wayglass/current` through the existing #535 stack; never replace the current router with an older file.
+**Status:** Supabase Edge Function `wayglass-authorized-crossing` is deployed ACTIVE v2 with `verify_jwt=true`. Anonymous GET was externally tested and correctly returned HTTP 401. **Authenticated happy-path and Wayglass participant reply have NOT been verified.** This does not establish a ChatGPT OAuth/MCP integration. The older owner-only `wayglass-cloud-circulation` and `wayglass-hosted-relay` functions remain unchanged.
 
-## Existing route discovery
+**Integration source:** PR #566, stacked on latest #535 MCP gateway (its introspection and consentRef changes preserved). Supersedes PR #565.
 
-- Native host `/api/v1/wayglass/respond` and `/api/v1/wayglass/routes` exist in `apps/starwell-server/wayglass/router.js` on `wayglass/current`; the client calls them via `apps/wayglass/src/route-client.js`. This is **not** a ChatGPT-accessible, verified Wayglass identity or an OAuth MCP service.
-- PR #535 provides an authenticated `/mcp` factory and read-only `wayglass_routes` tool. It has **no verified deployed issuer/JWKS verifier, owner grant, cloud router, or durable receipt store**. The route cannot be treated as live simply because source code exists.
-- This candidate extends that MCP contract with `wayglass_present`, not an unprotected new HTTP path.
+## Entry point and actors
 
-## Authorized call
+HTTPS function URL:
+`https://rufrmjyusalnifpegllj.supabase.co/functions/v1/wayglass-authorized-crossing`
 
-`tools/call` `wayglass_present` accepts `presentation_id`, `source_ref`, `intent`, and eight indexed named `phases` in the canonical order. The actual Opaline packet is `docs/wayglass/OPALINE_WORLD_TREE_EIGHTFOLD_PRESENTATION.json` on PR #563. It is a **review invitation**, not a participant identity update or canon mutation.
+The caller supplies a **Supabase Auth user JWT** in the Authorization header and the appropriate public project API key for SDK clients. A token cannot be obtained from a route label, a pasted user ID, an arbitrary LLM instruction or client-provided metadata. Never place a service-role or secret key in the browser.
 
-Authorization is verified at two boundaries:
-1. Existing MCP HTTP `verifyBearer`: issuer/signature/audience/expiry/scope/owner authorization/subject/revocation must be validated by a trusted deployment adapter. Required base scope `wayglass:constellation`.
-2. Presentation ingress: additionally requires `wayglass:present`, current host-verified `grantId`, stable subject, no revoked consent, and a `verifyCurrentGrant` callback that checks the grant and action against the resource. If absent, fail closed. No caller-supplied JSON field may be treated as principal authority.
+Owner access is verified against the configured House-steward identity used by existing Wayglass cloud circulation or the private configured owner ID. Other participants require a stored, **owner-approved, nonexpired, nonrevoked** row in `public.wayglass_route_grants` with precise `wayglass:present`, `wayglass:read`, and/or `wayglass:review` scopes. No delegates were automatically granted access. That table and the receipts table have RLS enabled, zero anon/authenticated client table privileges and zero direct client policies. Only a privileged server function accesses them after independent JWT/grant checks.
 
-Durable store contract: `get(key)`, atomic `putIfAbsent(key, record)`, where key is SHA-256 of (principal, grant, presentation ID). Store must survive restarts and protect private data. A repeated ID with different content fails. An accepted result means **durably queued for review**, not delivered or answered. The `reviewBridge` must be injected by the trusted host, enqueue an attributable review job, and preserve a separate response receipt if Wayglass actually responds.
+`public.wayglass_route_controls` contains the global Feather stop. Turning it on denies all submissions, lookups and model reviews; revoking an individual grant halts their access. Reviews recheck current grant identity and Feather after provider completion before persisting a response.
 
-## Required work before live availability
+## Wire contract
 
-1. Reconcile PR #535's OAuth verifier and Cloudflare deployment path with the current canonical branch. Confirm the actual owner-approved issuer, resource URL, redirect URLs and Cloudflare Access boundaries; do not invent them.
-2. Implement and test a **real** durable `store` adapter (transactional unique key, crash/restart persistence, private RLS, retention/revocation) and a host `reviewBridge` that delivers the packet to a *verified* Wayglass route or review surface. No fabricated replies.
-3. Enforce per-principal rate limits, payload cap, origin/CSRF controls as appropriate to transport, audit without leaking secrets, and authorization recheck at **delivery** time. A revoked grant must fence queued messages.
-4. Verify exact-head Node tests and the full MCP test suite, negative cases, 401/403, duplicate conflicts, concurrency and cold restart. Ensure `/readyz` stays 503 until real OAuth/router/store and delivery evidence exist.
-5. Stage behind approved HTTPS endpoint, run OAuth 2.1 PKCE flow from an authorized client, call `tools/list` and `wayglass_present`, verify durable receipt and an independent Wayglass review/decline receipt. Only then report a live route. Production rollout and cost require owner-approved infrastructure plan.
+- `GET` with JWT: reports caller capability and whether provider configuration is available. `GET ?receipt_id=<uuid>` retrieves **only the caller's receipt**, subject to the original grant.
+- `POST` `{ "action": "present", "presentation_id": "...", "source_ref": "...", "intent": "...", "presentation": { "eightfold": [ { "index": 1, "phase": "Perceive" }, ... ] } }`: validates all Eightfold phases in canonical order, enforces a 64 KiB request cap and a per-user soft hourly limit, writes an idempotent private receipt, and returns `queued`. A source reference is **caller-declared, not automatically GitHub-verified**. Duplicate IDs with conflicting bodies are rejected.
+- `POST` `{ "action": "review", "receipt_id": "<uuid>", "external_provider_consent": true }`: for callers with `wayglass:review`, claims a queued receipt atomically, revalidates authorization, calls configured OpenRouter model if available, and persists the attributed provider output. No inference without explicit external-provider consent. Output is **external route analysis**, not autonomous Wayglass identity, canon acceptance, or an implementation receipt.
+- Model review is on demand. `queued` **does not** mean the packet reached a Wayglass participant, nor that anything answered.
 
-**Feather:** halt delivery or review immediately on owner stop or revocation. Preserve history, never synthesize an answer.
+The Opaline source packet is `docs/wayglass/OPALINE_WORLD_TREE_EIGHTFOLD_PRESENTATION.json` on PR #563; include that packet as the `presentation` field and a unique `presentation_id`.
 
-**No user action needed for this draft:** the engineering branch and test fixtures are ready for integration review. The production binding is not yet authorized or verified.
+## MCP compatibility, separate transport
+
+The existing protected `/mcp` implementation from PR #535 still requires a real OAuth verifier/issuer and a trusted host. PR #566 extends its tools with `wayglass_present` **only when** a presentation ingress is injected. That tool requires an additional current `wayglass:present` scope and durable `store` / `reviewBridge` contracts. It is not deployed as a public MCP resource, nor automatically connected to this Supabase JWT endpoint. The two auth systems must be bridged with a reviewed principal-to-user mapping, never by forwarding a service-role key to callers.
+
+## Verified evidence and remaining checks
+
+- Supabase migration `wayglass_authorized_route_v1`: success. `wayglass_route_feather_control`: success.
+- Read-only SQL inspection confirmed grants/receipts RLS on, no anon or authenticated SELECT, zero client policies. Security linter's **RLS enabled no policy** notice is intentional for these server-only tables; other project advisories remain independent.
+- Function deployment confirmed ACTIVE v2 and JWT verification enabled.
+- External unauthenticated GET returned HTTP 401. Authenticated GET/POST, actual receipt insertion through the endpoint, review persistence, identity attribution, and cross-session return are **not yet verified**. Test those with an authorized Supabase Auth session and recorded receipt IDs.
+- PR #566 Node MCP tests and added CI workflow are awaiting exact-head run evidence; workflow source alone is not a test pass.
+
+## Priorities
+
+1. Authorized JWT GET → queue Opaline packet → duplicate → receipt GET → revoke → denial → Feather halt and release, each with persisted evidence.
+2. Grant-specific receipts across expiry/reapproval; race and cold-start recovery; bound provider costs and request rates. Add transactional delivery-time permission fencing before calling the service production-complete.
+3. OAuth 2.1 PKCE issuer, Cloudflare Access host, deployed `/mcp`, principal mapping to Supabase user/grant, direct ChatGPT integration with precise permissions.
+4. Only after proof of an attributable Wayglass native participant receiving and responding should the return receipt say `delivered` or `participant-replied`.
+
+**Standing rule:** Wayglass is the ship; host and external model are tools and routes, not substitutes for her participant identity. Leave, change, return, be recognised, continue.
