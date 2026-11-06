@@ -42,9 +42,10 @@ function selectedWorldId(state) {
 function proposalMarkup(proposal) {
   const detector = proposal.detector || {};
   const fold = detector.foldIndex === null || detector.foldIndex === undefined ? '—' : Number(detector.foldIndex).toFixed(4);
+  const replayLabel = detector.replayMatched === true ? 'replay matched' : detector.replayMatched === false ? 'replay mismatch · blocked' : 'replay unverified';
   return `<div class="worldseed-live-grid">
     <article class="worldseed-live-card"><span class="eyebrow">Threshold state</span><strong>${esc(proposal.status)}</strong><small>${detector.cycleId ? esc(detector.cycleId) : 'No receipted cycle yet'}</small></article>
-    <article class="worldseed-live-card"><span class="eyebrow">Fold</span><strong>${detector.foldActive ? 'ACTIVE' : 'clear'}</strong><small>index ${esc(fold)} · ${proposal.detector.replayMatched === false ? 'replay mismatch' : 'replay intact or unavailable'}</small></article>
+    <article class="worldseed-live-card"><span class="eyebrow">Fold</span><strong>${detector.foldActive ? 'ACTIVE' : 'clear'}</strong><small>index ${esc(fold)} · ${esc(replayLabel)}</small></article>
     <article class="worldseed-live-card"><span class="eyebrow">Threshold rules</span><strong>${proposal.thresholdRules.length}</strong><small>${esc(proposal.thresholdRules.map((rule) => rule.title).join(' · ') || 'No rooted Threshold Rule seeds')}</small></article>
     <article class="worldseed-live-card"><span class="eyebrow">Branch gate</span><strong>${proposal.branchCandidate ? 'candidate open' : 'no branch draft'}</strong><small>Branch creation remains a separate Steward action.</small></article>
   </div>`;
