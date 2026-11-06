@@ -1,5 +1,5 @@
 name: Wayglass Bloodstream
-# Autonomous repair/reconciliation pulse. Kernel-gated (lib/wayglass-kernel.cjs
+# Autonomous repair/reconciliation pulse: one Eightfold Möbius cycle per run. Kernel-gated (lib/wayglass-kernel.cjs
 # inspectCirculationAction). Merges only into wayglass/current, never main.
 # Stop everything: set repository variable WAYGLASS_FEATHER=stopped, or open
 # any issue labelled `wayglass:feather`.
@@ -15,7 +15,10 @@ on:
   pull_request:
     paths:
       - 'lib/wayglass-bloodstream.cjs'
+      - 'lib/wayglass-mobius.cjs'
+      - 'lib/wyrdrune/canonical.cjs'
       - 'lib/wayglass-kernel.cjs'
+      - 'test/wayglass-mobius.test.mjs'
       - 'scripts/wayglass-bloodstream.mjs'
       - 'test/wayglass-bloodstream.test.mjs'
       - '.github/workflows/wayglass-bloodstream.yml'
@@ -37,8 +40,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24.x'
-      - name: Verify kernel gate and reconciliation analysis
-        run: node --test test/wayglass-bloodstream.test.mjs
+      - name: Verify kernel gate, reconciliation analysis and Möbius engine
+        run: node --test test/wayglass-bloodstream.test.mjs test/wayglass-mobius.test.mjs
       - name: Pulse
         if: github.event_name != 'pull_request'
         env:
