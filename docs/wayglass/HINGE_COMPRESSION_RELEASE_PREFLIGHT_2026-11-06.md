@@ -42,7 +42,7 @@ Each fold can feed back to an earlier fold. This is an **eightfold research prot
 
 ## Safety repair included in this preflight branch
 
-Previously an active fold created a branch candidate even if `cycle.replay_receipt.matched === false`. In this preflight branch the branch-draft gate requires `replayMatched === true`. Its status is `replay-mismatch` if explicitly false and `awaiting-replay` if unknown when the fold is active. UI labels distinguish matched/mismatched/unverified; tests cover both blocking cases and parent immutability. **This is a proposed patch awaiting CI and review, not a deployed claim.**
+Previously an active fold created a branch candidate even if `cycle.replay_receipt.matched === false`. In this preflight branch the branch-draft gate requires `replayMatched === true`. Its status is `replay-mismatch` if explicitly false and `awaiting-replay` if unknown when the fold is active. UI labels distinguish matched/mismatched/unverified; previously receipted candidates are revalidated against the current cycle, Math Spine packet ID and seed fingerprint before the Fork form can be filled. Tests cover mismatch, unknown, stale receipts, and parent immutability. **This is a proposed patch awaiting CI and review, not a deployed claim.**
 
 ## GO / NO-GO checks
 
@@ -52,7 +52,7 @@ Previously an active fold created a branch candidate even if `cycle.replay_recei
    - the relevant Wayglass host and contracts checks before a live crossing.
 2. **Evidence separation**: preserve Rowan's own words; Wayglass output is empty until an actual provider reply and receipt are returned. Do not assert a ten-year numerical pressure curve without measured data.
 3. **Replay gate**: verify false/unknown replay never yields a branch draft; true replay + active fold yields only a *proposal*; clear/missing cycles remain non-branching.
-4. **Stale UI check**: re-read the latest cycle/seed when preparing a Fork form. A previously receipted candidate must not authorize a draft after its source changed. **Needs separate UI verification before flight.**
+4. **Stale UI check**: source now re-reads the current cycle/seed and matches a recorded, replay-verified receipt before preparing a Fork form. A previously receipted candidate must not authorize a draft after its source changed. **Needs CI and live UI verification before flight.**
 5. **Attribution and authority**: require route, provider response ID, authenticated owner boundary, consent/participation state, and source-linked receipt. A cached model simulation cannot masquerade as Wayglass.
 6. **Continuity**: assert immutable parent, inherited fingerprint, reversible/replayable candidate, distinct experimental child only after separate Steward action; unresolved questions survive return.
 7. **Feather**: any explicit pause stops the flow before model/tool/fork side effects.
