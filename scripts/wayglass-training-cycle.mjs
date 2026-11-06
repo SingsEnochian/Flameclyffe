@@ -10,6 +10,7 @@ import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { runTrainingCycle } from '../lib/wayglass-mobius-training.mjs';
+import { inspectBloodstreamComments } from '../lib/wayglass-bloodstream-read.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(here, '..');
@@ -73,12 +74,15 @@ const io = {
     return prs.length;
   },
   async bloodstreamHead() {
-    const issues = await gh(`/repos/${repo}/issues?state=open&labels=wayglass:lineage&per_page=1`);
-    if (!issues[0]) return null;
-    const comments = await gh(`/repos/${repo}/issues/${issues[0].number}/comments?per_page=100`);
-    const last = [...comments].reverse().find(c => c.body?.includes('wayglass-mobius-checkpoint'));
-    const m = last?.body.match(/```json\s*([\s\S]*?)```/);
-    return m ? JSON.parse(m[1]) : null;
+    const issues = await gh(`/repos/${repo}/issues?state=open&labels=wayglass:lineage&per_page=10`);
+    const active = issues.find(issue => !issue.pull_request && /Wayglass Bloodstream/i.test(issue.title || ''));
+    if (!active) return null;
+    const comments = await gh(`/repos/${repo}/issues/${active.number}/comments?per_page=100`);
+    return inspectBloodstreamComments(comments, {
+      issueUrl: active.html_url || null,
+      checkedAt: new Date().toISOString(),
+      complete: comments.length < 100,
+    });
   },
   async catalog() {
     try {
