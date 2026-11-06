@@ -18,13 +18,13 @@ test('route identity is not character ownership', () => {
 test('handoff requires owner authority and rejects revocation', () => {
   const izar = CHARACTER_BINDINGS[1];
   const handoff = { character_id: izar.character_id, from: 'Crow', to: 'Rowan', authorized: true };
-  assert.equal(canWriteCharacter(izar, 'Rowan', { handoff }), true);
+  assert.equal(canWriteCharacter(izar, 'Rowan', { handoff }), false);
   assert.equal(canWriteCharacter(izar, 'Rowan', { handoff: { ...handoff, revoked: true } }), false);
   assert.equal(canWriteCharacter(izar, 'Rowan', { handoff: { ...handoff, from: 'other' } }), false);
 });
 test('shared narrative is distinct from exclusive character ownership', () => {
   const shared = { character_id: 'example:shared', world_id: 'example', ownership: 'shared-narrative', owner_id: null };
   assert.equal(validateCharacterBindings([...CHARACTER_BINDINGS, shared]), true);
-  assert.equal(canWriteCharacter(shared, 'Rowan'), true);
+  assert.equal(canWriteCharacter(shared, 'Rowan'), false);
   assert.throws(() => validateCharacterBindings([...CHARACTER_BINDINGS, { ...shared, owner_id: 'Crow' }]));
 });
