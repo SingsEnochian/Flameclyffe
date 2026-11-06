@@ -128,7 +128,7 @@ async function bloodstreamEvidence() {
       typeof x.body==="string" && x.body.includes("<!-- wayglass-mobius-checkpoint:v1 -->"));
     if(match) {
       const text=String(match.body);
-      const found=text.match(/<!-- wayglass-mobius-checkpoint:v1 -->\s*```json\s*([\s\S]*?)```/);
+      const found=text.match(/<!-- wayglass-mobius-checkpoint:v1 -->[\s\S]{0,400}?```json\s*([\s\S]*?)```/);
       if(found && found[1].length<12000) {
         try {
           const p=JSON.parse(found[1]);
