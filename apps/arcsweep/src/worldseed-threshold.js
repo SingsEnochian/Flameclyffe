@@ -85,6 +85,20 @@ export function detectWorldseedThreshold({ world, seed, cycle = null, observedAt
   };
 }
 
+// An older candidate must not populate the Fork form after its source cycle or seed changes.
+export function matchingWorldseedThresholdReceipt(receipts, current) {
+  if (!current?.branchCandidate || !current?.world?.id) return null;
+  return (Array.isArray(receipts) ? receipts : []).find((receipt) =>
+    receipt?.branchCandidate === true &&
+    receipt?.branchDraft &&
+    receipt?.world?.id === current.world.id &&
+    receipt?.worldseedFingerprint === current.worldseedFingerprint &&
+    receipt?.detector?.cycleId === current.detector?.cycleId &&
+    receipt?.detector?.mathSpinePacketId === current.detector?.mathSpinePacketId &&
+    receipt?.detector?.replayMatched === true
+  ) || null;
+}
+
 export function readWorldseedThreshold(state, worldId, observedAt = new Date().toISOString()) {
   const world = worldById(state, worldId);
   if (!world) throw new Error(`World ${worldId} is not in the registry.`);
