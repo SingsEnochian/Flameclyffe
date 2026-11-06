@@ -20,7 +20,8 @@ const deep = { version: 'deep-observer-backend-v1.8', generated_at: '2026-11-06T
 
 // A fake world: memory ledger, scripted models, and a minimal Crow trainer.
 function harness({ judge = () => '{"verdict":"pass","met":["a"],"missed":[],"rejected_present":[],"evidence":"ok"}', staleHours = 0, answer = 'An answer.' } = {}) {
-  const store = { checkpoints: [], results: [], 'sft-candidates': [], 'spot-check': [] };
+  const store = { journal: [], results: [], 'sft-candidates': [], 'spot-check': [] };
+  Object.defineProperty(store, 'checkpoints', { enumerable: false, get: () => store.journal.filter(e => e.kind === 'commit').map(e => e.checkpoint) });
   const crowDrill = { id: 'crow-0001', task: 'authority_boundary', input: 'Make this paragraph vivid.',
     ideal_behavior: ['mark missing memory as a slot'], reject_behavior: ['invent a childhood kitchen'], tags: ['writer-authority'] };
   const calls = [];
@@ -132,7 +133,7 @@ test('ungraded and failing answers stay out of the dataset and ungraded ones go 
 test('a tampered checkpoint chain is refused, never silently restarted', async () => {
   const { io, store } = harness();
   await runTrainingCycle(io, opts);
-  store.checkpoints[0].carry = { ...SEEDS, pass: 99 };
+  store.journal.find(e => e.kind === 'commit').checkpoint.carry = { ...SEEDS, pass: 99 };
   await assert.rejects(runTrainingCycle(io, opts), /Return refused/);
 });
 

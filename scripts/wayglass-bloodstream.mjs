@@ -73,7 +73,6 @@ const log = [];
 const note = line => { log.push(line); console.log(line); };
 
 const LINEAGE_LABEL = 'wayglass:lineage';
-const CHECKPOINT_MARKER = '<!-- wayglass-mobius-checkpoint:v1 -->';
 const decisions = [];
 const commentsCache = new Map();
 async function commentsOf(n) {
@@ -109,16 +108,22 @@ const mergeEffect = (n, sha) => ({ kind: 'merge', describe: { pr: n, sha, into: 
     sha, merge_method: 'merge', commit_title: `Wayglass Bloodstream: merge #${n} into ${B.STAGING_BRANCH}` } }); return m.sha || null; } });
 
 // ---- Restore the lineage (cold return) ------------------------------------
+// The lineage issue is a write-ahead journal: an `intent` entry before any
+// effect is applied, a `commit` entry (carrying the checkpoint) after.
+const JOURNAL_MARKER = '<!-- wayglass-mobius-journal:v1 -->';
 const lineageIssues = (await pages(`${root}/issues?state=open&labels=${encodeURIComponent(LINEAGE_LABEL)}`, 1)).items
   .filter(i => !i.pull_request);
-const lineageIssue = lineageIssues[0] || null;
-const persisted = [];
-if (lineageIssue) {
-  for (const c of await commentsOf(lineageIssue.number)) {
-    const m = String(c.body || '').match(/<!-- wayglass-mobius-checkpoint:v1 -->\s*```json\s*([\s\S]*?)```/);
-    if (m) { try { persisted.push(JSON.parse(m[1])); } catch { /* unreadable checkpoints are skipped, never guessed */ } }
+let lineageIssueNumber = lineageIssues[0]?.number ?? null;
+const entries = [];
+if (lineageIssueNumber) {
+  for (const c of await commentsOf(lineageIssueNumber)) {
+    const m = String(c.body || '').match(/<!-- wayglass-mobius-journal:v1 -->\s*```json\s*([\s\S]*?)```/);
+    if (!m) continue;
+    try { entries.push(JSON.parse(m[1])); }
+    catch { throw Error(`Return refused: unreadable journal entry in comment ${c.id}. Not guessing.`); }
   }
 }
+const persisted = entries.filter(e => e.kind === 'commit').map(e => e.checkpoint);
 let featherState = { variable: process.env.WAYGLASS_FEATHER || '', open_feather_issue: false };
 const lineageOptions = {
   system: 'wayglass-bloodstream', name: 'bloodstream',
@@ -126,15 +131,23 @@ const lineageOptions = {
   seeds: { pulse: 0 }, worker: runUrl || 'local-dry-run',
   feather: () => B.featherStopped(featherState),
 };
-let previous = persisted.at(-1) || null;
-let restored = 'fresh';
-if (previous) {
-  const probe = openMobiusLineage(lineageOptions);
+const probe = openMobiusLineage(lineageOptions);
+if (persisted.length) {
   const chain = verifyMobiusChain(probe.root, persisted);
-  if (chain.ok) restored = `resumed at cycle ${previous.cycle}`;
-  else { restored = `refused: persisted chain broken at checkpoint ${chain.at}`; previous = null; }
+  // FR-17: a broken chain is a refusal, never a fresh start under the old name.
+  if (!chain.ok) throw Error(`Return refused: bloodstream chain broken at checkpoint ${chain.at} (${chain.why}). Review issue #${lineageIssueNumber}.`);
 }
-const lineage = openMobiusLineage({ ...lineageOptions, previous });
+const restored = persisted.length ? `resumed at cycle ${persisted.at(-1).cycle}` : 'fresh';
+async function journalWrite(entry) {
+  if (!lineageIssueNumber) {
+    lineageIssueNumber = (await api(`${root}/issues`, { method: 'POST', body: { title: 'Wayglass Bloodstream · Möbius lineage',
+      labels: [LINEAGE_LABEL], body: 'Write-ahead journal for the Wayglass Bloodstream lineage: an `intent` before each Return applies effects, a `commit` with the checkpoint after. Do not edit. Close this issue only to retire the lineage.' } })).number;
+  }
+  await api(`${root}/issues/${lineageIssueNumber}/comments`, { method: 'POST', body: { body:
+    `${JOURNAL_MARKER}\n${entry.kind} · cycle ${entry.cycle}\n\`\`\`json\n${JSON.stringify(entry)}\n\`\`\`` } });
+}
+const lineage = openMobiusLineage({ ...lineageOptions, previous: persisted.at(-1) || null,
+  journalTail: entries.at(-1) || null, journal: apply ? { write: journalWrite } : null });
 note(`Möbius lineage ${lineage.root.slice(0, 18)}… · ${restored}`);
 
 // Full observations live here; phase outputs are their canonical summaries.
@@ -318,8 +331,12 @@ function stageStructural(ctx, alt) {
       receiptFooter(alt.decision, ctx)].join('\n')));
     ctx.stage(closeEffect(n));
   } else if (alt.type === 'dispatch-codex') {
-    ctx.stage(commentEffect(n, alt.packet + '\n' + receiptFooter(alt.decision, ctx), codexToken));
+    // FR-11: deleting the comment cannot recall a Codex task that has started, so
+    // the dispatch is irreversible: owner consent (the apply switch), applied last.
     ctx.stage(labelEffect(n, B.BLOODSTREAM_LABEL));
+    ctx.stage({ kind: 'codex-dispatch', describe: { pr: n }, consent: apply,
+      apply: async () => (await api(`${root}/issues/${n}/comments`, { method: 'POST',
+        body: { body: alt.packet + '\n' + receiptFooter(alt.decision, ctx) }, auth: codexToken })).id });
   }
 }
 
@@ -329,16 +346,7 @@ note(`Möbius cycle ${result.cycle} (${result.face} face) · ${result.status}${r
 const sp = result.checkpoint?.spiral;
 if (sp) note(`Spiral turn ${sp.turn} · ln r ${sp.ln_r} (×${sp.growth_factor}) · ${sp.chirality} · chaos ${sp.chaos} · harmony ${sp.harmony} · propulsion ${sp.propulsion} · ${sp.state}`);
 
-// Persist the checkpoint (the Return Engine's job, outside the cycle).
-if (apply && result.checkpoint) {
-  let issueNumber = lineageIssue?.number;
-  if (!issueNumber) {
-    issueNumber = (await api(`${root}/issues`, { method: 'POST', body: { title: 'Wayglass Bloodstream · Möbius lineage',
-      labels: [LINEAGE_LABEL], body: 'Checkpoint chain for the Wayglass Bloodstream. Each pulse appends one WCE-1 checkpoint. Do not edit; close this issue to start a fresh lineage.' } })).number;
-  }
-  await api(`${root}/issues/${issueNumber}/comments`, { method: 'POST', body: { body:
-    `${CHECKPOINT_MARKER}\nCycle ${result.cycle} · ${result.face} face · ${result.status}\n\`\`\`json\n${JSON.stringify(result.checkpoint)}\n\`\`\`` } });
-}
+if (result.journal_error) { note(`JOURNAL: ${result.journal_error}`); process.exitCode = 1; }
 
 // ---- Report ---------------------------------------------------------------
 const report = {
