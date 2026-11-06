@@ -18,10 +18,13 @@ on:
   pull_request:
     paths:
       - 'lib/wayglass-mobius-training.mjs'
+      - 'lib/wayglass-training-bloodstream.mjs'
       - 'lib/wayglass-mobius.cjs'
       - 'scripts/wayglass-training-cycle.mjs'
       - 'training/wayglass/**'
+      - 'profiles/crow-trainer/skills/crow-training/references/DRILLS.jsonl'
       - 'test/wayglass-mobius-training.test.mjs'
+      - 'test/wayglass-training-bloodstream.test.mjs'
       - '.github/workflows/wayglass-training-loop.yml'
 permissions:
   contents: write
@@ -46,7 +49,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Verify the Möbius engine and the training loop
-        run: node --test test/wayglass-mobius.test.mjs test/wayglass-mobius-training.test.mjs
+        run: node --test test/wayglass-mobius.test.mjs test/wayglass-mobius-training.test.mjs test/wayglass-training-bloodstream.test.mjs
       - name: Open the training ledger
         if: github.event_name != 'pull_request'
         id: ledger
@@ -70,6 +73,10 @@ jobs:
           # Reuse the workflow token that actions/checkout configured for the main checkout.
           git config http.https://github.com/.extraheader "$(git -C .. config --get http.https://github.com/.extraheader)"
           printf '# Wayglass training ledger\n\nAppend-only Möbius training records: checkpoints.jsonl (chain), results.jsonl, sft-candidates.jsonl (unreviewed), spot-check.jsonl (awaiting Rowan), crow-state/ (Crow trainer state).\n' > README.md
+      - name: Validate Nikola-selected Crow trainer and Opaline exam corpus
+        run: |
+          python3 profiles/crow-trainer/skills/crow-training/scripts/trainer.py selftest
+          python3 profiles/crow-trainer/skills/crow-training/scripts/trainer.py drive --mode exam --tag wayglass-opaline
       - name: Run one training cycle
         if: github.event_name != 'pull_request'
         env:
@@ -77,6 +84,7 @@ jobs:
           WAYGLASS_LEDGER_DIR: .wayglass-ledger
           WAYGLASS_FEATHER: ${{ vars.WAYGLASS_FEATHER }}
           WAYGLASS_TRAIN_ANSWER_MODEL: ${{ vars.WAYGLASS_TRAIN_ANSWER_MODEL }}
+          WAYGLASS_CROW_TASK_TAG: ${{ vars.WAYGLASS_CROW_TASK_TAG }}
           WAYGLASS_TRAIN_JUDGE_MODEL: ${{ vars.WAYGLASS_TRAIN_JUDGE_MODEL }}
           WAYGLASS_TRAIN_APPLY: ${{ github.event_name == 'schedule' && vars.WAYGLASS_TRAINING_APPLY == 'true' || github.event_name == 'workflow_dispatch' && inputs.apply && 'true' || 'false' }}
         run: node scripts/wayglass-training-cycle.mjs
