@@ -19,6 +19,7 @@ const { createObserverSelfDevelopmentRouter } = require('./observer-self-develop
 
 const { resolveCharacterSeat, publicCharacterSeats, EMERGENCE_QUESTION_IDS } = require('./character-seats.cjs');
 
+const { CHARACTERS: PSYCHIC_CHARACTERS, inspectPsychicCharacter } = require('./psychic-bindings.cjs');
 const MAX_HISTORY = 16;
 const MAX_TEXT = 12000;
 
@@ -459,6 +460,8 @@ async function humainCatalogueResponse(route, res, fetchImpl = globalThis.fetch)
 
 function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThis.fetch, departureStore = createDepartureStore() } = {}) {
   const router = express.Router();
+  router.get('/psychic-universe/characters', (req, res) => { res.setHeader('Cache-Control','no-store'); return res.json({ schema:'wayglass.psychic-characters/v0.1', characters: PSYCHIC_CHARACTERS }); });
+  router.get('/psychic-universe/characters/:id', (req, res) => { res.setHeader('Cache-Control','no-store'); const result = inspectPsychicCharacter(req.params.id, 'psychic-universe'); return result ? res.json(result) : res.status(404).json({ error:'Unknown Psychic Universe character' }); });
   router.use('/library', createWayglassLibraryRouter());
   router.use('/observer/self-development', createObserverSelfDevelopmentRouter());
   router.get('/kernel/departures/:storageId', (req, res) => {
@@ -663,6 +666,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     res.setHeader('Cache-Control', 'no-store');
 
     const payload = req.body || {};
+    if (payload.world_id === 'psychic-universe' || String(payload.character_id || '').startsWith('psychic:')) return res.status(403).json({ error: 'Psychic Universe character responses require authenticated owner-specific seat authorization; read-only inspection is available.' });
     const autoSeat = payload.route_id === 'auto:character' && payload.character_id === 'bitty-twi';
     if (payload.route_id === 'auto:character' && !autoSeat) return res.status(400).json({ error: 'Auto character route needs a supported character seat.' });
     // Privacy conscious local-first routing, with an explicit receipt. This is host policy,
