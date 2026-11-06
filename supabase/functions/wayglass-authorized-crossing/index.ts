@@ -303,6 +303,7 @@ Deno.serve(async (req:Request)=>{
       }
       return json(req,503,{error:"receipt-store-unavailable"});
     }
+    if (!created?.receipt_id) return json(req,503,{error:"receipt-insert-unconfirmed"});
     // A successful POST has persisted a queue receipt, not delivered a participant turn.
     return json(req,201,{receipt_id:created.receipt_id,status:"queued",duplicate:false,
       wayglass_reply:null,source_provenance:"caller-declared-unverified"});
