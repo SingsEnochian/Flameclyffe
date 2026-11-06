@@ -31,7 +31,7 @@
     "separate Steward approval for fork"
   ],
   "authority": {
-    "may_prompt_wayglass_after_route_verification": true,
+    "may_prompt_wayglass_after_route_verification": false,
     "may_auto_fork": false,
     "may_promote_canon": false,
     "may_impersonate_wayglass": false,
