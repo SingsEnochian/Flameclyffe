@@ -5,7 +5,7 @@
   "output": "committed emits in order",
   "status": "committed | rolled-back | converged",
   "checkpoints": "[{cycle, face, prev, state, carry}] — prev chains to lineage.root via WCE-1 digests",
-  "lineage": "{root}"
+  "lineage": "{root, intent} — root = digest({source_hash, ir_digest, seeds, participant, intent})"
  },
  "fixtures": [
   {
@@ -238,6 +238,19 @@
     "status": "rolled-back",
     "cycles": 2,
     "chain_valid": true
+   }
+  },
+  {
+   "id": "L2-intent-binds-identity",
+   "level": "L2",
+   "invariant": null,
+   "note": "same code, different intention: same outputs, different lineage root (RFC §21)",
+   "source": "mobius \"hearth\" intent \"to keep the fire\" {\n perceive {  }\n compress {  }\n release {  }\n verify {  }\n integrate {  }\n choose {  }\n return { emit 7; }\n transcend {  }\n}",
+   "expect": {
+    "output": [
+     7
+    ],
+    "root_differs_from": "mobius \"hearth\" intent \"to carry the fire across\" {\n perceive {  }\n compress {  }\n release {  }\n verify {  }\n integrate {  }\n choose {  }\n return { emit 7; }\n transcend {  }\n}"
    }
   }
  ]
