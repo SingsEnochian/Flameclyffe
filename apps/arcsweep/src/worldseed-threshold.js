@@ -42,7 +42,8 @@ export function detectWorldseedThreshold({ world, seed, cycle = null, observedAt
     mayChange: record.mayChange,
     notes: record.notes,
   }));
-  const branchCandidate = Boolean(cycle && foldActive);
+  // A fold alone is insufficient to prepare a branch. Replay must be explicitly verified.
+  const branchCandidate = Boolean(cycle && foldActive && replayMatched === true);
   const cycleLabel = beforeSequence !== null || afterSequence !== null
     ? `PREMAQC ${beforeSequence ?? '?'}→${afterSequence ?? '?'}`
     : cycle?.cycle_id || 'observed threshold';
@@ -55,7 +56,10 @@ export function detectWorldseedThreshold({ world, seed, cycle = null, observedAt
     observedAt,
     world: { id: world.id, name: world.name || world.id },
     worldseedFingerprint: seed.fingerprint,
-    status: !cycle ? 'awaiting-observation' : branchCandidate ? 'branch-candidate' : 'threshold-clear',
+    status: !cycle ? 'awaiting-observation'
+      : replayMatched === false ? 'replay-mismatch'
+      : foldActive && replayMatched !== true ? 'awaiting-replay'
+      : branchCandidate ? 'branch-candidate' : 'threshold-clear',
     branchCandidate,
     detector: {
       cycleId: cycle?.cycle_id || null,
