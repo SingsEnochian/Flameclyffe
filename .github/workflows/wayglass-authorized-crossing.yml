@@ -52,4 +52,4 @@ jobs:
         with:
           deno-version: v2.x
       - name: Typecheck Wayglass authenticated crossing
-        run: deno check supabase/functions/wayglass-authorized-crossing/index.ts
+        run: deno check --node-modules-dir=auto supabase/functions/wayglass-authorized-crossing/index.ts
