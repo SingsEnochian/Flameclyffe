@@ -1,4 +1,4 @@
-import { readWorldseedThreshold, receiptWorldseedThreshold } from './worldseed-threshold.js';
+import { matchingWorldseedThresholdReceipt, readWorldseedThreshold, receiptWorldseedThreshold } from './worldseed-threshold.js';
 
 const STORAGE_KEY = 'hearthgate.arcsweep.local.v0.1';
 const ROOT_ID = 'worldseed-threshold-live';
@@ -65,8 +65,7 @@ async function mount() {
   if (!world) return;
   let proposal;
   try {
-    proposal = (state.worldseedThresholdProposals || []).find((item) => item.world?.id === worldId)
-      || readWorldseedThreshold(state, worldId);
+    proposal = readWorldseedThreshold(state, worldId);
   } catch (error) {
     const markup = `<article id="${ROOT_ID}" class="worldseed-live-card"><p class="callout">Threshold Detector stopped: ${esc(error.message)}</p></article>`;
     const current = document.getElementById(ROOT_ID);
@@ -75,10 +74,12 @@ async function mount() {
     else host.insertAdjacentHTML('beforeend', markup);
     return;
   }
+  const currentReceipt = matchingWorldseedThresholdReceipt(state.worldseedThresholdProposals, proposal);
+  const preparedDraft = currentReceipt?.branchDraft || null;
   const markup = `<article id="${ROOT_ID}" class="worldseed-live-card" data-world-id="${esc(worldId)}">
-    <div class="section-heading compact-heading"><div><p class="eyebrow">Threshold Detector · Worldseed branch gate</p><h3>${esc(world.name)}</h3><p class="muted">Reads the latest Math Spine fold and turns it into a branch proposal, never an automatic fork.</p></div><div class="button-row"><button type="button" data-worldseed-threshold-read>Read latest Threshold</button>${proposal.branchDraft ? '<button type="button" class="quiet" data-worldseed-threshold-draft>Use as Fork draft</button>' : ''}</div></div>
+    <div class="section-heading compact-heading"><div><p class="eyebrow">Threshold Detector · Worldseed branch gate</p><h3>${esc(world.name)}</h3><p class="muted">Reads the latest Math Spine fold and turns it into a branch proposal, never an automatic fork.</p></div><div class="button-row"><button type="button" data-worldseed-threshold-read>Read latest Threshold</button>${preparedDraft ? '<button type="button" class="quiet" data-worldseed-threshold-draft>Use as Fork draft</button>' : ''}</div></div>
     ${proposalMarkup(proposal)}
-    ${proposal.branchDraft ? `<article class="worldseed-live-card"><h4>Prepared branch</h4><p><b>${esc(proposal.branchDraft.childName)}</b></p><p>${esc(proposal.branchDraft.branchPoint)}</p><p class="muted">${esc(proposal.branchDraft.reason)}</p></article>` : ''}
+    ${preparedDraft ? `<article class="worldseed-live-card"><h4>Prepared branch</h4><p><b>${esc(preparedDraft.childName)}</b></p><p>${esc(preparedDraft.branchPoint)}</p><p class="muted">${esc(preparedDraft.reason)}</p></article>` : ''}
   </article>`;
   const current = document.getElementById(ROOT_ID);
   if (current?.outerHTML === markup) return;
@@ -111,10 +112,17 @@ document.addEventListener('click', async (event) => {
   const root = draftButton.closest(`#${ROOT_ID}`);
   const worldId = root?.dataset.worldId;
   const state = await readState();
-  const proposal = (state?.worldseedThresholdProposals || []).find((item) => item.world?.id === worldId && item.branchDraft);
+  let proposal = null;
+  try {
+    const current = state && worldId ? readWorldseedThreshold(state, worldId) : null;
+    proposal = matchingWorldseedThresholdReceipt(state?.worldseedThresholdProposals, current);
+  } catch (error) {
+    notice(`Threshold draft stopped: ${error.message}`);
+    return;
+  }
   const form = document.querySelector('[data-worldseed-fork-form]');
   if (!proposal?.branchDraft || !form) {
-    notice('Threshold draft could not find the Fork World form.');
+    notice('No current verified Threshold receipt or Fork World form. Read the latest Threshold first.');
     return;
   }
   const draft = proposal.branchDraft;
