@@ -49,6 +49,9 @@ test('three cycles alternate faces, carry the twist forward, and form a valid ch
   assert.deepEqual(M.verifyChain(L.root, cps), { ok: true, length: 3, head: digest(cps[2]) });
   const forged = cps.map(c => ({ ...c })); forged[1].carry = { n: 999 };
   assert.equal(M.verifyChain(L.root, forged).ok, false, 'tampering breaks the chain');
+  const head = cps.map(c => ({ ...c })); head[2].carry = { n: 999 };
+  assert.equal(M.verifyChain(L.root, head).ok, false, 'tampering with the head is caught too');
+  assert.throws(() => lineage({ previous: head[2] }), /does not match its digest/);
 });
 
 test('a failed Verify rolls the whole cycle back: no effect applied, head unchanged', async () => {
