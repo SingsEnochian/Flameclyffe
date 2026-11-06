@@ -122,6 +122,7 @@ const startRoom = roomQuery === 'observer' ? 'wayglass:living-observer'
   : roomQuery === 'library' ? 'wayglass:library'
   : roomQuery === 'toybox' ? 'wayglass:toybox'
   : roomQuery === 'organs' ? 'wayglass:systems'
+  : roomQuery === 'psychic' ? 'wayglass:psychic-universe'
   : roomQuery === 'video' ? 'wayglass:video-atelier'
   : 'arcsweep:writing-room';
 await wayglass.mount(startRoom);
