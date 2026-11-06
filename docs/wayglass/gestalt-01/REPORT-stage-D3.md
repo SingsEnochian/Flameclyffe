@@ -47,6 +47,8 @@
 
 > **Correction by impossibility cannot fire where it is most needed.** The condition that makes correction necessary is the condition that hides the error.
 
+> **⚠ Corrected by the later post-hoc investigation (below).** The "perfect-correction ceiling" above told each quad, as an oracle, which of its constraints was false. That is more than the quads know between them. Against the honest ceiling (what their *pooled* information identifies), 92 of the 99 S tasks cannot be solved by any protocol that does not guess. On those, keeping the ambiguity was the correct behaviour. The paragraph above is kept as written, because it is what I concluded at the time.
+
 **H6 is supported. Outside S, correction is redundant again.** Möbius did correct both quads in 79.4% of these tasks. But bus_transformed solved the same 79.4% anyway, because the masks pin the answer without the drop. This replicates D2's H2 on fresh seeds.
 
 **Spiral growth is still not success (exploratory).**
@@ -56,13 +58,55 @@
 ## Stage D3 established
 
 1. **The return across the twist is real and bandwidth-independent** in this apparatus: H7 and H7b.
-2. **Deductive re-verification has a structural blind spot.** It cannot detect an error that the remaining ambiguity keeps consistent. Its zero-false-drop record and this blind spot are two faces of the same strictness.
+2. ~~**Deductive re-verification has a structural blind spot.**~~ *Superseded by the post-hoc investigation below.* Stratum S mostly selected tasks that the pooled information does not identify. Within the identifiable tasks, each failure has a specific, separable cause.
 3. Two D2 results replicate on fresh seeds: verification versus the unverified bus (H8), and the redundancy of correction outside S (H6).
 4. The power rule worked as registered: H9 is reported as untested, not as a null.
 
+## Post-hoc investigation: where does information fail to become usable?
+
+These are diagnostics run after the fact, at Rarity's request, with no decision rule. **The registered D3 verdicts above are unchanged.**
+
+**1. The replica earned trust first** (`DIAGNOSTIC-D3-crossings-posthoc.json`, `scripts/gestalt-01-d3-replica.mjs`).
+- An exact replica of the mobius quad logic matched the apparatus at **3,200 of 3,200** quad-rounds on all 400 held_out tasks.
+- It matched on every one of these fields: candidate set (digest), emitted mask, packet received (and that it was exactly the peer's emission, from the peer's root), correction decision, carried state in, and the lineage's checkpoint carry.
+- First mismatch: none.
+- The apparatus gained a read-only `instrument` option for this. Stage D still reproduces digest-identically with it in place.
+
+**2. The counter means what was assumed.** In 400 of 400 tasks, `errors_caught === 2` held exactly when both quads' actual `dropped` arrays held their own false constraint. No quad ever dropped more than one constraint.
+
+**3. The honest ceiling is identifiability, not an oracle** (`DIAGNOSTIC-D3-identifiability-posthoc.json`). A task is *identifiable* when exactly one world satisfies the task's own rule (each quad holds exactly one false constraint) given both quads' private information pooled.
+
+| | tasks | identifiable | apparatus solved (identifiable) | apparatus solved (unidentifiable) |
+|---|---|---|---|---|
+| S | 99 | **7** | 0 | 0 |
+| not S | 301 | 242 | **239** | 0 |
+
+- Across 151 unidentifiable tasks, the apparatus never claimed a joint answer, never lost the truth and never dropped a true constraint. That is **correct abstention**.
+- The apparatus solved **239 of the 249 identifiable tasks (96.0%)**.
+
+**4. The ten identifiable failures dissociate cleanly** (`DIAGNOSTIC-D3-dissociation-posthoc.json`). Each variant changes one thing, and each failure yields to exactly one of them:
+
+| cause | tasks | 8 rounds | lossless channel | task's "exactly one" rule |
+|---|---|---|---|---|
+| **Discarded premise.** The protocol tolerates *at most one* own violation, but the task states *exactly one*. One quad keeps a world that breaks none of its own constraints, which the stated rule excludes. | 7 (all in S) | no | no | **yes** (0 wrong drops, truth kept) |
+| **Convergence time.** The pair masks reach the answer, just after round 4. | 3 (all outside S) | **yes** | **yes** | no |
+
+**5. The mechanism chain** (L0 latent in the peer's truths, then L1 in the peer's belief, L2 encoded in its mask, L3 received, L4 recognised by the rule; in the crossings diagnostic). The "shielded" signature (L0 holds, L1 fails) appears on tasks where one-sided oracle correction breaks the impasse. **But oracle runs exceed the identifiability ceiling by construction**, so they show what an oracle could do, not what the pair was entitled to conclude.
+
+**So, Rarity's question:** *can two quads each hold evidence sufficient to correct the other, yet fail because the protocol never makes it actionable?* In this apparatus, **yes, in exactly 10 of 400 tasks**, and for two separable reasons:
+- a premise both quads were given but the protocol never used;
+- a round budget slightly too short for the slowest convergences.
+
+Elsewhere the "failure" was the evidence genuinely not deciding the answer, and the quads were right not to pretend it did.
+
 ## Next
-- **D4:** pre-register a *non-deductive* correction rule for stratum S. For example, a quad drops the single constraint whose removal makes the informed set smallest and still non-empty, and the drop is *proposed across the twist* for the peer to check, never applied unilaterally. Its risk is the opposite of deduction's: it can introduce errors. So the primary outcomes are success in S together with errors introduced, and the trade-off is the result. Enlarge shifted so S reaches the power minimum.
+- **D4 (to pre-register):**
+  - Stratify every task family by **identifiability** (task-only, computed before any protocol runs) as well as by S.
+  - Test the "exactly one" rule as a registered protocol arm. Test a **round budget of 8** against 4.
+  - Make **false joint answers on unidentifiable tasks** a co-primary outcome, so that any rule which "solves" more by guessing is caught.
+  - Any *non-deductive* revision rule (proposed across the twist, checked by the peer) must be scored against the identifiability ceiling, never the oracle one.
+  - Enlarge shifted so the strata reach the power minimum.
 - **Stage M:** model-driven quads on frozen tasks.
 
 ## Not claimed
-These are deterministic quads, so a positive G here is largely by construction. D3 shows that the apparatus can separate the return from bandwidth, and can locate where deductive correction fails, under the continuity contract. It is not evidence of emergent coordination or cognition.
+These are deterministic quads, so a positive G here is largely by construction. D3 shows that the apparatus can separate the return from bandwidth under the continuity contract. The post-hoc work shows that it can tell *unidentifiable* tasks apart from *unsolved* ones. It is not evidence of emergent coordination or cognition.
