@@ -52,3 +52,11 @@ test('presentation tool is not advertised until the trusted host binds ingress',
  const unbound=await handleMcpMessage(call,{authenticated:true});
  assert.equal(unbound.error.code,-32603);
 });
+
+test('canonical Opaline eightfold payload is accepted without renaming phases',async()=>{
+ const f=fixture();const canonical={presentation_id:'opaline-canonical',
+   source_ref:'github:PR-563',intent:'owner-authorized review',
+   eightfold:phases.map(p=>({index:p.index,phase:p.name,presentation:'proposal',acceptance:'review-only'}))};
+ const receipt=await f.present({principal:f.principal,payload:canonical,resource:'https://example.org/mcp'});
+ assert.equal(receipt.status,'queued_for_review');assert.equal(f.records.size,1);
+});
