@@ -4,7 +4,7 @@ export const ROTH_FOLD_SCHEMA = 'wayglass.roth-fold/v0.1';
 export const ROTH_FOLD_PHASES = Object.freeze(['discover','attribute','authorize','contextualize','route','respond','receipt','return']);
 export const ROTH_FOLD_LAYERS = Object.freeze([
   'character','conversation','world','arcsweep','starwell','wayglass-host',
-  'model-route','living-observer','universal-codex','memory','return-engine','universe',
+  'model-route','cybersecurity','living-observer','universal-codex','memory','return-engine','universe',
 ]);
 const clean = (v,max=160) => String(v ?? '').trim().slice(0,max);
 const clone = x => JSON.parse(JSON.stringify(x));
