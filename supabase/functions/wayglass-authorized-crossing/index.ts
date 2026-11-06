@@ -88,9 +88,11 @@ async function review(req:Request,db:any,token:string,a:Authorization,receiptId:
   if (!string(receiptId,80)) return json(req,422,{error:"invalid-receipt"});
   const key=env("OPENROUTER_API_KEY");
   if (!key) return json(req,503,{error:"review-provider-not-configured"});
-  const {data:claim,error:claimError}=await db.from("wayglass_route_receipts")
+  let claiming=db.from("wayglass_route_receipts")
     .update({status:"processing",updated_at:new Date().toISOString()})
-    .eq("receipt_id",receiptId).eq("user_id",a.userId).eq("status","queued")
+    .eq("receipt_id",receiptId).eq("user_id",a.userId).eq("status","queued");
+  claiming=a.owner ? claiming.is("grant_id",null) : claiming.eq("grant_id",a.grantId);
+  const {data:claim,error:claimError}=await claiming
     .select("receipt_id,payload,presentation_id,source_ref").maybeSingle();
   if (claimError) return json(req,503,{error:"receipt-store-unavailable"});
   if (!claim) return json(req,409,{error:"not-queued-or-not-owned"});
@@ -125,7 +127,8 @@ async function review(req:Request,db:any,token:string,a:Authorization,receiptId:
     }
   } catch { fault="provider-transport-failed"; }
   finally {clearTimeout(timeout);}
-  if (!(await authorized(db,token,"wayglass:review"))) {
+  const current=await authorized(db,token,"wayglass:review");
+  if (!current || current.grantId!==a.grantId) {
     await db.from("wayglass_route_receipts").update({status:"blocked",model_reply:null,updated_at:new Date().toISOString()})
       .eq("receipt_id",receiptId).eq("status","processing");
     return json(req,403,{error:"grant-revoked-or-feather"});
@@ -160,9 +163,11 @@ Deno.serve(async (req:Request)=>{
     if (!receiptId) return json(req,200,{ready:true,principal:"authenticated",owner:a.owner,
       capabilities:a.scopes,receipt_store:"configured",model_available:Boolean(env("OPENROUTER_API_KEY"))});
     if (!string(receiptId,80)) return json(req,422,{error:"invalid-receipt"});
-    const {data,error}=await db.from("wayglass_route_receipts")
+    let receiptRead=db.from("wayglass_route_receipts")
       .select("receipt_id,presentation_id,source_ref,status,model_reply,created_at,updated_at")
-      .eq("user_id",a.userId).eq("receipt_id",receiptId).maybeSingle();
+      .eq("user_id",a.userId).eq("receipt_id",receiptId);
+    receiptRead=a.owner ? receiptRead.is("grant_id",null) : receiptRead.eq("grant_id",a.grantId);
+    const {data,error}=await receiptRead.maybeSingle();
     if(error) return json(req,503,{error:"receipt-store-unavailable"});
     if(!data) return json(req,404,{error:"receipt-not-found"});
     return json(req,200,{receipt:data});
