@@ -1,0 +1,370 @@
+{
+  "schema": "wayglass.gestalt-01.results/v1",
+  "preregistration_sha256": "8f5183d6317f5a3e4581ad27c63bb90b1cf000c8ca15621d19a4cbf393a0c3a1",
+  "stage": "D3 (deterministic quads): when does receiver re-verification matter, and is the return across the twist more than bandwidth?",
+  "sets": {
+    "held_out": {
+      "tasks": 400,
+      "generation_attempts": 519,
+      "protocols": {
+        "mobius": {
+          "P": 0.5975,
+          "invalid": 0,
+          "correct": 0.5975,
+          "joint": 0.5975,
+          "bytes": 376,
+          "errors_caught": 1.32,
+          "errors_introduced": 0,
+          "bits_retained": 13.368951620182363,
+          "truth_lost": 0,
+          "identity_drift": 0,
+          "development": [
+            {
+              "round": 0,
+              "mean_candidates": 96.91125,
+              "truth_kept": 1
+            },
+            {
+              "round": 1,
+              "mean_candidates": 8.08,
+              "truth_kept": 1
+            },
+            {
+              "round": 2,
+              "mean_candidates": 2.225,
+              "truth_kept": 1
+            },
+            {
+              "round": 3,
+              "mean_candidates": 1.835,
+              "truth_kept": 1
+            }
+          ],
+          "growth_mean": 1.9959701104144343,
+          "E1_growth_vs_success": 0.8514660196029752,
+          "E2_growth_vs_truth_lost": null
+        },
+        "bus": {
+          "P": 0,
+          "invalid": 0,
+          "correct": 0,
+          "joint": 0,
+          "bytes": 376,
+          "errors_caught": 0,
+          "errors_introduced": 0,
+          "bits_retained": 4.647809029973408,
+          "truth_lost": 1,
+          "identity_drift": 0,
+          "development": [
+            {
+              "round": 0,
+              "mean_candidates": 6.73,
+              "truth_kept": 0
+            },
+            {
+              "round": 1,
+              "mean_candidates": 1.90375,
+              "truth_kept": 0
+            },
+            {
+              "round": 2,
+              "mean_candidates": 1.90375,
+              "truth_kept": 0
+            },
+            {
+              "round": 3,
+              "mean_candidates": 1.90375,
+              "truth_kept": 0
+            }
+          ],
+          "growth_mean": 1.7378055205538991,
+          "E1_growth_vs_success": null,
+          "E2_growth_vs_truth_lost": null
+        },
+        "bus_transformed": {
+          "P": 0.5975,
+          "invalid": 0,
+          "correct": 0.5975,
+          "joint": 0.5975,
+          "bytes": 376,
+          "errors_caught": 0,
+          "errors_introduced": 0,
+          "bits_retained": 13.368951620182363,
+          "truth_lost": 0,
+          "identity_drift": 0,
+          "development": [
+            {
+              "round": 0,
+              "mean_candidates": 96.91125,
+              "truth_kept": 1
+            },
+            {
+              "round": 1,
+              "mean_candidates": 8.08,
+              "truth_kept": 1
+            },
+            {
+              "round": 2,
+              "mean_candidates": 2.225,
+              "truth_kept": 1
+            },
+            {
+              "round": 3,
+              "mean_candidates": 1.835,
+              "truth_kept": 1
+            }
+          ],
+          "growth_mean": 2.004912906987755,
+          "E1_growth_vs_success": 0.8525035130908014,
+          "E2_growth_vs_truth_lost": null
+        },
+        "mobius_noflip": {
+          "P": 0,
+          "invalid": 0,
+          "correct": 0,
+          "joint": 0,
+          "bytes": 188,
+          "errors_caught": 0.4025,
+          "errors_introduced": 0,
+          "bits_retained": 12.046661050796212,
+          "truth_lost": 0,
+          "identity_drift": 0,
+          "development": [
+            {
+              "round": 0,
+              "mean_candidates": 96.91125,
+              "truth_kept": 1
+            },
+            {
+              "round": 1,
+              "mean_candidates": 52.22875,
+              "truth_kept": 1
+            },
+            {
+              "round": 2,
+              "mean_candidates": 52.22875,
+              "truth_kept": 1
+            },
+            {
+              "round": 3,
+              "mean_candidates": 52.22875,
+              "truth_kept": 1
+            }
+          ],
+          "growth_mean": 1.4634082147863743,
+          "E1_growth_vs_success": null,
+          "E2_growth_vs_truth_lost": null
+        },
+        "solo": {
+          "P": 0,
+          "invalid": 0,
+          "correct": 0,
+          "joint": 0,
+          "bytes": 0,
+          "errors_caught": 0,
+          "errors_introduced": 0,
+          "bits_retained": 8.596504122945275,
+          "truth_lost": 0,
+          "identity_drift": 0,
+          "development": [
+            {
+              "round": 0,
+              "mean_candidates": 96.91125,
+              "truth_kept": 1
+            },
+            {
+              "round": 1,
+              "mean_candidates": 96.91125,
+              "truth_kept": 1
+            },
+            {
+              "round": 2,
+              "mean_candidates": 96.91125,
+              "truth_kept": 1
+            },
+            {
+              "round": 3,
+              "mean_candidates": 96.91125,
+              "truth_kept": 1
+            }
+          ],
+          "growth_mean": 1.0829441541679932,
+          "E1_growth_vs_success": null,
+          "E2_growth_vs_truth_lost": null
+        },
+        "mobius_half": {
+          "P": 0.5775,
+          "invalid": 0,
+          "correct": 0.5775,
+          "joint": 0.5775,
+          "bytes": 188,
+          "errors_caught": 1.29,
+          "errors_introduced": 0,
+          "bits_retained": 13.301670943104545,
+          "truth_lost": 0,
+          "identity_drift": 0,
+          "development": [
+            {
+              "round": 0,
+              "mean_candidates": 96.91125,
+              "truth_kept": 1
+            },
+            {
+              "round": 1,
+              "mean_candidates": 17.8125,
+              "truth_kept": 1
+            },
+            {
+              "round": 2,
+              "mean_candidates": 3.94,
+              "truth_kept": 1
+            },
+            {
+              "round": 3,
+              "mean_candidates": 2.19625,
+              "truth_kept": 1
+            }
+          ],
+          "growth_mean": 1.9793969449715019,
+          "E1_growth_vs_success": 0.8556296869835505,
+          "E2_growth_vs_truth_lost": null
+        }
+      },
+      "G": {
+        "bus": {
+          "mean": 0.5975,
+          "lo": 0.5525,
+          "hi": 0.6475,
+          "n": 400
+        },
+        "bus_transformed": {
+          "mean": 0,
+          "lo": 0,
+          "hi": 0,
+          "n": 400
+        },
+        "mobius_noflip": {
+          "mean": 0.5975,
+          "lo": 0.5525,
+          "hi": 0.6475,
+          "n": 400
+        },
+        "solo": {
+          "mean": 0.5975,
+          "lo": 0.5525,
+          "hi": 0.6475,
+          "n": 400
+        }
+      },
+      "trials_digest": "wce1:998a0e5325df8acf6240b8a684364075b4e74c6ed05a36f3191f3beec9aea5ca"
+    }
+  },
+  "config": {
+    "k": 7,
+    "rounds": 4
+  },
+  "hypotheses": {
+    "H1": true,
+    "H2": false,
+    "H3": true,
+    "H4": false
+  },
+  "d3": {
+    "held_out": {
+      "strata": {
+        "S": {
+          "tasks": 99,
+          "G_mobius_vs_bus_transformed": {
+            "mean": 0,
+            "lo": 0,
+            "hi": 0,
+            "n": 99
+          },
+          "P": {
+            "mobius": 0,
+            "bus": 0,
+            "bus_transformed": 0,
+            "mobius_noflip": 0,
+            "solo": 0,
+            "mobius_half": 0
+          },
+          "mobius_dropped_false": 0.494949494949495,
+          "errors": {
+            "mobius": {
+              "caught": 0.494949494949495,
+              "introduced": 0
+            },
+            "mobius_half": {
+              "caught": 0.47474747474747475,
+              "introduced": 0
+            }
+          }
+        },
+        "notS": {
+          "tasks": 301,
+          "G_mobius_vs_bus_transformed": {
+            "mean": 0,
+            "lo": 0,
+            "hi": 0,
+            "n": 301
+          },
+          "P": {
+            "mobius": 0.7940199335548173,
+            "bus": 0,
+            "bus_transformed": 0.7940199335548173,
+            "mobius_noflip": 0,
+            "solo": 0,
+            "mobius_half": 0.7674418604651163
+          },
+          "mobius_dropped_false": 0.7973421926910299,
+          "errors": {
+            "mobius": {
+              "caught": 1.5913621262458473,
+              "introduced": 0
+            },
+            "mobius_half": {
+              "caught": 1.558139534883721,
+              "introduced": 0
+            }
+          }
+        }
+      },
+      "G_mobius_half_vs_noflip": {
+        "mean": 0.5775,
+        "lo": 0.53,
+        "hi": 0.6275,
+        "n": 400
+      },
+      "B_correct_mobius_half_vs_noflip": {
+        "mean": 0.2925,
+        "lo": 0.245,
+        "hi": 0.3375,
+        "n": 400
+      },
+      "B_correct": {
+        "mobius": 0.6025,
+        "bus": 0,
+        "bus_transformed": 0.6025,
+        "mobius_noflip": 0.2975,
+        "solo": 0,
+        "mobius_half": 0.59
+      },
+      "bytes_per_round": {
+        "mobius": 94,
+        "bus": 94,
+        "bus_transformed": 94,
+        "mobius_noflip": 47,
+        "solo": 0,
+        "mobius_half": 47
+      },
+      "labels_digest": "wce1:94e567149018dcbb3cd1934b205375adc209310c4e0bdb96b2390d25d0246252"
+    }
+  },
+  "apparatus": {
+    "commit": "174c33a874379bf97568fce34dfb6f6b83d22014",
+    "dirty_tree": false,
+    "node": "v22.23.4",
+    "at": "2026-11-06T20:47:15.386Z",
+    "trials": 2400
+  }
+}
