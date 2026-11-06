@@ -1332,3 +1332,105 @@ html[data-wayglass-surface="wayglass:living-watercolor"] #app {
 
 
 .wc-continuity-actions{display:flex;flex-wrap:wrap;gap:8px}.wc-voice-preferences{display:grid;gap:8px}.wc-voice-preferences summary{cursor:pointer;color:#ddc89e;font-size:.76rem}.wc-voice-preferences label{display:grid;gap:5px;font-size:.72rem}.wc-unverified{font-size:.72rem;white-space:pre-wrap;overflow-wrap:anywhere}.wc-room-links{display:flex;flex-wrap:wrap;gap:7px}
+
+
+/* First Contact integration: a real conversation window inside the watercolor
+   body. Preserve existing model-route, continuity and room controls. */
+.wc-deck {
+  width: min(850px, calc(100% - 28px));
+  max-height: min(78svh, 750px);
+  gap: 12px;
+}
+.wc-deck-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.wc-expand {
+  white-space: nowrap;
+  border-color: rgba(237, 207, 158, .43);
+  color: #f2dab8;
+}
+.wc-deck .wc-voice {
+  min-height: 145px;
+  max-height: 34svh;
+  font-size: clamp(.95rem, 1.2vw, 1.06rem);
+  line-height: 1.62;
+  padding: 15px;
+}
+.wc-deck #wc-prompt {
+  min-height: 126px;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+.wc-stage.wc-stage-expanded {
+  overflow: visible;
+  isolation: auto;
+  z-index: 80;
+}
+.wc-deck.is-expanded {
+  position: fixed;
+  inset: max(16px, env(safe-area-inset-top)) max(16px, 4vw) max(16px, env(safe-area-inset-bottom));
+  z-index: 81;
+  width: auto;
+  max-width: none;
+  height: auto;
+  max-height: none;
+  overflow-y: auto;
+  border-radius: 26px;
+  padding: clamp(18px, 3vw, 34px);
+  background: linear-gradient(125deg, rgba(36,84,87,.13), transparent 60%), rgba(8,27,34,.93);
+  box-shadow: 0 28px 100px rgba(0,0,0,.63);
+  align-content: start;
+  grid-template-rows: auto auto auto minmax(155px,1fr) auto auto auto auto auto;
+}
+.wc-deck.is-expanded .wc-voice {
+  min-height: min(32svh, 320px);
+  max-height: none;
+  overflow-y: auto;
+}
+.wc-deck.is-expanded #wc-prompt {
+  min-height: 155px;
+  max-height: 32svh;
+}
+@media (max-width: 760px) {
+  .wc-deck {
+    max-height: 76%;
+    width: calc(100% - 16px);
+    padding: 16px;
+  }
+  .wc-deck .wc-voice { min-height: 132px; max-height: 28svh; }
+  .wc-deck #wc-prompt { min-height: 115px; }
+  .wc-deck.is-expanded {
+    inset: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom));
+    max-height: none;
+    height: auto;
+    width: auto;
+    padding: 16px;
+    border-radius: 18px;
+    gap: 10px;
+  }
+  .wc-deck.is-expanded .wc-voice { min-height: 156px; }
+  .wc-deck.is-expanded #wc-prompt { min-height: 132px; }
+}
+
+
+/* Keep a real touchable portion of the watercolor exposed even with the
+   larger desk. Chromium First Contact verifies this with actual pointer
+   input, not an invented paint event. */
+@media (min-width: 761px) {
+  .wc-deck:not(.is-expanded) {
+    left: auto;
+    right: 14px;
+    width: min(680px, 70%);
+  }
+}
+@media (max-width: 760px) {
+  .wc-deck:not(.is-expanded) {
+    left: 8px;
+    right: 8px;
+    width: calc(100% - 16px);
+  }
+}
