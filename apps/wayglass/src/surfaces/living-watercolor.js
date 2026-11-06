@@ -127,8 +127,8 @@ export async function mountLivingWatercolorSurface(root) {
     expandButton.textContent=deskExpanded?'Restore painting view':'Expand desk';
     expandButton.title=deskExpanded?'Return to the watercolor':'Expand reading and writing room';
   }
-  on(expandButton,'click',()=>setDeskExpanded(!deskExpanded));
-  on(root,'keydown',event=>{
+  listen(expandButton,'click',()=>setDeskExpanded(!deskExpanded));
+  listen(root,'keydown',event=>{
     if(event.key==='Escape'&&deskExpanded){
       setDeskExpanded(false);
       expandButton.focus();
