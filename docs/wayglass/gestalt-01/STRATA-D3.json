@@ -1,0 +1,23 @@
+{
+  "schema": "wayglass.gestalt-01.strata/v1",
+  "preregistration_sha256": "8f5183d6317f5a3e4581ad27c63bb90b1cf000c8ca15621d19a4cbf393a0c3a1",
+  "k": 7,
+  "rows": {
+    "held_out": {
+      "tasks": 400,
+      "S": 99,
+      "notS": 301
+    },
+    "shifted": {
+      "tasks": 200,
+      "S": 19,
+      "notS": 181
+    }
+  },
+  "apparatus": {
+    "commit": "b4795962e47ca4cbbc751bf25e7945ec9d4a3139",
+    "dirty_tree": false,
+    "node": "v22.23.4",
+    "at": "2026-11-06T20:43:44.170Z"
+  }
+}
