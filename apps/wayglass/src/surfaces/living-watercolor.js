@@ -45,9 +45,11 @@ export async function mountLivingWatercolorSurface(root) {
         '<div class="wc-stage glass-panel">',
           '<canvas id="wc-fluid" class="wc-fluid" aria-label="Interactive fluid watercolor painting; touch to add pigment" tabindex="0"></canvas>',
           '<div class="wc-stage-meta" aria-hidden="true">WAYGLASS / AQUARELLE / PREMAQC</div>',
-          '<div class="wc-deck glass-panel" aria-label="Wayglass collaborative expression desk">',
+          '<div class="wc-deck glass-panel" id="wc-deck" aria-label="Wayglass collaborative expression desk">',
             '<div class="wc-deck-header"><div><span class="eyebrow">Voice &amp; work surface</span>',
-            '<h2 id="wc-title">Dream</h2></div><span class="wc-model-state" id="wc-route-state">Checking model routes</span></div>',
+            '<h2 id="wc-title">Dream</h2></div><div class="wc-deck-tools">',
+            '<span class="wc-model-state" id="wc-route-state">Checking model routes</span>',
+            '<button type="button" class="glass-chip wc-expand" id="wc-expand" aria-controls="wc-deck" aria-expanded="false">Expand desk</button></div></div>',
             '<div class="wc-modes" role="group" aria-label="Wayglass creative and engineering modes">',
               ...WATERCOLOR_MODES.map(modeButton),
             '</div>',
@@ -56,7 +58,7 @@ export async function mountLivingWatercolorSurface(root) {
               '<span class="wc-voice-empty">An open page. Paint, leave a thought, or invite Wayglass to begin.</span>',
             '</div>',
             '<label class="wc-input-label" for="wc-prompt">Your contribution · optional</label>',
-            '<textarea id="wc-prompt" rows="2" maxlength="3500" placeholder="A question, a colour, a fragment, a possibility…"></textarea>',
+            '<textarea id="wc-prompt" rows="5" maxlength="3500" placeholder="A question, a colour, a fragment, a possibility…"></textarea>',
             '<div class="wc-compose-actions">',
               '<select id="wc-route" aria-label="Wayglass model route"></select>',
               '<button id="wc-invite" type="button" class="send-jewel" disabled>Invite Wayglass</button>',
@@ -115,6 +117,23 @@ export async function mountLivingWatercolorSurface(root) {
   const color=q('wc-color'),pressure=q('wc-pressure'),prompt=q('wc-prompt');
   const title=q('wc-title'),intent=q('wc-intent'),voice=q('wc-voice'),feedback=q('wc-feedback');
   const route=q('wc-route'),routeState=q('wc-route-state'),invite=q('wc-invite');
+  const desk=q('wc-deck'),expandButton=q('wc-expand');
+  let deskExpanded=false;
+  function setDeskExpanded(next){
+    deskExpanded=Boolean(next);
+    desk.classList.toggle('is-expanded',deskExpanded);
+    stage.classList.toggle('wc-stage-expanded',deskExpanded);
+    expandButton.setAttribute('aria-expanded',String(deskExpanded));
+    expandButton.textContent=deskExpanded?'Restore painting view':'Expand desk';
+    expandButton.title=deskExpanded?'Return to the watercolor':'Expand reading and writing room';
+  }
+  on(expandButton,'click',()=>setDeskExpanded(!deskExpanded));
+  on(root,'keydown',event=>{
+    if(event.key==='Escape'&&deskExpanded){
+      setDeskExpanded(false);
+      expandButton.focus();
+    }
+  });
   const modeButtons=[...root.querySelectorAll('[data-wc-mode]')];
   const activeMode=()=>resolveWatercolorMode(mode);
   let session='wc-'+(globalThis.crypto?.randomUUID?.()||String(Date.now()));
