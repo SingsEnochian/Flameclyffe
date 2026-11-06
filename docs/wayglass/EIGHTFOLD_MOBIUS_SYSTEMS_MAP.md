@@ -26,6 +26,7 @@ The existing Eightfold CI (`scripts/wayglass-eightfold-parallel.mjs`) runs the e
 | System | Where | As a Möbius lineage | State |
 |---|---|---|---|
 | **Bloodstream** | `scripts/wayglass-bloodstream.mjs` | one pulse = one cycle; carry `{pulse}`; checkpoints persisted on a `wayglass:lineage` issue | **[VERIFIED] adopted.** A live dry run committed cycle 1 on the outer face with all eight receipts |
+| **Training loop** | `lib/wayglass-mobius-training.mjs`, `scripts/wayglass-training-cycle.mjs` | one training cycle = one cycle; live DEEP Observer + bloodstream head perceived; Nikola picks a Crow drill plus one of eight Möbius drills; delegate answers, frozen, eight concept tests in Verify, different-model judge; carry `{cycles, pass, partial, fail, ungraded}`; ledger on `wayglass/training-ledger` | **[VERIFIED] in tests** (11/11 with scripted models; real Crow trainer exercised). First live run needs merge to `main` |
 | Autonomous circulation | `scripts/wayglass-autonomous-circulation.mjs` | Perceive issues → Choose task → Return diagnostic receipt | [PROPOSED] adopt next. Smallest, same author lane |
 | Eightfold parallel / generations | `scripts/wayglass-eightfold-*.mjs` | already the anatomy view; each lane receipt cites the current bloodstream checkpoint | [PROPOSED] |
 | Kernel cognition preflight | `lib/wayglass-kernel.cjs` (#544) | Verify for model turns | [PROPOSED] after #544 lands |
@@ -43,4 +44,4 @@ One system per PR, through the bloodstream's reconciliation, never as a ship-wid
 
 ## Not claimed
 
-Only the bloodstream is adopted. No other system has been changed. Quad-core concurrency is asynchronous concurrency in one Node process, real for I/O-bound phases such as network calls. CPU-parallel worker threads are not used: phase functions are closures and cannot be moved between threads.
+Only the bloodstream and the training loop are adopted. No other system has been changed. Quad-core concurrency is asynchronous concurrency in one Node process, real for I/O-bound phases such as network calls. CPU-parallel worker threads are not used: phase functions are closures and cannot be moved between threads.

@@ -1,0 +1,99 @@
+name: Wayglass Möbius Training
+# One Eightfold Möbius training cycle per run (lib/wayglass-mobius-training.mjs):
+# live DEEP Observer data + bloodstream state → Nikola (Crow trainer) picks a
+# drill + one Möbius-concept drill → a GitHub Models delegate answers for
+# Wayglass → answers frozen → eight Möbius concept tests in Verify → a different
+# model judges → dataset candidates and Rowan spot-checks grow on the
+# `wayglass/training-ledger` branch. No weights change. Free tier only.
+# Stop: repository variable WAYGLASS_FEATHER=stopped.
+on:
+  schedule:
+    - cron: '23 2-23/3 * * *'
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: 'Write results, dataset and checkpoints to the training ledger'
+        type: boolean
+        default: false
+  pull_request:
+    paths:
+      - 'lib/wayglass-mobius-training.mjs'
+      - 'lib/wayglass-mobius.cjs'
+      - 'scripts/wayglass-training-cycle.mjs'
+      - 'training/wayglass/**'
+      - 'test/wayglass-mobius-training.test.mjs'
+      - '.github/workflows/wayglass-training-loop.yml'
+permissions:
+  contents: write
+  models: read
+  issues: read
+  pull-requests: read
+concurrency:
+  group: wayglass-training
+  cancel-in-progress: false
+jobs:
+  cycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      LEDGER_BRANCH: wayglass/training-ledger
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify the Möbius engine and the training loop
+        run: node --test test/wayglass-mobius.test.mjs test/wayglass-mobius-training.test.mjs
+      - name: Open the training ledger
+        if: github.event_name != 'pull_request'
+        id: ledger
+        run: |
+          if git ls-remote --exit-code --heads origin "$LEDGER_BRANCH" >/dev/null; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: github.event_name != 'pull_request' && steps.ledger.outputs.exists == 'true'
+        with:
+          ref: ${{ env.LEDGER_BRANCH }}
+          path: .wayglass-ledger
+      - name: Start a new ledger
+        if: github.event_name != 'pull_request' && steps.ledger.outputs.exists == 'false'
+        run: |
+          mkdir -p .wayglass-ledger && cd .wayglass-ledger
+          git init -q -b "$LEDGER_BRANCH"
+          git remote add origin "$(git -C .. remote get-url origin)"
+          # Reuse the workflow token that actions/checkout configured for the main checkout.
+          git config http.https://github.com/.extraheader "$(git -C .. config --get http.https://github.com/.extraheader)"
+          printf '# Wayglass training ledger\n\nAppend-only Möbius training records: checkpoints.jsonl (chain), results.jsonl, sft-candidates.jsonl (unreviewed), spot-check.jsonl (awaiting Rowan), crow-state/ (Crow trainer state).\n' > README.md
+      - name: Run one training cycle
+        if: github.event_name != 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WAYGLASS_LEDGER_DIR: .wayglass-ledger
+          WAYGLASS_FEATHER: ${{ vars.WAYGLASS_FEATHER }}
+          WAYGLASS_TRAIN_ANSWER_MODEL: ${{ vars.WAYGLASS_TRAIN_ANSWER_MODEL }}
+          WAYGLASS_TRAIN_JUDGE_MODEL: ${{ vars.WAYGLASS_TRAIN_JUDGE_MODEL }}
+          WAYGLASS_TRAIN_APPLY: ${{ github.event_name == 'schedule' && vars.WAYGLASS_TRAINING_APPLY == 'true' || github.event_name == 'workflow_dispatch' && inputs.apply && 'true' || 'false' }}
+        run: node scripts/wayglass-training-cycle.mjs
+      - name: Persist the ledger (Return Engine)
+        if: github.event_name != 'pull_request'
+        run: |
+          cd .wayglass-ledger
+          git add -A
+          if git diff --cached --quiet; then echo "Nothing committed this cycle."; exit 0; fi
+          git -c user.name="wayglass-training[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -q -m "Wayglass Möbius training cycle (run ${{ github.run_id }})"
+          git push origin "HEAD:$LEDGER_BRANCH"
+      - name: Preserve cycle report
+        if: always() && github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayglass-training-cycle
+          path: .wayglass-artifacts/training-cycle.json
+          if-no-files-found: ignore
+          retention-days: 30
