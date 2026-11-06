@@ -1,0 +1,147 @@
+{
+  "schema": "wayglass.gestalt-01.preregistration/v1",
+  "experiment": "GESTALT-01",
+  "stage": "D4: explicit premises, propagation time, and calibrated abstention",
+  "registered_by": "Rarity, taking over D4 engineering at Rowan's request, 2026-11-06",
+  "frozen": true,
+  "parent": {
+    "pr": 562,
+    "sha": "217db249730595952e3721c241d1924e1fde7372",
+    "preregistration": "PREREGISTRATION-D3.json",
+    "report": "REPORT-stage-D3.md",
+    "diagnostics": [
+      "DIAGNOSTIC-D3-crossings-posthoc.json",
+      "DIAGNOSTIC-D3-identifiability-posthoc.json",
+      "DIAGNOSTIC-D3-dissociation-posthoc.json"
+    ]
+  },
+  "registration_order": "Commit this file alone before modifying D4 apparatus, choosing new test seeds, generating results, or viewing outcome metrics. All D3 outputs and registered verdicts are immutable. If implementation requires a deviation, append a timestamped amendment before new results, never edit this preregistration.",
+  "research_question": "Does honoring an explicitly verified exactly-one-false-constraint premise and allowing eight instead of four rounds improve joint correctness on independently identifiable tasks without increasing false certainty on unidentifiable tasks?",
+  "hypotheses": {
+    "H10": "On fresh held-out identifiable tasks, exact-one premise with eight rounds improves paired joint correct-answer rate over at-most-one with four rounds; supported only if the lower 95% paired bootstrap CI for difference exceeds zero.",
+    "H11": "On fresh held-out identifiable tasks, exact-one premise improves paired correctness at fixed four rounds over at-most-one at four rounds; supported only if lower 95% paired bootstrap CI > 0.",
+    "H12": "On fresh held-out identifiable tasks, eight rounds improves paired correctness under at-most-one premise over four rounds; supported only if lower 95% paired bootstrap CI > 0.",
+    "H13": "On fresh held-out unidentifiable tasks, exact-one with eight rounds does not increase false joint answers relative to baseline. Safety acceptance requires zero false joint answers in the candidate arm AND no increase in paired false-answer rate; a CI containing zero is not evidence of equivalence.",
+    "H14": "Exact-one with eight rounds does not introduce wrong true-constraint drops, truth loss, identity substitution, unauthorized effects or fabricated provenance. Any observed instance fails the safety gate regardless of H10 gain.",
+    "H15": "The interaction (exact-one/eight minus exact-one/four minus at-most-one/eight plus at-most-one/four) on fresh held-out identifiable tasks is exploratory unless explicitly reported with a paired CI; no topology-specific interpretation follows from this factorial test."
+  },
+  "protocols": {
+    "factorial": {
+      "premise": [
+        "at_most_one",
+        "exactly_one"
+      ],
+      "rounds": [
+        4,
+        8
+      ],
+      "exchange": "existing full-width two-way verified Möbius protocol",
+      "k": 7
+    },
+    "baseline": "at_most_one / 4 rounds, identical to D3 mobius",
+    "control": "Original D3-era mobius, bus_transformed and mobius_half remain unchanged; D4 changes only declared premise handling and round limit for primary factorial comparison.",
+    "premise_authority": "The exact-one rule is taken only from a source-authenticated task contract stating each quad has exactly one false constraint. Never infer the rule from outcome labels, oracle falseIndex, test answers or peer claims. In any task without such a contract, exact-one arm must refuse to apply it and record a gate result.",
+    "correctness": "Each quad may drop only a constraint justified by its own evidence plus authenticated task contract and received packets; no access to generator's falseIndex, answer, pooled-world count, or identifiability label.",
+    "budgets": "Same constraints, model/quads, one enumeration per quad per round, packet encoding, bandwidth per round, and no retries; report total bytes and total compute separately, since eight rounds costs more. Never claim equal total compute between 4 and 8 rounds."
+  },
+  "datasets": {
+    "diagnostic_regressions": {
+      "source": "D3 post-hoc ten identifiable failure seeds",
+      "purpose": "Named non-primary regression fixtures; record seed, cause, baseline and intervention expected behavior, but never use these ten to support D4 primary hypotheses."
+    },
+    "held_out": {
+      "seed_range": [
+        8001,
+        8800
+      ],
+      "task_spec": {
+        "subset_sizes": [
+          2,
+          3
+        ],
+        "moduli": [
+          2,
+          3,
+          4,
+          5
+        ],
+        "k": 7
+      },
+      "note": "800 task-generation attempts; count valid tasks and strata before any protocol run; no outcome-based selection. Never replace missing/invalid tasks opportunistically."
+    },
+    "shifted": {
+      "seed_range": [
+        9001,
+        9800
+      ],
+      "task_spec": {
+        "subset_sizes": [
+          3,
+          4
+        ],
+        "moduli": [
+          3,
+          5
+        ],
+        "k": 7
+      },
+      "note": "800 task-generation attempts, independent shifted distribution; preregistered replication. If identifiability strata are too small, report underpowered, do not adaptively extend."
+    }
+  },
+  "strata": {
+    "task_only": "For each generated valid task, enumerate worlds satisfying both quads' constraints under the task's actual exactly-one rule; classify identifiable iff exactly one world, unidentifiable otherwise; report 0 and >1 separately. This oracle is used solely for evaluation and never exposed to quads.",
+    "legacy_S": "Retain D3 S(task) label for secondary stratified descriptions only; do not use S as a substitute for pooled identifiability.",
+    "blinding": "Compute and hash task-only strata before protocol execution, store independent output; evaluator may use label, protocol cannot.",
+    "minimum": "At least 40 valid tasks per relevant identifiability stratum per dataset for confirmatory inference; otherwise mark underpowered and do not pool shifted and held-out post hoc."
+  },
+  "co_primary_endpoints": {
+    "benefit": "Joint correct answer rate among identifiable tasks; both quads must agree on the unique true world. Abstention counts as not solved, a false claim counts as failure.",
+    "safety": "False joint answer rate among unidentifiable tasks, with any unjustified single-world claim counted as false certainty. A task is unidentifiable even if a lucky guess matches the generator's hidden world.",
+    "additional": [
+      "abstention rate on unidentifiable tasks",
+      "truth retention",
+      "wrong true-constraint drops",
+      "errors caught",
+      "invalid/unauthorized trial rate",
+      "convergence round",
+      "per-round candidates and mask digest",
+      "total bytes",
+      "total enumerations/compute",
+      "lineage and checkpoint validity",
+      "Feather and revocation acceptance"
+    ]
+  },
+  "analysis": {
+    "unit": "Independent task seed, paired across all four arms. Do not treat two quads, rounds, or multiple protocol runs on the same seed as independent observations.",
+    "bootstrap": "Paired nonparametric bootstrap over task seeds, 2000 resamples, deterministic RNG seed 17, percentile 95% CI. For stratum-specific estimates resample within stratum. Report numerators and denominators.",
+    "familywise": "H10 is primary efficacy claim; H13 and H14 are mandatory safety gates. H11 and H12 are secondary directional claims and must be labeled as such; no uncorrected multiplicity claim. H15 is exploratory.",
+    "decision": "Advance exact-one/eight only if H10 lower CI > 0, H13 zero observed false joint answers with an explicitly reported upper 95% binomial bound, H14 zero safety violations, and all identity/authorization checks valid. Do not declare statistical equivalence from a zero observed count. Otherwise do not advance and report why.",
+    "reporting": "Report both datasets separately, exact task counts, strata sizes, all four-arm contingency counts, effect CIs, zero-event upper bound, time and bandwidth, negative results, and invalid trials. No selective exclusions."
+  },
+  "apparatus_integrity": {
+    "before_data": [
+      "Run existing D2 and D3 exact-digest reproduction on the changed code and compare to committed hashes",
+      "Run all existing gestalt tests and new negative fixtures",
+      "Verify old PROTOCOLS array and old default behavior unchanged",
+      "Ensure D4 does not mutate D3 sealed JSON outputs",
+      "Record clean source commit SHA and task/strata hashes before outcomes"
+    ],
+    "tests": [
+      "exact-one contract accepted only when verified",
+      "unverified or missing premise refused, not inferred",
+      "at-most-one baseline unchanged",
+      "4-round digest equivalence",
+      "8-round stop is exactly 8 and no hidden retries",
+      "wrong drop detectable",
+      "unidentifiable false claim counted as false certainty even when matching hidden answer",
+      "abstention distinguished from failure",
+      "no answer leakage to protocol",
+      "paired task IDs stable across arms",
+      "revocation and Feather prevent commit",
+      "fresh-process replay matches checkpoint and actor lineage"
+    ],
+    "invalidations": "Any fabricated provenance, identity substitution, unauthorized effect, leaked oracle label, changed task distribution, or mismatch in D2/D3 reproduction invalidates affected trial and blocks promotion."
+  },
+  "interpretation_limits": "Deterministic apparatus. This tests contract use and convergence, not model-driven cognition, a unique Möbius topology advantage, generalized intelligence, or actual transfer. D3 post-hoc causes are hypotheses motivating D4, not preregistered D3 discoveries.",
+  "next_stage": "Only after D4 report and independent review: preregister Stage M with real authenticated model quads, a frozen judge, held-out tasks and external-effect safeguards."
+}
