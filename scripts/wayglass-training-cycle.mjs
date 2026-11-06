@@ -43,7 +43,7 @@ function trainer(args) {
   return r.stdout ? JSON.parse(r.stdout) : null;
 }
 
-const files = { journal: 'journal.jsonl', checkpoints: 'checkpoints.jsonl', results: 'results.jsonl', 'sft-candidates': 'sft-candidates.jsonl', 'spot-check': 'spot-check.jsonl' };
+const files = { learning: 'learning.jsonl', journal: 'journal.jsonl', checkpoints: 'checkpoints.jsonl', results: 'results.jsonl', 'sft-candidates': 'sft-candidates.jsonl', 'spot-check': 'spot-check.jsonl' };
 const ledger = {
   async read(name) {
     const p = join(ledgerDir, files[name]);
@@ -123,6 +123,7 @@ const lines = [
   ...(result.checkpoint?.spiral ? [`spiral turn ${result.checkpoint.spiral.turn} · ln r ${result.checkpoint.spiral.ln_r} (×${result.checkpoint.spiral.growth_factor}) · ${result.checkpoint.spiral.chirality} · chaos ${result.checkpoint.spiral.chaos} · harmony ${result.checkpoint.spiral.harmony} · ${result.checkpoint.spiral.state}`] : []),
   ...concept.map(c => `${c.ok ? '✓' : '✗'} ${c.reason}`),
   ...(result.outputs.integrate || []).map(j => `judged ${j.drill}: ${j.verdict ?? 'ungraded'}`),
+  ...(result.outputs.choose?.learning ? [`learning reward ${result.outputs.choose.learning.reward.toFixed(3)} (progress ${result.outputs.choose.learning.progress.toFixed(3)}, discovery ${result.outputs.choose.learning.discovery}, regression ${result.outputs.choose.learning.regression.toFixed(3)})${result.outputs.choose.learning.moments.length ? ' · learning moments: ' + result.outputs.choose.learning.moments.join(', ') : ''}`] : []),
   ...(result.reason || []).map(r => `reason: ${r}`),
 ];
 console.log(lines.join('\n'));

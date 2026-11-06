@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { runTrainingCycle, shipWeather, answerPrompt, parseJudgement, sha256, SEEDS } from '../lib/wayglass-mobius-training.mjs';
+import { runTrainingCycle, shipWeather, answerPrompt, parseJudgement, sha256, SEEDS,
+  learningState, learningReward, chooseMobiusDrill } from '../lib/wayglass-mobius-training.mjs';
 
 const require = createRequire(import.meta.url);
 const { verifyChain: verifyMobiusChain } = require('../lib/wayglass-mobius.cjs');
@@ -20,7 +21,7 @@ const deep = { version: 'deep-observer-backend-v1.8', generated_at: '2026-11-06T
 
 // A fake world: memory ledger, scripted models, and a minimal Crow trainer.
 function harness({ judge = () => '{"verdict":"pass","met":["a"],"missed":[],"rejected_present":[],"evidence":"ok"}', staleHours = 0, answer = 'An answer.' } = {}) {
-  const store = { journal: [], results: [], 'sft-candidates': [], 'spot-check': [] };
+  const store = { journal: [], results: [], 'sft-candidates': [], 'spot-check': [], learning: [] };
   Object.defineProperty(store, 'checkpoints', { enumerable: false, get: () => store.journal.filter(e => e.kind === 'commit').map(e => e.checkpoint) });
   const crowDrill = { id: 'crow-0001', task: 'authority_boundary', input: 'Make this paragraph vivid.',
     ideal_behavior: ['mark missing memory as a slot'], reject_behavior: ['invent a childhood kitchen'], tags: ['writer-authority'] };
@@ -141,5 +142,72 @@ test('dry run writes nothing', async () => {
   const { io, store } = harness();
   const { result } = await runTrainingCycle(io, { ...opts, apply: false });
   assert.equal(result.status, 'committed');
-  assert.deepEqual(Object.values(store).map(v => v.length), [0, 0, 0, 0]);
+  assert.deepEqual(Object.values(store).map(v => v.length), [0, 0, 0, 0, 0]);
+});
+
+// ---- Learning is the reward ------------------------------------------------------
+const row = (drill, verdict, tags = ['craft']) => ({ drill, verdict, tags });
+const rewardFor = (history, next) => learningReward(learningState(history), learningState([...history, ...next]), next);
+
+test('learning, not score: passing the same drill every time earns nothing after discovery', () => {
+  const history = [row('d1', 'pass'), row('d1', 'pass'), row('d1', 'pass'), row('d1', 'pass'), row('d1', 'pass'), row('d1', 'pass')];
+  const r = rewardFor(history, [row('d1', 'pass')]);
+  assert.ok(r.reward < 0.01, `steady mastery earns ~0 (got ${r.reward.toFixed(4)})`);
+  assert.equal(r.discovery, 0);
+  assert.equal(rewardFor([], [row('d1', 'pass')]).discovery, 0.25, 'the first encounter is discovery');
+});
+
+test('moving from failing to passing earns the most, and is flagged as a learning moment', () => {
+  const struggling = [row('d2', 'fail'), row('d2', 'fail'), row('d2', 'partial')];
+  const breakthrough = rewardFor(struggling, [row('d2', 'pass')]);
+  const steady = rewardFor([row('d3', 'pass'), row('d3', 'pass'), row('d3', 'pass')], [row('d3', 'pass')]);
+  assert.ok(breakthrough.progress > steady.progress + 0.2);
+  assert.deepEqual(breakthrough.learning_moments, ['d2']);
+  assert.deepEqual(steady.learning_moments, []);
+});
+
+test('regression is a signal, not a punishment: the reward never goes negative', () => {
+  const r = rewardFor([row('d4', 'pass'), row('d4', 'pass')], [row('d4', 'fail')]);
+  assert.ok(r.regression > 0);
+  assert.ok(r.reward >= 0);
+});
+
+test('unknown is not evidence: ungraded answers move nothing', () => {
+  const r = rewardFor([row('d5', 'fail')], [row('d5', null)]);
+  assert.equal(r.skills_touched, 0);
+  assert.equal(r.reward, 0);
+  assert.equal(r.unknown, 1);
+});
+
+test('the Möbius curriculum follows learning: untried first, then where learning moves most', () => {
+  const drills = mobiusDrills;
+  assert.equal(chooseMobiusDrill(drills, learningState([]), 1).id, 'mobius-01-perceive');
+  const tried = drills.map(d => row(d.id, 'pass', d.tags));
+  const settled = Array.from({ length: 25 }, () => tried).flat(); // long mastery: progress has settled
+  const moving = [...settled, row('mobius-06-choose', 'fail', drills[5].tags), row('mobius-06-choose', 'pass', drills[5].tags)];
+  assert.equal(chooseMobiusDrill(drills, learningState(moving), 9).id, 'mobius-06-choose');
+});
+
+test('in the loop: learning is recorded each cycle, and a breakthrough is prioritised in the dataset', async () => {
+  let round = 0;
+  const { io, store } = harness({ judge: () => (round < 2
+    ? '{"verdict":"fail","met":[],"missed":["x"],"rejected_present":[],"evidence":"e"}'
+    : '{"verdict":"pass","met":["x"],"missed":[],"rejected_present":[],"evidence":"e"}') });
+  for (; round < 3; round++) {
+    const { result } = await runTrainingCycle(io, opts);
+    assert.equal(result.status, 'committed', JSON.stringify(result.reason));
+  }
+  assert.equal(store.learning.length, 3, 'one learning record per cycle');
+  assert.ok(store.learning.every(l => l.reward >= 0));
+  const last = store.learning.at(-1);
+  assert.ok(last.learning_moments.includes('crow-0001'), 'the Crow drill went from failing to passing');
+  assert.ok(store['sft-candidates'].some(c => c.provenance.drill === 'crow-0001' && c.learning_moment && c.priority === 'learning-moment'));
+});
+
+test('ungraded answers are never recorded in the Crow trainer as "partial"', async () => {
+  const recorded = [];
+  const { io } = harness({ judge: () => 'not json' });
+  io.trainer.record = async (id, verdict) => recorded.push(verdict);
+  await runTrainingCycle(io, opts);
+  assert.deepEqual(recorded, []);
 });
