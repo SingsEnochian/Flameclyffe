@@ -38,7 +38,18 @@ jobs:
           node - <<'NODE'
           const fs=require('node:fs'),assert=require('node:assert/strict');
           const s=fs.readFileSync('supabase/functions/wayglass-authorized-crossing/index.ts','utf8');
-          for(const phrase of ['db.auth.getUser(token)','wayglass_route_grants','wayglass_route_controls','featherStopped','grantId!==a.grantId','external_provider_consent','wayglass_route_receipts','digest','wayglass:present','wayglass:review']) {
+          for(const phrase of ['db.auth.getUser(token)','wayglass_route_grants','wayglass_route_controls','featherStopped','grantId!==a.grantId','external_provider_consent','wayglass_route_receipts','digest','wayglass:present','wayglass:review','wayglass:bloodstream:read','bloodstreamEvidence','mode:"read-only; host-gated effects remain separate"']) {
             assert(s.includes(phrase), 'Missing required guard: '+phrase);
           }
           NODE
+  edge-typecheck:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Typecheck Wayglass authenticated crossing
+        run: deno check supabase/functions/wayglass-authorized-crossing/index.ts
