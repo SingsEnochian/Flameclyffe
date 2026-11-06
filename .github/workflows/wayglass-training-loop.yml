@@ -69,7 +69,7 @@ jobs:
           git remote add origin "$(git -C .. remote get-url origin)"
           # Reuse the workflow token that actions/checkout configured for the main checkout.
           git config http.https://github.com/.extraheader "$(git -C .. config --get http.https://github.com/.extraheader)"
-          printf '# Wayglass training ledger\n\nAppend-only Möbius training records: journal.jsonl (write-ahead intent/commit with checkpoints), results.jsonl, sft-candidates.jsonl (unreviewed), spot-check.jsonl (awaiting Rowan), crow-state/ (Crow trainer state).\n' > README.md
+          printf '# Wayglass training ledger\n\nAppend-only Möbius training records: journal.jsonl (write-ahead intent/commit with checkpoints), results.jsonl, sft-candidates.jsonl (unreviewed; learning moments prioritised), learning.jsonl (exploration and demonstrated learning per cycle), evaluation.jsonl (held-out frozen evaluation: never trained on), spot-check.jsonl (awaiting Rowan), crow-state/ (Crow trainer state).\n' > README.md
       - name: Run one training cycle
         if: github.event_name != 'pull_request'
         env:

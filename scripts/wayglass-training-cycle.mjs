@@ -43,7 +43,7 @@ function trainer(args) {
   return r.stdout ? JSON.parse(r.stdout) : null;
 }
 
-const files = { journal: 'journal.jsonl', checkpoints: 'checkpoints.jsonl', results: 'results.jsonl', 'sft-candidates': 'sft-candidates.jsonl', 'spot-check': 'spot-check.jsonl' };
+const files = { learning: 'learning.jsonl', evaluation: 'evaluation.jsonl', journal: 'journal.jsonl', checkpoints: 'checkpoints.jsonl', results: 'results.jsonl', 'sft-candidates': 'sft-candidates.jsonl', 'spot-check': 'spot-check.jsonl' };
 const ledger = {
   async read(name) {
     const p = join(ledgerDir, files[name]);
@@ -114,7 +114,9 @@ const io = {
 };
 
 const mobiusDrills = readFileSync(join(repoRoot, 'training/wayglass/MOBIUS_DRILLS.jsonl'), 'utf8').split('\n').filter(Boolean).map(l => JSON.parse(l));
-const { result, concept } = await runTrainingCycle(io, { apply, answerModel, judgeModel, mobiusDrills,
+const evaluation = { text: readFileSync(join(repoRoot, 'training/wayglass/MOBIUS_EVAL_FROZEN.jsonl'), 'utf8'),
+  manifest: JSON.parse(readFileSync(join(repoRoot, 'training/wayglass/MOBIUS_EVAL_FROZEN.manifest.json'), 'utf8')) };
+const { result, concept } = await runTrainingCycle(io, { apply, answerModel, judgeModel, mobiusDrills, evaluation,
   feather: () => featherStopped({ variable: process.env.WAYGLASS_FEATHER || '' }) });
 if (result.journal_error) { console.log('JOURNAL: ' + result.journal_error); process.exitCode = 1; }
 
@@ -123,6 +125,8 @@ const lines = [
   ...(result.checkpoint?.spiral ? [`spiral turn ${result.checkpoint.spiral.turn} · ln r ${result.checkpoint.spiral.ln_r} (×${result.checkpoint.spiral.growth_factor}) · ${result.checkpoint.spiral.chirality} · chaos ${result.checkpoint.spiral.chaos} · harmony ${result.checkpoint.spiral.harmony} · ${result.checkpoint.spiral.state}`] : []),
   ...concept.map(c => `${c.ok ? '✓' : '✗'} ${c.reason}`),
   ...(result.outputs.integrate || []).map(j => `judged ${j.drill}: ${j.verdict ?? 'ungraded'}`),
+  ...(result.outputs.choose?.learning ? (l => [`learning reward ${l.reward.toFixed(3)} (exploration ${l.exploration.toFixed(3)}, demonstrated ${l.demonstrated_learning.toFixed(3)}, regression ${l.regression.toFixed(3)}) · curriculum: ${l.curriculum}${l.establishing.length ? ' · establishing: ' + l.establishing.join(', ') : ''}${l.moments.length ? ' · learning moments: ' + l.moments.join(', ') : ''}`])(result.outputs.choose.learning) : []),
+  ...(result.outputs.choose?.evaluation ? (e => [`frozen evaluation ${e.status}${e.score != null ? ' · score ' + e.score.toFixed(3) : ''} · transfer: ${e.transfer}${e.reason ? ' · ' + e.reason : ''}`])(result.outputs.choose.evaluation) : []),
   ...(result.reason || []).map(r => `reason: ${r}`),
 ];
 console.log(lines.join('\n'));
