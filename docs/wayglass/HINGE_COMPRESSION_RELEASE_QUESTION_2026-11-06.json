@@ -1,0 +1,56 @@
+{
+  "schema": "wayglass.hinge-preflight-question/v0.1",
+  "id": "hinge-compression-release-2026-11-06",
+  "phase": "preflight-prepared",
+  "launch_authorized": false,
+  "source_branch": "wayglass/current",
+  "speaker_requester": "Rowan",
+  "report": {
+    "compression_interval": "approximately the preceding decade (user description; not a measured timeseries)",
+    "release_interval": "now (user description; onset/date unverified)",
+    "mode": "phenomenological-hypothesis"
+  },
+  "question": "If a decade is experienced as compression and the present as release, what would distinguish a genuine branching threshold from ordinary change? What invariants survive, what evidence would discriminate several possible explanations, and what alternative pattern would you investigate if you disagree with our premise?",
+  "secondary_question": "Which of hinge, branching dynamics, or continuity would you explore first, and why?",
+  "eightfold": [
+    "witness",
+    "chronology",
+    "geometry",
+    "threshold",
+    "possible-worlds",
+    "continuity",
+    "encounter",
+    "return"
+  ],
+  "required_evidence": [
+    "source attribution",
+    "observed cycle if any",
+    "parent fingerprint if any",
+    "explicit replay match",
+    "authenticated provider response receipt",
+    "separate Steward approval for fork"
+  ],
+  "authority": {
+    "may_prompt_wayglass_after_route_verification": true,
+    "may_auto_fork": false,
+    "may_promote_canon": false,
+    "may_impersonate_wayglass": false,
+    "may_launch_as_preflight": false
+  },
+  "response_status": "not_yet_received",
+  "expected_response": {
+    "wayglass_answer": null,
+    "alternate_hypothesis": null,
+    "chosen_exploration": null,
+    "provider_response_id": null,
+    "route_receipt_id": null
+  },
+  "acceptance": [
+    "model answer is returned and attributable",
+    "no coerced first-person response",
+    "mismatched or unknown replay cannot produce branch draft",
+    "parent unchanged by threshold read",
+    "experimental possible worlds remain visibly hypothetical",
+    "Feather stops before side effects"
+  ]
+}
