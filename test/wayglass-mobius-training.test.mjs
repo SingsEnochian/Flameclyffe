@@ -142,3 +142,44 @@ test('dry run writes nothing', async () => {
   assert.equal(result.status, 'committed');
   assert.deepEqual(Object.values(store).map(v => v.length), [0, 0, 0, 0]);
 });
+
+test('verified Crow attempt stays Crow-authored and outside Wayglass SFT candidates', async () => {
+  const { io, store, calls } = harness();
+  const crowReceipt = { receipt_id: 'synthetic-crow-001', route: 'hermes:test-crow', author: 'the-crow' };
+  let verified = 0;
+  io.crowAgentAttempt = async ({ requester, permission }) => {
+    assert.equal(requester, 'wayglass-training');
+    assert.equal(permission, 'training-attempt-only');
+    return { text: 'Crow synthetic attempt: preserve both opaline expressions.', receipt: crowReceipt };
+  };
+  io.verifyCrowReceipt = async (receipt) => {
+    verified++;
+    return receipt === crowReceipt;
+  };
+  const { result } = await runTrainingCycle(io, opts);
+  assert.equal(result.status, 'committed', JSON.stringify(result.reason));
+  assert.equal(verified, 1);
+  assert.equal(store.results.length, 2);
+  assert.equal(store.results[0].authored_by, 'the-crow');
+  assert.equal(store.results[0].participant, 'the-crow');
+  assert.equal(store.results[0].answer_model, null);
+  assert.deepEqual(store.results[0].crow_receipt, crowReceipt);
+  assert.match(store.results[0].dropped_from_sft, /not Wayglass SFT/);
+  assert.equal(store.results[1].authored_by, 'model-delegate');
+  assert.equal(store['sft-candidates'].length, 1);
+  assert.equal(calls.filter(c => c.model === 'test/answerer').length, 1);
+});
+
+test('a Crow participant route cannot claim authorship without host verification', async () => {
+  const { io, store } = harness();
+  io.crowAgentAttempt = async () => ({text:'unverified actor', receipt:{receipt_id:'fake'}});
+  io.verifyCrowReceipt = async () => false;
+  try {
+    const { result } = await runTrainingCycle(io, opts);
+    assert.notEqual(result.status,'committed');
+  } catch(error) {
+    assert.match(String(error),/unverified attempt/);
+  }
+  assert.equal(store.results.length,0);
+  assert.equal(store['sft-candidates'].length,0);
+});
