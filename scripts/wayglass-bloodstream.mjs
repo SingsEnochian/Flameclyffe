@@ -163,21 +163,23 @@ const phases = {
       codex_dispatches_last_24h: recent.filter(c => String(c.body || '').includes(B.MARKERS.dispatch)).length,
       codex_dispatch_identity: Boolean(codexToken),
     });
+    ctx.possibility('gathered', world.prs.length);
     note(`Perceive · ${world.prs.length} relevant open PRs (list complete: ${complete}) · Feather ${B.featherStopped(featherState) ? 'STOPPED' : 'flowing'} · Codex ${context.codex_dispatches_last_24h}/${context.daily_codex_budget} in 24h · identity ${codexToken ? 'present' : 'absent'} · ${apply ? 'APPLY' : 'dry-run'} · ${ctx.face} face, origin ${ctx.origin}`);
     return { prs: world.prs.map(p => [p.number, p.head_sha]), list_complete: complete,
       feather: B.featherStopped(featherState), carried_pulse: ctx.carried.pulse };
   },
 
-  async compress() {
+  async compress(ctx) {
     world.supersessions = B.findSupersessions(world.prs);
     world.clusters = B.overlapClusters(world.prs);
+    ctx.possibility('generated', world.supersessions.length + world.clusters.length);
     const loss = world.prs.filter(p => !p.files_complete).map(p => p.number);
     note(`Compress · ${world.supersessions.length} supersession relations · ${world.clusters.length} overlap clusters · loss: ${loss.length ? loss.join(', ') : 'none'}`);
     return { supersessions: world.supersessions.map(r => [r.superseded, r.by, r.relation, r.identical.length, r.extended.length]),
       clusters: world.clusters.map(c => [c.base, c.prs.length, c.shared_files.length]), loss };
   },
 
-  async release() {
+  async release(ctx) {
     const alts = [];
     for (const pr of world.prs.filter(p => p.labels.includes(B.BLOODSTREAM_LABEL) && p.base === B.STAGING_BRANCH)) {
       const comments = await commentsOf(pr.number);
@@ -222,6 +224,7 @@ const phases = {
       alts.push({ type: 'dispatch-codex', structural: true, pr: world.byNumber.get(rel.by), rel, packet });
     }
     world.alternatives = alts;
+    ctx.possibility('generated', alts.length);
     note(`Release · ${alts.length} alternative actions`);
     return alts.map(a => [a.type, a.pr?.number ?? null]);
   },
@@ -236,7 +239,7 @@ const phases = {
     ];
   },
 
-  async integrate() {
+  async integrate(ctx) {
     const woven = [];
     for (const alt of world.alternatives) {
       const action = alt.type === 'close-superseded'
@@ -248,6 +251,8 @@ const phases = {
       woven.push([alt.type, alt.pr?.number ?? null, decision.allowed, decision.reasons]);
     }
     note(`Integrate · kernel allowed ${woven.filter(w => w[2]).length} of ${woven.length}`);
+    // Harmony: how much of the released possibility the kernel finds coherent with the ship's law.
+    ctx.harmony(woven.length ? woven.filter(w => w[2]).length / woven.length : 1);
     return woven;
   },
 
@@ -274,6 +279,7 @@ const phases = {
     });
     if (structural) stageStructural(ctx, structural);
     for (const d of dropped) note(`  held ${d[0]} #${d[1]} · ${d[2]}`);
+    ctx.possibility('generated', selected.length);
     return { selected, dropped, staged: apply };
   },
 
@@ -320,6 +326,8 @@ function stageStructural(ctx, alt) {
 // ---- One cycle -------------------------------------------------------------
 const result = await lineage.cycle(phases);
 note(`Möbius cycle ${result.cycle} (${result.face} face) · ${result.status}${result.reason ? ' · ' + result.reason.join('; ') : ''}`);
+const sp = result.checkpoint?.spiral;
+if (sp) note(`Spiral turn ${sp.turn} · ln r ${sp.ln_r} (×${sp.growth_factor}) · ${sp.chirality} · chaos ${sp.chaos} · harmony ${sp.harmony} · propulsion ${sp.propulsion} · ${sp.state}`);
 
 // Persist the checkpoint (the Return Engine's job, outside the cycle).
 if (apply && result.checkpoint) {

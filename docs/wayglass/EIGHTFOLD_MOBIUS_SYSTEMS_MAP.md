@@ -17,6 +17,19 @@ Withness coordinates from the center. Four cores times two faces is eight.
 
 **Sequential within a lineage, parallel across lineages.** A lineage's next cycle needs this cycle's carry, so one lineage never has two cycles in flight. The quad core pipelines *different* lineages: up to four cycles in flight, one per core. Core IV serializes every commit, and Withness keeps the ledger. [VERIFIED] In tests, four lineages ran with all four cores busy at once (`peak_concurrency = 4`), and each pipelined chain was digest-identical to its solo run.
 
+## The Möbius Spiral: unbounded growth
+
+Every committed cycle also turns a spiral recorded in its checkpoint (`spiral` field), built on Bifröst's canonical compression-release law with four refinements (proposal to the Math Spine: `docs/mathematics/BIFROST_SPIRAL_REFINEMENTS_PROPOSAL.md`):
+- **Compounding growth:** the law drives `ln r`, a logarithmic spiral. Growth feeds growth, with no cap and no decay. The additive Bifröst radius is kept beside it.
+- **Unwrapped winding:** every turn is remembered. Half-turn parity equals the Möbius face.
+- **Chirality:** compression-led and release-led turns twist differently; both push outward.
+- **Possibility as propulsion:** systems report what they *gather* and *generate* (`ctx.possibility`), counted on the ray of the phase where it arose. **Chaos** is its spread over the Chaos Star's eight rays. **Harmony** (`ctx.harmony`) is how much coheres. Their harmonic mean scales the thrust: Harmony steers, never brakes.
+- **Harmony slot:** `hearthweave-local` by default. Nocturne's Harmony can fill it only via `nocturne:approved-mapping:<ref>` (sovereignty).
+
+There is no stopping condition by default. A Möbius fixed point with growth still positive is a *stable orbit still climbing*, not an end. Bounds on spending, irreversible acts, consent and Feather stay in the host: the hull, not a ceiling.
+
+[VERIFIED] Live bloodstream dry run, turn 1: climbing, growth ×3.81, compression-led, chaos 0.33, harmony 0.60.
+
 ## Two readings of the Eightfold, reconciled
 
 The existing Eightfold CI (`scripts/wayglass-eightfold-parallel.mjs`) runs the eight phases as **parallel organ lanes**: each lane is a subsystem's test, all at once. The RFC and this engine run them as a **sequential cycle**. Both are kept: they are the same ship seen as anatomy (which organ owns which phase) and as heartbeat (the order a cycle passes through them). The quad core is where they meet: organs work concurrently while each lineage's cycle moves through them in order.

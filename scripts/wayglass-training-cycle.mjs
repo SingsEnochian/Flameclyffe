@@ -117,6 +117,7 @@ const { result, concept } = await runTrainingCycle(io, { apply, answerModel, jud
 
 const lines = [
   `Wayglass training · Möbius cycle ${result.cycle} (${result.face} face) · ${result.status} · ${apply ? 'APPLY' : 'dry-run'}`,
+  ...(result.checkpoint?.spiral ? [`spiral turn ${result.checkpoint.spiral.turn} · ln r ${result.checkpoint.spiral.ln_r} (×${result.checkpoint.spiral.growth_factor}) · ${result.checkpoint.spiral.chirality} · chaos ${result.checkpoint.spiral.chaos} · harmony ${result.checkpoint.spiral.harmony} · ${result.checkpoint.spiral.state}`] : []),
   ...concept.map(c => `${c.ok ? '✓' : '✗'} ${c.reason}`),
   ...(result.outputs.integrate || []).map(j => `judged ${j.drill}: ${j.verdict ?? 'ungraded'}`),
   ...(result.reason || []).map(r => `reason: ${r}`),
