@@ -1,0 +1,55 @@
+name: Wayglass Authorized Crossing Contracts
+on:
+  push:
+    branches:
+      - rarity/wayglass-authorized-crossing-integrated-20261106
+  pull_request:
+    paths:
+      - 'lib/wayglass-mcp-*.cjs'
+      - 'test/wayglass-mcp-*.test.cjs'
+      - 'supabase/functions/wayglass-authorized-crossing/**'
+      - '.github/workflows/wayglass-authorized-crossing.yml'
+jobs:
+  node-contracts:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: |
+          node --check lib/wayglass-mcp-core.cjs
+          node --check lib/wayglass-mcp-http.cjs
+          node --check lib/wayglass-mcp-presentation.cjs
+          node --check lib/wayglass-mcp-server.cjs
+      - name: MCP and presentation contracts
+        run: node --test test/wayglass-mcp-*.test.cjs
+  edge-static:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check deployed Edge Function source has hardened gates
+        run: |
+          node - <<'NODE'
+          const fs=require('node:fs'),assert=require('node:assert/strict');
+          const s=fs.readFileSync('supabase/functions/wayglass-authorized-crossing/index.ts','utf8');
+          for(const phrase of ['db.auth.getUser(token)','wayglass_route_grants','wayglass_route_controls','featherStopped','grantId!==a.grantId','external_provider_consent','wayglass_route_receipts','digest','wayglass:present','wayglass:review','wayglass:bloodstream:read','bloodstreamEvidence','mode:"read-only; host-gated effects remain separate"']) {
+            assert(s.includes(phrase), 'Missing required guard: '+phrase);
+          }
+          NODE
+  edge-typecheck:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Typecheck Wayglass authenticated crossing
+        run: deno check --node-modules-dir=auto supabase/functions/wayglass-authorized-crossing/index.ts
