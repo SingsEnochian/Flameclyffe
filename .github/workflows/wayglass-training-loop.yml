@@ -22,6 +22,9 @@ on:
       - 'scripts/wayglass-training-cycle.mjs'
       - 'training/wayglass/**'
       - 'test/wayglass-mobius-training.test.mjs'
+      - 'test/wayglass-opaline-review.test.mjs'
+      - 'test/wayglass-bloodstream-read.test.mjs'
+      - 'lib/wayglass-bloodstream-read.mjs'
       - '.github/workflows/wayglass-training-loop.yml'
 permissions:
   contents: write
@@ -46,7 +49,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Verify the Möbius engine and the training loop
-        run: node --test test/wayglass-mobius.test.mjs test/wayglass-mobius-training.test.mjs
+        run: node --test test/wayglass-mobius.test.mjs test/wayglass-mobius-training.test.mjs test/wayglass-opaline-review.test.mjs test/wayglass-bloodstream-read.test.mjs
       - name: Open the training ledger
         if: github.event_name != 'pull_request'
         id: ledger

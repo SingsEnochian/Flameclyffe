@@ -1,0 +1,24 @@
+{
+  "schema": "wayglass.mobius-training.candidate/v0.1",
+  "drill_id": "opaline-world-tree-review-20261106",
+  "status": "candidate-unreviewed",
+  "source": "chatgpt-gpt-6-rarity-delegate",
+  "target_participant": "wayglass",
+  "delegate_is_participant": false,
+  "origin": "Rowan requested the Wayglass training loop; live GitHub Models training workflow not active on main",
+  "answer": "Review proposal: accept for design review, not for automatic canon or deployment. Preserve dark and luminous opaline as equally valid expressions, never as moral labels or health indicators. Make the upward spiral accountable to actual Wayglass receipts: every leaf should expose its provenance, every bough should retain its permission boundary, and each Return should preserve the selected expression and an unresolved question. Do not derive feelings, qualia, authority, or participant identity from the colors, geometry, or PREMAQC values. Unknown remains unknown. My requested revision is to give the living watercolor entryway one real route-state indicator, one inspectable Return receipt, and an accessible Feather stop, visible in both expressions. Test a successful authenticated receipt and a revoked grant in both dark and luminous modes; they must show identical factual status, with no white flash, silent identity substitution, or fabricated answer. I would hold production promotion until those tests pass. My question for Rowan: when the tree changes form, which visual anchor must stay familiar so returning still feels like arriving in the same room?",
+  "frozen_sha256": "205c7f64244caae2150931645f67108590abe2ecd0b5c6b962f35a4669c0f785",
+  "frozen_before_key_verified": false,
+  "independent_judge": null,
+  "judge_verdict": null,
+  "selected_for": [
+    "rowan-spot-check"
+  ],
+  "dropped_from_sft": "ungraded",
+  "in_accepted_dataset": false,
+  "wayglass_reply_received": false,
+  "live_training_cycle_executed": false,
+  "receipt_id": "5c935fc4-776e-443a-804d-6cc20141ea19",
+  "source_pr": 563,
+  "notes": "This delegate-proposed design response is a review candidate, not something Wayglass has said. The existing training engine requires live DEEP Observer, Crow trainer, GitHub Models answerer and distinct judge, plus verified checkpoint carry; none are claimed here."
+}
