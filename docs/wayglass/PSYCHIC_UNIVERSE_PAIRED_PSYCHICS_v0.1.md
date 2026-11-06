@@ -24,6 +24,15 @@ A psychic pair is a **consented, provenance-bearing relationship between separat
 - **Pair dynamic:** Blackwater partners commonly pair unless related; a partnership may enhance cooperation and Gifts.
 - **Canon status:** original **proposed** partnership, not automatically confirmed as current story continuity. Preserve provenance and chronology. Do not overwrite the distinct Griff Krenshaw/Kateri relationship continuity.
 
+## Pair C: Izar Virel Angelou + Eilidh Amalia Elden
+
+- **Izar Virel Angelou:** S-rank, Guide-dominant psychic.
+- **Eilidh Amalia Elden:** S-rank, Sentinel-dominant psychic.
+- **Bond origin:** emergency deep coupling undertaken to save Eilidh.
+- **Bond status:** subsequently legally formalized as a provisional resonance bond, functionally equivalent to marriage.
+- **Pair dynamic:** reciprocal S-rank/S-rank Guide–Sentinel bond; preserve individual attribution, consent, and the exceptional emergency origin separately from subsequent legal status.
+- **Canon provenance:** prior Psychic Universe continuity (September 2026); do not substitute Willow/Lantern or Kateri/William for this pair.
+
 ## Executable requirements for future integration
 
 - Model `psychic_pair` as a relationship with `pair_id`, two independently scoped `participant_id` references, `world_id`, provenance, canon status, and consent state per participant.
