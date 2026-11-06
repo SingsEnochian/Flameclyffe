@@ -95,7 +95,13 @@ const io = {
     return (await res.json()).choices?.[0]?.message?.content ?? '';
   },
   trainer: {
-    async drive() { const d = trainer(['drive', '--mode', 'exam']); return { id: d.id, task: d.task, input: d.input, tags: d.tags || [] }; },
+    async drive() {
+      const tag = (process.env.WAYGLASS_CROW_TASK_TAG || '').trim();
+      if (tag && !/^[a-z0-9-]{1,60}$/.test(tag)) throw new Error('Invalid Crow task tag');
+      const args = ['drive', '--mode', 'exam', ...(tag ? ['--tag', tag] : [])];
+      const d = trainer(args);
+      return { id: d.id, task: d.task, input: d.input, tags: d.tags || [] };
+    },
     async freeze(id, answer) { const f = join(crowWork, `answer-${id}.txt`); writeFileSync(f, answer); return trainer(['freeze', '--id', id, '--response-file', f]); },
     async key(id) { return trainer(['key', '--id', id]); },
     async record(id, verdict, notes) { return trainer(['record', '--id', id, '--verdict', verdict, '--notes', notes]); },
