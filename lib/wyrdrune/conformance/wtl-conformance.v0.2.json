@@ -1,0 +1,244 @@
+{
+ "schema": "wyrdrune.conformance/v0.2",
+ "about": "Shared WTL conformance fixtures. L0 must pass on #552 today. L1/L2 are acceptance criteria for WIR v0.2 backends; the harness runs them as todo until a backend claims them.",
+ "result_contract": {
+  "output": "committed emits in order",
+  "status": "committed | rolled-back | converged",
+  "checkpoints": "[{cycle, face, prev, state, carry}] — prev chains to lineage.root via WCE-1 digests",
+  "lineage": "{root}"
+ },
+ "fixtures": [
+  {
+   "id": "L0-phase-order-arithmetic",
+   "level": "L0",
+   "invariant": "I1",
+   "note": "#552 canonical example without star(); phases run in canonical order",
+   "source": "mobius {\n perceive { let energy = 2; }\n compress { set energy = energy * 4; }\n release { set energy = energy + 1; }\n verify { emit energy; }\n integrate {  }\n choose { set energy = energy - 3; }\n return { emit energy; }\n transcend { emit energy / 2; }\n}",
+   "expect": {
+    "output": [
+     9,
+     6,
+     3
+    ],
+    "phases": [
+     "perceive",
+     "compress",
+     "release",
+     "verify",
+     "integrate",
+     "choose",
+     "return",
+     "transcend"
+    ]
+   }
+  },
+  {
+   "id": "L0-missing-phase",
+   "level": "L0",
+   "invariant": null,
+   "note": "strict #552 rule: all eight phases required (see D6)",
+   "source": "mobius { perceive {} }",
+   "expect": {
+    "error": "SyntaxError"
+   }
+  },
+  {
+   "id": "L0-runes-are-identifiers",
+   "level": "L0",
+   "invariant": null,
+   "note": "Elder Futhark letters are Unicode category Lo and valid identifiers",
+   "source": "mobius {\n perceive { let ᚠ = 3; }\n compress {  }\n release {  }\n verify { emit ᚠ * 2; }\n integrate {  }\n choose {  }\n return {  }\n transcend {  }\n}",
+   "expect": {
+    "output": [
+     6
+    ]
+   }
+  },
+  {
+   "id": "L0-bridge-denied-by-default",
+   "level": "L0",
+   "invariant": null,
+   "note": "bridges require a host-supplied capability",
+   "source": "mobius {\n perceive {  }\n compress {  }\n release {  }\n verify { emit bridge(\"python\",\"run\",1); }\n integrate {  }\n choose {  }\n return {  }\n transcend {  }\n}",
+   "expect": {
+    "error": "Bridge capability unavailable"
+   }
+  },
+  {
+   "id": "L0-no-foreign-source",
+   "level": "L0",
+   "invariant": null,
+   "note": "source text can never become host code",
+   "source": "require(\"fs\")",
+   "expect": {
+    "error": "SyntaxError"
+   }
+  },
+  {
+   "id": "L1-comparison-in-verify",
+   "level": "L1",
+   "invariant": null,
+   "note": "comparisons parse and evaluate; require passes on true",
+   "source": "mobius {\n perceive { let energy = 9; }\n compress {  }\n release {  }\n verify { require energy >= 9; }\n integrate {  }\n choose {  }\n return { emit energy; }\n transcend {  }\n}",
+   "expect": {
+    "output": [
+     9
+    ],
+    "status": "committed"
+   }
+  },
+  {
+   "id": "L1-verify-failure-rolls-back",
+   "level": "L1",
+   "invariant": "I5",
+   "note": "emits are staged: a failed Verify leaves no output",
+   "source": "mobius {\n perceive { emit \"seen\"; let energy = 1; }\n compress {  }\n release {  }\n verify { require energy > 5 else \"too little energy\"; }\n integrate {  }\n choose {  }\n return {  }\n transcend {  }\n}",
+   "expect": {
+    "output": [],
+    "status": "rolled-back"
+   }
+  },
+  {
+   "id": "L1-unknown-fails-require",
+   "level": "L1",
+   "invariant": null,
+   "note": "Kleene logic: unknown is not true, so require fails without becoming false",
+   "source": "mobius {\n perceive { let open = unknown; }\n compress {  }\n release {  }\n verify { require open; }\n integrate {  }\n choose {  }\n return { emit 1; }\n transcend {  }\n}",
+   "expect": {
+    "output": [],
+    "status": "rolled-back"
+   }
+  },
+  {
+   "id": "L1-require-only-in-verify",
+   "level": "L1",
+   "invariant": null,
+   "note": "phase restriction enforced at compile time (an unknown-statement error does not count)",
+   "source": "mobius {\n perceive {  }\n compress { require true; }\n release {  }\n verify {  }\n integrate {  }\n choose {  }\n return {  }\n transcend {  }\n}",
+   "expect": {
+    "error": "only allowed in verify"
+   }
+  },
+  {
+   "id": "L1-division-by-zero-is-a-verdict",
+   "level": "L1",
+   "invariant": null,
+   "note": "runtime faults become failed verdicts and roll back, identically in every backend",
+   "source": "mobius {\n perceive { let x = 1; }\n compress { set x = x / 0; }\n release {  }\n verify {  }\n integrate {  }\n choose {  }\n return { emit x; }\n transcend {  }\n}",
+   "expect": {
+    "output": [],
+    "status": "rolled-back"
+   }
+  },
+  {
+   "id": "L1-units-scope-their-bindings",
+   "level": "L1",
+   "invariant": null,
+   "note": "each mobius block is its own lineage; #552 raises Duplicate binding here",
+   "source": "mobius {\n perceive { let energy = 1; }\n compress {  }\n release {  }\n verify {  }\n integrate {  }\n choose {  }\n return { emit energy; }\n transcend {  }\n}\nmobius {\n perceive { let energy = 2; }\n compress {  }\n release {  }\n verify {  }\n integrate {  }\n choose {  }\n return { emit energy; }\n transcend {  }\n}",
+   "expect": {
+    "output": [
+     1,
+     2
+    ]
+   }
+  },
+  {
+   "id": "L1-single-cycle-checkpoint",
+   "level": "L1",
+   "invariant": "I4",
+   "note": "a one-cycle lineage still writes a checkpoint chained to its root",
+   "source": "mobius {\n perceive { let a = 1; }\n compress {  }\n release {  }\n verify {  }\n integrate {  }\n choose {  }\n return { emit a; }\n transcend {  }\n}",
+   "expect": {
+    "cycles": 1,
+    "faces": [
+     "outer"
+    ],
+    "chain_valid": true
+   }
+  },
+  {
+   "id": "L2-three-cycles-carry",
+   "level": "L2",
+   "invariant": "I2",
+   "note": "Transcend output becomes the next Perceive input on the opposite face",
+   "source": "mobius (energy = 1) cycles 3 {\n perceive {  }\n compress {  }\n release {  }\n verify { require energy > 0; }\n integrate {  }\n choose {  }\n return { emit energy; }\n transcend { carry energy = energy * 2; }\n}",
+   "expect": {
+    "output": [
+     1,
+     2,
+     4
+    ],
+    "status": "committed",
+    "cycles": 3,
+    "faces": [
+     "outer",
+     "inner",
+     "outer"
+    ],
+    "chain_valid": true
+   }
+  },
+  {
+   "id": "L2-carry-must-match-seeds",
+   "level": "L2",
+   "invariant": "I3",
+   "note": "the shape of the self is invariant across the twist",
+   "source": "mobius (energy = 1) cycles 2 {\n perceive {  }\n compress {  }\n release {  }\n verify {  }\n integrate {  }\n choose {  }\n return {  }\n transcend { carry other = 1; }\n}",
+   "expect": {
+    "error": "carry must bind exactly the seeds"
+   }
+  },
+  {
+   "id": "L2-fixed-point",
+   "level": "L2",
+   "invariant": null,
+   "note": "stops when the carry equals the carry two cycles back (tau0 = seeds)",
+   "source": "mobius (x = 0) cycles 50 until stable {\n perceive {  }\n compress {  }\n release {  }\n verify {  }\n integrate {  }\n choose {  }\n return { emit x; }\n transcend { carry x = 5; }\n}",
+   "expect": {
+    "output": [
+     0,
+     5,
+     5
+    ],
+    "status": "converged",
+    "cycles": 3
+   }
+  },
+  {
+   "id": "L2-period-two-orbit-is-stable",
+   "level": "L2",
+   "invariant": null,
+   "note": "back to the same value on the same face: the Möbius fixed point",
+   "source": "mobius (x = 0) cycles 50 until stable {\n perceive {  }\n compress {  }\n release {  }\n verify {  }\n integrate {  }\n choose {  }\n return { emit x; }\n transcend { carry x = 1 - x; }\n}",
+   "expect": {
+    "output": [
+     0,
+     1
+    ],
+    "status": "converged",
+    "cycles": 2,
+    "faces": [
+     "outer",
+     "inner"
+    ]
+   }
+  },
+  {
+   "id": "L2-mid-lineage-rollback",
+   "level": "L2",
+   "invariant": "I6",
+   "note": "carried values are re-verified; cycle 3 fails and leaves only cycles 1-2 committed",
+   "source": "mobius (n = 1) cycles 3 {\n perceive {  }\n compress {  }\n release {  }\n verify { require n < 3; }\n integrate {  }\n choose {  }\n return { emit n; }\n transcend { carry n = n + 1; }\n}",
+   "expect": {
+    "output": [
+     1,
+     2
+    ],
+    "status": "rolled-back",
+    "cycles": 2,
+    "chain_valid": true
+   }
+  }
+ ]
+}
