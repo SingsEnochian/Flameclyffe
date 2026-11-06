@@ -19,11 +19,11 @@ export function validateCharacterBindings(bindings = CHARACTER_BINDINGS) {
   }
   return true;
 }
-export function canWriteCharacter(binding, actorId, { handoff = null } = {}) {
+export function canWriteCharacter(binding, actorId) {
   if (!binding || !actorId) return false;
-  if (binding.ownership === 'shared-narrative') return true; // narrative collaboration, not identity impersonation
+  if (binding.ownership === 'shared-narrative') return false; // host must authorize collaboration per session
   if (binding.owner_id === actorId) return true;
-  return Boolean(handoff && handoff.character_id === binding.character_id && handoff.to === actorId && handoff.from === binding.owner_id && handoff.authorized === true && handoff.revoked !== true);
+  return false; // handoffs require a trusted host verifier, not caller-supplied flags
 }
 export function resolveCharacterBinding(characterId, bindings = CHARACTER_BINDINGS) {
   return bindings.find(b => b.character_id === characterId) || null;
