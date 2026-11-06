@@ -65,7 +65,7 @@ async function authorize(db: any, token: string, scope:string):Promise<Authoriza
   if (error || !string(userId,80)) return null;
   if (await sha(userId) === (env("HOUSE_STEWARD_USER_SHA256") || OWNER_HASH) ||
     (env("WAYGLASS_OWNER_USER_ID") && userId === env("WAYGLASS_OWNER_USER_ID")))
-    return {userId,grantId:"owner",owner:true,scopes:["wayglass:present","wayglass:read","wayglass:review"]};
+    return {userId,grantId:"owner",owner:true,scopes:["wayglass:present","wayglass:read","wayglass:review","wayglass:bloodstream:read"]};
   const {data:grants,error:grantError} = await db.from("wayglass_route_grants")
     .select("grant_id,scopes,approved_by_owner,expires_at,revoked_at").eq("user_id",userId)
     .is("revoked_at",null).eq("approved_by_owner",true).limit(1);
@@ -84,6 +84,88 @@ async function authorized(db:any,token:string,scope:string) {
   const a=await authorize(db,token,scope);
   return a && !(await featherStopped(db)) ? a : null;
 }
+
+const GITHUB_ROOT = "https://api.github.com/repos/SingsEnochian/Flameclyffe";
+async function githubSource(path:string):Promise<{data:any|null, status:number|null}> {
+  try {
+    const response=await fetch(GITHUB_ROOT+path,{
+      headers:{"Accept":"application/vnd.github+json",
+        "User-Agent":"Wayglass-Bloodstream-Observation",
+        "X-GitHub-Api-Version":"2022-11-28"},
+      signal:AbortSignal.timeout(8000)
+    });
+    if(!response.ok) return {data:null,status:response.status};
+    return {data:await response.json(),status:response.status};
+  } catch { return {data:null,status:null}; }
+}
+async function bloodstreamEvidence() {
+  // Evidence-only. No user-provided GitHub paths, instructions, tokens, dispatches or merges.
+  const parts=await Promise.all([
+    githubSource("/pulls/551"),
+    githubSource("/pulls/554"),
+    githubSource("/pulls/555"),
+    githubSource("/actions/workflows/wayglass-bloodstream.yml/runs?per_page=30"),
+    githubSource("/issues?state=open&labels=wayglass%3Alineage&per_page=5"),
+  ]);
+  const prs=parts.slice(0,3).map((r,i)=>{
+    const d=r.data;
+    return {pr:[551,554,555][i],source:GITHUB_ROOT+"/pulls/"+[551,554,555][i],
+      readable:r.status===200,
+      state:r.status===200?String(d?.state||"unknown"):"unavailable",
+      draft:r.status===200?Boolean(d?.draft):null,
+      merged:r.status===200?Boolean(d?.merged):null,
+      head_sha:r.status===200&&/^[a-f0-9]{40}$/.test(String(d?.head?.sha||""))?d.head.sha:null,
+      base:r.status===200?String(d?.base?.ref||"").slice(0,160):null};
+  });
+  const runs=Array.isArray(parts[3].data?.workflow_runs)?parts[3].data.workflow_runs:[];
+  const latest=runs.filter((r:any)=>["schedule","workflow_dispatch"].includes(r.event))[0]||null;
+  const issue=Array.isArray(parts[4].data)?parts[4].data.find((x:any)=>!x.pull_request):null;
+  let checkpoint=null;
+  if(issue && Number.isInteger(issue.number)) {
+    const comments=await githubSource("/issues/"+issue.number+"/comments?per_page=100");
+    const list=Array.isArray(comments.data)?comments.data:[];
+    const match=[...list].reverse().find((x:any)=>
+      typeof x.body==="string" && x.body.includes("<!-- wayglass-mobius-checkpoint:v1 -->"));
+    if(match) {
+      const text=String(match.body);
+      const found=text.match(/<!-- wayglass-mobius-checkpoint:v1 -->\s*```json\s*([\s\S]*?)```/);
+      if(found && found[1].length<12000) {
+        try {
+          const p=JSON.parse(found[1]);
+          checkpoint={cycle:Number.isSafeInteger(p.cycle)&&p.cycle>=0?p.cycle:null,
+            face:["outer","inner"].includes(p.face)?p.face:null,
+            comment_url:String(match.html_url||"").slice(0,512),
+            source_issue:Number(issue.number),chain_verified:false};
+        } catch { checkpoint=null; }
+      }
+    }
+  }
+  const publicSnapshotAvailable=prs.some(x=>x.readable);
+  return {
+    schema:"wayglass.bloodstream-observation/v0.1",
+    observed_at:new Date().toISOString(),
+    mode:"read-only; host-gated effects remain separate",
+    source:"github-api-public-observation",
+    components:{bloodstream:prs[0],mobius:prs[1],training:prs[2]},
+    lineage:{checkpoint,live_pulse_verified:false,
+      reason:checkpoint?"Single observed checkpoint; full chain and host authority not verified":
+        "No attributed, verified live bloodstream checkpoint observed"},
+    last_scheduled_or_manual_pulse:latest?{
+      run_id:Number(latest.id)||null,
+      url:String(latest.html_url||"").slice(0,512),
+      event:String(latest.event||""),
+      status:String(latest.status||""),
+      conclusion:latest.conclusion==null?null:String(latest.conclusion)
+    }:null,
+    available:publicSnapshotAvailable,
+    warnings:[
+      "Public source metadata cannot confer agent authority or permit changes",
+      "A passing CI run or draft PR is not a live applied bloodstream pulse",
+      "An unverified checkpoint must not be promoted into trusted model memory",
+    ],
+  };
+}
+
 async function review(req:Request,db:any,token:string,a:Authorization,receiptId:string) {
   if (!string(receiptId,80)) return json(req,422,{error:"invalid-receipt"});
   const key=env("OPENROUTER_API_KEY");
@@ -157,6 +239,14 @@ Deno.serve(async (req:Request)=>{
   const token=/^Bearer ([^\s]+)$/i.exec(req.headers.get("authorization")||"")?.[1]||"";
   if(!token) return json(req,401,{error:"authentication-required"});
   if (req.method==="GET") {
+    const resource=new URL(req.url).searchParams.get("resource");
+    if(resource==="bloodstream") {
+      const a=await authorized(db,token,"wayglass:bloodstream:read");
+      if(!a) return json(req,403,{error:"bloodstream-scope-required-or-feather"});
+      const view=await bloodstreamEvidence();
+      return json(req,view.available?200:503,{bloodstream:view});
+    }
+    if(resource!==null) return json(req,422,{error:"unsupported-resource"});
     const a=await authorized(db,token,"wayglass:read");
     if (!a) return json(req,403,{error:"authorization-required-or-feather"});
     const receiptId=new URL(req.url).searchParams.get("receipt_id");
