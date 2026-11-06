@@ -17,6 +17,22 @@
 * { box-sizing: border-box; }
 html, body, #app { min-height: 100%; margin: 0; }
 body { overflow-x: hidden; background: #071014; color: var(--glass-text); }
+body {
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+    env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+}
+.wg-installation {
+  width: min(1120px, calc(100% - 28px));
+  margin: 14px auto;
+  padding: 14px 18px;
+  border-radius: 18px;
+}
+.wg-installation p { line-height: 1.5; }
+.wg-installation[hidden] { display: none; }
+@media (pointer: coarse) {
+  button, select, input { min-height: 44px; }
+  select, input, textarea { font-size: 16px; }
+}
 
 .wayglass-field {
   position: fixed;
