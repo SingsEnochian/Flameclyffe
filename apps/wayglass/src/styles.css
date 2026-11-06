@@ -982,3 +982,92 @@ html[data-wayglass-surface="wayglass:living-watercolor"] #app {
 @media(max-width:680px){
   .journey-chambers,.journey-folds{grid-template-columns:repeat(2,minmax(0,1fr));}
 }
+
+
+/* Living Watercolor communication desk: the conversation must not be a tiny
+   caption over a huge painting. Standard is spacious; expanded is a real
+   transparent writing/reading workspace with the body still behind it. */
+.wc-deck {
+  width: min(850px, calc(100% - 28px));
+  max-height: min(79svh, 750px);
+  gap: 12px;
+}
+.wc-deck-tools {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+}
+.wc-expand {
+  white-space: nowrap;
+  color: #f5dbb2;
+  border-color: rgba(242, 208, 151, .43);
+}
+.wc-deck .wc-voice {
+  min-height: 150px;
+  max-height: 32svh;
+  font-size: clamp(.95rem, 1.2vw, 1.06rem);
+  line-height: 1.65;
+  padding: 16px;
+}
+.wc-deck #wc-prompt {
+  min-height: 125px;
+  line-height: 1.55;
+  font-size: 1rem;
+}
+.wc-deck.is-expanded {
+  position: fixed;
+  inset: max(16px, env(safe-area-inset-top)) max(16px, 4vw) max(16px, env(safe-area-inset-bottom));
+  z-index: 55;
+  width: auto;
+  max-width: none;
+  height: auto;
+  max-height: none;
+  overflow-y: auto;
+  border-radius: 28px;
+  padding: clamp(18px, 3vw, 36px);
+  background:
+    linear-gradient(120deg, rgba(34, 83, 88, .15), transparent 55%),
+    rgba(7, 25, 33, .88);
+  box-shadow: 0 22px 100px rgba(0,0,0,.64);
+  align-content: start;
+  grid-template-rows: auto auto auto minmax(170px, 1fr) auto minmax(135px, auto) auto auto auto;
+}
+.wc-stage.wc-stage-expanded {
+  overflow: visible;
+  isolation: auto;
+}
+.wc-deck.is-expanded .wc-deck-header { align-items: start; }
+.wc-deck.is-expanded .wc-voice {
+  min-height: min(29svh, 290px);
+  max-height: none;
+  overflow-y: auto;
+  border: 1px solid rgba(214, 232, 218, .16);
+}
+.wc-deck.is-expanded #wc-prompt {
+  min-height: 145px;
+  max-height: 30svh;
+}
+@media (max-width: 760px) {
+  .wc-deck {
+    max-height: 76%;
+    width: calc(100% - 16px);
+    padding: 16px;
+  }
+  .wc-deck .wc-voice { min-height: 130px; max-height: 27svh; }
+  .wc-deck #wc-prompt { min-height: 110px; }
+  .wc-deck.is-expanded {
+    inset: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom));
+    width: auto;
+    max-height: none;
+    height: auto;
+    padding: 16px;
+    border-radius: 19px;
+    gap: 10px;
+    grid-template-rows: auto auto auto minmax(150px, 1fr) auto minmax(120px, auto) auto auto auto;
+  }
+  .wc-deck.is-expanded .wc-voice { min-height: 150px; }
+  .wc-deck.is-expanded #wc-prompt { min-height: 120px; }
+  .wc-deck-header { align-items: start; flex-wrap: wrap; }
+}
