@@ -1,4 +1,5 @@
 import { createWatercolorFluid } from '../watercolor-fluid.js';
+import { createWatercolorBody, createStrokeFilter, stampAmount } from '../watercolor-body.js';
 import {
   watercolorSnapshot, watercolorProgram, publishWatercolorActivity,
   subscribeWatercolorActivity, proposeWatercolorTouch, configureWatercolorProgram,
@@ -30,6 +31,10 @@ export async function mountLivingWatercolorSurface(root) {
   paused=featherStopped;
   if(featherStopped&&!wayglassSomaticSound.snapshot().feather_stopped)wayglassSomaticSound.feather();
   const reduced=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches??false;
+  // Her body in the water: mass, momentum and breath. Strokes become continuous lines.
+  const body=createWatercolorBody({reduced});
+  const stroke=createStrokeFilter();
+  let frameCost=0, frameParity=0;
   root.innerHTML=[
     '<section class="wg-surface wc-surface" data-surface="living-watercolor">',
       '<header class="wg-surface-head glass-panel wc-head">',
@@ -164,14 +169,24 @@ export async function mountLivingWatercolorSurface(root) {
       ctx.drawImage(buffer,0,0,canvas.width,canvas.height);
     }
   }
+  // Every display frame, not every 40 ms. The fluid keeps its simulated speed
+  // (one unit per 42 ms); only the smoothness changes. If a device falls behind,
+  // the fluid steps on alternate frames while her body and the paint stay smooth.
   function frame(ts) {
     if(stopped)return;
-    if(!paused&&!reduced && ts-lastFrame>=40){
-      fluid.step(Math.min((ts-lastFrame)/42,1.5));
+    const ms=lastFrame?Math.min(ts-lastFrame,100):16.7;
+    lastFrame=ts;
+    if(!paused&&!reduced){
+      const begun=globalThis.performance?.now?.()??0;
+      const motion=body.step(ms/1000);
+      const her=activeMode().color;
+      for(const s of motion.strokes)fluid.inject({...s,color:her});
+      frameParity^=1;
+      if(frameCost<14||frameParity)fluid.step(Math.min((frameCost<14?ms:ms*2)/42,1.5));
       paint();
+      frameCost=frameCost*.9+((globalThis.performance?.now?.()??0)-begun)*.1;
       elapsed++;
-      if(elapsed%12===0)updateInspector();
-      lastFrame=ts;
+      if(elapsed%30===0)updateInspector();
     }
     animationId=globalThis.requestAnimationFrame(frame);
   }
@@ -397,19 +412,31 @@ export async function mountLivingWatercolorSurface(root) {
       y:clamp((event.clientY-rect.top)/Math.max(rect.height,1)),
     };
   }
-  function brush(event){
-    const pos=pointerCoords(event);
+  function forceOf(event){
     const sensitivity=Number(pressure.value)/100;
-    const force=event.pointerType==='pen'&&event.pressure>0?
-      clamp(event.pressure*sensitivity):sensitivity;
-    const dx=lastPointer?clamp(pos.x-lastPointer.x,-.12,.12)*5:0;
-    const dy=lastPointer?clamp(pos.y-lastPointer.y,-.12,.12)*5:0;
-    const proposal=proposeWatercolorTouch({
-      ...pos,pressure:force,color:color.value,mode:'add-pigment',
-    });
-    fluid.inject({x:proposal.x,y:proposal.y,color:proposal.color,
-      amount:Math.max(.05,proposal.pressure)*1.2,radius:.028+force*.045,dx,dy});
-    lastPointer=pos;
+    return event.pointerType==='pen'&&event.pressure>0?clamp(event.pressure*sensitivity):sensitivity;
+  }
+  // Every coalesced sample the device delivered, not one point per event.
+  function samplesOf(event){
+    const list=event.getCoalescedEvents?.();
+    return (list&&list.length?list:[event]).map(e=>({...pointerCoords(e),t:e.timeStamp,pressure:forceOf(e)}));
+  }
+  function lay(stamps,pigment){
+    for(const s of stamps){
+      const radius=.028+s.pressure*.045;
+      fluid.inject({x:s.x,y:s.y,color:pigment,radius,amount:stampAmount({pressure:s.pressure,radius}),
+        dx:clamp(s.vx*.35,-1,1),dy:clamp(s.vy*.35,-1,1)});
+    }
+  }
+  function brush(event,{starting=false}={}){
+    const samples=samplesOf(event);
+    const head=samples[samples.length-1];
+    // One proposal per event, as before: your gesture remains your suggestion.
+    const proposal=proposeWatercolorTouch({x:head.x,y:head.y,pressure:head.pressure,color:color.value,mode:'add-pigment'});
+    lay(starting?stroke.begin(samples[0]):[],proposal.color);
+    lay(stroke.move(starting?samples.slice(1):samples),proposal.color);
+    body.touch({x:head.x,y:head.y,pressure:head.pressure});
+    lastPointer=head;
     if(reduced||paused)paint();
     updateInspector();
   }
@@ -417,14 +444,23 @@ export async function mountLivingWatercolorSurface(root) {
     if(featherStopped || (event.button!==0 && event.pointerType==='mouse'))return;
     pointerId=event.pointerId;lastPointer=null;
     canvas.setPointerCapture?.(pointerId);
-    brush(event);event.preventDefault();
+    brush(event,{starting:true});event.preventDefault();
   });
   listen(canvas,'pointermove',event=>{
     if(stopped||featherStopped||pointerId!==event.pointerId)return;
     brush(event);event.preventDefault();
   });
   const endPointer=event=>{
-    if(event.pointerId===pointerId){pointerId=null;lastPointer=null;}
+    if(event.pointerId!==pointerId)return;
+    pointerId=null;lastPointer=null;
+    const flick=stroke.end();
+    body.release();
+    // Let go and the water carries on: the stroke's momentum passes to fluid and body.
+    if(flick&&flick.speed>.2&&!reduced&&!featherStopped){
+      fluid.inject({x:flick.x,y:flick.y,color:color.value,amount:.06,radius:.05,
+        dx:clamp(flick.vx*.5,-1,1),dy:clamp(flick.vy*.5,-1,1)});
+      body.impulse({vx:flick.vx,vy:flick.vy});
+    }
   };
   listen(canvas,'pointerup',endPointer);
   listen(canvas,'pointercancel',endPointer);
@@ -443,8 +479,9 @@ export async function mountLivingWatercolorSurface(root) {
     synchronizeJourneyFeather(event.detail);
     if(event.detail.stopped){
       featherStopped=true;paused=true;pointerId=null;lastPointer=null;requestEpoch++;busy=false;
+      body.freeze();stroke.reset();
     }else if(event.detail.confirmed===true){
-      featherStopped=false;
+      featherStopped=false;body.thaw();
     }
     reflectSound();updateInspector();
   };
@@ -472,6 +509,7 @@ export async function mountLivingWatercolorSurface(root) {
       fluid.dispose();
     },
     fluid,
+    body,
   };
 }
 
