@@ -44,8 +44,10 @@ test('HTTP announces presentation tool only on bound host and creates durable re
 });
 test('HTTP rejects missing token or revoked current grant before queueing',async()=>{
  await withHost({currentGrant:false},async({call,calls,rows})=>{
-   const anon=await call('bad','tools/call',{name:'wayglass_present',arguments:payload});
+   const anon=await call('','tools/call',{name:'wayglass_present',arguments:payload});
    assert.equal(anon.status,401);
+   const invalid=await call('bad','tools/call',{name:'wayglass_present',arguments:payload});
+   assert.equal(invalid.status,403);
    const revoked=await (await call('valid','tools/call',{name:'wayglass_present',arguments:payload})).json();
    assert.ok(revoked.error);assert.equal(calls.length,0);assert.equal(rows.size,0);
  });
