@@ -1415,3 +1415,22 @@ html[data-wayglass-surface="wayglass:living-watercolor"] #app {
   .wc-deck.is-expanded .wc-voice { min-height: 156px; }
   .wc-deck.is-expanded #wc-prompt { min-height: 132px; }
 }
+
+
+/* Keep a real touchable portion of the watercolor exposed even with the
+   larger desk. Chromium First Contact verifies this with actual pointer
+   input, not an invented paint event. */
+@media (min-width: 761px) {
+  .wc-deck:not(.is-expanded) {
+    left: auto;
+    right: 14px;
+    width: min(680px, 70%);
+  }
+}
+@media (max-width: 760px) {
+  .wc-deck:not(.is-expanded) {
+    left: 8px;
+    right: 8px;
+    width: calc(100% - 16px);
+  }
+}
