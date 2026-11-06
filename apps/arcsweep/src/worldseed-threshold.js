@@ -42,7 +42,8 @@ export function detectWorldseedThreshold({ world, seed, cycle = null, observedAt
     mayChange: record.mayChange,
     notes: record.notes,
   }));
-  const branchCandidate = Boolean(cycle && foldActive);
+  // A fold alone is insufficient to prepare a branch. Replay must be explicitly verified.
+  const branchCandidate = Boolean(cycle && foldActive && replayMatched === true);
   const cycleLabel = beforeSequence !== null || afterSequence !== null
     ? `PREMAQC ${beforeSequence ?? '?'}→${afterSequence ?? '?'}`
     : cycle?.cycle_id || 'observed threshold';
@@ -55,7 +56,10 @@ export function detectWorldseedThreshold({ world, seed, cycle = null, observedAt
     observedAt,
     world: { id: world.id, name: world.name || world.id },
     worldseedFingerprint: seed.fingerprint,
-    status: !cycle ? 'awaiting-observation' : branchCandidate ? 'branch-candidate' : 'threshold-clear',
+    status: !cycle ? 'awaiting-observation'
+      : replayMatched === false ? 'replay-mismatch'
+      : foldActive && replayMatched !== true ? 'awaiting-replay'
+      : branchCandidate ? 'branch-candidate' : 'threshold-clear',
     branchCandidate,
     detector: {
       cycleId: cycle?.cycle_id || null,
@@ -79,6 +83,20 @@ export function detectWorldseedThreshold({ world, seed, cycle = null, observedAt
       branchCreation: 'steward-action-only',
     },
   };
+}
+
+// An older candidate must not populate the Fork form after its source cycle or seed changes.
+export function matchingWorldseedThresholdReceipt(receipts, current) {
+  if (!current?.branchCandidate || !current?.world?.id) return null;
+  return (Array.isArray(receipts) ? receipts : []).find((receipt) =>
+    receipt?.branchCandidate === true &&
+    receipt?.branchDraft &&
+    receipt?.world?.id === current.world.id &&
+    receipt?.worldseedFingerprint === current.worldseedFingerprint &&
+    receipt?.detector?.cycleId === current.detector?.cycleId &&
+    receipt?.detector?.mathSpinePacketId === current.detector?.mathSpinePacketId &&
+    receipt?.detector?.replayMatched === true
+  ) || null;
 }
 
 export function readWorldseedThreshold(state, worldId, observedAt = new Date().toISOString()) {

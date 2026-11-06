@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { readWorldseedThreshold, receiptWorldseedThreshold } from '../src/worldseed-threshold.js';
+import { matchingWorldseedThresholdReceipt, readWorldseedThreshold, receiptWorldseedThreshold } from '../src/worldseed-threshold.js';
 
-function stateWithCycle({ foldActive = true, foldIndex = 0.91 } = {}) {
+function stateWithCycle({ foldActive = true, foldIndex = 0.91, replayMatched = true } = {}) {
   return {
     worlds: [{ id: 'earth', name: 'Earth', kind: 'Birth World' }],
     records: {
@@ -20,7 +20,7 @@ function stateWithCycle({ foldActive = true, foldIndex = 0.91 } = {}) {
         packet_id: 'math-9',
         projection: { fold: { active: foldActive }, jacobian: { fold_index: foldIndex } },
       },
-      replay_receipt: { matched: true },
+      replay_receipt: { matched: replayMatched },
     }],
   };
 }
@@ -38,6 +38,40 @@ test('active fold becomes a branch candidate with a prepared draft, not a create
   assert.equal(proposal.authority.automaticBranching, false);
   assert.equal(state.worldseedThresholdProposals.length, 1);
   assert.deepEqual(state.worlds, before);
+});
+
+test('active fold with replay mismatch cannot propose a branch', () => {
+  const state = stateWithCycle({ replayMatched: false });
+  const originalWorlds = structuredClone(state.worlds);
+  const proposal = receiptWorldseedThreshold(state, 'earth', '2030-01-01T00:00:00.000Z');
+  assert.equal(proposal.status, 'replay-mismatch');
+  assert.equal(proposal.branchCandidate, false);
+  assert.equal(proposal.branchDraft, null);
+  assert.equal(proposal.detector.replayMatched, false);
+  assert.deepEqual(state.worlds, originalWorlds);
+});
+
+test('active fold with unavailable replay remains awaiting-replay', () => {
+  const proposal = readWorldseedThreshold(stateWithCycle({ replayMatched: null }), 'earth');
+  assert.equal(proposal.status, 'awaiting-replay');
+  assert.equal(proposal.branchCandidate, false);
+  assert.equal(proposal.branchDraft, null);
+});
+
+test('stale receipt cannot populate a fork draft after cycle or seed changes', () => {
+  const state = stateWithCycle();
+  const receipted = receiptWorldseedThreshold(state, 'earth', '2030-01-01T00:00:00.000Z');
+  const initial = readWorldseedThreshold(state, 'earth');
+  assert.deepEqual(matchingWorldseedThresholdReceipt(state.worldseedThresholdProposals, initial), receipted);
+
+  state.feedbackCycles[0].cycle_id = 'cycle-10';
+  const changedCycle = readWorldseedThreshold(state, 'earth');
+  assert.equal(matchingWorldseedThresholdReceipt(state.worldseedThresholdProposals, changedCycle), null);
+
+  state.feedbackCycles[0].cycle_id = 'cycle-9';
+  state.records.seedhouse[0].mustSurvive = 'Memory, relationship and trust.';
+  const changedSeed = readWorldseedThreshold(state, 'earth');
+  assert.equal(matchingWorldseedThresholdReceipt(state.worldseedThresholdProposals, changedSeed), null);
 });
 
 test('clear fold records a threshold-clear reading without a branch draft', () => {
