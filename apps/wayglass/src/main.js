@@ -15,6 +15,7 @@ import { mountWayglassLivingObserver } from './surfaces/living-observer.js';
 import { mountWayglassLibrarySurface } from './surfaces/library.js';
 import { mountWayglassToybox } from './surfaces/toybox.js';
 import { mountWayglassCommonsSurface } from './surfaces/commons.js';
+import { mountPsychicUniverse } from './surfaces/psychic-universe.js';
 import { subscribeWayglassObserver } from './living-observer-model.js';
 import { recordRouteAsWonderLight } from './wonder-light.js';
 import { registerWayglassOrgan, listWayglassOrgans } from './organ-registry.js';
@@ -64,6 +65,7 @@ registerWayglassSurface({
   mount: mountWayglassCommonsSurface,
 });
 
+registerWayglassSurface({ surface_id: 'wayglass:psychic-universe', label: 'Psychic Universe', mount: mountPsychicUniverse });
 subscribeWayglassObserver(recordRouteAsWonderLight);
 
 registerWayglassSurface({
@@ -120,6 +122,7 @@ const startRoom = roomQuery === 'observer' ? 'wayglass:living-observer'
   : roomQuery === 'library' ? 'wayglass:library'
   : roomQuery === 'toybox' ? 'wayglass:toybox'
   : roomQuery === 'organs' ? 'wayglass:systems'
+  : roomQuery === 'psychic' ? 'wayglass:psychic-universe'
   : roomQuery === 'video' ? 'wayglass:video-atelier'
   : 'arcsweep:writing-room';
 await wayglass.mount(startRoom);
