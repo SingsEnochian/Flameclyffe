@@ -38,6 +38,17 @@ async function copyTree(from, to) {
     }
   }
 
+  // The ritual-preview adapter depends on reviewed, pure Wyrdrune modules.
+  // Stage runtime CommonJS only, not conformance tests, Python tools or mutable data.
+  const wyrdruneSource = path.join(repoRoot, 'lib', 'wyrdrune');
+  const wyrdruneRuntime = path.join(runtime, 'wyrdrune');
+  await fsp.mkdir(wyrdruneRuntime, { recursive: true });
+  for (const name of await fsp.readdir(wyrdruneSource)) {
+    if (name.endsWith('.cjs') && !name.endsWith('.test.cjs')) {
+      await fsp.copyFile(path.join(wyrdruneSource, name), path.join(wyrdruneRuntime, name));
+    }
+  }
+
   await fsp.rm(destination, { recursive: true, force: true });
   await copyTree(source, destination);
 

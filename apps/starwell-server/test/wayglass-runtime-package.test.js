@@ -13,6 +13,10 @@ const repositoryLib = path.resolve(__dirname, '../../../lib');
 const modules = fs.readdirSync(repositoryLib).filter(name => /^wayglass-.*\.cjs$/.test(name));
 const packageRoot = path.resolve(__dirname, '..');
 const runtime = path.join(packageRoot, 'wayglass-runtime');
+const wyrdruneRuntime = path.join(runtime, 'wyrdrune');
+const wyrdruneSource = path.join(repositoryLib, 'wyrdrune');
+const wyrdruneModules = fs.readdirSync(wyrdruneSource).filter(name =>
+  name.endsWith('.cjs') && !name.endsWith('.test.cjs'));
 
 test('staged Wayglass runtime is complete and matches canonical lib sources', () => {
   assert.ok(fs.existsSync(path.join(packageRoot, 'public/wayglass/index.html')), 'Wayglass UI must be staged before host tests');
@@ -33,12 +37,21 @@ test('staged Wayglass runtime is complete and matches canonical lib sources', ()
       assert.ok(fs.existsSync(target), name + ' imports missing ' + dependency);
     }
   }
+  for (const name of wyrdruneModules) {
+    const source = fs.readFileSync(path.join(wyrdruneSource, name), 'utf8');
+    const bundled = fs.readFileSync(path.join(wyrdruneRuntime, name), 'utf8');
+    assert.equal(bundled, source, 'Wyrdrune runtime ' + name + ' differs from canonical lib source');
+  }
 });
 
 test('staged Wayglass runtime loads and retains distinct identities without repository lib/', (t) => {
   const isolated = fs.mkdtempSync(path.join(os.tmpdir(), 'wayglass-runtime-package-'));
   t.after(() => fs.rmSync(isolated, { recursive: true, force: true }));
   for (const name of modules) fs.copyFileSync(path.join(runtime, name), path.join(isolated, name));
+  fs.mkdirSync(path.join(isolated, 'wyrdrune'), { recursive: true });
+  for (const name of wyrdruneModules) {
+    fs.copyFileSync(path.join(wyrdruneRuntime, name), path.join(isolated, 'wyrdrune', name));
+  }
 
   const smoke = `
     const assert = require('node:assert/strict');
