@@ -123,7 +123,10 @@ export async function mountLivingWatercolorSurface(root) {
   buffer.width=fluid.width;buffer.height=fluid.height;
   const off=buffer.getContext('2d',{alpha:false});
   let bitmap=off?.createImageData(fluid.width,fluid.height)||null;
-  const color=q('wc-color'),pressure=q('wc-pressure'),prompt=q('wc-prompt');
+  const color=q('wc-color'),pressure=q('wc-pressure'),brushSize=q('wc-brush-size'),prompt=q('wc-prompt');
+  const brushCursor=q('wc-brush-cursor');
+  const pigmentButtons=[...root.querySelectorAll('[data-wc-pigment]')];
+  let paperIsDark=false,keyboardCursor={x:.5,y:.5};
   const title=q('wc-title'),intent=q('wc-intent'),voice=q('wc-voice'),feedback=q('wc-feedback');
   const route=q('wc-route'),routeState=q('wc-route-state'),invite=q('wc-invite');
   const houseSignIn=q('wc-house-signin');
@@ -145,7 +148,7 @@ export async function mountLivingWatercolorSurface(root) {
   }
   function paint() {
     if(!ctx||!bitmap||!off)return;
-    bitmap.data.set(fluid.pixels());
+    bitmap.data.set(fluid.pixels({background:paperIsDark?'#13242e':'#eee8db'}));
     off.putImageData(bitmap,0,0);
     const w=canvas.clientWidth,h=canvas.clientHeight;
     if(w&&h){
@@ -346,6 +349,36 @@ export async function mountLivingWatercolorSurface(root) {
   });
   listen(pressure,'input',()=>{
     q('wc-pressure-label').textContent=pressure.value+'%';
+  });
+  function markPigment(){
+    for(const button of pigmentButtons){
+      const selected=button.dataset.wcPigment.toLowerCase()===color.value.toLowerCase();
+      button.setAttribute('aria-pressed',String(selected));
+      button.classList.toggle('active',selected);
+    }
+  }
+  for(const button of pigmentButtons)listen(button,'click',()=>{
+    color.value=button.dataset.wcPigment;
+    markPigment();
+    feedback.textContent='Pigment selected. Paint with a finger, Pencil, or mouse.';
+  });
+  listen(color,'input',markPigment);
+  markPigment();
+  listen(brushSize,'input',()=>{
+    q('wc-brush-size-label').textContent=brushSize.value+'%';
+  });
+  listen(q('wc-paper'),'click',()=>{
+    paperIsDark=!paperIsDark;
+    q('wc-paper').textContent=paperIsDark?'Light paper':'Dark paper';
+    q('wc-paper').setAttribute('aria-pressed',String(paperIsDark));
+    paint();
+    feedback.textContent=paperIsDark?'Dark paper selected. Pigment preserved.':'Light paper selected. Pigment preserved.';
+  });
+  listen(q('wc-clear-paint'),'click',()=>{
+    if(featherStopped){feedback.textContent='Release Feather before clearing the painting.';return;}
+    fluid.clear();
+    paint();updateInspector();
+    feedback.textContent='Painting cleared. Conversation and source receipts are preserved.';
   });
   listen(q('wc-flow'),'click',()=>{
     if(featherStopped){feedback.textContent='Release Feather before restarting the fluid.';return;}
