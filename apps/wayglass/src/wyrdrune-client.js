@@ -2,7 +2,7 @@ import { verifyWyrdrunePreview } from './wyrdrune-proof.js';
 
 // A read-only ritual preview crosses into a model conversation only after
 // Rowan explicitly stages it in the ordinary composer and chooses Send.
-export async function previewWyrdrune(source,{fetchImpl=fetch}={}) {
+export async function previewWyrdrune(source,{fetchImpl=fetch,cryptoImpl=globalThis.crypto}={}) {
   if(typeof source!=='string'||!source.trim()||source.length>16000)throw new TypeError('Enter Wyrdrune source (up to 16000 characters).');
   const response=await fetchImpl('/api/v1/wayglass/wyrdrune/preview',{
     method:'POST',credentials:'same-origin',cache:'no-store',
