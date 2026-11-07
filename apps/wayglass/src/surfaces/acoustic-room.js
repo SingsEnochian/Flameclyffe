@@ -5,6 +5,7 @@ import {WAYGLASS_FEATHER_EVENT,wayglassSomaticSound} from '../somatic-sound.js';
 import {createWorld,advanceWorld,forkWorld,worldReceipt,recoverWorld,compareWorlds} from '../acoustic-world-model.js';
 import {displacement,instrumentSnapshot} from '../field-instrument-model.js';
 import {createWayglassObservation} from '../living-observer-model.js';
+import {readLatestQuadGestalt,subscribeQuadGestalt} from '../quad-eightfold-client.js';
 
 const STORAGE_KEY='wayglass.acoustic-world.return/v0.1';
 export function mountWayglassAcousticRoom(root){
@@ -53,7 +54,7 @@ export function mountWayglassAcousticRoom(root){
  <label><input type="checkbox" data-ambience> Room ambience</label>
  <label><input type="checkbox" data-motion> Reduce motion</label>
  <button type="button" class="glass-chip" data-signal>Bell · Audition status cue</button>
- <p class="acoustic-note">Independent ambience, navigation and status buses. Mono keeps the visible bearing.</p>
+ <p class="acoustic-note">Independent ambience, navigation and status buses. Mono keeps the visible bearing.</p><p class="acoustic-note" data-quad-status>Quad evidence awaits a House-authenticated reading.</p>
  <p class="acoustic-note" data-audio-state aria-live="polite"></p>
  <button type="button" class="glass-chip" data-retry-audio hidden>Retry sound</button>
  </div>
@@ -70,7 +71,9 @@ export function mountWayglassAcousticRoom(root){
  $('[data-motion]').checked=reduced;
  function syncAudio(){
   const state=world.markerState;
-  audio.update({muted:state.muted,mono:state.mono,ambience:state.ambience,bearing:bearing(state)});
+  audio.update({muted:state.muted,mono:state.mono,ambience:state.ambience,bearing:bearing(state),quadSoundstage:readLatestQuadGestalt()?.soundstage||[]});
+  const quad=readLatestQuadGestalt();
+  $('[data-quad-status]').textContent=quad?('Quad · '+quad.completed_cycles+' cycles · '+quad.evidence.filter(x=>x.status==='observed').length+' observed sources · '+quad.gaps.length+' gaps'):'Quad evidence awaits a House-authenticated reading.';
   const status=audio.getState();
   $('[data-audio-state]').textContent=status.supported===false?'Audio unavailable here. Field and text instruments remain available.':state.muted?'Sound stopped. Enable sound to begin.':status.running?'Audio active · navigation, ambience and status.':status.status==='error'?'Audio could not start: '+(status.lastError||'device error')+'. Retry sound when ready.':status.status==='suspended'?'Audio suspended by the device. Retry sound to resume.':'Audio awaiting device start.';
   $('[data-retry-audio]').hidden=state.muted||status.supported===false||status.running;
@@ -199,8 +202,9 @@ export function mountWayglassAcousticRoom(root){
  observer?.observe($('[data-stage]'));
  globalThis.addEventListener?.('resize',onResize);
  globalThis.addEventListener?.(WAYGLASS_FEATHER_EVENT,onSharedFeather);
+ const unsubscribeQuad=subscribeQuadGestalt(()=>{if(!disposed)syncAudio();});
  root.addEventListener('click',onClick);root.addEventListener('change',onChange);root.addEventListener('input',onInput);root.addEventListener('keydown',onKey);
  root.tabIndex=0;render();
- return ()=>{disposed=true;observer?.disconnect();root.removeEventListener('click',onClick);root.removeEventListener('change',onChange);root.removeEventListener('input',onInput);root.removeEventListener('keydown',onKey);globalThis.removeEventListener?.('resize',onResize);globalThis.removeEventListener?.(WAYGLASS_FEATHER_EVENT,onSharedFeather);audio.dispose();};
+ return ()=>{disposed=true;unsubscribeQuad();observer?.disconnect();root.removeEventListener('click',onClick);root.removeEventListener('change',onChange);root.removeEventListener('input',onInput);root.removeEventListener('keydown',onKey);globalThis.removeEventListener?.('resize',onResize);globalThis.removeEventListener?.(WAYGLASS_FEATHER_EVENT,onSharedFeather);audio.dispose();};
 }
 
