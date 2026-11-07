@@ -1,5 +1,6 @@
 import { createWayglassOrgan } from './organ-registry.js';
 import { createWayglassObservation } from './living-observer-model.js';
+import {readLatestQuadGestalt} from './quad-eightfold-client.js';
 import { createWayglassVoiceBoundary, WAYGLASS_VOICE_BOUNDARY_SCHEMA } from './voice-boundary.js';
 import {
   createPresence,
@@ -85,4 +86,24 @@ export const voiceConsentOrgan = createWayglassOrgan({
   adapter: { createWayglassVoiceBoundary },
 });
 
-export const FIRST_WAYGLASS_ORGANS = Object.freeze([presenceOrgan, memoryOrgan, sensoriumOrgan, livingObserverOrgan, voiceConsentOrgan]);
+export const quadEightfoldOrgan = createWayglassOrgan({
+  organ_id: 'wayglass.organ.quad-eightfold-gestalt',
+  lineage: ['wayglass:wyrdrune-eightfold-phases','wayglass:quad-host-observer','wayglass:independent-agent-weight-learning'],
+  maturity: 'PARTIAL',
+  capabilities: ['quad.observe-authorized-sources','quad.perception','quad.resonance',
+    'quad.agency','quad.continuity','quad.recursive-return','quad.acoustic-project',
+    'quad.learning-invite','quad.agent-weight-manifest'],
+  authority_ceiling: ['observe-authorized-metadata','render-evidence-geometry',
+    'render-local-opt-in-audio','propose-independent-weight-experiment'],
+  receipt_schemas: ['wayglass.quad-checkpoint/v1','wayglass.quad-gestalt/v1',
+    'wayglass.agent-training-manifest/v1'],
+  dependencies: ['wayglass.organ.living-observer','wayglass.organ.sensorium',
+    'wayglass.organ.memory-flight-recorder'],
+  continuity_hooks: ['quad-checkpoint-hash','quad-open-wonder','quad-source-provenance'],
+  embodiment_hooks: ['no-audio-on-return','honor-feather-stop','honor-mono-safe'],
+  evidence: ['test/wayglass/quad-eightfold-gestalt.test.cjs',
+    'apps/wayglass/src/surfaces/quad-eightfold.js'],
+  adapter: {readLatestQuadGestalt},
+});
+
+export const FIRST_WAYGLASS_ORGANS = Object.freeze([presenceOrgan, memoryOrgan, sensoriumOrgan, livingObserverOrgan, voiceConsentOrgan, quadEightfoldOrgan]);
