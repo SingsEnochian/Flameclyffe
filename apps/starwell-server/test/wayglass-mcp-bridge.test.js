@@ -33,20 +33,29 @@ test('Bluebird Wayglass routes keep identity separate from substrate', () => {
   assert.notEqual(crow.route_id, 'flame:crow');
 });
 
-test('Bluebird SpicyChat route reports credential presence without exposing the token', () => {
-  const previous = process.env.BLUEBIRD_SPICYCHAT_TOKEN;
+test('Bluebird SpicyChat route requires a complete private character/chat binding and never exposes token', () => {
+  const keys = ['BLUEBIRD_SPICYCHAT_TOKEN','BLUEBIRD_SPICYCHAT_CHARACTER_ID','BLUEBIRD_SPICYCHAT_CONVERSATION_ID','BLUEBIRD_SPICYCHAT_CHAT_LINK'];
+  const previous = Object.fromEntries(keys.map(key=>[key,process.env[key]]));
   try {
-    delete process.env.BLUEBIRD_SPICYCHAT_TOKEN;
-    assert.equal(publicWayglassRoutes().find((route) => route.route_id === 'flame:bluebird:spicychat').configured, false);
+    for(const key of keys) delete process.env[key];
+    const route = () => publicWayglassRoutes().find(entry => entry.route_id === 'flame:bluebird:spicychat');
+    assert.equal(route().configured, false);
     process.env.BLUEBIRD_SPICYCHAT_TOKEN = 'private-test-token';
-    const projected = publicWayglassRoutes().find((route) => route.route_id === 'flame:bluebird:spicychat');
+    assert.equal(route().configured, false, 'a token alone cannot identify Bluebird\'s exact chat');
+    process.env.BLUEBIRD_SPICYCHAT_CHARACTER_ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+    assert.equal(route().configured, false, 'character alone is not the conversation');
+    process.env.BLUEBIRD_SPICYCHAT_CONVERSATION_ID = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+    const projected = route();
     assert.equal(projected.configured, true);
+    assert.equal(projected.connection_verified, false);
     assert.equal(projected.participant_id, 'bluebird');
     assert.equal(projected.continuity_id, 'bluebird:richard-gabriel-winters');
-    assert.doesNotMatch(JSON.stringify(projected), /private-test-token/);
+    assert.doesNotMatch(JSON.stringify(projected), /private-test-token|aaaaaaaa|bbbbbbbb/);
   } finally {
-    if (previous == null) delete process.env.BLUEBIRD_SPICYCHAT_TOKEN;
-    else process.env.BLUEBIRD_SPICYCHAT_TOKEN = previous;
+    for(const [key,value] of Object.entries(previous)) {
+      if(value == null) delete process.env[key];
+      else process.env[key] = value;
+    }
   }
 });
 

@@ -21,6 +21,11 @@ test('staged Wayglass runtime is complete and matches canonical lib sources', ()
   for (const [, name] of imported) {
     assert.ok(modules.includes(name), 'router imports an unbundled Wayglass runtime module: ' + name);
   }
+  for(const file of ['canonical.cjs','enochian.cjs','wyrdrune.cjs']){
+    const source=fs.readFileSync(path.join(repositoryLib,'wyrdrune',file),'utf8');
+    const bundled=fs.readFileSync(path.join(runtime,'wyrdrune',file),'utf8');
+    assert.equal(bundled,source,'WTL runtime drift: '+file);
+  }
   for (const name of modules) {
     const source = fs.readFileSync(path.join(repositoryLib, name), 'utf8');
     const bundled = fs.readFileSync(path.join(runtime, name), 'utf8');
@@ -39,6 +44,7 @@ test('staged Wayglass runtime loads and retains distinct identities without repo
   const isolated = fs.mkdtempSync(path.join(os.tmpdir(), 'wayglass-runtime-package-'));
   t.after(() => fs.rmSync(isolated, { recursive: true, force: true }));
   for (const name of modules) fs.copyFileSync(path.join(runtime, name), path.join(isolated, name));
+  fs.cpSync(path.join(runtime,'wyrdrune'),path.join(isolated,'wyrdrune'),{recursive:true});
 
   const smoke = `
     const assert = require('node:assert/strict');
@@ -57,6 +63,7 @@ test('staged Wayglass runtime loads and retains distinct identities without repo
     assert.equal(typeof load('wayglass-stop-receipt.cjs').createWayglassDeparture, 'function');
     assert.equal(typeof load('wayglass-departure-store.cjs').createDepartureStore, 'function');
     assert.equal(typeof load('wayglass-model-observation.cjs').createModelObservation, 'function');
+    assert.equal(typeof load('wayglass-wyrdrune-ritual.cjs').previewWyrdruneRitual,'function');
   `;
   const child = spawnSync(process.execPath, ['-e', smoke, isolated], {
     cwd: isolated,

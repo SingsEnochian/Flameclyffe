@@ -10,6 +10,7 @@ const {
   resolveWayglassRoute,
 } = require('../wayglass-runtime/wayglass-route-registry.cjs');
 const { bootWayglassKernel, inspectWayglassCognitionPreflight } = require('../wayglass-runtime/wayglass-kernel.cjs');
+const { previewWyrdruneRitual } = require('../wayglass-runtime/wayglass-wyrdrune-ritual.cjs');
 const { enterWayglassWorld } = require('../wayglass-runtime/wayglass-world-entry.cjs');
 const { createWayglassDeparture } = require('../wayglass-runtime/wayglass-stop-receipt.cjs');
 const { createDepartureStore } = require('../wayglass-runtime/wayglass-departure-store.cjs');
@@ -226,6 +227,14 @@ async function griffStewardAuthorized(req) {
 
 async function callSpicyChat(route, payload, compiled = null, fetchImpl = globalThis.fetch) {
   const token = route.api_key?.();
+  // All generic SpicyChat turns require an exact pair. A name lookup can
+  // collide with another participant's conversation and is not continuity.
+  const exactCharacter = cleanText(route.character_id?.(),180);
+  const exactConversation = cleanText(route.conversation_id?.(),180);
+  if(!exactCharacter||!exactConversation){
+    const error=new Error('SpicyChat requires the owner-pinned character and conversation pair.');
+    error.status=503;throw error;
+  }
   if (!token) {
     const error = new Error(route.label + ' is not configured for Wayglass.');
     error.status = 503;
@@ -247,20 +256,12 @@ async function callSpicyChat(route, payload, compiled = null, fetchImpl = global
   const conversations = Array.isArray(conversationData)
     ? conversationData
     : (Array.isArray(conversationData?.conversations) ? conversationData.conversations : []);
-  const pinnedId = cleanText(route.character_id?.(), 180);
-  const pinnedConversationId = cleanText(route.conversation_id?.(), 180);
-  const targetName = cleanText(route.character_name?.(), 180).toLowerCase();
-  if (route.route_id === 'flame:griff:spicychat' && (!pinnedId || !pinnedConversationId)) {
-    const error = new Error('Griff requires an exact owner-configured character and conversation binding.');
-    error.status = 503;
-    throw error;
-  }
+  const pinnedId = exactCharacter;
+  const pinnedConversationId = exactConversation;
   const conversation = conversations.find((item) => {
     const characterId = cleanText(item?.character_id || item?.character?.id, 180);
     if (pinnedConversationId && cleanText(item?.id, 180) !== pinnedConversationId) return false;
-    if (pinnedId) return characterId === pinnedId;
-    const name = cleanText(item?.character?.name || item?.label, 240).toLowerCase();
-    return targetName && name.includes(targetName);
+    return characterId === pinnedId;
   });
   if (!conversation) {
     const error = new Error(pinnedConversationId
@@ -376,6 +377,29 @@ async function callOpenAICompatible(route, payload, compiled = null, fetchImpl =
     response_id: data?.id || null,
     usage: data?.usage || null,
   };
+}
+
+// Current Claude Messages adapter. Provider execution is a distinct explicit
+// route selection; its output is an observation, never another seat's identity.
+async function callAnthropic(route, payload, compiled = null, fetchImpl = globalThis.fetch) {
+  const key=route.api_key();
+  if(!key){const error=new Error(route.label+' is not configured for Wayglass.');error.status=503;throw error;}
+  const messages=[
+    ...cleanHistory(payload.history),
+    ...inheritanceMessages(compiled).filter(x=>['user','assistant'].includes(x.role)),
+    {role:'user',content:cleanText(payload.input)},
+  ];
+  const response=await fetchImpl(route.endpoint(),{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
+    body:JSON.stringify({model:route.model(),system:buildInstructions(payload.interaction,compiled,resolveCharacterSeat(payload.character_id)),messages,max_tokens:Math.max(64,Math.min(4000,Number(payload.max_output_tokens)||1400))}),
+    signal:AbortSignal.timeout(120000),
+  });
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok){const error=new Error(data?.error?.message||'Wayglass Claude route failed.');error.status=response.status||502;throw error;}
+  const output=(Array.isArray(data.content)?data.content:[]).filter(x=>x?.type==='text'&&typeof x.text==='string').map(x=>x.text).join('\n');
+  if(!output.trim()){const error=new Error('Claude returned no attributable text.');error.status=502;throw error;}
+  return {output:cleanText(output,MAX_TEXT),thinking:null,returned_model:data.model||null,response_id:data.id||null,usage:data.usage||null};
 }
 
 async function callOpenAI(route, payload, compiled = null, fetchImpl = globalThis.fetch) {
@@ -660,6 +684,27 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
   // Route metadata exposes provider/model and participant bindings. A caller's
   // headers, origin or loopback socket do not confer Steward authorization.
   // Reuse the verified House session contract rather than inventing a proxy trust header.
+  // Wyrdrune is a first-class, pure Eightfold preview. This is not a model
+  // instruction, a prophecy, a bridge permission or an external provider turn.
+  router.post('/wyrdrune/preview', createRequestGate({ maxRequests: 15, maxConcurrent: 2 }), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required to preview Wyrdrune.' });
+    }
+    const source = req.body?.source;
+    if (typeof source !== 'string' || !source.trim() || source.length > 16000) {
+      return res.status(400).json({ error: 'WTL source must be nonempty text of at most 16000 characters.' });
+    }
+    try {
+      const preview = await previewWyrdruneRitual(source, { maxOperations: 2000 });
+      return res.json({ ...preview, dispatch: 'none', model_turn: false, canon_commit: false });
+    } catch (error) {
+      const invalid = error instanceof SyntaxError || error instanceof TypeError || error instanceof RangeError ||
+        error instanceof ReferenceError || /Bridge capability unavailable|Feather|operation budget|Duplicate binding|Unknown binding/.test(error.message);
+      return res.status(invalid ? 400 : 422).json({ error: 'Wyrdrune preview rejected: ' + cleanText(error.message, 250) });
+    }
+  });
+
   router.get('/routes', async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     try {
@@ -755,6 +800,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       }
       let result;
       if (route.provider === 'openai') result = await callOpenAI(route, payload, compiled, fetchImpl);
+      else if (route.provider === 'anthropic') result = await callAnthropic(route, payload, compiled, fetchImpl);
       else if (route.provider === 'ollama') result = await callOllama(route, payload, compiled, fetchImpl);
       else if (route.provider === 'humain-node' || route.provider === 'huggingface' || route.provider === 'stepfun') result = await callHumainNode(route, payload, compiled, fetchImpl);
       else if (route.provider === 'spicychat') result = await callSpicyChat(route, payload, compiled, fetchImpl);

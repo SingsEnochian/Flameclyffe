@@ -1,4 +1,5 @@
 import { createInteractionState } from '../interaction-state.js';
+import { previewWyrdrune, draftWyrdruneDiscussion } from '../wyrdrune-client.js';
 import { authorizationSession } from '../authorization-session.js';
 import { mountWayglassRoutePicker } from '../route-picker.js';
 import { WAYGLASS_WORLD_SEATS, findWayglassWorldSeat, wayglassWorldStatus } from '../world-seats.js';
@@ -41,6 +42,8 @@ export async function mountArcSweepWritingSurface(root) {
   let busy = false;
   let lastReceipt = null;
   let checkpoint = null;
+  let revisionOf = null;
+  let lastWTLPreview = null, lastWTLSource = null;
 
   root.innerHTML = [
     "<section class=\"wg-surface wg-writing-room\" data-surface=\"arcsweep-writing\">\n",
@@ -132,11 +135,22 @@ export async function mountArcSweepWritingSurface(root) {
     "      </section>\n",
     "      <section class=\"wg-composer\" aria-label=\"Compose a turn\">\n",
     "        <textarea id=\"wg-input\" rows=\"4\" placeholder=\"Write the next turn…\" aria-label=\"Next writing turn\" aria-keyshortcuts=\"Alt+W Control+Enter Meta+Enter\"></textarea>\n",
+    '<div id="wg-revision-note" class="wg-revision-note" hidden><span>Revising a previous turn. Sending adds a correction; the original and receipts stay unchanged.</span><button id="wg-revision-cancel" type="button" class="glass-chip">Cancel revision</button></div>',
     "        <div class=\"composer-foot\">\n",
     "          <span id=\"wg-status\" class=\"tiny\">IC · Rowan has the turn</span>\n",
     "          <button id=\"wg-send\" type=\"button\" class=\"send-jewel\"><span aria-hidden=\"true\">➤</span> Send to Writing Room</button>\n",
     "        </div>\n",
     "      </section>\n",
+    '<section class="wg-wtl-panel" aria-label="Wyrdrune ritual workbench">',
+      '<details id="wg-wtl-details" class="glass-panel">',
+        '<summary>Wyrdrune · Eightfold Ritual Workbench</summary>',
+        '<p class="tiny">Preview the Eightfold locally. You decide whether to discuss it with your selected model or SpicyChat route; nothing sends automatically.</p>',
+        '<textarea id="wg-wtl-source" data-wtl-code="true" spellcheck="false" rows="10" maxlength="16000" aria-label="Wyrdrune WTL source" placeholder="mobius { perceive { ... } ... }"></textarea>',
+        '<div class="wg-wtl-actions"><button type="button" class="glass-chip" id="wg-wtl-example">Insert example</button><button type="button" class="glass-chip" id="wg-wtl-preview">Preview Eightfold</button><button type="button" class="glass-chip" id="wg-wtl-discuss" disabled>Stage for model discussion</button></div>',
+        '<p id="wg-wtl-status" class="tiny" role="status">No Wyrdrune preview yet. Sign in as House Steward to use the compiler.</p>',
+        '<pre id="wg-wtl-output" aria-label="Wyrdrune phase receipts" hidden></pre>',
+      '</details>',
+    '</section>',
     "    </main>\n",
     "    <aside class=\"wg-session-sidebar glass-panel\" aria-label=\"Session and continuity\">\n",
     "      <div class=\"wg-sidebar-tabs\" role=\"tablist\" aria-label=\"Session views\">\n",
@@ -194,6 +208,41 @@ export async function mountArcSweepWritingSurface(root) {
   const ownershipList = root.querySelector('#wg-ownership-list');
   const thread = root.querySelector('#wg-thread');
   const input = root.querySelector('#wg-input');
+  const wtlSource=root.querySelector('#wg-wtl-source'),wtlStatus=root.querySelector('#wg-wtl-status');
+  const wtlOutput=root.querySelector('#wg-wtl-output'),wtlDiscuss=root.querySelector('#wg-wtl-discuss');
+  const WTL_EXAMPLE="mobius {\n perceive { let light = votive(\"Lantern\",\"An offered guiding light\"); }\n compress { let shape = star(8); }\n release { let letter = angelicLetter(1); }\n verify { emit light; }\n integrate { emit shape; }\n choose { emit letter; }\n return { emit \"held\"; }\n transcend { emit 1; }\n}";
+  root.querySelector('#wg-wtl-example').addEventListener('click',()=>{
+    wtlSource.value=WTL_EXAMPLE;lastWTLSource=null;lastWTLPreview=null;wtlDiscuss.disabled=true;
+    wtlStatus.textContent='Example loaded. Preview to obtain phase receipts.';
+  });
+  wtlSource.addEventListener('input',()=>{
+    lastWTLSource=null;lastWTLPreview=null;wtlDiscuss.disabled=true;wtlOutput.hidden=true;
+    wtlStatus.textContent='WTL source changed. Preview again before discussing.';
+  });
+  root.querySelector('#wg-wtl-preview').addEventListener('click',async(event)=>{
+    const button=event.currentTarget,source=wtlSource.value;
+    if(button.disabled)return;button.disabled=true;wtlDiscuss.disabled=true;
+    try {
+      const preview=await previewWyrdrune(source);
+      if(wtlSource.value!==source){wtlStatus.textContent='Source changed during preview. Run it again.';return;}
+      lastWTLPreview=preview;lastWTLSource=source;
+      wtlOutput.textContent=JSON.stringify({receiptHash:preview.receiptHash,phases:preview.phaseReceipts,values:preview.values,withness:preview.withness},null,2);
+      wtlOutput.hidden=false;wtlDiscuss.disabled=false;
+      wtlStatus.textContent='Eightfold preview verified. No model was contacted or ritual canon changed.';
+    } catch(error) {
+      lastWTLPreview=null;lastWTLSource=null;wtlOutput.hidden=true;
+      wtlStatus.textContent='Preview unavailable: '+error.message;
+    } finally {button.disabled=false;}
+  });
+  wtlDiscuss.addEventListener('click',()=>{
+    if(!lastWTLPreview||lastWTLSource!==wtlSource.value)return;
+    const draft=draftWyrdruneDiscussion(lastWTLSource,lastWTLPreview);
+    const staged=input.value.trim()?input.value.trim()+'\n\n'+draft:draft;
+    if(staged.length>11000){wtlStatus.textContent='Draft exceeds 11000 characters. Shorten the composer first.';return;}
+    input.value=staged;input.focus();
+    wtlStatus.textContent='WTL staged. Review, choose your route and press Send when you wish.';
+  });
+
   const sharedObserverReading = consumeObserverContextForWriting();
   if (sharedObserverReading) input.value = sharedObserverReading + '\n\n[My question about this observation:]\n';
   const status = root.querySelector('#wg-status');
@@ -347,7 +396,8 @@ export async function mountArcSweepWritingSurface(root) {
         renderThinking(message) +
         '<div class="turn-text">' + escapeHtml(message.content).replaceAll('\n', '<br>') + '</div>' +
         '<footer><button type="button" class="glass-chip" data-copy-reply="' + index + '">Copy reply</button> ' +
-        '<button type="button" class="glass-chip" data-copy-through="' + index + '">Copy log through here</button></footer>' +
+        '<button type="button" class="glass-chip" data-copy-through="' + index + '">Copy log through here</button> ' +
+        (message.role==='user'?'<button type="button" class="glass-chip" data-wg-revise="'+index+'">Revise my turn</button>':'')+'</footer>' +
         '</article>';
     }).join('');
     thread.scrollTop = thread.scrollHeight;
@@ -376,13 +426,28 @@ export async function mountArcSweepWritingSurface(root) {
 
   root.querySelector('#wg-copy-session').addEventListener('click', event => copyText(sessionLog(), event.currentTarget));
   thread.addEventListener('click', event => {
-    const button = event.target.closest('[data-copy-reply], [data-copy-through]');
+    const button = event.target.closest('[data-copy-reply], [data-copy-through], [data-wg-revise]');
     if (!button) return;
+    if (button.dataset.wgRevise !== undefined) {
+      const index=Number(button.dataset.wgRevise);
+      if(!Number.isInteger(index)||messages[index]?.role!=='user')return;
+      revisionOf=index;
+      input.value=messages[index].content;
+      root.querySelector('#wg-revision-note').hidden=false;
+      status.textContent='Correcting turn '+(index+1)+'; original will remain in the transcript.';
+      input.focus();
+      return;
+    }
     if (button.dataset.copyReply !== undefined) {
       copyText(messages[Number(button.dataset.copyReply)].content, button);
     } else {
       copyText(sessionLog(Number(button.dataset.copyThrough)), button);
     }
+  });
+
+  root.querySelector('#wg-revision-cancel').addEventListener('click',()=>{
+    revisionOf=null;root.querySelector('#wg-revision-note').hidden=true;
+    status.textContent='Revision cancelled. Current draft retained.';
   });
 
   function refreshExternalTransfer() {
@@ -456,6 +521,8 @@ export async function mountArcSweepWritingSurface(root) {
 
   async function passTurn({ emergenceQuestionId = null } = {}) {
     const text = input.value.trim();
+    const correctionOf=revisionOf;
+    const outgoing=correctionOf===null?text:'Correction to my earlier turn #'+(correctionOf+1)+':\n'+text;
     if (!text || busy) return;
     if (!selectedRoute) { status.textContent = 'No configured route available. Reload the route catalogue.'; return; }
     if ((selectedRoute.startsWith('stepfun:') || selectedRoute === 'flame:griff:spicychat') && !externalConsent.checked) {
@@ -472,7 +539,8 @@ export async function mountArcSweepWritingSurface(root) {
     const activeWorldId = cp('world').value.trim();
     const history = messages.filter(message => message.world_id === activeWorldId && ['user', 'assistant'].includes(message.role) && !message.content.startsWith('[Route error]'))
       .slice(-12).map(message => ({ role: message.role, content: message.content }));
-    messages.push({ role: 'user', content: text, channel: current.channel, world_id: activeWorldId, emergence_question_id: emergenceQuestionId });
+    messages.push({ role: 'user', content: outgoing, channel: current.channel, world_id: activeWorldId, emergence_question_id: emergenceQuestionId, revision_of: correctionOf });
+    revisionOf=null;root.querySelector('#wg-revision-note').hidden=true;
     input.value = '';
     refreshThread();
     refreshEmergenceInterview();
@@ -494,7 +562,7 @@ export async function mountArcSweepWritingSurface(root) {
         characterId: selectedCharacter || null,
         emergenceQuestionId,
         think: root.querySelector('#wg-think').checked,
-        input: text,
+        input: outgoing,
         history,
         interaction: current,
         sessionId: session,

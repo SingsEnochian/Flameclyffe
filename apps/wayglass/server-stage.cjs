@@ -38,6 +38,13 @@ async function copyTree(from, to) {
     }
   }
 
+  // WTL preview has local CommonJS dependencies; package the reviewed runtime exactly.
+  const wtlDir = path.join(runtime,'wyrdrune');
+  await fsp.mkdir(wtlDir,{recursive:true});
+  for(const file of ['canonical.cjs','enochian.cjs','wyrdrune.cjs']){
+    await fsp.copyFile(path.join(repoRoot,'lib','wyrdrune',file),path.join(wtlDir,file));
+  }
+
   await fsp.rm(destination, { recursive: true, force: true });
   await copyTree(source, destination);
 

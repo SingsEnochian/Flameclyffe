@@ -91,7 +91,7 @@
     {
       "branch": "wayglass/first-contact-integration-20261105",
       "target": "wayglass/current",
-      "status": "feature-branch-only-not-promoted",
+      "status": "promoted-to-wayglass/current-by-pr-547-2026-11-06",
       "sources": [
         {
           "pr": 539,
@@ -119,6 +119,23 @@
           "scope": "previously-verified-production-audit-manifest-and-lockfile-preserving-audit-gate"
         }
       ]
+    },
+    {
+      "branch": "wayglass/spelling-wtl-model-routes-20261106",
+      "target": "wayglass/current",
+      "status": "candidate-awaiting-exact-head-checks-and-review",
+      "scope": [
+        "native-spellcheck-and-revisions",
+        "wtl-runtime-and-owner-only-preview",
+        "latest-provider-route-selection",
+        "spicychat-identity-binding"
+      ],
+      "source_prs": [
+        552,
+        553,
+        571
+      ],
+      "note": "Selectively adopts WTL v0.1 source without overwriting updated First Contact or claiming WIR v0.2 completeness."
     }
   ]
 }

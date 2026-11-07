@@ -32,8 +32,16 @@ export async function listWayglassRoutes(fetchImpl = fetch) {
   const response = await fetchImpl('/api/v1/wayglass/routes', { cache: 'no-store' });
   const catalogue = await jsonOrThrow(response);
   const bluebirdRoute = authorizationSession.route();
-  if (bluebirdRoute && Array.isArray(catalogue.routes) && !catalogue.routes.some(route => route.route_id === bluebirdRoute)) {
-    catalogue.routes.unshift({ route_id: bluebirdRoute, label: 'Bluebird · SpicyChat', provider: 'spicychat', model: 'provider-managed', configured: true, connection_verified: true, capabilities: { text: true, local: false } });
+  if (bluebirdRoute && Array.isArray(catalogue.routes)) {
+    // An authenticated browser session authorizes a route, not a verified reply.
+    // Keep the identity-bound route distinct from Griff's private chat.
+    const match=catalogue.routes.find(route=>route.route_id===bluebirdRoute);
+    const sessionRoute={ route_id:bluebirdRoute,label:'Bluebird · SpicyChat',provider:'spicychat',
+      model:'provider-managed',configured:true,connection_verified:false,
+      configuration_message:'Authorized browser session; actual reply not yet verified.',
+      capabilities:{text:true,local:false} };
+    if(match)Object.assign(match,sessionRoute);
+    else catalogue.routes.unshift(sessionRoute);
   }
   return catalogue;
 }

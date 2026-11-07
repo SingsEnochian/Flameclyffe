@@ -1408,3 +1408,41 @@ html[data-wayglass-surface="wayglass:living-watercolor"] #app {
 
 
 .wc-continuity-actions{display:flex;flex-wrap:wrap;gap:8px}.wc-voice-preferences{display:grid;gap:8px}.wc-voice-preferences summary{cursor:pointer;color:#ddc89e;font-size:.76rem}.wc-voice-preferences label{display:grid;gap:5px;font-size:.72rem}.wc-unverified{font-size:.72rem;white-space:pre-wrap;overflow-wrap:anywhere}.wc-room-links{display:flex;flex-wrap:wrap;gap:7px}
+
+
+/* Wyrdrune is a real editor with inspectable, bounded receipts, not decorative text. */
+.wg-wtl-panel { margin-top: 15px; min-width: 0; }
+.wg-wtl-panel details {
+  padding: clamp(14px,2vw,22px);
+  border-radius: 20px;
+  background: rgba(7,26,33,.78);
+  border: 1px solid rgba(222,195,147,.4);
+}
+.wg-wtl-panel summary { cursor: pointer; color: #f7dfb4; font-weight: 700; font-size: 1rem; padding: 5px 0; }
+.wg-wtl-panel textarea {
+  display: block; box-sizing: border-box; width: 100%; min-width: 0; min-height: 225px;
+  margin: 10px 0; padding: 14px; resize: vertical;
+  border-radius: 14px; border: 1px solid rgba(216,230,216,.45);
+  color: #eef5df; background: rgba(3,15,21,.89);
+  font: 500 .92rem/1.6 ui-monospace, SFMono-Regular, Consolas, monospace;
+  tab-size: 2; white-space: pre; overflow: auto;
+}
+.wg-wtl-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
+.wg-wtl-actions button { min-height: 44px; white-space: normal; }
+.wg-wtl-panel pre {
+  padding: 12px; border-radius: 12px; border: 1px solid rgba(214,226,213,.24);
+  background: rgba(2,11,17,.85); overflow: auto; max-height: 360px;
+  white-space: pre-wrap; overflow-wrap: anywhere; color: #cce8df; font-size: .82rem;
+}
+.wg-revision-note {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+  color: #ffdfad; padding: 10px;
+  background: rgba(121,85,32,.25); border-radius: 12px;
+  border: 1px solid rgba(230,188,120,.42);
+}
+.wg-revision-note[hidden] { display: none; }
+.wg-revision-note button { min-height: 44px; }
+@media(max-width:700px) {
+  .wg-wtl-actions button { flex: 1 1 160px; }
+  .wg-wtl-panel textarea { font-size: 16px; }
+}
