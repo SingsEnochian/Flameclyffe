@@ -34,6 +34,35 @@ export function createAcousticAudioEngine({AudioContext = globalThis.AudioContex
     param.cancelScheduledValues(context.currentTime);
     param.setTargetAtTime(value, context.currentTime, 0.03);
   }
+  function ensureQuadLayers() {
+    // The legacy audio graph must not allocate extra oscillators without live
+    // evidence and an explicit audible ambience choice.
+    if (!graph || settings.muted || !settings.ambience || graph.quadLayers.length
+      || !settings.quadSoundstage.some(x=>x.evidence_status==='observed')) return;
+    try {
+      for (let i=0;i<settings.quadSoundstage.length;i++) {
+        const layer=settings.quadSoundstage[i];
+        if (layer.evidence_status!=='observed')continue;
+        const item={tone:null,gain:null,panner:null,sourceIndex:i};
+        graph.quadLayers.push(item);
+        item.tone=context.createOscillator();
+        item.gain=context.createGain();
+        item.panner=typeof context.createStereoPanner==='function' ? context.createStereoPanner():null;
+        item.tone.type='sine';item.tone.frequency.value=layer.frequency_hz;
+        item.gain.gain.value=0;
+        item.tone.connect(item.gain);
+        if(item.panner)item.gain.connect(item.panner).connect(graph.master);
+        else item.gain.connect(graph.master);
+        item.tone.start();
+      }
+    }catch{
+      for(const item of graph.quadLayers){
+        try{item.tone?.stop();}catch{}
+        disconnect(item.tone);disconnect(item.gain);disconnect(item.panner);
+      }
+      graph.quadLayers=[];
+    }
+  }
   function project() {
     if (!graph) return;
     const b = settings.bearing;
@@ -43,8 +72,9 @@ export function createAcousticAudioEngine({AudioContext = globalThis.AudioContex
     smooth(graph.status.gain, 0.025);
     if (graph.panner) smooth(graph.panner.pan, settings.mono ? 0 : b.pan);
     smooth(graph.navigationTone.frequency, b.distance < 0.25 ? 220 : 176);
+    ensureQuadLayers();
     for (let i = 0; i < (graph.quadLayers || []).length; i++) {
-      const node = graph.quadLayers[i], layer = settings.quadSoundstage[i];
+      const node = graph.quadLayers[i], layer = settings.quadSoundstage[node.sourceIndex];
       const allowed = !settings.muted && settings.ambience && layer?.evidence_status === 'observed'
         && layer.freshness !== 'clock-skew';
       smooth(node.gain.gain, allowed ? layer.gain : 0);
@@ -71,17 +101,6 @@ export function createAcousticAudioEngine({AudioContext = globalThis.AudioContex
     if (panner) { navigation.connect(panner); panner.connect(master); } else navigation.connect(master);
     ambienceTone.connect(ambience); ambience.connect(master); statusBus.connect(master);
     master.connect(compressor); compressor.connect(context.destination);
-    // Original layered spatial ambience. Quad evidence supplies parameters, never raw samples.
-    for (let i = 0; i < 8; i++) {
-      const tone = context.createOscillator();
-      const gain = context.createGain();
-      const pan = typeof context.createStereoPanner === 'function' ? context.createStereoPanner() : null;
-      tone.type = 'sine'; tone.frequency.value = [110, 144, 176, 196, 220, 264, 330, 440][i]; gain.gain.value = 0;
-      tone.connect(gain);
-      if (pan) gain.connect(pan).connect(master); else gain.connect(master);
-      graph.quadLayers.push({tone, gain, panner:pan});
-      tone.start();
-    }
     navigationTone.start(); ambienceTone.start(); project();
   }
   function isRunning() { return running && (!context?.state || context.state === 'running'); }
@@ -89,7 +108,7 @@ export function createAcousticAudioEngine({AudioContext = globalThis.AudioContex
     const active = isRunning();
     const effectiveStatus = running && !disposed && context?.state && context.state !== 'running' ? context.state : status;
     return {supported, running: active, disposed, status: effectiveStatus, muted: settings.muted, mono: settings.mono,
-      ambience: settings.ambience, quadLayers: settings.quadSoundstage.filter(x=>x.evidence_status==='observed').length, pending: Boolean(pending), lastError,
+      ambience: settings.ambience, quadLayers: graph?.quadLayers?.length || 0, pending: Boolean(pending), lastError,
       buses: {navigation: active && !settings.muted, ambience: active && !settings.muted && settings.ambience,
         status: active && !settings.muted}, activeSignals: voices.size, presentedEvents: presented.size};
   }
