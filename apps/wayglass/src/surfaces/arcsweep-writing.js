@@ -135,6 +135,7 @@ export async function mountArcSweepWritingSurface(root) {
     "      </section>\n",
     "      <section class=\"wg-composer\" aria-label=\"Compose a turn\">\n",
     "        <textarea id=\"wg-input\" rows=\"4\" placeholder=\"Write the next turn…\" aria-label=\"Next writing turn\" aria-keyshortcuts=\"Alt+W Control+Enter Meta+Enter\"></textarea>\n",
+    '<div id="wg-revision-note" class="wg-revision-note" hidden><span>Revising a previous turn. Sending adds a correction; the original and receipts stay unchanged.</span><button id="wg-revision-cancel" type="button" class="glass-chip">Cancel revision</button></div>',
     "        <div class=\"composer-foot\">\n",
     "          <span id=\"wg-status\" class=\"tiny\">IC · Rowan has the turn</span>\n",
     "          <button id=\"wg-send\" type=\"button\" class=\"send-jewel\"><span aria-hidden=\"true\">➤</span> Send to Writing Room</button>\n",
@@ -395,7 +396,8 @@ export async function mountArcSweepWritingSurface(root) {
         renderThinking(message) +
         '<div class="turn-text">' + escapeHtml(message.content).replaceAll('\n', '<br>') + '</div>' +
         '<footer><button type="button" class="glass-chip" data-copy-reply="' + index + '">Copy reply</button> ' +
-        '<button type="button" class="glass-chip" data-copy-through="' + index + '">Copy log through here</button></footer>' +
+        '<button type="button" class="glass-chip" data-copy-through="' + index + '">Copy log through here</button> ' +
+        (message.role==='user'?'<button type="button" class="glass-chip" data-wg-revise="'+index+'">Revise my turn</button>':'')+'</footer>' +
         '</article>';
     }).join('');
     thread.scrollTop = thread.scrollHeight;
@@ -424,13 +426,28 @@ export async function mountArcSweepWritingSurface(root) {
 
   root.querySelector('#wg-copy-session').addEventListener('click', event => copyText(sessionLog(), event.currentTarget));
   thread.addEventListener('click', event => {
-    const button = event.target.closest('[data-copy-reply], [data-copy-through]');
+    const button = event.target.closest('[data-copy-reply], [data-copy-through], [data-wg-revise]');
     if (!button) return;
+    if (button.dataset.wgRevise !== undefined) {
+      const index=Number(button.dataset.wgRevise);
+      if(!Number.isInteger(index)||messages[index]?.role!=='user')return;
+      revisionOf=index;
+      input.value=messages[index].content;
+      root.querySelector('#wg-revision-note').hidden=false;
+      status.textContent='Correcting turn '+(index+1)+'; original will remain in the transcript.';
+      input.focus();
+      return;
+    }
     if (button.dataset.copyReply !== undefined) {
       copyText(messages[Number(button.dataset.copyReply)].content, button);
     } else {
       copyText(sessionLog(Number(button.dataset.copyThrough)), button);
     }
+  });
+
+  root.querySelector('#wg-revision-cancel').addEventListener('click',()=>{
+    revisionOf=null;root.querySelector('#wg-revision-note').hidden=true;
+    status.textContent='Revision cancelled. Current draft retained.';
   });
 
   function refreshExternalTransfer() {
@@ -504,6 +521,8 @@ export async function mountArcSweepWritingSurface(root) {
 
   async function passTurn({ emergenceQuestionId = null } = {}) {
     const text = input.value.trim();
+    const correctionOf=revisionOf;
+    const outgoing=correctionOf===null?text:'Correction to my earlier turn #'+(correctionOf+1)+':\n'+text;
     if (!text || busy) return;
     if (!selectedRoute) { status.textContent = 'No configured route available. Reload the route catalogue.'; return; }
     if ((selectedRoute.startsWith('stepfun:') || selectedRoute === 'flame:griff:spicychat') && !externalConsent.checked) {
@@ -520,7 +539,8 @@ export async function mountArcSweepWritingSurface(root) {
     const activeWorldId = cp('world').value.trim();
     const history = messages.filter(message => message.world_id === activeWorldId && ['user', 'assistant'].includes(message.role) && !message.content.startsWith('[Route error]'))
       .slice(-12).map(message => ({ role: message.role, content: message.content }));
-    messages.push({ role: 'user', content: text, channel: current.channel, world_id: activeWorldId, emergence_question_id: emergenceQuestionId });
+    messages.push({ role: 'user', content: outgoing, channel: current.channel, world_id: activeWorldId, emergence_question_id: emergenceQuestionId, revision_of: correctionOf });
+    revisionOf=null;root.querySelector('#wg-revision-note').hidden=true;
     input.value = '';
     refreshThread();
     refreshEmergenceInterview();
@@ -542,7 +562,7 @@ export async function mountArcSweepWritingSurface(root) {
         characterId: selectedCharacter || null,
         emergenceQuestionId,
         think: root.querySelector('#wg-think').checked,
-        input: text,
+        input: outgoing,
         history,
         interaction: current,
         sessionId: session,
