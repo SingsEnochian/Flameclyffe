@@ -26,5 +26,5 @@ test('five NOAA collection schedules remain pinned and independently identifiabl
   for(const label of ['summary-fast','goes-six-hour','planetary-kp','rtsw-minute-archives','goes-weekly-window'])
     assert.match(schedule,new RegExp('wayglass-noaa-'+label+'-v1'));
   assert.match(schedule,/wayglass_observer_internal\.collect_noaa_feed/);
-  assert.doesNotMatch(schedule,/(SUPABASE_SERVICE_ROLE_KEY|sb_secret_|(?:password|secret)\s*[:=]\s*['"])/ii);
+  assert.doesNotMatch(schedule,/(SUPABASE_SERVICE_ROLE_KEY|sb_secret_|(?:password|secret)\s*[:=]\s*['"])/i);
 });
