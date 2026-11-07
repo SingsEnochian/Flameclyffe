@@ -9,8 +9,8 @@ test('Wayglass route listbox preserves transport labels, route IDs and disabled 
     { route_id: 'local:ollama', label: 'Local · test', model: 'ornith', configured: false },
   ]);
   assert.deepEqual(options, [
-    { value: 'flame:bluebird:spicychat', label: 'Bluebird · SpicyChat · default', detail: 'Bluebird', disabled: false, hint: 'Available route' },
-    { value: 'local:ollama', label: 'Local · test', detail: 'ornith', disabled: true, hint: 'Credentials missing' },
+    { value: 'flame:bluebird:spicychat', label: 'Bluebird · SpicyChat · default', detail: 'Bluebird', disabled: false, hint: 'Configured, live reply unverified' },
+    { value: 'local:ollama', label: 'Local · test', detail: 'ornith', disabled: true, hint: 'Not configured' },
   ]);
   assert.equal(JSON.stringify(options).includes('session_token'), false);
 });
