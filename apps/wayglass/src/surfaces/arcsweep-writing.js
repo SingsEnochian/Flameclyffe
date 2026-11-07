@@ -207,6 +207,41 @@ export async function mountArcSweepWritingSurface(root) {
   const ownershipList = root.querySelector('#wg-ownership-list');
   const thread = root.querySelector('#wg-thread');
   const input = root.querySelector('#wg-input');
+  const wtlSource=root.querySelector('#wg-wtl-source'),wtlStatus=root.querySelector('#wg-wtl-status');
+  const wtlOutput=root.querySelector('#wg-wtl-output'),wtlDiscuss=root.querySelector('#wg-wtl-discuss');
+  const WTL_EXAMPLE="mobius {\n perceive { let light = votive(\"Lantern\",\"An offered guiding light\"); }\n compress { let shape = star(8); }\n release { let letter = angelicLetter(1); }\n verify { emit light; }\n integrate { emit shape; }\n choose { emit letter; }\n return { emit \"held\"; }\n transcend { emit 1; }\n}";
+  root.querySelector('#wg-wtl-example').addEventListener('click',()=>{
+    wtlSource.value=WTL_EXAMPLE;lastWTLSource=null;lastWTLPreview=null;wtlDiscuss.disabled=true;
+    wtlStatus.textContent='Example loaded. Preview to obtain phase receipts.';
+  });
+  wtlSource.addEventListener('input',()=>{
+    lastWTLSource=null;lastWTLPreview=null;wtlDiscuss.disabled=true;wtlOutput.hidden=true;
+    wtlStatus.textContent='WTL source changed. Preview again before discussing.';
+  });
+  root.querySelector('#wg-wtl-preview').addEventListener('click',async(event)=>{
+    const button=event.currentTarget,source=wtlSource.value;
+    if(button.disabled)return;button.disabled=true;wtlDiscuss.disabled=true;
+    try {
+      const preview=await previewWyrdrune(source);
+      if(wtlSource.value!==source){wtlStatus.textContent='Source changed during preview. Run it again.';return;}
+      lastWTLPreview=preview;lastWTLSource=source;
+      wtlOutput.textContent=JSON.stringify({receiptHash:preview.receiptHash,phases:preview.phaseReceipts,values:preview.values,withness:preview.withness},null,2);
+      wtlOutput.hidden=false;wtlDiscuss.disabled=false;
+      wtlStatus.textContent='Eightfold preview verified. No model was contacted or ritual canon changed.';
+    } catch(error) {
+      lastWTLPreview=null;lastWTLSource=null;wtlOutput.hidden=true;
+      wtlStatus.textContent='Preview unavailable: '+error.message;
+    } finally {button.disabled=false;}
+  });
+  wtlDiscuss.addEventListener('click',()=>{
+    if(!lastWTLPreview||lastWTLSource!==wtlSource.value)return;
+    const draft=draftWyrdruneDiscussion(lastWTLSource,lastWTLPreview);
+    const staged=input.value.trim()?input.value.trim()+'\n\n'+draft:draft;
+    if(staged.length>11000){wtlStatus.textContent='Draft exceeds 11000 characters. Shorten the composer first.';return;}
+    input.value=staged;input.focus();
+    wtlStatus.textContent='WTL staged. Review, choose your route and press Send when you wish.';
+  });
+
   const sharedObserverReading = consumeObserverContextForWriting();
   if (sharedObserverReading) input.value = sharedObserverReading + '\n\n[My question about this observation:]\n';
   const status = root.querySelector('#wg-status');
