@@ -6,6 +6,7 @@ import {
 import { WATERCOLOR_MODES, resolveWatercolorMode, inviteWatercolorMode,
   extractWatercolorProgramProposal } from '../watercolor-modes.js';
 import { listWayglassRoutes } from '../route-client.js';
+import { signInHouseSteward } from '../house-steward-session.js';
 import { wayglassSomaticSound, SOUND_EVENTS, WAYGLASS_FEATHER_EVENT } from '../somatic-sound.js';
 import {createWatercolorContinuity} from '../watercolor-continuity.js';
 import { journeyLedger } from '../journey-before-destination.js';
@@ -61,6 +62,7 @@ export async function mountLivingWatercolorSurface(root) {
               '<select id="wc-route" aria-label="Wayglass model route"></select>',
               '<button id="wc-invite" type="button" class="send-jewel" disabled>Invite Wayglass</button>',
               '<button id="wc-first-contact" type="button" class="glass-chip" disabled>Invite a first hello</button>',
+               '<button id="wc-house-signin" type="button" class="glass-chip" hidden>House Steward sign-in</button>',
             '</div>',
             '<div class="wc-feedback tiny" id="wc-feedback" role="status">What would you like to try together?</div>',
             '<div class="wc-continuity-actions"><button type="button" class="glass-chip" id="wc-save-return">Save conversation</button><button type="button" class="glass-chip" id="wc-recover-return">Recover conversation</button></div>',
@@ -115,6 +117,7 @@ export async function mountLivingWatercolorSurface(root) {
   const color=q('wc-color'),pressure=q('wc-pressure'),prompt=q('wc-prompt');
   const title=q('wc-title'),intent=q('wc-intent'),voice=q('wc-voice'),feedback=q('wc-feedback');
   const route=q('wc-route'),routeState=q('wc-route-state'),invite=q('wc-invite');
+  const houseSignIn=q('wc-house-signin');
   const modeButtons=[...root.querySelectorAll('[data-wc-mode]')];
   const activeMode=()=>resolveWatercolorMode(mode);
   let session='wc-'+(globalThis.crypto?.randomUUID?.()||String(Date.now()));
@@ -215,16 +218,61 @@ export async function mountLivingWatercolorSurface(root) {
         route.append(option);
       }
       routeId=routes.find(r=>r.route_id==='local:ollama')?.route_id||routes[0]?.route_id||null;
+      houseSignIn.hidden=true;
       invite.disabled=!routeId||featherStopped;
       q('wc-first-contact').disabled=!routeId||featherStopped;
       routeState.textContent=routeId?'Model route available · opt-in':'No model route available';
     }catch(error){
       if(stopped)return;
       routeId=null;route.replaceChildren();invite.disabled=true;q('wc-first-contact').disabled=true;
-      routeState.textContent='Model route offline';
-      feedback.textContent='Canvas works offline; model route requires connected Hearthgate.';
+      const needsSignIn=/House Steward authorization|Steward identity|Sign in with your local House/i.test(String(error?.message||''));
+      houseSignIn.hidden=!needsSignIn;
+      routeState.textContent=needsSignIn?'House Steward sign-in required':'Model route offline';
+      feedback.textContent=needsSignIn?'Canvas remains available. Sign in to House to invite a model route.':'Canvas works offline; model route requires the Wayglass host.';
     }
   }
+  // Never store the local Steward credential, and never claim a route was
+  // connected until the host establishes an HttpOnly House session.
+  listen(houseSignIn,'click',()=>{
+    if(stopped)return;
+    const dialog=document.createElement('dialog');
+    dialog.className='wayglass-authorization';
+    dialog.setAttribute('aria-labelledby','wc-house-title');
+    dialog.innerHTML='<form method="dialog" class="wayglass-authorization__form">'+
+      '<p class="wayglass-authorization__eyebrow">WAYGLASS · HOUSE</p>'+
+      '<h2 id="wc-house-title">House Steward sign-in</h2>'+
+      '<p>Use your privately configured local House credential. This form does not store it.</p>'+
+      '<label for="wc-house-credential">Steward credential</label>'+
+      '<input id="wc-house-credential" type="password" autocomplete="off" spellcheck="false" required maxlength="4096">'+
+      '<p class="wayglass-authorization__error" role="alert" aria-live="polite"></p>'+
+      '<button type="submit" value="sign-in">Sign in</button>'+
+      '<button type="button" data-wc-house-cancel>Cancel</button></form>';
+    root.append(dialog);
+    const form=dialog.querySelector('form');
+    const field=dialog.querySelector('input');
+    const errorField=dialog.querySelector('[role="alert"]');
+    const submit=form.querySelector('button[type="submit"]');
+    const cancel=form.querySelector('[data-wc-house-cancel]');
+    const close=()=>{if(dialog.open)dialog.close();dialog.remove();};
+    cancel.addEventListener('click',close);
+    dialog.addEventListener('cancel',event=>{event.preventDefault();close();});
+    form.addEventListener('submit',async event=>{
+      event.preventDefault();
+      if(submit.disabled)return;
+      const credential=field.value;
+      field.value='';
+      submit.disabled=true;
+      try{
+        await signInHouseSteward(credential);
+        close();
+        if(!stopped){feedback.textContent='House session verified. Discovering model routes…';await loadRoutes();}
+      }catch(error){
+        if(!stopped){errorField.textContent=error?.message||'House authorization failed.';field.focus();}
+      }finally{submit.disabled=false;}
+    });
+    dialog.showModal();
+    field.focus();
+  });
   listen(route,'change',()=>{routeId=route.value||null;});
   async function requestContribution(){
     if(stopped||busy||!routeId||featherStopped)return;
