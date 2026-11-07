@@ -10,6 +10,7 @@ const {
   resolveWayglassRoute,
 } = require('../wayglass-runtime/wayglass-route-registry.cjs');
 const { bootWayglassKernel, inspectWayglassCognitionPreflight } = require('../wayglass-runtime/wayglass-kernel.cjs');
+const { previewWyrdruneRitual } = require('../wayglass-runtime/wayglass-wyrdrune-ritual.cjs');
 const { enterWayglassWorld } = require('../wayglass-runtime/wayglass-world-entry.cjs');
 const { createWayglassDeparture } = require('../wayglass-runtime/wayglass-stop-receipt.cjs');
 const { createDepartureStore } = require('../wayglass-runtime/wayglass-departure-store.cjs');
@@ -660,6 +661,27 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
   // Route metadata exposes provider/model and participant bindings. A caller's
   // headers, origin or loopback socket do not confer Steward authorization.
   // Reuse the verified House session contract rather than inventing a proxy trust header.
+  // Wyrdrune is a first-class, pure Eightfold preview. This is not a model
+  // instruction, a prophecy, a bridge permission or an external provider turn.
+  router.post('/wyrdrune/preview', createRequestGate({ maxRequests: 15, maxConcurrent: 2 }), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required to preview Wyrdrune.' });
+    }
+    const source = req.body?.source;
+    if (typeof source !== 'string' || !source.trim() || source.length > 16000) {
+      return res.status(400).json({ error: 'WTL source must be nonempty text of at most 16000 characters.' });
+    }
+    try {
+      const preview = await previewWyrdruneRitual(source, { maxOperations: 2000 });
+      return res.json({ ...preview, dispatch: 'none', model_turn: false, canon_commit: false });
+    } catch (error) {
+      const invalid = error instanceof SyntaxError || error instanceof TypeError || error instanceof RangeError ||
+        error instanceof ReferenceError || /Bridge capability unavailable|Feather|operation budget|Duplicate binding|Unknown binding/.test(error.message);
+      return res.status(invalid ? 400 : 422).json({ error: 'Wyrdrune preview rejected: ' + cleanText(error.message, 250) });
+    }
+  });
+
   router.get('/routes', async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     try {
