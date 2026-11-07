@@ -9,7 +9,7 @@
 1. **Perception:** Authenticated House opens the Quad cockpit. The host reads actual Supabase metadata (source status, counts and timestamps) and returns a hash-linked Quad checkpoint. Empty channels remain empty.
 2. **Choice:** The owner explicitly checks the external-review permission. Sharing is off by default; no external provider is contacted by merely opening the room.
 3. **Wayglass initial route:** Local route local:ollama inspects the source-state packet and proposes one reversible UI/UX experiment. Require a real wayglass.route-turn/v0.1 response with observation/response receipt. Stop on missing route, empty response or refusal.
-4. **Nikola evaluation:** The existing **Tesla Observatory** host route reviews the *same* metadata and Wayglass's initial reply in order: Wonder / What If, Science, Mythience. The legacy /api/tesla/chat route is not a verified independent Nikola seat, so the receipt labels it tesla-observatory-model-route. Explicit external share approval required. No raw private sources or continuity content included.
+4. **Nikola evaluation:** The existing **Tesla Observatory** host route reviews the *same* metadata and Wayglass's initial reply in order: Wonder / What If, Science, Mythience. The legacy Tesla Observatory model route is not a verified independent Nikola seat, so the receipt labels it tesla-observatory-model-route. Explicit external share approval required. No raw private sources or continuity content included.
 5. **Wayglass return:** The original local route receives the Tesla review and its own prior reply, is invited to accept/revise/decline design proposals, identify discriminators and preserve open Wonder. The review cannot silently alter canon, identity, audio consent or model weights.
 6. **Receipt:** Include the Quad checkpoint hash, actual route/provider attribution, three independent replies, stage order, and a proposed, unapproved training candidate. Export through the UI, not automatic external upload.
 7. **AI University / adapters:** Candidate material may later be inspected, sanitized, licensed, split into approved train/evaluation datasets, independently evaluated and used in each agent's exclusive QLoRA adapter. No autonomous GPU job or approval is inferred from a proposal.
@@ -21,7 +21,7 @@
 - Terra Prime lenses: apps/wayglass/src/quad-temporal-hinge.js
 - Authenticated data: apps/starwell-server/wayglass/router.js, POST /api/v1/wayglass/quad/run
 - Wayglass model route: POST /api/v1/wayglass/respond
-- Provisional Tesla model route: POST /api/tesla/chat
+- Provisional Tesla model route: POST /api/v1/wayglass/quad/tesla-review (authenticated, consent-gated, evidence-whitelisted)
 - Tests: apps/wayglass/test/wayglass-nikola-workflow.test.js
 - CI: .github/workflows/wayglass-nikola-return.yml
 
