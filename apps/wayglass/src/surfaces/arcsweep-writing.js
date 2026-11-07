@@ -226,9 +226,9 @@ export async function mountArcSweepWritingSurface(root) {
       const preview=await previewWyrdrune(source);
       if(wtlSource.value!==source){wtlStatus.textContent='Source changed during preview. Run it again.';return;}
       lastWTLPreview=preview;lastWTLSource=source;
-      wtlOutput.textContent=JSON.stringify({receiptHash:preview.receiptHash,phases:preview.phaseReceipts,values:preview.values,withness:preview.withness},null,2);
+      wtlOutput.textContent=JSON.stringify({receiptHash:preview.receiptHash,integrity:preview.verification,returnLedger:preview.ritualLedger,phases:preview.phaseReceipts,values:preview.values,withness:preview.withness},null,2);
       wtlOutput.hidden=false;wtlDiscuss.disabled=false;
-      wtlStatus.textContent='Eightfold preview verified. No model was contacted or ritual canon changed.';
+      wtlStatus.textContent='Eightfold receipt independently verified in browser. No model contacted; ritual meaning stays with you.';
     } catch(error) {
       lastWTLPreview=null;lastWTLSource=null;wtlOutput.hidden=true;
       wtlStatus.textContent='Preview unavailable: '+error.message;
