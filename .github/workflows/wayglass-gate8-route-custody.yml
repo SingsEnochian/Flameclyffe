@@ -34,6 +34,7 @@ jobs:
           cache: npm
       - name: Install Wayglass and host dependencies
         run: |
+          set -euo pipefail
           npm ci --ignore-scripts
           npm ci --prefix apps/starwell-server --omit=dev --ignore-scripts
       - name: Gate 8 · strict chat identity, host consent and no unintended egress
