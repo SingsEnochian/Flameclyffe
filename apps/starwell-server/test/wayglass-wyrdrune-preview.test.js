@@ -44,6 +44,10 @@ test('WTL owner-only HTTP preview preserves Eightfold records and never contacts
     assert.equal(preview.model_turn,false);
     assert.equal(preview.canon_commit,false);
     assert.equal(preview.phaseReceipts.length,8);
+    assert.equal(preview.ritualLedger.entries.length,8);
+    assert.equal(preview.ritualLedger.entries[0].previousHash,preview.ritualLedger.root);
+    assert.equal(preview.ritualLedger.entries[7].entryHash,preview.ritualLedger.terminalHash);
+    assert.match(preview.ritualLedger.terminalHash,/^wce1:[0-9a-f]{64}$/);
     assert.deepEqual(preview.values.slice(0,3).map(x=>x.kind),['votive-intention','letter-reference','inscription']);
     assert.equal(preview.values[2].translation,null);
     const repeat = await json({source},{authorization:'Bearer '+token});

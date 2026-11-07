@@ -123,7 +123,7 @@
     {
       "branch": "wayglass/spelling-wtl-model-routes-20261106",
       "target": "wayglass/current",
-      "status": "candidate-awaiting-exact-head-checks-and-review",
+      "status": "promoted-to-wayglass/current-by-pr-574-2026-11-06",
       "scope": [
         "native-spellcheck-and-revisions",
         "wtl-runtime-and-owner-only-preview",
@@ -136,6 +136,22 @@
         571
       ],
       "note": "Selectively adopts WTL v0.1 source without overwriting updated First Contact or claiming WIR v0.2 completeness."
+    },
+    {
+      "branch": "wayglass/wtl-cross-runtime-return-integrity-20261106",
+      "target": "wayglass/current",
+      "status": "candidate-awaiting-exact-head-tests",
+      "scope": [
+        "python-javascript-wtl-v0.1-pure-parity",
+        "faer-wce1-reference-vectors",
+        "eightfold-content-addressed-return-ledger",
+        "browser-verified-ritual-receipts"
+      ],
+      "source_prs": [
+        553,
+        574
+      ],
+      "note": "Adds a pure Python backend for current WTL IR, not WIR v0.2 or full language v1. Nothing predicts on Rowan's behalf or dispatches any uninvited model."
     }
   ]
 }

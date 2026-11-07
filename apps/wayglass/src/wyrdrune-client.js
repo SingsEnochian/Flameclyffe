@@ -1,6 +1,8 @@
+import { verifyWyrdrunePreview } from './wyrdrune-proof.js';
+
 // A read-only ritual preview crosses into a model conversation only after
 // Rowan explicitly stages it in the ordinary composer and chooses Send.
-export async function previewWyrdrune(source,{fetchImpl=fetch}={}) {
+export async function previewWyrdrune(source,{fetchImpl=fetch,cryptoImpl=globalThis.crypto}={}) {
   if(typeof source!=='string'||!source.trim()||source.length>16000)throw new TypeError('Enter Wyrdrune source (up to 16000 characters).');
   const response=await fetchImpl('/api/v1/wayglass/wyrdrune/preview',{
     method:'POST',credentials:'same-origin',cache:'no-store',
@@ -12,11 +14,13 @@ export async function previewWyrdrune(source,{fetchImpl=fetch}={}) {
   if(data.schema!=='wayglass.wyrdrune-ritual-preview/v0.1'||data.status!=='preview-only'||data.dispatch!=='none') {
     throw new TypeError('Unverified Wyrdrune preview response.');
   }
-  return data;
+
+  const proof=await verifyWyrdrunePreview(source,data,cryptoImpl);
+  return Object.freeze({...data,verification:proof});
 }
 
 export function draftWyrdruneDiscussion(source,preview){
-  if(typeof source!=='string'||!source.trim()||preview?.schema!=='wayglass.wyrdrune-ritual-preview/v0.1'||preview?.status!=='preview-only'||preview?.dispatch!=='none') {
+  if(typeof source!=='string'||!source.trim()||preview?.schema!=='wayglass.wyrdrune-ritual-preview/v0.1'||preview?.status!=='preview-only'||preview?.dispatch!=='none'||preview?.verification?.verified!==true) {
     throw new TypeError('An owner-reviewed Wyrdrune preview is required.');
   }
   const complete=source.length<=4500;
