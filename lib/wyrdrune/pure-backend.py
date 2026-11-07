@@ -106,7 +106,8 @@ class Execution:
             raise TypeError("Invalid WTL expression")
         kind = node.get("k")
         if kind == "literal":
-            return node["v"]
+            value = node["v"]
+            return float(value) if isinstance(value, (int, float)) and not isinstance(value, bool) else value
         if kind == "read":
             name = node["name"]
             if name not in self.environment:
@@ -212,7 +213,7 @@ def main():
     raw = sys.stdin.buffer.read(2_000_001)
     if len(raw) > 2_000_000:
         raise ValueError("WTL input too large")
-    envelope = json.loads(raw.decode("utf-8"), parse_int=float)
+    envelope = json.loads(raw.decode("utf-8"))
     ir = envelope["ir"]
     limit = envelope.get("maxOperations", 10000)
     result = Execution(ir, limit).execute()
