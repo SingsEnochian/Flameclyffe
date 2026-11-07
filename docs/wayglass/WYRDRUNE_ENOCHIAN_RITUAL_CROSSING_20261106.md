@@ -7,7 +7,7 @@
 ## Historical and source boundary
 
 - John Dee and Edward Kelley's Angelical alphabet was recorded in March 1583. The alphabet has 21 letter names commonly grouped into three sevens. Reference: British Library Sloane MS 3188, 26 March 1583, discussed in Donald Laycock, *The Complete Enochian Dictionary*, pp. 26–27, and John Dee's *Five Books of Mystery* (ed. Joseph H. Peterson).
-- This module stores **working Romanized labels** and historical context only. Some letter names have variant spellings in editions/transcriptions. A `romanizedName` is **not** a verified glyph, phoneme or translation.
+- This module stores **working Romanized labels** and historical context only. Manuscript-oriented spellings **Drux/Gisg** and transcribed variants **Drun/Gisa** are retained as separate provenance, rather than silently flattened. See the alphabet column in Joseph H. Peterson's transcription at https://www.esotericarchives.com/dee/holy_table_lettering.pdf. A `romanizedName` is **not** a verified glyph, phoneme or translation.
 - The historically distinct Calls/Keys, letter tables, ceremonial correspondences, and manuscript witnesses require individual attributed sources. None is synthesized by this implementation.
 - Enochian is integrated beside Kelyran and Skýrunor, not used to invent replacements for their approved or unresolved canon. No glyph aliases are assigned.
 - The language's ritual meaning is preserved as author-declared intent and a typed record. Execution claims refer only to observed WTL computation and its receipts.
@@ -56,6 +56,10 @@ node --test lib/wyrdrune/*.test.cjs
 ```
 
 Must pass: 21 names, three heptads, no invented glyphs/translations, digest determinism, bounded UTF-8/NFC text, normal Eightfold execution, wrong-arity failures, Feather stop, preview bridge denial and operation limit.
+
+## Collaborative interpretation
+
+A proposed opt-in discussion on Wayglass with Rowan, Bluebird, Vethrlauf, and invited Constellation members is documented in `WYRDRUNE_RITUAL_ROUNDTABLE_20261106.md`. Rowan retains ownership of predictions, spiritual meaning and final language canon. The draft room is **not a live connection** and makes no utterances on participants' behalf.
 
 ## Next engineering owners
 
