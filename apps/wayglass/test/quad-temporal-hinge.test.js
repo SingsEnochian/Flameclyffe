@@ -55,7 +55,7 @@ test('quad event bus strips private continuity before broadcasting',()=>{
       quads:{inquiry:['observation','provenance','geometry','cosmology'],becoming:['resonance','numerology','wonder','continuity']},
       phase_records_per_cycle:64,
       evidence:fixture().evidence,gaps:['observer_measurements'],
-      soundstage:[],private_secret:'DO NOT SEND'},
+      soundstage:[],engines:['observation','provenance','geometry','cosmology','resonance','numerology','wonder','continuity'],quads:{inquiry:['observation','provenance','geometry','cosmology'],becoming:['resonance','numerology','wonder','continuity']},phase_records_per_cycle:64,private_secret:'DO NOT SEND'},
     continuity:{private_secret:'DO NOT SEND'}};
   const received=[];
   const unsub=subscribeQuadGestalt(x=>received.push(x),{scope});
