@@ -129,6 +129,32 @@ try{
  await page.goto(origin,{waitUntil:'networkidle'});
  await page.locator('[data-surface="living-watercolor"]').waitFor();
  assert.equal(await page.locator('.wg-auth-overlay:visible').count(),0,'Offline watercolor entry must render without provider login');
+ const paintingRect=await page.locator('.wc-stage').boundingBox();
+ const workbenchRect=await page.locator('.wc-workbench').boundingBox();
+ assert.ok(paintingRect&&workbenchRect,'Painting and workbench must both be visible on desktop');
+ assert.ok(paintingRect.x+paintingRect.width<=workbenchRect.x+1 || workbenchRect.x+workbenchRect.width<=paintingRect.x+1,
+   'Watercolor canvas must never be covered by the conversation workbench');
+ assert.ok(paintingRect.width>=480,'Desktop painting should have substantial visible width');
+ assert.ok(await page.locator('#wc-paint-help').isVisible(),'Painting instructions must be visible');
+ await page.locator('[data-wc-pigment="#4c7961"]').click();
+ assert.equal(await page.locator('#wc-color').inputValue(),'#4c7961','Swatch must update brush pigment');
+ await page.locator('#wc-brush-size').evaluate(control=>{
+   control.value='85';control.dispatchEvent(new Event('input',{bubbles:true}));
+ });
+ assert.match(await page.locator('#wc-brush-size-label').textContent(),/85%/);
+ await page.locator('#wc-clear-paint').click();
+ const paperPixel=await page.locator('#wc-fluid').evaluate(node=>{
+   const ctx=node.getContext('2d');
+   return [...ctx.getImageData(Math.floor(node.width/2),Math.floor(node.height/2),1,1).data];
+ });
+ assert.ok(paperPixel[0]>200&&paperPixel[1]>190&&paperPixel[2]>180,
+   'Cleared painting must show bright, readable paper');
+ await page.locator('#wc-focus-paint').click();
+ assert.equal(await page.locator('.wc-workbench').isVisible(),false,'Focus mode must reclaim canvas space');
+ assert.match(await page.locator('#wc-focus-paint').textContent(),/Show workbench/);
+ await page.locator('#wc-focus-paint').click();
+ assert.equal(await page.locator('.wc-workbench').isVisible(),true,'Focus mode must be reversible');
+ receipt.scenarios.push({id:'unobstructed-paper-palette-brush-width-and-reversible-focus',status:'passed'});
  const before=await canvasDigest(page),canvas=page.locator('#wc-fluid');
  const box=await canvas.boundingBox();assert.ok(box&&box.width>0&&box.height>0);
  await canvas.click({position:{x:box.width*0.18,y:box.height*0.15}});
@@ -193,6 +219,13 @@ try{
  const touchPage=await mobile.newPage();await touchPage.goto(origin,{waitUntil:'networkidle'});
  const touchCanvas=touchPage.locator('#wc-fluid');await touchCanvas.waitFor();
  assert.equal(await touchPage.locator('.wc-deck').evaluate(el=>el.scrollWidth<=el.clientWidth+1),true,'Mobile contribution controls must fit without horizontal clipping');
+ const mobileStage=await touchPage.locator('.wc-stage').boundingBox();
+ const mobileWorkbench=await touchPage.locator('.wc-workbench').boundingBox();
+ assert.ok(mobileStage&&mobileWorkbench);
+ assert.ok(mobileStage.height>=320,'Mobile painting must retain a useful drawing area');
+ assert.ok(mobileStage.y+mobileStage.height<=mobileWorkbench.y+1,
+   'Mobile workbench must sit BELOW the canvas, not cover the picture');
+ assert.ok(await touchPage.locator('#wc-paint-help').isVisible());
  const touchBefore=await canvasDigest(touchPage),touchBox=await touchCanvas.boundingBox();assert.ok(touchBox);
  await touchCanvas.tap({position:{x:touchBox.width*0.2,y:touchBox.height*0.15}});
  assert.notEqual(await canvasDigest(touchPage),touchBefore,'Real touch must paint with reduced motion');

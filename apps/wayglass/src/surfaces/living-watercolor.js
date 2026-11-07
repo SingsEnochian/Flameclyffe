@@ -16,6 +16,7 @@ const clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
 const safeText=value=>String(value??'').replaceAll('&','&amp;')
   .replaceAll('<','&lt;').replaceAll('>','&gt;')
   .replaceAll('"','&quot;').replaceAll("'","&#39;");
+const PIGMENTS=Object.freeze([['Copper','#c26a46'],['Sun','#db9d3e'],['Moss','#4c7961'],['Tide','#347e9c'],['Amethyst','#8c669c']]);
 const modeButton=mode=>'<button type="button" class="wc-mode" data-wc-mode="'+mode.id+
   '" aria-pressed="false" title="'+safeText(mode.intent)+'">'+mode.label+'</button>';
 
@@ -44,8 +45,13 @@ export async function mountLivingWatercolorSurface(root) {
       '</header>',
       '<div class="wc-composition">',
         '<div class="wc-stage glass-panel">',
-          '<canvas id="wc-fluid" class="wc-fluid" aria-label="Interactive fluid watercolor painting; touch to add pigment" tabindex="0"></canvas>',
+          '<canvas id="wc-fluid" class="wc-fluid" aria-label="Watercolor canvas. Drag a finger, mouse or Pencil to paint; use arrow keys to move and Enter or Space to paint." aria-describedby="wc-paint-help" tabindex="0"></canvas>',
           '<div class="wc-stage-meta" aria-hidden="true">WAYGLASS / AQUARELLE / PREMAQC</div>',
+          '<button id="wc-focus-paint" type="button" class="wc-focus-paint glass-chip" aria-pressed="false">Focus painting</button>',
+          '<span class="wc-brush-cursor" id="wc-brush-cursor" aria-hidden="true"></span>',
+          '<p class="wc-paint-help" id="wc-paint-help">Draw directly on the paper · drag to blend · arrow keys + Enter also work</p>',
+        '</div>',
+        '<div class="wc-workbench">',
           '<div class="wc-deck glass-panel" aria-label="Wayglass collaborative expression desk">',
             '<div class="wc-deck-header"><div><span class="eyebrow">Voice &amp; work surface</span>',
             '<h2 id="wc-title">Dream</h2></div><span class="wc-model-state" id="wc-route-state">Checking model routes</span></div>',
@@ -74,13 +80,18 @@ export async function mountLivingWatercolorSurface(root) {
               '<button type="button" class="glass-chip" id="wc-program-dismiss">Keep current rules</button>',
             '</div>',
           '</div>',
-        '</div>',
         '<aside class="wc-controls glass-panel" aria-label="Watercolor and evidence controls">',
           '<div><p class="eyebrow">Pigment &amp; presence</p><h2>Touch the current</h2>',
           '<p class="tiny">A finger or Pencil sends movement, pressure and colour into the fluid. Your gesture remains your suggestion.</p></div>',
-          '<label class="wc-color-label" for="wc-color">New pigment <input id="wc-color" type="color" value="#c88b6b"></label>',
+          '<div class="wc-palette" role="group" aria-label="Quick pigment colors">',
+            ...PIGMENTS.map(([label,hex])=>'<button type="button" class="wc-pigment" data-wc-pigment="'+hex+'" style="--pigment:'+hex+'" aria-label="'+label+' pigment" aria-pressed="false" title="'+label+'"></button>'),
+          '</div>',
+          '<label class="wc-color-label" for="wc-color">Custom pigment <input id="wc-color" type="color" value="#c26a46"></label>',
           '<label for="wc-pressure">Brush saturation <output id="wc-pressure-label">70%</output></label>',
           '<input id="wc-pressure" type="range" min="10" max="100" value="70">',
+          '<label for="wc-brush-size">Brush width <output id="wc-brush-size-label">52%</output></label>',
+          '<input id="wc-brush-size" type="range" min="10" max="100" value="52">',
+          '<div class="wc-tool-buttons"><button id="wc-paper" type="button" class="glass-chip" aria-pressed="false">Dark paper</button><button id="wc-clear-paint" type="button" class="glass-chip">Clear painting</button></div>',
           '<div class="wc-tool-buttons">',
             '<button id="wc-flow" class="glass-chip active" type="button" aria-pressed="true">Fluid on</button>',
             '<button id="wc-clear-note" class="glass-chip" type="button">New suggestion</button>',
@@ -101,6 +112,7 @@ export async function mountLivingWatercolorSurface(root) {
           '</div>',
           '<p class="tiny">Activity carries its source references. Your touch offers direction; the canvas remains open to change.</p>',
         '</aside>',
+        '</div>',
       '</div>',
     '</section>',
   ].join('');
@@ -114,7 +126,10 @@ export async function mountLivingWatercolorSurface(root) {
   buffer.width=fluid.width;buffer.height=fluid.height;
   const off=buffer.getContext('2d',{alpha:false});
   let bitmap=off?.createImageData(fluid.width,fluid.height)||null;
-  const color=q('wc-color'),pressure=q('wc-pressure'),prompt=q('wc-prompt');
+  const color=q('wc-color'),pressure=q('wc-pressure'),brushSize=q('wc-brush-size'),prompt=q('wc-prompt');
+  const brushCursor=q('wc-brush-cursor');
+  const pigmentButtons=[...root.querySelectorAll('[data-wc-pigment]')];
+  let paperIsDark=false,keyboardCursor={x:.5,y:.5};
   const title=q('wc-title'),intent=q('wc-intent'),voice=q('wc-voice'),feedback=q('wc-feedback');
   const route=q('wc-route'),routeState=q('wc-route-state'),invite=q('wc-invite');
   const houseSignIn=q('wc-house-signin');
@@ -136,7 +151,7 @@ export async function mountLivingWatercolorSurface(root) {
   }
   function paint() {
     if(!ctx||!bitmap||!off)return;
-    bitmap.data.set(fluid.pixels());
+    bitmap.data.set(fluid.pixels({background:paperIsDark?'#13242e':'#eee8db'}));
     off.putImageData(bitmap,0,0);
     const w=canvas.clientWidth,h=canvas.clientHeight;
     if(w&&h){
@@ -338,6 +353,43 @@ export async function mountLivingWatercolorSurface(root) {
   listen(pressure,'input',()=>{
     q('wc-pressure-label').textContent=pressure.value+'%';
   });
+  function markPigment(){
+    for(const button of pigmentButtons){
+      const selected=button.dataset.wcPigment.toLowerCase()===color.value.toLowerCase();
+      button.setAttribute('aria-pressed',String(selected));
+      button.classList.toggle('active',selected);
+    }
+  }
+  for(const button of pigmentButtons)listen(button,'click',()=>{
+    color.value=button.dataset.wcPigment;
+    markPigment();
+    feedback.textContent='Pigment selected. Paint with a finger, Pencil, or mouse.';
+  });
+  listen(color,'input',markPigment);
+  markPigment();
+  listen(brushSize,'input',()=>{
+    q('wc-brush-size-label').textContent=brushSize.value+'%';
+  });
+  listen(q('wc-focus-paint'),'click',()=>{
+    const focused=root.querySelector('.wc-surface').classList.toggle('wc-focus');
+    q('wc-focus-paint').textContent=focused?'Show workbench':'Focus painting';
+    q('wc-focus-paint').setAttribute('aria-pressed',String(focused));
+    paint();
+    feedback.textContent=focused?'Canvas focus is on. Use Show workbench to return.':'Workbench restored.';
+  });
+  listen(q('wc-paper'),'click',()=>{
+    paperIsDark=!paperIsDark;
+    q('wc-paper').textContent=paperIsDark?'Light paper':'Dark paper';
+    q('wc-paper').setAttribute('aria-pressed',String(paperIsDark));
+    paint();
+    feedback.textContent=paperIsDark?'Dark paper selected. Pigment preserved.':'Light paper selected. Pigment preserved.';
+  });
+  listen(q('wc-clear-paint'),'click',()=>{
+    if(featherStopped){feedback.textContent='Release Feather before clearing the painting.';return;}
+    fluid.clear();
+    paint();updateInspector();
+    feedback.textContent='Painting cleared. Conversation and source receipts are preserved.';
+  });
   listen(q('wc-flow'),'click',()=>{
     if(featherStopped){feedback.textContent='Release Feather before restarting the fluid.';return;}
     paused=!paused;
@@ -426,8 +478,13 @@ export async function mountLivingWatercolorSurface(root) {
       y:clamp((event.clientY-rect.top)/Math.max(rect.height,1)),
     };
   }
-  function brush(event){
-    const pos=pointerCoords(event);
+  function positionBrushCursor(pos,visible=true){
+    brushCursor.style.left=(pos.x*100)+'%';
+    brushCursor.style.top=(pos.y*100)+'%';
+    brushCursor.hidden=!visible;
+  }
+  function brush(event,position=null){
+    const pos=position||pointerCoords(event);
     const sensitivity=Number(pressure.value)/100;
     const force=event.pointerType==='pen'&&event.pressure>0?
       clamp(event.pressure*sensitivity):sensitivity;
@@ -437,8 +494,10 @@ export async function mountLivingWatercolorSurface(root) {
       ...pos,pressure:force,color:color.value,mode:'add-pigment',
     });
     fluid.inject({x:proposal.x,y:proposal.y,color:proposal.color,
-      amount:Math.max(.05,proposal.pressure)*1.2,radius:.028+force*.045,dx,dy});
+      amount:Math.max(.25,proposal.pressure)*1.65,radius:.012+(Number(brushSize.value)/100)*.085,dx,dy});
     lastPointer=pos;
+    keyboardCursor=pos;
+    positionBrushCursor(pos);
     if(reduced||paused)paint();
     updateInspector();
   }
@@ -449,21 +508,30 @@ export async function mountLivingWatercolorSurface(root) {
     brush(event);event.preventDefault();
   });
   listen(canvas,'pointermove',event=>{
-    if(stopped||featherStopped||pointerId!==event.pointerId)return;
-    brush(event);event.preventDefault();
+    if(stopped||featherStopped)return;
+    positionBrushCursor(pointerCoords(event));
+    if(pointerId!==event.pointerId)return;
+    // Coalesced Pencil/mouse points preserve the complete trail on fast moves.
+    const samples=typeof event.getCoalescedEvents==='function'?event.getCoalescedEvents():[];
+    for(const sample of samples.length?samples:[event])brush(sample);
+    event.preventDefault();
   });
+  listen(canvas,'pointerleave',()=>{if(pointerId===null)positionBrushCursor(keyboardCursor,false);});
   const endPointer=event=>{
     if(event.pointerId===pointerId){pointerId=null;lastPointer=null;}
   };
   listen(canvas,'pointerup',endPointer);
   listen(canvas,'pointercancel',endPointer);
   listen(canvas,'keydown',event=>{
-    if(!featherStopped&&(event.key==='Enter'||event.key===' ')){
+    if(featherStopped)return;
+    const step={ArrowLeft:[-.045,0],ArrowRight:[.045,0],ArrowUp:[0,-.045],ArrowDown:[0,.045]}[event.key];
+    if(step){
       event.preventDefault();
-      const proposal=proposeWatercolorTouch({
-        x:.5,y:.5,color:color.value,pressure:Number(pressure.value)/100,
-      });
-      fluid.inject({x:proposal.x,y:proposal.y,color:proposal.color,amount:proposal.pressure});
+      keyboardCursor={x:clamp(keyboardCursor.x+step[0]),y:clamp(keyboardCursor.y+step[1])};
+      positionBrushCursor(keyboardCursor);
+    }else if(event.key==='Enter'||event.key===' '){
+      event.preventDefault();
+      brush({pointerType:'keyboard',pressure:0},keyboardCursor);
       paint();updateInspector();
     }
   });
@@ -487,6 +555,7 @@ export async function mountLivingWatercolorSurface(root) {
     const angle=event.sequence*2.399963229728653;
     addPigment(event,{x:clamp(.5+.3*Math.cos(angle)),y:clamp(.5+.3*Math.sin(angle))});
   }
+  positionBrushCursor(keyboardCursor,false);
   paint();updateInspector();void loadRoutes();
   if(!reduced)animationId=globalThis.requestAnimationFrame(frame);
   else feedback.textContent='Reduced motion enabled. Pigment flows only on interaction.';

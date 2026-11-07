@@ -126,3 +126,21 @@ test('Journey retains four chambers and Feather blocks unapproved movement',()=>
   assert.equal(journey.snapshot().feather_stopped,false);
 });
 
+
+test('clearing only the fluid resets pigment, motion and wetness without affecting fresh paints',()=>{
+  const fluid=createWatercolorFluid({width:40,height:28});
+  fluid.inject({x:.5,y:.5,color:'#c26a46',amount:1.8,dx:.5,dy:.3});
+  fluid.step(.5);
+  assert.ok(fluid.snapshot().pigment_mass>0);
+  fluid.clear();
+  assert.equal(fluid.snapshot().pigment_mass,0);
+  assert.equal(fluid.snapshot().motion,0);
+  assert.equal(fluid.snapshot().wetness,0);
+  assert.equal(fluid.snapshot().ticks,0);
+  const paper=fluid.pixels({background:'#eee8db'});
+  assert.deepEqual(Array.from(paper.slice(0,4)),[238,232,219,255]);
+  fluid.inject({x:.5,y:.5,color:'#347e9c',amount:1.4});
+  assert.ok(fluid.snapshot().pigment_mass>0,'painting still works immediately after clear');
+  fluid.dispose();
+  assert.throws(()=>fluid.clear(),/disposed/);
+});
