@@ -297,7 +297,10 @@ export function mountWayglassQuadGestalt(root){
     if(e.target===sound)void enableAudio();
     if(e.target===mono){audio.update({mono:mono.checked});renderLens();}
     if(e.target===live)auto=live.checked;
-    if(e.target===collabConsent)setCollabAvailability();
+    if(e.target===collabConsent){
+      if(!collabConsent.checked)collabRequest?.abort();
+      setCollabAvailability();
+    }
   }
   function onFeather(e){
     if(e.detail?.stopped===true){
