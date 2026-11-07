@@ -379,6 +379,29 @@ async function callOpenAICompatible(route, payload, compiled = null, fetchImpl =
   };
 }
 
+// Current Claude Messages adapter. Provider execution is a distinct explicit
+// route selection; its output is an observation, never another seat's identity.
+async function callAnthropic(route, payload, compiled = null, fetchImpl = globalThis.fetch) {
+  const key=route.api_key();
+  if(!key){const error=new Error(route.label+' is not configured for Wayglass.');error.status=503;throw error;}
+  const messages=[
+    ...cleanHistory(payload.history),
+    ...inheritanceMessages(compiled).filter(x=>['user','assistant'].includes(x.role)),
+    {role:'user',content:cleanText(payload.input)},
+  ];
+  const response=await fetchImpl(route.endpoint(),{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
+    body:JSON.stringify({model:route.model(),system:buildInstructions(payload.interaction,compiled,resolveCharacterSeat(payload.character_id)),messages,max_tokens:Math.max(64,Math.min(4000,Number(payload.max_output_tokens)||1400))}),
+    signal:AbortSignal.timeout(120000),
+  });
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok){const error=new Error(data?.error?.message||'Wayglass Claude route failed.');error.status=response.status||502;throw error;}
+  const output=(Array.isArray(data.content)?data.content:[]).filter(x=>x?.type==='text'&&typeof x.text==='string').map(x=>x.text).join('\n');
+  if(!output.trim()){const error=new Error('Claude returned no attributable text.');error.status=502;throw error;}
+  return {output:cleanText(output,MAX_TEXT),thinking:null,returned_model:data.model||null,response_id:data.id||null,usage:data.usage||null};
+}
+
 async function callOpenAI(route, payload, compiled = null, fetchImpl = globalThis.fetch) {
   const key = route.api_key();
   if (!key) {
@@ -777,6 +800,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       }
       let result;
       if (route.provider === 'openai') result = await callOpenAI(route, payload, compiled, fetchImpl);
+      else if (route.provider === 'anthropic') result = await callAnthropic(route, payload, compiled, fetchImpl);
       else if (route.provider === 'ollama') result = await callOllama(route, payload, compiled, fetchImpl);
       else if (route.provider === 'humain-node' || route.provider === 'huggingface' || route.provider === 'stepfun') result = await callHumainNode(route, payload, compiled, fetchImpl);
       else if (route.provider === 'spicychat') result = await callSpicyChat(route, payload, compiled, fetchImpl);
