@@ -19,8 +19,8 @@ export function mountWayglassQuadGestalt(root){
   root.innerHTML=[
     '<section class="wg-surface wg-quad-gestalt" data-surface="wayglass-quad-gestalt">',
     '<header class="glass-panel quad-header"><p class="eyebrow">Wayglass · Gestalt Navigation</p>',
-    '<h1>Quad Eightfold · Möbius Living Engine</h1>',
-    '<p>Four eight-phase organs. One continuity center. Source evidence drives the Living Observer, spatial sound, and questions for the next return.</p>',
+    '<h1>Eightfold Möbius · Two Quads, Eight Engines</h1>',
+    '<p>Eight instruments across two quads. Eight transformation phases each. One Withness center. Source evidence drives the Living Observer, spatial sound, and questions for the next return.</p>',
     '<small>House-authenticated evidence · independent agent lineages · no automatic audio or weight training</small></header>',
     '<div class="quad-actions glass-panel"><button type="button" class="glass-chip" data-quad-run>Run two recursive cycles</button>',
     '<label><input type="checkbox" data-quad-auto> Live refresh · 60s</label>',
@@ -47,12 +47,19 @@ export function mountWayglassQuadGestalt(root){
     '<div class="quad-nikola"><h3>Nikola · Independent Review</h3><p>Invite the existing Tesla Observatory route to evaluate the same source packet, in order: Wonder / What If, Science, then Mythience. A model-route response is attributed to that route, not asserted as a separate verified Nikola seat.</p>',
     '<button type="button" class="glass-chip" data-quad-nikola disabled>Request Tesla Observatory review</button>',
     '<p data-quad-nikola-status role="status">Awaiting a validated source checkpoint.</p><pre data-quad-nikola-output hidden></pre></div></section>',
-    '<div class="quad-engines">',
-    '<section class="glass-panel quad-engine"><h2>01 · Perception</h2><p>Actual instruments and evidence</p><div data-quad-perception></div></section>',
-    '<section class="glass-panel quad-engine"><h2>02 · Resonance</h2><p>Original Odio-inspired spatial layers</p><div data-quad-resonance></div></section>',
-    '<section class="glass-panel quad-engine"><h2>03 · Agency</h2><p>Autonomous questions and candidate learning</p><div data-quad-agency></div></section>',
-    '<section class="glass-panel quad-engine"><h2>04 · Continuity</h2><p>Memory, integrity and return</p><div data-quad-continuity></div></section>',
-    '</div><section class="glass-panel quad-withness"><h2>◇ Withness · Gestalt</h2>',
+    '<div class="quad-ensemble" aria-label="Eight engines, two quads">',
+    '<section class="quad-cluster" aria-label="First quad, inquiry"><h2>Quad I · Inquiry</h2><p>What is here, where did it come from, how is it structured, and where in time?</p><div class="quad-engines">',
+    '<section class="glass-panel quad-engine"><h3>01 · Observation</h3><p>Live instruments and source status</p><div data-quad-observation></div></section>',
+    '<section class="glass-panel quad-engine"><h3>02 · Provenance</h3><p>Lineage, receipts, source boundaries</p><div data-quad-provenance></div></section>',
+    '<section class="glass-panel quad-engine"><h3>03 · Geometry</h3><p>Jacobian folds and measured structure</p><div data-quad-geometry></div></section>',
+    '<section class="glass-panel quad-engine"><h3>04 · Cosmology</h3><p>Terra Prime and temporal alternatives</p><div data-quad-cosmology></div></section>',
+    '</div></section>',
+    '<section class="quad-cluster" aria-label="Second quad, becoming"><h2>Quad II · Becoming</h2><p>What can resonate, correspond, be wondered, and return intact?</p><div class="quad-engines">',
+    '<section class="glass-panel quad-engine"><h3>05 · Resonance</h3><p>Original spatial sound and embodiment</p><div data-quad-resonance></div></section>',
+    '<section class="glass-panel quad-engine"><h3>06 · Numerology</h3><p>Patterns and symbolic interpretations</p><div data-quad-numerology></div></section>',
+    '<section class="glass-panel quad-engine"><h3>07 · Wonder</h3><p>Hypotheses, open branches, questions</p><div data-quad-wonder></div></section>',
+    '<section class="glass-panel quad-engine"><h3>08 · Continuity</h3><p>Return Marker and living lineage</p><div data-quad-continuity></div></section>',
+    '</div></section></div><section class="glass-panel quad-withness"><h2>◇ Withness · Ninth coordinating center</h2>',
     '<p data-quad-gestalt>Waiting for the host-sourced checkpoint.</p>',
     '<div class="quad-phases" aria-label="Eightfold phase order"></div></section>',
     '<section class="glass-panel quad-learning"><h2>Learning Port · Wayglass and her agents</h2>',
@@ -89,21 +96,38 @@ export function mountWayglassQuadGestalt(root){
   function render(cp){
     checkpoint=cp;
     const g=cp.gestalt;
-    status.textContent='Cycle '+cp.completed_cycles+' · '+cp.entries.length+
+    status.textContent='Eight engines · two quads · Cycle '+cp.completed_cycles+' · '+cp.entries.length+
       ' hash-linked phase records · '+g.face+' face · '+cp.source_packet.observed_at;
     $('.quad-phases').dataset.face=g.face;
-    const perception=$('[data-quad-perception]');perception.replaceChildren();
+    const perception=$('[data-quad-observation]');perception.replaceChildren();
     for(const item of cp.source_packet.channels){
       const age=g.evidence.find(x=>x.id===item.id)?.freshness||'unknown';
       row(perception,item.id,String(item.count??'unavailable')+' · '+item.status+' · '+age);
     }
+    const provenance=$('[data-quad-provenance]');provenance.replaceChildren();
+    row(provenance,'Evidence hash',g.source_hash.slice(0,26)+'…');
+    row(provenance,'Ledger',cp.entries.length+' phase records');
+    row(provenance,'Source custody','Host-authorized counts, not raw private entries');
+    const geometry=$('[data-quad-geometry]');geometry.replaceChildren();
+    const math=g.evidence.find(x=>x.id==='math_spine_packets');
+    row(geometry,'Math Spine',math?.status||'unavailable');
+    row(geometry,'Jacobian detector','Requires instrument packet, not row-count inference');
+    row(geometry,'Phase topology',g.phase_records_per_cycle+' records/cycle');
+    const cosmology=$('[data-quad-cosmology]');cosmology.replaceChildren();
+    row(cosmology,'Terra Prime','Historical atlas and change-point inquiry');
+    row(cosmology,'Temporal branch','Hypothesis, not proof of physical universe branching');
+    row(cosmology,'Lens',lens+' · shared evidence');
     const resonance=$('[data-quad-resonance]');resonance.replaceChildren();
     for(const layer of g.soundstage)row(resonance,layer.layer,
-      layer.source_ref+' · '+layer.evidence_status+' · '+layer.frequency_hz+'Hz · pan '+layer.pan);
-    const agency=$('[data-quad-agency]');agency.replaceChildren();
-    for(const action of g.actions)row(agency,action.kind,
-      action.source_ref||action.source_refs?.join(', ')||'unassigned');
-    row(agency,'Independent training','Attributable agent choice, authorized data, QLoRA and evaluation');
+      layer.evidence_status+' · '+layer.frequency_hz+' Hz · pan '+layer.pan);
+    const numerology=$('[data-quad-numerology]');numerology.replaceChildren();
+    row(numerology,'Register','Symbolic patterns and owner interpretation');
+    row(numerology,'Nocturne / Echo','Separate provenance and consent, not fabricated readings');
+    row(numerology,'Eightfold','8 instruments × 8 phases, two quads');
+    const wonder=$('[data-quad-wonder]');wonder.replaceChildren();
+    for(const action of g.actions)row(wonder,action.kind,
+      action.source_ref||action.source_refs?.join(', ')||'open question');
+    row(wonder,'Independent training','Agent-specific QLoRA candidate only after attributed choice');
     const continuity=$('[data-quad-continuity]');continuity.replaceChildren();
     row(continuity,'Stop point',cp.continuity.stop_point||'not declared');
     row(continuity,'Next owner',cp.continuity.next_owner||'not declared');
