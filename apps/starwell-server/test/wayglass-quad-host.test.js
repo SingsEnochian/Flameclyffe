@@ -58,7 +58,7 @@ test('Quad reads authorized source metadata and rejects forged House callers',as
     const feather=await post({feather:true},credentials);
     assert.equal(feather.status,409);
     const corrupt=await post({previous:{schema:'wayglass.quad-checkpoint/v1',hash:'bad'}},credentials);
-    assert.equal(corrupt.status,409);
+    assert.equal(corrupt.status,400);
   }finally{
     server.closeAllConnections();await new Promise(resolve=>server.close(resolve));
     for(const [key,value] of Object.entries(old))
