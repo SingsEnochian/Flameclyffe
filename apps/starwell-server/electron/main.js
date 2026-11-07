@@ -21,6 +21,7 @@ const {
   sanitiseHearthgateConfig,
 } = require('../security/local-boundary');
 const { startMetadataWatcher } = require('./asset-watcher');
+const { selectPrimaryApplicationUrl } = require('./application-entry.cjs');
 
 app.enableSandbox();
 
@@ -100,10 +101,7 @@ function saveConfig(input) {
 }
 
 function primaryApplicationUrl() {
-  const starwellEntry = path.join(runtimeRoot(), 'public', 'starwell', 'index.html');
-  return fs.existsSync(starwellEntry)
-    ? `http://localhost:${PORT}/starwell/`
-    : `http://localhost:${PORT}/hearthgate.html`;
+  return selectPrimaryApplicationUrl(runtimeRoot(), PORT);
 }
 
 function isPathInside(candidate, root) {
@@ -354,3 +352,4 @@ app.whenReady().then(async () => {
 
 app.on('window-all-closed', () => { stopAssetWatchers(); stopServers(); app.quit(); });
 app.on('will-quit', () => { stopAssetWatchers(); stopServers(); });
+

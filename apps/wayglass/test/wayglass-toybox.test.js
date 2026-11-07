@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
+import { resolveWayglassEntry, WAYGLASS_ENTRY_SURFACE } from '../src/wayglass-entry.js';
 import {
   TOYBOX_SCHEMA,
   listSensoryProfiles,
@@ -66,5 +67,7 @@ test('Toybox surface keeps audio and haptics explicitly user-triggered', () => {
 test('Wayglass main registers Toybox as a first-class surface and URL room', () => {
   const source = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
   assert.match(source, /surface_id: 'wayglass:toybox'/);
-  assert.match(source, /roomQuery === 'toybox'/);
+  assert.equal(resolveWayglassEntry({available:[WAYGLASS_ENTRY_SURFACE,'wayglass:toybox'],room:'toybox'}).surface_id,'wayglass:toybox');
+  assert.throws(()=>resolveWayglassEntry({available:[WAYGLASS_ENTRY_SURFACE],room:'toybox'}),/not registered/);
 });
+

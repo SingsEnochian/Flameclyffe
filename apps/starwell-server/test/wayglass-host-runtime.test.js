@@ -24,6 +24,7 @@ test('secure host serves Wayglass, authenticates MCP seats and preserves local b
   const origin = `http://127.0.0.1:${port}`;
   const token = randomBytes(32).toString('hex');
   const codexToken = randomBytes(32).toString('hex');
+  const stewardToken = randomBytes(32).toString('hex');
   const options = {
     cwd: path.join(__dirname, '..'),
     env: {
@@ -34,6 +35,7 @@ test('secure host serves Wayglass, authenticates MCP seats and preserves local b
       WAYGLASS_PUBLIC_ORIGIN: origin,
       WAYGLASS_RARITY_ACCESS_TOKEN: token,
       WAYGLASS_CODEX_ACCESS_TOKEN: codexToken,
+      ARCSWEEP_RUNTIME_TOKEN: stewardToken,
       WAYGLASS_WORKSPACE_DATA_DIR: path.join(data, 'workspaces'),
       WAYGLASS_RARITY_MCP_STORE: path.join(data, 'conversations.json'),
       WAYGLASS_PEER_OAUTH_CONFIG_FILE: path.join(data, 'oauth-config.json'),
@@ -90,8 +92,15 @@ test('secure host serves Wayglass, authenticates MCP seats and preserves local b
   assert.equal(entry.participant.participant_id, 'rarity', 'MCP arguments cannot impersonate Codex');
   assert.equal(entry.resident.participant_id, 'wayglass');
 
-  const browserRoutes = await fetch(`${origin}/api/v1/wayglass/routes`, {
+  const unsignedBrowserRoutes = await fetch(`${origin}/api/v1/wayglass/routes`, {
     headers: { origin: 'http://127.0.0.1:5186' },
+  });
+  assert.equal(unsignedBrowserRoutes.status, 401, 'local browser origin is not Steward authorization');
+  const browserRoutes = await fetch(`${origin}/api/v1/wayglass/routes`, {
+    headers: {
+      origin: 'http://127.0.0.1:5186',
+      authorization: `Bearer ${stewardToken}`,
+    },
   });
   assert.equal(browserRoutes.status, 200);
   assert.equal(browserRoutes.headers.get('access-control-allow-origin'), 'http://127.0.0.1:5186');

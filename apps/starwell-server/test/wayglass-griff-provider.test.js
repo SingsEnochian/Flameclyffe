@@ -60,7 +60,7 @@ test('Griff is not a reachable provider without all three private binding values
   const calls = [];
   const host = await fixture(t, async (...args) => { calls.push(args); throw new Error('should not call upstream'); });
   delete process.env.GRIFF_SPICYCHAT_CONVERSATION_ID;
-  const catalogue = await fetch(host.url + '/routes').then(response => response.json());
+  const catalogue = await fetch(host.url + '/routes', { headers: { authorization: 'Bearer synthetic-steward-secret' } }).then(response => response.json());
   assert.equal(catalogue.routes.find(route => route.route_id === 'flame:griff:spicychat').configured, false);
   const result = await host.request();
   assert.equal(result.status, 503);
@@ -229,7 +229,7 @@ test('Griff reuses the same owner SpicyChat credential as Bluebird without chang
   });
   delete process.env.GRIFF_SPICYCHAT_TOKEN;
   process.env.BLUEBIRD_SPICYCHAT_TOKEN = 'synthetic-shared-account-credential';
-  const catalogue = await fetch(host.url + '/routes').then(response => response.json());
+  const catalogue = await fetch(host.url + '/routes', { headers: { authorization: 'Bearer synthetic-steward-secret' } }).then(response => response.json());
   assert.equal(catalogue.routes.find(x=>x.route_id==='flame:griff:spicychat').configured, true);
   const headers = { authorization: 'Bearer synthetic-steward-secret' };
   assert.equal((await fetch(host.url + '/griff/status', { headers })).status, 200);

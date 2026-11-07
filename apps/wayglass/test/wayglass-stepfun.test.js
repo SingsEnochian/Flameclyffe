@@ -26,8 +26,8 @@ async function host(t, fetchImpl) {
   t.after(() => new Promise(resolve => server.close(resolve)));
   const base = `http://127.0.0.1:${server.address().port}/api/v1/wayglass`;
   return {
-    async routes() {
-      const r = await fetch(base + '/routes');
+    async routes(stewardToken) {
+      const r = await fetch(base + '/routes', { headers: stewardToken ? { authorization: 'Bearer ' + stewardToken } : {} });
       return { status: r.status, body: await r.json() };
     },
     async send(body) {
@@ -42,8 +42,18 @@ async function host(t, fetchImpl) {
 
 test('StepFun routes list verified transport capabilities, not unconnected voice claims', async t => {
   withKey(t, null);
+  const previous = process.env.ARCSWEEP_RUNTIME_TOKEN;
+  const stewardToken = 'stepfun-catalogue-test-steward-token';
+  process.env.ARCSWEEP_RUNTIME_TOKEN = stewardToken;
+  t.after(() => {
+    if (previous === undefined) delete process.env.ARCSWEEP_RUNTIME_TOKEN;
+    else process.env.ARCSWEEP_RUNTIME_TOKEN = previous;
+  });
   const h = await host(t, () => { throw Error('Should not invoke provider'); });
-  const { body } = await h.routes();
+  const refused = await h.routes();
+  assert.equal(refused.status, 401, 'anonymous route metadata must stay private');
+  const { status, body } = await h.routes(stewardToken);
+  assert.equal(status, 200, 'verified Steward route catalogue');
   const flash = body.routes.find(r => r.route_id === 'stepfun:flash');
   const preview = body.routes.find(r => r.route_id === 'stepfun:step5');
   assert.equal(flash.provider, 'stepfun');

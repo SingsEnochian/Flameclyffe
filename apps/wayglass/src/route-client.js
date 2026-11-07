@@ -1,4 +1,5 @@
 import { authorizationSession } from './authorization-session.js';
+import { publishWatercolorActivity } from './watercolor-bridge.js';
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
@@ -120,7 +121,7 @@ export async function leaveWayglassWorld({
 }
 
 export async function invokeWayglassRoute({
-  routeId = 'openai:gpt',
+  routeId = 'local:ollama',
   externalProviderConsent = false,
   worldId = null,
   participantId = null,
@@ -132,19 +133,31 @@ export async function invokeWayglassRoute({
   sessionId,
   surfaceId = 'arcsweep:writing-room',
   checkpoint = null,
+  waygateManifest = null,
+  continuationPacket = null,
+  stopReceipt = null,
+  embodiment = {},
+  signal,
   maxOutputTokens = 1400,
   think = false,
   fetchImpl = fetch,
 } = {}) {
+  publishWatercolorActivity({kind:'route:pending',actor:'wayglass:route-client',intensity:0.48});
+  try {
   const response = await fetchImpl('/api/v1/wayglass/respond', {
     method: 'POST',
     headers: routeId === 'flame:bluebird:spicychat' ? { ...JSON_HEADERS, ...authorizationSession.headers() } : JSON_HEADERS,
+    signal,
     body: JSON.stringify({
       route_id: routeId,
       external_provider_consent: externalProviderConsent === true,
       world_id: worldId,
       participant_id: participantId,
       character_id: characterId,
+      waygate_manifest: waygateManifest,
+      continuation_packet: continuationPacket,
+      stop_receipt: stopReceipt,
+      embodiment,
       emergence_question_id: emergenceQuestionId,
       input,
       history,
@@ -158,7 +171,13 @@ export async function invokeWayglassRoute({
       think: think === true,
     }),
   });
-  return jsonOrThrow(response);
+  const data = await jsonOrThrow(response);
+  if (data?.schema === 'wayglass.route-turn/v0.1') publishWatercolorActivity({kind:'route:responded',actor:'wayglass:route-client',receipt:data.receipt||null,intensity:0.72});
+  return data;
+  } catch (error) {
+    publishWatercolorActivity({kind:'route:failed',actor:'wayglass:route-client',intensity:0.44});
+    throw error;
+  }
 }
 
 export async function queueObserverDevelopmentProposal(proposal, fetchImpl = fetch) {
@@ -214,3 +233,39 @@ export async function complexifyWayglassLibraryWonder({ wonderId, ...payload } =
     body: JSON.stringify(payload),
   }));
 }
+/**
+ * Read-only kernel contract probe. It does not establish a Waygate session,
+ * identify the owner, or replace an integrity-verified /kernel/enter crossing.
+ */
+export async function inspectWayglassKernel({
+  routeId = 'local:ollama',
+  worldId = 'wayglass:home',
+  embodiment = {},
+  fetchImpl = fetch,
+} = {}) {
+  const params = new URLSearchParams({
+    route: routeId,
+    world: worldId,
+    body: embodiment.body_id || 'browser-host',
+    body_class: embodiment.body_class || 'host-os',
+    keyboard: embodiment.keyboard === false ? '0' : '1',
+    touch: embodiment.touch ? '1' : '0',
+    ar: embodiment.ar ? '1' : '0',
+    haptics: embodiment.haptics ? '1' : '0',
+  });
+  const response = await fetchImpl('/api/v1/wayglass/kernel?' + params.toString(), {
+    cache: 'no-store',
+  });
+  const data = await jsonOrThrow(response);
+  if (data?.schema !== 'wayglass.kernel/v0.1' || data.status !== 'boot-contract') {
+    throw new Error('Kernel returned an unavailable or blocked boot contract.');
+  }
+  // A route snapshot is only metadata. The response endpoint separately
+  // verifies that the same registered route survives kernel preflight.
+  if (data.cognition?.route_id !== routeId) {
+    throw new Error('Kernel route differs from requested cognitive route.');
+  }
+  return data;
+}
+
+

@@ -1,0 +1,48 @@
+name: Wayglass First Contact Browser
+
+on:
+  pull_request:
+    paths:
+      - 'apps/wayglass/**'
+      - 'apps/starwell/src/premaqc-contract.js'
+      - 'scripts/wayglass-first-contact-browser.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/wayglass-first-contact.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wayglass-first-contact-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  chromium:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run wayglass:build
+      - name: Install pinned browser harness
+        run: npm install --prefix "$RUNNER_TEMP/wayglass-browser" --no-save --package-lock=false playwright@1.62.1
+      - name: Install Chromium and system dependencies
+        run: node "$RUNNER_TEMP/wayglass-browser/node_modules/playwright/cli.js" install chromium --with-deps
+      - name: Exercise captured First Contact in real Chromium
+        env:
+          WAYGLASS_PLAYWRIGHT_MODULE: ${{ runner.temp }}/wayglass-browser/node_modules/playwright/index.mjs
+        run: node scripts/wayglass-first-contact-browser.mjs
+      - name: Preserve browser receipts and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayglass-first-contact-browser-${{ github.sha }}
+          path: artifacts/wayglass/first-contact-browser/
+          if-no-files-found: warn
+          retention-days: 30
