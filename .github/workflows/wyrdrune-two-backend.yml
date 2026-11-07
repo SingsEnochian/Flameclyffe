@@ -1,16 +1,9 @@
 name: Wyrdrune Two-Backend Parity
 on:
   push:
-    branches: ['wayglass/wtl-cross-runtime-return-integrity-*']
-    paths:
-      - 'lib/wyrdrune/**'
-      - 'lib/wayglass-wyrdrune-ritual*'
-      - '.github/workflows/wyrdrune-two-backend.yml'
+    branches: ['wayglass/current']
   pull_request:
-    paths:
-      - 'lib/wyrdrune/**'
-      - 'lib/wayglass-wyrdrune-ritual*'
-      - '.github/workflows/wyrdrune-two-backend.yml'
+    branches: ['wayglass/current']
 
 permissions:
   contents: read

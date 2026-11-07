@@ -140,7 +140,7 @@
     {
       "branch": "wayglass/wtl-cross-runtime-return-integrity-20261106",
       "target": "wayglass/current",
-      "status": "candidate-awaiting-exact-head-tests",
+      "status": "promoted-to-wayglass/current-by-pr-575-2026-11-06",
       "scope": [
         "python-javascript-wtl-v0.1-pure-parity",
         "faer-wce1-reference-vectors",
@@ -152,6 +152,22 @@
         574
       ],
       "note": "Adds a pure Python backend for current WTL IR, not WIR v0.2 or full language v1. Nothing predicts on Rowan's behalf or dispatches any uninvited model."
+    },
+    {
+      "branch": "wayglass/eightfold-verification-gates-6-8-20261106",
+      "target": "wayglass/current",
+      "status": "candidate-awaiting-eight-exact-head-gates",
+      "scope": [
+        "independent-adversarial-wyrdrune-verifier",
+        "durable-cold-return-and-revocation",
+        "model-and-spicychat-exact-route-custody",
+        "eight-verification-gate-release-manifest"
+      ],
+      "source_prs": [
+        574,
+        575
+      ],
+      "note": "Adds three independent CI gates to the five passed launch gates. Does not assert live provider response or canon/identity authority."
     }
   ]
 }

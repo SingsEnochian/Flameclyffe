@@ -1,0 +1,49 @@
+name: Gate 7 · Cold Return Continuity
+on:
+  push:
+    branches: ['wayglass/current']
+    paths:
+      - 'lib/wayglass-stop-receipt*'
+      - 'lib/wayglass-continuation-packet*'
+      - 'lib/wayglass-departure-store*'
+      - 'lib/wayglass-return-trial*'
+      - 'lib/wayglass-world-entry*'
+      - 'lib/wayglass-waygate*'
+      - 'lib/wayglass-kernel*'
+      - 'test/wayglass/eightfold-cold-return.test.cjs'
+      - '.github/workflows/wayglass-gate7-cold-return.yml'
+  pull_request:
+    branches: ['wayglass/current']
+    paths:
+      - 'lib/wayglass-stop-receipt*'
+      - 'lib/wayglass-continuation-packet*'
+      - 'lib/wayglass-departure-store*'
+      - 'lib/wayglass-return-trial*'
+      - 'lib/wayglass-world-entry*'
+      - 'lib/wayglass-waygate*'
+      - 'lib/wayglass-kernel*'
+      - 'test/wayglass/eightfold-cold-return.test.cjs'
+      - '.github/workflows/wayglass-gate7-cold-return.yml'
+permissions:
+  contents: read
+jobs:
+  durable-return:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Gate 7 · cold restart and adversarial continuity replay
+        run: |
+          set -euo pipefail
+          node --test --test-reporter=tap test/wayglass/eightfold-cold-return.test.cjs | tee gate7.tap
+      - name: Record Gate 7 result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayglass-gate7-cold-return-${{ github.sha }}
+          path: gate7.tap
+          if-no-files-found: warn
+          retention-days: 30

@@ -1,0 +1,50 @@
+name: Gate 8 · Model and SpicyChat Custody
+on:
+  push:
+    branches: ['wayglass/current']
+    paths:
+      - 'lib/wayglass-route-registry*'
+      - 'apps/starwell-server/wayglass/**'
+      - 'apps/starwell-server/wayglass-runtime/**'
+      - 'apps/starwell-server/security/**'
+      - 'apps/wayglass/src/route-client.js'
+      - 'apps/starwell-server/test/eightfold-route-custody.test.js'
+      - '.github/workflows/wayglass-gate8-route-custody.yml'
+  pull_request:
+    branches: ['wayglass/current']
+    paths:
+      - 'lib/wayglass-route-registry*'
+      - 'apps/starwell-server/wayglass/**'
+      - 'apps/starwell-server/wayglass-runtime/**'
+      - 'apps/starwell-server/security/**'
+      - 'apps/wayglass/src/route-client.js'
+      - 'apps/starwell-server/test/eightfold-route-custody.test.js'
+      - '.github/workflows/wayglass-gate8-route-custody.yml'
+permissions:
+  contents: read
+jobs:
+  route-custody:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install Wayglass and host dependencies
+        run: |
+          set -euo pipefail
+          npm ci --ignore-scripts
+          npm ci --prefix apps/starwell-server --omit=dev --ignore-scripts
+      - name: Gate 8 · strict chat identity, host consent and no unintended egress
+        run: |
+          node --test --test-reporter=tap apps/starwell-server/test/eightfold-route-custody.test.js | tee gate8.tap
+      - name: Record Gate 8 result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayglass-gate8-route-custody-${{ github.sha }}
+          path: gate8.tap
+          if-no-files-found: warn
+          retention-days: 30
