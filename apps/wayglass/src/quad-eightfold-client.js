@@ -10,8 +10,8 @@ export function subscribeQuadGestalt(listener,{scope=globalThis}={}){
   return ()=>scope.removeEventListener?.(QUAD_EVENT,fn);
 }
 export function publishQuadGestalt(checkpoint,{scope=globalThis}={}){
-  if(checkpoint?.schema!=='wayglass.quad-checkpoint/v1'
-    ||checkpoint.gestalt?.schema!=='wayglass.quad-gestalt/v1')
+  if(checkpoint?.schema!=='wayglass.quad-checkpoint/v2'
+    ||checkpoint.gestalt?.schema!=='wayglass.quad-gestalt/v2')
     throw new TypeError('Quad host checkpoint required');
   // Only metadata projections circulate: no private continuity or training records.
   const detail=Object.freeze({
@@ -21,6 +21,8 @@ export function publishQuadGestalt(checkpoint,{scope=globalThis}={}){
     evidence:checkpoint.gestalt.evidence.map(e=>({...e})),
     soundstage:checkpoint.gestalt.soundstage.map(x=>({...x})),
     gaps:[...checkpoint.gestalt.gaps],
+    engines:[...checkpoint.gestalt.engines],quads:checkpoint.gestalt.quads,
+    phase_records_per_cycle:checkpoint.gestalt.phase_records_per_cycle,
     mode:'host-observed-metadata-projection',sound_autoplay:false,
     model_training_completed:false,
   });
