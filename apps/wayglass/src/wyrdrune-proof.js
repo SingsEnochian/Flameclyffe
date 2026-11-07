@@ -18,7 +18,7 @@ export function encodeWce1(value) {
   }
   if(Array.isArray(value))return '['+value.map(encodeWce1).join(',')+']';
   const proto=value&&typeof value==='object'?Object.getPrototypeOf(value):null;
-  if(proto===Object.prototype||proto===null){
+  if(value&&typeof value==='object'&&(proto===Object.prototype||proto===null)){
     return '{'+Object.keys(value).sort().map(key=>
       encodeWce1(key)+':'+encodeWce1(value[key])
     ).join(',')+'}';
