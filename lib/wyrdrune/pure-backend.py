@@ -8,7 +8,11 @@ import json
 import math
 import sys
 import unicodedata
+from pathlib import Path
 
+# -I isolates the interpreter from site/user paths; explicitly allow this
+# pinned repository-local canonical codec, never caller-supplied modules.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from canonical import digest
 
 PHASES = ("perceive", "compress", "release", "verify", "integrate",
