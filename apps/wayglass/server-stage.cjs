@@ -38,11 +38,14 @@ async function copyTree(from, to) {
     }
   }
 
-  // WTL preview has local CommonJS dependencies; package the reviewed runtime exactly.\n  const wtlDir = path.join(runtime,'wyrdrune');
+  // WTL preview has local CommonJS dependencies; package the reviewed runtime exactly.
+  const wtlDir = path.join(runtime,'wyrdrune');
   await fsp.mkdir(wtlDir,{recursive:true});
   for(const file of ['canonical.cjs','enochian.cjs','wyrdrune.cjs']){
     await fsp.copyFile(path.join(repoRoot,'lib','wyrdrune',file),path.join(wtlDir,file));
-  }\n\n  await fsp.rm(destination, { recursive: true, force: true });
+  }
+
+  await fsp.rm(destination, { recursive: true, force: true });
   await copyTree(source, destination);
 
   await fsp.writeFile(path.join(destination, 'hearthgate-host.js'), "window.__wayglassHost=Object.freeze({host:'hearthgate',version:'0.1.0',hostedSince:Date.now()});\n", 'utf8');
