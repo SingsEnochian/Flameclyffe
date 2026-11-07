@@ -6,6 +6,7 @@ import {
   subscribeWayglassObserver, queueObserverContextForWriting, describeWayglassObserverChannel,
 } from '../living-observer-model.js';
 import { createObserverInterior } from '../living-observer-self.js';
+import { mountNoaaObserverPanel } from '../noaa-observer-panel.js';
 import { queueObserverDevelopmentProposal } from '../route-client.js';
 
 import { observerNodes, platePoint, nodeAtPoint, angularDelta, createObserverRotation, OBSERVER_PLATE_SIZE } from '../living-observer-optics.js';
@@ -221,6 +222,7 @@ export async function mountWayglassLivingObserver(root) {
     '</section>',
     '<footer class="wg-receipt tiny">Direct readings stay inspectable. Private interior dynamics may persist and self-organise locally. Surfaced self-development remains proposal-first and can be handed to Hermes with an explicit acceptance test.</footer></section>'
   ].join('');
+  const disposeNoaa = mountNoaaObserverPanel(root);
   const canvas=root.querySelector('canvas');
   const title=root.querySelector('[data-observer-title]'), description=root.querySelector('[data-observer-description]');
   const source=root.querySelector('[data-observer-source]'), packetView=root.querySelector('[data-observer-packet]');
@@ -333,7 +335,7 @@ export async function mountWayglassLivingObserver(root) {
   function cleanup() {
     if(disposed)return;
     disposed=true;
-    cancelAnimationFrame(animation);clearInterval(timer);unsubscribe();unsubscribeLight();
+    cancelAnimationFrame(animation);clearInterval(timer);unsubscribe();unsubscribeLight();disposeNoaa();
     globalThis.removeEventListener?.('arcsweep:gesture-feedback', onExternalFeather);
     if(audioContext){audioContext.close().catch(()=>{});audioContext=null;}
   }
