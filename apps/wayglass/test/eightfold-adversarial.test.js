@@ -28,7 +28,8 @@ const signedPreview = async () => ({
 
 function corrupted(label, mutate) {
   test('adversarial receipt must be rejected: ' + label, async () => {
-    const packet = await signedPreview();
+    // A network JSON receipt is mutable; frozen in-process runtime objects are not.
+    const packet = structuredClone(await signedPreview());
     assert.equal((await verifyWyrdrunePreview(SOURCE, packet, webcrypto)).verified, true);
     mutate(packet);
     await assert.rejects(
@@ -62,8 +63,8 @@ corrupted('phase list addition', p => { p.phaseReceipts.push(p.phaseReceipts[0])
 corrupted('missing ledger phase', p => { p.ritualLedger.entries.shift(); });
 corrupted('extra ledger phase', p => { p.ritualLedger.entries.push(p.ritualLedger.entries[0]); });
 for (let i = 0; i < 8; i++) {
-  corrupted('phase ' + (i+1) + ' wrong position', p => { p.phaseReceipts[i].phase = 'transcend'; });
-  corrupted('phase ' + (i+1) + ' forged predecessor', p => { p.ritualLedger.entries[i].previousHash = p.ritualLedger.root; });
+  corrupted('phase ' + (i+1) + ' wrong position', p => { p.phaseReceipts[i].phase = ['compress','release','verify','integrate','choose','return','transcend','perceive'][i]; });
+  corrupted('phase ' + (i+1) + ' forged predecessor', p => { p.ritualLedger.entries[i].previousHash = 'wce1:' + 'c'.repeat(64); });
   corrupted('phase ' + (i+1) + ' operation tamper', p => { p.phaseReceipts[i].operations += 2; });
   corrupted('phase ' + (i+1) + ' link mutation', p => { p.ritualLedger.entries[i].entryHash = 'wce1:' + 'b'.repeat(64); });
 }
