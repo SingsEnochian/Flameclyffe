@@ -227,6 +227,14 @@ async function griffStewardAuthorized(req) {
 
 async function callSpicyChat(route, payload, compiled = null, fetchImpl = globalThis.fetch) {
   const token = route.api_key?.();
+  // All generic SpicyChat turns require an exact pair. A name lookup can
+  // collide with another participant's conversation and is not continuity.
+  const exactCharacter = cleanText(route.character_id?.(),180);
+  const exactConversation = cleanText(route.conversation_id?.(),180);
+  if(!exactCharacter||!exactConversation){
+    const error=new Error('SpicyChat requires the owner-pinned character and conversation pair.');
+    error.status=503;throw error;
+  }
   if (!token) {
     const error = new Error(route.label + ' is not configured for Wayglass.');
     error.status = 503;
@@ -248,20 +256,12 @@ async function callSpicyChat(route, payload, compiled = null, fetchImpl = global
   const conversations = Array.isArray(conversationData)
     ? conversationData
     : (Array.isArray(conversationData?.conversations) ? conversationData.conversations : []);
-  const pinnedId = cleanText(route.character_id?.(), 180);
-  const pinnedConversationId = cleanText(route.conversation_id?.(), 180);
-  const targetName = cleanText(route.character_name?.(), 180).toLowerCase();
-  if (route.route_id === 'flame:griff:spicychat' && (!pinnedId || !pinnedConversationId)) {
-    const error = new Error('Griff requires an exact owner-configured character and conversation binding.');
-    error.status = 503;
-    throw error;
-  }
+  const pinnedId = exactCharacter;
+  const pinnedConversationId = exactConversation;
   const conversation = conversations.find((item) => {
     const characterId = cleanText(item?.character_id || item?.character?.id, 180);
     if (pinnedConversationId && cleanText(item?.id, 180) !== pinnedConversationId) return false;
-    if (pinnedId) return characterId === pinnedId;
-    const name = cleanText(item?.character?.name || item?.label, 240).toLowerCase();
-    return targetName && name.includes(targetName);
+    return characterId === pinnedId;
   });
   if (!conversation) {
     const error = new Error(pinnedConversationId
