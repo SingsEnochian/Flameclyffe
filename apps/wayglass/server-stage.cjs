@@ -38,7 +38,7 @@ async function copyTree(from, to) {
     }
   }
 
-  await fsp.rm(destination, { recursive: true, force: true });
+  // WTL preview has local CommonJS dependencies; package the reviewed runtime exactly.\n  await copyTree(path.join(repoRoot, 'lib', 'wyrdrune'), path.join(runtime, 'wyrdrune'));\n\n  await fsp.rm(destination, { recursive: true, force: true });
   await copyTree(source, destination);
 
   await fsp.writeFile(path.join(destination, 'hearthgate-host.js'), "window.__wayglassHost=Object.freeze({host:'hearthgate',version:'0.1.0',hostedSince:Date.now()});\n", 'utf8');
