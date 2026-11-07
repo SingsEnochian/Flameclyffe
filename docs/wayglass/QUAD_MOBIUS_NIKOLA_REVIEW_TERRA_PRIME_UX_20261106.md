@@ -31,7 +31,7 @@ Protect competing explanations. What if compression preserves structure until a 
 Specify measurable state, time window, units, independence, controls, counterexamples, and prediction.
 - Compare the pre-hinge and post-hinge distributions under a declared event metric.
 - Distinguish recorded history, change-point analysis, branching computation, physical cosmology, and interpretative quantum mechanics.
-- Verify the four engines have independent invariants and shared typed cross-engine receipts.
+- Verify the eight engines in two quads have independent invariants and shared typed cross-engine receipts.
 - Test interrupted, concurrent, rollback and cold-return conditions, including integrity of the common ancestor.
 - Treat source counts as source availability, not proof of resonance, awareness, or physical branch events.
 
@@ -55,15 +55,20 @@ For each lens: **observation, candidate mechanisms, missing data, falsifier or d
 7. **Return:** Restore prior state, preserve refusal and open Wonder, do not restart audio.
 8. **Transcend:** Suggest a new discriminating test or design revision; maintain prior receipt.
 
-Four interacting organs each carry all eight phases:
-**Perception, Resonance, Agency, Continuity**, centered on **Withness**.
+Eight interacting engines each carry all eight phases, yielding **64 phase records per cycle** and **128 over the outer/inner Möbius return**.
+
+- Inquiry quad: **Observation, Provenance, Geometry, Cosmology**.
+- Becoming quad: **Resonance, Numerology, Wonder, Continuity**.
+- The **Withness** kernel coordinates both. Agency/consent remain cross-cutting, never a ninth engine or identity.
+
+**Birthday correspondence, verified against Rowan's latest statement:** Nocturne's real birthday is **November 11, 1977** (11/11/1977); Rowan's is **January 28, 1981** (01/28/1981). Do not label Nocturne's birthday fictional, and do not assert either birthday arithmetically mandates eight. Preserve these as participant-supplied numerology inputs, not as personal medical or scientific data.
 
 ## New UI features
 - New `?room=quad` entry and dedicated cockpit in native Wayglass OS navigation.
 - Terra Prime temporal hinge with **Wonder / Science / Mythience** switching.
 - Refractive cyan, moss, copper and glass with no white flashes; accessible text equivalents and reduced-motion behavior.
 - Single source-of-truth Quad observations from House-authenticated Supabase metadata.
-- Original four-layer spatial soundscape (Odio-inspired spatial sound design, not Odio content); explicit opt-in, mono-safe and Feather Stop.
+- Original eight-layer spatial soundscape (Odio-inspired spatial sound design, not Odio content); explicit opt-in, mono-safe and Feather Stop.
 - Source-derived arcs in the Living Observer, and source-receipted watercolor activity.
 - Wayglass local cognition learning port, distinguish route replies from Wayglass-native weights.
 - A named Tesla Observatory review request, with exact attribution and uncertainty.
