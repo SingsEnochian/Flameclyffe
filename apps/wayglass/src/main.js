@@ -17,6 +17,8 @@ import { mountWayglassLibrarySurface } from './surfaces/library.js';
 import { mountWayglassToybox } from './surfaces/toybox.js';
 import { mountWayglassCommonsSurface } from './surfaces/commons.js';
 import { mountWayglassAcousticRoom } from './surfaces/acoustic-room.js';
+import { mountWayglassQuadGestalt } from './surfaces/quad-eightfold.js';
+import { installQuadFeatherListener, readLatestQuadGestalt } from './quad-eightfold-client.js';
 import { mountLivingWatercolorSurface } from './surfaces/living-watercolor.js';
 import { mountJourneyBeforeDestinationSurface } from './surfaces/journey-before-destination.js';
 import { WAYGLASS_ENTRY_SURFACE, resolveWayglassEntry } from './wayglass-entry.js';
@@ -74,8 +76,14 @@ registerWayglassSurface({
   label: 'Wayglass · Acoustic Room',
   mount: mountWayglassAcousticRoom,
 });
+registerWayglassSurface({
+  surface_id: 'wayglass:quad-gestalt',
+  label: 'Wayglass · Quad Möbius',
+  mount: mountWayglassQuadGestalt,
+});
 
 subscribeWayglassObserver(recordRouteAsWonderLight);
+installQuadFeatherListener();
 
 registerWayglassSurface({
   surface_id: 'wayglass:living-observer',
@@ -148,6 +156,7 @@ const wayglass = Object.freeze({
   schema: 'wayglass.os/v0.1',
   surfaces: listWayglassSurfaces,
   organs: listWayglassOrgans,
+  quadGestalt: readLatestQuadGestalt,
   mount: mountSurface,
   connectBluebird: () => openWayglassAuthorization(),
   enter: ({ embodiment: entryEmbodiment = {}, ...entry } = {}) => enterWayglassWorld({
