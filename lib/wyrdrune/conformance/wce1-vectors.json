@@ -1,0 +1,25 @@
+{
+  "schema": "wyrdrune.wce1-vectors/v1",
+  "about": "Shared WCE-1 vectors. Every backend must reproduce each `expect` byte-for-byte. Numeric expectations follow RFC 8785 / ECMAScript Number::toString.",
+  "vectors": [
+    { "name": "zero", "value": 0, "expect": "0" },
+    { "name": "negative-zero", "value": -0.0, "expect": "0" },
+    { "name": "integer", "value": 100, "expect": "100" },
+    { "name": "negative-fraction", "value": -2.5, "expect": "-2.5" },
+    { "name": "one-tenth", "value": 0.1, "expect": "0.1" },
+    { "name": "one-third", "value": 0.3333333333333333, "expect": "0.3333333333333333" },
+    { "name": "rfc8785-large", "value": 333333333.3333333, "expect": "333333333.3333333" },
+    { "name": "1e20-stays-digits", "value": 1e20, "expect": "100000000000000000000" },
+    { "name": "1e21-goes-exponent", "value": 1e21, "expect": "1e+21" },
+    { "name": "micro", "value": 0.000001, "expect": "0.000001" },
+    { "name": "1.5e-7", "value": 1.5e-7, "expect": "1.5e-7" },
+    { "name": "min-subnormal", "value": 5e-324, "expect": "5e-324" },
+    { "name": "max-double", "value": 1.7976931348623157e308, "expect": "1.7976931348623157e+308" },
+    { "name": "beyond-safe-int", "value": 123456789012345680000, "expect": "123456789012345680000" },
+    { "name": "elder-futhark", "value": "ᚠᚢᚦᚨᚱᚲ", "expect": "\"ᚠᚢᚦᚨᚱᚲ\"" },
+    { "name": "kelyran-acute", "value": "varutóra", "expect": "\"varutóra\"" },
+    { "name": "controls", "value": "a\u0000\t\n\u001f\"\\", "expect": "\"a\\u0000\\t\\n\\u001f\\\"\\\\\"" },
+    { "name": "utf16-key-order", "value": { "￿": 1, "😀": 2, "a": 3, "B": 4 }, "expect": "{\"B\":4,\"a\":3,\"😀\":2,\"￿\":1}" },
+    { "name": "nested-receipt", "value": { "phase": "verify", "cycle": 2, "face": "outer", "verdicts": [true, null, false], "prev": "wce1:00" }, "expect": "{\"cycle\":2,\"face\":\"outer\",\"phase\":\"verify\",\"prev\":\"wce1:00\",\"verdicts\":[true,null,false]}" }
+  ]
+}
