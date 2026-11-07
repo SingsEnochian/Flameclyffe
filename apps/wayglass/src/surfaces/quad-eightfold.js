@@ -1,6 +1,7 @@
 import './quad-eightfold.css';
 import {runLiveQuad,subscribeQuadGestalt,quadFeatherState,readLatestQuadGestalt} from '../quad-eightfold-client.js';
 import {temporalHingeFor,designThroughEightfold} from '../quad-temporal-hinge.js';
+import {runWayglassNikolaReview} from '../wayglass-nikola-workflow.js';
 import {createAcousticAudioEngine} from '../acoustic-audio-engine.js';
 import {WAYGLASS_FEATHER_EVENT,wayglassSomaticSound} from '../somatic-sound.js';
 import {invokeWayglassRoute} from '../route-client.js';
@@ -14,7 +15,7 @@ function row(root,label,value){
   title.textContent=String(label);data.textContent=String(value);line.append(title,data);root.append(line);
 }
 export function mountWayglassQuadGestalt(root){
-  let checkpoint=null,disposed=false,request=null,reviewRequest=null,busy=false,auto=false,lens='wonder',feather=quadFeatherState()||wayglassSomaticSound.snapshot().feather_stopped;
+  let checkpoint=null,disposed=false,request=null,reviewRequest=null,collabRequest=null,busy=false,collabBusy=false,collabReceipt=null,auto=false,lens='wonder',feather=quadFeatherState()||wayglassSomaticSound.snapshot().feather_stopped;
   const audio=createAcousticAudioEngine();
   root.innerHTML=[
     '<section class="wg-surface wg-quad-gestalt" data-surface="wayglass-quad-gestalt">',
@@ -47,6 +48,14 @@ export function mountWayglassQuadGestalt(root){
     '<div class="quad-nikola"><h3>Nikola · Independent Review</h3><p>Invite the existing Tesla Observatory route to evaluate the same source packet, in order: Wonder / What If, Science, then Mythience. A model-route response is attributed to that route, not asserted as a separate verified Nikola seat.</p>',
     '<button type="button" class="glass-chip" data-quad-nikola disabled>Request Tesla Observatory review</button>',
     '<p data-quad-nikola-status role="status">Awaiting a validated source checkpoint.</p><pre data-quad-nikola-output hidden></pre></div></section>',
+    '<section class="glass-panel quad-collaboration" aria-label="Wayglass and Nikola collaboration">',
+    '<h2>Wayglass ↔ Nikola · Eightfold Review & Return</h2>',
+    '<p>Wayglass reads the actual Quad evidence, Tesla Observatory evaluates Wonder, Science, and Mythience, then Wayglass examines the review and chooses a test. This is not a claim of a verified Nikola seat.</p>',
+    '<label><input type="checkbox" data-quad-collab-consent> I authorize sharing the metadata summary and Wayglass first response with Tesla Observatory (external Anthropic provider).</label>',
+    '<div class="quad-actions"><button type="button" class="glass-chip" data-quad-collab-run disabled>Run the three-part exchange</button>',
+    '<button type="button" class="glass-chip" data-quad-collab-export disabled>Export Return receipt</button></div>',
+    '<p data-quad-collab-status role="status" aria-live="polite">A fresh host reading and explicit external-model permission are needed.</p>',
+    '<pre data-quad-collab-output hidden></pre></section>',
     '<div class="quad-ensemble" aria-label="Eight engines, two quads">',
     '<section class="quad-cluster" aria-label="First quad, inquiry"><h2>Quad I · Inquiry</h2><p>What is here, where did it come from, how is it structured, and where in time?</p><div class="quad-engines">',
     '<section class="glass-panel quad-engine"><h3>01 · Observation</h3><p>Live instruments and source status</p><div data-quad-observation></div></section>',
@@ -71,8 +80,14 @@ export function mountWayglassQuadGestalt(root){
   const $=s=>root.querySelector(s);
   const status=$('[data-quad-status]'),sound=$('[data-quad-sound]'),mono=$('[data-quad-mono]');
   const live=$('[data-quad-auto]'),run=$('[data-quad-run]'),invite=$('[data-quad-invite]'),nikola=$('[data-quad-nikola]');
+  const collabButton=$('[data-quad-collab-run]'),
+    collabConsent=$('[data-quad-collab-consent]'),collabExport=$('[data-quad-collab-export]');
+  function setCollabAvailability(){
+    collabButton.disabled=busy||collabBusy||feather||!checkpoint||!collabConsent.checked;
+    collabExport.disabled=!collabReceipt;
+  }
   for(const p of PHASES){const e=document.createElement('span');e.textContent=p;$('.quad-phases').append(e);}
-  function setBusy(value){busy=value;run.disabled=value||feather;invite.disabled=value||!checkpoint||feather;nikola.disabled=value||!checkpoint||feather;}
+  function setBusy(value){busy=value;run.disabled=value||feather;invite.disabled=value||!checkpoint||feather;nikola.disabled=value||!checkpoint||feather;setCollabAvailability();}
   function renderLens(){
     const reading=readLatestQuadGestalt();
     if(!reading)return;
@@ -140,6 +155,7 @@ export function mountWayglassQuadGestalt(root){
       'sound '+(audio.getState().running?'enabled':'silent')+
       ' · no canon, identity, or model-weight changes claimed.';
     invite.disabled=false;
+    setCollabAvailability();
     audio.update({quadSoundstage:g.soundstage});
     renderLens();
   }
@@ -243,13 +259,69 @@ export function mountWayglassQuadGestalt(root){
     }finally{if(reviewRequest===controller)reviewRequest=null;
       if(!disposed)nikola.disabled=!checkpoint||feather||busy;}
   }
+  async function startCollaboration(){
+    if(!checkpoint||disposed||feather||busy||collabBusy||!collabConsent.checked)return;
+    const reading=readLatestQuadGestalt();
+    const state=$('[data-quad-collab-status]');
+    if(!reading||reading.checkpoint_hash!==checkpoint.hash){
+      state.textContent='Refresh Quad evidence before collaborating.';return;
+    }
+    const controller=new AbortController();collabRequest=controller;
+    collabBusy=true;collabReceipt=null;setCollabAvailability();
+    $('[data-quad-collab-output]').hidden=true;
+    try{
+      const review=await runWayglassNikolaReview({
+        reading,signal:controller.signal,externalShareApproved:collabConsent.checked,
+        onStage:({stage})=>{if(!disposed&&!controller.signal.aborted)
+          state.textContent='Collaboration · '+stage.replaceAll('-',' ');},
+        askWayglass:async ({input,signal})=>invokeWayglassRoute({
+          routeId:'local:ollama',worldId:'wayglass:home',history:[],
+          input,signal,maxOutputTokens:900,surfaceId:'wayglass:quad-gestalt'}),
+        askTesla:async ({payload,signal})=>{
+          const res=await fetch('/api/tesla/chat',{method:'POST',
+            credentials:'same-origin',cache:'no-store',signal,
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({provider:'anthropic',
+              messages:[{role:'user',content:JSON.stringify(payload)}]})});
+          const result=await res.json().catch(()=>({}));
+          if(!res.ok)throw Error(result.error||'Tesla Observatory unavailable');
+          return result;
+        },
+      });
+      if(disposed||controller.signal.aborted)return;
+      collabReceipt=review;
+      const out=$('[data-quad-collab-output]');
+      out.textContent=[
+        'WAYGLASS · FIRST\n'+review.replies.wayglass_first.output,
+        'TESLA OBSERVATORY · THREE LENSES\n'+review.replies.tesla_observatory.output,
+        'WAYGLASS · RETURN\n'+review.replies.wayglass_return.output,
+      ].join('\n\n');
+      out.hidden=false;
+      state.textContent='Three model-route turns completed and attributed. Training candidate still awaiting approval; no weights changed.';
+    }catch(error){
+      if(!disposed)state.textContent=controller.signal.aborted
+        ? 'Feather cancelled the review; no completion claimed.'
+        : 'Collaboration incomplete: '+error.message;
+    }finally{
+      if(collabRequest===controller)collabRequest=null;
+      collabBusy=false;setCollabAvailability();
+    }
+  }
+  function exportCollaboration(){
+    if(!collabReceipt)return;
+    const url=URL.createObjectURL(new Blob([JSON.stringify(collabReceipt,null,2)],{type:'application/json'}));
+    const a=document.createElement('a');a.href=url;a.download='wayglass-nikola-return.json';a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
   function onClick(e){
     if(e.target.closest('[data-quad-run]'))void execute();
     else if(e.target.closest('[data-quad-lens]')){lens=e.target.closest('[data-quad-lens]').dataset.quadLens;renderLens();}
+    else if(e.target.closest('[data-quad-collab-run]'))void startCollaboration();
+    else if(e.target.closest('[data-quad-collab-export]'))exportCollaboration();
     else if(e.target.closest('[data-quad-nikola]'))void askNikola();
     else if(e.target.closest('[data-quad-invite]'))void askWayglass();
     else if(e.target.closest('[data-quad-feather]')){
-      feather=true;request?.abort();reviewRequest?.abort();sound.checked=false;live.checked=false;auto=false;
+      feather=true;request?.abort();reviewRequest?.abort();collabRequest?.abort();sound.checked=false;live.checked=false;auto=false;
       audio.stop();wayglassSomaticSound.feather();setBusy(false);
       status.textContent='Feather Stop · requests cancelled and audio silent.';
     }else if(e.target.closest('[data-quad-export]')){
@@ -263,11 +335,12 @@ export function mountWayglassQuadGestalt(root){
     if(e.target===sound)void enableAudio();
     if(e.target===mono){audio.update({mono:mono.checked});renderLens();}
     if(e.target===live)auto=live.checked;
+    if(e.target===collabConsent)setCollabAvailability();
   }
   function onFeather(e){
     if(e.detail?.stopped===true){
       feather=true;auto=false;live.checked=false;sound.checked=false;audio.stop();
-      request?.abort();reviewRequest?.abort();setBusy(false);status.textContent='Feather Stop · no audio or polling.';
+      request?.abort();reviewRequest?.abort();collabRequest?.abort();setBusy(false);status.textContent='Feather Stop · no audio or polling.';
     }else if(e.detail?.stopped===false&&e.detail?.confirmed===true){
       feather=false;setBusy(false);status.textContent='Feather released. Audio remains off until enabled.';
     }
@@ -280,7 +353,7 @@ export function mountWayglassQuadGestalt(root){
   globalThis.addEventListener?.(WAYGLASS_FEATHER_EVENT,onFeather);
   const tick=setInterval(()=>{if(auto&&!busy&&!feather&&document.visibilityState!=='hidden')void execute();},60000);
   void execute();
-  return ()=>{disposed=true;request?.abort();reviewRequest?.abort();clearInterval(tick);unsub();
+  return ()=>{disposed=true;request?.abort();reviewRequest?.abort();collabRequest?.abort();clearInterval(tick);unsub();
     root.removeEventListener('click',onClick);root.removeEventListener('change',onChange);
     globalThis.removeEventListener?.(WAYGLASS_FEATHER_EVENT,onFeather);audio.dispose();};
 }
