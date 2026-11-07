@@ -15,7 +15,7 @@ export async function previewWyrdrune(source,{fetchImpl=fetch,cryptoImpl=globalT
     throw new TypeError('Unverified Wyrdrune preview response.');
   }
 
-  const proof=await verifyWyrdrunePreview(source,data);
+  const proof=await verifyWyrdrunePreview(source,data,cryptoImpl);
   return Object.freeze({...data,verification:proof});
 }
 
