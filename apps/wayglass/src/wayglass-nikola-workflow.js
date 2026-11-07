@@ -92,6 +92,8 @@ export async function runWayglassNikolaReview({
         output:reviewer.output,verified_nikola_seat:false}}),
   }),'return');
   checkAbort(signal);
+  if(returning.route_id!==first.route_id)
+    throw new Error('Wayglass return route differs from its first attributable route');
   mark('return-receipt-ready');
   return Object.freeze({
     schema:COLLABORATION_SCHEMA,checkpoint_hash:reading.checkpoint_hash,
