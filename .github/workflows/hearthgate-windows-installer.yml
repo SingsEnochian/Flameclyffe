@@ -5,6 +5,9 @@ on:
   pull_request:
     paths:
       - "apps/starwell-server/**"
+      - "apps/wayglass/**"
+      - "scripts/wayglass-*.mjs"
+      - "scripts/Start-Wayglass.ps1"
       - "lib/wayglass-*.cjs"
       - "apps/starwell/**"
       - "apps/project-zero-companion/**"
@@ -22,6 +25,9 @@ on:
       - "hearthgate-v*"
     paths:
       - "apps/starwell-server/**"
+      - "apps/wayglass/**"
+      - "scripts/wayglass-*.mjs"
+      - "scripts/Start-Wayglass.ps1"
       - "lib/wayglass-*.cjs"
       - "apps/starwell/**"
       - "apps/project-zero-companion/**"
