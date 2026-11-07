@@ -17,6 +17,7 @@ const { createDepartureStore } = require('../wayglass-runtime/wayglass-departure
 const { createModelObservation } = require('../wayglass-runtime/wayglass-model-observation.cjs');
 const { createWayglassLibraryRouter } = require('./research-library');
 const { createObserverSelfDevelopmentRouter } = require('./observer-self-development');
+const { createWayglassNoaaRouter } = require('./noaa-observer');
 
 const { resolveCharacterSeat, publicCharacterSeats, EMERGENCE_QUESTION_IDS } = require('./character-seats.cjs');
 
@@ -491,6 +492,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
   });
   router.use('/library', createWayglassLibraryRouter());
   router.use('/observer/self-development', createObserverSelfDevelopmentRouter());
+  router.use('/observer/noaa', createWayglassNoaaRouter({ authorize: griffStewardAuthorized, fetchImpl }));
   router.get('/kernel/departures/:storageId', (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     try {
