@@ -651,12 +651,23 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     }
   });
 
-  router.get('/routes', (_req, res) => {
+  // Route metadata exposes provider/model and participant bindings. A caller's
+  // headers, origin or loopback socket do not confer Steward authorization.
+  // Reuse the verified House session contract rather than inventing a proxy trust header.
+  router.get('/routes', async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
-    return res.json({
-      schema: 'wayglass.route-catalogue/v0.1',
-      routes: publicWayglassRoutes(),
-    });
+    try {
+      if (!await griffStewardAuthorized(req)) {
+        return res.status(401).json({ error: 'Wayglass route catalogue requires House Steward authorization.' });
+      }
+      return res.json({
+        schema: 'wayglass.route-catalogue/v0.1',
+        routes: publicWayglassRoutes(),
+      });
+    } catch (_error) {
+      // Fail closed; never disclose route data if session verification fails.
+      return res.status(503).json({ error: 'Wayglass Steward authorization is unavailable.' });
+    }
   });
 
   router.post('/respond', async (req, res) => {
