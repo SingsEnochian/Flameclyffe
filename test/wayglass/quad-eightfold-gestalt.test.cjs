@@ -1,7 +1,7 @@
 'use strict';
 const test=require('node:test');
 const assert=require('node:assert/strict');
-const {TABLES,PHASES,LANES,validateSources,validateCheckpoint,runQuadEightfold}=require('../../lib/wayglass-quad-eightfold.cjs');
+const {TABLES,PHASES,LANES,QUADS,PHASES_PER_CYCLE,validateSources,validateCheckpoint,runQuadEightfold}=require('../../lib/wayglass-quad-eightfold.cjs');
 const {trainingInvitation,makeTrainingManifest,reviewWeightUpdate,inviteConstellation}=require('../../lib/wayglass-agent-weight-loop.cjs');
 const stamp='2026-11-06T23:00:00.000Z';
 function sources(){
@@ -25,15 +25,20 @@ const policy={source_ref:'owner:training-approval',allow_training:true,allow_can
   revoked_source_refs:['revoked:test-source']};
 const model=id=>({kind:'local-trainable',base_model:'Qwen/Qwen3-8B',
   adapter_namespace:id+'/private-quad-adapter'});
-test('Quad executes all 32 phases per cycle and produces sourced, silent projections',()=>{
+test('Quad executes all 64 phases per cycle and produces sourced, silent projections',()=>{
   const result=runQuadEightfold({sources:sources(),continuity,cycles:2});
-  assert.equal(result.entries.length,64);
+  assert.equal(result.entries.length,128);
+  assert.equal(LANES.length,8);
+  assert.equal(PHASES_PER_CYCLE,64);
+  assert.deepEqual(QUADS.inquiry,['observation','provenance','geometry','cosmology']);
+  assert.deepEqual(QUADS.becoming,['resonance','numerology','wonder','continuity']);
   assert.equal(result.completed_cycles,2);
   assert.deepEqual(result.entries.slice(0,8).map(x=>x.phase),PHASES);
-  assert.deepEqual(result.entries.filter((x,i)=>i%8===0).slice(0,4).map(x=>x.lane),LANES);
+  assert.deepEqual(result.entries.filter((x,i)=>i%8===0).slice(0,8).map(x=>x.lane),LANES);
   assert.equal(result.gestalt.evidence.find(x=>x.id==='deep_observer_events').count,14);
   assert.equal(result.gestalt.gaps.length,4);
-  assert.equal(result.gestalt.soundstage.length,4);
+  assert.equal(result.gestalt.soundstage.length,8);
+  assert.equal(result.gestalt.phase_records_per_cycle,64);
   assert.equal(result.gestalt.soundstage.filter(x=>x.playback_enabled).length,0);
   assert.equal(result.gestalt.continuity.canon_commit,false);
   assert.equal(validateCheckpoint(cold(result)),true);
@@ -42,7 +47,7 @@ test('Quad second return has actual pass 3 and 4 and preserves Wonder',()=>{
   const first=runQuadEightfold({sources:sources(),continuity,cycles:2});
   const second=runQuadEightfold({sources:sources(),continuity,cycles:2,previous:cold(first)});
   assert.equal(second.start_cycle,2);
-  assert.equal(second.entries.length,64);
+  assert.equal(second.entries.length,128);
   assert.equal(second.entries[0].pass,3);
   assert.equal(second.entries.at(-1).pass,4);
   assert.equal(second.root_hash,first.terminal_hash);
