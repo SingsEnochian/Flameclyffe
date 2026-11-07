@@ -459,6 +459,12 @@ async function humainCatalogueResponse(route, res, fetchImpl = globalThis.fetch)
 
 function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThis.fetch, departureStore = createDepartureStore() } = {}) {
   const router = express.Router();
+  // Stable, public, metadata-free process readiness. Never use the private
+  // /routes catalogue as a health probe (401 is expected without House auth).
+  router.get('/healthz', (_req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    return res.json({ schema: 'wayglass.host-health/v0.1', status: 'ready' });
+  });
   router.use('/library', createWayglassLibraryRouter());
   router.use('/observer/self-development', createObserverSelfDevelopmentRouter());
   router.get('/kernel/departures/:storageId', (req, res) => {
