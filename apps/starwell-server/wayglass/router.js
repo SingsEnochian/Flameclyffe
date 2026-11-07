@@ -546,7 +546,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
           'Proposed audio is silent until explicitly enabled',
           'Training candidates require distinct agent choices and approved datasets']});
     }catch(error){
-      return res.status(error.status||((error instanceof TypeError||error instanceof RangeError)?400:409))
+      return res.status(error.status||((error instanceof TypeError||error instanceof RangeError||/integrity failure|Missing checkpoint|Invalid quad cycle origin|Return identity|corrupt|Invalid channel/.test(error.message))?400:409))
         .json({error:error.message||'Quad execution failed'});
     }
   });
