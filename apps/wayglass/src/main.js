@@ -7,6 +7,7 @@ import { installKeyboardControls } from './keyboard-controls.js';
 import { detectEmbodimentCapabilities, detectARSupport, publishEmbodiment } from './embodiment.js';
 import { enterWayglassWorld, leaveWayglassWorld, recoverWayglassDeparture, readVoyageMessages, replyToVoyage } from './route-client.js';
 import { installVoyageInbox } from './voyage-inbox.js';
+import { createWayglassSpellingController } from './spelling-assistance.js';
 import { mountWayglassSurface, registerWayglassSurface, listWayglassSurfaces } from './surface-registry.js';
 import { mountArcSweepWritingSurface } from './surfaces/arcsweep-writing.js';
 import { mountWayglassSystemsSurface } from './surfaces/systems.js';
@@ -107,6 +108,7 @@ const browserEmbodiment = Object.freeze({
 // The registry owns cleanup. Serialize requests so a quick room change cannot
 // leave an earlier async surface subscribed after another room has mounted.
 let mountQueue=Promise.resolve();
+const spelling=createWayglassSpellingController({document});
 const shell=document.createElement('nav');
 shell.id='wg-shell-nav';shell.className='wg-shell-nav glass-panel';
 shell.setAttribute('aria-label','Explore Wayglass');shell.hidden=true;
@@ -116,6 +118,14 @@ for(const surface of listWayglassSurfaces()){
 }
 const connection=document.createElement('button');connection.type='button';connection.className='glass-chip';
 connection.textContent='Connect Bluebird';connection.addEventListener('click',()=>{void openWayglassAuthorization();});shell.append(connection);
+const spellingButton=document.createElement('button');spellingButton.type='button';spellingButton.className='glass-chip';
+spellingButton.textContent='Spellcheck on';spellingButton.setAttribute('aria-pressed','true');
+spellingButton.setAttribute('aria-label','Toggle native spellcheck for writing and messages');
+spellingButton.addEventListener('click',()=>{
+ const next=spelling.setEnabled(!spelling.enabled);
+ spellingButton.textContent=next?'Spellcheck on':'Spellcheck off';
+ spellingButton.setAttribute('aria-pressed',String(next));
+});shell.append(spellingButton);
 const switcher=document.createElement('button');switcher.type='button';switcher.className='wg-ship-switch glass-chip';
 switcher.setAttribute('aria-controls',shell.id);switcher.setAttribute('aria-expanded','false');switcher.textContent='Explore Wayglass';
 root.after(shell,switcher);
@@ -123,6 +133,7 @@ switcher.addEventListener('click',()=>{shell.hidden=!shell.hidden;switcher.setAt
 function mountSurface(surfaceId){
   const request=mountQueue.then(async()=>{
     const result=await mountWayglassSurface(surfaceId,root);
+    spelling.apply(root);
     document.documentElement.dataset.wayglassSurface=surfaceId;
     for(const button of shell.querySelectorAll('[data-surface-id]')){
       const active=button.dataset.surfaceId===surfaceId;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));
