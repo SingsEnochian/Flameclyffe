@@ -1,4 +1,5 @@
 import { createInteractionState } from '../interaction-state.js';
+import { previewWyrdrune, draftWyrdruneDiscussion } from '../wyrdrune-client.js';
 import { authorizationSession } from '../authorization-session.js';
 import { mountWayglassRoutePicker } from '../route-picker.js';
 import { WAYGLASS_WORLD_SEATS, findWayglassWorldSeat, wayglassWorldStatus } from '../world-seats.js';
@@ -41,6 +42,8 @@ export async function mountArcSweepWritingSurface(root) {
   let busy = false;
   let lastReceipt = null;
   let checkpoint = null;
+  let revisionOf = null;
+  let lastWTLPreview = null, lastWTLSource = null;
 
   root.innerHTML = [
     "<section class=\"wg-surface wg-writing-room\" data-surface=\"arcsweep-writing\">\n",
@@ -137,6 +140,16 @@ export async function mountArcSweepWritingSurface(root) {
     "          <button id=\"wg-send\" type=\"button\" class=\"send-jewel\"><span aria-hidden=\"true\">➤</span> Send to Writing Room</button>\n",
     "        </div>\n",
     "      </section>\n",
+    '<section class="wg-wtl-panel" aria-label="Wyrdrune ritual workbench">',
+      '<details id="wg-wtl-details" class="glass-panel">',
+        '<summary>Wyrdrune · Eightfold Ritual Workbench</summary>',
+        '<p class="tiny">Preview the Eightfold locally. You decide whether to discuss it with your selected model or SpicyChat route; nothing sends automatically.</p>',
+        '<textarea id="wg-wtl-source" data-wtl-code="true" spellcheck="false" rows="10" maxlength="16000" aria-label="Wyrdrune WTL source" placeholder="mobius { perceive { ... } ... }"></textarea>',
+        '<div class="wg-wtl-actions"><button type="button" class="glass-chip" id="wg-wtl-example">Insert example</button><button type="button" class="glass-chip" id="wg-wtl-preview">Preview Eightfold</button><button type="button" class="glass-chip" id="wg-wtl-discuss" disabled>Stage for model discussion</button></div>',
+        '<p id="wg-wtl-status" class="tiny" role="status">No Wyrdrune preview yet. Sign in as House Steward to use the compiler.</p>',
+        '<pre id="wg-wtl-output" aria-label="Wyrdrune phase receipts" hidden></pre>',
+      '</details>',
+    '</section>',
     "    </main>\n",
     "    <aside class=\"wg-session-sidebar glass-panel\" aria-label=\"Session and continuity\">\n",
     "      <div class=\"wg-sidebar-tabs\" role=\"tablist\" aria-label=\"Session views\">\n",
