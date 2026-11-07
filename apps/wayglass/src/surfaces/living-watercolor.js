@@ -47,9 +47,11 @@ export async function mountLivingWatercolorSurface(root) {
         '<div class="wc-stage glass-panel">',
           '<canvas id="wc-fluid" class="wc-fluid" aria-label="Watercolor canvas. Drag a finger, mouse or Pencil to paint; use arrow keys to move and Enter or Space to paint." aria-describedby="wc-paint-help" tabindex="0"></canvas>',
           '<div class="wc-stage-meta" aria-hidden="true">WAYGLASS / AQUARELLE / PREMAQC</div>',
+          '<button id="wc-focus-paint" type="button" class="wc-focus-paint glass-chip" aria-pressed="false">Focus painting</button>',
           '<span class="wc-brush-cursor" id="wc-brush-cursor" aria-hidden="true"></span>',
           '<p class="wc-paint-help" id="wc-paint-help">Draw directly on the paper · drag to blend · arrow keys + Enter also work</p>',
         '</div>',
+        '<div class="wc-workbench">',
           '<div class="wc-deck glass-panel" aria-label="Wayglass collaborative expression desk">',
             '<div class="wc-deck-header"><div><span class="eyebrow">Voice &amp; work surface</span>',
             '<h2 id="wc-title">Dream</h2></div><span class="wc-model-state" id="wc-route-state">Checking model routes</span></div>',
@@ -110,6 +112,7 @@ export async function mountLivingWatercolorSurface(root) {
           '</div>',
           '<p class="tiny">Activity carries its source references. Your touch offers direction; the canvas remains open to change.</p>',
         '</aside>',
+        '</div>',
       '</div>',
     '</section>',
   ].join('');
@@ -366,6 +369,13 @@ export async function mountLivingWatercolorSurface(root) {
   markPigment();
   listen(brushSize,'input',()=>{
     q('wc-brush-size-label').textContent=brushSize.value+'%';
+  });
+  listen(q('wc-focus-paint'),'click',()=>{
+    const focused=root.querySelector('.wc-surface').classList.toggle('wc-focus');
+    q('wc-focus-paint').textContent=focused?'Show workbench':'Focus painting';
+    q('wc-focus-paint').setAttribute('aria-pressed',String(focused));
+    paint();
+    feedback.textContent=focused?'Canvas focus is on. Use Show workbench to return.':'Workbench restored.';
   });
   listen(q('wc-paper'),'click',()=>{
     paperIsDark=!paperIsDark;
