@@ -17,6 +17,7 @@ const { createDepartureStore } = require('../wayglass-runtime/wayglass-departure
 const { createModelObservation } = require('../wayglass-runtime/wayglass-model-observation.cjs');
 const { createWayglassLibraryRouter } = require('./research-library');
 const { createObserverSelfDevelopmentRouter } = require('./observer-self-development');
+const { runQuadEightfold, SOURCE_SCHEMA, TABLES } = require('../wayglass-runtime/wayglass-quad-eightfold.cjs');
 
 const { resolveCharacterSeat, publicCharacterSeats, EMERGENCE_QUESTION_IDS } = require('./character-seats.cjs');
 
@@ -481,6 +482,43 @@ async function humainCatalogueResponse(route, res, fetchImpl = globalThis.fetch)
   }
 }
 
+// House-authenticated server-only metadata bridge. No provider keys or private rows leave the host.
+const QUAD_SOURCE_TIMES = Object.freeze({
+  deep_observer_events:'occurred_at',
+  observer_measurements:'measured_at',
+  wayglass_route_receipts:'created_at',
+  house_runtime_events:'occurred_at',
+  math_spine_packets:'observed_at',
+  source_library_query_receipts:'created_at',
+});
+async function readQuadSourcesFromSupabase(fetchImpl=globalThis.fetch){
+  const endpoint=String(process.env.SUPABASE_URL||'').replace(/\/+$/,'');
+  const token=String(process.env.SUPABASE_SERVICE_ROLE_KEY||process.env.SUPABASE_SECRET_KEY||'');
+  if(!/^https:\/\/[a-z0-9.-]+\.supabase\.co$/i.test(endpoint)||!token)
+    throw Object.assign(new Error('Authorized Wayglass Supabase metadata adapter is not configured'),{status:503});
+  const observed_at=new Date().toISOString();
+  const channels=await Promise.all(TABLES.map(async id=>{
+    const time=QUAD_SOURCE_TIMES[id];
+    const url=endpoint+'/rest/v1/'+encodeURIComponent(id)
+      +'?select='+encodeURIComponent(time)+'&order='+encodeURIComponent(time)+'.desc&limit=1';
+    try{
+      const response=await fetchImpl(url,{method:'GET',headers:{
+        apikey:token,Authorization:'Bearer '+token,Prefer:'count=exact',
+        'Range-Unit':'items',Range:'0-0',Accept:'application/json',
+      },signal:AbortSignal.timeout(7000)});
+      if(!response.ok)throw Error('source-not-authorized-or-unavailable');
+      const countValue=(response.headers.get('content-range')||'').match(/\/(\d+)$/);
+      if(!countValue)throw Error('missing-source-count');
+      const count=Number(countValue[1]);
+      if(!Number.isSafeInteger(count)||count<0)throw Error('invalid-source-count');
+      const records=await response.json();
+      const at=Array.isArray(records)&&records[0]?.[time] ? records[0][time] : null;
+      return {id,status:count>0?'observed':'empty',count,latest_at:at,provenance:'supabase:server-authorized-metadata'};
+    }catch{return {id,status:'unavailable',count:null,latest_at:null,provenance:'supabase:source-not-available'};}
+  }));
+  return {schema:SOURCE_SCHEMA,observed_at,channels};
+}
+
 function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThis.fetch, departureStore = createDepartureStore() } = {}) {
   const router = express.Router();
   // Stable, public, metadata-free process readiness. Never use the private
@@ -488,6 +526,29 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
   router.get('/healthz', (_req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     return res.json({ schema: 'wayglass.host-health/v0.1', status: 'ready' });
+  });
+  // The Quad is a single ship-wide process, not an unprotected read-only probe.
+  // Only authenticated House sessions may inspect source activity or run a fold.
+  router.post('/quad/run',createRequestGate({maxRequests:12,maxConcurrent:2}),async(req,res)=>{
+    res.setHeader('Cache-Control','no-store');
+    if(!(await griffStewardAuthorized(req).catch(()=>false)))
+      return res.status(401).json({error:'Authenticated House session required for Quad readings'});
+    if(req.body?.feather===true)return res.status(409).json({error:'Feather Stop active'});
+    try{
+      const sources=await readQuadSourcesFromSupabase(fetchImpl);
+      const result=runQuadEightfold({
+        sources,cycles:req.body?.cycles===undefined?2:req.body.cycles,
+        continuity:req.body?.continuity||{},previous:req.body?.previous||null,
+      });
+      return res.json({schema:'wayglass.quad-host-response/v1',status:'host-observed',
+        source:'authorized-supabase-metadata',checkpoint:result,
+        notes:['Source counts and last timestamps are real; no private raw rows returned',
+          'Proposed audio is silent until explicitly enabled',
+          'Training candidates require distinct agent choices and approved datasets']});
+    }catch(error){
+      return res.status(error.status||((error instanceof TypeError||error instanceof RangeError)?400:409))
+        .json({error:error.message||'Quad execution failed'});
+    }
   });
   router.use('/library', createWayglassLibraryRouter());
   router.use('/observer/self-development', createObserverSelfDevelopmentRouter());
