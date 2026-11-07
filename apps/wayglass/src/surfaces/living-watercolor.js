@@ -478,8 +478,13 @@ export async function mountLivingWatercolorSurface(root) {
       y:clamp((event.clientY-rect.top)/Math.max(rect.height,1)),
     };
   }
-  function brush(event){
-    const pos=pointerCoords(event);
+  function positionBrushCursor(pos,visible=true){
+    brushCursor.style.left=(pos.x*100)+'%';
+    brushCursor.style.top=(pos.y*100)+'%';
+    brushCursor.hidden=!visible;
+  }
+  function brush(event,position=null){
+    const pos=position||pointerCoords(event);
     const sensitivity=Number(pressure.value)/100;
     const force=event.pointerType==='pen'&&event.pressure>0?
       clamp(event.pressure*sensitivity):sensitivity;
@@ -489,8 +494,10 @@ export async function mountLivingWatercolorSurface(root) {
       ...pos,pressure:force,color:color.value,mode:'add-pigment',
     });
     fluid.inject({x:proposal.x,y:proposal.y,color:proposal.color,
-      amount:Math.max(.05,proposal.pressure)*1.2,radius:.028+force*.045,dx,dy});
+      amount:Math.max(.25,proposal.pressure)*1.65,radius:.012+(Number(brushSize.value)/100)*.085,dx,dy});
     lastPointer=pos;
+    keyboardCursor=pos;
+    positionBrushCursor(pos);
     if(reduced||paused)paint();
     updateInspector();
   }
@@ -501,21 +508,30 @@ export async function mountLivingWatercolorSurface(root) {
     brush(event);event.preventDefault();
   });
   listen(canvas,'pointermove',event=>{
-    if(stopped||featherStopped||pointerId!==event.pointerId)return;
-    brush(event);event.preventDefault();
+    if(stopped||featherStopped)return;
+    positionBrushCursor(pointerCoords(event));
+    if(pointerId!==event.pointerId)return;
+    // Coalesced Pencil/mouse points preserve the complete trail on fast moves.
+    const samples=typeof event.getCoalescedEvents==='function'?event.getCoalescedEvents():[];
+    for(const sample of samples.length?samples:[event])brush(sample);
+    event.preventDefault();
   });
+  listen(canvas,'pointerleave',()=>{if(pointerId===null)positionBrushCursor(keyboardCursor,false);});
   const endPointer=event=>{
     if(event.pointerId===pointerId){pointerId=null;lastPointer=null;}
   };
   listen(canvas,'pointerup',endPointer);
   listen(canvas,'pointercancel',endPointer);
   listen(canvas,'keydown',event=>{
-    if(!featherStopped&&(event.key==='Enter'||event.key===' ')){
+    if(featherStopped)return;
+    const step={ArrowLeft:[-.045,0],ArrowRight:[.045,0],ArrowUp:[0,-.045],ArrowDown:[0,.045]}[event.key];
+    if(step){
       event.preventDefault();
-      const proposal=proposeWatercolorTouch({
-        x:.5,y:.5,color:color.value,pressure:Number(pressure.value)/100,
-      });
-      fluid.inject({x:proposal.x,y:proposal.y,color:proposal.color,amount:proposal.pressure});
+      keyboardCursor={x:clamp(keyboardCursor.x+step[0]),y:clamp(keyboardCursor.y+step[1])};
+      positionBrushCursor(keyboardCursor);
+    }else if(event.key==='Enter'||event.key===' '){
+      event.preventDefault();
+      brush({pointerType:'keyboard',pressure:0},keyboardCursor);
       paint();updateInspector();
     }
   });
@@ -539,6 +555,7 @@ export async function mountLivingWatercolorSurface(root) {
     const angle=event.sequence*2.399963229728653;
     addPigment(event,{x:clamp(.5+.3*Math.cos(angle)),y:clamp(.5+.3*Math.sin(angle))});
   }
+  positionBrushCursor(keyboardCursor,false);
   paint();updateInspector();void loadRoutes();
   if(!reduced)animationId=globalThis.requestAnimationFrame(frame);
   else feedback.textContent='Reduced motion enabled. Pigment flows only on interaction.';
