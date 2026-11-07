@@ -1,0 +1,38 @@
+name: Wyrdrune Two-Backend Parity
+on:
+  push:
+    branches: ['wayglass/wtl-cross-runtime-return-integrity-*']
+    paths:
+      - 'lib/wyrdrune/**'
+      - 'lib/wayglass-wyrdrune-ritual*'
+      - '.github/workflows/wyrdrune-two-backend.yml'
+  pull_request:
+    paths:
+      - 'lib/wyrdrune/**'
+      - 'lib/wayglass-wyrdrune-ritual*'
+      - '.github/workflows/wyrdrune-two-backend.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Syntax gate
+        run: |
+          node --check lib/wyrdrune/wyrdrune.cjs
+          node --check lib/wyrdrune/cross-backend.parity.cjs
+          python3 -m py_compile lib/wyrdrune/canonical.py lib/wyrdrune/pure-backend.py
+      - name: WTL native, Enochian and RFC L0 conformance
+        run: node --test lib/wyrdrune/wyrdrune.test.cjs lib/wyrdrune/enochian.test.cjs lib/wyrdrune/conformance.test.cjs
+      - name: Python and JavaScript WTL parity
+        run: node --test lib/wyrdrune/cross-backend.parity.cjs
