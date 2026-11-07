@@ -37,6 +37,7 @@ jobs:
           node-version: 24
       - name: Gate 7 · cold restart and adversarial continuity replay
         run: |
+          set -euo pipefail
           node --test --test-reporter=tap test/wayglass/eightfold-cold-return.test.cjs | tee gate7.tap
       - name: Record Gate 7 result
         if: always()
