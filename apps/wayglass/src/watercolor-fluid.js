@@ -125,6 +125,12 @@ export function createWatercolorFluid({width=112,height=72,halfLife=560}={}){
     }
     return out;
   }
+  // Clearing pigment is a visual operation, not a delete of source receipts.
+  function clear(){
+    assertActive();
+    for(const field of [u,v,dye,red,green,blue,wet,nu,nv,div,pressure,nextP,dyeNext,redNext,greenNext,blueNext,wetNext])field.fill(0);
+    ticks=0;
+  }
   function snapshot(){
     let total=0,water=0,motion=0;
     if(!disposed)for(let i=0;i<n;i++){total+=dye[i];water+=wet[i];motion+=Math.hypot(u[i],v[i]);}
@@ -142,6 +148,6 @@ export function createWatercolorFluid({width=112,height=72,halfLife=560}={}){
     u=v=dye=red=green=blue=wet=nu=nv=div=pressure=nextP=null;
     dyeNext=redNext=greenNext=blueNext=wetNext=pixelBytes=null;
   }
-  return Object.freeze({width,height,inject,step,pixels,snapshot,dispose});
+  return Object.freeze({width,height,inject,step,pixels,clear,snapshot,dispose});
 }
 
