@@ -1,0 +1,40 @@
+name: Wyrdrune Enochian Ritual Crossing
+
+on:
+  push:
+    branches:
+      - 'wayglass/wtl-enochian-ritual-crossing-*'
+    paths:
+      - 'lib/wyrdrune/**'
+      - 'lib/wayglass-wyrdrune-ritual*'
+      - 'lib/wayglass-kernel.cjs'
+      - '.github/workflows/wyrdrune-enochian-check.yml'
+  pull_request:
+    paths:
+      - 'lib/wyrdrune/**'
+      - 'lib/wayglass-wyrdrune-ritual*'
+      - 'lib/wayglass-kernel.cjs'
+      - '.github/workflows/wyrdrune-enochian-check.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  ritual-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Wyrdrune candidate syntax
+        run: |
+          node --check lib/wyrdrune/enochian.cjs
+          node --check lib/wyrdrune/wyrdrune.cjs
+          node --check lib/wayglass-wyrdrune-ritual.cjs
+      - name: Exact-head WTL core and ritual tests
+        run: node --test lib/wyrdrune/*.test.cjs lib/wayglass-wyrdrune-ritual.test.cjs
