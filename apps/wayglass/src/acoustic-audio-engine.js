@@ -72,11 +72,11 @@ export function createAcousticAudioEngine({AudioContext = globalThis.AudioContex
     ambienceTone.connect(ambience); ambience.connect(master); statusBus.connect(master);
     master.connect(compressor); compressor.connect(context.destination);
     // Original layered spatial ambience. Quad evidence supplies parameters, never raw samples.
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 8; i++) {
       const tone = context.createOscillator();
       const gain = context.createGain();
       const pan = typeof context.createStereoPanner === 'function' ? context.createStereoPanner() : null;
-      tone.type = 'sine'; tone.frequency.value = [110, 176, 220, 330][i]; gain.gain.value = 0;
+      tone.type = 'sine'; tone.frequency.value = [110, 144, 176, 196, 220, 264, 330, 440][i]; gain.gain.value = 0;
       tone.connect(gain);
       if (pan) gain.connect(pan).connect(master); else gain.connect(master);
       graph.quadLayers.push({tone, gain, panner:pan});
@@ -128,8 +128,8 @@ export function createAcousticAudioEngine({AudioContext = globalThis.AudioContex
         distance: Math.max(0, number(b.distance, 'distance'))};
     }
     if (Object.hasOwn(value, 'quadSoundstage')) {
-      if (!Array.isArray(value.quadSoundstage) || value.quadSoundstage.length > 4)
-        throw new TypeError('Quad soundstage requires up to four evidence-bound layers');
+      if (!Array.isArray(value.quadSoundstage) || value.quadSoundstage.length > 8)
+        throw new TypeError('Quad soundstage requires up to eight evidence-bound layers');
       next.quadSoundstage = value.quadSoundstage.map((x) => {
         if (!x || typeof x.source_ref !== 'string' || typeof x.layer !== 'string'
           || !['observed','empty','unavailable','error'].includes(x.evidence_status))
