@@ -53,3 +53,17 @@
 @media(prefers-reduced-motion:reduce){.quad-twist{filter:none}}
 @media(prefers-contrast:more){.quad-hinge{background:transparent;border-width:2px}.quad-hinge-reading{border-width:3px}
   .quad-readout{border-bottom-color:currentColor}}
+
+/* Wayglass–Nikola evidence-first collaboration. Clear start/stop and readable receipts. */
+.quad-collaboration{display:grid;gap:.8rem;border:1px solid rgba(113,213,192,.34);
+ background:linear-gradient(145deg,rgba(22,71,72,.18),rgba(50,38,69,.13))}
+.quad-collaboration h2{margin:0;font-size:clamp(1.1rem,2.5vw,1.65rem)}
+.quad-collaboration p{max-width:95ch;line-height:1.55;margin:.3rem 0}
+.quad-collaboration label{display:flex;align-items:flex-start;gap:.75rem;line-height:1.4}
+.quad-collaboration label input{accent-color:#78c4ba;flex:none;margin-top:.3rem}
+.quad-collaboration pre{white-space:pre-wrap;overflow-wrap:anywhere;
+ max-height:40rem;overflow:auto;border-radius:1rem;padding:1rem;
+ border:1px solid rgba(150,199,194,.22);
+ background:rgba(8,26,35,.42);line-height:1.6}
+.quad-collaboration [data-quad-collab-status]{font-size:.9rem}
+@media(prefers-contrast:more){.quad-collaboration{border-width:2px}}
