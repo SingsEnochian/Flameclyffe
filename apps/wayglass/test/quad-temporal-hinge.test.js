@@ -48,9 +48,12 @@ test('eightfold experience design remains reversible, readable and provenance-bo
 test('quad event bus strips private continuity before broadcasting',()=>{
   const scope=new EventTarget();
   scope.CustomEvent=class extends Event {constructor(type,options){super(type);this.detail=options.detail;}};
-  const packet={schema:'wayglass.quad-checkpoint/v1',hash:'wce1:'+'d'.repeat(64),
+  const packet={schema:'wayglass.quad-checkpoint/v2',hash:'wce1:'+'d'.repeat(64),
     completed_cycles:2,source_packet:{observed_at:'2026-11-06T23:00:00.000Z'},
-    gestalt:{schema:'wayglass.quad-gestalt/v1',
+    gestalt:{schema:'wayglass.quad-gestalt/v2',
+      engines:['observation','provenance','geometry','cosmology','resonance','numerology','wonder','continuity'],
+      quads:{inquiry:['observation','provenance','geometry','cosmology'],becoming:['resonance','numerology','wonder','continuity']},
+      phase_records_per_cycle:64,
       evidence:fixture().evidence,gaps:['observer_measurements'],
       soundstage:[],private_secret:'DO NOT SEND'},
     continuity:{private_secret:'DO NOT SEND'}};
