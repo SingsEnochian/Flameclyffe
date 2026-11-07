@@ -41,7 +41,7 @@ export async function runLiveQuad({cycles=2,previous=null,continuity={},signal,f
   let payload;try{payload=await response.json();}catch{payload={};}
   if(!response.ok)throw new Error(payload.error||'Quad live observation unavailable');
   if(payload?.schema!=='wayglass.quad-host-response/v1'
-    ||payload.checkpoint?.schema!=='wayglass.quad-checkpoint/v1')
+    ||payload.checkpoint?.schema!=='wayglass.quad-checkpoint/v2')
     throw new Error('Malformed Quad host response');
   publishQuadGestalt(payload.checkpoint);
   return payload.checkpoint;
