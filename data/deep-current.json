@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-11-06T23:37:04.190Z",
+  "generated_at": "2026-11-07T04:25:21.375Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,51 +13,51 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-11-06T18:30",
+    "time": "2026-11-06T23:15",
     "sky": "Night",
     "current": {
-      "time": "2026-11-06T18:30",
+      "time": "2026-11-06T23:15",
       "interval": 900,
-      "temperature_2m": 75.2,
-      "relative_humidity_2m": 88,
+      "temperature_2m": 70.2,
+      "relative_humidity_2m": 92,
       "is_day": 0,
       "precipitation": 0,
       "rain": 0,
-      "weather_code": 1,
-      "cloud_cover": 37,
+      "weather_code": 0,
+      "cloud_cover": 12,
       "pressure_msl": 1012.8,
-      "wind_speed_10m": 2.3,
-      "wind_direction_10m": 21
+      "wind_speed_10m": 2.6,
+      "wind_direction_10m": 249
     }
   },
   "space_weather": {
     "kp": {
-      "value": 2.33,
-      "time_tag": "2026-11-06T18:00:00",
-      "a_running": 9
+      "value": 3,
+      "time_tag": "2026-11-07T00:00:00",
+      "a_running": 15
     },
     "solar_wind": {
-      "time_tag": "2026-11-06T23:31:00Z",
-      "bz": 2,
-      "bt": 12,
+      "time_tag": "2026-11-07T04:21:00Z",
+      "bz": 1,
+      "bt": 15,
       "density": null,
-      "speed": 398
+      "speed": 441
     }
   },
   "moon": {
-    "age_days": 26.6,
-    "illumination": 9.4,
+    "age_days": 26.8,
+    "illumination": 8.2,
     "name": "Waning Crescent"
   },
   "field": {
     "P": 0.45777777777777723,
-    "C": 0.5538095238095238,
-    "R": 0.73,
-    "E": 0.74489010989011,
-    "M": 0.094,
-    "A": 0.6223076923076923,
+    "C": 0.5628571428571428,
+    "R": 0.7508333333333334,
+    "E": 0.8081318681318682,
+    "M": 0.08199999999999999,
+    "A": 0.7184615384615385,
     "Q": null,
-    "dpdt": 0.73,
+    "dpdt": 0.7508333333333334,
     "dynamic_axes": [
       "P",
       "C",
