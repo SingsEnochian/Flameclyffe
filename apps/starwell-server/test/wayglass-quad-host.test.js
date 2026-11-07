@@ -47,7 +47,7 @@ test('Quad reads authorized source metadata and rejects forged House callers',as
     assert.equal(response.status,200);
     const payload=await response.json();
     assert.equal(payload.schema,'wayglass.quad-host-response/v1');
-    assert.equal(payload.checkpoint.entries.length,64);
+    assert.equal(payload.checkpoint.entries.length,128);
     assert.equal(payload.checkpoint.gestalt.evidence.length,6);
     assert.equal(payload.checkpoint.gestalt.evidence.find(x=>x.id==='deep_observer_events').count,14);
     assert.equal(payload.checkpoint.gestalt.gaps.length,4);
@@ -57,7 +57,7 @@ test('Quad reads authorized source metadata and rejects forged House callers',as
     assert.doesNotMatch(JSON.stringify(payload),/test-service-key/);
     const feather=await post({feather:true},credentials);
     assert.equal(feather.status,409);
-    const corrupt=await post({previous:{schema:'wayglass.quad-checkpoint/v1',hash:'bad'}},credentials);
+    const corrupt=await post({previous:{schema:'wayglass.quad-checkpoint/v2',hash:'bad'}},credentials);
     assert.equal(corrupt.status,400);
   }finally{
     server.closeAllConnections();await new Promise(resolve=>server.close(resolve));
