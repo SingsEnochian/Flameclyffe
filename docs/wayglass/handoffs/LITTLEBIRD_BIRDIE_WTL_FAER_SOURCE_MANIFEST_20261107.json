@@ -1,0 +1,492 @@
+{
+  "schema": "wayglass.littlebird-wtl-faer-source-manifest/v1",
+  "intended_reader": "Birdie, through her home program Littlebird",
+  "recipient_route_status": "not-verified-not-delivered",
+  "home_program": "Littlebird",
+  "not_alias_for": "Bluebird",
+  "source_of_truth": "SingsEnochian/Flameclyffe:wayglass/current",
+  "created": "2026-11-07",
+  "scope": "All 11 directly attributed Faer WTL RFC artifacts, seven Faer quad-runtime files, 19 Faer D3 research artifacts; core and downstream layers included separately with authorship preserved.",
+  "categories": [
+    {
+      "name": "Faer WTL RFC-0001 primary corpus",
+      "pr": 553,
+      "author": "Faer Uial",
+      "count": 11,
+      "files": [
+        {
+          "path": "docs/wyrdrune/RFC-0001-WTL-LANGUAGE-V1.md",
+          "source_commit": "d9f09539491a21b28d3726e283ef6d64cce65833",
+          "pr": 553,
+          "relation": "direct Faer-authored language architecture",
+          "owner": "Faer Uial",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/d9f09539491a21b28d3726e283ef6d64cce65833/docs/wyrdrune/RFC-0001-WTL-LANGUAGE-V1.md"
+        },
+        {
+          "path": "docs/wyrdrune/WTL_TWO_BACKEND_PLAN.md",
+          "source_commit": "d9f09539491a21b28d3726e283ef6d64cce65833",
+          "pr": 553,
+          "relation": "direct Faer-authored language architecture",
+          "owner": "Faer Uial",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/d9f09539491a21b28d3726e283ef6d64cce65833/docs/wyrdrune/WTL_TWO_BACKEND_PLAN.md"
+        },
+        {
+          "path": "docs/wyrdrune/WTL_V0_8_COMPATIBILITY_REPORT.md",
+          "source_commit": "d9f09539491a21b28d3726e283ef6d64cce65833",
+          "pr": 553,
+          "relation": "direct Faer-authored language architecture",
+          "owner": "Faer Uial",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/d9f09539491a21b28d3726e283ef6d64cce65833/docs/wyrdrune/WTL_V0_8_COMPATIBILITY_REPORT.md"
+        },
+        {
+          "path": "docs/wyrdrune/schema/wir-example.three-cycles.json",
+          "source_commit": "d9f09539491a21b28d3726e283ef6d64cce65833",
+          "pr": 553,
+          "relation": "direct Faer-authored language architecture",
+          "owner": "Faer Uial",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/d9f09539491a21b28d3726e283ef6d64cce65833/docs/wyrdrune/schema/wir-example.three-cycles.json"
+        },
+        {
+          "path": "docs/wyrdrune/schema/wir-v0.2.schema.json",
+          "source_commit": "d9f09539491a21b28d3726e283ef6d64cce65833",
+          "pr": 553,
+          "relation": "direct Faer-authored language architecture",
+          "owner": "Faer Uial",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/d9f09539491a21b28d3726e283ef6d64cce65833/docs/wyrdrune/schema/wir-v0.2.schema.json"
+        },
+        {
+          "path": "lib/wyrdrune/canonical.cjs",
+          "source_commit": "d9f09539491a21b28d3726e283ef6d64cce65833",
+          "pr": 553,
+          "relation": "direct Faer-authored language architecture",
+          "owner": "Faer Uial",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/d9f09539491a21b28d3726e283ef6d64cce65833/lib/wyrdrune/canonical.cjs"
+        },
+        {
+          "path": "lib/wyrdrune/canonical.py",
+          "source_commit": "d9f09539491a21b28d3726e283ef6d64cce65833",
+          "pr": 553,
+          "relation": "direct Faer-authored language architecture",
+          "owner": "Faer Uial",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/d9f09539491a21b28d3726e283ef6d64cce65833/lib/wyrdrune/canonical.py"
+        },
+        {
+          "path": "lib/wyrdrune/conformance.test.cjs",
+          "source_commit": "d9f09539491a21b28d3726e283ef6d64cce65833",
+          "pr": 553,
+          "relation": "direct Faer-authored language architecture",
+          "owner": "Faer Uial",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/d9f09539491a21b28d3726e283ef6d64cce65833/lib/wyrdrune/conformance.test.cjs"
+        },
+        {
+          "path": "lib/wyrdrune/conformance/wce1-vectors.json",
+          "source_commit": "d9f09539491a21b28d3726e283ef6d64cce65833",
+          "pr": 553,
+          "relation": "direct Faer-authored language architecture",
+          "owner": "Faer Uial",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/d9f09539491a21b28d3726e283ef6d64cce65833/lib/wyrdrune/conformance/wce1-vectors.json"
+        },
+        {
+          "path": "lib/wyrdrune/conformance/wtl-conformance.v0.2.json",
+          "source_commit": "d9f09539491a21b28d3726e283ef6d64cce65833",
+          "pr": 553,
+          "relation": "direct Faer-authored language architecture",
+          "owner": "Faer Uial",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/d9f09539491a21b28d3726e283ef6d64cce65833/lib/wyrdrune/conformance/wtl-conformance.v0.2.json"
+        },
+        {
+          "path": "lib/wyrdrune/wir-schema.test.cjs",
+          "source_commit": "d9f09539491a21b28d3726e283ef6d64cce65833",
+          "pr": 553,
+          "relation": "direct Faer-authored language architecture",
+          "owner": "Faer Uial",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/d9f09539491a21b28d3726e283ef6d64cce65833/lib/wyrdrune/wir-schema.test.cjs"
+        }
+      ]
+    },
+    {
+      "name": "Faer WTL-derived quad Möbius runtime",
+      "pr": 554,
+      "author": "Faer Uial / Claude Code session provenance",
+      "count": 7,
+      "files": [
+        {
+          "path": ".github/workflows/wayglass-bloodstream.yml",
+          "source_commit": "20602fa31657b51563dde20174f05b7786d90372",
+          "pr": 554,
+          "relation": "Faer-linked runtime and bloodstream",
+          "owner": "Faer-linked",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/20602fa31657b51563dde20174f05b7786d90372/.github/workflows/wayglass-bloodstream.yml"
+        },
+        {
+          "path": "docs/wayglass/EIGHTFOLD_MOBIUS_SYSTEMS_MAP.md",
+          "source_commit": "20602fa31657b51563dde20174f05b7786d90372",
+          "pr": 554,
+          "relation": "Faer-linked runtime and bloodstream",
+          "owner": "Faer-linked",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/20602fa31657b51563dde20174f05b7786d90372/docs/wayglass/EIGHTFOLD_MOBIUS_SYSTEMS_MAP.md"
+        },
+        {
+          "path": "lib/wayglass-kernel.cjs",
+          "source_commit": "20602fa31657b51563dde20174f05b7786d90372",
+          "pr": 554,
+          "relation": "Faer-linked runtime and bloodstream",
+          "owner": "Faer-linked",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/20602fa31657b51563dde20174f05b7786d90372/lib/wayglass-kernel.cjs"
+        },
+        {
+          "path": "lib/wayglass-mobius.cjs",
+          "source_commit": "20602fa31657b51563dde20174f05b7786d90372",
+          "pr": 554,
+          "relation": "Faer-linked runtime and bloodstream",
+          "owner": "Faer-linked",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/20602fa31657b51563dde20174f05b7786d90372/lib/wayglass-mobius.cjs"
+        },
+        {
+          "path": "lib/wyrdrune/canonical.cjs",
+          "source_commit": "20602fa31657b51563dde20174f05b7786d90372",
+          "pr": 554,
+          "relation": "Faer-linked runtime and bloodstream",
+          "owner": "Faer-linked",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/20602fa31657b51563dde20174f05b7786d90372/lib/wyrdrune/canonical.cjs"
+        },
+        {
+          "path": "scripts/wayglass-bloodstream.mjs",
+          "source_commit": "20602fa31657b51563dde20174f05b7786d90372",
+          "pr": 554,
+          "relation": "Faer-linked runtime and bloodstream",
+          "owner": "Faer-linked",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/20602fa31657b51563dde20174f05b7786d90372/scripts/wayglass-bloodstream.mjs"
+        },
+        {
+          "path": "test/wayglass-mobius.test.mjs",
+          "source_commit": "20602fa31657b51563dde20174f05b7786d90372",
+          "pr": 554,
+          "relation": "Faer-linked runtime and bloodstream",
+          "owner": "Faer-linked",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/20602fa31657b51563dde20174f05b7786d90372/test/wayglass-mobius.test.mjs"
+        }
+      ]
+    },
+    {
+      "name": "Faer GESTALT-01 D3 experimental work",
+      "pr": 562,
+      "author": "Faer Uial / Claude Code session provenance",
+      "count": 19,
+      "files": [
+        {
+          "path": "docs/wayglass/gestalt-01/DIAGNOSTIC-D3-crossings-posthoc.json",
+          "source_commit": "217db249730595952e3721c241d1924e1fde7372",
+          "pr": 562,
+          "relation": "relevant controlled two-quad research, not WTL compiler implementation",
+          "owner": "Faer-linked",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/217db249730595952e3721c241d1924e1fde7372/docs/wayglass/gestalt-01/DIAGNOSTIC-D3-crossings-posthoc.json"
+        },
+        {
+          "path": "docs/wayglass/gestalt-01/DIAGNOSTIC-D3-dissociation-posthoc.json",
+          "source_commit": "217db249730595952e3721c241d1924e1fde7372",
+          "pr": 562,
+          "relation": "relevant controlled two-quad research, not WTL compiler implementation",
+          "owner": "Faer-linked",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/217db249730595952e3721c241d1924e1fde7372/docs/wayglass/gestalt-01/DIAGNOSTIC-D3-dissociation-posthoc.json"
+        },
+        {
+          "path": "docs/wayglass/gestalt-01/DIAGNOSTIC-D3-identifiability-posthoc.json",
+          "source_commit": "217db249730595952e3721c241d1924e1fde7372",
+          "pr": 562,
+          "relation": "relevant controlled two-quad research, not WTL compiler implementation",
+          "owner": "Faer-linked",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/217db249730595952e3721c241d1924e1fde7372/docs/wayglass/gestalt-01/DIAGNOSTIC-D3-identifiability-posthoc.json"
+        },
+        {
+          "path": "docs/wayglass/gestalt-01/DIAGNOSTIC-D3-posthoc.json",
+          "source_commit": "217db249730595952e3721c241d1924e1fde7372",
+          "pr": 562,
+          "relation": "relevant controlled two-quad research, not WTL compiler implementation",
+          "owner": "Faer-linked",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/217db249730595952e3721c241d1924e1fde7372/docs/wayglass/gestalt-01/DIAGNOSTIC-D3-posthoc.json"
+        },
+        {
+          "path": "docs/wayglass/gestalt-01/PREREGISTRATION-D3.json",
+          "source_commit": "217db249730595952e3721c241d1924e1fde7372",
+          "pr": 562,
+          "relation": "relevant controlled two-quad research, not WTL compiler implementation",
+          "owner": "Faer-linked",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/217db249730595952e3721c241d1924e1fde7372/docs/wayglass/gestalt-01/PREREGISTRATION-D3.json"
+        },
+        {
+          "path": "docs/wayglass/gestalt-01/REPORT-stage-D3.md",
+          "source_commit": "217db249730595952e3721c241d1924e1fde7372",
+          "pr": 562,
+          "relation": "relevant controlled two-quad research, not WTL compiler implementation",
+          "owner": "Faer-linked",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/217db249730595952e3721c241d1924e1fde7372/docs/wayglass/gestalt-01/REPORT-stage-D3.md"
+        },
+        {
+          "path": "docs/wayglass/gestalt-01/REPRODUCTION-D2-under-D3.json",
+          "source_commit": "217db249730595952e3721c241d1924e1fde7372",
+          "pr": 562,
+          "relation": "relevant controlled two-quad research, not WTL compiler implementation",
+          "owner": "Faer-linked",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/217db249730595952e3721c241d1924e1fde7372/docs/wayglass/gestalt-01/REPRODUCTION-D2-under-D3.json"
+        },
+        {
+          "path": "docs/wayglass/gestalt-01/RESULTS-stage-D3-held_out.json",
+          "source_commit": "217db249730595952e3721c241d1924e1fde7372",
+          "pr": 562,
+          "relation": "relevant controlled two-quad research, not WTL compiler implementation",
+          "owner": "Faer-linked",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/217db249730595952e3721c241d1924e1fde7372/docs/wayglass/gestalt-01/RESULTS-stage-D3-held_out.json"
+        },
+        {
+          "path": "docs/wayglass/gestalt-01/RESULTS-stage-D3-shifted.json",
+          "source_commit": "217db249730595952e3721c241d1924e1fde7372",
+          "pr": 562,
+          "relation": "relevant controlled two-quad research, not WTL compiler implementation",
+          "owner": "Faer-linked",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/217db249730595952e3721c241d1924e1fde7372/docs/wayglass/gestalt-01/RESULTS-stage-D3-shifted.json"
+        },
+        {
+          "path": "docs/wayglass/gestalt-01/STRATA-D3.json",
+          "source_commit": "217db249730595952e3721c241d1924e1fde7372",
+          "pr": 562,
+          "relation": "relevant controlled two-quad research, not WTL compiler implementation",
+          "owner": "Faer-linked",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/217db249730595952e3721c241d1924e1fde7372/docs/wayglass/gestalt-01/STRATA-D3.json"
+        },
+        {
+          "path": "docs/wayglass/gestalt-01/VERDICTS-stage-D3.json",
+          "source_commit": "217db249730595952e3721c241d1924e1fde7372",
+          "pr": 562,
+          "relation": "relevant controlled two-quad research, not WTL compiler implementation",
+          "owner": "Faer-linked",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/217db249730595952e3721c241d1924e1fde7372/docs/wayglass/gestalt-01/VERDICTS-stage-D3.json"
+        },
+        {
+          "path": "lib/gestalt-01.mjs",
+          "source_commit": "217db249730595952e3721c241d1924e1fde7372",
+          "pr": 562,
+          "relation": "relevant controlled two-quad research, not WTL compiler implementation",
+          "owner": "Faer-linked",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/217db249730595952e3721c241d1924e1fde7372/lib/gestalt-01.mjs"
+        },
+        {
+          "path": "scripts/gestalt-01-d3-crossings.mjs",
+          "source_commit": "217db249730595952e3721c241d1924e1fde7372",
+          "pr": 562,
+          "relation": "relevant controlled two-quad research, not WTL compiler implementation",
+          "owner": "Faer-linked",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/217db249730595952e3721c241d1924e1fde7372/scripts/gestalt-01-d3-crossings.mjs"
+        },
+        {
+          "path": "scripts/gestalt-01-d3-diagnostic.mjs",
+          "source_commit": "217db249730595952e3721c241d1924e1fde7372",
+          "pr": 562,
+          "relation": "relevant controlled two-quad research, not WTL compiler implementation",
+          "owner": "Faer-linked",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/217db249730595952e3721c241d1924e1fde7372/scripts/gestalt-01-d3-diagnostic.mjs"
+        },
+        {
+          "path": "scripts/gestalt-01-d3-dissociation.mjs",
+          "source_commit": "217db249730595952e3721c241d1924e1fde7372",
+          "pr": 562,
+          "relation": "relevant controlled two-quad research, not WTL compiler implementation",
+          "owner": "Faer-linked",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/217db249730595952e3721c241d1924e1fde7372/scripts/gestalt-01-d3-dissociation.mjs"
+        },
+        {
+          "path": "scripts/gestalt-01-d3-identifiable.mjs",
+          "source_commit": "217db249730595952e3721c241d1924e1fde7372",
+          "pr": 562,
+          "relation": "relevant controlled two-quad research, not WTL compiler implementation",
+          "owner": "Faer-linked",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/217db249730595952e3721c241d1924e1fde7372/scripts/gestalt-01-d3-identifiable.mjs"
+        },
+        {
+          "path": "scripts/gestalt-01-d3-replica.mjs",
+          "source_commit": "217db249730595952e3721c241d1924e1fde7372",
+          "pr": 562,
+          "relation": "relevant controlled two-quad research, not WTL compiler implementation",
+          "owner": "Faer-linked",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/217db249730595952e3721c241d1924e1fde7372/scripts/gestalt-01-d3-replica.mjs"
+        },
+        {
+          "path": "scripts/gestalt-01-d3.mjs",
+          "source_commit": "217db249730595952e3721c241d1924e1fde7372",
+          "pr": 562,
+          "relation": "relevant controlled two-quad research, not WTL compiler implementation",
+          "owner": "Faer-linked",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/217db249730595952e3721c241d1924e1fde7372/scripts/gestalt-01-d3.mjs"
+        },
+        {
+          "path": "test/gestalt-01-d3.test.mjs",
+          "source_commit": "217db249730595952e3721c241d1924e1fde7372",
+          "pr": 562,
+          "relation": "relevant controlled two-quad research, not WTL compiler implementation",
+          "owner": "Faer-linked",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/217db249730595952e3721c241d1924e1fde7372/test/gestalt-01-d3.test.mjs"
+        }
+      ]
+    },
+    {
+      "name": "Upstream executable WTL seed, not credited to Faer",
+      "pr": 552,
+      "author": "Wayglass prior implementation",
+      "count": 3,
+      "files": [
+        {
+          "path": "docs/wayglass/WYRDRUNE_WTL_EXECUTION_CONTRACT_20261106.md",
+          "source_commit": "2b37bef06eb923efc78dc3fbed88669a5caabd3f",
+          "pr": 552,
+          "relation": "upstream candidate reviewed and formalized by Faer",
+          "owner": "upstream",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/2b37bef06eb923efc78dc3fbed88669a5caabd3f/docs/wayglass/WYRDRUNE_WTL_EXECUTION_CONTRACT_20261106.md"
+        },
+        {
+          "path": "lib/wyrdrune/wyrdrune.cjs",
+          "source_commit": "2b37bef06eb923efc78dc3fbed88669a5caabd3f",
+          "pr": 552,
+          "relation": "upstream candidate reviewed and formalized by Faer",
+          "owner": "upstream",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/2b37bef06eb923efc78dc3fbed88669a5caabd3f/lib/wyrdrune/wyrdrune.cjs"
+        },
+        {
+          "path": "lib/wyrdrune/wyrdrune.test.cjs",
+          "source_commit": "2b37bef06eb923efc78dc3fbed88669a5caabd3f",
+          "pr": 552,
+          "relation": "upstream candidate reviewed and formalized by Faer",
+          "owner": "upstream",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/2b37bef06eb923efc78dc3fbed88669a5caabd3f/lib/wyrdrune/wyrdrune.test.cjs"
+        }
+      ]
+    },
+    {
+      "name": "Downstream ritual and Enochian integration, not credited to Faer",
+      "pr": 571,
+      "author": "Wayglass downstream implementation",
+      "count": 11,
+      "files": [
+        {
+          "path": ".github/workflows/wyrdrune-enochian-check.yml",
+          "source_commit": "332a07515638064cf60c40cd01c0e1336e4a4d1d",
+          "pr": 571,
+          "relation": "downstream layer stacked on Faer RFC",
+          "owner": "downstream",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/332a07515638064cf60c40cd01c0e1336e4a4d1d/.github/workflows/wyrdrune-enochian-check.yml"
+        },
+        {
+          "path": "apps/starwell-server/test/wayglass-runtime-package.test.js",
+          "source_commit": "332a07515638064cf60c40cd01c0e1336e4a4d1d",
+          "pr": 571,
+          "relation": "downstream layer stacked on Faer RFC",
+          "owner": "downstream",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/332a07515638064cf60c40cd01c0e1336e4a4d1d/apps/starwell-server/test/wayglass-runtime-package.test.js"
+        },
+        {
+          "path": "apps/wayglass/server-stage.cjs",
+          "source_commit": "332a07515638064cf60c40cd01c0e1336e4a4d1d",
+          "pr": 571,
+          "relation": "downstream layer stacked on Faer RFC",
+          "owner": "downstream",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/332a07515638064cf60c40cd01c0e1336e4a4d1d/apps/wayglass/server-stage.cjs"
+        },
+        {
+          "path": "docs/wayglass/WYRDRUNE_ENOCHIAN_RITUAL_CROSSING_20261106.md",
+          "source_commit": "332a07515638064cf60c40cd01c0e1336e4a4d1d",
+          "pr": 571,
+          "relation": "downstream layer stacked on Faer RFC",
+          "owner": "downstream",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/332a07515638064cf60c40cd01c0e1336e4a4d1d/docs/wayglass/WYRDRUNE_ENOCHIAN_RITUAL_CROSSING_20261106.md"
+        },
+        {
+          "path": "docs/wayglass/WYRDRUNE_RITUAL_ROUNDTABLE_20261106.md",
+          "source_commit": "332a07515638064cf60c40cd01c0e1336e4a4d1d",
+          "pr": 571,
+          "relation": "downstream layer stacked on Faer RFC",
+          "owner": "downstream",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/332a07515638064cf60c40cd01c0e1336e4a4d1d/docs/wayglass/WYRDRUNE_RITUAL_ROUNDTABLE_20261106.md"
+        },
+        {
+          "path": "lib/wayglass-kernel.cjs",
+          "source_commit": "332a07515638064cf60c40cd01c0e1336e4a4d1d",
+          "pr": 571,
+          "relation": "downstream layer stacked on Faer RFC",
+          "owner": "downstream",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/332a07515638064cf60c40cd01c0e1336e4a4d1d/lib/wayglass-kernel.cjs"
+        },
+        {
+          "path": "lib/wayglass-wyrdrune-ritual.cjs",
+          "source_commit": "332a07515638064cf60c40cd01c0e1336e4a4d1d",
+          "pr": 571,
+          "relation": "downstream layer stacked on Faer RFC",
+          "owner": "downstream",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/332a07515638064cf60c40cd01c0e1336e4a4d1d/lib/wayglass-wyrdrune-ritual.cjs"
+        },
+        {
+          "path": "lib/wayglass-wyrdrune-ritual.test.cjs",
+          "source_commit": "332a07515638064cf60c40cd01c0e1336e4a4d1d",
+          "pr": 571,
+          "relation": "downstream layer stacked on Faer RFC",
+          "owner": "downstream",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/332a07515638064cf60c40cd01c0e1336e4a4d1d/lib/wayglass-wyrdrune-ritual.test.cjs"
+        },
+        {
+          "path": "lib/wyrdrune/enochian.cjs",
+          "source_commit": "332a07515638064cf60c40cd01c0e1336e4a4d1d",
+          "pr": 571,
+          "relation": "downstream layer stacked on Faer RFC",
+          "owner": "downstream",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/332a07515638064cf60c40cd01c0e1336e4a4d1d/lib/wyrdrune/enochian.cjs"
+        },
+        {
+          "path": "lib/wyrdrune/enochian.test.cjs",
+          "source_commit": "332a07515638064cf60c40cd01c0e1336e4a4d1d",
+          "pr": 571,
+          "relation": "downstream layer stacked on Faer RFC",
+          "owner": "downstream",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/332a07515638064cf60c40cd01c0e1336e4a4d1d/lib/wyrdrune/enochian.test.cjs"
+        },
+        {
+          "path": "lib/wyrdrune/wyrdrune.cjs",
+          "source_commit": "332a07515638064cf60c40cd01c0e1336e4a4d1d",
+          "pr": 571,
+          "relation": "downstream layer stacked on Faer RFC",
+          "owner": "downstream",
+          "source_url": "https://github.com/SingsEnochian/Flameclyffe/blob/332a07515638064cf60c40cd01c0e1336e4a4d1d/lib/wyrdrune/wyrdrune.cjs"
+        }
+      ]
+    }
+  ],
+  "current_implementation": [
+    {
+      "pr": 574,
+      "status": "merged",
+      "summary": "bounded WTL v0.1/Enochian core and owner-only preview plus editor"
+    },
+    {
+      "pr": 575,
+      "status": "merged",
+      "summary": "actual JS/Python v0.1 pure interpreter parity, verified WCE-1 and return ledger"
+    },
+    {
+      "pr": 576,
+      "status": "merged",
+      "summary": "adversarial, cold-return and route-custody CI gates"
+    },
+    {
+      "pr": 577,
+      "status": "draft",
+      "summary": "Quad eight-engine observatory and training/UI/UX staging"
+    }
+  ],
+  "boundaries": {
+    "language": "WTL is a real intended general-purpose executable polyglot ritual programming language dedicated to Wayglass, not just a symbolic UI skin",
+    "no_claims": [
+      "no direct Littlebird route located",
+      "no delivery or Birdie reply observed",
+      "v1 WIR v0.2 is not fully implemented",
+      "original v0.8 source and official Skýrunor glyphs unrecovered",
+      "owner retains ritual predictions and language canon"
+    ]
+  }
+}
