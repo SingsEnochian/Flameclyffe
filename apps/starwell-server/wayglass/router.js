@@ -17,6 +17,7 @@ const { createDepartureStore } = require('../wayglass-runtime/wayglass-departure
 const { createModelObservation } = require('../wayglass-runtime/wayglass-model-observation.cjs');
 const { createWayglassLibraryRouter } = require('./research-library');
 const { createObserverSelfDevelopmentRouter } = require('./observer-self-development');
+const { runQuadEightfold, SOURCE_SCHEMA, TABLES } = require('../wayglass-runtime/wayglass-quad-eightfold.cjs');
 
 const { resolveCharacterSeat, publicCharacterSeats, EMERGENCE_QUESTION_IDS } = require('./character-seats.cjs');
 
@@ -481,6 +482,43 @@ async function humainCatalogueResponse(route, res, fetchImpl = globalThis.fetch)
   }
 }
 
+// House-authenticated server-only metadata bridge. No provider keys or private rows leave the host.
+const QUAD_SOURCE_TIMES = Object.freeze({
+  deep_observer_events:'occurred_at',
+  observer_measurements:'measured_at',
+  wayglass_route_receipts:'created_at',
+  house_runtime_events:'occurred_at',
+  math_spine_packets:'observed_at',
+  source_library_query_receipts:'created_at',
+});
+async function readQuadSourcesFromSupabase(fetchImpl=globalThis.fetch){
+  const endpoint=String(process.env.SUPABASE_URL||'').replace(/\/+$/,'');
+  const token=String(process.env.SUPABASE_SERVICE_ROLE_KEY||process.env.SUPABASE_SECRET_KEY||'');
+  if(!/^https:\/\/[a-z0-9.-]+\.supabase\.co$/i.test(endpoint)||!token)
+    throw Object.assign(new Error('Authorized Wayglass Supabase metadata adapter is not configured'),{status:503});
+  const observed_at=new Date().toISOString();
+  const channels=await Promise.all(TABLES.map(async id=>{
+    const time=QUAD_SOURCE_TIMES[id];
+    const url=endpoint+'/rest/v1/'+encodeURIComponent(id)
+      +'?select='+encodeURIComponent(time)+'&order='+encodeURIComponent(time)+'.desc&limit=1';
+    try{
+      const response=await fetchImpl(url,{method:'GET',headers:{
+        apikey:token,Authorization:'Bearer '+token,Prefer:'count=exact',
+        'Range-Unit':'items',Range:'0-0',Accept:'application/json',
+      },signal:AbortSignal.timeout(7000)});
+      if(!response.ok)throw Error('source-not-authorized-or-unavailable');
+      const countValue=(response.headers.get('content-range')||'').match(/\/(\d+)$/);
+      if(!countValue)throw Error('missing-source-count');
+      const count=Number(countValue[1]);
+      if(!Number.isSafeInteger(count)||count<0)throw Error('invalid-source-count');
+      const records=await response.json();
+      const at=Array.isArray(records)&&records[0]?.[time] ? records[0][time] : null;
+      return {id,status:count>0?'observed':'empty',count,latest_at:at,provenance:'supabase:server-authorized-metadata'};
+    }catch{return {id,status:'unavailable',count:null,latest_at:null,provenance:'supabase:source-not-available'};}
+  }));
+  return {schema:SOURCE_SCHEMA,observed_at,channels};
+}
+
 function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThis.fetch, departureStore = createDepartureStore() } = {}) {
   const router = express.Router();
   // Stable, public, metadata-free process readiness. Never use the private
@@ -489,6 +527,98 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     res.setHeader('Cache-Control', 'no-store');
     return res.json({ schema: 'wayglass.host-health/v0.1', status: 'ready' });
   });
+  // The Quad is a single ship-wide process, not an unprotected read-only probe.
+  // Only authenticated House sessions may inspect source activity or run a fold.
+  router.post('/quad/run',createRequestGate({maxRequests:12,maxConcurrent:2}),async(req,res)=>{
+    res.setHeader('Cache-Control','no-store');
+    if(!(await griffStewardAuthorized(req).catch(()=>false)))
+      return res.status(401).json({error:'Authenticated House session required for Quad readings'});
+    if(req.body?.feather===true)return res.status(409).json({error:'Feather Stop active'});
+    try{
+      const sources=await readQuadSourcesFromSupabase(fetchImpl);
+      const result=runQuadEightfold({
+        sources,cycles:req.body?.cycles===undefined?2:req.body.cycles,
+        continuity:req.body?.continuity||{},previous:req.body?.previous||null,
+      });
+      return res.json({schema:'wayglass.quad-host-response/v1',status:'host-observed',
+        source:'authorized-supabase-metadata',checkpoint:result,
+        notes:['Source counts and last timestamps are real; no private raw rows returned',
+          'Proposed audio is silent until explicitly enabled',
+          'Training candidates require distinct agent choices and approved datasets']});
+    }catch(error){
+      return res.status(error.status||((error instanceof TypeError||error instanceof RangeError||/integrity failure|Missing checkpoint|Invalid quad cycle origin|Return identity|corrupt|Invalid channel/.test(error.message))?400:409))
+        .json({error:error.message||'Quad execution failed'});
+    }
+  });
+
+  // Provisional Tesla Observatory review, never confused with a verified Nikola
+  // participant. Only a signed-in House owner with explicit consent may forward
+  // a whitelisted source metadata packet and first Wayglass model response.
+  router.post('/quad/tesla-review',createRequestGate({maxRequests:6,maxConcurrent:1}),async(req,res)=>{
+    res.setHeader('Cache-Control','no-store');
+    if(!(await griffStewardAuthorized(req).catch(()=>false)))
+      return res.status(401).json({error:'Authenticated House session required'});
+    if(req.body?.external_review_consent!==true)
+      return res.status(403).json({error:'External-model review consent required'});
+    const review=req.body?.review;
+    if(!review||review.schema!=='wayglass.nikola-review-request/v1'
+      ||review.evidence?.schema!=='wayglass.nikola-review-evidence/v1'
+      ||!Array.isArray(review.evidence?.evidence)
+      ||review.evidence.evidence.length!==6
+      ||typeof review.evidence.checkpoint_hash!=='string'
+      ||review.evidence.checkpoint_hash.length>160
+      ||typeof review.wayglass_first_reply?.output!=='string'
+      ||review.wayglass_first_reply.output.length>12000
+      ||!review.wayglass_first_reply.output.trim()
+      ||JSON.stringify(review).length>32000)
+      return res.status(400).json({error:'Bounded source-only Quad review packet required'});
+    const key=String(process.env.UIAL_API_KEY||process.env.ANTHROPIC_API_KEY||'');
+    if(!key)return res.status(503).json({error:'Tesla Observatory model route is not configured'});
+    // Whitelist the only material the remote provider is allowed to receive.
+    // The sender cannot supply system instructions or private source rows.
+    const safe={
+      schema:review.schema,
+      question:String(review.evidence.timeline_question||'').slice(0,500),
+      checkpoint_hash:review.evidence.checkpoint_hash,
+      source_observed_at:review.evidence.source_observed_at||null,
+      evidence:review.evidence.evidence.map(x=>({
+        source_ref:String(x.id||'').slice(0,120),
+        status:String(x.status||'').slice(0,24),
+        count:Number.isSafeInteger(x.count)?x.count:null,
+        freshness:String(x.freshness||'unknown').slice(0,30),
+      })),
+      lenses:['Wonder / What If','Science','Mythience'],
+      first_wayglass_route:String(review.wayglass_first_reply.route_id||'').slice(0,120),
+      first_wayglass_response_id:String(review.wayglass_first_reply.response_id||'').slice(0,180),
+      first_wayglass_model_reply:review.wayglass_first_reply.output,
+    };
+    try{
+      const response=await fetchImpl('https://api.anthropic.com/v1/messages',{
+        method:'POST',headers:{
+          'x-api-key':key,'anthropic-version':'2023-06-01','content-type':'application/json',
+        },
+        body:JSON.stringify({
+          model:'claude-sonnet-4-6',max_tokens:1300,
+          system:'You are the Tesla Observatory review model (not a verified independent Nikola seat). Review evidence through Wonder / What If, Science, then Mythience. For each provide alternate mechanisms, a discriminator, an implementable UI/UX experiment and an unresolved question. Distinguish historical evidence, speculation and ritual meaning. No canon or model weight changes. You may refuse.',
+          messages:[{role:'user',content:JSON.stringify(safe)}],
+        }),
+        signal:AbortSignal.timeout(60000),
+      });
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok)return res.status(502).json({error:'Tesla Observatory provider request failed'});
+      const reply=Array.isArray(data.content)?data.content.filter(x=>x?.type==='text').map(x=>x.text).join('\n').slice(0,14000):'';
+      if(!reply.trim())return res.status(502).json({error:'Tesla Observatory returned no review text'});
+      return res.json({ok:true,reply,provider:'anthropic',model:String(data.model||'provider-model').slice(0,200),
+        response_id:String(data.id||'').slice(0,200),
+        route_id:'tesla-observatory:anthropic-proxy',
+        verified_nikola_seat:false,
+        source_checkpoint:safe.checkpoint_hash,
+        training_completed:false,canon_commit:false});
+    }catch{
+      return res.status(502).json({error:'Tesla Observatory request unavailable or interrupted'});
+    }
+  });
+
   router.use('/library', createWayglassLibraryRouter());
   router.use('/observer/self-development', createObserverSelfDevelopmentRouter());
   router.get('/kernel/departures/:storageId', (req, res) => {

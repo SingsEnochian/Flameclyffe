@@ -8,7 +8,7 @@ const number = (value, name) => {
 export function createAcousticAudioEngine({AudioContext = globalThis.AudioContext || globalThis.webkitAudioContext} = {}) {
   let context = null, graph = null, disposed = false, running = false, epoch = 0, pending = null;
   let status = typeof AudioContext === 'function' ? 'stopped' : 'unsupported', lastError = null;
-  let settings = {muted: true, mono: false, ambience: false, bearing: {pan: 0, gain: 1, distance: 1}};
+  let settings = {muted: true, mono: false, ambience: false, quadSoundstage: [], bearing: {pan: 0, gain: 1, distance: 1}};
   const voices = new Set(), presented = new Set();
   const supported = typeof AudioContext === 'function';
 
@@ -22,16 +22,46 @@ export function createAcousticAudioEngine({AudioContext = globalThis.AudioContex
   function teardown() {
     for (const voice of [...voices]) releaseVoice(voice);
     if (!graph) return;
-    for (const osc of [graph.navigationTone, graph.ambienceTone]) {
+    for (const osc of [graph.navigationTone, graph.ambienceTone, ...(graph.quadLayers || []).map(x => x.tone)]) {
       try { osc.stop(); } catch {}
     }
     try { graph.master.gain.cancelScheduledValues(context.currentTime); graph.master.gain.setValueAtTime(0, context.currentTime); } catch {}
+    for (const layer of graph.quadLayers || []) { disconnect(layer.tone); disconnect(layer.gain); disconnect(layer.panner); }
     for (const node of Object.values(graph)) disconnect(node);
     graph = null;
   }
   function smooth(param, value) {
     param.cancelScheduledValues(context.currentTime);
     param.setTargetAtTime(value, context.currentTime, 0.03);
+  }
+  function ensureQuadLayers() {
+    // The legacy audio graph must not allocate extra oscillators without live
+    // evidence and an explicit audible ambience choice.
+    if (!graph || settings.muted || !settings.ambience || graph.quadLayers.length
+      || !settings.quadSoundstage.some(x=>x.evidence_status==='observed')) return;
+    try {
+      for (let i=0;i<settings.quadSoundstage.length;i++) {
+        const layer=settings.quadSoundstage[i];
+        if (layer.evidence_status!=='observed')continue;
+        const item={tone:null,gain:null,panner:null,sourceIndex:i};
+        graph.quadLayers.push(item);
+        item.tone=context.createOscillator();
+        item.gain=context.createGain();
+        item.panner=typeof context.createStereoPanner==='function' ? context.createStereoPanner():null;
+        item.tone.type='sine';item.tone.frequency.value=layer.frequency_hz;
+        item.gain.gain.value=0;
+        item.tone.connect(item.gain);
+        if(item.panner)item.gain.connect(item.panner).connect(graph.master);
+        else item.gain.connect(graph.master);
+        item.tone.start();
+      }
+    }catch{
+      for(const item of graph.quadLayers){
+        try{item.tone?.stop();}catch{}
+        disconnect(item.tone);disconnect(item.gain);disconnect(item.panner);
+      }
+      graph.quadLayers=[];
+    }
   }
   function project() {
     if (!graph) return;
@@ -42,6 +72,15 @@ export function createAcousticAudioEngine({AudioContext = globalThis.AudioContex
     smooth(graph.status.gain, 0.025);
     if (graph.panner) smooth(graph.panner.pan, settings.mono ? 0 : b.pan);
     smooth(graph.navigationTone.frequency, b.distance < 0.25 ? 220 : 176);
+    ensureQuadLayers();
+    for (let i = 0; i < (graph.quadLayers || []).length; i++) {
+      const node = graph.quadLayers[i], layer = settings.quadSoundstage[node.sourceIndex];
+      const allowed = !settings.muted && settings.ambience && layer?.evidence_status === 'observed'
+        && layer.freshness !== 'clock-skew';
+      smooth(node.gain.gain, allowed ? layer.gain : 0);
+      if (layer) smooth(node.tone.frequency, layer.frequency_hz);
+      if (node.panner) smooth(node.panner.pan, settings.mono ? 0 : (layer?.pan || 0));
+    }
   }
   function createGraph() {
     // Register each allocation immediately so any later adapter error is recoverable.
@@ -50,6 +89,7 @@ export function createAcousticAudioEngine({AudioContext = globalThis.AudioContex
     graph.navigation = context.createGain(); graph.ambience = context.createGain(); graph.status = context.createGain();
     graph.panner = typeof context.createStereoPanner === 'function' ? context.createStereoPanner() : null;
     graph.navigationTone = context.createOscillator(); graph.ambienceTone = context.createOscillator();
+    graph.quadLayers = [];
     const {master, compressor, navigation, ambience, status: statusBus, panner, navigationTone, ambienceTone} = graph;
     // Conservative digital gain budget with a compression stage. Device SPL is not calibrated here.
     master.gain.value = 0; navigation.gain.value = 0; ambience.gain.value = 0; statusBus.gain.value = 0;
@@ -68,7 +108,7 @@ export function createAcousticAudioEngine({AudioContext = globalThis.AudioContex
     const active = isRunning();
     const effectiveStatus = running && !disposed && context?.state && context.state !== 'running' ? context.state : status;
     return {supported, running: active, disposed, status: effectiveStatus, muted: settings.muted, mono: settings.mono,
-      ambience: settings.ambience, pending: Boolean(pending), lastError,
+      ambience: settings.ambience, quadLayers: graph?.quadLayers?.length || 0, pending: Boolean(pending), lastError,
       buses: {navigation: active && !settings.muted, ambience: active && !settings.muted && settings.ambience,
         status: active && !settings.muted}, activeSignals: voices.size, presentedEvents: presented.size};
   }
@@ -105,6 +145,20 @@ export function createAcousticAudioEngine({AudioContext = globalThis.AudioContex
       const b = {...settings.bearing, ...value.bearing};
       next.bearing = {pan: clamp(number(b.pan, 'pan'), -1, 1), gain: clamp(number(b.gain, 'gain'), 0, 1),
         distance: Math.max(0, number(b.distance, 'distance'))};
+    }
+    if (Object.hasOwn(value, 'quadSoundstage')) {
+      if (!Array.isArray(value.quadSoundstage) || value.quadSoundstage.length > 8)
+        throw new TypeError('Quad soundstage requires up to eight evidence-bound layers');
+      next.quadSoundstage = value.quadSoundstage.map((x) => {
+        if (!x || typeof x.source_ref !== 'string' || typeof x.layer !== 'string'
+          || !['observed','empty','unavailable','error'].includes(x.evidence_status))
+          throw new TypeError('Quad layer requires source provenance');
+        return {source_ref:x.source_ref, layer:x.layer, evidence_status:x.evidence_status,
+          freshness:String(x.freshness || 'unknown'),
+          gain:clamp(number(x.gain,'quad gain'),0,0.075),
+          pan:clamp(number(x.pan,'quad pan'),-1,1),
+          frequency_hz:clamp(number(x.frequency_hz,'quad frequency'),60,1500)};
+      });
     }
     settings = next;
     if (settings.muted) stop(); else project();

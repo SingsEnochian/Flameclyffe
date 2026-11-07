@@ -6,6 +6,7 @@ import {
   subscribeWayglassObserver, queueObserverContextForWriting, describeWayglassObserverChannel,
 } from '../living-observer-model.js';
 import { createObserverInterior } from '../living-observer-self.js';
+import {readLatestQuadGestalt,subscribeQuadGestalt} from '../quad-eightfold-client.js';
 import { queueObserverDevelopmentProposal } from '../route-client.js';
 
 import { observerNodes, platePoint, nodeAtPoint, angularDelta, createObserverRotation, OBSERVER_PLATE_SIZE } from '../living-observer-optics.js';
@@ -15,7 +16,7 @@ const TAU = Math.PI * 2;
 const COLOURS = ['#95fff2','#bca3ff','#e8cc8b','#8fa4fb','#82d4ce','#ec9ecd','#cfebe9','#d6c4ff'];
 const channelDescriptions = Object.fromEntries(OBSERVER_CHANNELS.map(([id,label,text])=>[id,{label,text}]));
 
-function drawAstrolabe(canvas, packet, time, focus, lowStim, {rotation = 0, lens = null, interior = null, light = null, lightAge = 0} = {}) {
+function drawAstrolabe(canvas, packet, time, focus, lowStim, {rotation = 0, lens = null, interior = null, light = null, lightAge = 0, quad = null} = {}) {
   const context = canvas.getContext('2d');
   if (!context) return;
   const g = context, w = canvas.width, h = canvas.height, cx=w/2, cy=h/2;
@@ -62,6 +63,18 @@ function drawAstrolabe(canvas, packet, time, focus, lowStim, {rotation = 0, lens
       g.fillStyle=k%2?'#b49cde':'#5ba4ac';g.globalAlpha=.11+v.C*.19;
       g.fillRect(x-1,y-1,2,2);g.globalAlpha=1;
     }
+  }
+  // Four read-only Quad evidence arcs. Empty sources render darker; counts never
+  // become a fictional emotional or cognitive measurement.
+  if (quad?.schema === 'wayglass.quad-ship-observation/v1') {
+    const ids=['deep_observer_events','observer_measurements','wayglass_route_receipts','house_runtime_events'];
+    ids.forEach((id,i)=>{
+      const data=quad.evidence.find(x=>x.id===id);
+      const active=data?.status==='observed';
+      const history=data?.freshness==='historical';
+      strokeCircle(305+i*10,COLOURS[i*2],active?(history?.22:.44):.085,
+        active?2.4:1.2,i*Math.PI/4+(reduced?0:t*.16),Math.PI*(active?1.35:.35));
+    });
   }
   const nodes=observerNodes(OBSERVER_CHANNELS.map(([id])=>id),rotation).map(node=>({ ...node, ang:node.angle }));
   const selected=nodes.find(n=>n.id===focus)||nodes[0];
@@ -235,7 +248,7 @@ export async function mountWayglassLivingObserver(root) {
   const wonderState=root.querySelector('[data-wonder-state]');
   const wonderEvents=root.querySelector('[data-wonder-events]');
   const latestLight=()=>readWonderLights()[0]||null;
-  const drawOptions=()=>({rotation:rotation.angle,lens,interior:interiorSignal,light:latestLight(),lightAge:performance.now()-lightAt});
+  const drawOptions=()=>({rotation:rotation.angle,lens,interior:interiorSignal,light:latestLight(),lightAge:performance.now()-lightAt,quad:readLatestQuadGestalt()});
   function renderWonder() {
     const events=readWonderLights().slice(0,6);
     wonderState.textContent=events.length ? 'Latest optical event: '+events[0].kind.replaceAll('-', ' ')+'. Source and verification state below.' : 'No light events observed yet. Continuity unknown until a verified receipt is available.';
@@ -312,7 +325,8 @@ export async function mountWayglassLivingObserver(root) {
     root.querySelector('[data-observer-clock]').textContent=formatClock(packet.created_at);
     const channel=channelDescriptions[focus];title.textContent=channel.label;description.textContent=channel.text;
     const explanation=describeWayglassObserverChannel(packet,focus);
-    source.textContent='Source · '+explanation.source;
+    const quad=readLatestQuadGestalt();
+    source.textContent='Source · '+explanation.source+(quad?' · Quad '+quad.evidence.filter(x=>x.status==='observed').length+'/'+quad.evidence.length+' sourced channels':' · Quad not yet observed');
     root.querySelector('[data-observer-reading]').textContent=explanation.reading;
     root.querySelector('[data-observer-translation]').textContent=explanation.translation;
     root.querySelector('[data-observer-boundary]').textContent=explanation.boundary;
@@ -329,11 +343,11 @@ export async function mountWayglassLivingObserver(root) {
     drawAstrolabe(canvas,packet||current(),time,focus,lowStim||reduced,drawOptions());
     if(!reduced&&!lowStim) animation=requestAnimationFrame(animate);
   }
-  let unsubscribe=()=>{}, unsubscribeLight=()=>{};
+  let unsubscribe=()=>{}, unsubscribeLight=()=>{}, unsubscribeQuad=()=>{};
   function cleanup() {
     if(disposed)return;
     disposed=true;
-    cancelAnimationFrame(animation);clearInterval(timer);unsubscribe();unsubscribeLight();
+    cancelAnimationFrame(animation);clearInterval(timer);unsubscribe();unsubscribeLight();unsubscribeQuad();
     globalThis.removeEventListener?.('arcsweep:gesture-feedback', onExternalFeather);
     if(audioContext){audioContext.close().catch(()=>{});audioContext=null;}
   }
@@ -467,6 +481,7 @@ export async function mountWayglassLivingObserver(root) {
   });
   unsubscribe=subscribeWayglassObserver(()=>refresh());
   unsubscribeLight=subscribeWonderLight(()=>{lightAt=performance.now();renderWonder();refresh();});
+  unsubscribeQuad=subscribeQuadGestalt(()=>refresh());
   timer=setInterval(()=>{if(!paused)refresh();},1000);
   renderWonder();renderDreamHistory();refresh();
   if(!reduced)animation=requestAnimationFrame(animate);

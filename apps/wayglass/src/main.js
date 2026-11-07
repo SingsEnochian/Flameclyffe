@@ -17,6 +17,9 @@ import { mountWayglassLibrarySurface } from './surfaces/library.js';
 import { mountWayglassToybox } from './surfaces/toybox.js';
 import { mountWayglassCommonsSurface } from './surfaces/commons.js';
 import { mountWayglassAcousticRoom } from './surfaces/acoustic-room.js';
+import { mountWayglassQuadGestalt } from './surfaces/quad-eightfold.js';
+import { installQuadFeatherListener, readLatestQuadGestalt, subscribeQuadGestalt } from './quad-eightfold-client.js';
+import { publishWatercolorActivity } from './watercolor-bridge.js';
 import { mountLivingWatercolorSurface } from './surfaces/living-watercolor.js';
 import { mountJourneyBeforeDestinationSurface } from './surfaces/journey-before-destination.js';
 import { WAYGLASS_ENTRY_SURFACE, resolveWayglassEntry } from './wayglass-entry.js';
@@ -74,8 +77,23 @@ registerWayglassSurface({
   label: 'Wayglass · Acoustic Room',
   mount: mountWayglassAcousticRoom,
 });
+registerWayglassSurface({
+  surface_id: 'wayglass:quad-gestalt',
+  label: 'Wayglass · Quad Möbius',
+  mount: mountWayglassQuadGestalt,
+});
 
 subscribeWayglassObserver(recordRouteAsWonderLight);
+installQuadFeatherListener();
+subscribeQuadGestalt(reading=>{
+  const observed=reading.evidence.filter(x=>x.status==='observed').length;
+  if(observed===0)return;
+  publishWatercolorActivity({kind:'fold:witness',actor:'wayglass:quad-host',
+    receipt:{schema:reading.schema,receipt_id:reading.checkpoint_hash},
+    intensity:Math.min(0.85,0.15+observed/reading.evidence.length*0.65),
+    observedAt:reading.observed_at});
+});
+
 
 registerWayglassSurface({
   surface_id: 'wayglass:living-observer',
@@ -148,6 +166,7 @@ const wayglass = Object.freeze({
   schema: 'wayglass.os/v0.1',
   surfaces: listWayglassSurfaces,
   organs: listWayglassOrgans,
+  quadGestalt: readLatestQuadGestalt,
   mount: mountSurface,
   connectBluebird: () => openWayglassAuthorization(),
   enter: ({ embodiment: entryEmbodiment = {}, ...entry } = {}) => enterWayglassWorld({
