@@ -16,6 +16,7 @@ const clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
 const safeText=value=>String(value??'').replaceAll('&','&amp;')
   .replaceAll('<','&lt;').replaceAll('>','&gt;')
   .replaceAll('"','&quot;').replaceAll("'","&#39;");
+const PIGMENTS=Object.freeze([['Copper','#c26a46'],['Sun','#db9d3e'],['Moss','#4c7961'],['Tide','#347e9c'],['Amethyst','#8c669c']]);
 const modeButton=mode=>'<button type="button" class="wc-mode" data-wc-mode="'+mode.id+
   '" aria-pressed="false" title="'+safeText(mode.intent)+'">'+mode.label+'</button>';
 
@@ -44,8 +45,11 @@ export async function mountLivingWatercolorSurface(root) {
       '</header>',
       '<div class="wc-composition">',
         '<div class="wc-stage glass-panel">',
-          '<canvas id="wc-fluid" class="wc-fluid" aria-label="Interactive fluid watercolor painting; touch to add pigment" tabindex="0"></canvas>',
+          '<canvas id="wc-fluid" class="wc-fluid" aria-label="Watercolor canvas. Drag a finger, mouse or Pencil to paint; use arrow keys to move and Enter or Space to paint." aria-describedby="wc-paint-help" tabindex="0"></canvas>',
           '<div class="wc-stage-meta" aria-hidden="true">WAYGLASS / AQUARELLE / PREMAQC</div>',
+          '<span class="wc-brush-cursor" id="wc-brush-cursor" aria-hidden="true"></span>',
+          '<p class="wc-paint-help" id="wc-paint-help">Draw directly on the paper · drag to blend · arrow keys + Enter also work</p>',
+        '</div>',
           '<div class="wc-deck glass-panel" aria-label="Wayglass collaborative expression desk">',
             '<div class="wc-deck-header"><div><span class="eyebrow">Voice &amp; work surface</span>',
             '<h2 id="wc-title">Dream</h2></div><span class="wc-model-state" id="wc-route-state">Checking model routes</span></div>',
@@ -74,13 +78,18 @@ export async function mountLivingWatercolorSurface(root) {
               '<button type="button" class="glass-chip" id="wc-program-dismiss">Keep current rules</button>',
             '</div>',
           '</div>',
-        '</div>',
         '<aside class="wc-controls glass-panel" aria-label="Watercolor and evidence controls">',
           '<div><p class="eyebrow">Pigment &amp; presence</p><h2>Touch the current</h2>',
           '<p class="tiny">A finger or Pencil sends movement, pressure and colour into the fluid. Your gesture remains your suggestion.</p></div>',
-          '<label class="wc-color-label" for="wc-color">New pigment <input id="wc-color" type="color" value="#c88b6b"></label>',
+          '<div class="wc-palette" role="group" aria-label="Quick pigment colors">',
+            ...PIGMENTS.map(([label,hex])=>'<button type="button" class="wc-pigment" data-wc-pigment="'+hex+'" style="--pigment:'+hex+'" aria-label="'+label+' pigment" aria-pressed="false" title="'+label+'"></button>'),
+          '</div>',
+          '<label class="wc-color-label" for="wc-color">Custom pigment <input id="wc-color" type="color" value="#c26a46"></label>',
           '<label for="wc-pressure">Brush saturation <output id="wc-pressure-label">70%</output></label>',
           '<input id="wc-pressure" type="range" min="10" max="100" value="70">',
+          '<label for="wc-brush-size">Brush width <output id="wc-brush-size-label">52%</output></label>',
+          '<input id="wc-brush-size" type="range" min="10" max="100" value="52">',
+          '<div class="wc-tool-buttons"><button id="wc-paper" type="button" class="glass-chip" aria-pressed="false">Dark paper</button><button id="wc-clear-paint" type="button" class="glass-chip">Clear painting</button></div>',
           '<div class="wc-tool-buttons">',
             '<button id="wc-flow" class="glass-chip active" type="button" aria-pressed="true">Fluid on</button>',
             '<button id="wc-clear-note" class="glass-chip" type="button">New suggestion</button>',
