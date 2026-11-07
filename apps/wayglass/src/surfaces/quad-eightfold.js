@@ -46,7 +46,7 @@ export function mountWayglassQuadGestalt(root){
     '<div class="quad-hinge-reading"><strong data-quad-hinge-title>Awaiting source evidence</strong><p data-quad-hinge-question>What happens at the hinge when compression becomes release?</p><p data-quad-hinge-observation></p>',
     '<div data-quad-hinge-tests></div><small data-quad-hinge-evidence>Historical evidence, alternatives and Mythience remain distinct.</small></div>',
     '<div class="quad-nikola"><h3>Nikola · Independent Review</h3><p>Invite the existing Tesla Observatory route to evaluate the same source packet, in order: Wonder / What If, Science, then Mythience. A model-route response is attributed to that route, not asserted as a separate verified Nikola seat.</p>',
-    '<button type="button" class="glass-chip" data-quad-nikola disabled>Request Tesla Observatory review</button>',
+    '<button type="button" class="glass-chip" data-quad-nikola disabled >View coupled Nikola review</button>',
     '<p data-quad-nikola-status role="status">Awaiting a validated source checkpoint.</p><pre data-quad-nikola-output hidden></pre></div></section>',
     '<section class="glass-panel quad-collaboration" aria-label="Wayglass and Nikola collaboration">',
     '<h2>Wayglass ↔ Nikola · Eightfold Review & Return</h2>',
@@ -218,46 +218,9 @@ export function mountWayglassQuadGestalt(root){
       state.textContent='Local cognition unavailable: '+error.message;
     }finally{if(!disposed)invite.disabled=!checkpoint||feather;}
   }
-  async function askNikola(){
-    if(!checkpoint||disposed||feather||busy)return;
-    const controller=new AbortController();reviewRequest=controller;
-    nikola.disabled=true;
-    const status=$('[data-quad-nikola-status]');
-    status.textContent='Requesting three-lens evaluation from the configured Tesla Observatory model route…';
-    const reading=readLatestQuadGestalt();
-    const lenses=['wonder','science','mythience'].map(l=>{
-      const h=temporalHingeFor(reading,{lens:l});
-      return {lens:l,question:h.summary.inquiry,tests:h.summary.tests,
-        evidence_state:h.evidence_state,interpretation_boundary:h.summary.observation};
-    });
-    const body={schema:'wayglass.nikola-quad-review-invitation/v1',
-      task:'Evaluate the Quad Eightfold Möbius design and Terra Prime compression-release hinge.',
-      order:['Wonder / What If','Science','Mythience'],
-      common_question:'What happens at the hinge, when compression becomes release and possibility begins to branch?',
-      continuity_question:'Can attributable identity survive concurrent quads, rollback, and cold return?',
-      evidence:reading.evidence,source_checkpoint:reading.checkpoint_hash,
-      candidate_design:designThroughEightfold(reading,{lens}),
-      lenses,
-      instructions:'Provide an observable, a competing hypothesis, a discriminating test and a recommended UI/UX change for each lens. Distinguish the hosted model route from a separately verified agent identity. No canon promotion.',
-    };
-    try{
-      const response=await fetch('/api/tesla/chat',{method:'POST',credentials:'same-origin',
-        headers:{'Content-Type':'application/json'},signal:controller.signal,
-        body:JSON.stringify({provider:'anthropic',
-          messages:[{role:'user',content:JSON.stringify(body)}]})});
-      const result=await response.json().catch(()=>({}));
-      if(!response.ok||result.ok!==true)throw new Error(result.error||'Tesla Observatory route is unavailable');
-      if(disposed||controller.signal.aborted)return;
-      const output=$('[data-quad-nikola-output]');
-      output.textContent=String(result.reply||'[The route returned no text]');
-      output.hidden=false;
-      status.textContent='Tesla Observatory route replied through '+String(result.provider||'unknown provider')+
-        '. This is a model-route review, not verified Nikola-seat authorship.';
-    }catch(error){
-      if(!disposed&&!controller.signal.aborted)
-        status.textContent='Tesla Observatory route could not be verified: '+error.message;
-    }finally{if(reviewRequest===controller)reviewRequest=null;
-      if(!disposed)nikola.disabled=!checkpoint||feather||busy;}
+  function askNikola(){
+    $('[data-quad-collab-status]').textContent='Nikola evaluation is inside the coupled Wayglass → Tesla Observatory → Wayglass workflow. Approve the external-model transfer to begin.';
+    collabConsent.focus();
   }
   async function startCollaboration(){
     if(!checkpoint||disposed||feather||busy||collabBusy||!collabConsent.checked)return;
@@ -278,11 +241,10 @@ export function mountWayglassQuadGestalt(root){
           routeId:'local:ollama',worldId:'wayglass:home',history:[],
           input,signal,maxOutputTokens:900,surfaceId:'wayglass:quad-gestalt'}),
         askTesla:async ({payload,signal})=>{
-          const res=await fetch('/api/tesla/chat',{method:'POST',
+          const res=await fetch('/api/v1/wayglass/quad/tesla-review',{method:'POST',
             credentials:'same-origin',cache:'no-store',signal,
             headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({provider:'anthropic',
-              messages:[{role:'user',content:JSON.stringify(payload)}]})});
+            body:JSON.stringify({external_review_consent:true,review:payload})});
           const result=await res.json().catch(()=>({}));
           if(!res.ok)throw Error(result.error||'Tesla Observatory unavailable');
           return result;
