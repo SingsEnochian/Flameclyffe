@@ -42,3 +42,27 @@ test('oversized bodies, invalid endpoints and unreachable hosts never fall back 
   const invalid = createWayglassGatewayHandler({ env: { get: key => key.endsWith('URL') ? 'http://host.example' : 'fixture' }, authorise: () => true });
   assert.equal((await invalid(new Request('https://preview.example/api/v1/wayglass/routes'))).status, 503);
 });
+
+
+test('double-Möbius runtime endpoint is House-gated and preserves the host crossing verdict', async () => {
+  let count = 0;
+  const fetchImpl = async (url, options) => {
+    count++;
+    assert.equal(url, 'https://host.example/api/v1/wayglass/kernel/double-mobius');
+    assert.equal(options.headers.authorization, 'Bearer fixture-host-token');
+    return Response.json({ schema: 'wayglass.gateway-double-mobius/v0.1',
+      status: 'completed-in-memory', return_verification: { verdict: 'accepted' } });
+  };
+  const request = () => new Request('https://preview.example/api/v1/wayglass/kernel/double-mobius', {
+    method: 'POST', body: '{}',
+  });
+  const rejected = createWayglassGatewayHandler({ env, fetchImpl, authorise: () => false });
+  assert.equal((await rejected(request())).status, 401);
+  assert.equal(count, 0);
+  const accepted = createWayglassGatewayHandler({ env, fetchImpl, authorise: () => true });
+  const response = await accepted(request());
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).return_verification.verdict, 'accepted');
+  assert.equal(count, 1);
+  assert.equal((await accepted(new Request('https://preview.example/api/v1/wayglass/kernel/double-mobius', { method: 'DELETE' }))).status, 405);
+});
