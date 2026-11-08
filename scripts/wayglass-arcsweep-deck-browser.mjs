@@ -31,7 +31,7 @@ await new Promise((done,fail)=>{server.once('error',fail);server.listen(0,'127.0
 const origin='http://127.0.0.1:'+server.address().port;
 const receipt={schema:'wayglass.arcsweep-deck-browser/v1',source_sha:process.env.GITHUB_SHA||null,
  live_provider_calls:false,production_deployment:false,host:'staged-app-loopback-static-with-production-frame-policy',
- playwright:packageInfo.version,scenarios:[],page_errors:[],blocked_external_requests:[],status:'running'};
+ playwright:packageInfo.version,scenarios:[],page_errors:[],console_errors:[],blocked_external_requests:[],status:'running'};
 let browser,activePage;
 try{
  browser=await chromium.launch({headless:true,...(process.env.WAYGLASS_CHROMIUM_EXECUTABLE?{executablePath:process.env.WAYGLASS_CHROMIUM_EXECUTABLE}: {})});
@@ -40,7 +40,7 @@ try{
   await context.route('**/*',async route=>{
    if(new URL(route.request().url()).origin!==origin){receipt.blocked_external_requests.push(route.request().url());await route.abort('blockedbyclient');return;}await route.continue();
   });
-  const page=await context.newPage();activePage=page;page.on('pageerror',error=>receipt.page_errors.push(error.message));
+  const page=await context.newPage();activePage=page;page.on('pageerror',error=>receipt.page_errors.push(error.message));page.on('console',message=>{if(message.type()==='error')receipt.console_errors.push(message.text().slice(0,2000));});
   await page.goto(origin+'/wayglass/?room=deck');
   await page.locator('[data-surface="arcsweep-deck"]').waitFor();assert.equal(await page.locator('iframe').count(),0,'loading remains explicit');
   const parentSound=page.locator('[data-deck-composer]');
@@ -108,6 +108,7 @@ try{
  receipt.status='failed';receipt.failure=String(error.stack||error);
  if(activePage&&!activePage.isClosed()){
   try{const state=await activePage.evaluate(()=>({url:location.href,click_trace:globalThis.__deckClickTrace,status:[...document.querySelectorAll('[data-composition-status],[data-composition-error],[data-story-declaration-status],[data-deck-status]')].map(n=>({tag:n.outerHTML,text:n.textContent})),sound_state:globalThis.__wayglassOS?.soundCompositionState?.()||null,declarations:[...document.querySelectorAll('[data-story-voice-one],[data-story-voice-two],[data-story-affinity]')].map(n=>({field:n.outerHTML,value:n.value})),readyState:document.readyState}));
+   state.frames=await Promise.all(activePage.frames().map(async frame=>{try{return await frame.evaluate(()=>({url:location.href,title:document.title,brand:document.querySelector('.brand')?.textContent,body:document.body.innerText.slice(0,1200),host:globalThis.__wayglassHost||null}));}catch(error){return {url:frame.url(),error:String(error)};}}));
    await writeFile(resolve(output,'failure-state.json'),JSON.stringify(state,null,2)+'\n');
    await activePage.screenshot({path:resolve(output,'failure.png'),fullPage:true});
   }catch{receipt.diagnostic_capture_failed=true;}
