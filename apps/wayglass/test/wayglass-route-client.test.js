@@ -115,3 +115,21 @@ test('browser provider request serialises explicit StepFun transfer confirmation
   assert.equal(seen[1].payload.external_provider_consent, true);
   assert.equal(seen[1].payload.route_id, 'stepfun:step5');
 });
+
+
+test('Wyrdrune writing score sends declared participants and text only through the scoring route', async () => {
+  const { scoreWyrdruneStory } = await import('../src/route-client.js');
+  let sent;
+  const score=await scoreWyrdruneStory({
+    text:'Water and wind',affinity:0.6,turns:2,
+    participants:[{id:'participant:author'},{id:'route:local'}],
+    fetchImpl:async(url,options)=>{
+      sent={url,options};
+      return response(200,{schema:'wayglass.wyrdrune-story-soundscape/v0.1',status:'scored',model_invoked:false,audio_started:false});
+    },
+  });
+  assert.equal(sent.url,'/api/v1/wayglass/wyrdrune/story-soundscape');
+  assert.equal(JSON.parse(sent.options.body).affinity,0.6);
+  assert.equal(JSON.parse(sent.options.body).participants.length,2);
+  assert.equal(score.model_invoked,false);
+});
