@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import { createWayglassSpectralField } from '../src/spectral-field.js';
 
 function harness(){
- const scope=new EventTarget(), document=new EventTarget(), calls=[],updates=[];
+ const scope=new EventTarget(), document=new EventTarget(), calls=[],updates=[],vibrations=[];
  let nextTimer=0;const timers=new Map();
  Object.assign(scope,{
-   document,innerWidth:1000,
+   document,innerWidth:1000,navigator:{vibrate:n=>{vibrations.push(n);return true}}, 
    setTimeout(fn){const id=++nextTimer;timers.set(id,fn);return id},
    clearTimeout(id){timers.delete(id)},
  });
@@ -26,6 +26,7 @@ function harness(){
     infrasonic:{hz:3,physical_playback:false},
     audible:{voice_one_hz:220,voice_two_hz:300,foreground_gain:.012,atmosphere_gain:.005},
     ultrasonic:{hz:26500,physical_playback:false},
+    projection:{refraction:.5,granulation:.6,tactile_ms:17,actuation:'user-opt-in-only'}, 
    },
   }))};
  };
@@ -35,7 +36,7 @@ function harness(){
    watercolorSubscribe:()=>()=>{},
    featherState:()=>({feather_stopped:false}),
  });
- return {field,scope,document,calls,updates,timers, get audioRunning(){return audioRunning},get audioDisposed(){return audioDisposed}};
+ return {field,scope,document,calls,updates,timers,vibrations, get audioRunning(){return audioRunning},get audioDisposed(){return audioDisposed}};
 }
 
 test('global listener is silent and has no interaction capture until opt-in',async()=>{
@@ -100,5 +101,22 @@ test('metadata route does not silently invent Wyrdrune frames if the host fails'
  h.field.capture({kind:'world',source_ref:'wayglass:ui-events'});
  const good=await h.field.flush();
  assert.equal(good.error,null);
+ h.field.dispose();
+});
+
+test('Wyrdrune haptic echo is opt-in, bounded, and returns quiet on Feather',async()=>{
+ const h=harness();
+ h.field.observe();
+ await h.field.flush();
+ assert.deepEqual(h.vibrations,[]);
+ h.field.setHaptics(true);
+ h.field.capture({kind:'gesture',source_ref:'wayglass:ui-events'});
+ await h.field.flush();
+ assert.ok(h.vibrations.includes(17));
+ const feather=new Event('wayglass:feather');
+ Object.defineProperty(feather,'detail',{value:{stopped:true}});
+ h.scope.dispatchEvent(feather);
+ assert.equal(h.field.status().haptics,false);
+ assert.equal(h.vibrations.at(-1),0);
  h.field.dispose();
 });
