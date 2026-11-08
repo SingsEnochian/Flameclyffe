@@ -67,6 +67,18 @@ export async function scoreWyrdruneStory({
   return jsonOrThrow(response);
 }
 
+/**
+ * A bounded observation-only stream: no message text, private keyboard key,
+ * model reply or identity assertion is sent, only dimensionless event signals.
+ * Actual spectral composition executes in the server-owned Wyrdrune programme.
+ */
+export async function scoreWyrdruneSpectrum(events, fetchImpl=fetch, signal=undefined) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/wyrdrune/full-spectrum',{
+    method:'POST',headers:JSON_HEADERS,cache:'no-store',signal,
+    body:JSON.stringify({events}),
+  }));
+}
+
 export async function listWayglassCharacters(fetchImpl = fetch) {
   return jsonOrThrow(await fetchImpl('/api/v1/wayglass/characters', { cache: 'no-store' }));
 }
