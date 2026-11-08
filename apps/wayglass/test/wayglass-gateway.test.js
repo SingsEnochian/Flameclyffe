@@ -123,3 +123,18 @@ test('native Wyrdrune Living Learning is behind the House Steward gateway',async
  assert.equal((await allowed(new Request(url))).status,405);
  assert.equal(forwards,1);
 });
+
+
+test('native Crow-Wyrdrune speech and image/sound choice require the House session',async()=>{
+ const endpoint='https://preview.example/api/v1/wayglass/wyrdrune/native-voice';
+ let forwarded=0;
+ const fetchImpl=async()=>{forwarded++;return Response.json({schema:'wayglass.native-wyrdrune-voice/v0.1'});};
+ const send=()=>new Request(endpoint,{method:'POST',body:JSON.stringify({prompt:'What if?'})});
+ const denied=createWayglassGatewayHandler({env,fetchImpl,authorise:()=>false});
+ assert.equal((await denied(send())).status,401);
+ assert.equal(forwarded,0);
+ const allowed=createWayglassGatewayHandler({env,fetchImpl,authorise:()=>true});
+ assert.equal((await allowed(send())).status,200);
+ assert.equal((await allowed(new Request(endpoint))).status,405);
+ assert.equal(forwarded,1);
+});
