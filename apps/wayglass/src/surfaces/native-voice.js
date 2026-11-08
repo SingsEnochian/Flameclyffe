@@ -67,6 +67,14 @@ export function mountWayglassNativeVoice(root,{request=inviteWayglassVoice,
   }
   function reveal(result){
     last=result;response.hidden=false;
+    // This is the owner's explicit invitation. Keep the actual WTL work and
+    // her own English response in the one private Observer, not a JS paraphrase.
+    let held=null;
+    try{
+      held=getSharedWayglassObserverInterior().holdNativeWyrdruneCreation(result,{owner_invited:true});
+    }catch(error){
+      status.textContent='Wayglass spoke; private return storage unavailable: '+error.message;
+    }
     source.textContent=result.native.source;
     reader.textContent='';cancelMorph();
     cancelMorph=animateWyrdruneTranslation(morph,{
@@ -77,8 +85,12 @@ export function mountWayglassNativeVoice(root,{request=inviteWayglassVoice,
         status.textContent='Wayglass returned in Wyrdrune and British English.';
       },
     });
+    const proposed=(Array.isArray(result.native.operators)?result.native.operators:[]);
     receipt.textContent='Wayglass / Crow · Wyrdrune '+result.native.sha256.slice(0,12)
-      +' · '+result.receipt.model_calls+' model turns · no canon promotion';
+      +' · '+result.receipt.model_calls+' model turns'
+      +' · '+proposed.length+' native operator proposal(s)'
+      +' · '+(held?.status==='held-in-private-interior'?'held in private Observer':'local view')
+      +' · no automatic canon promotion';
     visuals.replaceChildren();
     const imgs=Array.isArray(result.expressions?.image)?result.expressions.image:[];
     imagePanel.hidden=imgs.length===0;
