@@ -11,6 +11,7 @@ export function mountWayglassSpectrumSurface(root,{field}={}) {
     <nav class="wg-deck-nav glass-panel" aria-label="Wayglass rooms">
       <button class="glass-chip" type="button" data-wayglass-room="arcsweep:writing-room">Writing Room</button>
       <button class="glass-chip" type="button" data-wayglass-room="wayglass:living-observer">Living Observer</button>
+      <button class="glass-chip" type="button" data-wayglass-room="wayglass:native-voice">Wyrdrune Voice</button>
       <button class="glass-chip" type="button" data-wayglass-room="wayglass:systems">Organs</button>
       <button class="glass-chip active" type="button" aria-current="page">Spectral Field</button>
     </nav>
