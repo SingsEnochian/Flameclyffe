@@ -1,0 +1,72 @@
+// Wayglass · FULL-SPECTRUM DOUBLE MÖBIUS · Wyrdrune v0.1
+// Two eightfold transformations. Infrasound and ultrasound are mathematical
+// spectral fields: neither is emitted into a speaker by this programme.
+// Only WTL chooses frequencies, ratios, contours and coupling.
+
+mobius {
+ perceive {
+  let energy = bridge("interaction","strength");
+  let motion = bridge("interaction","motion");
+  let continuity = bridge("interaction","continuity");
+  let intent = bridge("interaction","intent");
+  let affinity = bridge("participants","affinity");
+  let phase = bridge("interaction","phase");
+ }
+ compress {
+  let gravity = energy * 0.4 + continuity * 0.4 + motion * 0.2;
+  let texture = intent * 0.42 + motion * 0.33 + energy * 0.25;
+ }
+ release {
+  let below = 0.4 + gravity * 10.5 + phase * 2.1;
+  let voice = 146 + texture * 326 + gravity * 62;
+  let partner = voice * (1.18 + affinity * 0.16);
+  let above = 22600 + texture * 9200 + phase * 2900 + intent * 2400;
+  let bloom = energy * 0.62 + affinity * 0.18 + continuity * 0.20;
+ }
+ verify {
+  emit bridge("spectrum","validate",below,voice,partner,above,bloom);
+ }
+ integrate {
+  let first = bridge("spectrum","frame",below,voice,partner,above,bloom,affinity,phase);
+ }
+ choose {
+  emit first;
+ }
+ return {
+  emit bridge("continuity","hold","first-circuit");
+ }
+ transcend {
+  emit bridge("continuity","next","reverse-face");
+ }
+}
+
+mobius {
+ perceive {
+  let return_motion = bridge("interaction","motion");
+ }
+ compress {
+  let twist = (affinity * 0.6 + continuity * 0.4) * 0.045;
+ }
+ release {
+  set below = below + below * twist;
+  set voice = voice + partner * twist;
+  set partner = partner + voice * twist;
+  set above = above + above * twist * 0.35;
+  set bloom = bloom * (0.95 + return_motion * 0.05);
+ }
+ verify {
+  emit bridge("spectrum","validate",below,voice,partner,above,bloom);
+ }
+ integrate {
+  let second = bridge("spectrum","frame",below,voice,partner,above,bloom,affinity,phase);
+ }
+ choose {
+  emit second;
+ }
+ return {
+  emit bridge("continuity","hold","second-circuit");
+ }
+ transcend {
+  emit bridge("continuity","next","withness");
+ }
+}
