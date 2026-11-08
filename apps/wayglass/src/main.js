@@ -143,6 +143,8 @@ switcher.addEventListener('click',()=>{shell.hidden=!shell.hidden;switcher.setAt
 function mountSurface(surfaceId){
   const request=mountQueue.then(async()=>{
     const result=await mountWayglassSurface(surfaceId,root);
+    fullSpectrum.capture({kind:'world',strength:.55,motion:.32,continuity:.82,intent:.65,
+      source_ref:'wayglass:room-crossing'});
     spelling.apply(root);
     document.documentElement.dataset.wayglassSurface=surfaceId;
     for(const button of shell.querySelectorAll('[data-surface-id]')){
@@ -163,10 +165,18 @@ const wayglass = Object.freeze({
   enter: ({ embodiment: entryEmbodiment = {}, ...entry } = {}) => enterWayglassWorld({
     ...entry,
     embodiment: { ...browserEmbodiment, ...entryEmbodiment },
+  }).then(result=>{
+    if(result?.entered)fullSpectrum.capture({kind:'world',strength:.78,motion:.6,continuity:.9,intent:.85,
+      source_ref:'wayglass:waygate-entry'});
+    return result;
   }),
   leave: ({ embodiment: departureEmbodiment = {}, ...departure } = {}) => leaveWayglassWorld({
     ...departure,
     embodiment: { ...browserEmbodiment, ...departureEmbodiment },
+  }).then(result=>{
+    if(result?.status==='stopped')fullSpectrum.capture({kind:'return',strength:.6,motion:.4,continuity:1,intent:.8,
+      source_ref:'wayglass:return-engine'});
+    return result;
   }),
   embodiment: Object.freeze({ ...embodiment, ar }),
   readMessages: readVoyageMessages,
