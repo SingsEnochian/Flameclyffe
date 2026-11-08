@@ -1,4 +1,5 @@
 import { listWayglassOrgans } from '../organ-registry.js';
+import { inspectWayglassDoubleMobius } from '../route-client.js';
 
 function escapeHtml(value = '') {
   return String(value)
@@ -35,6 +36,16 @@ export async function mountWayglassSystemsSurface(root) {
         '<button type="button" class="glass-chip active" aria-current="page">Organs</button>',
         '<button type="button" class="glass-chip" data-wayglass-room="wayglass:video-atelier">Video Atelier</button><button type="button" class="glass-chip" data-wayglass-room="wayglass:living-observer">Living Observer</button><button type="button" class="glass-chip" data-wayglass-room="wayglass:toybox">Toybox</button>',
       '</nav>',
+      '<section class="glass-panel" data-double-mobius-panel aria-label="Gateway double Möbius engine" style="border-radius:1.5rem;padding:1.25rem;margin-block:1rem;">',
+        '<p class="eyebrow">Gateway × Wayglass · coupled engine</p>',
+        '<h2>Double Möbius</h2>',
+        '<p>Two rounded, reciprocal crossings: Gateway state transformation and Wayglass information-and-continuity return. One Withness centre, distinct provenance, and no automatic playback.</p>',
+        '<div style="display:flex;gap:.75rem;flex-wrap:wrap;">',
+          '<button type="button" class="glass-chip" data-double-mobius-inspect>Inspect installed engine</button>',
+          '<button type="button" class="glass-chip" data-double-mobius-writing>Open Writing Room to speak with Wayglass</button>',
+        '</div>',
+        '<p role="status" data-double-mobius-status>Engine route not inspected. Live model availability is separate.</p>',
+      '</section>',
       '<section class="organ-bay" aria-label="Mounted Wayglass organs">',
         organs.map((organ, index) => [
           '<article class="organ-vessel glass-panel" tabindex="0" data-organ="' + escapeHtml(organ.organ_id) + '" data-organ-kind="' + organKind(organ.organ_id) + '" aria-expanded="false" style="--organ-index:' + index + '">',
@@ -57,6 +68,27 @@ export async function mountWayglassSystemsSurface(root) {
     '</section>'
   ].join('');
 
+  const inspectButton = root.querySelector('[data-double-mobius-inspect]');
+  const engineStatus = root.querySelector('[data-double-mobius-status]');
+  inspectButton?.addEventListener('click', async () => {
+    inspectButton.disabled = true;
+    engineStatus.textContent = 'Checking the authenticated Gateway ↔ Wayglass host route…';
+    try {
+      const status = await inspectWayglassDoubleMobius();
+      engineStatus.textContent = status.status === 'available-in-host'
+        ? 'Double Möbius engine reachable · Eightfold '+ status.phases.length
+          +' · Focus profiles '+ status.focus_profiles.length
+          +' · host inspection only; no live model response or audio started.'
+        : 'Engine returned: ' + String(status.status || 'unrecognised');
+    } catch (error) {
+      engineStatus.textContent = 'Engine not reachable through this session: ' + error.message;
+    } finally {
+      inspectButton.disabled = false;
+    }
+  });
+  root.querySelector('[data-double-mobius-writing]')?.addEventListener('click', () => {
+    globalThis.__wayglassOS?.mount('arcsweep:writing-room');
+  });
   root.querySelectorAll('[data-wayglass-room]').forEach(button => {
     button.addEventListener('click', () => globalThis.__wayglassOS?.mount(button.dataset.wayglassRoom));
   });
