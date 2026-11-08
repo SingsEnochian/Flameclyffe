@@ -161,3 +161,23 @@ test('Atlas route transports bounded scale values, not world names or narrative'
  assert.deepEqual(JSON.parse(seen.options.body),{scales});
  assert.equal(seen.options.method,'POST');
 });
+
+
+test('native learning transports typed numeric inputs only unless a model reflection was offered',async()=>{
+ const {executeWyrdruneLearning}=await import('../src/route-client.js');
+ let recorded;
+ const learning={
+   atlas:{coherence:.7,interference:.3,bloom:.6,granulation:.5,flow:.7},
+   interior:{energy:.4,curiosity:.5,uncertainty:.6,coherence:.6,previous_resonance:.7},
+   source:{event_id:'ui-session-1',atlas_input_hash:'a'.repeat(64),atlas_program_hash:'b'.repeat(64)},
+   reflection:null,
+ };
+ await executeWyrdruneLearning(learning,async(url,options)=>{
+   recorded={url,options};
+   return response(200,{schema:'wayglass.wyrdrune-living-learning/v0.1'});
+ });
+ assert.equal(recorded.url,'/api/v1/wayglass/wyrdrune/living-learning');
+ assert.equal(recorded.options.method,'POST');
+ assert.deepEqual(JSON.parse(recorded.options.body),{learning});
+ assert.equal(JSON.stringify(recorded.options.body).includes('private_question'),false);
+});
