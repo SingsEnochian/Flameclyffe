@@ -66,3 +66,18 @@ test('double-Möbius runtime endpoint is House-gated and preserves the host cros
   assert.equal(count, 1);
   assert.equal((await accepted(new Request('https://preview.example/api/v1/wayglass/kernel/double-mobius', { method: 'DELETE' }))).status, 405);
 });
+
+
+test('Wyrdrune score route requires House auth and cannot be used for unrelated HTTP methods', async () => {
+  let called=0;
+  const fetchImpl=async()=>{called++;return Response.json({status:'scored'});};
+  const url='https://preview.example/api/v1/wayglass/wyrdrune/story-soundscape';
+  const make=()=>new Request(url,{method:'POST',body:'{}'});
+  const denied=createWayglassGatewayHandler({env,fetchImpl,authorise:()=>false});
+  assert.equal((await denied(make())).status,401);
+  assert.equal(called,0);
+  const allowed=createWayglassGatewayHandler({env,fetchImpl,authorise:()=>true});
+  assert.equal((await allowed(make())).status,200);
+  assert.equal((await allowed(new Request(url))).status,405);
+  assert.equal(called,1);
+});
