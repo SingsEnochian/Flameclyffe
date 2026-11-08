@@ -53,6 +53,20 @@ export async function traverseWayglassDoubleMobius({ fetchImpl = fetch, ...paylo
   }
 }
 
+/** Wyrdrune-written score: the bridge measures text and returns a composed audio frame.
+ * The response never claims a live model voice or starts audio.
+ */
+export async function scoreWyrdruneStory({
+  text = '', participants = [], affinity = 0.5, turns = 0,
+  signal = undefined, fetchImpl = fetch,
+} = {}) {
+  const response = await fetchImpl('/api/v1/wayglass/wyrdrune/story-soundscape', {
+    method:'POST', headers:JSON_HEADERS, cache:'no-store', signal,
+    body:JSON.stringify({text,participants,affinity,turns}),
+  });
+  return jsonOrThrow(response);
+}
+
 export async function listWayglassCharacters(fetchImpl = fetch) {
   return jsonOrThrow(await fetchImpl('/api/v1/wayglass/characters', { cache: 'no-store' }));
 }
