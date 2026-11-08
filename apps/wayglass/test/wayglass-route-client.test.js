@@ -133,3 +133,17 @@ test('Wyrdrune writing score sends declared participants and text only through t
   assert.equal(JSON.parse(sent.options.body).participants.length,2);
   assert.equal(score.model_invoked,false);
 });
+
+test('full-spectrum browser transport sends only bounded event scalars', async()=>{
+  const { scoreWyrdruneSpectrum } = await import('../src/route-client.js');
+  let sent;
+  const input={event_id:'ui-1',kind:'gesture',strength:.6,motion:.2,continuity:.8,intent:.7,
+    affinity:.5,phase:.1,source_ref:'wayglass:ui-events'};
+  const response=await scoreWyrdruneSpectrum([input],async(url,options)=>{
+    sent={url,options};
+    return {ok:true,async json(){return {schema:'wayglass.full-spectrum/v0.1',count:1}}};
+  });
+  assert.equal(sent.url,'/api/v1/wayglass/wyrdrune/full-spectrum');
+  assert.deepEqual(JSON.parse(sent.options.body).events,[input]);
+  assert.equal(response.count,1);
+});
