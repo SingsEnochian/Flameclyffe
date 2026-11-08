@@ -12,6 +12,8 @@ import { createWayglassSpellingController } from './spelling-assistance.js';
 import { mountWayglassSurface, registerWayglassSurface, listWayglassSurfaces } from './surface-registry.js';
 import { mountArcSweepWritingSurface } from './surfaces/arcsweep-writing.js';
 import { mountWayglassSystemsSurface } from './surfaces/systems.js';
+import { mountWayglassSpectrumSurface } from './surfaces/spectral-field.js';
+import { createWayglassSpectralField } from './spectral-field.js';
 import { mountWayglassVideoAtelier } from './surfaces/video-atelier.js';
 import { mountWayglassLivingObserver } from './surfaces/living-observer.js';
 import { mountWayglassLibrarySurface } from './surfaces/library.js';
@@ -41,6 +43,7 @@ document.documentElement.dataset.wayglassKeyboard = embodiment.keyboard ? 'ready
 document.documentElement.dataset.wayglassAr = ar.supported ? 'ready' : ar.reason;
 
 FIRST_WAYGLASS_ORGANS.forEach(registerWayglassOrgan);
+const fullSpectrum = createWayglassSpectralField();
 
 registerWayglassSurface({surface_id:WAYGLASS_ENTRY_SURFACE,label:'Living Watercolor',mount:mountLivingWatercolorSurface});
 registerWayglassSurface({surface_id:'wayglass:journey-before-destination',label:'Journey Before Destination',mount:mountJourneyBeforeDestinationSurface});
@@ -51,6 +54,12 @@ registerWayglassSurface({
   mount: mountArcSweepWritingSurface,
 });
 
+
+registerWayglassSurface({
+  surface_id: 'wayglass:spectral-field',
+  label: 'Wayglass · Full Spectrum',
+  mount: root => mountWayglassSpectrumSurface(root,{field:fullSpectrum}),
+});
 
 registerWayglassSurface({
   surface_id: 'wayglass:systems',
@@ -164,6 +173,7 @@ const wayglass = Object.freeze({
   recoverDeparture: recoverWayglassDeparture,
   reply: replyToVoyage,
   doubleMobius: Object.freeze({ inspect: inspectWayglassDoubleMobius, traverse: traverseWayglassDoubleMobius }),
+  fullSpectrum,
 });
 
 globalThis.__wayglassOS = wayglass;
