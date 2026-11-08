@@ -1,0 +1,35 @@
+.wg-spectrum { display: grid; gap: 1rem; max-width: 78rem; margin: auto; padding: 1rem; }
+.wg-spectrum > .glass-panel { border-radius: 1.5rem; padding: clamp(1rem,2.5vw,2rem); }
+.wg-spectrum-heading h1 { margin-block: .25rem .75rem; }
+.wg-spectrum-controls { display: flex; gap: .65rem; flex-wrap: wrap; align-items: center; }
+.wg-spectrum-controls .glass-chip { border-radius: 999px; min-height: 2.75rem; }
+.wg-spectrum-affinity { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; padding-block: 1rem; }
+.wg-spectrum-affinity input { flex: 1 1 12rem; max-width: 22rem; }
+.wg-spectrum-ring { overflow: hidden; }
+.wg-spectrum-ribbons { position: relative; height: clamp(120px,25vw,210px); max-width: 34rem; margin: .25rem auto 1rem; isolation: isolate; }
+.wg-spectrum-ribbon { position: absolute; width: 58%; height: 68%; top: 16%; border: clamp(10px,2vw,24px) solid; border-radius: 52% 48% 52% 48% / 50%; opacity: .6; filter: drop-shadow(0 0 14px currentColor); pointer-events: none; }
+.wg-spectrum-ribbon-a { left: 2%; transform: rotate(-25deg); color: #65c5c7; border-color: #65c5c7 #76b9dc #87d2c6 #77c4d3; }
+.wg-spectrum-ribbon-b { right: 2%; transform: rotate(25deg); color: #b3a1dd; border-color: #ad99db #a6b8ea #8acbc9 #bca2d7; }
+.wg-spectrum-center { display: grid; place-items: center; position:absolute; width: 6rem; height:6rem; left:50%; top:50%; transform: translate(-50%,-50%); background: radial-gradient(circle at 40% 36%,#cce8ed,#819bb2 75%,#6d7aa3); border-radius: 50%; color:#182537; font-size: .71rem; letter-spacing: .12em; font-weight: 700; box-shadow: 0 0 24px #7cb6c799; }
+.wg-spectrum-bands { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,13rem),1fr)); gap:.8rem; }
+.wg-spectrum-band { border: 1px solid #8a9bac77; border-radius:1.15rem; padding:1rem; background: linear-gradient(145deg, #72879b15,#86b2c310); }
+.wg-spectrum-band h2 { font-size:1rem; line-height:1.4; margin:0 0 .7rem; }
+.wg-spectrum-band output { display:block; font-variant-numeric:tabular-nums; font-size:clamp(1rem,2.3vw,1.45rem); font-weight:650; }
+.wg-spectrum-sub { border-color:#7bb4c4aa; }
+.wg-spectrum-mid { border-color:#7ac0acaa; }
+.wg-spectrum-high { border-color:#baa4d6aa; }
+.wg-spectrum-log ol { max-height: 12rem; overflow:auto; padding-left: 1.3rem; font-variant-numeric: tabular-nums; }
+.wg-spectrum-log li { padding:.25rem; overflow-wrap:anywhere; }
+@media (prefers-reduced-motion: reduce) { .wg-spectrum-ribbon { filter:none; } }
+
+/* Wyrdrune carries the refraction and fine-detail coefficients; CSS only projects them. */
+.wg-spectrum-ribbon-a { opacity: calc(.28 + var(--wg-refraction, .5) * .58); }
+.wg-spectrum-ribbon-b { opacity: calc(.28 + var(--wg-granulation, .5) * .58); }
+.wg-spectrum-ring { transition: box-shadow .4s ease-out; }
+@media (prefers-reduced-motion: reduce) { .wg-spectrum-ring { transition: none; } }
+
+.wg-atlas { border-radius: 1.5rem; }
+.wg-atlas-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,10rem),1fr)); gap:.75rem; margin-block: 1rem; }
+.wg-atlas-grid > div { display:flex; flex-direction:column; gap:.4rem; padding:1rem; border-radius:1rem; border:1px solid #8eaac477; background:linear-gradient(145deg,#88a9b511,#a8a2de10); }
+.wg-atlas-grid output { font-variant-numeric: tabular-nums; font-weight:650; }
+.wg-atlas-grid strong { font-size:.9rem; }

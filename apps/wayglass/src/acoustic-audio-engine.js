@@ -8,7 +8,7 @@ const number = (value, name) => {
 export function createAcousticAudioEngine({AudioContext = globalThis.AudioContext || globalThis.webkitAudioContext} = {}) {
   let context = null, graph = null, disposed = false, running = false, epoch = 0, pending = null;
   let status = typeof AudioContext === 'function' ? 'stopped' : 'unsupported', lastError = null;
-  let settings = {muted: true, mono: false, ambience: false, bearing: {pan: 0, gain: 1, distance: 1}};
+  let settings = {muted: true, mono: false, ambience: false, bearing: {pan: 0, gain: 1, distance: 1}, score: null};
   const voices = new Set(), presented = new Set();
   const supported = typeof AudioContext === 'function';
 
@@ -37,11 +37,12 @@ export function createAcousticAudioEngine({AudioContext = globalThis.AudioContex
     if (!graph) return;
     const b = settings.bearing;
     smooth(graph.master.gain, settings.muted ? 0 : 0.35);
-    smooth(graph.navigation.gain, 0.035 * b.gain);
-    smooth(graph.ambience.gain, settings.ambience ? 0.008 : 0);
+    smooth(graph.navigation.gain, (settings.score?.foregroundGain ?? 0.035) * b.gain);
+    smooth(graph.ambience.gain, settings.ambience ? (settings.score?.atmosphereGain ?? 0.008) : 0);
     smooth(graph.status.gain, 0.025);
     if (graph.panner) smooth(graph.panner.pan, settings.mono ? 0 : b.pan);
-    smooth(graph.navigationTone.frequency, b.distance < 0.25 ? 220 : 176);
+    smooth(graph.navigationTone.frequency, settings.score?.rootHz ?? (b.distance < 0.25 ? 220 : 176));
+    if (settings.score) smooth(graph.ambienceTone.frequency, settings.score.counterpartHz);
   }
   function createGraph() {
     // Register each allocation immediately so any later adapter error is recoverable.
@@ -105,6 +106,23 @@ export function createAcousticAudioEngine({AudioContext = globalThis.AudioContex
       const b = {...settings.bearing, ...value.bearing};
       next.bearing = {pan: clamp(number(b.pan, 'pan'), -1, 1), gain: clamp(number(b.gain, 'gain'), 0, 1),
         distance: Math.max(0, number(b.distance, 'distance'))};
+    }
+    if ('score' in value) {
+      if (value.score == null) next.score = null;
+      else {
+        const frame = value.score;
+        for (const [key, lo, hi] of [
+          ['rootHz',70,650], ['counterpartHz',70,900],
+          ['foregroundGain',0,0.06], ['atmosphereGain',0,0.04],
+        ]) {
+          number(frame[key], key);
+          if (frame[key] < lo || frame[key] > hi) throw new RangeError(key + ' exceeds the bounded audio range.');
+        }
+        next.score = Object.freeze({
+          rootHz: frame.rootHz, counterpartHz: frame.counterpartHz,
+          foregroundGain: frame.foregroundGain, atmosphereGain: frame.atmosphereGain,
+        });
+      }
     }
     settings = next;
     if (settings.muted) stop(); else project();

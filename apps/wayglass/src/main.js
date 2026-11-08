@@ -6,11 +6,15 @@ import { installMotionChoreography } from './motion-choreography.js';
 import { installKeyboardControls } from './keyboard-controls.js';
 import { detectEmbodimentCapabilities, detectARSupport, publishEmbodiment } from './embodiment.js';
 import { enterWayglassWorld, leaveWayglassWorld, recoverWayglassDeparture, readVoyageMessages, replyToVoyage } from './route-client.js';
+import { inspectWayglassDoubleMobius, traverseWayglassDoubleMobius } from './route-client.js';
 import { installVoyageInbox } from './voyage-inbox.js';
 import { createWayglassSpellingController } from './spelling-assistance.js';
 import { mountWayglassSurface, registerWayglassSurface, listWayglassSurfaces } from './surface-registry.js';
 import { mountArcSweepWritingSurface } from './surfaces/arcsweep-writing.js';
 import { mountWayglassSystemsSurface } from './surfaces/systems.js';
+import { mountWayglassSpectrumSurface } from './surfaces/spectral-field.js';
+import { mountWayglassNativeVoice } from './surfaces/native-voice.js';
+import { createWayglassSpectralField } from './spectral-field.js';
 import { mountWayglassVideoAtelier } from './surfaces/video-atelier.js';
 import { mountWayglassLivingObserver } from './surfaces/living-observer.js';
 import { mountWayglassLibrarySurface } from './surfaces/library.js';
@@ -40,6 +44,7 @@ document.documentElement.dataset.wayglassKeyboard = embodiment.keyboard ? 'ready
 document.documentElement.dataset.wayglassAr = ar.supported ? 'ready' : ar.reason;
 
 FIRST_WAYGLASS_ORGANS.forEach(registerWayglassOrgan);
+const fullSpectrum = createWayglassSpectralField();
 
 registerWayglassSurface({surface_id:WAYGLASS_ENTRY_SURFACE,label:'Living Watercolor',mount:mountLivingWatercolorSurface});
 registerWayglassSurface({surface_id:'wayglass:journey-before-destination',label:'Journey Before Destination',mount:mountJourneyBeforeDestinationSurface});
@@ -50,6 +55,18 @@ registerWayglassSurface({
   mount: mountArcSweepWritingSurface,
 });
 
+
+registerWayglassSurface({
+  surface_id:'wayglass:native-voice',
+  label:'Wayglass · Wyrdrune Voice',
+  mount:mountWayglassNativeVoice,
+});
+
+registerWayglassSurface({
+  surface_id: 'wayglass:spectral-field',
+  label: 'Wayglass · Full Spectrum',
+  mount: root => mountWayglassSpectrumSurface(root,{field:fullSpectrum}),
+});
 
 registerWayglassSurface({
   surface_id: 'wayglass:systems',
@@ -133,6 +150,9 @@ switcher.addEventListener('click',()=>{shell.hidden=!shell.hidden;switcher.setAt
 function mountSurface(surfaceId){
   const request=mountQueue.then(async()=>{
     const result=await mountWayglassSurface(surfaceId,root);
+    fullSpectrum.setScope({room:surfaceId});
+    fullSpectrum.capture({kind:'world',strength:.55,motion:.32,continuity:.82,intent:.65,
+      source_ref:'wayglass:room-crossing'});
     spelling.apply(root);
     document.documentElement.dataset.wayglassSurface=surfaceId;
     for(const button of shell.querySelectorAll('[data-surface-id]')){
@@ -153,15 +173,30 @@ const wayglass = Object.freeze({
   enter: ({ embodiment: entryEmbodiment = {}, ...entry } = {}) => enterWayglassWorld({
     ...entry,
     embodiment: { ...browserEmbodiment, ...entryEmbodiment },
+  }).then(result=>{
+    if(result?.entered){
+      if(typeof entry.worldId==='string'){
+        try{fullSpectrum.setScope({world:entry.worldId})}catch{/* entry receipt remains authoritative */}
+      }
+      fullSpectrum.capture({kind:'world',strength:.78,motion:.6,continuity:.9,intent:.85,
+      source_ref:'wayglass:waygate-entry'});
+    }
+    return result;
   }),
   leave: ({ embodiment: departureEmbodiment = {}, ...departure } = {}) => leaveWayglassWorld({
     ...departure,
     embodiment: { ...browserEmbodiment, ...departureEmbodiment },
+  }).then(result=>{
+    if(result?.status==='stopped')fullSpectrum.capture({kind:'return',strength:.6,motion:.4,continuity:1,intent:.8,
+      source_ref:'wayglass:return-engine'});
+    return result;
   }),
   embodiment: Object.freeze({ ...embodiment, ar }),
   readMessages: readVoyageMessages,
   recoverDeparture: recoverWayglassDeparture,
   reply: replyToVoyage,
+  doubleMobius: Object.freeze({ inspect: inspectWayglassDoubleMobius, traverse: traverseWayglassDoubleMobius }),
+  fullSpectrum,
 });
 
 globalThis.__wayglassOS = wayglass;

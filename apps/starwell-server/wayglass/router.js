@@ -11,9 +11,15 @@ const {
 } = require('../wayglass-runtime/wayglass-route-registry.cjs');
 const { bootWayglassKernel, inspectWayglassCognitionPreflight } = require('../wayglass-runtime/wayglass-kernel.cjs');
 const { previewWyrdruneRitual } = require('../wayglass-runtime/wayglass-wyrdrune-ritual.cjs');
+const { scoreStoryWithWyrdrune } = require('../wayglass-runtime/wayglass-wyrdrune-soundscape.cjs');
+const { scoreSpectralBatch } = require('../wayglass-runtime/wayglass-wyrdrune-spectrum.cjs');
+const { scoreResonanceAtlas } = require('../wayglass-runtime/wayglass-wyrdrune-atlas.cjs');
+const { executeLivingLearning } = require('../wayglass-runtime/wayglass-wyrdrune-learning.cjs');
+const { composeWayglassNativeVoice } = require('../wayglass-runtime/wayglass-wyrdrune-voice.cjs');
 const { enterWayglassWorld } = require('../wayglass-runtime/wayglass-world-entry.cjs');
 const { createWayglassDeparture } = require('../wayglass-runtime/wayglass-stop-receipt.cjs');
 const { createDepartureStore } = require('../wayglass-runtime/wayglass-departure-store.cjs');
+const { inspectDoubleMobius, traverseDoubleMobius } = require('../wayglass-runtime/wayglass-double-mobius.cjs');
 const { createModelObservation } = require('../wayglass-runtime/wayglass-model-observation.cjs');
 const { createWayglassLibraryRouter } = require('./research-library');
 const { createObserverSelfDevelopmentRouter } = require('./observer-self-development');
@@ -491,6 +497,29 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
   });
   router.use('/library', createWayglassLibraryRouter());
   router.use('/observer/self-development', createObserverSelfDevelopmentRouter());
+  // Gateway ↔ Wayglass is an existing-kernel, double-Möbius transformation.
+  // This endpoint performs in-memory processing only. It cannot silently
+  // authenticate participants, invoke models, play audio or persist canon.
+  router.get('/kernel/double-mobius', (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    return res.json(inspectDoubleMobius());
+  });
+  router.post('/kernel/double-mobius', createRequestGate({ maxRequests: 8, maxConcurrent: 2 }), (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    try {
+      const result = traverseDoubleMobius({
+        ...(req.body || {}),
+        // Server time, never a client-controlled timestamp in runtime receipts.
+        recorded_at: new Date().toISOString(),
+      });
+      return res.status(result.status === 'blocked-entry' ? 409 : 200).json(result);
+    } catch (error) {
+      return res.status(400).json({
+        schema: 'wayglass.gateway-double-mobius-error/v0.1',
+        error: error?.message || 'Double Möbius crossing rejected.',
+      });
+    }
+  });
   router.get('/kernel/departures/:storageId', (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     try {
@@ -686,6 +715,145 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
   // Reuse the verified House session contract rather than inventing a proxy trust header.
   // Wyrdrune is a first-class, pure Eightfold preview. This is not a model
   // instruction, a prophecy, a bridge permission or an external provider turn.
+  // Wyrdrune is the only score composer. This route exposes typed, bounded
+  // observational bridges to authenticated House writing sessions; it never
+  // invokes a model, plays audio or stores a user's draft on the server.
+  // Every captured interaction becomes a Wyrdrune-composed tri-band field.
+  // No user content, raw keystrokes or speaker emissions are accepted here.
+  // Wyrdrune composes room/world/universe fields from bounded aggregate scalars.
+  // Scope names and participant identities remain client-side, never forwarded.
+  // Learning transitions belong to Wyrdrune. The host only carries typed
+  // observations, handles authentication, and returns a provenance receipt.
+  // The Crow authors two independent returns: her native WTL composition
+  // and her own en-GB reading. Image/sound can only arise from actual
+  // verified Wyrdrune expression operations, never host-invented narration.
+  router.post('/wyrdrune/native-voice',createRequestGate({maxRequests:12,maxConcurrent:1}),async(req,res)=>{
+    res.setHeader('Cache-Control','no-store');
+    if(!(await griffStewardAuthorized(req).catch(()=>false))){
+      return res.status(401).json({error:'Sign in as House Steward to invite Wayglass.'});
+    }
+    const route=resolveWayglassRoute('wayglass:crow');
+    if(!route||route.participant_id!=='wayglass'||route.provider!=='openai-compatible')
+      return res.status(503).json({error:'Wayglass Crow identity route is unavailable.'});
+    let completed=0,actualModel=null;
+    try{
+      const result=await composeWayglassNativeVoice({
+        prompt:req.body?.prompt,channels:req.body?.channels,
+        principal:{authorized:true},
+        invoke:async({system,user,max_tokens,signal})=>{
+          const response=await fetchImpl(route.endpoint(),{
+            method:'POST',
+            headers:{'Content-Type':'application/json',
+              ...(route.api_key?.()?{Authorization:'Bearer '+route.api_key()}:{}),
+            },
+            body:JSON.stringify({
+              model:route.model(),messages:[{role:'system',content:system},
+                {role:'user',content:user}],
+              stream:false,max_tokens,
+            }),
+            signal:signal||AbortSignal.timeout(120000),
+          });
+          const data=await response.json().catch(()=>({}));
+          if(!response.ok){
+            const error=new Error(cleanText(data?.error?.message||data?.error||data?.message
+              ||'Wayglass Crow route could not complete.',240));
+            error.status=response.status||502;throw error;
+          }
+          const content=data?.choices?.[0]?.message?.content;
+          if(typeof content!=='string'||!content.trim()){
+            const error=new Error('Crow returned no authored text.');
+            error.status=502;throw error;
+          }
+          completed++;
+          if(data?.model)actualModel=data.model;
+          return {output:content};
+        },
+      });
+      return res.json({...result,
+        provenance:{route_id:route.route_id,participant_id:route.participant_id,
+          requested_model:route.model(),returned_model:actualModel,
+          completed_model_calls:completed,host_time:new Date().toISOString()},
+      });
+    }catch(error){
+      return res.status(error?.status||((error instanceof TypeError||error instanceof SyntaxError)
+        ?422:503)).json({
+        schema:'wayglass.native-wyrdrune-voice-error/v0.1',
+        error:cleanText(error?.message||'Native voice is currently unavailable.',260),
+        completed_model_calls:completed,
+        invented_reply:false,
+      });
+    }
+  });
+
+  router.post('/wyrdrune/living-learning', createRequestGate({maxRequests:24,maxConcurrent:1}), async(req,res)=>{
+    res.setHeader('Cache-Control','no-store');
+    if(!(await griffStewardAuthorized(req).catch(()=>false))){
+      return res.status(401).json({error:'House Steward sign-in required for native Wyrdrune learning.'});
+    }
+    try{
+      return res.json(await executeLivingLearning(req.body?.learning,{
+        principal:{authorized:true},
+      }));
+    }catch(error){
+      return res.status(400).json({
+        schema:'wayglass.wyrdrune-living-learning-error/v0.1',
+        error:cleanText(error?.message||'Native Wyrdrune learning rejected this crossing.',240),
+      });
+    }
+  });
+
+  router.post('/wyrdrune/resonance-atlas', createRequestGate({ maxRequests: 30, maxConcurrent: 2 }), async(req,res)=>{
+    res.setHeader('Cache-Control','no-store');
+    if(!(await griffStewardAuthorized(req).catch(()=>false))){
+      return res.status(401).json({error:'House Steward authentication required for the Atlas.'});
+    }
+    try{
+      return res.json(await scoreResonanceAtlas(req.body?.scales,{
+        principal:{authorized:true},
+      }));
+    }catch(error){
+      return res.status(400).json({
+        schema:'wayglass.resonance-atlas-error/v0.1',
+        error:cleanText(error?.message||'Atlas rejected the input.',240),
+      });
+    }
+  });
+
+  router.post('/wyrdrune/full-spectrum', createRequestGate({ maxRequests: 60, maxConcurrent: 2 }), async (req, res) => {
+    res.setHeader('Cache-Control','no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({error:'House Steward sign-in required for spectral scoring.'});
+    }
+    try {
+      return res.json(await scoreSpectralBatch(req.body?.events,{
+        principal:{authorized:true},
+      }));
+    } catch (error) {
+      return res.status(400).json({
+        schema:'wayglass.full-spectrum-error/v0.1',
+        error:cleanText(error?.message||'Spectral event was rejected.',240),
+      });
+    }
+  });
+
+  router.post('/wyrdrune/story-soundscape', createRequestGate({ maxRequests: 48, maxConcurrent: 2 }), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required to score the writing room.' });
+    }
+    try {
+      const score = await scoreStoryWithWyrdrune(req.body || {}, {
+        principal: { authorized: true },
+      });
+      return res.json(score);
+    } catch (error) {
+      return res.status(400).json({
+        schema: 'wayglass.wyrdrune-story-soundscape-error/v0.1',
+        error: cleanText(error?.message || 'Wyrdrune scoring refused the input.', 250),
+      });
+    }
+  });
+
   router.post('/wyrdrune/preview', createRequestGate({ maxRequests: 15, maxConcurrent: 2 }), async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     if (!(await griffStewardAuthorized(req).catch(() => false))) {
