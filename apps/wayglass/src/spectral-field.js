@@ -1,7 +1,7 @@
 import { scoreWyrdruneSpectrum } from './route-client.js';
 import { createAcousticAudioEngine } from './acoustic-audio-engine.js';
 import { subscribeWayglassObserver } from './living-observer-model.js';
-import { subscribeWatercolorActivity } from './watercolor-bridge.js';
+import { subscribeWatercolorActivity, publishWatercolorActivity } from './watercolor-bridge.js';
 import { wayglassSomaticSound, WAYGLASS_FEATHER_EVENT } from './somatic-sound.js';
 
 export const SPECTRAL_FIELD_SCHEMA='wayglass.full-spectrum-client/v0.1';
@@ -91,6 +91,19 @@ export function createWayglassSpectralField({
         history.push(record);
         if(history.length>64)history.shift();
         lastFrame=record.spectrum;
+      }
+      // Refract the verified spectral frame through the existing watercolour body.
+      // Actor filtering below prevents score → pigment → score recursion.
+      publishWatercolorActivity({
+        kind:'form:morph',actor:'wayglass:full-spectrum',
+        intensity:lastFrame.projection.refraction,
+      });
+      if(typeof scope.CustomEvent==='function') {
+        scope.dispatchEvent?.(new scope.CustomEvent('wayglass:spectrum-frame',{
+          detail:Object.freeze({schema:SPECTRAL_FIELD_SCHEMA,
+            event_id:result.events.at(-1).event_id,spectrum:lastFrame,
+            source_hash:result.events.at(-1).source_hash}),
+        }));
       }
       listenFrame(lastFrame);
       if(haptics && typeof scope.navigator?.vibrate==='function') {
@@ -182,6 +195,7 @@ export function createWayglassSpectralField({
         source_ref:'wayglass:route-observation'});
     });
     unsubscribeWatercolor=watercolorSubscribe?.(packet=>{
+      if(packet?.actor==='wayglass:full-spectrum')return;
       capture({kind:'observer',strength:clamp(packet?.intensity,.5),
         motion:clamp(packet?.flow,.4),continuity:.75,intent:.6,
         source_ref:'wayglass:watercolor-activity'});
