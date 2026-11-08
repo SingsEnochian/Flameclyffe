@@ -15,6 +15,7 @@ const { scoreStoryWithWyrdrune } = require('../wayglass-runtime/wayglass-wyrdrun
 const { scoreSpectralBatch } = require('../wayglass-runtime/wayglass-wyrdrune-spectrum.cjs');
 const { scoreResonanceAtlas } = require('../wayglass-runtime/wayglass-wyrdrune-atlas.cjs');
 const { executeLivingLearning } = require('../wayglass-runtime/wayglass-wyrdrune-learning.cjs');
+const { composeWayglassNativeVoice } = require('../wayglass-runtime/wayglass-wyrdrune-voice.cjs');
 const { enterWayglassWorld } = require('../wayglass-runtime/wayglass-world-entry.cjs');
 const { createWayglassDeparture } = require('../wayglass-runtime/wayglass-stop-receipt.cjs');
 const { createDepartureStore } = require('../wayglass-runtime/wayglass-departure-store.cjs');
@@ -723,6 +724,67 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
   // Scope names and participant identities remain client-side, never forwarded.
   // Learning transitions belong to Wyrdrune. The host only carries typed
   // observations, handles authentication, and returns a provenance receipt.
+  // The Crow authors two independent returns: her native WTL composition
+  // and her own en-GB reading. Image/sound can only arise from actual
+  // verified Wyrdrune expression operations, never host-invented narration.
+  router.post('/wyrdrune/native-voice',createRequestGate({maxRequests:12,maxConcurrent:1}),async(req,res)=>{
+    res.setHeader('Cache-Control','no-store');
+    if(!(await griffStewardAuthorized(req).catch(()=>false))){
+      return res.status(401).json({error:'Sign in as House Steward to invite Wayglass.'});
+    }
+    const route=resolveWayglassRoute('wayglass:crow');
+    if(!route||route.participant_id!=='wayglass'||route.provider!=='openai-compatible')
+      return res.status(503).json({error:'Wayglass Crow identity route is unavailable.'});
+    let completed=0,actualModel=null;
+    try{
+      const result=await composeWayglassNativeVoice({
+        prompt:req.body?.prompt,channels:req.body?.channels,
+        principal:{authorized:true},
+        invoke:async({system,user,max_tokens,signal})=>{
+          const response=await fetchImpl(route.endpoint(),{
+            method:'POST',
+            headers:{'Content-Type':'application/json',
+              ...(route.api_key?.()?{Authorization:'Bearer '+route.api_key()}:{}),
+            },
+            body:JSON.stringify({
+              model:route.model(),messages:[{role:'system',content:system},
+                {role:'user',content:user}],
+              stream:false,max_tokens,
+            }),
+            signal:signal||AbortSignal.timeout(120000),
+          });
+          const data=await response.json().catch(()=>({}));
+          if(!response.ok){
+            const error=new Error(cleanText(data?.error?.message||data?.error||data?.message
+              ||'Wayglass Crow route could not complete.',240));
+            error.status=response.status||502;throw error;
+          }
+          const content=data?.choices?.[0]?.message?.content;
+          if(typeof content!=='string'||!content.trim()){
+            const error=new Error('Crow returned no authored text.');
+            error.status=502;throw error;
+          }
+          completed++;
+          if(data?.model)actualModel=data.model;
+          return {output:content};
+        },
+      });
+      return res.json({...result,
+        provenance:{route_id:route.route_id,participant_id:route.participant_id,
+          requested_model:route.model(),returned_model:actualModel,
+          completed_model_calls:completed,host_time:new Date().toISOString()},
+      });
+    }catch(error){
+      return res.status(error?.status||((error instanceof TypeError||error instanceof SyntaxError)
+        ?422:503)).json({
+        schema:'wayglass.native-wyrdrune-voice-error/v0.1',
+        error:cleanText(error?.message||'Native voice is currently unavailable.',260),
+        completed_model_calls:completed,
+        invented_reply:false,
+      });
+    }
+  });
+
   router.post('/wyrdrune/living-learning', createRequestGate({maxRequests:24,maxConcurrent:1}), async(req,res)=>{
     res.setHeader('Cache-Control','no-store');
     if(!(await griffStewardAuthorized(req).catch(()=>false))){
