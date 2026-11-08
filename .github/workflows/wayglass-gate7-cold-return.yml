@@ -16,6 +16,8 @@ on:
       - 'lib/wyrdrune/full-spectrum.wtl'
       - 'lib/wayglass-wyrdrune-atlas.cjs'
       - 'lib/wyrdrune/resonance-atlas.wtl'
+      - 'lib/wyrdrune/living-learning.wtl'
+      - 'lib/wayglass-wyrdrune-learning.cjs'
       - 'lib/wyrdrune/story-soundscape.wtl'
       - 'test/wayglass/eightfold-cold-return.test.cjs'
       - '.github/workflows/wayglass-gate7-cold-return.yml'
