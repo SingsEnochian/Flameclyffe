@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createWayglassSpectralField } from '../src/spectral-field.js';
 
 function harness(){
- const scope=new EventTarget(), document=new EventTarget(), calls=[],updates=[],vibrations=[];
+ const scope=new EventTarget(), document=new EventTarget(), calls=[],atlasCalls=[],updates=[],vibrations=[];
  let nextTimer=0;const timers=new Map();
  Object.assign(scope,{
    document,innerWidth:1000,navigator:{vibrate:n=>{vibrations.push(n);return true}}, 
@@ -26,17 +26,27 @@ function harness(){
     infrasonic:{hz:3,physical_playback:false},
     audible:{voice_one_hz:220,voice_two_hz:300,foreground_gain:.012,atmosphere_gain:.005},
     ultrasonic:{hz:26500,physical_playback:false},
+    bloom:.65,
     projection:{refraction:.5,granulation:.6,tactile_ms:17,actuation:'user-opt-in-only'}, 
    },
   }))};
  };
+ const atlasScore=async scalars=>{
+   atlasCalls.push(scalars);
+   return {schema:'wayglass.resonance-atlas/v0.1',status:'composed-in-wyrdrune',
+     phase_receipts:Array.from({length:16},()=>({phase:'verify'})),source_sha256:'atlas-fixture',
+     counts:scalars.counts,returned:{below:{hz:3,physical_playback:false},
+       within:{root_hz:190,counterpart_hz:240,autoplay:false},
+       above:{hz:26000,physical_playback:false},
+       structure:{coherence:.7,interference:.3,bloom:.5,granulation:.3,flow:.4}}};
+ };
  const field=createWayglassSpectralField({
-   scope,document,score,audioFactory,
+   scope,document,score,atlasScore,audioFactory,
    observerSubscribe:()=>()=>{},
    watercolorSubscribe:callback=>{watercolorSink=callback;return ()=>{watercolorSink=null}}, 
    featherState:()=>({feather_stopped:false}),
  });
- return {field,scope,document,calls,updates,timers,vibrations,
+ return {field,scope,document,calls,atlasCalls,updates,timers,vibrations,
    sendWatercolor:record=>watercolorSink?.(record),
    get audioRunning(){return audioRunning},get audioDisposed(){return audioDisposed}};
 }
@@ -132,5 +142,35 @@ test('spectral watercolor feedback cannot recursively score itself',async()=>{
  assert.equal(h.field.status().captured,before+1);
  await h.field.flush();
  assert.equal(h.field.status().last.kind,'observer');
+ h.field.dispose();
+});
+
+test('Atlas composes scoped interaction/room/world/universe signals without sending names',async()=>{
+ const h=harness();
+ h.field.setScope({room:'arcsweep:writing-room',world:'world:forest'});
+ h.field.observe();
+ await h.field.flush();
+ const first=h.field.status();
+ assert.equal(first.atlas.counts.instant,1);
+ assert.equal(first.atlas.counts.universe,1);
+ assert.equal(first.atlas.spectrum.structure.coherence,.7);
+ h.field.setScope({room:'arcsweep:writing-room',world:'world:sea'});
+ h.field.capture({kind:'world',source_ref:'wayglass:room-crossing'});
+ await h.field.flush();
+ const second=h.field.status();
+ assert.equal(second.atlas.counts.universe,2);
+ assert.equal(second.atlas_window.distinct_worlds,2);
+ assert.equal(second.atlas_scope.world,'world:sea');
+ assert.ok(h.atlasCalls.every(call=>!Object.keys(call).includes('world_ref')));
+ assert.ok(h.atlasCalls.every(call=>!JSON.stringify(call).includes('world:forest')));
+ h.field.dispose();
+});
+
+test('an Atlas adapter failure does not forge Atlas harmonics or stop independent Wyrdrune spectrum',async()=>{
+ const h=harness();
+ h.field.observe();
+ await h.field.flush();
+ assert.equal(h.field.status().atlas.source_hash,'atlas-fixture');
+ assert.equal(h.field.status().active,true);
  h.field.dispose();
 });
