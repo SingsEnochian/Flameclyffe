@@ -444,6 +444,10 @@ export async function mountArcSweepWritingSurface(root) {
     const changed = cp('world').value !== world.world_id;
     worldSelect.value = world.world_id;
     cp('world').value = world.world_id;
+    // Local atlas lineage changes with the actual selected narrative world.
+    globalThis.__wayglassOS?.fullSpectrum?.setScope({
+      room:'arcsweep:writing-room',world:world.world_id,
+    });
     root.querySelector('#wg-place-name').textContent = world.name;
     root.querySelector('#wg-place-hint').textContent = world.character
       ? world.character.name + ' · world anchor; transport status shown separately'
