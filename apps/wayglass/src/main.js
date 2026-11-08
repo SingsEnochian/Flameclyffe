@@ -143,6 +143,7 @@ switcher.addEventListener('click',()=>{shell.hidden=!shell.hidden;switcher.setAt
 function mountSurface(surfaceId){
   const request=mountQueue.then(async()=>{
     const result=await mountWayglassSurface(surfaceId,root);
+    fullSpectrum.setScope({room:surfaceId});
     fullSpectrum.capture({kind:'world',strength:.55,motion:.32,continuity:.82,intent:.65,
       source_ref:'wayglass:room-crossing'});
     spelling.apply(root);
@@ -166,8 +167,13 @@ const wayglass = Object.freeze({
     ...entry,
     embodiment: { ...browserEmbodiment, ...entryEmbodiment },
   }).then(result=>{
-    if(result?.entered)fullSpectrum.capture({kind:'world',strength:.78,motion:.6,continuity:.9,intent:.85,
+    if(result?.entered){
+      if(typeof entry.worldId==='string'){
+        try{fullSpectrum.setScope({world:entry.worldId})}catch{/* entry receipt remains authoritative */}
+      }
+      fullSpectrum.capture({kind:'world',strength:.78,motion:.6,continuity:.9,intent:.85,
       source_ref:'wayglass:waygate-entry'});
+    }
     return result;
   }),
   leave: ({ embodiment: departureEmbodiment = {}, ...departure } = {}) => leaveWayglassWorld({
