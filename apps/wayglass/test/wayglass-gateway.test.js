@@ -81,3 +81,16 @@ test('Wyrdrune score route requires House auth and cannot be used for unrelated 
   assert.equal((await allowed(new Request(url))).status,405);
   assert.equal(called,1);
 });
+
+test('full-spectrum composition cannot be reached without the House session',async()=>{
+  let called=0;
+  const url='https://preview.example/api/v1/wayglass/wyrdrune/full-spectrum';
+  const fetchImpl=async ()=>{called++;return Response.json({schema:'wayglass.full-spectrum/v0.1'});};
+  const request=()=>new Request(url,{method:'POST',body:JSON.stringify({events:[]})});
+  assert.equal((await createWayglassGatewayHandler({env,fetchImpl,authorise:()=>false})(request())).status,401);
+  assert.equal(called,0);
+  const allowed=createWayglassGatewayHandler({env,fetchImpl,authorise:()=>true});
+  assert.equal((await allowed(request())).status,200);
+  assert.equal((await allowed(new Request(url))).status,405);
+  assert.equal(called,1);
+});
