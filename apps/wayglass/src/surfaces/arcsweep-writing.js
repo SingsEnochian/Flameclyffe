@@ -301,6 +301,13 @@ export async function mountArcSweepWritingSurface(root) {
   function applyScore(frame) {
     lastSoundscape = frame;
     const score = frame.score;
+    // A Wyrdrune-authored story score joins the larger ship field by metadata.
+    // No story text or participant identity is copied into spectral capture.
+    globalThis.__wayglassOS?.fullSpectrum?.capture({
+      kind:'writing',strength:score.pulse,motion:score.pulse,
+      continuity:.85,intent:.8,relationship:score.relationshipAffinity,
+      source_ref:'wayglass:story-soundscape',
+    });
     scoreReadout.textContent = 'Wyrdrune · '+score.rootHz.toFixed(1)+' Hz ⇄ '
       +score.counterpartHz.toFixed(1)+' Hz · affinity '+score.relationshipAffinity.toFixed(2)
       +' · below '+score.infrasonic.hz.toFixed(2)+' Hz · above '+(score.ultrasonic.hz/1000).toFixed(2)+' kHz (virtual)'
