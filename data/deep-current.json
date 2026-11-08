@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-11-08T06:27:16.884Z",
+  "generated_at": "2026-11-08T13:45:19.321Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,49 +13,49 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-11-08T01:15",
-    "sky": "Night",
+    "time": "2026-11-08T08:45",
+    "sky": "Day",
     "current": {
-      "time": "2026-11-08T01:15",
+      "time": "2026-11-08T08:45",
       "interval": 900,
-      "temperature_2m": 59.9,
-      "relative_humidity_2m": 88,
-      "is_day": 0,
+      "temperature_2m": 64.4,
+      "relative_humidity_2m": 97,
+      "is_day": 1,
       "precipitation": 0,
       "rain": 0,
-      "weather_code": 0,
-      "cloud_cover": 0,
-      "pressure_msl": 1015.6,
-      "wind_speed_10m": 4.8,
-      "wind_direction_10m": 333
+      "weather_code": 45,
+      "cloud_cover": 66,
+      "pressure_msl": 1018,
+      "wind_speed_10m": 5,
+      "wind_direction_10m": 334
     }
   },
   "space_weather": {
     "kp": {
       "value": 3.33,
-      "time_tag": "2026-11-08T03:00:00",
+      "time_tag": "2026-11-08T09:00:00",
       "a_running": 18
     },
     "solar_wind": {
-      "time_tag": "2026-11-08T06:22:00Z",
-      "bz": -1,
-      "bt": 6,
+      "time_tag": "2026-11-08T13:40:00Z",
+      "bz": -2,
+      "bt": 5,
       "density": null,
-      "speed": 739
+      "speed": 743
     }
   },
   "moon": {
-    "age_days": 27.88,
-    "illumination": 3,
+    "age_days": 28.19,
+    "illumination": 2,
     "name": "New Moon"
   },
   "field": {
-    "P": 0.48888888888888915,
-    "C": 0.62,
+    "P": 0.5755555555555556,
+    "C": 0.30571428571428577,
     "R": 1,
-    "E": 0.8413186813186814,
-    "M": 0.03,
-    "A": 0.7646153846153847,
+    "E": 0.900934065934066,
+    "M": 0.02,
+    "A": 0.7307692307692307,
     "Q": null,
     "dpdt": 1,
     "dynamic_axes": [
