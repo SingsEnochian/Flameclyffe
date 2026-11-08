@@ -1,6 +1,7 @@
 import { scoreWyrdruneSpectrum } from './route-client.js';
 import { createAcousticAudioEngine } from './acoustic-audio-engine.js';
 import { subscribeWayglassObserver } from './living-observer-model.js';
+import { subscribeWatercolorActivity } from './watercolor-bridge.js';
 import { wayglassSomaticSound, WAYGLASS_FEATHER_EVENT } from './somatic-sound.js';
 
 export const SPECTRAL_FIELD_SCHEMA='wayglass.full-spectrum-client/v0.1';
@@ -18,11 +19,12 @@ export function createWayglassSpectralField({
   score=scoreWyrdruneSpectrum,
   audioFactory=createAcousticAudioEngine,
   observerSubscribe=subscribeWayglassObserver,
+  watercolorSubscribe=subscribeWatercolorActivity,
   featherState=()=>wayglassSomaticSound.snapshot(),
 }={}) {
   const listeners=new Set(), history=[];
   let active=false,disposed=false,heard=false,error=null,sequence=0,affinity=.5;
-  let queue=[],pending=null,abort=null,timer=null,unsubscribeObserver=null,lastFrame=null;
+  let queue=[],pending=null,abort=null,timer=null,unsubscribeObserver=null,unsubscribeWatercolor=null,lastFrame=null;
   const audio=audioFactory();
   const status=()=>Object.freeze({
     schema:SPECTRAL_FIELD_SCHEMA,active,heard,disposed,error,affinity,
@@ -161,6 +163,7 @@ export function createWayglassSpectralField({
     for(const [type,handler] of browserInputs)document?.removeEventListener?.(type,handler,true);
     scope.removeEventListener?.('wayglass:material-wake',fromMaterial);
     unsubscribeObserver?.();unsubscribeObserver=null;
+    unsubscribeWatercolor?.();unsubscribeWatercolor=null;
   }
   function observe(){
     if(disposed)throw new Error('Spectral field has been disposed.');
@@ -174,6 +177,11 @@ export function createWayglassSpectralField({
       capture({kind:'route',strength:packet.status==='completed'?.82:.6,
         motion:packet.status==='started'?.7:.3,continuity:.8,intent:.75,
         source_ref:'wayglass:route-observation'});
+    });
+    unsubscribeWatercolor=watercolorSubscribe?.(packet=>{
+      capture({kind:'observer',strength:clamp(packet?.intensity,.5),
+        motion:clamp(packet?.flow,.4),continuity:.75,intent:.6,
+        source_ref:'wayglass:watercolor-activity'});
     });
     capture({kind:'presence',strength:.35,continuity:.9,source_ref:'wayglass:field-entry'});
     notify();return status();
