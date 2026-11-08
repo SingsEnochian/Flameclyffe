@@ -13,6 +13,7 @@ const { bootWayglassKernel, inspectWayglassCognitionPreflight } = require('../wa
 const { previewWyrdruneRitual } = require('../wayglass-runtime/wayglass-wyrdrune-ritual.cjs');
 const { scoreStoryWithWyrdrune } = require('../wayglass-runtime/wayglass-wyrdrune-soundscape.cjs');
 const { scoreSpectralBatch } = require('../wayglass-runtime/wayglass-wyrdrune-spectrum.cjs');
+const { scoreResonanceAtlas } = require('../wayglass-runtime/wayglass-wyrdrune-atlas.cjs');
 const { enterWayglassWorld } = require('../wayglass-runtime/wayglass-world-entry.cjs');
 const { createWayglassDeparture } = require('../wayglass-runtime/wayglass-stop-receipt.cjs');
 const { createDepartureStore } = require('../wayglass-runtime/wayglass-departure-store.cjs');
@@ -717,6 +718,25 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
   // invokes a model, plays audio or stores a user's draft on the server.
   // Every captured interaction becomes a Wyrdrune-composed tri-band field.
   // No user content, raw keystrokes or speaker emissions are accepted here.
+  // Wyrdrune composes room/world/universe fields from bounded aggregate scalars.
+  // Scope names and participant identities remain client-side, never forwarded.
+  router.post('/wyrdrune/resonance-atlas', createRequestGate({ maxRequests: 30, maxConcurrent: 2 }), async(req,res)=>{
+    res.setHeader('Cache-Control','no-store');
+    if(!(await griffStewardAuthorized(req).catch(()=>false))){
+      return res.status(401).json({error:'House Steward authentication required for the Atlas.'});
+    }
+    try{
+      return res.json(await scoreResonanceAtlas(req.body?.scales,{
+        principal:{authorized:true},
+      }));
+    }catch(error){
+      return res.status(400).json({
+        schema:'wayglass.resonance-atlas-error/v0.1',
+        error:cleanText(error?.message||'Atlas rejected the input.',240),
+      });
+    }
+  });
+
   router.post('/wyrdrune/full-spectrum', createRequestGate({ maxRequests: 60, maxConcurrent: 2 }), async (req, res) => {
     res.setHeader('Cache-Control','no-store');
     if (!(await griffStewardAuthorized(req).catch(() => false))) {
