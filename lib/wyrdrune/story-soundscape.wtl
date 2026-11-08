@@ -24,12 +24,14 @@ mobius {
     let counterpart = root * interval;
     let foreground = 0.014 + pulse * 0.021;
     let atmosphere = 0.006 + water * 0.009 + memory * 0.006;
+    let below = 0.6 + memory * 7 + water * 2 + shadow * 4;
+    let above = 22500 + wind * 3700 + flame * 4200 + motion * 2600 + affinity * 2500;
   }
   verify {
-    emit bridge("sound","validate",root,counterpart,foreground,atmosphere);
+    emit bridge("sound","validate",root,counterpart,foreground,atmosphere,below,above);
   }
   integrate {
-    let score = bridge("sound","frame",root,counterpart,foreground,atmosphere,affinity,pulse);
+    let score = bridge("sound","frame",root,counterpart,foreground,atmosphere,affinity,pulse,below,above);
   }
   choose {
     emit score;
@@ -54,9 +56,11 @@ mobius {
   release {
     set root = root + counterpart * return_weight;
     set counterpart = counterpart + root * return_weight;
+    set below = below + below * return_weight * 0.5;
+    set above = above + counterpart * return_weight * 0.8;
   }
   verify {
-    emit bridge("sound","validate",root,counterpart,foreground,atmosphere);
+    emit bridge("sound","validate",root,counterpart,foreground,atmosphere,below,above);
   }
   integrate {
     let returned_score = bridge("sound","frame",root,counterpart,foreground,atmosphere,returned_affinity,pulse);
