@@ -115,7 +115,7 @@ export function createAcousticAudioEngine({AudioContext = globalThis.AudioContex
     settings = next;
     if('mono'in value&&composition.snapshot().mono!==next.mono)composition.setMix({mono:next.mono});
     if(value.ambience===false)composition.disableAudio();
-    if (settings.muted) stop(); else project();
+    if (settings.muted) stop({pauseComposition:false}); else project();
     return getState();
   }
   function signal({eventId, kind = 'status'} = {}) {
@@ -143,8 +143,8 @@ export function createAcousticAudioEngine({AudioContext = globalThis.AudioContex
       return {accepted: false, reason: 'adapter-error'};
     }
   }
-  function stop() {
-    composition.pauseGeneration();composition.disableAudio();
+  function stop({pauseComposition=true}={}) {
+    if(pauseComposition)composition.pauseGeneration();composition.disableAudio();
     ++epoch; pending = null; settings.muted = true; running = false;
     teardown(); status = disposed ? 'disposed' : supported ? 'stopped' : 'unsupported';
     return getState();

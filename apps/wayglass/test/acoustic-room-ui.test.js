@@ -36,13 +36,13 @@ class Root{
  removeEventListener(type,handler){if(this.listeners.get(type)===handler)this.listeners.delete(type);}
  dispatch(type,target,properties={}){let prevented=false;this.listeners.get(type)?.({target,preventDefault(){prevented=true;},...properties});return prevented;}
 }
-function setup(){
- const descriptors=new Map(),storage=new Map(),globalListeners=new Map(),counts={closed:0,stops:0,contexts:0,resizeDisconnected:0};
+function setup({loadCompositionControls,storage:stored=new Map()}={}){
+ const descriptors=new Map(),storage=stored,globalListeners=new Map(),counts={closed:0,stops:0,contexts:0,resizeDisconnected:0};
  const replace=(key,value)=>{descriptors.set(key,Object.getOwnPropertyDescriptor(globalThis,key));Object.defineProperty(globalThis,key,{configurable:true,writable:true,value});};
  const parameter=()=>({value:0,cancelScheduledValues(){},setValueAtTime(v){this.value=v;},setTargetAtTime(v){this.value=v;},linearRampToValueAtTime(v){this.value=v;}});
  const node=()=>({connect(){},disconnect(){}});
  class AudioContext{
-  constructor(){counts.contexts++;this.currentTime=1;this.destination={};}
+  constructor(){counts.contexts++;this.currentTime=1;this.destination={};this.state='running';}
   resume(){return Promise.resolve();}
   close(){counts.closed++;return Promise.resolve();}
   createGain(){return {...node(),gain:parameter()};}
@@ -56,7 +56,7 @@ function setup(){
  replace('ResizeObserver',class{observe(){}disconnect(){counts.resizeDisconnected++;}});
  replace('addEventListener',(type,handler)=>globalListeners.set(type,handler));
  replace('removeEventListener',(type,handler)=>{if(globalListeners.get(type)===handler)globalListeners.delete(type);});
- const root=new Root(),dispose=mountWayglassAcousticRoom(root),$=selector=>{const element=root.querySelector(selector);assert.ok(element,`missing ${selector}`);return element;};
+ const root=new Root(),dispose=mountWayglassAcousticRoom(root,{loadCompositionControls}),$=selector=>{const element=root.querySelector(selector);assert.ok(element,`missing ${selector}`);return element;};
  const packet=()=>JSON.parse($('[data-inspector]').textContent);
  return {root,$,packet,storage,counts,globalListeners,dispose,restore(){dispose();for(const [key,descriptor] of descriptors){if(descriptor)Object.defineProperty(globalThis,key,descriptor);else delete globalThis[key];}}};
 }
@@ -139,4 +139,69 @@ test('malformed or corrupted saved state leaves the active room intact',()=>{
    assert.match(f.$('[data-receipt]').textContent,/No valid saved return/);
   }
  }finally{f.restore();}
+});
+
+test('expandable acoustic composition binds the authored score, preserves navigation and returns paused',async()=>{
+ let controls=null,destroyed=0;
+ const f=setup({loadCompositionControls:async()=>({mountWayglassSoundComposition(_root,options){controls=options;return{destroy(){destroyed++;}};}})});
+ try{
+  assert.equal(f.counts.contexts,0,'Fresh quiet generation must not create a sound device');
+  const panel=f.$('[data-acoustic-composition-panel]');panel.open=true;f.root.dispatch('toggle',panel);await new Promise(resolve=>setImmediate(resolve));
+  assert.ok(controls?.composition&&controls.storyBinding&&controls.soundscape);
+  assert.equal(controls.storyBinding.getContext(),null);
+  controls.soundscape.releaseFeather({confirmed:true});controls.composition.startGeneration({confirmed:true});
+  const story=f.$('[data-acoustic-story]');story.value='Water wind and a river';f.root.dispatch('input',story);
+  controls.storyBinding.setContext({voices:[{voice_id:'captured:acoustic-a',source_ref:'fixture:voice-a'},{voice_id:'captured:acoustic-b',source_ref:'fixture:voice-b'}],affinity:{value:.4,source_ref:'fixture:owner-affinity'}});
+  await controls.composition.waitForScore();
+  assert.equal(controls.composition.snapshot().score_status,'source-score-ready');assert.equal(controls.composition.snapshot().layers.length,4);
+  const anchor=controls.composition.snapshot().program_provenance.return_anchor;
+  await controls.composition.enableAudio({confirmed:true});
+  assert.equal(f.counts.contexts,1);assert.equal(f.$('[data-audio]').checked,true);assert.equal(f.$('[data-ambience]').checked,true);
+  assert.equal(controls.composition.snapshot().audio_enabled,true);
+  f.$('[data-field-mass]').value='1.3';f.root.dispatch('change',f.$('[data-field-mass]'));
+  assert.equal(controls.composition.snapshot().audio_enabled,true,'Field rendering must not silently stop explicitly enabled composition');
+  assert.deepEqual(controls.composition.snapshot().program_provenance.return_anchor,anchor);
+  controls.composition.disableAudio();assert.equal(f.$('[data-audio]').checked,false);assert.equal(controls.composition.snapshot().generating,true,'Silence does not pause score generation');
+  f.root.dispatch('click',f.$('[data-save]'));const record=JSON.parse([...f.storage.values()][0]);assert.ok(record.sound_composition);assert.equal(record.sound_composition.story_text,story.value);
+  f.root.dispatch('keydown',f.$('[data-stage]'),{key:'ArrowUp'});
+  f.root.dispatch('click',f.$('[data-return]'));
+  assert.equal(controls.composition.snapshot().generating,false);assert.equal(controls.composition.snapshot().audio_enabled,false);assert.equal(controls.composition.snapshot().score_status,'return-held');
+  assert.deepEqual(controls.storyBinding.checkpoint().anchor,anchor);
+  controls.soundscape.feather();assert.equal(controls.composition.snapshot().feather_stopped,true);assert.equal(f.$('[data-audio]').disabled,true);
+  controls.soundscape.releaseFeather({confirmed:true});assert.equal(controls.composition.snapshot().generating,false);assert.equal(controls.composition.snapshot().audio_enabled,false);
+  f.dispose();assert.equal(destroyed,1);
+ }finally{f.restore();}
+});
+test('corrupt saved composition is rejected before changing active field or score',async()=>{
+ let controls;const f=setup({loadCompositionControls:async()=>({mountWayglassSoundComposition(_root,options){controls=options;return{destroy(){}};}})});
+ try{
+  const panel=f.$('[data-acoustic-composition-panel]');panel.open=true;f.root.dispatch('toggle',panel);await new Promise(resolve=>setImmediate(resolve));
+  controls.soundscape.releaseFeather({confirmed:true});controls.composition.startGeneration({confirmed:true});
+  controls.storyBinding.setContext({voices:[{voice_id:'captured:a',source_ref:'fixture:a'},{voice_id:'captured:b',source_ref:'fixture:b'}],affinity:{value:.5,source_ref:'fixture:affinity'}});await controls.composition.waitForScore();
+  f.root.dispatch('click',f.$('[data-save]'));const key=[...f.storage.keys()][0],record=JSON.parse(f.storage.get(key));
+  f.root.dispatch('keydown',f.$('[data-stage]'),{key:'ArrowUp'});const before=f.packet().world,scoreBefore=controls.composition.checkpoint();
+  record.sound_composition.binding.sourceHash='wrong-source';f.storage.set(key,JSON.stringify(record));f.root.dispatch('click',f.$('[data-return]'));
+  assert.deepEqual(f.packet().world,before);assert.deepEqual(controls.composition.checkpoint(),scoreBefore);assert.match(f.$('[data-receipt]').textContent,/No valid saved return/);
+ }finally{f.restore();}
+});
+
+test('regional cold remount restores actual score declarations and anchor with generation and playback held',async()=>{
+ const storage=new Map();let original,returned;
+ const loader=receive=>async()=>({mountWayglassSoundComposition(_root,options){receive(options);return{destroy(){}};}});
+ const first=setup({storage,loadCompositionControls:loader(options=>{original=options;})});
+ let checkpoint;
+ try{
+  const panel=first.$('[data-acoustic-composition-panel]');panel.open=true;first.root.dispatch('toggle',panel);await new Promise(resolve=>setImmediate(resolve));
+  original.soundscape.releaseFeather({confirmed:true});original.composition.startGeneration({confirmed:true});
+  first.$('[data-acoustic-story]').value='A flame beside the river';first.root.dispatch('input',first.$('[data-acoustic-story]'));
+  original.storyBinding.setContext({voices:[{voice_id:'captured:return-a',source_ref:'fixture:return-a'},{voice_id:'captured:return-b',source_ref:'fixture:return-b'}],affinity:{value:.2,source_ref:'fixture:return-affinity'}});await original.composition.waitForScore();
+  checkpoint=original.storyBinding.checkpoint();
+ }finally{first.restore();}
+ const cold=setup({storage,loadCompositionControls:loader(options=>{returned=options;})});
+ try{
+  assert.equal(cold.counts.contexts,0);
+  const panel=cold.$('[data-acoustic-composition-panel]');panel.open=true;cold.root.dispatch('toggle',panel);await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(returned.composition.snapshot().score_status,'return-held');assert.equal(returned.composition.snapshot().generating,false);assert.equal(returned.composition.snapshot().audio_enabled,false);
+  assert.deepEqual(returned.storyBinding.checkpoint(),checkpoint);assert.equal(cold.$('[data-acoustic-story]').value,'A flame beside the river');
+ }finally{cold.restore();}
 });

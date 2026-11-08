@@ -29,3 +29,8 @@
 .acoustic-mirror .acoustic-readout{font-size:.78rem;overflow-wrap:anywhere}
 .acoustic-inspector{border-top:1px solid #9bd3ca33;padding-top:14px;margin-top:14px}.acoustic-inspector summary{cursor:pointer;color:#d7e8be;font-size:.85rem}.acoustic-inspector pre{max-height:300px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font:.7rem/1.5 ui-monospace,monospace;color:#a3c4ba}.acoustic-inspector button{margin-top:12px}
 
+
+.acoustic-composition-panel { margin-top: 18px; padding: clamp(16px,2vw,25px); border-radius: 24px; }
+.acoustic-composition-panel > summary { min-height: 44px; cursor: pointer; color: #ecd5aa; font-weight: 650; }
+.acoustic-composition-panel > label { display: grid; gap: 8px; margin-block: 12px; }
+.acoustic-composition-panel textarea { box-sizing: border-box; width: 100%; max-width: 100%; min-height: 88px; color: inherit; background: rgba(6,19,27,.75); border: 1px solid rgba(172,218,208,.4); border-radius: 14px; padding: 12px; }

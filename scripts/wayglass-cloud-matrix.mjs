@@ -26,7 +26,7 @@ const specs = [
  ['motion','apps/wayglass/test',/^(motion-choreography|glass-field|sound-composition-ui).*\.test\.js$/],
  ['cloud-health','test',/^wayglass-cloud-host\.test\.cjs$/],
  ['canonical-return','test/wayglass',/.*\.test\.cjs$/],
- ['arcsweep-deck','apps/wayglass/test',/^arcsweep-deck.*\.test\.js$/],
+ ['arcsweep-deck','apps/wayglass/test',/^(arcsweep-deck.*|acoustic-composition)\.test\.js$/],
 ];
 await mkdir(output,{recursive:true});
 const receipt = {schema:'wayglass.cloud-matrix/v1',source_sha:head,source_tree:tree,canonical_source_sha:canonical,

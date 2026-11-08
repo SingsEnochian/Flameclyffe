@@ -73,6 +73,8 @@ try{
   await page.getByRole('button',{name:'Open world deck',exact:true}).click();
   await page.getByText('Wayglass deck ready · its saved workspace is open.',{exact:true}).waitFor({timeout:45000});
   const child=page.frameLocator('iframe');await child.locator('#app .app-shell').waitFor();
+  const hiddenCodex=child.locator('#arcsweep-magic-book[hidden]');await hiddenCodex.waitFor({state:'attached'});
+  assert.equal(await hiddenCodex.evaluate(node=>getComputedStyle(node).display),'none','hidden inherited dialogs must not intercept deck controls');
   assert.ok(await child.locator('.sidebar nav [data-room]').count()>=11,'real core rooms must be present');
   await child.getByText('Spatial composition · this listening landscape',{exact:true}).click();
   await child.locator('[data-composition-status]').filter({hasText:'source-score-ready'}).waitFor({timeout:30000});
@@ -100,7 +102,27 @@ try{
   if(profile.isMobile){await cold.locator('[data-mobile-more]').click();await cold.locator('.mobile-room-sheet [data-mobile-room="waking-thread"]').click();}
   else await cold.locator('.sidebar [data-room="waking-thread"]').click();
   await cold.getByText('Deck cold return '+name,{exact:true}).waitFor();
-  receipt.scenarios.push({profile:name,child_core_ready:true,real_rooms:true,saved_state_cold_return:true,feather_inert:true,no_autoplay_requested:true,wtl_program_composed_both_regions:true,declared_voices_preserved:true,spatial_keyboard_control:true,parent_audio_graph_enabled_by_gesture:true,physical_output_verified:false});await context.close();
+  console.log('Verified inherited deck and WTL bridge: '+name);
+  receipt.scenarios.push({profile:name,child_core_ready:true,real_rooms:true,saved_state_cold_return:true,feather_inert:true,no_autoplay_requested:true,wtl_program_composed_both_regions:true,declared_voices_preserved:true,spatial_keyboard_control:true,parent_audio_graph_enabled_by_gesture:true,physical_output_verified:false});
+  await page.goto(origin+'/wayglass/?room=acoustic');
+  await page.locator('[data-surface="wayglass-acoustic-room"]').waitFor();
+  await page.getByText('Compose this acoustic landscape',{exact:true}).click();
+  const acoustic=page.locator('[data-acoustic-composer]');
+  await page.locator('[data-acoustic-story]').fill('Water and wind move through the flame and shadow');
+  await acoustic.locator('[data-story-voice-one]').fill('captured-acoustic-a');
+  await acoustic.locator('[data-story-voice-two]').fill('captured-acoustic-b');
+  await acoustic.locator('[data-story-affinity]').fill('0.4');await acoustic.locator('[data-story-apply]').click();
+  await acoustic.locator('[data-composition-status]').filter({hasText:'source-score-ready'}).waitFor();
+  assert.equal(await acoustic.locator('[data-sound-layer]').count(),4);
+  assert.match(await acoustic.locator('[data-composition-status]').textContent(),/Score evolving.*Sound off/);
+  await acoustic.locator('[data-audio-enable]').click();await acoustic.locator('[data-composition-status]').filter({hasText:'Sound enabled'}).waitFor();
+  assert.equal(await page.locator('[data-audio]').isChecked(),true,'shared projection synchronizes original acoustic controls');
+  await acoustic.locator('[data-audio-disable]').click();assert.equal(await page.locator('[data-audio]').isChecked(),false);
+  await page.locator('[data-save]').click();await page.locator('[data-return]').click();
+  await acoustic.locator('[data-composition-status]').filter({hasText:'return-held'}).waitFor();
+  assert.match(await acoustic.locator('[data-composition-status]').textContent(),/Score paused.*Sound off/);
+  receipt.scenarios.push({profile:name+'-acoustic',wtl_source_ready:true,independent_declared_voices:true,four_spatial_objects:true,quiet_continuous_generation:true,explicit_audio_synchronizes_existing_controls:true,combined_return_paused_and_muted:true,physical_output_verified:false});
+  console.log('Verified acoustic WTL composition and held return: '+name);await context.close();
  }
  hideArcSweep=true;
  const context=await browser.newContext();const page=await context.newPage();

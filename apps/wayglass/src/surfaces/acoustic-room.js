@@ -1,16 +1,22 @@
 import './acoustic-room.css';
 import {transition,bearing} from '../acoustic-marker-model.js';
 import {createAcousticAudioEngine} from '../acoustic-audio-engine.js';
+import {createAcousticComposition,ACOUSTIC_COMPOSITION_STORAGE_KEY} from '../acoustic-composition.js';
 import {WAYGLASS_FEATHER_EVENT,wayglassSomaticSound} from '../somatic-sound.js';
 import {createWorld,advanceWorld,forkWorld,worldReceipt,recoverWorld,compareWorlds} from '../acoustic-world-model.js';
 import {displacement,instrumentSnapshot} from '../field-instrument-model.js';
 import {createWayglassObservation} from '../living-observer-model.js';
 
 const STORAGE_KEY='wayglass.acoustic-world.return/v0.1';
-export function mountWayglassAcousticRoom(root){
+export function mountWayglassAcousticRoom(root,{loadCompositionControls=()=>import('./sound-composition.js')}={}){
  let world=createWorld(),mirror=null,disposed=false,eventSequence=0,interactions=0;
  let featherStopped=wayglassSomaticSound.snapshot().feather_stopped;
  const audio=createAcousticAudioEngine();
+ let composer=null,compositionRestored=false;
+ const score=createAcousticComposition({audio,getWorldReceipt:()=>worldReceipt(world),
+  setPlayback:setCompositionPlayback,setMono:value=>act({type:'mono',value}),
+  feather:()=>{wayglassSomaticSound.feather();applySharedFeather({stopped:true});},
+  releaseFeather:()=>{wayglassSomaticSound.releaseFeather({confirmed:true});applySharedFeather({stopped:false,confirmed:true});}});
  root.innerHTML=`
  <section class="wg-surface wg-acoustic-room" data-surface="wayglass-acoustic-room">
  <nav class="wg-deck-nav glass-panel" aria-label="Wayglass rooms">
@@ -64,10 +70,19 @@ export function mountWayglassAcousticRoom(root){
  <p class="acoustic-receipt" data-receipt aria-live="polite">No saved return in this session.</p>
  <details class="acoustic-inspector"><summary>Lantern · Inspect shared readings</summary><button type="button" class="glass-chip" data-export>Vessel · Export instrument packet</button><pre data-inspector></pre></details>
  <p class="acoustic-note">Compass shows a bearing; Key requests crossing. This prototype never executes a route.</p>
- </aside></div></section>`;
+ </aside></div>
+ <details class="glass-panel acoustic-composition-panel" data-acoustic-composition-panel><summary>Compose this acoustic landscape</summary>
+ <label class="acoustic-note">Acoustic-local story text (optional)<textarea data-acoustic-story maxlength="10000" rows="3" aria-label="Acoustic-local story text"></textarea></label>
+ <div data-acoustic-composer></div></details></section>`;
  const $=s=>root.querySelector(s);
  let reduced=Boolean(globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches);
  $('[data-motion]').checked=reduced;
+ function setCompositionPlayback(enabled){
+  const state=world.markerState;
+  if(state.muted===!enabled&&state.ambience===enabled){render();return;}
+  const muted=transition(state,{type:'mute',value:!enabled});
+  advance(transition(muted,{type:'ambience',value:enabled}));
+ }
  function syncAudio(){
   const state=world.markerState;
   audio.update({muted:state.muted,mono:state.mono,ambience:state.ambience,bearing:bearing(state)});
@@ -81,7 +96,7 @@ export function mountWayglassAcousticRoom(root){
  function measure(w=world){const l=w.markerState.listener;return instrumentSnapshot({x:l.x,y:l.y,sources:sources(w),options:options(w)});}
  function metric(value,places){return Number.isFinite(value)?value.toFixed(places):'∞';}
  function instrumentPacket(){
-  return {schema:'wayglass.acoustic-instrument-packet/v0.1',kind:'local-simulation',world:worldReceipt(world),field:{...measure(),world_id:world.world_id,snapshot_id:world.snapshot_id,tick:world.tick},comparison:mirror?{world:worldReceipt(mirror),difference:compareWorlds(world,mirror)}:null,observer:createWayglassObservation({surface:'wayglass:acoustic-room',touches:interactions,reducedMotion:reduced,sound:!world.markerState.muted,focus:'touch'})};
+  return {schema:'wayglass.acoustic-instrument-packet/v0.1',kind:'local-simulation',world:worldReceipt(world),field:{...measure(),world_id:world.world_id,snapshot_id:world.snapshot_id,tick:world.tick},comparison:mirror?{world:worldReceipt(mirror),difference:compareWorlds(world,mirror)}:null,observer:createWayglassObservation({surface:'wayglass:acoustic-room',touches:interactions,reducedMotion:reduced,sound:!world.markerState.muted,focus:'touch'}),composition:audio.composition.snapshot()};
  }
  function drawField(){
   if(disposed)return;
@@ -135,10 +150,10 @@ export function mountWayglassAcousticRoom(root){
  function applySharedFeather(detail){
   if(disposed)return;
   if(detail?.stopped===true){
-   featherStopped=true;audio.stop();
+   featherStopped=true;audio.composition.feather();audio.stop();
    if(world.markerState.status!=='cancelled'||!world.markerState.muted||world.markerState.ambience)advance(transition(world.markerState,{type:'feather'}));
    else render();
-  }else if(detail?.stopped===false&&detail?.confirmed===true){featherStopped=false;render();}
+  }else if(detail?.stopped===false&&detail?.confirmed===true){featherStopped=false;audio.composition.releaseFeather({confirmed:true});render();}
  }
  const onSharedFeather=event=>applySharedFeather(event.detail);
  function act(intent){
@@ -149,7 +164,8 @@ export function mountWayglassAcousticRoom(root){
   }
   if(featherStopped&&((intent.type==='mute'&&!intent.value)||(intent.type==='ambience'&&intent.value))){render();return;}
   const markerState=transition(world.markerState,intent);
-  if(intent.type==='feather'||intent.type==='reset'||(intent.type==='mute'&&intent.value))audio.stop();
+  if(intent.type==='reset')audio.stop();
+  if(intent.type==='mute'&&intent.value)audio.stop({pauseComposition:false});
   if(intent.type==='reset'){mirror=null;world=createWorld({markerState});render();}else advance(markerState);
   if(['select','orient','request-traverse','decline'].includes(intent.type))audio.signal({eventId:world.snapshot_id+':'+intent.type+':'+(++eventSequence),kind:'status'});
  }
@@ -170,11 +186,11 @@ export function mountWayglassAcousticRoom(root){
    finally{if(url)setTimeout(()=>URL.revokeObjectURL(url),1000);}return;
   }
   if(e.target.closest('[data-save]')){
-   try{globalThis.localStorage.setItem(STORAGE_KEY,JSON.stringify(worldReceipt(world)));$('[data-receipt]').textContent='Return saved · '+world.snapshot_id+' · field and listener preserved.';}
-   catch{$('[data-receipt]').textContent='Storage unavailable; return not saved.';}return;
+   try{const saved={...worldReceipt(world),sound_composition:score.checkpoint()};recoverWorld(saved);score.validate(saved.sound_composition,{worldSnapshotId:saved.snapshot_id});globalThis.localStorage.setItem(STORAGE_KEY,JSON.stringify(saved));$('[data-receipt]').textContent='Return saved · '+world.snapshot_id+' · field and listener preserved.';}
+   catch{$('[data-receipt]').textContent='Return could not be saved. Field and score remain open.';}return;
   }
   if(e.target.closest('[data-return]')){
-   try{const saved=globalThis.localStorage.getItem(STORAGE_KEY);if(!saved)throw Error('No return');const restored=recoverWorld(JSON.parse(saved));audio.stop();world=restored;mirror=null;render();$('[data-receipt]').textContent='Returned · '+world.snapshot_id+' · audio muted.';}
+   try{const saved=globalThis.localStorage.getItem(STORAGE_KEY);if(!saved)throw Error('No return');const value=JSON.parse(saved),restored=recoverWorld(value);if(value.sound_composition)score.validate(value.sound_composition,{worldSnapshotId:value.snapshot_id});audio.stop();world=restored;mirror=null;if(value.sound_composition){score.restore(value.sound_composition);$('[data-acoustic-story]').value=score.getStoryText();}render();$('[data-receipt]').textContent='Returned · '+world.snapshot_id+' · audio muted.';}
    catch{$('[data-receipt]').textContent='No valid saved return found.';}return;
   }
   const stage=e.target.closest('[data-stage]');
@@ -192,15 +208,28 @@ export function mountWayglassAcousticRoom(root){
   if(e.target.matches('[data-motion]')){reduced=e.target.checked;render();}
   if(e.target.matches('[data-field-mass]')&&Number(e.target.value)!==world.fieldMass)advance(world.markerState,Number(e.target.value));
  }
- function onInput(e){if(e.target.matches('[data-field-mass]')){interactions++;if(Number(e.target.value)!==world.fieldMass)advance(world.markerState,Number(e.target.value));}}
- function onKey(e){if(e.target.closest('input,button,textarea,select'))return;if(e.key==='ArrowLeft'){e.preventDefault();act({type:'turn',value:-Math.PI/12});}if(e.key==='ArrowRight'){e.preventDefault();act({type:'turn',value:Math.PI/12});}if(e.key==='ArrowUp'){e.preventDefault();act({type:'move',value:0.1});}if(e.key==='ArrowDown'){e.preventDefault();act({type:'move',value:-0.1});}}
+ function onInput(e){if(e.target.matches('[data-acoustic-story]')){score.setStoryText(e.target.value);return;}if(e.target.matches('[data-field-mass]')){interactions++;if(Number(e.target.value)!==world.fieldMass)advance(world.markerState,Number(e.target.value));}}
+ function onKey(e){if(e.target.closest('input,button,textarea,select,summary'))return;if(e.key==='ArrowLeft'){e.preventDefault();act({type:'turn',value:-Math.PI/12});}if(e.key==='ArrowRight'){e.preventDefault();act({type:'turn',value:Math.PI/12});}if(e.key==='ArrowUp'){e.preventDefault();act({type:'move',value:0.1});}if(e.key==='ArrowDown'){e.preventDefault();act({type:'move',value:-0.1});}}
+ async function onCompositionToggle(event){
+  const panel=$('[data-acoustic-composition-panel]');if(event.target!==panel||!panel.open||composer||disposed)return;
+  const holder=$('[data-acoustic-composer]');
+  try{
+   const {mountWayglassSoundComposition}=await loadCompositionControls();
+   if(!disposed&&!composer)composer=mountWayglassSoundComposition(holder,{composition:score.composition,soundscape:score.soundscape,storyBinding:score.storyBinding});
+  }catch{if(!disposed)holder.textContent='The soundstage could not open. Acoustic navigation and your saved field remain available.';}
+ }
  const onResize=()=>{if(!disposed)render();};
  const observer=typeof globalThis.ResizeObserver==='function'?new globalThis.ResizeObserver(onResize):null;
  observer?.observe($('[data-stage]'));
  globalThis.addEventListener?.('resize',onResize);
  globalThis.addEventListener?.(WAYGLASS_FEATHER_EVENT,onSharedFeather);
  root.addEventListener('click',onClick);root.addEventListener('change',onChange);root.addEventListener('input',onInput);root.addEventListener('keydown',onKey);
+ root.addEventListener('toggle',onCompositionToggle,true);
+ try{const saved=globalThis.localStorage?.getItem(ACOUSTIC_COMPOSITION_STORAGE_KEY);if(saved){compositionRestored=true;score.restore(JSON.parse(saved));$('[data-acoustic-story]').value=score.getStoryText();}}
+ catch{compositionRestored=true;audio.stop();$('[data-receipt]').textContent='Acoustic score return unavailable; sound remains off.';}
+ if(featherStopped)audio.composition.feather();
  root.tabIndex=0;render();
- return ()=>{disposed=true;observer?.disconnect();root.removeEventListener('click',onClick);root.removeEventListener('change',onChange);root.removeEventListener('input',onInput);root.removeEventListener('keydown',onKey);globalThis.removeEventListener?.('resize',onResize);globalThis.removeEventListener?.(WAYGLASS_FEATHER_EVENT,onSharedFeather);audio.dispose();};
+ if(!compositionRestored&&!featherStopped)audio.composition.startGeneration({confirmed:true});
+ return ()=>{if(disposed)return;try{globalThis.localStorage?.setItem(ACOUSTIC_COMPOSITION_STORAGE_KEY,JSON.stringify(score.checkpoint()));}catch{}disposed=true;composer?.destroy();root.removeEventListener('toggle',onCompositionToggle,true);observer?.disconnect();root.removeEventListener('click',onClick);root.removeEventListener('change',onChange);root.removeEventListener('input',onInput);root.removeEventListener('keydown',onKey);globalThis.removeEventListener?.('resize',onResize);globalThis.removeEventListener?.(WAYGLASS_FEATHER_EVENT,onSharedFeather);audio.dispose();};
 }
 
