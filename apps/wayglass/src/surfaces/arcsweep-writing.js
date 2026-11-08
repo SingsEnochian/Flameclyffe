@@ -303,6 +303,7 @@ export async function mountArcSweepWritingSurface(root) {
     const score = frame.score;
     scoreReadout.textContent = 'Wyrdrune · '+score.rootHz.toFixed(1)+' Hz ⇄ '
       +score.counterpartHz.toFixed(1)+' Hz · affinity '+score.relationshipAffinity.toFixed(2)
+      +' · below '+score.infrasonic.hz.toFixed(2)+' Hz · above '+(score.ultrasonic.hz/1000).toFixed(2)+' kHz (virtual)'
       +' · '+frame.eightfold.length+' phase receipts · '+frame.story_sha256.slice(0,12);
     if (soundscapeAudioOn) {
       scoreAudio.update({ muted:false, ambience:true, mono:scoreMono.checked, score });
