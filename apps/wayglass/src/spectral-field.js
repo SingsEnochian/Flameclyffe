@@ -45,14 +45,14 @@ export function createWayglassSpectralField({
       },
     });
   }
-  function capture({kind='system',strength=.5,motion=.2,continuity=.5,intent=.5,phase=null,source_ref='wayglass:ui-events'}={}) {
+  function capture({kind='system',strength=.5,motion=.2,continuity=.5,intent=.5,phase=null,relationship=null,source_ref='wayglass:ui-events'}={}) {
     if(!active||disposed)return false;
     if(!allowedKinds.has(kind))throw new TypeError('Unrecognised Wayglass interaction.');
     // Event semantics only, never raw key codes, prose, DOM values or participant IDs.
     const event=Object.freeze({
       event_id:'ui-'+(++sequence),kind,strength:clamp(strength),
       motion:clamp(motion),continuity:clamp(continuity),intent:clamp(intent),
-      affinity,phase:phase===null?((sequence%8)/8):clamp(phase),
+      affinity:relationship===null?affinity:clamp(relationship),phase:phase===null?((sequence%8)/8):clamp(phase),
       source_ref,
     });
     if(queue.length>=256){error='Spectral event queue capacity reached. Input was not silently marked as scored.';notify();return false}
