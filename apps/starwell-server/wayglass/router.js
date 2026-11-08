@@ -14,6 +14,7 @@ const { previewWyrdruneRitual } = require('../wayglass-runtime/wayglass-wyrdrune
 const { scoreStoryWithWyrdrune } = require('../wayglass-runtime/wayglass-wyrdrune-soundscape.cjs');
 const { scoreSpectralBatch } = require('../wayglass-runtime/wayglass-wyrdrune-spectrum.cjs');
 const { scoreResonanceAtlas } = require('../wayglass-runtime/wayglass-wyrdrune-atlas.cjs');
+const { executeLivingLearning } = require('../wayglass-runtime/wayglass-wyrdrune-learning.cjs');
 const { enterWayglassWorld } = require('../wayglass-runtime/wayglass-world-entry.cjs');
 const { createWayglassDeparture } = require('../wayglass-runtime/wayglass-stop-receipt.cjs');
 const { createDepartureStore } = require('../wayglass-runtime/wayglass-departure-store.cjs');
@@ -720,6 +721,25 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
   // No user content, raw keystrokes or speaker emissions are accepted here.
   // Wyrdrune composes room/world/universe fields from bounded aggregate scalars.
   // Scope names and participant identities remain client-side, never forwarded.
+  // Learning transitions belong to Wyrdrune. The host only carries typed
+  // observations, handles authentication, and returns a provenance receipt.
+  router.post('/wyrdrune/living-learning', createRequestGate({maxRequests:24,maxConcurrent:1}), async(req,res)=>{
+    res.setHeader('Cache-Control','no-store');
+    if(!(await griffStewardAuthorized(req).catch(()=>false))){
+      return res.status(401).json({error:'House Steward sign-in required for native Wyrdrune learning.'});
+    }
+    try{
+      return res.json(await executeLivingLearning(req.body?.learning,{
+        principal:{authorized:true},
+      }));
+    }catch(error){
+      return res.status(400).json({
+        schema:'wayglass.wyrdrune-living-learning-error/v0.1',
+        error:cleanText(error?.message||'Native Wyrdrune learning rejected this crossing.',240),
+      });
+    }
+  });
+
   router.post('/wyrdrune/resonance-atlas', createRequestGate({ maxRequests: 30, maxConcurrent: 2 }), async(req,res)=>{
     res.setHeader('Cache-Control','no-store');
     if(!(await griffStewardAuthorized(req).catch(()=>false))){
