@@ -6,6 +6,7 @@ import { installMotionChoreography } from './motion-choreography.js';
 import { installKeyboardControls } from './keyboard-controls.js';
 import { detectEmbodimentCapabilities, detectARSupport, publishEmbodiment } from './embodiment.js';
 import { enterWayglassWorld, leaveWayglassWorld, recoverWayglassDeparture, readVoyageMessages, replyToVoyage } from './route-client.js';
+import { inspectWayglassDoubleMobius, traverseWayglassDoubleMobius } from './route-client.js';
 import { installVoyageInbox } from './voyage-inbox.js';
 import { createWayglassSpellingController } from './spelling-assistance.js';
 import { mountWayglassSurface, registerWayglassSurface, listWayglassSurfaces } from './surface-registry.js';
@@ -162,6 +163,7 @@ const wayglass = Object.freeze({
   readMessages: readVoyageMessages,
   recoverDeparture: recoverWayglassDeparture,
   reply: replyToVoyage,
+  doubleMobius: Object.freeze({ inspect: inspectWayglassDoubleMobius, traverse: traverseWayglassDoubleMobius }),
 });
 
 globalThis.__wayglassOS = wayglass;
