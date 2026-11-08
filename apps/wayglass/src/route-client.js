@@ -89,6 +89,17 @@ export async function scoreWyrdruneAtlas(scales, fetchImpl=fetch, signal=undefin
   }));
 }
 
+/**
+ * Living Learning is native Wyrdrune. The host receives only typed Atlas
+ * values and an explicitly offered model return, never unsolicited thoughts.
+ */
+export async function executeWyrdruneLearning(learning,fetchImpl=fetch,signal=undefined) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/wyrdrune/living-learning',{
+    method:'POST',headers:JSON_HEADERS,cache:'no-store',signal,
+    body:JSON.stringify({learning}),
+  }));
+}
+
 export async function listWayglassCharacters(fetchImpl = fetch) {
   return jsonOrThrow(await fetchImpl('/api/v1/wayglass/characters', { cache: 'no-store' }));
 }
