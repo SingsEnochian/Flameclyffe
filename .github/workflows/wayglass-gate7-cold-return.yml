@@ -12,6 +12,8 @@ on:
       - 'lib/wayglass-kernel*'
       - 'lib/wayglass-double-mobius.cjs'
       - 'lib/wayglass-wyrdrune-soundscape.cjs'
+      - 'lib/wayglass-wyrdrune-spectrum.cjs'
+      - 'lib/wyrdrune/full-spectrum.wtl'
       - 'lib/wyrdrune/story-soundscape.wtl'
       - 'test/wayglass/eightfold-cold-return.test.cjs'
       - '.github/workflows/wayglass-gate7-cold-return.yml'
