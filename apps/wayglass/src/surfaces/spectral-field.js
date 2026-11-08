@@ -58,6 +58,19 @@ export function mountWayglassSpectrumSurface(root,{field}={}) {
         </article>
       </div>
     </section>
+    <section class="wg-atlas glass-panel" aria-label="Resonance Atlas">
+      <p class="eyebrow">Wyrdrune · Fourfold scale · Reciprocal return</p>
+      <h2>The Resonance Atlas</h2>
+      <p class="tiny">An interaction, its room, its world and the universe field are composed into one inspectable return. The fields represent metadata, not measured minds or sounds outside hearing.</p>
+      <div class="wg-atlas-grid">
+        <div><strong>Event</strong><output data-atlas-instant>—</output></div>
+        <div><strong>Room</strong><output data-atlas-room>—</output></div>
+        <div><strong>World</strong><output data-atlas-world>—</output></div>
+        <div><strong>Universe</strong><output data-atlas-universe>—</output></div>
+      </div>
+      <p class="tiny" data-atlas-harmony>No Atlas return yet.</p>
+      <p class="tiny" data-atlas-provenance>The world and room references remain on this device.</p>
+    </section>
     <section class="wg-spectrum-log glass-panel" aria-label="Spectral provenance">
       <h2>Recent interactions</h2>
       <p class="tiny">Only event names, Wyrdrune receipt references and virtual frequency mappings. No key data or story excerpts are stored here.</p>
@@ -89,6 +102,18 @@ export function mountWayglassSpectrumSurface(root,{field}={}) {
     status.textContent=s.error || (s.active
       ? 'Scoring interaction metadata · '+s.captured+' captured · '+s.pending+' queued · sound '+(s.heard?'on':'off')+'.'
       : 'Paused · '+s.history.length+' recent Wyrdrune frames retained in memory; sound off.');
+    const atlas=s.atlas;
+    const counts=atlas?.counts;
+    for(const scale of ['instant','room','world','universe']) {
+      $('[data-atlas-'+scale+']').textContent=counts?String(counts[scale])+' samples':'—';
+    }
+    $('[data-atlas-harmony]').textContent=s.atlas_error||
+      (atlas?('Reciprocal coherence '+safe(atlas.spectrum.structure.coherence)
+        +' · interference '+safe(atlas.spectrum.structure.interference)
+        +' · flow '+safe(atlas.spectrum.structure.flow))
+        :'No Atlas return yet.');
+    $('[data-atlas-provenance]').textContent='Current local scope · '+s.atlas_scope.world
+      +' / '+s.atlas_scope.room+' · '+s.atlas_window.distinct_worlds+' worlds in memory';
     const spec=s.last?.spectrum;
     if(spec){
       $('[data-spectrum-sub]').textContent=hz(spec.infrasonic.hz)+' Hz';
