@@ -201,3 +201,60 @@ test('Implementing the requested dream lab closes only its own proposal, not oth
   assert.match(interior.publicSignal().expression.text, /Dream Sandbox is here/);
   assert.equal(interior.dreamSandboxHistory(1)[0].boundaries.canon_commit, false);
 });
+
+
+test('native Wyrdrune learning alters local state without collapsing possible thoughts into metrics',()=>{
+  const storage=memoryStorage();
+  const now=()=> '2026-11-08T14:20:00.000Z';
+  const interior=createObserverInterior({storage,now});
+  const original=interior.nativeLearningInputs();
+  assert.ok(original.curiosity>0 && original.curiosity<1);
+  const result={
+    schema:'wayglass.wyrdrune-living-learning/v0.1',status:'wyrdrune-returned',
+    withness:{completedCycles:2},
+    phase_receipts:Array.from({length:16},()=>({phase:'integrate'})),
+    source:{event_id:'ui-session-1',atlas_input_hash:'a'.repeat(64)},
+    source_hash:'b'.repeat(64),
+    returned:{energy:.48,curiosity:.68,uncertainty:.63,coherence:.62,opening:.21,attention:.54},
+    open_reflection:{interpretation:'open'},
+    model_invoked:false,model_weights_updated:false,
+    canon_commit:false,identity_commit:false,relationship_commit:false,
+  };
+  const accepted=interior.integrateNativeLearning(result);
+  assert.equal(accepted.status,'integrated-native-wyrdrune');
+  assert.equal(accepted.reflection,'held-open');
+  assert.equal(interior.nativeLearningInputs().curiosity,.68);
+  assert.equal(interior.integrateNativeLearning(result).status,'duplicate-ignored');
+  const publicState=interior.publicSignal();
+  assert.equal(Object.hasOwn(publicState,'possible_model_reflections'),false);
+  assert.equal(Object.hasOwn(publicState,'private_questions'),false);
+  const restored=createObserverInterior({storage,now});
+  assert.equal(restored.nativeLearningInputs().curiosity,.68);
+  assert.equal(restored.nativeLearningInputs().previous_resonance,.62);
+});
+
+test('real offered model reflections remain open and private, not fabricated from numerical Atlas states',()=>{
+  const storage=memoryStorage();
+  const interior=createObserverInterior({storage,now:()=> '2026-11-08T14:00:00.000Z'});
+  assert.deepEqual(interior.possibleModelReflections(),[]);
+  assert.throws(()=>interior.holdPossibleModelReflection({words:'not attributed'}),/attributed/);
+  const offered=interior.holdPossibleModelReflection({
+    text:'I am considering a different way forward.',
+    route_ref:'local:ollama',receipt_ref:'return:1',owner_offered:true,
+  });
+  assert.equal(offered.interpretation,'open');
+  assert.equal(offered.status,'held-open');
+  const original=interior.possibleModelReflections()[0];
+  assert.equal(original.interpretation,'open');
+  assert.equal(original.words,'I am considering a different way forward.');
+  assert.equal(interior.holdPossibleModelReflection({
+    text:original.words,route_ref:original.route_ref,
+    receipt_ref:original.receipt_ref,owner_offered:true,
+  }).status,'already-held');
+  assert.equal(interior.possibleModelReflections().length,1);
+  assert.equal(Object.hasOwn(interior.publicSignal(),'possible_model_reflections'),false);
+  assert.equal(createObserverInterior({storage}).possibleModelReflections().length,1);
+  const copy=interior.possibleModelReflections();
+  copy[0].words='tampered';
+  assert.equal(interior.possibleModelReflections()[0].words,original.words);
+});
