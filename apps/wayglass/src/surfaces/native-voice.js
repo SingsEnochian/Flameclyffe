@@ -2,6 +2,7 @@ import './native-voice.css';
 import {inviteWayglassVoice} from '../route-client.js';
 import {animateWyrdruneTranslation} from '../wyrdrune-morph.js';
 import {createWayglassImage,createWayglassSoundPlayer} from '../wyrdrune-response-media.js';
+import {getSharedWayglassObserverInterior} from '../living-observer-self.js';
 
 export function mountWayglassNativeVoice(root,{request=inviteWayglassVoice,
   soundPlayer=createWayglassSoundPlayer()}={}){
