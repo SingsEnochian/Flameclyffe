@@ -1,3 +1,6 @@
+import {createStoryCompositionBinding} from '../../../lib/wayglass-story-score.mjs';
+import {createSoundComposition} from '../../../lib/wayglass-sound-composition.mjs';
+import {createCompositionProjection} from '../../../lib/wayglass-composition-projection.mjs';
 import { WorkletSynthesizer } from 'spessasynth_lib';
 import { SoundBankLoader } from 'spessasynth_core';
 import { WorldweaveAcoustics } from './worldweave-acoustics.js';
@@ -122,14 +125,27 @@ export class StorySoundscape {
     this.bluebirdSomaticProxy = false;
     this.bluebirdReceipts = [];
     this.worldweave = new WorldweaveAcoustics(this);
+    this.compositionProjection=createCompositionProjection({getContext:()=>this.context,getDestination:()=>this.buses.ambience,canPlay:()=>this.context?.state==='running'});
+    this.composition=createSoundComposition({region:'wayglass-arcsweep',source_ref:'apps/arcsweep/src/story-soundscape.js',scene:{id:'world-sound-mixer',root_hz:369,source_ref:'apps/arcsweep/src/worldweave-acoustics.js'},
+      onScore:frame=>this.compositionProjection.render(frame),enableAudio:async()=>{await this.arm(this._compositionWorld||{});return this.context?.state==='running';},stopAudio:()=>this.compositionProjection.stop()});
+    this.storyScoreTurns=0;
+    this.storyScoreBinding=createStoryCompositionBinding({composition:this.composition,getText:()=>this.lastText,getTurns:()=>this.storyScoreTurns,restoreTurns:value=>{this.storyScoreTurns=value;},
+      getAnchor:()=>({schema:'wayglass.local-score-anchor/v1',anchor_id:globalThis.crypto.randomUUID(),world_id:this.world.worldId||null,source_ref:'owner-declared:story-composer'}),
+      source_ref:'apps/arcsweep/src/story-soundscape.js#lastText'});
+  }
+
+  setStoryScoreContext(value) {
+    return this.storyScoreBinding.setContext(value);
   }
 
   get armed() { return Boolean(this.context); }
 
   setWorld(world) {
+    this._compositionWorld=world;
     const previousRoot = this.world.rootHz;
     this.world = { ...this.world, ...resolveWorldTone(world) };
     this.soundfontMap = resolveWorldSoundfontMap(world);
+    this.composition?.setScene({id:String(this.world.worldId).slice(0,160),root_hz:Math.max(40,Math.min(1200,this.world.rootHz)),source_ref:'apps/arcsweep/src/story-soundscape.js#resolveWorldTone'});
     if (this.humActive && previousRoot !== this.world.rootHz) this.restartHum();
     this.worldweave.transition(world);
     return this.snapshot();
@@ -691,6 +707,7 @@ export class StorySoundscape {
   }
 
   featherStop() {
+    this.composition.feather();
     this.worldweave.stop('feather-stop');
     this.stopHum();
     this.stopHeartfield();
@@ -706,10 +723,11 @@ export class StorySoundscape {
   }
 
   getTurnReceipts() { return structuredClone(this.turnReceipts); }
-  clearTurn(text = '') { this.turnReceipts = []; this.seenTextEvents.clear(); this.lastText = String(text); }
+  clearTurn(text = '') { this.storyScoreTurns++; this.turnReceipts = []; this.seenTextEvents.clear(); this.lastText = String(text); }
 
   snapshot() {
     return {
+      composition: this.composition.snapshot(),
       armed: this.armed,
       humActive: this.humActive,
       recording: Boolean(this.recording),

@@ -1,3 +1,6 @@
+import {mountWayglassSoundComposition} from './surfaces/sound-composition.js';
+import {wayglassSomaticSound} from './somatic-sound.js';
+import {wayglassStoryScoreBinding,installWayglassStoryComposition} from './story-score-binding.js';
 import './styles.css';
 import './authorization.css';
 import { openWayglassAuthorization } from './authorization.js';
@@ -9,6 +12,7 @@ import { enterWayglassWorld, leaveWayglassWorld, recoverWayglassDeparture, readV
 import { installVoyageInbox } from './voyage-inbox.js';
 import { createWayglassSpellingController } from './spelling-assistance.js';
 import { mountWayglassSurface, registerWayglassSurface, listWayglassSurfaces } from './surface-registry.js';
+import { mountArcSweepDeckSurface } from './surfaces/arcsweep-deck.js';
 import { mountArcSweepWritingSurface } from './surfaces/arcsweep-writing.js';
 import { mountWayglassSystemsSurface } from './surfaces/systems.js';
 import { mountWayglassVideoAtelier } from './surfaces/video-atelier.js';
@@ -30,7 +34,6 @@ const root = document.querySelector('#app');
 // Bluebird provider authorization is an explicit connection action.
 // The local entry and other configured provider routes remain independently usable.
 installWayglassField({ host: document.body });
-installMotionChoreography({ root: document.documentElement });
 installKeyboardControls({ root: document });
 
 const embodiment = detectEmbodimentCapabilities(globalThis);
@@ -41,8 +44,11 @@ document.documentElement.dataset.wayglassAr = ar.supported ? 'ready' : ar.reason
 
 FIRST_WAYGLASS_ORGANS.forEach(registerWayglassOrgan);
 
+registerWayglassSurface({surface_id:'wayglass:sound-composition',label:'Wayglass · Spatial Soundstage',mount:root=>mountWayglassSoundComposition(root,{composition:wayglassSomaticSound.composition,soundscape:wayglassSomaticSound,storyBinding:wayglassStoryScoreBinding})});
 registerWayglassSurface({surface_id:WAYGLASS_ENTRY_SURFACE,label:'Living Watercolor',mount:mountLivingWatercolorSurface});
 registerWayglassSurface({surface_id:'wayglass:journey-before-destination',label:'Journey Before Destination',mount:mountJourneyBeforeDestinationSurface});
+
+registerWayglassSurface({surface_id:'arcsweep:deck',label:'Wayglass · World and Continuity Deck',mount:mountArcSweepDeckSurface});
 
 registerWayglassSurface({
   surface_id: 'arcsweep:writing-room',
@@ -129,11 +135,13 @@ spellingButton.addEventListener('click',()=>{
 const switcher=document.createElement('button');switcher.type='button';switcher.className='wg-ship-switch glass-chip';
 switcher.setAttribute('aria-controls',shell.id);switcher.setAttribute('aria-expanded','false');switcher.textContent='Explore Wayglass';
 root.after(shell,switcher);
+const motion=installMotionChoreography({root:document.documentElement,controlsHost:shell,contentRoot:root});
 switcher.addEventListener('click',()=>{shell.hidden=!shell.hidden;switcher.setAttribute('aria-expanded',String(!shell.hidden));switcher.textContent=shell.hidden?'Explore Wayglass':'Close ship map';});
 function mountSurface(surfaceId){
   const request=mountQueue.then(async()=>{
     const result=await mountWayglassSurface(surfaceId,root);
     spelling.apply(root);
+    motion?.arrive(root);
     document.documentElement.dataset.wayglassSurface=surfaceId;
     for(const button of shell.querySelectorAll('[data-surface-id]')){
       const active=button.dataset.surfaceId===surfaceId;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));
@@ -170,3 +178,4 @@ const roomQuery=new URLSearchParams(globalThis.location?.search||'').get('room')
 const entry=resolveWayglassEntry({available:listWayglassSurfaces(),room:roomQuery});
 await wayglass.mount(entry.surface_id);
 installVoyageInbox();
+installWayglassStoryComposition({observe:subscribeWayglassObserver});

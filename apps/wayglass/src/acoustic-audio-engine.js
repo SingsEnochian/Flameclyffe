@@ -1,3 +1,5 @@
+import {createSoundComposition} from '../../../lib/wayglass-sound-composition.mjs';
+import {createCompositionProjection} from '../../../lib/wayglass-composition-projection.mjs';
 // Optional WebAudio projection. World state and route authority remain in the host.
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const number = (value, name) => {
@@ -5,12 +7,16 @@ const number = (value, name) => {
   return value;
 };
 
-export function createAcousticAudioEngine({AudioContext = globalThis.AudioContext || globalThis.webkitAudioContext} = {}) {
+export function createAcousticAudioEngine({AudioContext = globalThis.AudioContext || globalThis.webkitAudioContext,scope=globalThis} = {}) {
   let context = null, graph = null, disposed = false, running = false, epoch = 0, pending = null;
   let status = typeof AudioContext === 'function' ? 'stopped' : 'unsupported', lastError = null;
   let settings = {muted: true, mono: false, ambience: false, bearing: {pan: 0, gain: 1, distance: 1}};
   const voices = new Set(), presented = new Set();
   const supported = typeof AudioContext === 'function';
+  const compositionProjection=createCompositionProjection({getContext:()=>context,getDestination:()=>graph?.ambience,canPlay:()=>isRunning()&&!settings.muted&&!disposed});
+  const composition=createSoundComposition({region:'wayglass-acoustic',source_ref:'apps/wayglass/src/acoustic-audio-engine.js',scene:{id:'acoustic-field',root_hz:110,source_ref:'apps/wayglass/src/acoustic-world-model.js'},
+    onScore:frame=>{settings.mono=frame.mono;project();return compositionProjection.render(frame);},
+    enableAudio:async()=>{await start();settings.ambience=true;project();return isRunning();},stopAudio:()=>compositionProjection.stop()});
 
   function disconnect(node) { try { node?.disconnect(); } catch {} }
   function releaseVoice(voice) {
@@ -107,6 +113,8 @@ export function createAcousticAudioEngine({AudioContext = globalThis.AudioContex
         distance: Math.max(0, number(b.distance, 'distance'))};
     }
     settings = next;
+    if('mono'in value&&composition.snapshot().mono!==next.mono)composition.setMix({mono:next.mono});
+    if(value.ambience===false)composition.disableAudio();
     if (settings.muted) stop(); else project();
     return getState();
   }
@@ -136,14 +144,17 @@ export function createAcousticAudioEngine({AudioContext = globalThis.AudioContex
     }
   }
   function stop() {
+    composition.pauseGeneration();composition.disableAudio();
     ++epoch; pending = null; settings.muted = true; running = false;
     teardown(); status = disposed ? 'disposed' : supported ? 'stopped' : 'unsupported';
     return getState();
   }
   function dispose() {
     if (disposed) return;
-    disposed = true; stop();
+    disposed = true; stop();composition.dispose();compositionProjection.dispose();scope.removeEventListener?.('wayglass:feather',onFeather);
     try { Promise.resolve(context?.close()).catch(() => {}); } catch {}
   }
-  return {start, update, signal, stop, dispose, getState};
+  function onFeather(event){if(event.detail?.stopped===true){composition.feather();stop();}else if(event.detail?.stopped===false&&event.detail?.confirmed===true)composition.releaseFeather({confirmed:true});}
+  scope.addEventListener?.('wayglass:feather',onFeather);
+  return {composition,start, update, signal, stop, dispose, getState};
 }

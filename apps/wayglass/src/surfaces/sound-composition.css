@@ -1,0 +1,44 @@
+.wg-composer { max-width: 1250px; margin-inline: auto; display: grid; gap: 18px; }
+.wg-composer header, .wg-composer-panel { padding: clamp(18px,3vw,30px); border-radius: 26px; }
+.wg-composer header h1 { margin: .3em 0; }
+.wg-composer-layout { display: grid; grid-template-columns: minmax(0,1.4fr) minmax(280px,1fr); gap: 18px; }
+.wg-composer-stage {
+ position: relative; min-height: 430px; overflow: hidden; isolation: isolate; border-radius: 24px;
+ border: 1px solid rgba(177,218,207,.35); touch-action: none;
+ background: radial-gradient(ellipse at 50% 50%, rgba(184,137,82,.15), transparent 45%), linear-gradient(145deg,rgba(23,64,69,.9),rgba(17,29,47,.94));
+}
+.wg-composer-orbits, .wg-composer-orbits::before, .wg-composer-orbits::after {
+ position: absolute; pointer-events: none; inset: 12%; border: 1px solid rgba(211,221,187,.16); border-radius: 50%;
+}
+.wg-composer-orbits::before { content: ''; inset: 16%; }
+.wg-composer-orbits::after { content: ''; inset: -18%; }
+.wg-composer-centre { position: absolute; inset: 50% auto auto 50%; transform: translate(-50%,-50%); color: #ecd5aa; font-size: 1.4em; pointer-events: none; }
+.wg-composer-object {
+ position: absolute; min-width: 48px; min-height: 48px; max-width: 155px;
+ transform: translate(-50%,-50%); border: 1px solid rgba(172,218,208,.55); border-radius: 50%;
+ padding: 12px; color: #f0f5e9; background: rgba(28,72,76,.94); overflow-wrap: anywhere;
+ box-shadow: 0 0 25px rgba(135,186,173,.15); cursor: grab; touch-action: none;
+}
+.wg-composer-object[aria-pressed="true"] { border-color: #e5c68f; box-shadow: 0 0 0 3px rgba(229,198,143,.2),0 0 25px rgba(135,186,173,.15); }
+.wg-composer-object[data-muted="true"] { opacity: .6; }
+.wg-composer-object:focus-visible { outline: 3px solid #f4ddb1; outline-offset: 5px; }
+.wg-composer-options { display: grid; gap: 12px; }
+.wg-composer-options label { display: grid; gap: 5px; color: #dce9df; }
+.wg-composer-options input[type="range"] { width: 100%; min-height: 30px; accent-color: #a6d7c6; }
+.wg-composer-options input[type="checkbox"] { width: 20px; height: 20px; }
+.wg-composer-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-block: 12px; }
+.wg-composer-actions .glass-chip { min-height: 44px; }
+.wg-composer-layers { display: grid; gap: 10px; padding-left: 0; list-style: none; }
+.wg-composer-layers li { padding: 12px; border: 1px solid rgba(177,218,207,.2); border-radius: 15px; overflow-wrap: anywhere; }
+.wg-composer-readout { color: #dce9df; overflow-wrap: anywhere; }
+.wg-composer-note { color: #c2d4cd; font-size: .86rem; line-height: 1.6; }
+.wg-composer legend { color: #ecd5aa; }
+.wg-composer fieldset { min-width: 0; border: 1px solid rgba(177,218,207,.25); border-radius: 18px; padding: 16px; }
+@media (max-width: 760px) {
+ .wg-composer-layout { grid-template-columns: minmax(0,1fr); }
+ .wg-composer-stage { min-height: 350px; }
+ .wg-composer-object { max-width: 115px; font-size: .8rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+ .wg-composer *, .wg-composer *::before, .wg-composer *::after { animation: none !important; transition: none !important; }
+}
