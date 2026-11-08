@@ -24,6 +24,7 @@ export function mountWayglassSpectrumSurface(root,{field}={}) {
       <div class="wg-spectrum-controls">
         <button type="button" class="glass-chip" data-spectrum-observe aria-pressed="false">Observe interactions</button>
         <button type="button" class="glass-chip" data-spectrum-hear aria-pressed="false">Hear the audible voice</button>
+        <button type="button" class="glass-chip" data-spectrum-haptics aria-pressed="false">Enable tactile echo</button>
         <button type="button" class="glass-chip" data-spectrum-feather>🪽 Feather Stop</button>
       </div>
       <label class="wg-spectrum-affinity">Declared harmonic relationship
@@ -60,6 +61,7 @@ export function mountWayglassSpectrumSurface(root,{field}={}) {
     <section class="wg-spectrum-log glass-panel" aria-label="Spectral provenance">
       <h2>Recent interactions</h2>
       <p class="tiny">Only event names, Wyrdrune receipt references and virtual frequency mappings. No key data or story excerpts are stored here.</p>
+      <p data-spectrum-projection class="tiny">No visual or tactile projection yet.</p>
       <p data-spectrum-counts class="tiny">No samples.</p>
       <ol data-spectrum-history aria-label="Recent spectrum events"></ol>
     </section>
@@ -67,6 +69,7 @@ export function mountWayglassSpectrumSurface(root,{field}={}) {
   const $=selector=>root.querySelector(selector);
   const observe=$('[data-spectrum-observe]');
   const hear=$('[data-spectrum-hear]');
+  const haptics=$('[data-spectrum-haptics]');
   const affinity=$('[data-spectrum-affinity]');
   const status=$('[data-spectrum-status]');
   const log=$('[data-spectrum-history]');
@@ -78,6 +81,9 @@ export function mountWayglassSpectrumSurface(root,{field}={}) {
     hear.textContent=s.heard?'Silence audible voice':'Hear the audible voice';
     hear.setAttribute('aria-pressed',String(s.heard));
     hear.disabled=!s.active||(!s.heard&&!s.last);
+    haptics.textContent=s.haptics?'Stop tactile echo':'Enable tactile echo';
+    haptics.setAttribute('aria-pressed',String(s.haptics));
+    haptics.disabled=!s.active;
     affinity.value=String(s.affinity);
     $('[data-spectrum-affinity-readout]').textContent=safe(s.affinity);
     status.textContent=s.error || (s.active
@@ -88,6 +94,12 @@ export function mountWayglassSpectrumSurface(root,{field}={}) {
       $('[data-spectrum-sub]').textContent=hz(spec.infrasonic.hz)+' Hz';
       $('[data-spectrum-mid]').textContent=hz(spec.audible.voice_one_hz)+' / '+hz(spec.audible.voice_two_hz)+' Hz';
       $('[data-spectrum-high]').textContent=hz(spec.ultrasonic.hz/1000)+' kHz';
+      $('[data-spectrum-projection]').textContent='Wyrdrune refraction '+safe(spec.projection.refraction)
+        +' · fine granulation '+safe(spec.projection.granulation)
+        +' · tactile proposal '+hz(spec.projection.tactile_ms)+' ms (off unless enabled).';
+      const ribbons=$('.wg-spectrum-ribbons');
+      ribbons.style.setProperty('--wg-refraction',String(spec.projection.refraction));
+      ribbons.style.setProperty('--wg-granulation',String(spec.projection.granulation));
     }
     $('[data-spectrum-counts]').textContent=s.history.length+' locally held receipts · '+(s.processing?'Wyrdrune composing…':'idle');
     log.replaceChildren();
@@ -105,6 +117,9 @@ export function mountWayglassSpectrumSurface(root,{field}={}) {
   hear.addEventListener('click',async()=>{
     try{field.status().heard?field.stopHearing():await field.hear()}
     catch(error){status.textContent=error.message;}
+  });
+  haptics.addEventListener('click',()=>{
+    try{field.setHaptics(!field.status().haptics)}catch(error){status.textContent=error.message}
   });
   affinity.addEventListener('input',()=>field.setAffinity(Number(affinity.value)));
   $('[data-spectrum-feather]').addEventListener('click',()=>wayglassSomaticSound.feather());
