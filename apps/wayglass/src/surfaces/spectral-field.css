@@ -27,3 +27,9 @@
 .wg-spectrum-ribbon-b { opacity: calc(.28 + var(--wg-granulation, .5) * .58); }
 .wg-spectrum-ring { transition: box-shadow .4s ease-out; }
 @media (prefers-reduced-motion: reduce) { .wg-spectrum-ring { transition: none; } }
+
+.wg-atlas { border-radius: 1.5rem; }
+.wg-atlas-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,10rem),1fr)); gap:.75rem; margin-block: 1rem; }
+.wg-atlas-grid > div { display:flex; flex-direction:column; gap:.4rem; padding:1rem; border-radius:1rem; border:1px solid #8eaac477; background:linear-gradient(145deg,#88a9b511,#a8a2de10); }
+.wg-atlas-grid output { font-variant-numeric: tabular-nums; font-weight:650; }
+.wg-atlas-grid strong { font-size:.9rem; }
