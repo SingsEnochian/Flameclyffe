@@ -23,11 +23,11 @@ export function createWayglassSpectralField({
   featherState=()=>wayglassSomaticSound.snapshot(),
 }={}) {
   const listeners=new Set(), history=[];
-  let active=false,disposed=false,heard=false,error=null,sequence=0,affinity=.5;
+  let active=false,disposed=false,heard=false,haptics=false,error=null,sequence=0,affinity=.5;
   let queue=[],pending=null,abort=null,timer=null,unsubscribeObserver=null,unsubscribeWatercolor=null,lastFrame=null;
   const audio=audioFactory();
   const status=()=>Object.freeze({
-    schema:SPECTRAL_FIELD_SCHEMA,active,heard,disposed,error,affinity,
+    schema:SPECTRAL_FIELD_SCHEMA,active,heard,haptics,disposed,error,affinity,
     pending:queue.length,processing:Boolean(pending),captured:sequence,
     last:history.at(-1)||null,history:Object.freeze([...history]),
     virtual_bands:['infrasonic','ultrasonic'],
@@ -93,6 +93,9 @@ export function createWayglassSpectralField({
         lastFrame=record.spectrum;
       }
       listenFrame(lastFrame);
+      if(haptics && typeof scope.navigator?.vibrate==='function') {
+        try{scope.navigator.vibrate(Math.round(lastFrame.projection.tactile_ms));}catch{}
+      }
     }catch(e){
       if(!disposed && active && e?.name!=='AbortError'){
         error='Spectral scoring halted: '+(e?.message||'host unavailable');
@@ -198,12 +201,19 @@ export function createWayglassSpectralField({
     heard=true;listenFrame(lastFrame);notify();return status();
   }
   function pause(){
-    active=false;queue=[];error=null;
+    active=false;queue=[];error=null;haptics=false;
+    if(typeof scope.navigator?.vibrate==='function'){try{scope.navigator.vibrate(0)}catch{}}
     if(timer!==null){scope.clearTimeout(timer);timer=null}
     abort?.abort();abort=null;
     removeCaptureListeners();stopHearing();notify();return status();
   }
   function setAffinity(value){affinity=clamp(value);notify();return affinity}
+  function setHaptics(value){
+    if(!active||disposed||featherState()?.feather_stopped)throw new Error('Haptics require active spectral consent.');
+    haptics=value===true;
+    if(!haptics&&typeof scope.navigator?.vibrate==='function'){try{scope.navigator.vibrate(0)}catch{}}
+    notify();return haptics;
+  }
   function subscribe(listener){
     if(typeof listener!=='function')throw new TypeError('A spectral subscriber function is required.');
     listeners.add(listener);listener(status());
@@ -216,5 +226,5 @@ export function createWayglassSpectralField({
     audio.dispose();notify();listeners.clear();
   }
   scope.addEventListener?.(WAYGLASS_FEATHER_EVENT,fromFeather);
-  return Object.freeze({observe,pause,hear,stopHearing,setAffinity,subscribe,capture,flush,status,dispose});
+  return Object.freeze({observe,pause,hear,stopHearing,setAffinity,setHaptics,subscribe,capture,flush,status,dispose});
 }
