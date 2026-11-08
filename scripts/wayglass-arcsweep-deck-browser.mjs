@@ -48,6 +48,13 @@ try{
   await parentSound.locator('[data-story-voice-one]').fill('captured-declared-a');
   await parentSound.locator('[data-story-voice-two]').fill('captured-declared-b');
   await parentSound.locator('[data-story-affinity]').fill('0.5');
+  await page.evaluate(()=>{
+   globalThis.__deckClickTrace=[];
+   for(const name of ['pointerdown','pointerup','click'])document.addEventListener(name,event=>{
+    if(event.target.closest?.('[data-story-apply]'))globalThis.__deckClickTrace.push({phase:'capture',name,target:event.target.outerHTML,path:event.composedPath().filter(n=>n.nodeType===1).map(n=>n.tagName+' '+(n.getAttribute('data-deck-composer')!==null?'composer-root':''))});
+   },true);
+   document.querySelector('[data-deck-composer]').addEventListener('click',event=>globalThis.__deckClickTrace.push({phase:'bubble',target:event.target.outerHTML}));
+  });
   await parentSound.locator('[data-story-apply]').click();
   await parentSound.locator('[data-composition-status]').filter({hasText:'source-score-ready'}).waitFor();
   assert.equal(await parentSound.locator('[data-sound-layer]').count(),4,'WTL returns two foreground and two atmospheric sound objects');
@@ -99,7 +106,7 @@ try{
 }catch(error){
  receipt.status='failed';receipt.failure=String(error.stack||error);
  if(activePage&&!activePage.isClosed()){
-  try{const state=await activePage.evaluate(()=>({url:location.href,status:[...document.querySelectorAll('[data-composition-status],[data-composition-error],[data-story-declaration-status],[data-deck-status]')].map(n=>({tag:n.outerHTML,text:n.textContent})),sound_state:globalThis.__wayglassOS?.soundCompositionState?.()||null,declarations:[...document.querySelectorAll('[data-story-voice-one],[data-story-voice-two],[data-story-affinity]')].map(n=>({field:n.outerHTML,value:n.value})),readyState:document.readyState}));
+  try{const state=await activePage.evaluate(()=>({url:location.href,click_trace:globalThis.__deckClickTrace,status:[...document.querySelectorAll('[data-composition-status],[data-composition-error],[data-story-declaration-status],[data-deck-status]')].map(n=>({tag:n.outerHTML,text:n.textContent})),sound_state:globalThis.__wayglassOS?.soundCompositionState?.()||null,declarations:[...document.querySelectorAll('[data-story-voice-one],[data-story-voice-two],[data-story-affinity]')].map(n=>({field:n.outerHTML,value:n.value})),readyState:document.readyState}));
    await writeFile(resolve(output,'failure-state.json'),JSON.stringify(state,null,2)+'\n');
    await activePage.screenshot({path:resolve(output,'failure.png'),fullPage:true});
   }catch{receipt.diagnostic_capture_failed=true;}
