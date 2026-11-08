@@ -79,6 +79,9 @@ try{
    });
    assert.equal(clear,true,'host utilities must leave the inherited touch surface unobstructed');
   }
+  // The host and child have independent scroll positions. Bring the full
+  // listening region into view before using its fixed mobile toolbar.
+  await page.locator('iframe').scrollIntoViewIfNeeded();
   const child=page.frameLocator('iframe');await child.locator('#app .app-shell').waitFor();
   // Codex is a post-core optional sidecar. When mounted, its closed dialog
   // must respect hidden; the subsequent real clicks also catch late overlays.
@@ -107,6 +110,7 @@ try{
   assert.equal(returned.child_state_saved,true);
   await page.goto(origin+'/wayglass/?room=deck');await page.getByRole('button',{name:'Open world deck',exact:true}).click();
   await page.getByText('Wayglass deck ready · its saved workspace is open.',{exact:true}).waitFor({timeout:45000});
+  await page.locator('iframe').scrollIntoViewIfNeeded();
   const cold=page.frameLocator('iframe');
   if(profile.isMobile){await cold.locator('[data-mobile-more]').click();await cold.locator('.mobile-room-sheet [data-mobile-room="waking-thread"]').click();}
   else await cold.locator('.sidebar [data-room="waking-thread"]').click();
