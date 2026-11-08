@@ -293,6 +293,7 @@ export async function mountArcSweepWritingSurface(root) {
   }
   function recentStoryText() {
     const previous = messages.filter(item => item.channel === 'IC'
+      && item.world_id === cp('world').value.trim()
       && !item.content.startsWith('[Route error]')).slice(-4)
       .map(item => item.content);
     return [...previous, input.value].join('\n').slice(-4900);
@@ -326,7 +327,8 @@ export async function mountArcSweepWritingSurface(root) {
     try {
       const scored = await scoreWyrdruneStory({
         text,participants:scoreParticipants(),affinity:Number(scoreAffinity.value),
-        turns:messages.filter(m => m.channel === 'IC' && !m.content.startsWith('[Route error]')).length,
+        turns:messages.filter(m => m.channel === 'IC' && m.world_id === cp('world').value.trim()
+          && !m.content.startsWith('[Route error]')).length,
         signal:soundscapeAbort?.signal,
       });
       if (soundscapeDisposed || revision !== soundscapeRevision || !scoreLive.checked) return;
@@ -454,6 +456,11 @@ export async function mountArcSweepWritingSurface(root) {
     selectedCharacter = '';
     characterSelect.value = '';
     externalConsent.checked = false;
+    // A world crossing never drags its predecessor's continuous audio along.
+    stopScoreAudio();
+    lastSoundscape = null;
+    scoreReadout.textContent = 'A new world needs its own Wyrdrune score.';
+    queueStoryScore();
     void loadRoutes();
   });
   selectWorldSeat(cp('world').value, { resetCheckpoint: false });
