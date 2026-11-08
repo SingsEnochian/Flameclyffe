@@ -109,3 +109,17 @@ test('Resonance Atlas only crosses the authenticated House gateway as a numeric 
  assert.equal((await allowed(new Request(endpoint))).status,405);
  assert.equal(called,1);
 });
+
+
+test('native Wyrdrune Living Learning is behind the House Steward gateway',async()=>{
+ const url='https://preview.example/api/v1/wayglass/wyrdrune/living-learning';
+ let forwards=0;
+ const fetchImpl=async()=>{forwards++;return Response.json({status:'wyrdrune-returned'});};
+ const request=()=>new Request(url,{method:'POST',body:JSON.stringify({learning:{}})});
+ assert.equal((await createWayglassGatewayHandler({env,fetchImpl,authorise:()=>false})(request())).status,401);
+ assert.equal(forwards,0);
+ const allowed=createWayglassGatewayHandler({env,fetchImpl,authorise:()=>true});
+ assert.equal((await allowed(request())).status,200);
+ assert.equal((await allowed(new Request(url))).status,405);
+ assert.equal(forwards,1);
+});
