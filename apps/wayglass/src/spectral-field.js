@@ -1,4 +1,5 @@
-import { scoreWyrdruneSpectrum, scoreWyrdruneAtlas } from './route-client.js';
+import { scoreWyrdruneSpectrum, scoreWyrdruneAtlas, executeWyrdruneLearning } from './route-client.js';
+import { getSharedWayglassObserverInterior } from './living-observer-self.js';
 import { createResonanceScopeStore } from './resonance-scope-store.js';
 import { createAcousticAudioEngine } from './acoustic-audio-engine.js';
 import { subscribeWayglassObserver } from './living-observer-model.js';
@@ -9,6 +10,7 @@ export const SPECTRAL_FIELD_SCHEMA='wayglass.full-spectrum-client/v0.1';
 const clamp=(value,fallback=.5)=>typeof value==='number'&&Number.isFinite(value)
   ?Math.max(0,Math.min(1,value)):fallback;
 const allowedKinds=new Set(['gesture','writing','choice','route','world','return','feather','presence','observer','system']);
+let spectralSessionSerial=0;
 
 /**
  * One instrument across the entire OS, not another Writing Room app.
@@ -19,6 +21,8 @@ export function createWayglassSpectralField({
   scope=globalThis, document=scope.document,
   score=scoreWyrdruneSpectrum,
   atlasScore=scoreWyrdruneAtlas,
+  learningScore=executeWyrdruneLearning,
+  observerInterior=getSharedWayglassObserverInterior(),
   audioFactory=createAcousticAudioEngine,
   observerSubscribe=subscribeWayglassObserver,
   watercolorSubscribe=subscribeWatercolorActivity,
@@ -26,8 +30,11 @@ export function createWayglassSpectralField({
 }={}) {
   const listeners=new Set(), history=[];
   const atlasStore=createResonanceScopeStore();
+  // The current session keeps unique event IDs across page reloads where crypto is available.
+  const sessionRef=String(scope.crypto?.randomUUID?.()||`${Date.now().toString(36)}-${++spectralSessionSerial}`)
+    .toLowerCase().replace(/[^a-z0-9-]/g,'').slice(0,35);
   const eventScopes=new Map();
-  let atlasFrame=null,atlasError=null;
+  let atlasFrame=null,atlasError=null,learningReceipt=null,learningError=null;
   let active=false,disposed=false,heard=false,haptics=false,error=null,sequence=0,affinity=.5;
   let queue=[],pending=null,abort=null,timer=null,unsubscribeObserver=null,unsubscribeWatercolor=null,lastFrame=null;
   const audio=audioFactory();
@@ -36,7 +43,8 @@ export function createWayglassSpectralField({
     pending:queue.length,processing:Boolean(pending),captured:sequence,
     last:history.at(-1)||null,history:Object.freeze([...history]),
     virtual_bands:['infrasonic','ultrasonic'],
-    atlas:atlasFrame,atlas_error:atlasError,atlas_scope:atlasStore.scope(),
+    atlas:atlasFrame,atlas_error:atlasError,
+    learning:learningReceipt,learning_error:learningError,atlas_scope:atlasStore.scope(),
     atlas_window:atlasStore.inspect(),
     physical_inaudible_output:false,
   });
@@ -57,7 +65,7 @@ export function createWayglassSpectralField({
     if(!allowedKinds.has(kind))throw new TypeError('Unrecognised Wayglass interaction.');
     // Event semantics only, never raw key codes, prose, DOM values or participant IDs.
     const event=Object.freeze({
-      event_id:'ui-'+(++sequence),kind,strength:clamp(strength),
+      event_id:'ui-'+sessionRef+'-'+(++sequence),kind,strength:clamp(strength),
       motion:clamp(motion),continuity:clamp(continuity),intent:clamp(intent),
       affinity:relationship===null?affinity:clamp(relationship),phase:phase===null?((sequence%8)/8):clamp(phase),
       source_ref,
@@ -118,9 +126,36 @@ export function createWayglassSpectralField({
             ||field.returned?.above?.physical_playback!==false||field.returned?.within?.autoplay!==false) {
             throw new Error('Atlas returned an incomplete or untrusted Wyrdrune result.');
           }
+          if(typeof field.input_sha256!=='string'||!/^[a-f0-9]{64}$/.test(field.input_sha256)
+            ||typeof field.source_sha256!=='string'||!/^[a-f0-9]{64}$/.test(field.source_sha256)) {
+            throw new Error('Atlas omitted its exact programme and numeric-input receipts.');
+          }
           atlasFrame=Object.freeze({spectrum:field.returned,source_hash:field.source_sha256,
-            event_id:atlasInput.event_id,counts:field.counts,provenance:atlasInput.provenance});
+            input_hash:field.input_sha256,event_id:atlasInput.event_id,
+            counts:field.counts,provenance:atlasInput.provenance});
           atlasError=null;
+          // A single existing Observer instance receives native Wyrdrune,
+          // never a JS-invented phase or interpretation of possible thoughts.
+          try{
+            const native=await learningScore({
+              atlas:field.returned.structure,
+              interior:observerInterior.nativeLearningInputs(),
+              source:{
+                event_id:atlasFrame.event_id,atlas_input_hash:atlasFrame.input_hash,
+                atlas_program_hash:atlasFrame.source_hash,
+              },
+              reflection:null,
+            },undefined,controller?.signal);
+            if(!active||disposed||controller?.signal.aborted)return status();
+            learningReceipt=observerInterior.integrateNativeLearning(native);
+            learningError=null;
+          }catch(learningFailure){
+            if(learningFailure?.name!=='AbortError'){
+              learningError='Native Wyrdrune learning unavailable: '
+                +String(learningFailure?.message||'No verified return');
+              learningReceipt=null;
+            }
+          }
         }catch(atlasFailure){
           if(atlasFailure?.name!=='AbortError'){
             atlasError='Atlas unavailable: '+String(atlasFailure?.message||'No verified score');
@@ -260,7 +295,8 @@ export function createWayglassSpectralField({
   function setAffinity(value){affinity=clamp(value);notify();return affinity}
   function setScope(next={}){
     const result=atlasStore.setScope(next);
-    if(result.worldChanged){stopHearing();lastFrame=null;atlasFrame=null;atlasError=null;}
+    if(result.worldChanged){stopHearing();lastFrame=null;atlasFrame=null;atlasError=null;
+      learningReceipt=null;learningError=null;}
     notify();return result;
   }
   function setHaptics(value){
