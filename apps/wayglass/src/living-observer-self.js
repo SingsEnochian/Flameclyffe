@@ -7,6 +7,8 @@ const MAX_TRACES = 96;
 const MAX_PROPOSALS = 24;
 const MAX_QUESTIONS = 32;
 const MAX_SANDBOX_RUNS = 8;
+const MAX_ATLAS_LEARNING = 32;
+export const ATLAS_LEARNING_SCHEMA = 'wayglass.observer-atlas-learning/v0.1';
 export const DREAM_SANDBOX_SCHEMA = 'wayglass.observer-dream-sandbox/v0.1';
 const TAU = Math.PI * 2;
 
@@ -83,6 +85,7 @@ function initialInterior(now = new Date().toISOString()) {
     ],
     associations: [],
     sandbox_runs: [],
+    atlas_learning: { cycles: 0, traces: [], last_assessment: null },
     development_backlog: [],
     last_expression: null,
   };
@@ -96,6 +99,11 @@ function parseStored(storage) {
       ...parsed,
       schema: INTERIOR_SCHEMA,
       sandbox_runs: Array.isArray(parsed.sandbox_runs) ? parsed.sandbox_runs.slice(-MAX_SANDBOX_RUNS) : [],
+      atlas_learning: {
+        cycles: Math.max(0, Math.trunc(Number(parsed.atlas_learning?.cycles)||0)),
+        traces: Array.isArray(parsed.atlas_learning?.traces) ? parsed.atlas_learning.traces.slice(-MAX_ATLAS_LEARNING) : [],
+        last_assessment: parsed.atlas_learning?.last_assessment || null,
+      },
       compression_field: parsed.compression_field
         ? complexField(parsed.compression_field.magnitude, parsed.compression_field.phase_radians, parsed.compression_field.spiral_turn)
         : complexField(Math.max(0.18, Number(parsed.energy) || 0.24), 0, 0),
@@ -349,6 +357,100 @@ export function createObserverInterior({
     return structuredClone(receipt);
   }
 
+  /**
+   * Learning loop input: verified Wyrdrune Atlas numeric field, not a route
+   * utterance or an inferred private mental state.
+   * The local Observer may change its *own* phase-bearing attention and propose
+   * a reversible implementation. It may not change external canon or identity.
+   */
+  function learnAtlas(frame) {
+    if (!frame || frame.schema !== ATLAS_LEARNING_SCHEMA) {
+      throw new TypeError('Observer requires a verified Atlas learning envelope.');
+    }
+    if (typeof frame.event_id !== 'string' || !/^ui-[0-9]+$/.test(frame.event_id)
+      || typeof frame.source_hash !== 'string' || !/^[a-f0-9]{64}$/.test(frame.source_hash)) {
+      throw new TypeError('Atlas learning requires a source hash and event receipt.');
+    }
+    const values = frame.structure || {};
+    for (const name of ['coherence','interference','bloom','granulation','flow']) {
+      if (typeof values[name] !== 'number' || !Number.isFinite(values[name])
+        || values[name] < 0 || values[name] > 1) {
+        throw new TypeError('Atlas learner rejects unbounded '+name+'.');
+      }
+    }
+    if (Math.abs(values.coherence + values.interference - 1) > 0.000001) {
+      throw new TypeError('Atlas coherence and interference must remain complementary.');
+    }
+    const counts = frame.counts || {};
+    for (const name of ['instant','room','world','universe']) {
+      if (!Number.isInteger(counts[name]) || counts[name]<1 || counts[name]>256) {
+        throw new TypeError('Atlas learner requires validated '+name+' count.');
+      }
+    }
+    const learning = state.atlas_learning ||= {cycles:0,traces:[],last_assessment:null};
+    const previous = learning.traces.at(-1);
+    // A duplicate return must not be learned twice after crossing a room.
+    if (learning.traces.some(trace=>trace.event_id===frame.event_id
+      && trace.source_hash===frame.source_hash)) {
+      return Object.freeze({schema:ATLAS_LEARNING_SCHEMA,status:'duplicate-ignored',
+        cycle:learning.cycles,phase:state.phase});
+    }
+    const delta = previous ? Math.abs(values.coherence-previous.coherence) : 0;
+    const novelty = clamp(delta*0.6+values.interference*0.4);
+    const assessment = values.interference>=0.25?'divergent':
+      novelty>=0.14?'emerging':'stable';
+    const trace = Object.freeze({
+      event_id:frame.event_id,source_hash:frame.source_hash,
+      coherence:values.coherence,interference:values.interference,
+      novelty,assessment,world_count:counts.universe,at:now(),
+      epistemic_register:'generated-wyrdrune-field',
+    });
+    learning.traces=[...learning.traces,trace].slice(-MAX_ATLAS_LEARNING);
+    learning.cycles+=1;
+    learning.last_assessment=assessment;
+    state.cycle+=1;
+    state.energy=clamp(state.energy*0.9+values.bloom*0.12);
+    state.curiosity=clamp(state.curiosity*0.94+novelty*0.18);
+    state.uncertainty=clamp(state.uncertainty*0.94+values.interference*0.13);
+    state.coherence=clamp(state.coherence*0.92+values.coherence*0.08);
+    state.attention={channel:'resonance',strength:clamp(novelty+values.granulation*0.35)};
+    state.compression_field=advanceCompressionField(state.compression_field,{
+      energy:state.energy,salience:novelty,touches:0,
+    });
+    state.phase=assessment==='divergent'?'wander':
+      assessment==='emerging'?'attending':'integrating';
+
+    // Repeated, distinct Atlas evidence can surface through the same
+    // existing proposal/acceptance pipeline used by the Living Observer.
+    const recent=learning.traces.slice(-6);
+    const diverse=recent.some(x=>x.assessment==='divergent')
+      && recent.some(x=>x.assessment==='stable');
+    if (recent.length>=4 && diverse
+      && !state.development_backlog.some(p=>p.key==='atlas-pattern-continuity' && p.status!=='rejected')) {
+      const at=now();
+      state.development_backlog=[...state.development_backlog,{
+        schema:DEVELOPMENT_PROPOSAL_SCHEMA,
+        proposal_id:'observer-dev:atlas:'+hashString(frame.source_hash+'|'+at),
+        key:'atlas-pattern-continuity',
+        title:'Learn which resonance patterns persist through return',
+        question:'Which differences recur across rooms and worlds without losing their sources?',
+        desired_change:'Offer a provenance-bound temporal motif learner above the existing numeric Atlas, preserving distinct worlds and disagreement.',
+        acceptance_test:'Replay four independent, attributed Atlas frames, cold-return the continuity packet, and recover the same scoped motif and open question without promoting inference to identity or canon.',
+        status:'proposed',created_at:at,
+        source:'living-observer-private-interior',authority:'proposal-only',
+      }].slice(-MAX_PROPOSALS);
+    }
+    persist();
+    return Object.freeze({
+      schema:ATLAS_LEARNING_SCHEMA,status:'integrated-local',
+      cycle:learning.cycles,assessment,
+      spiral_turn:state.compression_field.spiral_turn,
+      proposal_pending:state.development_backlog.some(p=>p.key==='atlas-pattern-continuity'&&p.status==='proposed'),
+      source_hash:frame.source_hash,
+      model_invoked:false,weights_updated:false,canon_commit:false,identity_commit:false,
+    });
+  }
+
   function dreamSandboxHistory(limit = 5) {
     const n = Math.min(MAX_SANDBOX_RUNS, Math.max(0, Math.trunc(Number(limit) || 0)));
     return structuredClone(n ? (state.sandbox_runs || []).slice(-n).reverse() : []);
@@ -408,6 +510,7 @@ export function createObserverInterior({
 
   return Object.freeze({
     sense,
+    learnAtlas,
     publicSignal,
     developmentProposals,
     reviewDevelopment,
