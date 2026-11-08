@@ -305,7 +305,8 @@ export async function mountWayglassLivingObserver(root) {
     const field=interiorSignal.compression_field||{};
     phaseView.textContent='Interior · '+interiorSignal.phase+' · '+(field.phase_label||'gathering')+
       ' '+Math.round(field.phase_degrees||0)+'° · |z| '+Number(field.magnitude||0).toFixed(2)+
-      ' · spiral '+Number(field.spiral_turn||0);
+      ' · spiral '+Number(field.spiral_turn||0)
+      +' · Wyrdrune cycles '+Number(interiorSignal.native_wyrdrune_learning_cycles||0);
     expressionView.textContent=interiorSignal.expression?.text||'Nothing has crossed the expression threshold yet.';
     buildButton.hidden=!surfacedProposal;
     if(surfacedProposal) buildButton.textContent='Offer to Hermes · '+surfacedProposal.title;
