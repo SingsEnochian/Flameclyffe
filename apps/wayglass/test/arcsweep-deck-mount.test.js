@@ -43,3 +43,20 @@ test('missing child boot surfaces unavailable state and preserves a return witho
  assert.match(f.elements.get('status').textContent,/unavailable/);f.elements.get('return').click();
  assert.equal(JSON.parse(f.saved.get('wayglass.arcsweep-deck.return/v1')).child_state_saved,false);assert.equal(f.mounts.length,1);f.surface.destroy();
 });
+
+test('late child listener receives bounded repeated init and matched ready ends retries',async()=>{
+ const f=fixture({timeoutMs:100,handshakeRetryMs:5});f.elements.get('load').click();
+ f.frame().dispatchEvent(new Event('load')); // First greeting arrives before child listener exists.
+ const first=f.frame().sent.length;assert.equal(first,1);
+ await new Promise(resolve=>setTimeout(resolve,16));assert.ok(f.frame().sent.length>first);
+ assert.ok(f.frame().sent.every(({data,origin})=>data.kind==='init'&&data.session===session&&origin===f.scope.location.origin));
+ f.message({schema,kind:'ready',session});const count=f.frame().sent.length;
+ await new Promise(resolve=>setTimeout(resolve,16));assert.equal(f.frame().sent.length,count);f.surface.destroy();
+});
+test('unavailable deadline and disposal terminate init retries',async()=>{
+ const f=fixture({timeoutMs:12,handshakeRetryMs:3});f.elements.get('load').click();f.frame().dispatchEvent(new Event('load'));
+ await new Promise(resolve=>setTimeout(resolve,22));assert.match(f.elements.get('status').textContent,/unavailable/);
+ const count=f.frame().sent.length;f.frame().dispatchEvent(new Event('load'));await new Promise(resolve=>setTimeout(resolve,12));assert.equal(f.frame().sent.length,count);f.surface.destroy();
+ const g=fixture({timeoutMs:100,handshakeRetryMs:3});g.elements.get('load').click();g.frame().dispatchEvent(new Event('load'));g.surface.destroy();
+ const after=g.frame().sent.length;await new Promise(resolve=>setTimeout(resolve,12));assert.equal(g.frame().sent.length,after);
+});
