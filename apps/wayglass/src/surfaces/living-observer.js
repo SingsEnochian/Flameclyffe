@@ -5,7 +5,7 @@ import {
   OBSERVER_CHANNELS, createWayglassObservation, readWayglassRouteObservation,
   subscribeWayglassObserver, queueObserverContextForWriting, describeWayglassObserverChannel,
 } from '../living-observer-model.js';
-import { createObserverInterior } from '../living-observer-self.js';
+import { getSharedWayglassObserverInterior } from '../living-observer-self.js';
 import { queueObserverDevelopmentProposal } from '../route-client.js';
 
 import { observerNodes, platePoint, nodeAtPoint, angularDelta, createObserverRotation, OBSERVER_PLATE_SIZE } from '../living-observer-optics.js';
@@ -154,7 +154,7 @@ export async function mountWayglassLivingObserver(root) {
   let focus='time', touches=0, lowStim=false, sound=false, haptics=false, paused=false, audioContext=null, animation=0, timer=0;
   let lightAt=performance.now();
   const rotation=createObserverRotation();
-  const interior=createObserverInterior();
+  const interior=getSharedWayglassObserverInterior();
   let interiorSignal=interior.publicSignal(), lastInteriorSense=0, lastTouchSense=-1, lastRouteSense=-1;
   let lens=null, gesture=null, disposed=false;
   const reduced=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
