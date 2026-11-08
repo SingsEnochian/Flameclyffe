@@ -520,3 +520,13 @@ export function createObserverInterior({
     schema: INTERIOR_SCHEMA,
   });
 }
+
+
+// One owner-private Living Observer instance across the ship. The Observer
+// surface and the spectral engine feed the same learner rather than creating
+// two out-of-sync interiors that can overwrite one another's private storage.
+let sharedObserverInterior = null;
+export function getSharedWayglassObserverInterior() {
+  if (!sharedObserverInterior) sharedObserverInterior = createObserverInterior();
+  return sharedObserverInterior;
+}
