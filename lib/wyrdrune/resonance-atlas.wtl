@@ -1,0 +1,82 @@
+// Wayglass Resonance Atlas v0.1 · executable Wyrdrune
+// Multi-scale composition of observed numerical WTL spectral frames.
+// Four levels: instant, room, world and universe. All fields remain
+// attributable representations, not measured acoustics or minds.
+// Two eightfold Möbius traversals: outward and reciprocal return.
+
+mobius {
+ perceive {
+  let instant = bridge("atlas","instant");
+  let room = bridge("atlas","room");
+  let world = bridge("atlas","world");
+  let universe = bridge("atlas","universe");
+  let affinity = bridge("atlas","affinity");
+  let phase = bridge("atlas","phase");
+ }
+ compress {
+  let microDifference = (instant - room) * (instant - room);
+  let roomDifference = (room - world) * (room - world);
+  let worldDifference = (world - universe) * (world - universe);
+  let coherence = 1 - microDifference * 0.40 - roomDifference * 0.35 - worldDifference * 0.25;
+  let interference = 1 - coherence;
+  let depth = instant * 0.10 + room * 0.20 + world * 0.30 + universe * 0.40;
+  let detail = instant * 0.45 + room * 0.30 + world * 0.15 + universe * 0.10;
+ }
+ release {
+  let below = 0.30 + depth * 8.2 + universe * 2.7;
+  let voice = 116 + detail * 294 + coherence * 95;
+  let partner = voice * (1.12 + affinity * 0.17);
+  let above = 21500 + detail * 9250 + interference * 6600 + phase * 3200;
+  let bloom = depth * 0.42 + coherence * 0.38 + detail * 0.20;
+  let grain = detail * 0.61 + interference * 0.29;
+  let flow = depth * 0.58 + coherence * 0.24 + universe * 0.18;
+ }
+ verify {
+  emit bridge("atlas","validate",below,voice,partner,above,coherence,interference,bloom,grain,flow);
+ }
+ integrate {
+  let outward = bridge("atlas","frame",below,voice,partner,above,coherence,interference,bloom,grain,flow);
+ }
+ choose {
+  emit outward;
+ }
+ return {
+  emit bridge("continuity","hold","outward");
+ }
+ transcend {
+  emit bridge("continuity","next","reciprocal");
+ }
+}
+
+mobius {
+ perceive {
+  let shared = bridge("atlas","affinity");
+ }
+ compress {
+  let reciprocal = (shared * 0.50 + coherence * 0.35 + universe * 0.15) * 0.032;
+ }
+ release {
+  set below = below + below * reciprocal;
+  set voice = voice + partner * reciprocal;
+  set partner = partner + voice * reciprocal;
+  set above = above + above * reciprocal * 0.42;
+  set bloom = bloom + interference * reciprocal * 0.2;
+  set grain = grain + interference * reciprocal * 0.45;
+  set flow = flow + coherence * reciprocal * 0.30;
+ }
+ verify {
+  emit bridge("atlas","validate",below,voice,partner,above,coherence,interference,bloom,grain,flow);
+ }
+ integrate {
+  let returned = bridge("atlas","frame",below,voice,partner,above,coherence,interference,bloom,grain,flow);
+ }
+ choose {
+  emit returned;
+ }
+ return {
+  emit bridge("continuity","hold","returned");
+ }
+ transcend {
+  emit bridge("continuity","next","withness");
+ }
+}
