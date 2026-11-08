@@ -69,6 +69,7 @@ export function mountWayglassSpectrumSurface(root,{field}={}) {
         <div><strong>Universe</strong><output data-atlas-universe>—</output></div>
       </div>
       <p class="tiny" data-atlas-harmony>No Atlas return yet.</p>
+      <p class="tiny" data-atlas-learning>Native Wyrdrune learning has not returned.</p>
       <p class="tiny" data-atlas-provenance>The world and room references remain on this device.</p>
     </section>
     <section class="wg-spectrum-log glass-panel" aria-label="Spectral provenance">
@@ -112,6 +113,10 @@ export function mountWayglassSpectrumSurface(root,{field}={}) {
         +' · interference '+safe(atlas.spectrum.structure.interference)
         +' · flow '+safe(atlas.spectrum.structure.flow))
         :'No Atlas return yet.');
+    $('[data-atlas-learning]').textContent=s.learning_error
+      ||(s.learning?.status==='integrated-native-wyrdrune'
+        ? 'Wyrdrune learning · '+s.learning.cycles+' returning cycles · possible reflections remain open.'
+        : 'Native Wyrdrune learning has not returned.');
     $('[data-atlas-provenance]').textContent='Current local scope · '+s.atlas_scope.world
       +' / '+s.atlas_scope.room+' · '+s.atlas_window.distinct_worlds+' worlds in memory';
     const spec=s.last?.spectrum;
