@@ -181,3 +181,19 @@ test('native learning transports typed numeric inputs only unless a model reflec
  assert.deepEqual(JSON.parse(recorded.options.body),{learning});
  assert.equal(JSON.stringify(recorded.options.body).includes('private_question'),false);
 });
+
+
+test('native voice invitation requests Wayglass-authored WTL, en-GB and optional image/sound',async()=>{
+ const {inviteWayglassVoice}=await import('../src/route-client.js');
+ let called;
+ await inviteWayglassVoice({prompt:'What if?',channels:{image:true,sound:false},
+   fetchImpl:async(url,options)=>{
+     called={url,options};
+     return response(200,{schema:'wayglass.native-wyrdrune-voice/v0.1'});
+   }});
+ assert.equal(called.url,'/api/v1/wayglass/wyrdrune/native-voice');
+ assert.equal(called.options.method,'POST');
+ assert.deepEqual(JSON.parse(called.options.body),{
+   prompt:'What if?',channels:{image:true,sound:false},
+ });
+});
