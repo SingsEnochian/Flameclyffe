@@ -1,4 +1,5 @@
-import { scoreWyrdruneSpectrum } from './route-client.js';
+import { scoreWyrdruneSpectrum, scoreWyrdruneAtlas } from './route-client.js';
+import { createResonanceScopeStore } from './resonance-scope-store.js';
 import { createAcousticAudioEngine } from './acoustic-audio-engine.js';
 import { subscribeWayglassObserver } from './living-observer-model.js';
 import { subscribeWatercolorActivity, publishWatercolorActivity } from './watercolor-bridge.js';
@@ -17,12 +18,16 @@ const allowedKinds=new Set(['gesture','writing','choice','route','world','return
 export function createWayglassSpectralField({
   scope=globalThis, document=scope.document,
   score=scoreWyrdruneSpectrum,
+  atlasScore=scoreWyrdruneAtlas,
   audioFactory=createAcousticAudioEngine,
   observerSubscribe=subscribeWayglassObserver,
   watercolorSubscribe=subscribeWatercolorActivity,
   featherState=()=>wayglassSomaticSound.snapshot(),
 }={}) {
   const listeners=new Set(), history=[];
+  const atlasStore=createResonanceScopeStore();
+  const eventScopes=new Map();
+  let atlasFrame=null,atlasError=null;
   let active=false,disposed=false,heard=false,haptics=false,error=null,sequence=0,affinity=.5;
   let queue=[],pending=null,abort=null,timer=null,unsubscribeObserver=null,unsubscribeWatercolor=null,lastFrame=null;
   const audio=audioFactory();
@@ -31,6 +36,8 @@ export function createWayglassSpectralField({
     pending:queue.length,processing:Boolean(pending),captured:sequence,
     last:history.at(-1)||null,history:Object.freeze([...history]),
     virtual_bands:['infrasonic','ultrasonic'],
+    atlas:atlasFrame,atlas_error:atlasError,atlas_scope:atlasStore.scope(),
+    atlas_window:atlasStore.inspect(),
     physical_inaudible_output:false,
   });
   function notify(){const s=status();for(const listener of [...listeners]){try{listener(s)}catch{}}}
@@ -56,7 +63,7 @@ export function createWayglassSpectralField({
       source_ref,
     });
     if(queue.length>=256){error='Spectral event queue capacity reached. Input was not silently marked as scored.';notify();return false}
-    queue.push(event);schedule();notify();return true;
+    queue.push(event);eventScopes.set(event.event_id,atlasStore.scope());schedule();notify();return true;
   }
   function schedule(){
     if(timer!==null||pending||!active||disposed)return;
@@ -91,12 +98,41 @@ export function createWayglassSpectralField({
         history.push(record);
         if(history.length>64)history.shift();
         lastFrame=record.spectrum;
+        const bloom=event.spectrum?.bloom;
+        if(typeof bloom!=='number'||!Number.isFinite(bloom)||bloom<0||bloom>1) {
+          throw new Error('Wyrdrune spectral bloom must be a bounded numeric value.');
+        }
+        atlasStore.record({event_id:event.event_id,source_ref:event.source_ref,bloom,
+          scope_ref:eventScopes.get(event.event_id)||atlasStore.scope()});
+        eventScopes.delete(event.event_id);
+      }
+      const atlasInput=atlasStore.snapshot(result.events.at(-1).event_id);
+      if(atlasInput && active && !controller?.signal.aborted) {
+        try{
+          const lastEvent=events.at(-1);
+          const field=await atlasScore({...atlasInput.scalars,counts:atlasInput.counts,
+            affinity:lastEvent.affinity,phase:lastEvent.phase},undefined,controller?.signal);
+          if(!active||disposed||controller?.signal.aborted)return status();
+          if(field?.schema!=='wayglass.resonance-atlas/v0.1'||field?.status!=='composed-in-wyrdrune'
+            ||field.phase_receipts?.length!==16||field.returned?.below?.physical_playback!==false
+            ||field.returned?.above?.physical_playback!==false||field.returned?.within?.autoplay!==false) {
+            throw new Error('Atlas returned an incomplete or untrusted Wyrdrune result.');
+          }
+          atlasFrame=Object.freeze({spectrum:field.returned,source_hash:field.source_sha256,
+            event_id:atlasInput.event_id,counts:field.counts,provenance:atlasInput.provenance});
+          atlasError=null;
+        }catch(atlasFailure){
+          if(atlasFailure?.name!=='AbortError'){
+            atlasError='Atlas unavailable: '+String(atlasFailure?.message||'No verified score');
+            atlasFrame=null;
+          }
+        }
       }
       // Refract the verified spectral frame through the existing watercolour body.
       // Actor filtering below prevents score → pigment → score recursion.
       publishWatercolorActivity({
         kind:'form:morph',actor:'wayglass:full-spectrum',
-        intensity:lastFrame.projection.refraction,
+        intensity:atlasFrame?.spectrum?.structure?.bloom ?? lastFrame.projection.refraction,
       });
       if(typeof scope.CustomEvent==='function') {
         scope.dispatchEvent?.(new scope.CustomEvent('wayglass:spectrum-frame',{
@@ -113,7 +149,7 @@ export function createWayglassSpectralField({
       if(!disposed && active && e?.name!=='AbortError'){
         error='Spectral scoring halted: '+(e?.message||'host unavailable');
         // Fail closed: do not silently fall back to JavaScript-composed tones.
-        active=false;queue=[];stopHearing();
+        active=false;queue=[];eventScopes.clear();stopHearing();
         removeCaptureListeners();
       }
     }finally{
@@ -215,13 +251,18 @@ export function createWayglassSpectralField({
     heard=true;listenFrame(lastFrame);notify();return status();
   }
   function pause(){
-    active=false;queue=[];error=null;haptics=false;
+    active=false;queue=[];eventScopes.clear();error=null;haptics=false;
     if(typeof scope.navigator?.vibrate==='function'){try{scope.navigator.vibrate(0)}catch{}}
     if(timer!==null){scope.clearTimeout(timer);timer=null}
     abort?.abort();abort=null;
     removeCaptureListeners();stopHearing();notify();return status();
   }
   function setAffinity(value){affinity=clamp(value);notify();return affinity}
+  function setScope(next={}){
+    const result=atlasStore.setScope(next);
+    if(result.worldChanged){stopHearing();lastFrame=null;atlasFrame=null;atlasError=null;}
+    notify();return result;
+  }
   function setHaptics(value){
     if(!active||disposed||featherState()?.feather_stopped)throw new Error('Haptics require active spectral consent.');
     haptics=value===true;
@@ -237,8 +278,8 @@ export function createWayglassSpectralField({
     if(disposed)return;
     pause();disposed=true;
     scope.removeEventListener?.(WAYGLASS_FEATHER_EVENT,fromFeather);
-    audio.dispose();notify();listeners.clear();
+    audio.dispose();atlasStore.clear();notify();listeners.clear();
   }
   scope.addEventListener?.(WAYGLASS_FEATHER_EVENT,fromFeather);
-  return Object.freeze({observe,pause,hear,stopHearing,setAffinity,setHaptics,subscribe,capture,flush,status,dispose});
+  return Object.freeze({observe,pause,hear,stopHearing,setAffinity,setScope,setHaptics,subscribe,capture,flush,status,dispose});
 }
