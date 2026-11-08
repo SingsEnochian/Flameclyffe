@@ -21,3 +21,9 @@
 .wg-spectrum-log ol { max-height: 12rem; overflow:auto; padding-left: 1.3rem; font-variant-numeric: tabular-nums; }
 .wg-spectrum-log li { padding:.25rem; overflow-wrap:anywhere; }
 @media (prefers-reduced-motion: reduce) { .wg-spectrum-ribbon { filter:none; } }
+
+/* Wyrdrune carries the refraction and fine-detail coefficients; CSS only projects them. */
+.wg-spectrum-ribbon-a { opacity: calc(.28 + var(--wg-refraction, .5) * .58); }
+.wg-spectrum-ribbon-b { opacity: calc(.28 + var(--wg-granulation, .5) * .58); }
+.wg-spectrum-ring { transition: box-shadow .4s ease-out; }
+@media (prefers-reduced-motion: reduce) { .wg-spectrum-ring { transition: none; } }
