@@ -147,3 +147,17 @@ test('full-spectrum browser transport sends only bounded event scalars', async()
   assert.deepEqual(JSON.parse(sent.options.body).events,[input]);
   assert.equal(response.count,1);
 });
+
+
+test('Atlas route transports bounded scale values, not world names or narrative',async()=>{
+ const {scoreWyrdruneAtlas}=await import('../src/route-client.js');
+ let seen;
+ const scales={instant:.4,room:.5,world:.6,universe:.7,affinity:.3,phase:.1,
+  counts:{instant:1,room:2,world:3,universe:4}};
+ await scoreWyrdruneAtlas(scales,async(url,options)=>{
+  seen={url,options};return response(200,{schema:'wayglass.resonance-atlas/v0.1'});
+ });
+ assert.equal(seen.url,'/api/v1/wayglass/wyrdrune/resonance-atlas');
+ assert.deepEqual(JSON.parse(seen.options.body),{scales});
+ assert.equal(seen.options.method,'POST');
+});
