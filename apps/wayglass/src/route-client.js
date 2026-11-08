@@ -100,6 +100,17 @@ export async function executeWyrdruneLearning(learning,fetchImpl=fetch,signal=un
   }));
 }
 
+/** Request Wayglass's own Wyrdrune, en-GB rendering, and optional image/sound
+ * expressions. A real Crow model return is required; there is no canned voice.
+ */
+export async function inviteWayglassVoice({prompt,channels={image:true,sound:true},
+  fetchImpl=fetch,signal}={}) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/wyrdrune/native-voice',{
+    method:'POST',headers:JSON_HEADERS,cache:'no-store',signal,
+    body:JSON.stringify({prompt,channels}),
+  }));
+}
+
 export async function listWayglassCharacters(fetchImpl = fetch) {
   return jsonOrThrow(await fetchImpl('/api/v1/wayglass/characters', { cache: 'no-store' }));
 }
