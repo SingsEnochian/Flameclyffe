@@ -85,4 +85,19 @@ export const voiceConsentOrgan = createWayglassOrgan({
   adapter: { createWayglassVoiceBoundary },
 });
 
-export const FIRST_WAYGLASS_ORGANS = Object.freeze([presenceOrgan, memoryOrgan, sensoriumOrgan, livingObserverOrgan, voiceConsentOrgan]);
+
+// Gateway × Wayglass are two reciprocally crossing transformations, not two identities.
+// The host executes them with Waygate/Return Engine provenance; no automatic audio.
+export const doubleMobiusOrgan = createWayglassOrgan({
+  organ_id: 'wayglass.organ.gateway-double-mobius',
+  lineage: ['wayglass:kernel', 'wayglass:waygate', 'wayglass:return-engine', 'monroe:gateway-historical-research'],
+  maturity: 'PARTIAL',
+  capabilities: ['double-mobius.inspect', 'double-mobius.traverse', 'double-mobius.return-verify'],
+  routes: ['/api/v1/wayglass/kernel/double-mobius'],
+  authority_ceiling: ['inspect-engine', 'propose-reciprocal-transform', 'verify-return-context'],
+  receipt_schemas: ['wayglass.gateway-double-mobius/v0.1', 'wayglass.return-trial-outcome/v0.1'],
+  continuity_hooks: ['waygate-world-entry', 'stop-receipt', 'continuation-packet', 'unresolved-wonder'],
+  evidence: ['lib/wayglass-double-mobius.cjs', 'apps/wayglass/test/wayglass-double-mobius.test.js'],
+});
+
+export const FIRST_WAYGLASS_ORGANS = Object.freeze([presenceOrgan, memoryOrgan, sensoriumOrgan, livingObserverOrgan, voiceConsentOrgan, doubleMobiusOrgan]);
