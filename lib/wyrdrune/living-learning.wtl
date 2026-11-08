@@ -20,13 +20,13 @@ mobius {
  compress {
   let change = (resonance - previous_resonance) * (resonance - previous_resonance);
   let opening = change * 0.52 + difference * 0.28 + grain * 0.20;
-  let attention = opening * 0.70 + flow * 0.30;
+  let attention = opening * 0.65 + flow * 0.25;
  }
  release {
-  let energy = energy_prior * 0.88 + bloom * 0.12;
-  let curiosity = curiosity_prior * 0.91 + opening * 0.09;
-  let uncertainty = uncertainty_prior * 0.92 + difference * 0.08;
-  let coherence = coherence_prior * 0.90 + resonance * 0.10;
+  let energy = energy_prior * 0.85 + bloom * 0.12;
+  let curiosity = curiosity_prior * 0.88 + opening * 0.08;
+  let uncertainty = uncertainty_prior * 0.88 + difference * 0.08;
+  let coherence = coherence_prior * 0.88 + resonance * 0.08;
  }
  verify {
   emit bridge("learning","validate",energy,curiosity,uncertainty,coherence,opening,attention);
