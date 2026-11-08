@@ -14,6 +14,7 @@ const { previewWyrdruneRitual } = require('../wayglass-runtime/wayglass-wyrdrune
 const { enterWayglassWorld } = require('../wayglass-runtime/wayglass-world-entry.cjs');
 const { createWayglassDeparture } = require('../wayglass-runtime/wayglass-stop-receipt.cjs');
 const { createDepartureStore } = require('../wayglass-runtime/wayglass-departure-store.cjs');
+const { inspectDoubleMobius, traverseDoubleMobius } = require('../wayglass-runtime/wayglass-double-mobius.cjs');
 const { createModelObservation } = require('../wayglass-runtime/wayglass-model-observation.cjs');
 const { createWayglassLibraryRouter } = require('./research-library');
 const { createObserverSelfDevelopmentRouter } = require('./observer-self-development');
@@ -491,6 +492,29 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
   });
   router.use('/library', createWayglassLibraryRouter());
   router.use('/observer/self-development', createObserverSelfDevelopmentRouter());
+  // Gateway ↔ Wayglass is an existing-kernel, double-Möbius transformation.
+  // This endpoint performs in-memory processing only. It cannot silently
+  // authenticate participants, invoke models, play audio or persist canon.
+  router.get('/kernel/double-mobius', (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    return res.json(inspectDoubleMobius());
+  });
+  router.post('/kernel/double-mobius', createRequestGate({ maxRequests: 8, maxConcurrent: 2 }), (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    try {
+      const result = traverseDoubleMobius({
+        ...(req.body || {}),
+        // Server time, never a client-controlled timestamp in runtime receipts.
+        recorded_at: new Date().toISOString(),
+      });
+      return res.status(result.status === 'blocked-entry' ? 409 : 200).json(result);
+    } catch (error) {
+      return res.status(400).json({
+        schema: 'wayglass.gateway-double-mobius-error/v0.1',
+        error: error?.message || 'Double Möbius crossing rejected.',
+      });
+    }
+  });
   router.get('/kernel/departures/:storageId', (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     try {
