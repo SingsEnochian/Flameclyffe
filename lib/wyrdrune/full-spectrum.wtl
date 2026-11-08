@@ -22,12 +22,14 @@ mobius {
   let partner = voice * (1.18 + affinity * 0.16);
   let above = 22600 + texture * 9200 + phase * 2900 + intent * 2400;
   let bloom = energy * 0.62 + affinity * 0.18 + continuity * 0.20;
+  let audible_gain = 0.009 + bloom * 0.017;
+  let ambience_gain = 0.003 + (1 - gravity) * 0.009;
  }
  verify {
   emit bridge("spectrum","validate",below,voice,partner,above,bloom);
  }
  integrate {
-  let first = bridge("spectrum","frame",below,voice,partner,above,bloom,affinity,phase);
+  let first = bridge("spectrum","frame",below,voice,partner,above,bloom,affinity,phase,audible_gain,ambience_gain);
  }
  choose {
   emit first;
@@ -53,12 +55,14 @@ mobius {
   set partner = partner + voice * twist;
   set above = above + above * twist * 0.35;
   set bloom = bloom * (0.95 + return_motion * 0.05);
+  set audible_gain = audible_gain + twist * 0.03;
+  set ambience_gain = ambience_gain + twist * 0.02;
  }
  verify {
   emit bridge("spectrum","validate",below,voice,partner,above,bloom);
  }
  integrate {
-  let second = bridge("spectrum","frame",below,voice,partner,above,bloom,affinity,phase);
+  let second = bridge("spectrum","frame",below,voice,partner,above,bloom,affinity,phase,audible_gain,ambience_gain);
  }
  choose {
   emit second;
