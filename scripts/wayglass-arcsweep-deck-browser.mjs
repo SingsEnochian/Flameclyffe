@@ -32,7 +32,7 @@ const origin='http://127.0.0.1:'+server.address().port;
 const receipt={schema:'wayglass.arcsweep-deck-browser/v1',source_sha:process.env.GITHUB_SHA||null,
  live_provider_calls:false,production_deployment:false,host:'staged-app-loopback-static-with-production-frame-policy',
  playwright:packageInfo.version,scenarios:[],page_errors:[],blocked_external_requests:[],status:'running'};
-let browser;
+let browser,activePage;
 try{
  browser=await chromium.launch({headless:true,...(process.env.WAYGLASS_CHROMIUM_EXECUTABLE?{executablePath:process.env.WAYGLASS_CHROMIUM_EXECUTABLE}: {})});
  for(const profile of [{name:'desktop',viewport:{width:1440,height:1100}},{name:'mobile-reduced-motion',viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'reduce'}]){
@@ -40,7 +40,7 @@ try{
   await context.route('**/*',async route=>{
    if(new URL(route.request().url()).origin!==origin){receipt.blocked_external_requests.push(route.request().url());await route.abort('blockedbyclient');return;}await route.continue();
   });
-  const page=await context.newPage();page.on('pageerror',error=>receipt.page_errors.push(error.message));
+  const page=await context.newPage();activePage=page;page.on('pageerror',error=>receipt.page_errors.push(error.message));
   await page.goto(origin+'/wayglass/?room=deck');
   await page.locator('[data-surface="arcsweep-deck"]').waitFor();assert.equal(await page.locator('iframe').count(),0,'loading remains explicit');
   const parentSound=page.locator('[data-deck-composer]');
@@ -96,5 +96,14 @@ try{
  await page.getByRole('button',{name:'Return to Watercolor',exact:true}).click();await page.locator('#wc-fluid').waitFor();
  receipt.scenarios.push({profile:'missing-staged-child',unavailable_visible:true,return_available:true});await context.close();
  assert.deepEqual(receipt.page_errors,[]);receipt.status='passed';
-}catch(error){receipt.status='failed';receipt.failure=String(error.stack||error);throw error;}
+}catch(error){
+ receipt.status='failed';receipt.failure=String(error.stack||error);
+ if(activePage&&!activePage.isClosed()){
+  try{const state=await activePage.evaluate(()=>({url:location.href,status:[...document.querySelectorAll('[data-composition-status],[data-composition-error],[data-story-declaration-status],[data-deck-status]')].map(n=>({tag:n.outerHTML,text:n.textContent})),declarations:[...document.querySelectorAll('[data-story-voice-one],[data-story-voice-two],[data-story-affinity]')].map(n=>({field:n.outerHTML,value:n.value})),readyState:document.readyState}));
+   await writeFile(resolve(output,'failure-state.json'),JSON.stringify(state,null,2)+'\n');
+   await activePage.screenshot({path:resolve(output,'failure.png'),fullPage:true});
+  }catch{receipt.diagnostic_capture_failed=true;}
+ }
+ throw error;
+}
 finally{await writeFile(resolve(output,'receipt.json'),JSON.stringify(receipt,null,2)+'\n');await browser?.close();await new Promise(done=>server.close(done));}
