@@ -1,0 +1,17 @@
+{
+  "schema": "wayglass.first-contact-browser-evidence/v1",
+  "source_sha": null,
+  "transport": "captured-host-fixture",
+  "browser": "chromium",
+  "playwright": "1.62.1",
+  "live_model_inference": false,
+  "provider_authentication_verified": false,
+  "production_deployment": false,
+  "scenarios": [],
+  "requests": [],
+  "page_errors": [],
+  "transport_errors": [],
+  "blocked_external_requests": [],
+  "status": "failed",
+  "failure": "browserType.launch: Executable doesn't exist at /root/.cache/ms-playwright/chromium_headless_shell-1234/chrome-headless-shell-linux64/chrome-headless-shell\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     npx playwright install                                 ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝\n    at /workspace/scratch/e503f9eb38ea/lane-motion/scripts/wayglass-first-contact-browser.mjs:152:25"
+}
