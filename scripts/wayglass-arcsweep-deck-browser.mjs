@@ -72,6 +72,13 @@ try{
   await page.getByText('Shape this region’s soundscape',{exact:true}).click();
   await page.getByRole('button',{name:'Open world deck',exact:true}).click();
   await page.getByText('Wayglass deck ready · its saved workspace is open.',{exact:true}).waitFor({timeout:45000});
+  if(profile.isMobile){
+   const clear=await page.evaluate(()=>{
+    const frame=document.querySelector('iframe').getBoundingClientRect();
+    return [...document.querySelectorAll('.wg-ship-switch,.wg-voyage-inbox')].every(node=>{const r=node.getBoundingClientRect();return r.bottom<=frame.top||r.top>=frame.bottom||r.right<=frame.left||r.left>=frame.right;});
+   });
+   assert.equal(clear,true,'host utilities must leave the inherited touch surface unobstructed');
+  }
   const child=page.frameLocator('iframe');await child.locator('#app .app-shell').waitFor();
   // Codex is a post-core optional sidecar. When mounted, its closed dialog
   // must respect hidden; the subsequent real clicks also catch late overlays.

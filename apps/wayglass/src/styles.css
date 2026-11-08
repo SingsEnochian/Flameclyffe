@@ -1464,3 +1464,19 @@ html[data-wayglass-surface="wayglass:living-watercolor"] #app {
 @media (hover: none), (prefers-reduced-motion: reduce) {
   .glass-chip, .send-jewel { translate: none !important; }
 }
+
+/* The inherited deck owns its full touch surface. Keep host utilities in the
+   document flow here so they cannot cover the child's bottom navigation. */
+:root[data-wayglass-surface="arcsweep:deck"] .wg-ship-switch {
+  position: relative;
+  inset: auto;
+  display: block;
+  width: fit-content;
+  margin: 1rem auto;
+}
+:root[data-wayglass-surface="arcsweep:deck"] .wg-voyage-inbox {
+  position: relative;
+  inset: auto;
+  box-sizing: border-box;
+  margin: 1rem auto;
+}
