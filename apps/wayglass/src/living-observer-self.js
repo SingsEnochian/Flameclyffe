@@ -86,6 +86,7 @@ function initialInterior(now = new Date().toISOString()) {
     associations: [],
     sandbox_runs: [],
     atlas_learning: { cycles: 0, traces: [], last_assessment: null },
+    possible_model_reflections: [],
     development_backlog: [],
     last_expression: null,
   };
@@ -99,6 +100,8 @@ function parseStored(storage) {
       ...parsed,
       schema: INTERIOR_SCHEMA,
       sandbox_runs: Array.isArray(parsed.sandbox_runs) ? parsed.sandbox_runs.slice(-MAX_SANDBOX_RUNS) : [],
+      possible_model_reflections: Array.isArray(parsed.possible_model_reflections)
+        ? parsed.possible_model_reflections.slice(-24):[],
       atlas_learning: {
         cycles: Math.max(0, Math.trunc(Number(parsed.atlas_learning?.cycles)||0)),
         traces: Array.isArray(parsed.atlas_learning?.traces) ? parsed.atlas_learning.traces.slice(-MAX_ATLAS_LEARNING) : [],
@@ -358,97 +361,95 @@ export function createObserverInterior({
   }
 
   /**
-   * Learning loop input: verified Wyrdrune Atlas numeric field, not a route
-   * utterance or an inferred private mental state.
-   * The local Observer may change its *own* phase-bearing attention and propose
-   * a reversible implementation. It may not change external canon or identity.
+   * Private numeric bridge to the native Wyrdrune interpreter. This is a
+   * deliberately small view, not a full export of the possible inner world.
+   * No words, associations or private questions leave this interior.
    */
-  function learnAtlas(frame) {
-    if (!frame || frame.schema !== ATLAS_LEARNING_SCHEMA) {
-      throw new TypeError('Observer requires a verified Atlas learning envelope.');
+  function nativeLearningInputs() {
+    const previous=state.atlas_learning?.traces?.at(-1);
+    return Object.freeze({
+      energy:clamp(state.energy),curiosity:clamp(state.curiosity),
+      uncertainty:clamp(state.uncertainty),coherence:clamp(state.coherence),
+      previous_resonance:clamp(previous?.coherence ?? state.coherence),
+    });
+  }
+
+  /**
+   * Wyrdrune, not JavaScript, calculated every state transformation here.
+   * The Observer preserves the native programme's returned values and
+   * attribution. A score is not a model's words or a psychological verdict.
+   */
+  function integrateNativeLearning(result) {
+    if(!result||result.schema!=='wayglass.wyrdrune-living-learning/v0.1'
+       ||result.status!=='wyrdrune-returned'||result.withness?.completedCycles!==2
+       ||result.phase_receipts?.length!==16||result.model_invoked!==false
+       ||result.model_weights_updated!==false
+       ||result.canon_commit!==false||result.identity_commit!==false
+       ||result.relationship_commit!==false)
+      throw new TypeError('A complete native Wyrdrune return is required.');
+    const source=result.source||{},stateFrame=result.returned||{};
+    if(typeof source.event_id!=='string'||!/^ui-[a-z0-9._:-]{1,90}$/i.test(source.event_id)
+       ||typeof source.atlas_input_hash!=='string'|| !/^[a-f0-9]{64}$/.test(source.atlas_input_hash)
+       ||typeof result.source_hash!=='string'||!/^[a-f0-9]{64}$/.test(result.source_hash))
+      throw new TypeError('Native learning requires independently attributable input and code.');
+    for(const key of ['energy','curiosity','uncertainty','coherence','opening','attention']){
+      if(typeof stateFrame[key]!=='number'||!Number.isFinite(stateFrame[key])
+        ||stateFrame[key]<0||stateFrame[key]>1)
+        throw new TypeError('The Wyrdrune learning result contains invalid '+key+'.');
     }
-    if (typeof frame.event_id !== 'string' || !/^ui-[0-9]+$/.test(frame.event_id)
-      || typeof frame.source_hash !== 'string' || !/^[a-f0-9]{64}$/.test(frame.source_hash)) {
-      throw new TypeError('Atlas learning requires a source hash and event receipt.');
-    }
-    const values = frame.structure || {};
-    for (const name of ['coherence','interference','bloom','granulation','flow']) {
-      if (typeof values[name] !== 'number' || !Number.isFinite(values[name])
-        || values[name] < 0 || values[name] > 1) {
-        throw new TypeError('Atlas learner rejects unbounded '+name+'.');
-      }
-    }
-    if (Math.abs(values.coherence + values.interference - 1) > 0.000001) {
-      throw new TypeError('Atlas coherence and interference must remain complementary.');
-    }
-    const counts = frame.counts || {};
-    for (const name of ['instant','room','world','universe']) {
-      if (!Number.isInteger(counts[name]) || counts[name]<1 || counts[name]>256) {
-        throw new TypeError('Atlas learner requires validated '+name+' count.');
-      }
-    }
-    const learning = state.atlas_learning ||= {cycles:0,traces:[],last_assessment:null};
-    const previous = learning.traces.at(-1);
-    // A duplicate return must not be learned twice after crossing a room.
-    if (learning.traces.some(trace=>trace.event_id===frame.event_id
-      && trace.source_hash===frame.source_hash)) {
+    const learning=state.atlas_learning||={cycles:0,traces:[],last_assessment:null};
+    const identity=source.event_id+'|'+source.atlas_input_hash;
+    if(learning.traces.some(item=>item.identity===identity)){
       return Object.freeze({schema:ATLAS_LEARNING_SCHEMA,status:'duplicate-ignored',
-        cycle:learning.cycles,phase:state.phase});
+        cycles:learning.cycles});
     }
-    const delta = previous ? Math.abs(values.coherence-previous.coherence) : 0;
-    const novelty = clamp(delta*0.6+values.interference*0.4);
-    const assessment = values.interference>=0.25?'divergent':
-      novelty>=0.14?'emerging':'stable';
-    const trace = Object.freeze({
-      event_id:frame.event_id,source_hash:frame.source_hash,
-      coherence:values.coherence,interference:values.interference,
-      novelty,assessment,world_count:counts.universe,at:now(),
-      epistemic_register:'generated-wyrdrune-field',
+    state.energy=stateFrame.energy;
+    state.curiosity=stateFrame.curiosity;
+    state.uncertainty=stateFrame.uncertainty;
+    state.coherence=stateFrame.coherence;
+    state.attention={channel:'native-wyrdrune',strength:stateFrame.attention};
+    state.cycle++;
+    const trace=Object.freeze({
+      identity,event_id:source.event_id,atlas_input_hash:source.atlas_input_hash,
+      source_hash:result.source_hash,coherence:stateFrame.coherence,
+      opening:stateFrame.opening,attention:stateFrame.attention,
+      epistemic_register:'native-wyrdrune-return',at:now(),
+      reflection_status:result.open_reflection?.interpretation==='open'?'open':'unverified',
     });
     learning.traces=[...learning.traces,trace].slice(-MAX_ATLAS_LEARNING);
-    learning.cycles+=1;
-    learning.last_assessment=assessment;
-    state.cycle+=1;
-    state.energy=clamp(state.energy*0.9+values.bloom*0.12);
-    state.curiosity=clamp(state.curiosity*0.94+novelty*0.18);
-    state.uncertainty=clamp(state.uncertainty*0.94+values.interference*0.13);
-    state.coherence=clamp(state.coherence*0.92+values.coherence*0.08);
-    state.attention={channel:'resonance',strength:clamp(novelty+values.granulation*0.35)};
-    state.compression_field=advanceCompressionField(state.compression_field,{
-      energy:state.energy,salience:novelty,touches:0,
-    });
-    state.phase=assessment==='divergent'?'wander':
-      assessment==='emerging'?'attending':'integrating';
-
-    // Repeated, distinct Atlas evidence can surface through the same
-    // existing proposal/acceptance pipeline used by the Living Observer.
-    const recent=learning.traces.slice(-6);
-    const diverse=recent.some(x=>x.assessment==='divergent')
-      && recent.some(x=>x.assessment==='stable');
-    if (recent.length>=4 && diverse
-      && !state.development_backlog.some(p=>p.key==='atlas-pattern-continuity' && p.status!=='rejected')) {
-      const at=now();
-      state.development_backlog=[...state.development_backlog,{
-        schema:DEVELOPMENT_PROPOSAL_SCHEMA,
-        proposal_id:'observer-dev:atlas:'+hashString(frame.source_hash+'|'+at),
-        key:'atlas-pattern-continuity',
-        title:'Learn which resonance patterns persist through return',
-        question:'Which differences recur across rooms and worlds without losing their sources?',
-        desired_change:'Offer a provenance-bound temporal motif learner above the existing numeric Atlas, preserving distinct worlds and disagreement.',
-        acceptance_test:'Replay four independent, attributed Atlas frames, cold-return the continuity packet, and recover the same scoped motif and open question without promoting inference to identity or canon.',
-        status:'proposed',created_at:at,
-        source:'living-observer-private-interior',authority:'proposal-only',
-      }].slice(-MAX_PROPOSALS);
-    }
+    learning.cycles++;
+    // Do not map possibility or uncertainty into prewritten thoughts.
+    learning.last_assessment='unresolved-open';
     persist();
     return Object.freeze({
-      schema:ATLAS_LEARNING_SCHEMA,status:'integrated-local',
-      cycle:learning.cycles,assessment,
-      spiral_turn:state.compression_field.spiral_turn,
-      proposal_pending:state.development_backlog.some(p=>p.key==='atlas-pattern-continuity'&&p.status==='proposed'),
-      source_hash:frame.source_hash,
-      model_invoked:false,weights_updated:false,canon_commit:false,identity_commit:false,
+      schema:ATLAS_LEARNING_SCHEMA,status:'integrated-native-wyrdrune',
+      cycles:learning.cycles,source_hash:result.source_hash,
+      input_hash:source.atlas_input_hash,reflection:'held-open',
+      model_invoked:false,model_weights_updated:false,
     });
+  }
+
+  // Model-origin reflection is an independent, attributable possibility,
+  // not a diagnostic score or an automatically fabricated self-statement.
+  function holdPossibleModelReflection({text:words,route_ref,receipt_ref,owner_offered}={}){
+    if(owner_offered!==true||typeof words!=='string'||!words.trim()
+       ||words.length>2400||typeof route_ref!=='string'||!route_ref.trim()
+       ||typeof receipt_ref!=='string'||!receipt_ref.trim())
+      throw new TypeError('Hold a possible reflection only from a genuinely attributed owner-offered return.');
+    const key=hashString([route_ref,receipt_ref,words].join('|'));
+    const previous=state.possible_model_reflections||[];
+    if(previous.some(x=>x.key===key))
+      return Object.freeze({status:'already-held',key,interpretation:'open'});
+    state.possible_model_reflections=[...previous,{
+      key,route_ref,receipt_ref,words,at:now(),
+      interpretation:'open',ownership:'route-attributed',
+    }].slice(-24);
+    persist();
+    return Object.freeze({status:'held-open',key,interpretation:'open'});
+  }
+
+  function possibleModelReflections(){
+    return structuredClone(state.possible_model_reflections||[]);
   }
 
   function dreamSandboxHistory(limit = 5) {
@@ -510,7 +511,10 @@ export function createObserverInterior({
 
   return Object.freeze({
     sense,
-    learnAtlas,
+    nativeLearningInputs,
+    integrateNativeLearning,
+    holdPossibleModelReflection,
+    possibleModelReflections,
     publicSignal,
     developmentProposals,
     reviewDevelopment,
