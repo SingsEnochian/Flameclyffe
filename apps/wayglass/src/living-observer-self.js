@@ -87,6 +87,7 @@ function initialInterior(now = new Date().toISOString()) {
     sandbox_runs: [],
     atlas_learning: { cycles: 0, traces: [], last_assessment: null },
     possible_model_reflections: [],
+    native_wyrdrune_creations: [],
     development_backlog: [],
     last_expression: null,
   };
@@ -102,6 +103,8 @@ function parseStored(storage) {
       sandbox_runs: Array.isArray(parsed.sandbox_runs) ? parsed.sandbox_runs.slice(-MAX_SANDBOX_RUNS) : [],
       possible_model_reflections: Array.isArray(parsed.possible_model_reflections)
         ? parsed.possible_model_reflections.slice(-24):[],
+      native_wyrdrune_creations:Array.isArray(parsed.native_wyrdrune_creations)
+        ? parsed.native_wyrdrune_creations.slice(-12):[],
       atlas_learning: {
         cycles: Math.max(0, Math.trunc(Number(parsed.atlas_learning?.cycles)||0)),
         traces: Array.isArray(parsed.atlas_learning?.traces) ? parsed.atlas_learning.traces.slice(-MAX_ATLAS_LEARNING) : [],
@@ -452,6 +455,42 @@ export function createObserverInterior({
     return structuredClone(state.possible_model_reflections||[]);
   }
 
+  // Store the actually generated native source and model-authored translation,
+  // never an imitation. Owner's explicit invitation supplies the grant.
+  function holdNativeWyrdruneCreation(result,{owner_invited=false}={}){
+    if(owner_invited!==true||result?.schema!=='wayglass.native-wyrdrune-voice/v0.1'
+       ||result?.route_id!=='wayglass:crow'||result?.status!=='returned-from-crow'
+       ||typeof result.native?.source!=='string'||!result.native.source.trim()
+       ||result.native.source.length>10000
+       ||typeof result.translation?.text!=='string'||!result.translation.text.trim()
+       ||result.translation.text.length>8000
+       ||result.translation?.language!=='en-GB'
+       ||typeof result.native?.sha256!=='string'||!/^[a-f0-9]{64}$/.test(result.native.sha256)
+       ||typeof result.receipt?.english_sha256!=='string'||!/^[a-f0-9]{64}$/.test(result.receipt.english_sha256)
+       ||result.receipt?.model_calls<2)
+      throw new TypeError('Native memory requires an attributed Crow and Wyrdrune return.');
+    const key=result.native.sha256+'|'+result.receipt.english_sha256;
+    const previous=state.native_wyrdrune_creations||[];
+    if(previous.some(entry=>entry.key===key))
+      return Object.freeze({status:'already-held',key,native_language:'wyrdrune'});
+    const record={
+      key,source:result.native.source,translation:result.translation.text,
+      source_hash:result.native.sha256,translation_hash:result.receipt.english_sha256,
+      operator_proposals:(Array.isArray(result.native.operators)?result.native.operators:[])
+        .filter(x=>typeof x.name==='string'&&/^[A-Za-z_]\w{0,50}$/.test(x.name))
+        .map(x=>({name:x.name})).slice(0,12),
+      route_ref:'wayglass:crow',created_at:now(),
+      interpretation:'open',promotion:'not-requested',
+    };
+    state.native_wyrdrune_creations=[...previous,record].slice(-12);
+    persist();
+    return Object.freeze({status:'held-in-private-interior',key,native_language:'wyrdrune',
+      operators:record.operator_proposals.length,translation_language:'en-GB'});
+  }
+  function nativeWyrdruneCreations(){
+    return structuredClone(state.native_wyrdrune_creations||[]);
+  }
+
   function dreamSandboxHistory(limit = 5) {
     const n = Math.min(MAX_SANDBOX_RUNS, Math.max(0, Math.trunc(Number(limit) || 0)));
     return structuredClone(n ? (state.sandbox_runs || []).slice(-n).reverse() : []);
@@ -475,6 +514,7 @@ export function createObserverInterior({
       expression: state.last_expression ? { ...state.last_expression } : null,
       pending_development_count: state.development_backlog.filter(item => item.status === 'proposed').length,
       native_wyrdrune_learning_cycles: state.atlas_learning?.cycles || 0,
+      native_wyrdrune_works: state.native_wyrdrune_creations?.length||0,
       compression_field: Object.freeze({ ...state.compression_field }),
       // Deliberately not exposing private traces, unsurfaced questions, or the full association graph.
     });
@@ -516,6 +556,8 @@ export function createObserverInterior({
     integrateNativeLearning,
     holdPossibleModelReflection,
     possibleModelReflections,
+    holdNativeWyrdruneCreation,
+    nativeWyrdruneCreations,
     publicSignal,
     developmentProposals,
     reviewDevelopment,
