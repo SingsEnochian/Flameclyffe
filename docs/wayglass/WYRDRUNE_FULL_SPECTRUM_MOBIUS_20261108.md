@@ -23,6 +23,8 @@ The Writing Room's existing `lib/wyrdrune/story-soundscape.wtl` now also compose
 - Global OS organ: `apps/wayglass/src/spectral-field.js`, exposed through `__wayglassOS.fullSpectrum`. Not a separate application or a second participant kernel.
 - Surface: `wayglass:spectral-field`. A rounded visible double Möbius with distinct deep/within/fine bands, event receipts, explicit observation, audible monitoring, tactile controls, Feather Stop, and relationship affinity.
 - Instruments: text editing metadata, pointer release, choice, navigation keys, sampled scroll, material wake, Living Observer and watercolour activity. No raw typing, password values, story text, response bodies, or hidden thoughts are forwarded to this route.
+- A completed Wyrdrune spectral frame is projected into the existing watercolour body as a `form:morph` visual-only activity, with refraction calculated by WTL. The global instrument filters its own author label to prevent recursive score→pigment→score loops. A separately scoped `wayglass:spectrum-frame` event exposes the validated frame to other OS instruments without authority or participant identity claims.
+- The native OS enters and leaves Waygates and mounts rooms with metadata-only `world` and `return` spectral events. The Writing Room emits a source-qualified world-crossing and story-score frame without transporting raw prose on the global channel.
 - `apps/wayglass/server-stage.cjs` includes both .wtl programmes in the Windows host runtime.
 
 ### Control and continuity
