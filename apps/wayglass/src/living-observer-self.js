@@ -474,6 +474,7 @@ export function createObserverInterior({
       attention_channel: state.attention.channel,
       expression: state.last_expression ? { ...state.last_expression } : null,
       pending_development_count: state.development_backlog.filter(item => item.status === 'proposed').length,
+      native_wyrdrune_learning_cycles: state.atlas_learning?.cycles || 0,
       compression_field: Object.freeze({ ...state.compression_field }),
       // Deliberately not exposing private traces, unsurfaced questions, or the full association graph.
     });
