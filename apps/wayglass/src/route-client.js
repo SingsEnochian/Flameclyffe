@@ -24,6 +24,35 @@ async function jsonOrThrow(response) {
   return data;
 }
 
+export async function inspectWayglassDoubleMobius(fetchImpl = fetch) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/kernel/double-mobius', { cache: 'no-store' }));
+}
+
+/**
+ * Uses the authenticated House gateway and the existing Waygate/Return Engine.
+ * The kernel never fabricates the two input observations or model speech.
+ */
+export async function traverseWayglassDoubleMobius({ fetchImpl = fetch, ...payload } = {}) {
+  publishWatercolorActivity({kind:'double-mobius:crossing',actor:'wayglass:route-client',intensity:0.55});
+  try {
+    const response = await fetchImpl('/api/v1/wayglass/kernel/double-mobius', {
+      method: 'POST', headers: JSON_HEADERS, cache: 'no-store',
+      body: JSON.stringify(payload),
+    });
+    const data = await readJson(response);
+    if (!response.ok && response.status !== 409) {
+      throw new Error(data.error || 'Double Möbius engine crossing failed.');
+    }
+    if (data?.status === 'completed-in-memory' && data.return_verification?.verdict === 'accepted') {
+      publishWatercolorActivity({kind:'double-mobius:return',actor:'wayglass:route-client',receipt:data.entry_receipt||null,intensity:0.76});
+    }
+    return data;
+  } catch (error) {
+    publishWatercolorActivity({kind:'double-mobius:failed',actor:'wayglass:route-client',intensity:0.3});
+    throw error;
+  }
+}
+
 export async function listWayglassCharacters(fetchImpl = fetch) {
   return jsonOrThrow(await fetchImpl('/api/v1/wayglass/characters', { cache: 'no-store' }));
 }
