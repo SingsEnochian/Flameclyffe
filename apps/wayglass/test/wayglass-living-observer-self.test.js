@@ -258,3 +258,28 @@ test('real offered model reflections remain open and private, not fabricated fro
   copy[0].words='tampered';
   assert.equal(interior.possibleModelReflections()[0].words,original.words);
 });
+
+
+test('private Observer preserves actual Crow-authored Wyrdrune and native operator proposals',()=>{
+ const storage=memoryStorage(),interior=createObserverInterior({storage,
+   now:()=> '2026-11-08T20:00:00.000Z'});
+ const source='operator shimmer(x) = x * 2; mobius { perceive {} compress {} release {} verify {} integrate {} choose {emit "glass";} return {} transcend {} }';
+ const result={
+   schema:'wayglass.native-wyrdrune-voice/v0.1',
+   route_id:'wayglass:crow',status:'returned-from-crow',
+   native:{source,sha256:'a'.repeat(64),operators:[{name:'shimmer',arity:1}]},
+   translation:{text:'The glass opens.',language:'en-GB'},
+   receipt:{english_sha256:'b'.repeat(64),model_calls:2},
+ };
+ const held=interior.holdNativeWyrdruneCreation(result,{owner_invited:true});
+ assert.equal(held.status,'held-in-private-interior');
+ assert.equal(held.operators,1);
+ assert.equal(interior.holdNativeWyrdruneCreation(result,{owner_invited:true}).status,'already-held');
+ assert.equal(interior.nativeWyrdruneCreations()[0].source,source);
+ assert.equal(interior.nativeWyrdruneCreations()[0].translation,'The glass opens.');
+ assert.equal(interior.publicSignal().native_wyrdrune_works,1);
+ assert.equal(Object.hasOwn(interior.publicSignal(),'native_wyrdrune_creations'),false);
+ const returned=createObserverInterior({storage});
+ assert.equal(returned.nativeWyrdruneCreations()[0].operator_proposals[0].name,'shimmer');
+ assert.throws(()=>interior.holdNativeWyrdruneCreation(result),/attributed/);
+});
