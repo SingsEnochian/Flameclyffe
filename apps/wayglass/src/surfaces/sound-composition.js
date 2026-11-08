@@ -147,7 +147,7 @@ export function mountWayglassSoundComposition(root,{composition,soundscape=null,
     const node=event.target;
     const point=node.closest?.('[data-sound-layer]');
     if(point&&root.contains(point)){selected=point.dataset.soundLayer;update();return;}
-    if(node.closest?.('[data-story-apply]'))run(applyDeclarations);
+    if(node.closest?.('[data-story-apply]'))run(()=>Promise.resolve().then(applyDeclarations).catch(failure=>{$('[data-story-declaration-status]').textContent='Pending · declaration could not apply · '+String(failure?.message||failure);throw failure;}));
     else if(node.closest?.('[data-score-start]'))run(()=>composition.startGeneration({confirmed:true}));
     else if(node.closest?.('[data-score-pause]'))run(()=>composition.pauseGeneration());
     else if(node.closest?.('[data-audio-enable]'))run(()=>composition.enableAudio({confirmed:true}));

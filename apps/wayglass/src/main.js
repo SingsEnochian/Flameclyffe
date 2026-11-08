@@ -154,6 +154,7 @@ shell.addEventListener('click',event=>{const button=event.target.closest('[data-
 
 const wayglass = Object.freeze({
   schema: 'wayglass.os/v0.1',
+  soundCompositionState:()=>{const s=wayglassSomaticSound.composition.snapshot();return Object.freeze({score_status:s.score_status,generating:s.generating,audio_enabled:s.audio_enabled,sequence:s.sequence,last_error:s.last_error,voice_count:s.layers.length,declared_context:wayglassStoryScoreBinding.getContext()!==null});},
   surfaces: listWayglassSurfaces,
   organs: listWayglassOrgans,
   mount: mountSurface,

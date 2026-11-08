@@ -99,7 +99,7 @@ try{
 }catch(error){
  receipt.status='failed';receipt.failure=String(error.stack||error);
  if(activePage&&!activePage.isClosed()){
-  try{const state=await activePage.evaluate(()=>({url:location.href,status:[...document.querySelectorAll('[data-composition-status],[data-composition-error],[data-story-declaration-status],[data-deck-status]')].map(n=>({tag:n.outerHTML,text:n.textContent})),declarations:[...document.querySelectorAll('[data-story-voice-one],[data-story-voice-two],[data-story-affinity]')].map(n=>({field:n.outerHTML,value:n.value})),readyState:document.readyState}));
+  try{const state=await activePage.evaluate(()=>({url:location.href,status:[...document.querySelectorAll('[data-composition-status],[data-composition-error],[data-story-declaration-status],[data-deck-status]')].map(n=>({tag:n.outerHTML,text:n.textContent})),sound_state:globalThis.__wayglassOS?.soundCompositionState?.()||null,declarations:[...document.querySelectorAll('[data-story-voice-one],[data-story-voice-two],[data-story-affinity]')].map(n=>({field:n.outerHTML,value:n.value})),readyState:document.readyState}));
    await writeFile(resolve(output,'failure-state.json'),JSON.stringify(state,null,2)+'\n');
    await activePage.screenshot({path:resolve(output,'failure.png'),fullPage:true});
   }catch{receipt.diagnostic_capture_failed=true;}
