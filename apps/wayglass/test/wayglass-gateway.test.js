@@ -94,3 +94,18 @@ test('full-spectrum composition cannot be reached without the House session',asy
   assert.equal((await allowed(new Request(url))).status,405);
   assert.equal(called,1);
 });
+
+
+test('Resonance Atlas only crosses the authenticated House gateway as a numeric POST',async()=>{
+ let called=0;
+ const endpoint='https://preview.example/api/v1/wayglass/wyrdrune/resonance-atlas';
+ const fetchImpl=async()=>{called++;return Response.json({schema:'wayglass.resonance-atlas/v0.1'});};
+ const request=()=>new Request(endpoint,{method:'POST',body:JSON.stringify({scales:{instant:.5}})});
+ const denied=createWayglassGatewayHandler({env,fetchImpl,authorise:()=>false});
+ assert.equal((await denied(request())).status,401);
+ assert.equal(called,0);
+ const allowed=createWayglassGatewayHandler({env,fetchImpl,authorise:()=>true});
+ assert.equal((await allowed(request())).status,200);
+ assert.equal((await allowed(new Request(endpoint))).status,405);
+ assert.equal(called,1);
+});
