@@ -63,7 +63,7 @@ mobius {
     emit bridge("sound","validate",root,counterpart,foreground,atmosphere,below,above);
   }
   integrate {
-    let returned_score = bridge("sound","frame",root,counterpart,foreground,atmosphere,returned_affinity,pulse);
+    let returned_score = bridge("sound","frame",root,counterpart,foreground,atmosphere,returned_affinity,pulse,below,above);
   }
   choose {
     emit returned_score;
