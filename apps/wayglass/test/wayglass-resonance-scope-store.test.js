@@ -30,7 +30,7 @@ test('world boundaries never mix private source refs into server scalars',()=>{
  assert.equal(snap.counts.world,8);
  assert.equal(snap.counts.universe,1);
  assert.equal(store.inspect().size,8);
- assert.equal(snap.scalars.universe,.8);
+ assert.ok(Math.abs(snap.scalars.universe-.8)<1e-12);
  assert.equal(snap.provenance.event_refs.length,8);
 });
 test('scope and sensor values must be bounded; no model identities are inferred',()=>{
