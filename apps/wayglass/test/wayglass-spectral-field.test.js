@@ -1,0 +1,104 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { createWayglassSpectralField } from '../src/spectral-field.js';
+
+function harness(){
+ const scope=new EventTarget(), document=new EventTarget(), calls=[],updates=[];
+ let nextTimer=0;const timers=new Map();
+ Object.assign(scope,{
+   document,innerWidth:1000,
+   setTimeout(fn){const id=++nextTimer;timers.set(id,fn);return id},
+   clearTimeout(id){timers.delete(id)},
+ });
+ let audioRunning=false,audioDisposed=false;
+ const audioFactory=()=>({
+   start:async()=>{audioRunning=true;return {running:true}},
+   update:v=>updates.push(v),
+   stop:()=>{audioRunning=false},
+   dispose:()=>{audioDisposed=true},
+ });
+ const score=async events=>{
+  calls.push(events);
+  return {schema:'wayglass.full-spectrum/v0.1',count:events.length,events:events.map(e=>({
+   event_id:e.event_id,kind:e.kind,source_ref:e.source_ref,source_hash:'wtl-fixture',
+   phases:Array.from({length:16},(_,i)=>String(i)),
+   spectrum:{
+    infrasonic:{hz:3,physical_playback:false},
+    audible:{voice_one_hz:220,voice_two_hz:300,foreground_gain:.012,atmosphere_gain:.005},
+    ultrasonic:{hz:26500,physical_playback:false},
+   },
+  }))};
+ };
+ const field=createWayglassSpectralField({
+   scope,document,score,audioFactory,
+   observerSubscribe:()=>()=>{},
+   watercolorSubscribe:()=>()=>{},
+   featherState:()=>({feather_stopped:false}),
+ });
+ return {field,scope,document,calls,updates,timers, get audioRunning(){return audioRunning},get audioDisposed(){return audioDisposed}};
+}
+
+test('global listener is silent and has no interaction capture until opt-in',async()=>{
+ const h=harness();
+ h.document.dispatchEvent(new Event('input'));
+ assert.equal(h.field.status().captured,0);
+ assert.equal(h.calls.length,0);
+ await assert.rejects(h.field.hear(),/Enable/);
+ h.field.dispose();
+ assert.equal(h.audioDisposed,true);
+});
+
+test('each authorised interaction gets a distinct queued Wyrdrune event, never key contents',async()=>{
+ const h=harness();
+ h.field.observe();
+ const before=h.field.status().captured;
+ h.document.dispatchEvent(new Event('input'));
+ h.document.dispatchEvent(new Event('pointerup'));
+ h.document.dispatchEvent(new Event('change'));
+ assert.equal(h.field.status().captured,before+3);
+ await h.field.flush();
+ assert.equal(h.calls.length,1);
+ assert.ok(h.calls[0].every(event=>Object.keys(event).every(k=>k!=='raw_text'&&k!=='key'&&k!=='value')));
+ assert.equal(h.field.status().history.length,4);
+ assert.equal(h.field.status().last.spectrum.ultrasonic.hz,26500);
+ assert.equal(h.audioRunning,false);
+ h.field.dispose();
+});
+
+test('audible mapping needs explicit gesture and is stopped by Feather',async()=>{
+ const h=harness();
+ h.field.observe();
+ await h.field.flush();
+ await h.field.hear();
+ assert.equal(h.audioRunning,true);
+ assert.equal(h.field.status().heard,true);
+ assert.equal(h.updates.at(-1).score.rootHz,220);
+ assert.equal(h.updates.at(-1).score.counterpartHz,300);
+ assert.equal(h.updates.at(-1).score.foregroundGain,.012);
+ const feather=new Event('wayglass:feather');
+ Object.defineProperty(feather,'detail',{value:{stopped:true}});
+ h.scope.dispatchEvent(feather);
+ assert.equal(h.field.status().active,false);
+ assert.equal(h.field.status().heard,false);
+ assert.equal(h.audioRunning,false);
+ h.field.dispose();
+});
+
+test('completed model/observer signals cross without assuming a real model identity',async()=>{
+ const h=harness();
+ h.field.observe();
+ h.scope.dispatchEvent(new Event('wayglass:material-wake'));
+ await h.field.flush();
+ assert.ok(h.calls[0].some(event=>event.source_ref==='wayglass:material-signal'));
+ assert.equal(h.field.status().history.at(-1).source_ref,'wayglass:material-signal');
+ h.field.dispose();
+});
+
+test('metadata route does not silently invent Wyrdrune frames if the host fails',async()=>{
+ const h=harness();
+ h.field.observe();
+ h.field.capture({kind:'world',source_ref:'wayglass:ui-events'});
+ const good=await h.field.flush();
+ assert.equal(good.error,null);
+ h.field.dispose();
+});
