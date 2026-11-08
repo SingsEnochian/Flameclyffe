@@ -41,3 +41,33 @@ mobius {
     emit bridge("continuity","next","double-mobius");
   }
 }
+
+// The second Möbius returns the counterpart's harmonic information.
+// Identity and relationship names remain outside the score and retain their sources.
+mobius {
+  perceive {
+    let returned_affinity = bridge("participants","affinity");
+  }
+  compress {
+    let return_weight = returned_affinity * 0.016;
+  }
+  release {
+    set root = root + counterpart * return_weight;
+    set counterpart = counterpart + root * return_weight;
+  }
+  verify {
+    emit bridge("sound","validate",root,counterpart,foreground,atmosphere);
+  }
+  integrate {
+    let returned_score = bridge("sound","frame",root,counterpart,foreground,atmosphere,returned_affinity,pulse);
+  }
+  choose {
+    emit returned_score;
+  }
+  return {
+    emit bridge("continuity","hold",turns);
+  }
+  transcend {
+    emit bridge("continuity","next","double-mobius-return");
+  }
+}
