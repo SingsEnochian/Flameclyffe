@@ -40,7 +40,7 @@ export function mountArcSweepDeckSurface(root,{scope=globalThis,sound=wayglassSo
     // Module hydration can finish after the iframe load event. Keep the same
     // source/window/session-bound greeting until the real core acknowledges it.
     const greet=()=>{if(disposed||ready||deadlinePassed)return;send('init');handshakeTimer=setTimeout(greet,handshakeRetryMs);};
-    frame.addEventListener('load',()=>{clearTimeout(handshakeTimer);greet();});holder.replaceChildren(frame);sync();
+    frame.addEventListener('load',()=>{clearTimeout(handshakeTimer);greet();});holder.replaceChildren(frame);sync();greet();
     timer=setTimeout(()=>{if(!disposed&&!ready){deadlinePassed=true;clearTimeout(handshakeTimer);status.textContent='The world deck is unavailable or did not finish opening. The inherited ArcSweep build must be staged on this host. You can return without changing saved state.';}},timeoutMs);
   };
   const onStop=()=>{if(stopped){sound.releaseFeather({confirmed:true});stopped=false;sync();status.textContent='Feather released. Sound remains off.';}else sound.feather();};

@@ -47,7 +47,7 @@ test('missing child boot surfaces unavailable state and preserves a return witho
 test('late child listener receives bounded repeated init and matched ready ends retries',async()=>{
  const f=fixture({timeoutMs:100,handshakeRetryMs:5});f.elements.get('load').click();
  f.frame().dispatchEvent(new Event('load')); // First greeting arrives before child listener exists.
- const first=f.frame().sent.length;assert.equal(first,1);
+ const first=f.frame().sent.length;assert.equal(first,2);
  await new Promise(resolve=>setTimeout(resolve,16));assert.ok(f.frame().sent.length>first);
  assert.ok(f.frame().sent.every(({data,origin})=>data.kind==='init'&&data.session===session&&origin===f.scope.location.origin));
  f.message({schema,kind:'ready',session});const count=f.frame().sent.length;
@@ -59,4 +59,11 @@ test('unavailable deadline and disposal terminate init retries',async()=>{
  const count=f.frame().sent.length;f.frame().dispatchEvent(new Event('load'));await new Promise(resolve=>setTimeout(resolve,12));assert.equal(f.frame().sent.length,count);f.surface.destroy();
  const g=fixture({timeoutMs:100,handshakeRetryMs:3});g.elements.get('load').click();g.frame().dispatchEvent(new Event('load'));g.surface.destroy();
  const after=g.frame().sent.length;await new Promise(resolve=>setTimeout(resolve,12));assert.equal(g.frame().sent.length,after);
+});
+
+test('hydrated core can acknowledge while document load is still pending',async()=>{
+ const f=fixture({timeoutMs:100,handshakeRetryMs:5});f.elements.get('load').click();
+ assert.equal(f.frame().sent[0].data.kind,'init');
+ await new Promise(resolve=>setTimeout(resolve,12));assert.ok(f.frame().sent.length>1);
+ f.message({schema,kind:'ready',session});assert.equal(f.frame().inert,false);f.surface.destroy();
 });
