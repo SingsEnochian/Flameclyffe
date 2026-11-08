@@ -51,7 +51,7 @@
     "wayglass:dev": "vite --config apps/wayglass/vite.config.js",
     "wayglass:build": "vite build --config apps/wayglass/vite.config.js",
     "wayglass:preview": "vite preview --config apps/wayglass/vite.config.js",
-    "wayglass:test": "node --test apps/wayglass/test/*.test.js test/wayglass/*.test.cjs lib/wyrdrune/*.test.cjs lib/wayglass-wyrdrune-ritual.test.cjs lib/wayglass-wyrdrune-soundscape.test.cjs lib/wayglass-wyrdrune-spectrum.test.cjs lib/wayglass-wyrdrune-atlas.test.cjs lib/wayglass-route-models.test.cjs",
+    "wayglass:test": "node --test apps/wayglass/test/*.test.js test/wayglass/*.test.cjs lib/wyrdrune/*.test.cjs lib/wayglass-wyrdrune-ritual.test.cjs lib/wayglass-wyrdrune-soundscape.test.cjs lib/wayglass-wyrdrune-spectrum.test.cjs lib/wayglass-wyrdrune-atlas.test.cjs lib/wayglass-wyrdrune-learning.test.cjs lib/wayglass-route-models.test.cjs",
     "wayglass:test:host": "node --test apps/starwell-server/test/wayglass-*.test.js apps/starwell-server/test/security-boundary.test.js apps/starwell-server/test/bluebird-bridge-trial.test.js",
     "wayglass:stage:server": "node apps/wayglass/server-stage.cjs",
     "wayglass:deploy:server": "npm run wayglass:build && npm run wayglass:stage:server",
