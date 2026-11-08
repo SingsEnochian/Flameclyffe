@@ -466,6 +466,8 @@ export async function mountArcSweepWritingSurface(root) {
     externalConsent.checked = false;
     // A world crossing never drags its predecessor's continuous audio along.
     stopScoreAudio();
+    globalThis.__wayglassOS?.fullSpectrum?.capture({kind:'world',strength:.8,motion:.6,
+      continuity:.95,intent:.8,source_ref:'wayglass:story-world-crossing'});
     lastSoundscape = null;
     scoreReadout.textContent = 'A new world needs its own Wyrdrune score.';
     queueStoryScore();
