@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createWayglassSpectralField } from '../src/spectral-field.js';
 
 function harness(){
- const scope=new EventTarget(), document=new EventTarget(), calls=[],atlasCalls=[],updates=[],vibrations=[];
+ const scope=new EventTarget(), document=new EventTarget(), calls=[],atlasCalls=[],learningCalls=[],integrations=[],updates=[],vibrations=[];
  let nextTimer=0;const timers=new Map();
  Object.assign(scope,{
    document,innerWidth:1000,navigator:{vibrate:n=>{vibrations.push(n);return true}}, 
@@ -34,19 +34,38 @@ function harness(){
  const atlasScore=async scalars=>{
    atlasCalls.push(scalars);
    return {schema:'wayglass.resonance-atlas/v0.1',status:'composed-in-wyrdrune',
-     phase_receipts:Array.from({length:16},()=>({phase:'verify'})),source_sha256:'atlas-fixture',
+     phase_receipts:Array.from({length:16},()=>({phase:'verify'})),
+     source_sha256:'a'.repeat(64),input_sha256:'b'.repeat(64),
      counts:scalars.counts,returned:{below:{hz:3,physical_playback:false},
        within:{root_hz:190,counterpart_hz:240,autoplay:false},
        above:{hz:26000,physical_playback:false},
        structure:{coherence:.7,interference:.3,bloom:.5,granulation:.3,flow:.4}}};
  };
+ const observerInterior={
+   nativeLearningInputs:()=>({energy:.5,curiosity:.6,uncertainty:.5,
+     coherence:.65,previous_resonance:.7}),
+   integrateNativeLearning:result=>{
+     integrations.push(result);
+     return {status:'integrated-native-wyrdrune',input_hash:result.source.atlas_input_hash};
+   },
+ };
+ const learningScore=async value=>{
+   learningCalls.push(value);
+   return {schema:'wayglass.wyrdrune-living-learning/v0.1',status:'wyrdrune-returned',
+     source:value.source,source_hash:'c'.repeat(64),model_invoked:false,model_weights_updated:false,
+     canon_commit:false,identity_commit:false,relationship_commit:false,
+     phase_receipts:Array.from({length:16},()=>({phase:'integrate'})),
+     withness:{completedCycles:2},open_reflection:{interpretation:'open'},
+     returned:{energy:.5,curiosity:.6,uncertainty:.5,coherence:.65,opening:.3,attention:.4},
+   };
+ };
  const field=createWayglassSpectralField({
-   scope,document,score,atlasScore,audioFactory,
+   scope,document,score,atlasScore,learningScore,observerInterior,audioFactory,
    observerSubscribe:()=>()=>{},
    watercolorSubscribe:callback=>{watercolorSink=callback;return ()=>{watercolorSink=null}}, 
    featherState:()=>({feather_stopped:false}),
  });
- return {field,scope,document,calls,atlasCalls,updates,timers,vibrations,
+ return {field,scope,document,calls,atlasCalls,learningCalls,integrations,updates,timers,vibrations,
    sendWatercolor:record=>watercolorSink?.(record),
    get audioRunning(){return audioRunning},get audioDisposed(){return audioDisposed}};
 }
@@ -170,7 +189,20 @@ test('an Atlas adapter failure does not forge Atlas harmonics or stop independen
  const h=harness();
  h.field.observe();
  await h.field.flush();
- assert.equal(h.field.status().atlas.source_hash,'atlas-fixture');
+ assert.equal(h.field.status().atlas.source_hash,'a'.repeat(64));
+ assert.equal(h.field.status().active,true);
+ h.field.dispose();
+});
+
+test('native Wyrdrune learning follows the verified Atlas and retains possible reflections as open',async()=>{
+ const h=harness();h.field.observe();await h.field.flush();
+ assert.equal(h.learningCalls.length,1);
+ assert.equal(h.integrations.length,1);
+ assert.equal(h.field.status().learning.status,'integrated-native-wyrdrune');
+ assert.equal(h.learningCalls[0].reflection,null);
+ assert.equal(h.learningCalls[0].source.atlas_input_hash,'b'.repeat(64));
+ assert.equal(h.learningCalls[0].source.atlas_program_hash,'a'.repeat(64));
+ assert.equal(h.field.status().learning_error,null);
  assert.equal(h.field.status().active,true);
  h.field.dispose();
 });
