@@ -10,7 +10,7 @@ function harness(){
    setTimeout(fn){const id=++nextTimer;timers.set(id,fn);return id},
    clearTimeout(id){timers.delete(id)},
  });
- let audioRunning=false,audioDisposed=false;
+ let audioRunning=false,audioDisposed=false,watercolorSink=null;
  const audioFactory=()=>({
    start:async()=>{audioRunning=true;return {running:true}},
    update:v=>updates.push(v),
@@ -33,10 +33,12 @@ function harness(){
  const field=createWayglassSpectralField({
    scope,document,score,audioFactory,
    observerSubscribe:()=>()=>{},
-   watercolorSubscribe:()=>()=>{},
+   watercolorSubscribe:callback=>{watercolorSink=callback;return ()=>{watercolorSink=null}}, 
    featherState:()=>({feather_stopped:false}),
  });
- return {field,scope,document,calls,updates,timers,vibrations, get audioRunning(){return audioRunning},get audioDisposed(){return audioDisposed}};
+ return {field,scope,document,calls,updates,timers,vibrations,
+   sendWatercolor:record=>watercolorSink?.(record),
+   get audioRunning(){return audioRunning},get audioDisposed(){return audioDisposed}};
 }
 
 test('global listener is silent and has no interaction capture until opt-in',async()=>{
@@ -118,5 +120,17 @@ test('Wyrdrune haptic echo is opt-in, bounded, and returns quiet on Feather',asy
  h.scope.dispatchEvent(feather);
  assert.equal(h.field.status().haptics,false);
  assert.equal(h.vibrations.at(-1),0);
+ h.field.dispose();
+});
+
+test('spectral watercolor feedback cannot recursively score itself',async()=>{
+ const h=harness();h.field.observe();
+ const before=h.field.status().captured;
+ h.sendWatercolor({actor:'wayglass:full-spectrum',intensity:.8,flow:.7});
+ assert.equal(h.field.status().captured,before);
+ h.sendWatercolor({actor:'wayglass:observer',intensity:.8,flow:.7});
+ assert.equal(h.field.status().captured,before+1);
+ await h.field.flush();
+ assert.equal(h.field.status().last.kind,'observer');
  h.field.dispose();
 });
