@@ -51,11 +51,12 @@ try{
   await page.evaluate(()=>{
    globalThis.__deckClickTrace=[];
    for(const name of ['pointerdown','pointerup','click'])document.addEventListener(name,event=>{
-    if(event.target.closest?.('[data-story-apply]'))globalThis.__deckClickTrace.push({phase:'capture',name,target:event.target.outerHTML,path:event.composedPath().filter(n=>n.nodeType===1).map(n=>n.tagName+' '+(n.getAttribute('data-deck-composer')!==null?'composer-root':''))});
+    if(event.target.closest?.('[data-story-apply]'))globalThis.__deckClickTrace.push({phase:'capture',name,target:event.target.tagName,apply:event.target.closest?.('[data-story-apply]')!==null,path:event.composedPath().filter(n=>n.nodeType===1).map(n=>n.tagName+' '+(n.getAttribute('data-deck-composer')!==null?'composer-root':''))});
    },true);
-   document.querySelector('[data-deck-composer]').addEventListener('click',event=>globalThis.__deckClickTrace.push({phase:'bubble',target:event.target.outerHTML}));
+   document.querySelector('[data-deck-composer]').addEventListener('click',event=>globalThis.__deckClickTrace.push({phase:'bubble',target:event.target.tagName,apply:event.target.closest?.('[data-story-apply]')!==null}));
   });
   await parentSound.locator('[data-story-apply]').click();
+  assert.ok(await page.evaluate(()=>globalThis.__deckClickTrace.some(event=>event.phase==='capture'&&event.name==='click'&&event.apply)), 'declaration gesture must reach its visible control');
   await parentSound.locator('[data-composition-status]').filter({hasText:'source-score-ready'}).waitFor();
   assert.equal(await parentSound.locator('[data-sound-layer]').count(),4,'WTL returns two foreground and two atmospheric sound objects');
   const point=parentSound.locator('[data-sound-layer]').first(),before=await point.getAttribute('style');

@@ -25,7 +25,7 @@ export function mountWayglassSoundComposition(root,{composition,soundscape=null,
   const returnKey='wayglass.sound-composition.return/'+composition.snapshot().region+'/v1';
   let disposed=false,selected=null,dragging=null,last=null;
   const nodes=new Map();
-  root.innerHTML=`<section class="wg-surface wg-composer" data-surface="sound-composition">
+  root.innerHTML=`<section class="wg-surface wg-soundstage" data-surface="sound-composition">
   <header class="glass-panel"><p class="eyebrow">Wayglass · Living composition</p><h1>The Spatial Soundstage</h1>
   <p>Place each sound in the landscape. Let the score evolve, then choose when to hear it.</p>
   <p class="wg-composer-note">One vessel. Many listening landscapes. Source and region stay with each sound.</p></header>

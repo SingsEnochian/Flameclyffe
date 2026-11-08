@@ -1,6 +1,6 @@
-.wg-composer { max-width: 1250px; margin-inline: auto; display: grid; gap: 18px; }
-.wg-composer header, .wg-composer-panel { padding: clamp(18px,3vw,30px); border-radius: 26px; }
-.wg-composer header h1 { margin: .3em 0; }
+.wg-soundstage { max-width: 1250px; margin-inline: auto; display: grid; gap: 18px; }
+.wg-soundstage header, .wg-composer-panel { padding: clamp(18px,3vw,30px); border-radius: 26px; }
+.wg-soundstage header h1 { margin: .3em 0; }
 .wg-composer-layout { display: grid; grid-template-columns: minmax(0,1.4fr) minmax(280px,1fr); gap: 18px; }
 .wg-composer-stage {
  position: relative; min-height: 430px; overflow: hidden; isolation: isolate; border-radius: 24px;
@@ -32,13 +32,16 @@
 .wg-composer-layers li { padding: 12px; border: 1px solid rgba(177,218,207,.2); border-radius: 15px; overflow-wrap: anywhere; }
 .wg-composer-readout { color: #dce9df; overflow-wrap: anywhere; }
 .wg-composer-note { color: #c2d4cd; font-size: .86rem; line-height: 1.6; }
-.wg-composer legend { color: #ecd5aa; }
-.wg-composer fieldset { min-width: 0; border: 1px solid rgba(177,218,207,.25); border-radius: 18px; padding: 16px; }
+.wg-soundstage legend { color: #ecd5aa; }
+.wg-soundstage fieldset { min-width: 0; border: 1px solid rgba(177,218,207,.25); border-radius: 18px; padding: 16px; }
 @media (max-width: 760px) {
  .wg-composer-layout { grid-template-columns: minmax(0,1fr); }
  .wg-composer-stage { min-height: 350px; }
  .wg-composer-object { max-width: 115px; font-size: .8rem; }
 }
 @media (prefers-reduced-motion: reduce) {
- .wg-composer *, .wg-composer *::before, .wg-composer *::after { animation: none !important; transition: none !important; }
+ .wg-soundstage *, .wg-soundstage *::before, .wg-soundstage *::after { animation: none !important; transition: none !important; }
 }
+
+/* Keep composition controls stationary and large enough for touch. */
+.wg-soundstage .glass-chip { min-height: 44px; }
