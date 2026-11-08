@@ -79,6 +79,16 @@ export async function scoreWyrdruneSpectrum(events, fetchImpl=fetch, signal=unde
   }));
 }
 
+/** Transmits only bounded numeric scale values and counts to the House-scoped
+ * Wyrdrune Atlas, never world IDs, participant names or raw narratives.
+ */
+export async function scoreWyrdruneAtlas(scales, fetchImpl=fetch, signal=undefined) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/wyrdrune/resonance-atlas',{
+    method:'POST',headers:JSON_HEADERS,cache:'no-store',signal,
+    body:JSON.stringify({scales}),
+  }));
+}
+
 export async function listWayglassCharacters(fetchImpl = fetch) {
   return jsonOrThrow(await fetchImpl('/api/v1/wayglass/characters', { cache: 'no-store' }));
 }
