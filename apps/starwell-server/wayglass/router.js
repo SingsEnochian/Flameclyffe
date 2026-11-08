@@ -11,6 +11,7 @@ const {
 } = require('../wayglass-runtime/wayglass-route-registry.cjs');
 const { bootWayglassKernel, inspectWayglassCognitionPreflight } = require('../wayglass-runtime/wayglass-kernel.cjs');
 const { previewWyrdruneRitual } = require('../wayglass-runtime/wayglass-wyrdrune-ritual.cjs');
+const { scoreStoryWithWyrdrune } = require('../wayglass-runtime/wayglass-wyrdrune-soundscape.cjs');
 const { enterWayglassWorld } = require('../wayglass-runtime/wayglass-world-entry.cjs');
 const { createWayglassDeparture } = require('../wayglass-runtime/wayglass-stop-receipt.cjs');
 const { createDepartureStore } = require('../wayglass-runtime/wayglass-departure-store.cjs');
@@ -710,6 +711,27 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
   // Reuse the verified House session contract rather than inventing a proxy trust header.
   // Wyrdrune is a first-class, pure Eightfold preview. This is not a model
   // instruction, a prophecy, a bridge permission or an external provider turn.
+  // Wyrdrune is the only score composer. This route exposes typed, bounded
+  // observational bridges to authenticated House writing sessions; it never
+  // invokes a model, plays audio or stores a user's draft on the server.
+  router.post('/wyrdrune/story-soundscape', createRequestGate({ maxRequests: 48, maxConcurrent: 2 }), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required to score the writing room.' });
+    }
+    try {
+      const score = await scoreStoryWithWyrdrune(req.body || {}, {
+        principal: { authorized: true },
+      });
+      return res.json(score);
+    } catch (error) {
+      return res.status(400).json({
+        schema: 'wayglass.wyrdrune-story-soundscape-error/v0.1',
+        error: cleanText(error?.message || 'Wyrdrune scoring refused the input.', 250),
+      });
+    }
+  });
+
   router.post('/wyrdrune/preview', createRequestGate({ maxRequests: 15, maxConcurrent: 2 }), async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     if (!(await griffStewardAuthorized(req).catch(() => false))) {
