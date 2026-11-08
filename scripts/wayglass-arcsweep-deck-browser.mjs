@@ -73,8 +73,10 @@ try{
   await page.getByRole('button',{name:'Open world deck',exact:true}).click();
   await page.getByText('Wayglass deck ready · its saved workspace is open.',{exact:true}).waitFor({timeout:45000});
   const child=page.frameLocator('iframe');await child.locator('#app .app-shell').waitFor();
-  const hiddenCodex=child.locator('#arcsweep-magic-book[hidden]');await hiddenCodex.waitFor({state:'attached'});
-  assert.equal(await hiddenCodex.evaluate(node=>getComputedStyle(node).display),'none','hidden inherited dialogs must not intercept deck controls');
+  // Codex is a post-core optional sidecar. When mounted, its closed dialog
+  // must respect hidden; the subsequent real clicks also catch late overlays.
+  const hiddenCodex=child.locator('#arcsweep-magic-book[hidden]');
+  if(await hiddenCodex.count())assert.equal(await hiddenCodex.evaluate(node=>getComputedStyle(node).display),'none','hidden inherited dialogs must not intercept deck controls');
   assert.ok(await child.locator('.sidebar nav [data-room]').count()>=11,'real core rooms must be present');
   await child.getByText('Spatial composition · this listening landscape',{exact:true}).click();
   await child.locator('[data-composition-status]').filter({hasText:'source-score-ready'}).waitFor({timeout:30000});
