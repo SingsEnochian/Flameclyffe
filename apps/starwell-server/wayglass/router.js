@@ -797,10 +797,12 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       }
       // Griff's provider binding is not an inheritance-host dependency. A
       // signed, owner-approved chat turn must work before any optional bridge.
-      const wantsInheritance = resolver != null || (
+      // First Contact uses its own explicitly bound ship route. Do not make
+      // a local conversation depend on an optional inheritance host adapter.
+      const wantsInheritance = route.route_id !== 'wayglass:ship' && (resolver != null || (
         route.route_id !== 'flame:griff:spicychat'
         && (payload.participant_id != null || payload.world_id != null)
-      );
+      ));
       let compiled = null;
       if (wantsInheritance) {
         if (typeof resolver?.resolve !== 'function') {
