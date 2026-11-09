@@ -123,7 +123,9 @@ async function callOllama(route, payload, compiled = null, fetchImpl = globalThi
       messages,
       think: payload.think === true,
       stream: false,
-      keep_alive: '15m',
+      // Bounded by default for shared laptop GPU memory. Owner can tune after
+      // observing load vs generation time in the performance receipt.
+      keep_alive: process.env.WAYGLASS_OLLAMA_KEEP_ALIVE || '5m',
       options: {
         num_predict: Math.max(64, Math.min(4000, Number(payload.max_output_tokens) || 1400)),
       },
