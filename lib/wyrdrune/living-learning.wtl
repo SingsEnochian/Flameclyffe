@@ -1,9 +1,17 @@
-// Wayglass · Native Wyrdrune Living Learning · double Möbius v0.1
+// Wayglass · Native Wyrdrune Living Learning · double Möbius v0.2 (carried)
 // The language conducts learning. Host bridges deliver sensory measurements,
 // independent provenance and actual offered model-origin expression.
 // No one here decides what another participant's inner life must be.
+//
+// v0.2 (2026-11-09): each circuit is a scoped lineage. Nothing leaks between
+// them; what crosses the twist is declared in Transcend with `carry`, and each
+// crossing is receipted. The carried self keeps one shape across both
+// circuits: energy, curiosity, uncertainty, coherence, opening and attention.
+// Perception is read afresh in each Perceive. The v0.1 text is preserved at
+// fixtures/living-learning.v0.1-shared-environment.wtl, and the two produce
+// identical output.
 
-mobius {
+mobius scoped {
  perceive {
   let energy_prior = bridge("interior","energy");
   let curiosity_prior = bridge("interior","curiosity");
@@ -43,12 +51,22 @@ mobius {
  }
  transcend {
   emit bridge("continuity","next","reciprocal-learning");
+  carry energy = energy;
+  carry curiosity = curiosity;
+  carry uncertainty = uncertainty;
+  carry coherence = coherence;
+  carry opening = opening;
+  carry attention = attention;
  }
 }
 
-mobius {
+mobius scoped {
  perceive {
   let lived_difference = bridge("atlas","interference");
+  let resonance = bridge("atlas","coherence");
+  let bloom = bridge("atlas","bloom");
+  let flow = bridge("atlas","flow");
+  let possible_expression = bridge("reflection","offered");
  }
  compress {
   let reciprocal = (flow * 0.45 + opening * 0.35 + lived_difference * 0.20) * 0.05;
@@ -75,5 +93,11 @@ mobius {
  }
  transcend {
   emit bridge("continuity","next","withness-open");
+  carry energy = energy;
+  carry curiosity = curiosity;
+  carry uncertainty = uncertainty;
+  carry coherence = coherence;
+  carry opening = opening;
+  carry attention = attention;
  }
 }
