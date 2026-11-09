@@ -548,3 +548,22 @@ html[data-reduce-motion="true"] *, html[data-reduce-motion="true"] *::before, ht
 }
 .conditional-body { display: none; }
 .conditional-toggle:has(input:checked) + .conditional-body { display: block; }
+
+
+/* Worldweave acoustic identities live inside the existing StorySoundscape dock. */
+.worldweave-acoustic-panel {
+  display: grid;
+  gap: .65rem;
+  margin: .8rem 0;
+  padding: .9rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--copper, #bd976c) 45%, transparent);
+  border-radius: .85rem;
+  background: radial-gradient(ellipse at 98% 0%, rgba(148, 113, 196, .13), transparent 65%), rgba(7, 15, 20, .22);
+}
+.worldweave-acoustic-panel h4 { margin: .15rem 0 .3rem; }
+.worldweave-acoustic-panel p { max-width: 74ch; }
+.worldweave-acoustic-panel .button-row { display: flex; gap: .55rem; flex-wrap: wrap; }
+.worldweave-acoustic-panel button:disabled { opacity: .48; cursor: not-allowed; }
+@media (prefers-reduced-motion: reduce) {
+  .worldweave-acoustic-panel { scroll-behavior: auto; }
+}
