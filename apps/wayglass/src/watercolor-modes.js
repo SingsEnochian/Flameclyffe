@@ -52,6 +52,7 @@ export async function inviteWatercolorMode({
   worldId=null,participantId=null,externalProviderConsent=false,fetchImpl=fetch,invoke=invokeWayglassRoute,
 }={}){
   const prompt=composeWatercolorPrompt({mode,authorText,activity,voicePreferences});
+  const shipVoice = routeId === 'wayglass:ship';
   if(!Array.isArray(history)||history.length>16||Array.from(history).some(turn=>!turn||!['user','assistant'].includes(turn.role)||typeof turn.content!=='string'||turn.content.length>12000))throw new TypeError('Bounded user/assistant history required');
   const continuationHistory=history.map(({role,content})=>({role,content}));
   if(checkpoint!=null&&(!checkpoint||typeof checkpoint!=='object'||Array.isArray(checkpoint)||['storageId','worldId','participantId'].some(key=>typeof checkpoint[key]!=='string'||!checkpoint[key].trim()||checkpoint[key].length>512)))throw new TypeError('Canonical host checkpoint required');
@@ -60,7 +61,11 @@ export async function inviteWatercolorMode({
   try{
     const result=await invoke({
       routeId,input:prompt.input,
-      sessionId,history:continuationHistory,checkpoint:continuationCheckpoint,worldId,participantId,externalProviderConsent,
+      sessionId,history:continuationHistory,checkpoint:continuationCheckpoint,
+      worldId: shipVoice ? 'wayglass:home' : worldId,
+      participantId: shipVoice ? 'wayglass' : participantId,
+      characterId: shipVoice ? 'wayglass' : null,
+      externalProviderConsent,
       surfaceId:'wayglass:living-watercolor',
       interaction:{channel:'OOC',turn_owner:'Rowan',character_ownership:[]},
       fetchImpl,
@@ -74,6 +79,10 @@ export async function inviteWatercolorMode({
     if(result.schema!=='wayglass.route-turn/v0.1'||result.route_id!==routeId||typeof result.model!=='string'||!result.model.trim()||typeof result.provider!=='string'||!result.provider.trim()||typeof receiptRef!=='string'||!receiptRef.trim()){
       const error=new Error('Model route attribution incomplete: schema, route, provider, model and receipt required');
       error.code='WATERCOLOR_INCOMPLETE_ATTRIBUTION';error.raw_result=result;throw error;
+    }
+    if (shipVoice && (result.participant_id !== 'wayglass' || observation?.character_id !== 'wayglass' || observation?.voice_seat_kind !== 'system-voice-over-external-route')) {
+      const error=new Error('Wayglass seat attribution missing or mismatched. This reply cannot be presented as hers.');
+      error.code='WATERCOLOR_SHIP_SEAT_MISMATCH';error.raw_result=result;throw error;
     }
     const model=result.model,provider=result.provider;
     const response=Object.freeze({
