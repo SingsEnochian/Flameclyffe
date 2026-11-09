@@ -141,6 +141,20 @@ export async function mountLivingWatercolorSurface(root) {
   const activeMode=()=>resolveWatercolorMode(mode);
   let session='wc-'+(globalThis.crypto?.randomUUID?.()||String(Date.now()));
   const continuity=createWatercolorContinuity({sessionId:session});
+  // Watercolour's earlier explicit local save becomes an automatic cold-return
+  // checkpoint after an attributable answer. A corrupt archive is never replaced
+  // automatically; the author can still inspect it and choose how to proceed.
+  let localSaveBlocked=false,localSaveWarning='';
+  try {
+    const restored=continuity.recoverLocal();
+    session=restored.session_id;
+    for(const turn of restored.turns)responses.set(turn.request.mode,turn.response);
+  }catch(error){
+    if(!/No saved watercolor conversation/.test(String(error.message))){
+      localSaveBlocked=true;
+      localSaveWarning=error.message;
+    }
+  }
   function updateInspector() {
     const s=fluid.snapshot(),data=watercolorSnapshot();
     q('wc-fluid-status').textContent=paused?'paused':s.motion>0.003?'flowing':'settling';
@@ -339,7 +353,12 @@ export async function mountLivingWatercolorSurface(root) {
       continuity.append({request,response});
       responses.set(requestedMode,response);
       renderVoiceHistory();
-      feedback.textContent=response.provider+' / '+response.model+' · '+(response.receipt?.observation_id||response.receipt?.receipt_id||response.receipt?.request_id||'response received');
+      let saveStatus=' · saved in this browser';
+      try {
+        if(localSaveBlocked)throw new Error(localSaveWarning);
+        continuity.saveLocal();
+      }catch(error){saveStatus=' · save failed: '+error.message;}
+      feedback.textContent=response.provider+' / '+response.model+' · '+(response.receipt?.observation_id||response.receipt?.receipt_id||response.receipt?.request_id||'response received')+saveStatus;
       q('wc-unverified').hidden=true;
       const proposed=extractWatercolorProgramProposal(response.text);pendingProgram=proposed;
       q('wc-program').hidden=!proposed;
@@ -618,6 +637,8 @@ export async function mountLivingWatercolorSurface(root) {
   }
   positionBrushCursor(keyboardCursor,false);
   paint();updateInspector();void loadRoutes();
+  if(localSaveWarning)feedback.textContent='Saved conversation was not auto-opened: '+localSaveWarning;
+  else if(continuity.snapshot().turns.length)feedback.textContent='Saved conversation restored · '+continuity.snapshot().turns.length+' turns.';
   if(!reduced)animationId=globalThis.requestAnimationFrame(frame);
   else feedback.textContent='Reduced motion enabled. Pigment flows only on interaction.';
   return {
