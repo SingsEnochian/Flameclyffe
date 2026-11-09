@@ -105,6 +105,7 @@ function outputText(data) {
 }
 
 async function callOllama(route, payload, compiled = null, fetchImpl = globalThis.fetch) {
+  const upstreamStarted=process.hrtime.bigint();
   const input = cleanText(payload.input);
   const messages = [
     { role: 'system', content: buildInstructions(payload.interaction, compiled, resolveCharacterSeat(payload.character_id)) },
@@ -122,6 +123,7 @@ async function callOllama(route, payload, compiled = null, fetchImpl = globalThi
       messages,
       think: payload.think === true,
       stream: false,
+      keep_alive: '15m',
       options: {
         num_predict: Math.max(64, Math.min(4000, Number(payload.max_output_tokens) || 1400)),
       },
@@ -143,6 +145,12 @@ async function callOllama(route, payload, compiled = null, fetchImpl = globalThi
     usage: {
       prompt_tokens: data?.prompt_eval_count ?? null,
       completion_tokens: data?.eval_count ?? null,
+    },
+    performance: {
+      upstream_ms: Math.round(Number(process.hrtime.bigint()-upstreamStarted)/1e6),
+      ...(Number.isFinite(data?.load_duration)?{load_ms:Math.round(data.load_duration/1e6)}:{}),
+      ...(Number.isFinite(data?.prompt_eval_duration)?{prompt_eval_ms:Math.round(data.prompt_eval_duration/1e6)}:{}),
+      ...(Number.isFinite(data?.eval_duration)?{generation_ms:Math.round(data.eval_duration/1e6)}:{}),
     },
   };
 }
@@ -884,6 +892,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
           ...(compiled ? { inheritance_context: compiled.reference } : {}),
           thinking_exposed: Boolean(result.thinking),
           usage: result.usage,
+          ...(result.performance ? { performance: result.performance } : {}),
         },
       });
     } catch (error) {
