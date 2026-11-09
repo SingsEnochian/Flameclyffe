@@ -106,6 +106,7 @@ export async function mountLivingWatercolorSurface(root) {
           '<textarea id="wc-note" rows="3" maxlength="300" placeholder="For example: more gold when something is verified…"></textarea>',
           '<button class="glass-chip" type="button" id="wc-suggest">Place a suggestion</button>',
           '<div class="wc-inspector"><p class="eyebrow">Instrument readings</p>',
+          '<button type="button" class="glass-chip" id="wc-copy-profile">Copy timing report</button>',
             '<dl><div><dt>Fluid</dt><dd id="wc-fluid-status">still</dd></div>',
             '<div><dt>Performance</dt><dd id="wc-performance">Measuring local paint and reply latency</dd></div>',
             '<div><dt>PREMAQC</dt><dd id="wc-premaqc">not connected</dd></div>',
@@ -328,6 +329,19 @@ export async function mountLivingWatercolorSurface(root) {
     });
     dialog.showModal();
     field.focus();
+  });
+  listen(q('wc-copy-profile'),'click',async()=>{
+    const snapshot=wayglassPerformanceSnapshot();
+    const last=continuity.snapshot().turns.at(-1)?.response;
+    const report={schema:'wayglass.performance-report/v1',timings:snapshot,
+      model:last?.model||null,model_performance:last?.receipt?.performance||null};
+    try{
+      if(!globalThis.navigator?.clipboard?.writeText)throw new Error('Clipboard unavailable');
+      await globalThis.navigator.clipboard.writeText(JSON.stringify(report,null,2));
+      feedback.textContent='Timing report copied. No prompts, messages or credentials included.';
+    }catch{
+      feedback.textContent='Clipboard unavailable. Open DevTools and run __wayglassPerformance() to inspect timings.';
+    }
   });
   listen(route,'change',()=>{
     routeId=route.value||null;
