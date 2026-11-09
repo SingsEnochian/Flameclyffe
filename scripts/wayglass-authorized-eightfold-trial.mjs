@@ -141,6 +141,13 @@ export async function runEightfoldTrial(packet, {
     stored?.status === 'responded',
     'persisted receipt missing, substituted, or incomplete');
   const reply = stored.model_reply;
+  const p = packet.presentation;
+  const requiredReviewDomain = p?.review_domain === 'narrative-branch' ||
+    (p?.review_domain === undefined && p?.schema === 'wayglass.sihrel.divergence-study/v0.1' &&
+      p?.study_type === 'counterfactual-narrative-causal-simulation')
+    ? 'narrative-branch' : 'engineering';
+  requireCondition(reply?.review_domain === requiredReviewDomain,
+    'returned review domain does not match requested narrative/engineering study');
   requireCondition(reply?.kind === 'attributable-external-model-output' &&
     clean(reply.provider, 80) && clean(reply.model, 200) &&
     typeof reply.text === 'string' && reply.text.trim().length > 0,
@@ -148,6 +155,7 @@ export async function runEightfoldTrial(packet, {
   if (review?.reply) {
     requireCondition(review.reply.provider === reply.provider &&
       review.reply.model === reply.model &&
+      review.reply.review_domain === reply.review_domain &&
       review.reply.text === reply.text,
       'provider output changed between review and persisted readback');
   }
@@ -160,6 +168,7 @@ export async function runEightfoldTrial(packet, {
     receipt_id: queued.receipt_id,
     provider: reply.provider,
     model: reply.model,
+    review_domain: reply.review_domain,
     provider_response_id: reply.provider_response_id || null,
     provider_response_id_available: !!reply.provider_response_id,
     output: reply.text,
