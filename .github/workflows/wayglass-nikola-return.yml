@@ -1,0 +1,53 @@
+name: Wayglass Nikola Eightfold Return Gate
+on:
+  pull_request:
+    branches:
+      - wayglass/current
+    paths:
+      - 'apps/wayglass/src/wayglass-nikola-workflow.js'
+      - 'apps/wayglass/src/quad-temporal-hinge.js'
+      - 'apps/wayglass/src/surfaces/quad-eightfold.js'
+      - 'apps/wayglass/test/wayglass-nikola-workflow.test.js'
+      - 'docs/wayglass/WAYGLASS_NIKOLA_EIGHTFOLD_WORKFLOW.md'
+      - '.github/workflows/wayglass-nikola-return.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: wayglass-nikola-\${{ github.workflow }}-\${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  review-contract:
+    name: Consent, attribution, three lenses, Feather and Return
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out the exact commit
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Check collaboration and Terra Prime contracts
+        run: node --test apps/wayglass/test/wayglass-nikola-workflow.test.js apps/wayglass/test/quad-temporal-hinge.test.js
+      - name: Verify all Wayglass and Wyrdrune invariants
+        run: npm run wayglass:test
+      - name: Build the native Wayglass cockpit
+        run: npm run wayglass:build
+      - name: Record accurate outcome
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p artifacts/wayglass
+          printf 'Repository SHA: %s\nWorkflow: Wayglass-Nikola Return Gate\nMode: deterministic contracts only\nNo external model invoked\nNo model weights changed\nNo canon promoted\n' "$GITHUB_SHA" > artifacts/wayglass/wayglass-nikola-gate.txt
+      - name: Preserve contract outcome
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayglass-nikola-gate-\${{ github.sha }}
+          path: artifacts/wayglass/wayglass-nikola-gate.txt
+          if-no-files-found: error
+          retention-days: 30
