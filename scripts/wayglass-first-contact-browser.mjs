@@ -34,7 +34,11 @@ const receipt={schema:'wayglass.first-contact-browser-evidence/v1',source_sha:pr
  transport:'captured-host-fixture',browser:'chromium',playwright:packageInfo.version,
  live_model_inference:false,provider_authentication_verified:false,production_deployment:false,
  scenarios:[],requests:[],page_errors:[],transport_errors:[],blocked_external_requests:[],status:'running'};
-const fixtureRoute={route_id:'local:ollama',provider:'ollama',model:'captured-first-contact-fixture',label:'Captured host fixture'};
+// First Contact speaks through the dedicated ship voice seat (#584). The catalogue
+// marks it configured, as the real host does for a local Ollama-backed route, and the
+// captured reply carries the same seat attribution the host receipts.
+const fixtureRoute={route_id:'wayglass:ship',provider:'ollama',model:'captured-first-contact-fixture',label:'Wayglass · Ship Voice',
+ participant_id:'wayglass',continuity_id:'wayglass:ship',configured:true};
 let browser,heldRelease=null,holdNext=false,fixtureSequence=0;
 function routeTurn(payload,text){
  const observationId='captured-observation:'+ (++fixtureSequence);
@@ -45,6 +49,7 @@ function routeTurn(payload,text){
    source:{kind:'model-route',route_id:fixtureRoute.route_id,provider:fixtureRoute.provider,model:fixtureRoute.model,response_id:null},
    interaction:{session_id:payload.session_id,surface_id:payload.surface_id,channel:'OOC'},content:{output:text,deliberation_trace:null}},
   receipt:{response_id:null,observation_id:observationId,session_id:payload.session_id,surface_id:payload.surface_id,
+   participant_id:'wayglass',character_id:'wayglass',voice_seat_kind:'system-voice-over-external-route',
    completed_at:at,wayglass_persisted:false,canon_commit:false}};
 }
 async function prepareContext(options){
@@ -66,6 +71,7 @@ async function prepareContext(options){
    try{
    const payload=route.request().postDataJSON();
    assert.equal(payload.route_id,fixtureRoute.route_id,'UI must use the selected captured route');
+   assert.equal(payload.character_id,'wayglass','First Contact must request the Wayglass ship voice seat');
    assert.equal(payload.surface_id,'wayglass:living-watercolor');
    assert.equal(typeof payload.session_id,'string');
    receipt.requests.push({route_id:payload.route_id,session_id:payload.session_id,surface_id:payload.surface_id,history_messages:payload.history?.length||0,
