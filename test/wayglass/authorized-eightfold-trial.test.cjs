@@ -32,10 +32,12 @@ const reply = {
   model: 'test-model',
   text: 'SYNTHETIC_OUTPUT_NOT_A_WAYGLASS_VOICE',
   provider_response_id: 'synthetic-provider-response-id',
+  review_domain: 'engineering',
   completed_at: '2026-11-08T00:00:00Z',
 };
 
 function successfulFetch(requests, scenario = {}) {
+  const emittedReply = { ...reply, review_domain: scenario.reviewDomain || 'engineering' };
   return async (url, options) => {
     requests.push({
       url,
@@ -63,7 +65,7 @@ function successfulFetch(requests, scenario = {}) {
         return Response.json({
           schema: SCHEMA, receipt_id: RECEIPT_ID, status: 'responded',
           reply: scenario.changedDuringReadback
-            ? { ...reply, text: 'one answer' } : reply,
+            ? { ...emittedReply, text: 'one answer' } : emittedReply,
         }, { status: 200 });
       }
     }
@@ -76,7 +78,7 @@ function successfulFetch(requests, scenario = {}) {
           presentation_id: PRESENTATION_ID,
           status: 'responded',
           model_reply: scenario.changedDuringReadback
-            ? { ...reply, text: 'another answer' } : reply,
+            ? { ...emittedReply, text: 'another answer' } : emittedReply,
         },
       }, { status: 200 });
     }
@@ -201,4 +203,23 @@ test('host redirects fail closed instead of forwarding bearer to another origin'
     token: fakeJwt, consent: true, fetchImpl: fakeFetch,
   }), /HTTP 302/);
   assert.equal(called, 1);
+});
+
+test('Sihrel narrative packet must return the narrative domain, never engineering review', async () => {
+  const { runEightfoldTrial } = await mod();
+  const packet = await fixture();
+  packet.presentation.schema = 'wayglass.sihrel.divergence-study/v0.1';
+  packet.presentation.study_type = 'counterfactual-narrative-causal-simulation';
+  const requests = [];
+  const result = await runEightfoldTrial(packet, {
+    token: fakeJwt, consent: true,
+    fetchImpl: successfulFetch(requests, { reviewDomain: 'narrative-branch' }),
+  });
+  assert.equal(result.review_domain, 'narrative-branch');
+  assert.equal(result.canon_commit, false);
+  assert.equal(requests[2].body.action, 'review');
+  await assert.rejects(runEightfoldTrial(packet, {
+    token: fakeJwt, consent: true,
+    fetchImpl: successfulFetch([]),
+  }), /returned review domain does not match/);
 });
