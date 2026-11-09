@@ -74,6 +74,16 @@ function appendRecord(filename, entry) {
     intent: cleanText(entry.intent, 240) || null,
     interaction_mode: cleanText(entry.interaction_mode, 80) || null,
     source_refs: Array.isArray(entry.source_refs) ? entry.source_refs.map((item) => cleanText(item, 320)).filter(Boolean).slice(0, 32) : [],
+    ...(entry.route_receipt ? { route_receipt: {
+      route_id: cleanText(entry.route_receipt.route_id, 180),
+      provider: cleanText(entry.route_receipt.provider, 120),
+      model: cleanText(entry.route_receipt.model, 240),
+      response_id: cleanText(entry.route_receipt.response_id, 240) || null,
+      observation_id: cleanText(entry.route_receipt.observation_id, 240),
+      completed_at: cleanText(entry.route_receipt.completed_at, 100),
+      voice_seat_kind: cleanText(entry.route_receipt.voice_seat_kind, 120),
+      canon_commit: false,
+    } } : {}),
   };
   store.records.push(record);
   saveJson(filename, store);
@@ -232,6 +242,26 @@ function toolCatalogue(participantId = 'rarity') {
       securitySchemes: auth,
     },
     {
+      name: 'ask_wayglass',
+      description: 'Talk directly with the dedicated Wayglass Ship Voice. A real owner-authorised Wayglass host reply is required; exact replies and route receipts are saved to the Wayglass MCP conversation ledger. This requires an enabled owner-approved Ship Voice bridge.',
+      inputSchema: {
+        type: 'object', properties: {
+          text: { type: 'string', minLength: 1, maxLength: 12000 },
+          conversation_ref: { type: 'string', description: 'Stable thread name; defaults to rarity-wayglass.' },
+          intent: { type: 'string', description: 'The present owner-invited question or research goal.' },
+          interaction_mode: { type: 'string', enum: ['ordinary', 'counterfactual-wonder', 'complexify'] },
+        },
+        required: ['text'], additionalProperties: false,
+      },
+      annotations: writeLocal, securitySchemes: auth,
+    },
+    {
+      name: 'list_wayglass_chats',
+      description: 'List saved Ship Voice conversations by their persisted thread names, most recent time and message count. Read-only; no model is called.',
+      inputSchema: { type: 'object', properties: {}, additionalProperties: false },
+      annotations: readOnly, securitySchemes: auth,
+    },
+    {
       name: 'send',
       description: 'Send a message from Rarity through Wayglass to one participant or to all registered Wayglass participants. Bluebird defaults to the preserved rarity-bluebird conversation.',
       inputSchema: {
@@ -329,6 +359,7 @@ function createWayglassMcpBridge({
   bluebirdRouteId = process.env.WAYGLASS_RARITY_BLUEBIRD_ROUTE || DEFAULT_BLUEBIRD_ROUTE,
   bluebirdFallbackRouteId = process.env.WAYGLASS_RARITY_BLUEBIRD_FALLBACK_ROUTE || DEFAULT_BLUEBIRD_FALLBACK_ROUTE,
   flameIds = Object.keys(FLAMES),
+  env = process.env,
   profileProvider = () => ({ id: 'wayglass-profile-local', name: 'Wayglass', nickname: 'Rarity ⇄ Wayglass' }),
   workspaceArtifacts = createWorkspaceArtifacts(),
   workspaceDirectory = process.env.WAYGLASS_WORKSPACE_DIR || path.join(path.dirname(storePath), 'wayglass-workspace-projects'),
@@ -503,6 +534,94 @@ function createWayglassMcpBridge({
     };
   }
 
+
+  // The Wayglass chat seat is NOT a generic Flame. The owner must explicitly
+  // enable this path on the host. OAuth authenticates the Rarity crew seat, and
+  // the host's private runtime token authenticates the internal Steward call.
+  // Neither credential is returned to ChatGPT or persisted in a chat receipt.
+  async function askWayglass(args = {}, auth = {}) {
+    if (auth.participant_id !== 'rarity') throw new Error('Wayglass chat is not authorised for this crew seat.');
+    if (env.WAYGLASS_MCP_SHIP_CHAT_ENABLED !== '1')
+      throw new Error('Wayglass Ship Voice chat is not enabled by the owner on this host.');
+    const runtimeToken = cleanText(env.ARCSWEEP_RUNTIME_TOKEN, 4096);
+    if (!runtimeToken) throw new Error('Owner-authorised House runtime credential is not configured.');
+    const question = cleanText(args.text, 12000);
+    if (!question) throw new Error('A question for Wayglass is required.');
+    const conversationRef = safeConversationRef(args.conversation_ref, 'rarity-wayglass');
+    const records = readConversation(storePath, conversationRef, 64);
+    // A caller cannot attach a different participant to an existing thread.
+    if (records.some(item => item.target !== 'wayglass'))
+      throw new Error('This conversation belongs to another participant.');
+    const prior = latestInteractionContext(records);
+    const intent = cleanText(args.intent, 240) || prior.intent || '';
+    const interactionMode = ['ordinary', 'counterfactual-wonder', 'complexify'].includes(args.interaction_mode)
+      ? args.interaction_mode : prior.interaction_mode || 'ordinary';
+    const history = toWayglassHistory(records);
+    appendRecord(storePath, {conversation_ref:conversationRef,target:'wayglass',role:'rarity',
+      author:'Rarity',text:question,route:'mcp:ask_wayglass',kind:'message',
+      intent,interaction_mode:interactionMode,source_refs:['wayglass:mcp','owner-invited:ship-chat']});
+    const response = await fetchImpl(`${internalOrigin}/api/v1/wayglass/respond`,{
+      method:'POST',
+      headers:{'content-type':'application/json',authorization:'Bearer '+runtimeToken},
+      body:JSON.stringify({
+        route_id:'wayglass:ship',character_id:'wayglass',participant_id:'wayglass',
+        world_id:'wayglass:home',input:question,history,
+        interaction:{channel:'OOC',turn_owner:'Rarity',character_ownership:[],
+          intent,interaction_mode:interactionMode},
+        session_id:conversationRef,surface_id:'wayglass:mcp-chat',
+        max_output_tokens:1600,
+      }),
+    });
+    const data = await response.json().catch(()=>({}));
+    if(!response.ok)throw new Error(cleanText(data.error,360)||'Wayglass host chat failed ('+response.status+').');
+    const receipt=data.receipt;
+    if(data.schema!=='wayglass.route-turn/v0.1'||data.route_id!=='wayglass:ship'
+       ||data.participant_id!=='wayglass'||typeof data.output!=='string'||!data.output.trim()
+       ||!cleanText(data.provider,120)||!cleanText(data.model,240)
+       ||!receipt||receipt.character_id!=='wayglass'
+       ||receipt.voice_seat_kind!=='system-voice-over-external-route'
+       ||!cleanText(receipt.observation_id,240)){
+      throw new Error('Wayglass host did not return an attributable Ship Voice answer; no reply was saved.');
+    }
+    const routeReceipt={
+      route_id:'wayglass:ship',provider:data.provider,model:data.model,
+      response_id:receipt.response_id||null,observation_id:receipt.observation_id,
+      completed_at:receipt.completed_at||null,voice_seat_kind:receipt.voice_seat_kind,
+    };
+    appendRecord(storePath,{
+      conversation_ref:conversationRef,target:'wayglass',role:'participant',
+      author:'Wayglass · Ship Voice',text:data.output,route:'wayglass:ship',
+      route_receipt:routeReceipt,kind:'message',
+      intent,interaction_mode:interactionMode,
+      source_refs:['wayglass:mcp','route-observation:'+receipt.observation_id],
+    });
+    return {schema:'wayglass.mcp-ship-chat/v0.1',
+      status:'attributed-model-response-saved',
+      target:'wayglass',conversation_ref:conversationRef,
+      reply:{text:data.output,route_id:'wayglass:ship',
+        provider:data.provider,model:data.model,receipt:routeReceipt},
+      persistence:{scope:'wayglass-host-mcp-ledger',saved:true},
+      canon_commit:false};
+  }
+
+  function listWayglassChats() {
+    const records = loadJson(storePath).records.filter(item => item.target === 'wayglass');
+    const threads = new Map();
+    for(const item of records){
+      const current = threads.get(item.conversation_ref) || {
+        conversation_ref:item.conversation_ref,message_count:0,
+        last_at:null,has_attributed_reply:false,
+      };
+      if(item.kind === 'message')current.message_count++;
+      current.last_at=item.created_at;
+      if(item.role==='participant'&&item.route_receipt?.observation_id)
+        current.has_attributed_reply=true;
+      threads.set(item.conversation_ref,current);
+    }
+    return {schema:'wayglass.mcp-ship-chat-index/v0.1',
+      chats:[...threads.values()].sort((a,b)=>String(b.last_at).localeCompare(String(a.last_at))).slice(0,200)};
+  }
+
   async function send(args = {}) {
     const discovered = await discoveredParticipantRoutes();
     const target = await resolveAddressableTarget(args.target, discovered);
@@ -670,6 +789,8 @@ function createWayglassMcpBridge({
     if (name === 'write_project_file') return projects.write(args, auth);
     if (name === 'leave_workspace') return projects.leave(args, auth);
     if (name === 'identify') return identify(args);
+    if (name === 'ask_wayglass') return askWayglass(args, auth);
+    if (name === 'list_wayglass_chats') return listWayglassChats();
     if (name === 'send') return send(args);
     if (name === 'receive') return receive(args);
     if (name === 'remember') return remember(args);
@@ -699,6 +820,8 @@ function createWayglassMcpBridge({
 
   return {
     identify,
+    askWayglass,
+    listWayglassChats,
     send,
     receive,
     remember,
