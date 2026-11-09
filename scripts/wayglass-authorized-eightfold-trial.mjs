@@ -146,12 +146,12 @@ export async function runEightfoldTrial(packet, {
     (p?.review_domain === undefined && p?.schema === 'wayglass.sihrel.divergence-study/v0.1' &&
       p?.study_type === 'counterfactual-narrative-causal-simulation')
     ? 'narrative-branch' : 'engineering';
-  requireCondition(reply?.review_domain === requiredReviewDomain,
-    'returned review domain does not match requested narrative/engineering study');
   requireCondition(reply?.kind === 'attributable-external-model-output' &&
     clean(reply.provider, 80) && clean(reply.model, 200) &&
     typeof reply.text === 'string' && reply.text.trim().length > 0,
     'no attributable persisted external model text');
+  requireCondition(reply.review_domain === requiredReviewDomain,
+    'returned review domain does not match requested narrative/engineering study');
   if (review?.reply) {
     requireCondition(review.reply.provider === reply.provider &&
       review.reply.model === reply.model &&
