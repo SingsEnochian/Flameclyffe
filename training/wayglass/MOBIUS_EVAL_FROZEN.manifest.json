@@ -1,0 +1,16 @@
+{
+  "schema": "wayglass.frozen-eval/v1",
+  "file": "MOBIUS_EVAL_FROZEN.jsonl",
+  "sha256": "a158f126e5a375804fb29a3c6f49062451c35058e23f6f04037e58d9bafdf652",
+  "tasks": 4,
+  "frozen_at": "2026-11-06",
+  "author": "faer-uial",
+  "reviewed_by": null,
+  "rules": [
+    "Held out: never offered to the curriculum, never written as training data, never counted in learning state, Harmony or possibility.",
+    "Runs on a fixed schedule (cycles 1, 5, 9, …) regardless of training outcomes.",
+    "Pinned by digest: any edit refuses the evaluation until a new manifest version is reviewed and committed.",
+    "Must not share ids or inputs with the training drills.",
+    "A held-out score is a signal about transfer, not proof that capability increased."
+  ]
+}
