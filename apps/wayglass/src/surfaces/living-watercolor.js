@@ -1,3 +1,4 @@
+import {shipSoundscape} from '../ship-soundscape.js';
 import { createWatercolorFluid } from '../watercolor-fluid.js';
 import {
   watercolorSnapshot, watercolorProgram, publishWatercolorActivity,
@@ -97,10 +98,12 @@ export async function mountLivingWatercolorSurface(root) {
             '<button id="wc-clear-note" class="glass-chip" type="button">New suggestion</button>',
           '</div>',
           '<div class="wc-tool-buttons" aria-label="Opt-in sound and touch cues">',
-            '<button id="wc-sound" class="glass-chip" type="button" aria-pressed="false">Sound off</button>',
+            '<button id="wc-sound" class="glass-chip" type="button" aria-pressed="false">Cues off</button>',
+            '<button id="wc-wyrdrune-sound" class="glass-chip" type="button" aria-pressed="false">Play Wyrdrune soundscape</button>',
             '<button id="wc-haptics" class="glass-chip" type="button" aria-pressed="false">Haptics off</button>',
             '<button id="wc-feather" class="glass-chip" type="button">Feather Stop</button>',
           '</div>',
+          '<p class="tiny" id="wc-wyrdrune-status" role="status">Wyrdrune composition: opt in to play the actual score.</p>',
           '<label for="wc-note">Offer a direction</label>',
           '<textarea id="wc-note" rows="3" maxlength="300" placeholder="For example: more gold when something is verified…"></textarea>',
           '<button class="glass-chip" type="button" id="wc-suggest">Place a suggestion</button>',
@@ -306,6 +309,14 @@ export async function mountLivingWatercolorSurface(root) {
       if(stopped||featherStopped||epoch!==requestEpoch)return;
       continuity.append({request,response});
       responses.set(requestedMode,response);
+      // Real returned text contributes to the next Wyrdrune score, never to
+      // an invented voice. No score failure can erase a successful chat turn.
+      if(shipSoundscape.snapshot().playing){
+        const text=[authorText,response.text].filter(Boolean).join('\n').slice(0,4900);
+        void shipSoundscape.compose({text,turns:continuity.snapshot().turns.length}).catch(error=>{
+          if(!stopped)q('wc-wyrdrune-status').textContent='Score unavailable: '+error.message;
+        });
+      }
       if(mode===requestedMode)activateMode(requestedMode);
       feedback.textContent=response.provider+' / '+response.model+' · '+(response.receipt?.observation_id||response.receipt?.receipt_id||response.receipt?.request_id||'response received');
       q('wc-unverified').hidden=true;
@@ -401,10 +412,32 @@ export async function mountLivingWatercolorSurface(root) {
     updateInspector();
   });
   const soundButton=q('wc-sound'),hapticButton=q('wc-haptics'),featherButton=q('wc-feather');
+  const wyrdruneButton=q('wc-wyrdrune-sound'),wyrdruneStatus=q('wc-wyrdrune-status');
+  const offShipSound=shipSoundscape.subscribe(state=>{
+    if(stopped)return;
+    wyrdruneButton.setAttribute('aria-pressed',String(state.playing));
+    wyrdruneButton.textContent=state.playing?'Stop Wyrdrune soundscape':'Play Wyrdrune soundscape';
+    if(state.playing)wyrdruneStatus.textContent='Wyrdrune soundscape playing · shared across rooms';
+  });
+  listen(wyrdruneButton,'click',async()=>{
+    if(featherStopped)return;
+    if(shipSoundscape.snapshot().playing){shipSoundscape.stop();wyrdruneStatus.textContent='Wyrdrune soundtrack stopped.';return;}
+    wyrdruneButton.disabled=true;
+    wyrdruneStatus.textContent='Composing from this Watercolour session…';
+    try{
+      const turns=continuity.snapshot().turns;
+      const last=turns.at(-1);
+      const text=[last?.request?.authorText||prompt.value,last?.response?.text].filter(Boolean).join('\n').slice(0,4900);
+      await shipSoundscape.compose({text,turns:turns.length});
+      if(stopped||featherStopped)return;
+      await shipSoundscape.enable({mono:true});
+    }catch(error){if(!stopped)wyrdruneStatus.textContent='Wyrdrune score unavailable: '+error.message;}
+    finally{if(!stopped)wyrdruneButton.disabled=false;}
+  });
   function reflectSound(){
     const state=wayglassSomaticSound.snapshot();
     soundButton.setAttribute('aria-pressed',String(state.audio_enabled));
-    soundButton.textContent=state.audio_enabled?'Sound on':'Sound off';
+    soundButton.textContent=state.audio_enabled?'Cues on':'Cues off';
     hapticButton.setAttribute('aria-pressed',String(state.haptics_enabled));
     hapticButton.textContent=state.haptics_enabled?'Haptics on':'Haptics off';
     featherButton.textContent=featherStopped?'Release Feather':'Feather Stop';
@@ -562,7 +595,7 @@ export async function mountLivingWatercolorSurface(root) {
   return {
     destroy(){
       stopped=true;requestEpoch++;busy=false;pointerId=null;lastPointer=null;
-      offActivity();
+      offActivity();offShipSound();
       for(const remove of cleanups.splice(0))remove();
       globalThis.removeEventListener?.(WAYGLASS_FEATHER_EVENT,onFeather);
       wayglassSomaticSound.stop();
