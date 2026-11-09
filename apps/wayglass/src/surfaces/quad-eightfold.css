@@ -1,0 +1,69 @@
+.wg-quad-gestalt{display:grid;gap:1rem;max-width:1500px;margin:auto}
+.quad-header h1{font-size:clamp(1.6rem,3vw,2.8rem);margin:.3rem 0}
+.quad-header p{max-width:78ch}
+.quad-actions{display:flex;gap:.65rem;align-items:center;flex-wrap:wrap}
+.quad-actions label{display:inline-flex;gap:.4rem;align-items:center}
+.quad-actions input{accent-color:#6ac9bf}
+.quad-status{font-size:.9rem;margin:0;min-height:3rem}
+.quad-engines{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.85rem}
+.quad-engine{min-width:0}
+.quad-engine h2{font-size:1.1rem;margin:0 0 .45rem}
+.quad-engine p{opacity:.85}
+.quad-readout{display:grid;grid-template-columns:minmax(9rem,35%) 1fr;align-items:start;gap:.7rem;padding:.45rem 0;border-bottom:1px solid rgba(160,218,214,.13);overflow-wrap:anywhere}
+.quad-readout strong{font-size:.83rem;font-weight:650;color:#b9e6dd}
+.quad-readout span{font-size:.81rem;opacity:.95}
+.quad-withness{border:1px solid rgba(119,209,195,.4)}
+.quad-phases{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:.3rem;margin-top:1rem}
+.quad-phases span{text-align:center;border:1px solid rgba(119,209,195,.3);border-radius:100px;padding:.45rem .2rem;font-size:.7rem;background:rgba(25,120,117,.13)}
+.quad-phases[data-face="inner"] span:nth-child(even){background:rgba(218,183,125,.14);border-color:rgba(218,183,125,.4)}
+.quad-learning pre{max-height:22rem;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:750px){.quad-engines{grid-template-columns:1fr}.quad-phases{grid-template-columns:repeat(4,minmax(0,1fr))}.quad-readout{grid-template-columns:1fr;gap:.15rem}}
+@media(prefers-reduced-motion:reduce){.wg-quad-gestalt *{animation:none!important;transition:none!important}}
+
+/* Terra Prime: a tactile, evidence-led cyberfae hinge.
+   Layered motion and color communicate transformation, never source certainty. */
+.quad-hinge{display:grid;gap:1.15rem;position:relative;overflow:hidden;
+  background:linear-gradient(142deg,rgba(12,51,57,.38),rgba(61,37,71,.28) 60%,rgba(23,64,73,.32))}
+.quad-hinge:before{content:'';pointer-events:none;position:absolute;inset:0;
+  border-radius:inherit;background:radial-gradient(ellipse at 52% -10%,rgba(122,206,192,.15),transparent 55%)}
+.quad-hinge-head{display:flex;gap:1.25rem;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;position:relative}
+.quad-hinge h2{font-size:clamp(1.25rem,2.6vw,1.85rem);margin:.2rem 0}
+.quad-hinge h3{font-size:1rem}
+.quad-hinge p{line-height:1.48}
+.quad-lenses{display:flex;gap:.4rem;flex-wrap:wrap}
+.quad-lenses .glass-chip{white-space:nowrap}
+.quad-lenses [aria-pressed="true"]{box-shadow:inset 0 0 0 1px rgba(153,234,216,.7),0 0 23px rgba(95,184,174,.22);
+  background:rgba(57,131,128,.18)}
+.quad-hinge[data-lens="mythience"] .quad-lenses [aria-pressed="true"]{box-shadow:inset 0 0 0 1px rgba(226,183,122,.8),0 0 25px rgba(211,160,100,.22)}
+.quad-hinge[data-lens="science"] .quad-lenses [aria-pressed="true"]{box-shadow:inset 0 0 0 1px rgba(134,164,226,.8),0 0 25px rgba(111,139,192,.2)}
+.quad-twist{display:block;width:100%;max-height:210px;filter:drop-shadow(0 0 12px rgba(130,199,193,.18));
+  overflow:visible}
+.quad-hinge-reading{position:relative;border-inline-start:2px solid rgba(124,197,184,.55);padding-inline-start:1rem}
+.quad-hinge-reading>strong{font-size:1.08rem}
+.quad-hinge-reading p{max-width:90ch}
+.quad-hinge-reading small{display:block;margin-top:.7rem;opacity:.78}
+.quad-nikola{padding:1rem;border-radius:1.1rem;border:1px solid rgba(226,186,125,.27);
+  background:linear-gradient(135deg,rgba(180,133,70,.07),rgba(44,103,125,.08))}
+.quad-nikola pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:25rem;overflow:auto;
+  padding:1rem;border:1px solid rgba(175,206,211,.2);border-radius:.7rem}
+.quad-gesture{touch-action:pan-y}
+@media(max-width:750px){.quad-hinge{gap:.65rem;padding:.85rem}.quad-twist{max-height:130px}
+  .quad-hinge-head{display:block}.quad-lenses{margin-top:.5rem}
+  .quad-lenses .glass-chip{font-size:.8rem}.quad-nikola{padding:.7rem}}
+@media(prefers-reduced-motion:reduce){.quad-twist{filter:none}}
+@media(prefers-contrast:more){.quad-hinge{background:transparent;border-width:2px}.quad-hinge-reading{border-width:3px}
+  .quad-readout{border-bottom-color:currentColor}}
+
+/* Wayglass–Nikola evidence-first collaboration. Clear start/stop and readable receipts. */
+.quad-collaboration{display:grid;gap:.8rem;border:1px solid rgba(113,213,192,.34);
+ background:linear-gradient(145deg,rgba(22,71,72,.18),rgba(50,38,69,.13))}
+.quad-collaboration h2{margin:0;font-size:clamp(1.1rem,2.5vw,1.65rem)}
+.quad-collaboration p{max-width:95ch;line-height:1.55;margin:.3rem 0}
+.quad-collaboration label{display:flex;align-items:flex-start;gap:.75rem;line-height:1.4}
+.quad-collaboration label input{accent-color:#78c4ba;flex:none;margin-top:.3rem}
+.quad-collaboration pre{white-space:pre-wrap;overflow-wrap:anywhere;
+ max-height:40rem;overflow:auto;border-radius:1rem;padding:1rem;
+ border:1px solid rgba(150,199,194,.22);
+ background:rgba(8,26,35,.42);line-height:1.6}
+.quad-collaboration [data-quad-collab-status]{font-size:.9rem}
+@media(prefers-contrast:more){.quad-collaboration{border-width:2px}}
