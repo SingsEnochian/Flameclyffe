@@ -14,7 +14,8 @@ test.beforeEach(() => clearWayglassOrgansForTest());
 test('registered donor organs share one registry contract and preserve heterogeneous lineage', () => {
   FIRST_WAYGLASS_ORGANS.forEach(registerWayglassOrgan);
   const mounted = listWayglassOrgans();
-  assert.equal(mounted.length, 5);
+  assert.equal(mounted.length, 6);
+  assert.equal(mounted[5].organ_id, 'wayglass.organ.gateway-double-mobius');
   assert.equal(mounted[3].organ_id, 'wayglass.organ.living-observer');
   assert.ok(livingObserverOrgan.lineage.includes('starwell:deep-observer'));
   assert.ok(!livingObserverOrgan.authority_ceiling.includes('canon-commit'));

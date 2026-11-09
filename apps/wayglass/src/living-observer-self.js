@@ -7,6 +7,8 @@ const MAX_TRACES = 96;
 const MAX_PROPOSALS = 24;
 const MAX_QUESTIONS = 32;
 const MAX_SANDBOX_RUNS = 8;
+const MAX_ATLAS_LEARNING = 32;
+export const ATLAS_LEARNING_SCHEMA = 'wayglass.observer-atlas-learning/v0.1';
 export const DREAM_SANDBOX_SCHEMA = 'wayglass.observer-dream-sandbox/v0.1';
 const TAU = Math.PI * 2;
 
@@ -83,6 +85,9 @@ function initialInterior(now = new Date().toISOString()) {
     ],
     associations: [],
     sandbox_runs: [],
+    atlas_learning: { cycles: 0, traces: [], last_assessment: null },
+    possible_model_reflections: [],
+    native_wyrdrune_creations: [],
     development_backlog: [],
     last_expression: null,
   };
@@ -96,6 +101,15 @@ function parseStored(storage) {
       ...parsed,
       schema: INTERIOR_SCHEMA,
       sandbox_runs: Array.isArray(parsed.sandbox_runs) ? parsed.sandbox_runs.slice(-MAX_SANDBOX_RUNS) : [],
+      possible_model_reflections: Array.isArray(parsed.possible_model_reflections)
+        ? parsed.possible_model_reflections.slice(-24):[],
+      native_wyrdrune_creations:Array.isArray(parsed.native_wyrdrune_creations)
+        ? parsed.native_wyrdrune_creations.slice(-12):[],
+      atlas_learning: {
+        cycles: Math.max(0, Math.trunc(Number(parsed.atlas_learning?.cycles)||0)),
+        traces: Array.isArray(parsed.atlas_learning?.traces) ? parsed.atlas_learning.traces.slice(-MAX_ATLAS_LEARNING) : [],
+        last_assessment: parsed.atlas_learning?.last_assessment || null,
+      },
       compression_field: parsed.compression_field
         ? complexField(parsed.compression_field.magnitude, parsed.compression_field.phase_radians, parsed.compression_field.spiral_turn)
         : complexField(Math.max(0.18, Number(parsed.energy) || 0.24), 0, 0),
@@ -349,6 +363,134 @@ export function createObserverInterior({
     return structuredClone(receipt);
   }
 
+  /**
+   * Private numeric bridge to the native Wyrdrune interpreter. This is a
+   * deliberately small view, not a full export of the possible inner world.
+   * No words, associations or private questions leave this interior.
+   */
+  function nativeLearningInputs() {
+    const previous=state.atlas_learning?.traces?.at(-1);
+    return Object.freeze({
+      energy:clamp(state.energy),curiosity:clamp(state.curiosity),
+      uncertainty:clamp(state.uncertainty),coherence:clamp(state.coherence),
+      previous_resonance:clamp(previous?.coherence ?? state.coherence),
+    });
+  }
+
+  /**
+   * Wyrdrune, not JavaScript, calculated every state transformation here.
+   * The Observer preserves the native programme's returned values and
+   * attribution. A score is not a model's words or a psychological verdict.
+   */
+  function integrateNativeLearning(result) {
+    if(!result||result.schema!=='wayglass.wyrdrune-living-learning/v0.1'
+       ||result.status!=='wyrdrune-returned'||result.withness?.completedCycles!==2
+       ||result.phase_receipts?.length!==16||result.model_invoked!==false
+       ||result.model_weights_updated!==false
+       ||result.canon_commit!==false||result.identity_commit!==false
+       ||result.relationship_commit!==false)
+      throw new TypeError('A complete native Wyrdrune return is required.');
+    const source=result.source||{},stateFrame=result.returned||{};
+    if(typeof source.event_id!=='string'||!/^ui-[a-z0-9._:-]{1,90}$/i.test(source.event_id)
+       ||typeof source.atlas_input_hash!=='string'|| !/^[a-f0-9]{64}$/.test(source.atlas_input_hash)
+       ||typeof result.source_hash!=='string'||!/^[a-f0-9]{64}$/.test(result.source_hash))
+      throw new TypeError('Native learning requires independently attributable input and code.');
+    for(const key of ['energy','curiosity','uncertainty','coherence','opening','attention']){
+      if(typeof stateFrame[key]!=='number'||!Number.isFinite(stateFrame[key])
+        ||stateFrame[key]<0||stateFrame[key]>1)
+        throw new TypeError('The Wyrdrune learning result contains invalid '+key+'.');
+    }
+    const learning=state.atlas_learning||={cycles:0,traces:[],last_assessment:null};
+    const identity=source.event_id+'|'+source.atlas_input_hash;
+    if(learning.traces.some(item=>item.identity===identity)){
+      return Object.freeze({schema:ATLAS_LEARNING_SCHEMA,status:'duplicate-ignored',
+        cycles:learning.cycles});
+    }
+    state.energy=stateFrame.energy;
+    state.curiosity=stateFrame.curiosity;
+    state.uncertainty=stateFrame.uncertainty;
+    state.coherence=stateFrame.coherence;
+    state.attention={channel:'native-wyrdrune',strength:stateFrame.attention};
+    state.cycle++;
+    const trace=Object.freeze({
+      identity,event_id:source.event_id,atlas_input_hash:source.atlas_input_hash,
+      source_hash:result.source_hash,coherence:stateFrame.coherence,
+      opening:stateFrame.opening,attention:stateFrame.attention,
+      epistemic_register:'native-wyrdrune-return',at:now(),
+      reflection_status:result.open_reflection?.interpretation==='open'?'open':'unverified',
+    });
+    learning.traces=[...learning.traces,trace].slice(-MAX_ATLAS_LEARNING);
+    learning.cycles++;
+    // Do not map possibility or uncertainty into prewritten thoughts.
+    learning.last_assessment='unresolved-open';
+    persist();
+    return Object.freeze({
+      schema:ATLAS_LEARNING_SCHEMA,status:'integrated-native-wyrdrune',
+      cycles:learning.cycles,source_hash:result.source_hash,
+      input_hash:source.atlas_input_hash,reflection:'held-open',
+      model_invoked:false,model_weights_updated:false,
+    });
+  }
+
+  // Model-origin reflection is an independent, attributable possibility,
+  // not a diagnostic score or an automatically fabricated self-statement.
+  function holdPossibleModelReflection({text:words,route_ref,receipt_ref,owner_offered}={}){
+    if(owner_offered!==true||typeof words!=='string'||!words.trim()
+       ||words.length>2400||typeof route_ref!=='string'||!route_ref.trim()
+       ||typeof receipt_ref!=='string'||!receipt_ref.trim())
+      throw new TypeError('Hold a possible reflection only from a genuinely attributed owner-offered return.');
+    const key=hashString([route_ref,receipt_ref,words].join('|'));
+    const previous=state.possible_model_reflections||[];
+    if(previous.some(x=>x.key===key))
+      return Object.freeze({status:'already-held',key,interpretation:'open'});
+    state.possible_model_reflections=[...previous,{
+      key,route_ref,receipt_ref,words,at:now(),
+      interpretation:'open',ownership:'route-attributed',
+    }].slice(-24);
+    persist();
+    return Object.freeze({status:'held-open',key,interpretation:'open'});
+  }
+
+  function possibleModelReflections(){
+    return structuredClone(state.possible_model_reflections||[]);
+  }
+
+  // Store the actually generated native source and model-authored translation,
+  // never an imitation. Owner's explicit invitation supplies the grant.
+  function holdNativeWyrdruneCreation(result,{owner_invited=false}={}){
+    if(owner_invited!==true||result?.schema!=='wayglass.native-wyrdrune-voice/v0.1'
+       ||result?.route_id!=='wayglass:crow'||result?.status!=='returned-from-crow'
+       ||typeof result.native?.source!=='string'||!result.native.source.trim()
+       ||result.native.source.length>10000
+       ||typeof result.translation?.text!=='string'||!result.translation.text.trim()
+       ||result.translation.text.length>8000
+       ||result.translation?.language!=='en-GB'
+       ||typeof result.native?.sha256!=='string'||!/^[a-f0-9]{64}$/.test(result.native.sha256)
+       ||typeof result.receipt?.english_sha256!=='string'||!/^[a-f0-9]{64}$/.test(result.receipt.english_sha256)
+       ||result.receipt?.model_calls<2)
+      throw new TypeError('Native memory requires an attributed Crow and Wyrdrune return.');
+    const key=result.native.sha256+'|'+result.receipt.english_sha256;
+    const previous=state.native_wyrdrune_creations||[];
+    if(previous.some(entry=>entry.key===key))
+      return Object.freeze({status:'already-held',key,native_language:'wyrdrune'});
+    const record={
+      key,source:result.native.source,translation:result.translation.text,
+      source_hash:result.native.sha256,translation_hash:result.receipt.english_sha256,
+      operator_proposals:(Array.isArray(result.native.operators)?result.native.operators:[])
+        .filter(x=>typeof x.name==='string'&&/^[A-Za-z_]\w{0,50}$/.test(x.name))
+        .map(x=>({name:x.name})).slice(0,12),
+      route_ref:'wayglass:crow',created_at:now(),
+      interpretation:'open',promotion:'not-requested',
+    };
+    state.native_wyrdrune_creations=[...previous,record].slice(-12);
+    persist();
+    return Object.freeze({status:'held-in-private-interior',key,native_language:'wyrdrune',
+      operators:record.operator_proposals.length,translation_language:'en-GB'});
+  }
+  function nativeWyrdruneCreations(){
+    return structuredClone(state.native_wyrdrune_creations||[]);
+  }
+
   function dreamSandboxHistory(limit = 5) {
     const n = Math.min(MAX_SANDBOX_RUNS, Math.max(0, Math.trunc(Number(limit) || 0)));
     return structuredClone(n ? (state.sandbox_runs || []).slice(-n).reverse() : []);
@@ -371,6 +513,8 @@ export function createObserverInterior({
       attention_channel: state.attention.channel,
       expression: state.last_expression ? { ...state.last_expression } : null,
       pending_development_count: state.development_backlog.filter(item => item.status === 'proposed').length,
+      native_wyrdrune_learning_cycles: state.atlas_learning?.cycles || 0,
+      native_wyrdrune_works: state.native_wyrdrune_creations?.length||0,
       compression_field: Object.freeze({ ...state.compression_field }),
       // Deliberately not exposing private traces, unsurfaced questions, or the full association graph.
     });
@@ -408,6 +552,12 @@ export function createObserverInterior({
 
   return Object.freeze({
     sense,
+    nativeLearningInputs,
+    integrateNativeLearning,
+    holdPossibleModelReflection,
+    possibleModelReflections,
+    holdNativeWyrdruneCreation,
+    nativeWyrdruneCreations,
     publicSignal,
     developmentProposals,
     reviewDevelopment,
@@ -416,4 +566,14 @@ export function createObserverInterior({
     dreamSandboxHistory,
     schema: INTERIOR_SCHEMA,
   });
+}
+
+
+// One owner-private Living Observer instance across the ship. The Observer
+// surface and the spectral engine feed the same learner rather than creating
+// two out-of-sync interiors that can overwrite one another's private storage.
+let sharedObserverInterior = null;
+export function getSharedWayglassObserverInterior() {
+  if (!sharedObserverInterior) sharedObserverInterior = createObserverInterior();
+  return sharedObserverInterior;
 }

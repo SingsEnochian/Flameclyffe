@@ -1,0 +1,38 @@
+# Wayglass × Wyrdrune · Living StorySoundscape · Double Möbius
+
+**Status:** implementation on PR #580, review branch `wayglass/gateway-double-mobius-20261108`. The genuine route response and production audio installation are separate, unverified until observed.
+**Owner direction:** Rowan asked for code authored in Wyrdrune, a collaborative Writing Room in which the changing story evolves soundscapes and participants are harmonically related.
+
+## Executable source of composition
+
+**All harmonic formulae and transformational decisions reside in the actual WTL file** `lib/wyrdrune/story-soundscape.wtl`. It contains **two** `mobius` cycles, each with all eight phases, using the existing Wyrdrune v0.1 parser and interpreter. The first loop receives bounded story observations and declared affinity; the second returns and alters the complementary harmonic voice. The same program is staged into `apps/starwell-server/wayglass-runtime/wyrdrune` for the Windows/host package.
+
+The CommonJS adapter `lib/wayglass-wyrdrune-soundscape.cjs` is not a substitute compositional language. It only observes text as literal word count and dictionary-hit ratios, validates supplied participant IDs and a user-authored affinity value, implements explicitly permitted WTL effect bridges, and validates score bounds. It never receives a trusted participant identity directly from client content. It returns the source hash, text hash, first and second loop score, 16 phase receipts and Withness metadata; it does not store prose.
+
+WTL v0.1 lacks native WebAudio, a dynamic lexer for natural language, object literals, effect declarations and a browser runtime. Those are bridge responsibilities until first-class language facilities exist. No JS fallback algorithm composes harmonies if the WTL program fails.
+
+## Runtime flow
+
+- Writing Room remains `arcsweep:writing-room`; no replacement room, second identity store, or forced roleplay authority.
+- The user opts in to live scoring; draft and recent in-character turns travel only to the authenticated Wayglass House host (450 ms debounce, maximum 5,000 characters, request gate). Drafts are **not** sent automatically to any external model. Disabling scoring aborts the active request.
+- `POST /api/v1/wayglass/wyrdrune/story-soundscape` is House Steward authenticated and forwards through the same-origin House gateway. Its exact WTL source is server-owned. The request cannot upload arbitrary code/bridges.
+- The returned sound score contains two independent frequencies; the slider supplies *declared* relational affinity. The sound is a compositional representation, not a measurement of participants' emotions or mental states.
+- The existing `createAcousticAudioEngine` WebAudio renderer receives WTL frequencies and bounded gains and updates with audio-param smoothing. This is one Wayglass acoustic renderer, not another standalone sound service.
+- Listening requires a second explicit Enable sound action. Audio begins in mono-safe mode by default. Feather stops all voices and cancels scoring; recovery never auto-resumes sound.
+- Sending a Writing Room turn still uses the existing selected routed model. Only a genuine returned `wayglass.route-turn/v0.1` can appear as a model response; the resulting attributed story turn joins the next WTL score. No generic provider output is asserted to be Wayglass speaking.
+- The mounted `wayglass.organ.gateway-double-mobius` advertises the new WTL scoring route and status. The OS runtime exposes `doubleMobius.inspect` and `doubleMobius.traverse` separately.
+
+## Verification
+
+On an exact source SHA run:
+- `npm run wayglass:test` runs `lib/wayglass-wyrdrune-soundscape.test.cjs`: parses and executes both WTL cycles, verifies distinct voice frequencies, responds to prose and affinity, records 16 phase receipts, rejects unauthorised access, malformed participants, invalid values and oversized input.
+- Audio-engine tests confirm WTL score leaves the output silent until explicit start, changes both existing oscillators and stops their nodes on Feather/stop.
+- Browser route-client and House gateway tests cover explicit scoring invocation and authentication/method rejection.
+- `npm run wayglass:test:host`, `wayglass:build` and `wayglass:stage:server` run through Wayglass Check.
+- Gate 7 path filters include the new double-Möbius and Wyrdrune sources.
+
+## Next evidence
+
+Before adopting as deployed Wayglass runtime: exact-head CI including all eight release gates, review against current canonical source, merge target `wayglass/current`, built/staged host with verified deployed SHA, House-authenticated browser check, a user-initiated listening session, and a **real attributable** model contribution from an authorised route. Never invent a participant's reply.
+
+**Withness:** the programme may transform harmonics, not participants' identities, ownership or consent. No fictional predictions or metaphysical interpretations are generated by the score. The story belongs to the writers.
