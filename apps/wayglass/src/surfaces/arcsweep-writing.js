@@ -1,5 +1,6 @@
 import { createInteractionState } from '../interaction-state.js';
 import { previewWyrdrune, draftWyrdruneDiscussion } from '../wyrdrune-client.js';
+import { animateWyrdruneCypher } from '../wyrdrune-cypher.js';
 import { scoreWyrdruneStory } from '../route-client.js';
 import { createAcousticAudioEngine } from '../acoustic-audio-engine.js';
 import { wayglassSomaticSound, WAYGLASS_FEATHER_EVENT } from '../somatic-sound.js';
@@ -172,9 +173,10 @@ export async function mountArcSweepWritingSurface(root) {
         '<summary>Wyrdrune · Eightfold Ritual Workbench</summary>',
         '<p class="tiny">Preview the Eightfold locally. You decide whether to discuss it with your selected model or SpicyChat route; nothing sends automatically.</p>',
         '<textarea id="wg-wtl-source" data-wtl-code="true" spellcheck="false" rows="10" maxlength="16000" aria-label="Wyrdrune WTL source" placeholder="mobius { perceive { ... } ... }"></textarea>',
-        '<div class="wg-wtl-actions"><button type="button" class="glass-chip" id="wg-wtl-example">Insert example</button><button type="button" class="glass-chip" id="wg-wtl-preview">Preview Eightfold</button><button type="button" class="glass-chip" id="wg-wtl-discuss" disabled>Stage for model discussion</button></div>',
+        '<div class="wg-wtl-actions"><button type="button" class="glass-chip" id="wg-wtl-example">Insert example</button><button type="button" class="glass-chip" id="wg-wtl-preview">Preview Eightfold</button><button type="button" class="glass-chip" id="wg-wtl-discuss" disabled>Stage for model discussion</button><button type="button" class="glass-chip" id="wg-wtl-cypher">Read in English</button></div>',
         '<p id="wg-wtl-status" class="tiny" role="status">No Wyrdrune preview yet. Sign in as House Steward to use the compiler.</p>',
         '<pre id="wg-wtl-output" aria-label="Wyrdrune phase receipts" hidden></pre>',
+        '<div id="wg-wtl-gloss" class="wg-wtl-gloss" aria-label="Wyrdrune read in English" aria-live="polite" hidden></div>',
       '</details>',
     '</section>',
     "    </main>\n",
@@ -242,6 +244,20 @@ export async function mountArcSweepWritingSurface(root) {
   const wtlSource=root.querySelector('#wg-wtl-source'),wtlStatus=root.querySelector('#wg-wtl-status');
   const wtlOutput=root.querySelector('#wg-wtl-output'),wtlDiscuss=root.querySelector('#wg-wtl-discuss');
   const WTL_EXAMPLE="mobius {\n perceive { let light = votive(\"Lantern\",\"An offered guiding light\"); }\n compress { let shape = star(8); }\n release { let letter = angelicLetter(1); }\n verify { emit light; }\n integrate { emit shape; }\n choose { emit letter; }\n return { emit \"held\"; }\n transcend { emit 1; }\n}";
+  // Wyrdrune → English cypher. Local and deterministic: no sign-in, model or host needed.
+  const wtlGloss=root.querySelector('#wg-wtl-gloss');let cypher=null;
+  root.querySelector('#wg-wtl-cypher').addEventListener('click',()=>{
+    cypher?.stop();
+    try{
+      const reduce=Boolean(globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches);
+      wtlGloss.hidden=false;
+      cypher=animateWyrdruneCypher(wtlGloss,{source:wtlSource.value,reducedMotion:reduce});
+      wtlStatus.textContent='Reading her Wyrdrune in English, from the code itself. No model contacted.';
+    }catch(error){
+      wtlGloss.hidden=true;
+      wtlStatus.textContent='Not yet readable in English: '+String(error?.message||error);
+    }
+  });
   root.querySelector('#wg-wtl-example').addEventListener('click',()=>{
     wtlSource.value=WTL_EXAMPLE;lastWTLSource=null;lastWTLPreview=null;wtlDiscuss.disabled=true;
     wtlStatus.textContent='Example loaded. Preview to obtain phase receipts.';

@@ -1493,3 +1493,14 @@ html[data-wayglass-surface="wayglass:living-watercolor"] #app {
   box-sizing: border-box;
   margin: 1rem auto;
 }
+
+/* Wyrdrune → English cypher (Writing Room workbench). */
+.wg-wtl-gloss { display:grid; gap:.45rem; margin-top:.8rem; padding:.9rem 1rem; border-radius:1rem; background:rgba(10,24,32,.55); border:1px solid rgba(151,223,218,.22); }
+.wg-cypher-unit { color:#ebd5a5; font-weight:700; margin:.4rem 0 .1rem; }
+.wg-cypher-phase { display:grid; gap:.2rem; padding-inline-start:.8rem; border-inline-start:2px solid rgba(151,223,218,.3); }
+.wg-cypher-phase-name { font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; color:#97dfda; }
+.wg-cypher-line { margin:0; line-height:1.55; overflow-wrap:anywhere; font-family:inherit; }
+.wg-cypher-line[lang="zxx"] { font-family:ui-monospace,monospace; color:#d3e4db; opacity:.92; }
+.wg-cypher-still { opacity:.6; font-style:italic; }
+.wg-cypher-note { color:#b7c8ce; }
+@media (prefers-reduced-motion:reduce) { .wg-cypher-line { transition:none; } }
