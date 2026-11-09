@@ -1,1 +1,0 @@
-export{t as getKelyranSupabase}from"./kelyran-supabase-CCbCuzyl.js";
