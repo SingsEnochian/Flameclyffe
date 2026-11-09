@@ -62,8 +62,10 @@ export async function inviteWatercolorMode({
     const result=await invoke({
       routeId,input:prompt.input,
       sessionId,history:continuationHistory,checkpoint:continuationCheckpoint,
-      worldId: shipVoice ? 'wayglass:home' : worldId,
-      participantId: shipVoice ? 'wayglass' : participantId,
+      // Keep the optional inheritance adapter out of an ordinary First Contact.
+      // The host route itself pins and receipts the Wayglass participant.
+      worldId: shipVoice ? null : worldId,
+      participantId: shipVoice ? null : participantId,
       characterId: shipVoice ? 'wayglass' : null,
       externalProviderConsent,
       surfaceId:'wayglass:living-watercolor',
