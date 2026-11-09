@@ -192,6 +192,10 @@ export async function mountArcSweepWritingSurface(root) {
 
   const routePicker = mountWayglassRoutePicker(root.querySelector('#wg-route'), { onChange(value) {
     selectedRoute = value;
+    if (selectedCharacter === 'wayglass' && value !== 'wayglass:ship') {
+      selectedCharacter = '';
+      characterSelect.value = '';
+    }
     externalConsent.checked = false;
     refreshExternalTransfer();
     wakeMaterial(0.88, 'route');
@@ -484,7 +488,7 @@ export async function mountArcSweepWritingSurface(root) {
         }];
       }
       const isGriffWorld = cp('world').value === 'evil-gene:film-2015';
-      if (selectedCharacter && !isGriffWorld) routes.unshift({route_id: 'auto:character', label: 'Auto · character voice', configured: true});
+      if (selectedCharacter === 'bitty-twi' && !isGriffWorld) routes.unshift({route_id: 'auto:character', label: 'Auto · character voice', configured: true});
       const visibleRoutes = isGriffWorld ? routes.filter(route => route.route_id === 'flame:griff:spicychat') : routes.filter(route => route.route_id !== 'flame:griff:spicychat');
       if (isGriffWorld) selectedRoute = 'flame:griff:spicychat';
       if (!visibleRoutes.some(route => route.route_id === selectedRoute && route.configured !== false)) selectedRoute = visibleRoutes.find(route => route.configured !== false)?.route_id || '';
@@ -532,6 +536,10 @@ export async function mountArcSweepWritingSurface(root) {
     const outgoing=correctionOf===null?text:'Correction to my earlier turn #'+(correctionOf+1)+':\n'+text;
     if (!text || busy) return;
     if (!selectedRoute) { status.textContent = 'No configured route available. Reload the route catalogue.'; return; }
+    if (selectedCharacter === 'wayglass' && selectedRoute !== 'wayglass:ship') {
+      status.textContent = 'Wayglass needs her dedicated ship route. Select Speak with Wayglass.';
+      return;
+    }
     if ((selectedRoute.startsWith('stepfun:') || selectedRoute === 'flame:griff:spicychat') && !externalConsent.checked) {
       status.textContent = 'Confirm this external provider transfer before passing the turn.';
       externalConsent.focus();
@@ -565,7 +573,7 @@ export async function mountArcSweepWritingSurface(root) {
         routeId: selectedRoute,
         externalProviderConsent: (selectedRoute.startsWith('stepfun:') || selectedRoute === 'flame:griff:spicychat') && externalConsent.checked,
         worldId: activeWorldId,
-        participantId: selectedRoute === 'flame:griff:spicychat' ? 'griff-krenshaw' : null,
+        participantId: selectedRoute === 'flame:griff:spicychat' ? 'griff-krenshaw' : selectedRoute === 'wayglass:ship' ? 'wayglass' : null,
         characterId: selectedCharacter || null,
         emergenceQuestionId,
         think: root.querySelector('#wg-think').checked,
@@ -654,6 +662,7 @@ export async function mountArcSweepWritingSurface(root) {
   firstContact.addEventListener('click', () => {
     if (busy) return;
     selectedCharacter = 'wayglass';
+    selectedRoute = 'wayglass:ship';
     characterSelect.value = 'wayglass';
     interaction.setChannel('OOC');
     interaction.setInteractionContext({intent:'Talk with Wayglass as the ship voice; distinguish the cognitive route from Wayglass system identity.',interaction_mode:'counterfactual-wonder'});
@@ -665,7 +674,7 @@ export async function mountArcSweepWritingSurface(root) {
 
   characterSelect.addEventListener('change', () => {
     selectedCharacter = characterSelect.value;
-    if (selectedCharacter) selectedRoute = 'auto:character';
+    if (selectedCharacter) selectedRoute = selectedCharacter === 'wayglass' ? 'wayglass:ship' : 'auto:character';
     if (selectedCharacter === 'wayglass') interaction.setChannel('OOC');
     else if (selectedRoute === 'auto:character') selectedRoute = routes.find(r => r.configured !== false)?.route_id || '';
     void loadRoutes();
