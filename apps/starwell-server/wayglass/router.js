@@ -725,7 +725,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     res.setHeader('Cache-Control', 'no-store');
 
     const payload = req.body || {};
-    const autoSeat = payload.route_id === 'auto:character' && payload.character_id === 'bitty-twi';
+    const autoSeat = payload.route_id === 'auto:character' && ['bitty-twi', 'wayglass'].includes(payload.character_id);
     if (payload.route_id === 'auto:character' && !autoSeat) return res.status(400).json({ error: 'Auto character route needs a supported character seat.' });
     // Privacy conscious local-first routing, with an explicit receipt. This is host policy,
     // not an assertion that a character autonomously selected a provider.
@@ -769,6 +769,12 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       }
     }
     if (payload.character_id && !resolveCharacterSeat(payload.character_id)) return res.status(400).json({ error: 'Unknown character seat.' });
+    if (payload.character_id === 'wayglass' && payload.interaction?.channel !== 'OOC') {
+      return res.status(422).json({ error: 'Wayglass ship voice requires OOC dialogue, not fictional IC roleplay.' });
+    }
+    if (payload.character_id === 'wayglass' && !(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'Wayglass ship voice requires House Steward authorization.' });
+    }
     if (!cleanText(payload.input)) return res.status(400).json({ error: 'input required.' });
     // The external StepFun routes are deliberately opt-in for every request.
     // This acknowledgement is a transport preflight, not a durable consent receipt
@@ -828,7 +834,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
         receipt: {
           requested_model: route.model(),
           returned_model: result.returned_model || null,
-          participant_id: route.participant_id || cleanText(payload.participant_id, 180) || null,
+          participant_id: route.participant_id || (payload.character_id === 'wayglass' ? 'wayglass' : cleanText(payload.participant_id, 180) || null),
           continuity_id: route.continuity_id || null,
           candidate_id: route.candidate_id || null,
           provider: route.provider,
