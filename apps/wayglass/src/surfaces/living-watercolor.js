@@ -1,3 +1,4 @@
+import {wayglassTimer,wayglassPerformanceSnapshot} from '../performance-diagnostics.js';
 import { createWatercolorFluid } from '../watercolor-fluid.js';
 import {
   watercolorSnapshot, watercolorProgram, publishWatercolorActivity,
@@ -106,6 +107,7 @@ export async function mountLivingWatercolorSurface(root) {
           '<button class="glass-chip" type="button" id="wc-suggest">Place a suggestion</button>',
           '<div class="wc-inspector"><p class="eyebrow">Instrument readings</p>',
             '<dl><div><dt>Fluid</dt><dd id="wc-fluid-status">still</dd></div>',
+            '<div><dt>Performance</dt><dd id="wc-performance">Measuring local paint and reply latency</dd></div>',
             '<div><dt>PREMAQC</dt><dd id="wc-premaqc">not connected</dd></div>',
             '<div><dt>Agent events</dt><dd id="wc-events">0</dd></div>',
             '<div><dt>Proposals</dt><dd id="wc-proposals">0, local only</dd></div></dl>',
@@ -139,6 +141,10 @@ export async function mountLivingWatercolorSurface(root) {
   const continuity=createWatercolorContinuity({sessionId:session});
   function updateInspector() {
     const s=fluid.snapshot(),data=watercolorSnapshot();
+    const measures=wayglassPerformanceSnapshot();
+    const frameMs=measures['watercolour:fluid-frame']?.p95_ms;
+    const replyMs=measures['model:roundtrip:wayglass:ship']?.latest_ms;
+    q('wc-performance').textContent=(frameMs==null?'Frame: measuring':'Frame p95: '+frameMs+' ms')+' · '+(replyMs==null?'Reply: not measured':'Reply: '+(replyMs/1000).toFixed(1)+' s');
     q('wc-fluid-status').textContent=paused?'paused':s.motion>0.003?'flowing':'settling';
     q('wc-premaqc').textContent=data.events.some(e=>e.texture?.data_state==='supplied-observation')?
       'observations present':'not connected';
@@ -165,9 +171,19 @@ export async function mountLivingWatercolorSurface(root) {
   }
   function frame(ts) {
     if(stopped)return;
-    if(!paused&&!reduced && ts-lastFrame>=40){
+    // Stop consuming simulation time in background tabs. During inference,
+    // leave more main-thread budget for typing and browser networking.
+    const hidden=Boolean(globalThis.document?.hidden);
+    const targetInterval=busy ? 100 : frameInterval;
+    if(!paused&&!reduced&&!hidden && ts-lastFrame>=targetInterval){
+      const endFrame=wayglassTimer('watercolour:fluid-frame');
+      const start=globalThis.performance?.now?.()??Date.now();
       fluid.step(Math.min((ts-lastFrame)/42,1.5));
       paint();
+      const cost=(globalThis.performance?.now?.()??Date.now())-start;
+      endFrame();
+      slowFrameStreak=cost>24?Math.min(12,slowFrameStreak+1):Math.max(0,slowFrameStreak-1);
+      frameInterval=slowFrameStreak>=3?100:slowFrameStreak>=1?66:40;
       elapsed++;
       if(elapsed%12===0)updateInspector();
       lastFrame=ts;
