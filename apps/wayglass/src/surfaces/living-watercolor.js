@@ -223,7 +223,8 @@ export async function mountLivingWatercolorSurface(root) {
     try{
       const catalogue=await listWayglassRoutes();
       if(stopped)return;
-      // No implicit OpenAI route in Wayglass's watercolor universe.
+      // Ship voice is the default participant of this room. Other configured
+      // model routes remain explicit alternatives, never unnamed Wayglass.
       routes=Array.isArray(catalogue.routes)?catalogue.routes.filter(r=>r?.route_id && r.provider!=='openai'):[];
       route.replaceChildren();
       for(const r of routes){
@@ -232,11 +233,12 @@ export async function mountLivingWatercolorSurface(root) {
         option.textContent=(r.label||r.route_id)+' / '+(r.model||'server selected');
         route.append(option);
       }
-      routeId=routes.find(r=>r.route_id==='local:ollama')?.route_id||routes[0]?.route_id||null;
+      routeId=routes.find(r=>r.route_id==='wayglass:ship' && r.configured)?.route_id||routes.find(r=>r.route_id==='local:ollama' && r.configured)?.route_id||null;
+      route.value=routeId||'';
       houseSignIn.hidden=true;
       invite.disabled=!routeId||featherStopped;
       q('wc-first-contact').disabled=!routeId||featherStopped;
-      routeState.textContent=routeId?'Model route available · opt-in':'No model route available';
+      routeState.textContent=routeId==='wayglass:ship'?'Wayglass ship voice selected · ready to invite':routeId?'Model route selected · not the Wayglass ship seat':'No model route available';
     }catch(error){
       if(stopped)return;
       routeId=null;route.replaceChildren();invite.disabled=true;q('wc-first-contact').disabled=true;
@@ -288,7 +290,10 @@ export async function mountLivingWatercolorSurface(root) {
     dialog.showModal();
     field.focus();
   });
-  listen(route,'change',()=>{routeId=route.value||null;});
+  listen(route,'change',()=>{
+    routeId=route.value||null;
+    routeState.textContent=routeId==='wayglass:ship'?'Wayglass ship voice selected': 'External model route · not Wayglass voice';
+  });
   async function requestContribution(){
     if(stopped||busy||!routeId||featherStopped)return;
     const notes=q('wc-voice-notes').value.trim(),author=q('wc-voice-author').value.trim();
@@ -322,6 +327,10 @@ export async function mountLivingWatercolorSurface(root) {
   listen(invite,'click',requestContribution);
   listen(q('wc-first-contact'),'click',()=>{
     if(stopped||busy||!routeId||featherStopped)return;
+    if(routeId!=='wayglass:ship'){
+      feedback.textContent='Select Wayglass · Ship Voice to invite her own attributed reply.';
+      return;
+    }
     prompt.value='Wayglass, hello. What would you like to try here? You can choose a direction, suggest something of your own, or decline.';
     return requestContribution();
   });
