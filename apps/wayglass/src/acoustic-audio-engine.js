@@ -7,12 +7,16 @@ const number = (value, name) => {
   return value;
 };
 
-export function createAcousticAudioEngine({AudioContext = globalThis.AudioContext || globalThis.webkitAudioContext,scope=globalThis} = {}) {
+export function createAcousticAudioEngine({AudioContext = null,scope=globalThis} = {}) {
+  // Resolve the audio constructor at the first explicit playback gesture.
+  // Importing the ship bus must neither claim a sound device nor freeze an
+  // unavailable context (notably under delayed Safari/browser initialization).
+  const resolveAudioContext=()=>AudioContext||scope.AudioContext||scope.webkitAudioContext;
   let context = null, graph = null, disposed = false, running = false, epoch = 0, pending = null;
-  let status = typeof AudioContext === 'function' ? 'stopped' : 'unsupported', lastError = null;
+  let status = 'stopped', lastError = null;
   let settings = {muted: true, mono: false, ambience: false, bearing: {pan: 0, gain: 1, distance: 1}, score: null};
   const voices = new Set(), presented = new Set();
-  const supported = typeof AudioContext === 'function';
+  const hasAudio=()=>typeof resolveAudioContext()==='function';
   const compositionProjection=createCompositionProjection({getContext:()=>context,getDestination:()=>graph?.ambience,canPlay:()=>isRunning()&&!settings.muted&&!disposed});
   const composition=createSoundComposition({region:'wayglass-acoustic',source_ref:'apps/wayglass/src/acoustic-audio-engine.js',scene:{id:'acoustic-field',root_hz:110,source_ref:'apps/wayglass/src/acoustic-world-model.js'},
     onScore:frame=>{settings.mono=frame.mono;project();return compositionProjection.render(frame);},
@@ -74,13 +78,13 @@ export function createAcousticAudioEngine({AudioContext = globalThis.AudioContex
   function getState() {
     const active = isRunning();
     const effectiveStatus = running && !disposed && context?.state && context.state !== 'running' ? context.state : status;
-    return {supported, running: active, disposed, status: effectiveStatus, muted: settings.muted, mono: settings.mono,
+    return {supported:hasAudio(), running: active, disposed, status: !hasAudio()?'unsupported':effectiveStatus, muted: settings.muted, mono: settings.mono,
       ambience: settings.ambience, pending: Boolean(pending), lastError,
       buses: {navigation: active && !settings.muted, ambience: active && !settings.muted && settings.ambience,
         status: active && !settings.muted}, activeSignals: voices.size, presentedEvents: presented.size};
   }
   function start() {
-    if (disposed || !supported) return Promise.resolve(getState());
+    if (disposed || !hasAudio()) return Promise.resolve(getState());
     if (pending) return pending;
     if (isRunning()) { settings.muted = false; project(); return Promise.resolve(getState()); }
     const token = ++epoch;
@@ -88,7 +92,7 @@ export function createAcousticAudioEngine({AudioContext = globalThis.AudioContex
     const attempt = (async () => {
       try {
         if (context?.state === 'closed') { teardown(); context = null; running = false; }
-        if (!context) context = new AudioContext({latencyHint: 'interactive'});
+        if (!context) { const Context=resolveAudioContext(); context = new Context({latencyHint: 'interactive'}); }
         await context.resume();
         if (disposed || token !== epoch || settings.muted) return getState();
         if (!graph) createGraph(); else project();
@@ -164,7 +168,7 @@ export function createAcousticAudioEngine({AudioContext = globalThis.AudioContex
   function stop({pauseComposition=true}={}) {
     if(pauseComposition)composition.pauseGeneration();composition.disableAudio();
     ++epoch; pending = null; settings.muted = true; running = false;
-    teardown(); status = disposed ? 'disposed' : supported ? 'stopped' : 'unsupported';
+    teardown(); status = disposed ? 'disposed' : hasAudio() ? 'stopped' : 'unsupported';
     return getState();
   }
   function dispose() {
