@@ -1,5 +1,8 @@
 import { createInteractionState } from '../interaction-state.js';
 import { previewWyrdrune, draftWyrdruneDiscussion } from '../wyrdrune-client.js';
+import { scoreWyrdruneStory } from '../route-client.js';
+import { createAcousticAudioEngine } from '../acoustic-audio-engine.js';
+import { wayglassSomaticSound, WAYGLASS_FEATHER_EVENT } from '../somatic-sound.js';
 import { authorizationSession } from '../authorization-session.js';
 import { mountWayglassRoutePicker } from '../route-picker.js';
 import { WAYGLASS_WORLD_SEATS, findWayglassWorldSeat, wayglassWorldStatus } from '../world-seats.js';
@@ -59,7 +62,7 @@ export async function mountArcSweepWritingSurface(root) {
     "    <button type=\"button\" class=\"glass-chip\" data-wayglass-room=\"wayglass:living-observer\">Living Observer</button>\n",
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:library">Library</button>',
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:toybox">Toybox</button>',
-    '<button type="button" class="glass-chip" data-wayglass-room="wayglass:acoustic-room">Acoustic Room</button>',
+    '<button type="button" class="glass-chip" data-wayglass-room="wayglass:acoustic-room">Acoustic Room</button><button type="button" class="glass-chip" data-wayglass-room="wayglass:spectral-field">Full Spectrum</button>',
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:commons">Commons</button>',
     "  </nav>\n",
     "  <header class=\"wg-surface-head glass-panel\">\n",
@@ -147,6 +150,23 @@ export async function mountArcSweepWritingSurface(root) {
     "          <button id=\"wg-send\" type=\"button\" class=\"send-jewel\"><span aria-hidden=\"true\">➤</span> Send to Writing Room</button>\n",
     "        </div>\n",
     "      </section>\n",
+    '<section class="wg-wyrdrune-soundscape glass-panel" aria-label="Wyrdrune living story soundscape" style="border-radius:1.5rem;padding:1.1rem;margin-block:1rem;">',
+      '<p class="eyebrow">Wyrdrune · Double Möbius score</p>',
+      '<h2>Living Soundscape</h2>',
+      '<p class="tiny">Your prose and the selected model’s actual returned turns change two interwoven voices. The harmonic relationship is your chosen value, never inferred from private thoughts. The score itself is executable Wyrdrune.</p>',
+      '<label><input id="wg-score-live" type="checkbox"> Let Wyrdrune read this room as I write</label>',
+      '<p class="tiny">When enabled, the current draft and recent in-character turns are sent to your authenticated Wayglass host. Nothing goes to the model until you explicitly send a turn.</p>',
+      '<label for="wg-score-affinity">Participants · harmonic closeness <input id="wg-score-affinity" type="range" min="0" max="1" step="0.05" value="0.5"></label>',
+      '<output id="wg-score-affinity-output">0.50</output>',
+      '<div style="display:flex;gap:.65rem;flex-wrap:wrap;align-items:center;margin-block:.6rem;">',
+        '<button type="button" class="glass-chip" id="wg-score-audio" aria-pressed="false">Enable sound</button>',
+        '<label><input id="wg-score-mono" type="checkbox" checked> Mono-safe</label>',
+        '<button type="button" class="glass-chip" id="wg-score-feather">🪽 Feather Stop</button>',
+      '</div>',
+      '<p id="wg-score-status" class="tiny" role="status">Quiet. Live scoring and audio are off.</p>',
+      '<output id="wg-score-readout" class="tiny" aria-live="polite">No Wyrdrune harmonics yet.</output>',
+      '<p class="tiny">A genuine routed reply can join the score after Send; route provenance remains visible in the Writing Room. Sound never starts automatically.</p>',
+    '</section>',
     '<section class="wg-wtl-panel" aria-label="Wyrdrune ritual workbench">',
       '<details id="wg-wtl-details" class="glass-panel">',
         '<summary>Wyrdrune · Eightfold Ritual Workbench</summary>',
@@ -256,6 +276,167 @@ export async function mountArcSweepWritingSurface(root) {
 
   const sharedObserverReading = consumeObserverContextForWriting();
   if (sharedObserverReading) input.value = sharedObserverReading + '\n\n[My question about this observation:]\n';
+
+  // This UI transports text and renders the Wyrdrune score. It does not
+  // implement the musical decisions, which live only in the .wtl program.
+  const scoreLive = root.querySelector('#wg-score-live');
+  const scoreAudioButton = root.querySelector('#wg-score-audio');
+  const scoreMono = root.querySelector('#wg-score-mono');
+  const scoreAffinity = root.querySelector('#wg-score-affinity');
+  const scoreAffinityOutput = root.querySelector('#wg-score-affinity-output');
+  const scoreStatus = root.querySelector('#wg-score-status');
+  const scoreReadout = root.querySelector('#wg-score-readout');
+  const scoreAudio = createAcousticAudioEngine();
+  let soundscapeDisposed = false;
+  let soundscapeTimer = null;
+  let soundscapeAbort = null;
+  let soundscapeRevision = 0;
+  let soundscapeAudioOn = false;
+  let lastSoundscape = null;
+
+  function scoreParticipants() {
+    // A route identifier is an attributed transport endpoint, not an
+    // unverified claim to the personality or identity of Wayglass.
+    return [
+      {id:'participant:rowan',kind:'participant-declared'},
+      {id:'route:' + (selectedRoute || 'none'),kind:'model-route'},
+    ];
+  }
+  function recentStoryText() {
+    const previous = messages.filter(item => item.channel === 'IC'
+      && item.world_id === cp('world').value.trim()
+      && !item.content.startsWith('[Route error]')).slice(-4)
+      .map(item => item.content);
+    return [...previous, input.value].join('\n').slice(-4900);
+  }
+  function applyScore(frame) {
+    lastSoundscape = frame;
+    const score = frame.score;
+    // A Wyrdrune-authored story score joins the larger ship field by metadata.
+    // No story text or participant identity is copied into spectral capture.
+    globalThis.__wayglassOS?.fullSpectrum?.capture({
+      kind:'writing',strength:score.pulse,motion:score.pulse,
+      continuity:.85,intent:.8,relationship:score.relationshipAffinity,
+      source_ref:'wayglass:story-soundscape',
+    });
+    scoreReadout.textContent = 'Wyrdrune · '+score.rootHz.toFixed(1)+' Hz ⇄ '
+      +score.counterpartHz.toFixed(1)+' Hz · affinity '+score.relationshipAffinity.toFixed(2)
+      +' · below '+score.infrasonic.hz.toFixed(2)+' Hz · above '+(score.ultrasonic.hz/1000).toFixed(2)+' kHz (virtual)'
+      +' · '+frame.eightfold.length+' phase receipts · '+frame.story_sha256.slice(0,12);
+    if (soundscapeAudioOn) {
+      scoreAudio.update({ muted:false, ambience:true, mono:scoreMono.checked, score });
+    }
+  }
+  function stopScoreAudio() {
+    soundscapeAudioOn = false;
+    scoreAudio.stop();
+    scoreAudioButton.textContent = 'Enable sound';
+    scoreAudioButton.setAttribute('aria-pressed','false');
+  }
+  async function updateStoryScore() {
+    const revision = ++soundscapeRevision;
+    soundscapeAbort?.abort();
+    soundscapeAbort = typeof AbortController === 'function' ? new AbortController() : null;
+    if (soundscapeDisposed || !scoreLive.checked) return;
+    if (interaction.snapshot().channel !== 'IC') {
+      scoreStatus.textContent = 'The score follows in-character writing only.';
+      return;
+    }
+    const text = recentStoryText();
+    try {
+      const scored = await scoreWyrdruneStory({
+        text,participants:scoreParticipants(),affinity:Number(scoreAffinity.value),
+        turns:messages.filter(m => m.channel === 'IC' && m.world_id === cp('world').value.trim()
+          && !m.content.startsWith('[Route error]')).length,
+        signal:soundscapeAbort?.signal,
+      });
+      if (soundscapeDisposed || revision !== soundscapeRevision || !scoreLive.checked) return;
+      if (scored.schema !== 'wayglass.wyrdrune-story-soundscape/v0.1'
+        || scored.withness?.completedCycles !== 2 || scored.eightfold?.length !== 16) {
+        throw new Error('The double Möbius score returned an invalid receipt.');
+      }
+      applyScore(scored);
+      scoreStatus.textContent = 'Two Möbius turns complete. Wyrdrune is scoring '
+        + (soundscapeAudioOn ? 'audibly.' : 'silently.') + ' No model was invoked by scoring.';
+    } catch (error) {
+      if (soundscapeDisposed || revision !== soundscapeRevision
+        || error?.name === 'AbortError') return;
+      scoreStatus.textContent = 'Wyrdrune score unavailable: ' + error.message;
+    }
+  }
+  function queueStoryScore() {
+    if (soundscapeTimer != null) globalThis.clearTimeout(soundscapeTimer);
+    if (!scoreLive.checked || soundscapeDisposed) {
+      soundscapeRevision++;
+      soundscapeAbort?.abort();
+      return;
+    }
+    soundscapeTimer = globalThis.setTimeout(() => {
+      soundscapeTimer = null;
+      void updateStoryScore();
+    }, 450);
+  }
+  function onSharedFeather(event) {
+    if (event?.detail?.stopped === true) {
+      scoreLive.checked = false;
+      queueStoryScore();
+      stopScoreAudio();
+      scoreStatus.textContent = 'Feather Stop · quiet and held. Restart requires a new choice.';
+    }
+  }
+  globalThis.addEventListener?.(WAYGLASS_FEATHER_EVENT,onSharedFeather);
+  scoreLive.addEventListener('change', () => {
+    if (!scoreLive.checked) {
+      queueStoryScore();
+      stopScoreAudio();
+      scoreStatus.textContent = 'Live story scoring disabled.';
+    } else {
+      if (wayglassSomaticSound.snapshot().feather_stopped) {
+        scoreLive.checked = false;
+        scoreStatus.textContent = 'Feather Stop is active. Release it explicitly before scoring again.';
+        return;
+      }
+      scoreStatus.textContent = 'Wyrdrune is reading the in-character draft through the House host.';
+      queueStoryScore();
+    }
+  });
+  scoreAffinity.addEventListener('input', () => {
+    scoreAffinityOutput.textContent = Number(scoreAffinity.value).toFixed(2);
+    queueStoryScore();
+  });
+  scoreMono.addEventListener('change', () => {
+    if(soundscapeAudioOn) scoreAudio.update({mono:scoreMono.checked});
+  });
+  scoreAudioButton.addEventListener('click', async () => {
+    if (soundscapeAudioOn) { stopScoreAudio();scoreStatus.textContent='Sound stopped. Wyrdrune may continue scoring silently.';return; }
+    if (wayglassSomaticSound.snapshot().feather_stopped) {
+      scoreStatus.textContent = 'Feather Stop active. Confirm release from the existing sound controls.';
+      return;
+    }
+    if (!scoreLive.checked || !lastSoundscape) {
+      scoreStatus.textContent = 'Enable live Wyrdrune scoring and obtain a valid score before sound.';
+      return;
+    }
+    const result = await scoreAudio.start();
+    if (!result.running) {
+      scoreStatus.textContent = 'Sound unavailable on this device: '+(result.lastError||result.status);
+      return;
+    }
+    soundscapeAudioOn = true;
+    scoreAudio.update({muted:false, ambience:true, mono:scoreMono.checked, score:lastSoundscape.score});
+    scoreAudioButton.textContent = 'Stop sound';
+    scoreAudioButton.setAttribute('aria-pressed','true');
+    scoreStatus.textContent = 'Playing two score-derived voices through the existing Wayglass acoustic mixer.';
+  });
+  root.querySelector('#wg-score-feather').addEventListener('click', () => {
+    wayglassSomaticSound.feather();
+    scoreLive.checked = false;
+    queueStoryScore();
+    stopScoreAudio();
+    scoreStatus.textContent = 'Feather Stop · all local score voices stopped.';
+  });
+  input.addEventListener('input',queueStoryScore);
+
   const status = root.querySelector('#wg-status');
   const send = root.querySelector('#wg-send');
   const cp = name => root.querySelector('#wg-cp-' + name);
@@ -274,6 +455,10 @@ export async function mountArcSweepWritingSurface(root) {
     const changed = cp('world').value !== world.world_id;
     worldSelect.value = world.world_id;
     cp('world').value = world.world_id;
+    // Local atlas lineage changes with the actual selected narrative world.
+    globalThis.__wayglassOS?.fullSpectrum?.setScope({
+      room:'arcsweep:writing-room',world:world.world_id,
+    });
     root.querySelector('#wg-place-name').textContent = world.name;
     root.querySelector('#wg-place-hint').textContent = world.character
       ? world.character.name + ' · world anchor; transport status shown separately'
@@ -294,6 +479,13 @@ export async function mountArcSweepWritingSurface(root) {
     selectedCharacter = '';
     characterSelect.value = '';
     externalConsent.checked = false;
+    // A world crossing never drags its predecessor's continuous audio along.
+    stopScoreAudio();
+    globalThis.__wayglassOS?.fullSpectrum?.capture({kind:'world',strength:.8,motion:.6,
+      continuity:.95,intent:.8,source_ref:'wayglass:story-world-crossing'});
+    lastSoundscape = null;
+    scoreReadout.textContent = 'A new world needs its own Wyrdrune score.';
+    queueStoryScore();
     void loadRoutes();
   });
   selectWorldSeat(cp('world').value, { resetCheckpoint: false });
@@ -555,6 +747,7 @@ export async function mountArcSweepWritingSurface(root) {
     const history = messages.filter(message => message.world_id === activeWorldId && ['user', 'assistant'].includes(message.role) && !message.content.startsWith('[Route error]'))
       .slice(-12).map(message => ({ role: message.role, content: message.content }));
     messages.push({ role: 'user', content: outgoing, channel: current.channel, world_id: activeWorldId, emergence_question_id: emergenceQuestionId, revision_of: correctionOf });
+    queueStoryScore();
     revisionOf=null;root.querySelector('#wg-revision-note').hidden=true;
     input.value = '';
     refreshThread();
@@ -593,6 +786,7 @@ export async function mountArcSweepWritingSurface(root) {
         emergence_question_id: emergenceQuestionId,
       });
       succeeded = true;
+      queueStoryScore();
       lastReceipt = result.receipt || null;
       recordWayglassRouteObservation({status:'completed',routeId:selectedRoute,provider:result.provider,model:result.model,receipt:lastReceipt});
       receipt.textContent = lastReceipt
@@ -759,6 +953,11 @@ export async function mountArcSweepWritingSurface(root) {
     lastReceipt: () => lastReceipt,
     destroy() {
       globalThis.removeEventListener?.('wayglass:command', handleWayglassCommand);
+      soundscapeDisposed = true;
+      if (soundscapeTimer != null) globalThis.clearTimeout(soundscapeTimer);
+      soundscapeAbort?.abort();
+      scoreAudio.dispose();
+      globalThis.removeEventListener?.(WAYGLASS_FEATHER_EVENT,onSharedFeather);
       routePicker.destroy();
     },
   });

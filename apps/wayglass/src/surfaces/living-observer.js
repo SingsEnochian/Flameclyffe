@@ -5,7 +5,7 @@ import {
   OBSERVER_CHANNELS, createWayglassObservation, readWayglassRouteObservation,
   subscribeWayglassObserver, queueObserverContextForWriting, describeWayglassObserverChannel,
 } from '../living-observer-model.js';
-import { createObserverInterior } from '../living-observer-self.js';
+import { getSharedWayglassObserverInterior } from '../living-observer-self.js';
 import { queueObserverDevelopmentProposal } from '../route-client.js';
 
 import { observerNodes, platePoint, nodeAtPoint, angularDelta, createObserverRotation, OBSERVER_PLATE_SIZE } from '../living-observer-optics.js';
@@ -154,7 +154,7 @@ export async function mountWayglassLivingObserver(root) {
   let focus='time', touches=0, lowStim=false, sound=false, haptics=false, paused=false, audioContext=null, animation=0, timer=0;
   let lightAt=performance.now();
   const rotation=createObserverRotation();
-  const interior=createObserverInterior();
+  const interior=getSharedWayglassObserverInterior();
   let interiorSignal=interior.publicSignal(), lastInteriorSense=0, lastTouchSense=-1, lastRouteSense=-1;
   let lens=null, gesture=null, disposed=false;
   const reduced=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
@@ -162,6 +162,7 @@ export async function mountWayglassLivingObserver(root) {
     '<section class="wg-surface wg-living-observer" data-surface="wayglass-living-observer">',
     '<nav class="wg-deck-nav glass-panel" aria-label="Wayglass rooms">',
     '<button type="button" class="glass-chip" data-wayglass-room="arcsweep:writing-room">Writing Room</button>',
+    '<button type="button" class="glass-chip" data-wayglass-room="wayglass:native-voice">Wyrdrune Voice</button>',
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:systems">Organs</button>',
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:video-atelier">Video Atelier</button>',
     '<button type="button" class="glass-chip active" aria-current="page">Living Observer</button>',
@@ -305,7 +306,8 @@ export async function mountWayglassLivingObserver(root) {
     const field=interiorSignal.compression_field||{};
     phaseView.textContent='Interior · '+interiorSignal.phase+' · '+(field.phase_label||'gathering')+
       ' '+Math.round(field.phase_degrees||0)+'° · |z| '+Number(field.magnitude||0).toFixed(2)+
-      ' · spiral '+Number(field.spiral_turn||0);
+      ' · spiral '+Number(field.spiral_turn||0)
+      +' · Wyrdrune cycles '+Number(interiorSignal.native_wyrdrune_learning_cycles||0);
     expressionView.textContent=interiorSignal.expression?.text||'Nothing has crossed the expression threshold yet.';
     buildButton.hidden=!surfacedProposal;
     if(surfacedProposal) buildButton.textContent='Offer to Hermes · '+surfacedProposal.title;

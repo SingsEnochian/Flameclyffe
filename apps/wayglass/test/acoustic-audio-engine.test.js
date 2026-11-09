@@ -128,3 +128,26 @@ test('no stereo panner still supports mono, clamped control and invalid numeric 
   assert.throws(()=>e.update({bearing:{pan:NaN}}),TypeError);
   assert.throws(()=>e.signal({eventId:''}),TypeError); e.dispose();
 });
+
+
+test('Wyrdrune score drives two existing voices with smooth frequency changes, without autoplay', async () => {
+  const f=fixture(),e=createAcousticAudioEngine({AudioContext:f.Context});
+  const score={rootHz:174.4,counterpartHz:229.8,foregroundGain:0.022,atmosphereGain:0.012};
+  // A score is inert until the owner explicitly starts the audio graph.
+  e.update({score});
+  assert.equal(f.nodes.length,0);
+  await e.start();
+  e.update({muted:false,score,ambience:true,mono:true});
+  const oscs=f.nodes.filter(n=>n.typeName==='oscillator');
+  assert.equal(oscs.length,2);
+  assert.equal(oscs[0].frequency.value,174.4);
+  assert.equal(oscs[1].frequency.value,229.8);
+  assert.equal(f.nodes.filter(n=>n.typeName==='gain')[1].gain.value,0.022);
+  assert.equal(f.nodes.filter(n=>n.typeName==='gain')[2].gain.value,0.012);
+  assert.throws(()=>e.update({score:{...score,rootHz:Infinity}}),TypeError);
+  assert.throws(()=>e.update({score:{...score,counterpartHz:9001}}),RangeError);
+  e.stop();
+  assert.equal(e.getState().running,false);
+  assert.ok(oscs.every(n=>n.stops.length>0));
+  e.dispose();
+});

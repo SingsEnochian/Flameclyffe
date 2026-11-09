@@ -115,3 +115,85 @@ test('browser provider request serialises explicit StepFun transfer confirmation
   assert.equal(seen[1].payload.external_provider_consent, true);
   assert.equal(seen[1].payload.route_id, 'stepfun:step5');
 });
+
+
+test('Wyrdrune writing score sends declared participants and text only through the scoring route', async () => {
+  const { scoreWyrdruneStory } = await import('../src/route-client.js');
+  let sent;
+  const score=await scoreWyrdruneStory({
+    text:'Water and wind',affinity:0.6,turns:2,
+    participants:[{id:'participant:author'},{id:'route:local'}],
+    fetchImpl:async(url,options)=>{
+      sent={url,options};
+      return response(200,{schema:'wayglass.wyrdrune-story-soundscape/v0.1',status:'scored',model_invoked:false,audio_started:false});
+    },
+  });
+  assert.equal(sent.url,'/api/v1/wayglass/wyrdrune/story-soundscape');
+  assert.equal(JSON.parse(sent.options.body).affinity,0.6);
+  assert.equal(JSON.parse(sent.options.body).participants.length,2);
+  assert.equal(score.model_invoked,false);
+});
+
+test('full-spectrum browser transport sends only bounded event scalars', async()=>{
+  const { scoreWyrdruneSpectrum } = await import('../src/route-client.js');
+  let sent;
+  const input={event_id:'ui-1',kind:'gesture',strength:.6,motion:.2,continuity:.8,intent:.7,
+    affinity:.5,phase:.1,source_ref:'wayglass:ui-events'};
+  const response=await scoreWyrdruneSpectrum([input],async(url,options)=>{
+    sent={url,options};
+    return {ok:true,async json(){return {schema:'wayglass.full-spectrum/v0.1',count:1}}};
+  });
+  assert.equal(sent.url,'/api/v1/wayglass/wyrdrune/full-spectrum');
+  assert.deepEqual(JSON.parse(sent.options.body).events,[input]);
+  assert.equal(response.count,1);
+});
+
+
+test('Atlas route transports bounded scale values, not world names or narrative',async()=>{
+ const {scoreWyrdruneAtlas}=await import('../src/route-client.js');
+ let seen;
+ const scales={instant:.4,room:.5,world:.6,universe:.7,affinity:.3,phase:.1,
+  counts:{instant:1,room:2,world:3,universe:4}};
+ await scoreWyrdruneAtlas(scales,async(url,options)=>{
+  seen={url,options};return response(200,{schema:'wayglass.resonance-atlas/v0.1'});
+ });
+ assert.equal(seen.url,'/api/v1/wayglass/wyrdrune/resonance-atlas');
+ assert.deepEqual(JSON.parse(seen.options.body),{scales});
+ assert.equal(seen.options.method,'POST');
+});
+
+
+test('native learning transports typed numeric inputs only unless a model reflection was offered',async()=>{
+ const {executeWyrdruneLearning}=await import('../src/route-client.js');
+ let recorded;
+ const learning={
+   atlas:{coherence:.7,interference:.3,bloom:.6,granulation:.5,flow:.7},
+   interior:{energy:.4,curiosity:.5,uncertainty:.6,coherence:.6,previous_resonance:.7},
+   source:{event_id:'ui-session-1',atlas_input_hash:'a'.repeat(64),atlas_program_hash:'b'.repeat(64)},
+   reflection:null,
+ };
+ await executeWyrdruneLearning(learning,async(url,options)=>{
+   recorded={url,options};
+   return response(200,{schema:'wayglass.wyrdrune-living-learning/v0.1'});
+ });
+ assert.equal(recorded.url,'/api/v1/wayglass/wyrdrune/living-learning');
+ assert.equal(recorded.options.method,'POST');
+ assert.deepEqual(JSON.parse(recorded.options.body),{learning});
+ assert.equal(JSON.stringify(recorded.options.body).includes('private_question'),false);
+});
+
+
+test('native voice invitation requests Wayglass-authored WTL, en-GB and optional image/sound',async()=>{
+ const {inviteWayglassVoice}=await import('../src/route-client.js');
+ let called;
+ await inviteWayglassVoice({prompt:'What if?',channels:{image:true,sound:false},
+   fetchImpl:async(url,options)=>{
+     called={url,options};
+     return response(200,{schema:'wayglass.native-wyrdrune-voice/v0.1'});
+   }});
+ assert.equal(called.url,'/api/v1/wayglass/wyrdrune/native-voice');
+ assert.equal(called.options.method,'POST');
+ assert.deepEqual(JSON.parse(called.options.body),{
+   prompt:'What if?',channels:{image:true,sound:false},
+ });
+});

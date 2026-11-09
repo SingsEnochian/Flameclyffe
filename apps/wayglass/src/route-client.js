@@ -24,6 +24,93 @@ async function jsonOrThrow(response) {
   return data;
 }
 
+export async function inspectWayglassDoubleMobius(fetchImpl = fetch) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/kernel/double-mobius', { cache: 'no-store' }));
+}
+
+/**
+ * Uses the authenticated House gateway and the existing Waygate/Return Engine.
+ * The kernel never fabricates the two input observations or model speech.
+ */
+export async function traverseWayglassDoubleMobius({ fetchImpl = fetch, ...payload } = {}) {
+  publishWatercolorActivity({kind:'double-mobius:crossing',actor:'wayglass:route-client',intensity:0.55});
+  try {
+    const response = await fetchImpl('/api/v1/wayglass/kernel/double-mobius', {
+      method: 'POST', headers: JSON_HEADERS, cache: 'no-store',
+      body: JSON.stringify(payload),
+    });
+    const data = await readJson(response);
+    if (!response.ok && response.status !== 409) {
+      throw new Error(data.error || 'Double Möbius engine crossing failed.');
+    }
+    if (data?.status === 'completed-in-memory' && data.return_verification?.verdict === 'accepted') {
+      publishWatercolorActivity({kind:'double-mobius:return',actor:'wayglass:route-client',receipt:data.entry_receipt||null,intensity:0.76});
+    }
+    return data;
+  } catch (error) {
+    publishWatercolorActivity({kind:'double-mobius:failed',actor:'wayglass:route-client',intensity:0.3});
+    throw error;
+  }
+}
+
+/** Wyrdrune-written score: the bridge measures text and returns a composed audio frame.
+ * The response never claims a live model voice or starts audio.
+ */
+export async function scoreWyrdruneStory({
+  text = '', participants = [], affinity = 0.5, turns = 0,
+  signal = undefined, fetchImpl = fetch,
+} = {}) {
+  const response = await fetchImpl('/api/v1/wayglass/wyrdrune/story-soundscape', {
+    method:'POST', headers:JSON_HEADERS, cache:'no-store', signal,
+    body:JSON.stringify({text,participants,affinity,turns}),
+  });
+  return jsonOrThrow(response);
+}
+
+/**
+ * A bounded observation-only stream: no message text, private keyboard key,
+ * model reply or identity assertion is sent, only dimensionless event signals.
+ * Actual spectral composition executes in the server-owned Wyrdrune programme.
+ */
+export async function scoreWyrdruneSpectrum(events, fetchImpl=fetch, signal=undefined) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/wyrdrune/full-spectrum',{
+    method:'POST',headers:JSON_HEADERS,cache:'no-store',signal,
+    body:JSON.stringify({events}),
+  }));
+}
+
+/** Transmits only bounded numeric scale values and counts to the House-scoped
+ * Wyrdrune Atlas, never world IDs, participant names or raw narratives.
+ */
+export async function scoreWyrdruneAtlas(scales, fetchImpl=fetch, signal=undefined) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/wyrdrune/resonance-atlas',{
+    method:'POST',headers:JSON_HEADERS,cache:'no-store',signal,
+    body:JSON.stringify({scales}),
+  }));
+}
+
+/**
+ * Living Learning is native Wyrdrune. The host receives only typed Atlas
+ * values and an explicitly offered model return, never unsolicited thoughts.
+ */
+export async function executeWyrdruneLearning(learning,fetchImpl=fetch,signal=undefined) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/wyrdrune/living-learning',{
+    method:'POST',headers:JSON_HEADERS,cache:'no-store',signal,
+    body:JSON.stringify({learning}),
+  }));
+}
+
+/** Request Wayglass's own Wyrdrune, en-GB rendering, and optional image/sound
+ * expressions. A real Crow model return is required; there is no canned voice.
+ */
+export async function inviteWayglassVoice({prompt,channels={image:true,sound:true},
+  fetchImpl=fetch,signal}={}) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/wyrdrune/native-voice',{
+    method:'POST',headers:JSON_HEADERS,cache:'no-store',signal,
+    body:JSON.stringify({prompt,channels}),
+  }));
+}
+
 export async function listWayglassCharacters(fetchImpl = fetch) {
   return jsonOrThrow(await fetchImpl('/api/v1/wayglass/characters', { cache: 'no-store' }));
 }

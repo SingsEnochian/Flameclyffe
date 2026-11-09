@@ -85,8 +85,31 @@ def _votive(name, dedication):
     })
 
 
+def _ident(name):
+    """Same rule as the JS compiler: [\p{L}_][\p{L}\p{N}_]*."""
+    return (isinstance(name, str) and bool(name)
+            and (name[0] == "_" or unicodedata.category(name[0]).startswith("L"))
+            and all(c == "_" or unicodedata.category(c)[0] in "LN" for c in name[1:]))
+
+
+def _carry_record(value, label):
+    if not isinstance(value, dict):
+        raise TypeError(label + " must be a record")
+    if len(value) > 64:
+        raise ValueError(label + " may bind at most 64 names")
+    for name in value:
+        if not _ident(name):
+            raise TypeError(label + " has an invalid name " + str(name))
+    digest(value)  # carried values must be WCE-1 canonical (finite, plain data)
+    return dict(value)
+
+
+def _shape(record):
+    return sorted(record)
+
+
 class Execution:
-    def __init__(self, ir, max_operations):
+    def __init__(self, ir, max_operations, seeds=None):
         if not isinstance(ir, dict) or ir.get("schema") != "wyrdrune.ir/v0.1":
             raise TypeError("Invalid WTL IR")
         if (isinstance(max_operations, bool) or not isinstance(max_operations, int)
@@ -96,8 +119,16 @@ class Execution:
         self.max_operations = max_operations
         self.operations = 0
         self.environment = {}
+        self.scope = self.environment
         self.output = []
         self.receipts = []
+        # The carry register: seeds in, each scoped unit's carry out (see wyrdrune.cjs).
+        units = ir.get("units") if isinstance(ir.get("units"), list) else []
+        self.continuing = seeds is not None or any(
+            isinstance(u, dict) and u.get("scope") == "carried" for u in units)
+        self.register = {} if seeds is None else _carry_record(seeds, "seeds")
+        self.seeds_digest = digest(self.register) if self.continuing else None
+        self.crossings = []
 
     def tick(self):
         self.operations += 1
@@ -114,9 +145,9 @@ class Execution:
             return float(value) if isinstance(value, (int, float)) and not isinstance(value, bool) else value
         if kind == "read":
             name = node["name"]
-            if name not in self.environment:
+            if name not in self.scope:
                 raise NameError("Unknown variable " + str(name))
-            return self.environment[name]
+            return self.scope[name]
         if kind == "neg":
             value = self.expression(node["v"])
             if isinstance(value, bool) or not isinstance(value, (float, int)):
@@ -171,9 +202,21 @@ class Execution:
         units = self.ir.get("units")
         if not isinstance(units, list):
             raise TypeError("Invalid WTL IR")
-        for unit in units:
+        for unit_index, unit in enumerate(units):
             if unit.get("k") != "mobius" or len(unit.get("phases", [])) != 8:
                 raise TypeError("Invalid WTL IR")
+            if unit.get("scope") not in (None, "carried"):
+                raise TypeError("Invalid WTL IR")
+            carried = unit.get("scope") == "carried"
+            carried_in = self.register
+            out = {}
+            if carried:
+                carries_out = [x["name"] for x in unit["phases"][7]["body"] if x.get("k") == "carry"]
+                if self.register and carries_out and _shape(self.register) != sorted(carries_out):
+                    raise TypeError("carry must bind exactly the seeds")
+                self.scope = dict(self.register)
+            else:
+                self.scope = self.environment
             for index, phase in enumerate(unit["phases"]):
                 if phase.get("phase") != PHASES[index]:
                     raise TypeError("Noncanonical Eightfold phase order")
@@ -184,16 +227,18 @@ class Execution:
                     kind = stmt["k"]
                     if kind == "let":
                         name = stmt["name"]
-                        if name in self.environment:
+                        if name in self.scope:
                             raise SyntaxError("Duplicate binding " + name)
-                        self.environment[name] = self.expression(stmt["e"])
+                        self.scope[name] = self.expression(stmt["e"])
                     elif kind == "set":
                         name = stmt["name"]
-                        if name not in self.environment:
+                        if name not in self.scope:
                             raise NameError("Unknown binding " + name)
-                        self.environment[name] = self.expression(stmt["e"])
+                        self.scope[name] = self.expression(stmt["e"])
                     elif kind == "emit":
                         self.output.append(self.expression(stmt["e"]))
+                    elif kind == "carry" and carried and PHASES[index] == "transcend":
+                        out[stmt["name"]] = self.expression(stmt["e"])
                     else:
                         raise TypeError("Invalid statement")
                 self.receipts.append({
@@ -203,7 +248,17 @@ class Execution:
                     "sourceHash": self.ir["sourceHash"],
                     "principalId": None,
                 })
-        return {
+            if carried:
+                if out:
+                    self.register = _carry_record(out, "carry")
+                self.crossings.append({
+                    "unit": unit_index,
+                    "carried_in": digest(carried_in),
+                    "carried_out": digest(self.register),
+                    "names": sorted(self.register),
+                })
+        self.scope = self.environment
+        result = {
             "schema": "wyrdrune.execution/v0.1",
             "sourceHash": self.ir["sourceHash"],
             "output": self.output,
@@ -211,6 +266,15 @@ class Execution:
             "receipts": self.receipts,
             "withness": {"center": "withness", "completedCycles": len(units)},
         }
+        if self.continuing:
+            result["continuity"] = {
+                "schema": "wyrdrune.continuity/v0.1",
+                "seeds_digest": self.seeds_digest,
+                "carry": self.register,
+                "carry_digest": digest(self.register),
+                "crossings": self.crossings,
+            }
+        return result
 
 
 def main():
@@ -220,7 +284,7 @@ def main():
     envelope = json.loads(raw.decode("utf-8"))
     ir = envelope["ir"]
     limit = envelope.get("maxOperations", 10000)
-    result = Execution(ir, limit).execute()
+    result = Execution(ir, limit, envelope.get("seeds")).execute()
     sys.stdout.write(json.dumps(result, ensure_ascii=False, allow_nan=False, separators=(",", ":")))
     sys.stdout.write("\n")
 

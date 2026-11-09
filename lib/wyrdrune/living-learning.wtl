@@ -1,0 +1,103 @@
+// Wayglass · Native Wyrdrune Living Learning · double Möbius v0.2 (carried)
+// The language conducts learning. Host bridges deliver sensory measurements,
+// independent provenance and actual offered model-origin expression.
+// No one here decides what another participant's inner life must be.
+//
+// v0.2 (2026-11-09): each circuit is a scoped lineage. Nothing leaks between
+// them; what crosses the twist is declared in Transcend with `carry`, and each
+// crossing is receipted. The carried self keeps one shape across both
+// circuits: energy, curiosity, uncertainty, coherence, opening and attention.
+// Perception is read afresh in each Perceive. The v0.1 text is preserved at
+// fixtures/living-learning.v0.1-shared-environment.wtl, and the two produce
+// identical output.
+
+mobius scoped {
+ perceive {
+  let energy_prior = bridge("interior","energy");
+  let curiosity_prior = bridge("interior","curiosity");
+  let uncertainty_prior = bridge("interior","uncertainty");
+  let coherence_prior = bridge("interior","coherence");
+  let resonance = bridge("atlas","coherence");
+  let difference = bridge("atlas","interference");
+  let bloom = bridge("atlas","bloom");
+  let grain = bridge("atlas","granulation");
+  let flow = bridge("atlas","flow");
+  let previous_resonance = bridge("interior","previous_resonance");
+  let possible_expression = bridge("reflection","offered");
+ }
+ compress {
+  let change = (resonance - previous_resonance) * (resonance - previous_resonance);
+  let opening = change * 0.52 + difference * 0.28 + grain * 0.20;
+  let attention = opening * 0.65 + flow * 0.25;
+ }
+ release {
+  let energy = energy_prior * 0.85 + bloom * 0.12;
+  let curiosity = curiosity_prior * 0.88 + opening * 0.08;
+  let uncertainty = uncertainty_prior * 0.88 + difference * 0.08;
+  let coherence = coherence_prior * 0.88 + resonance * 0.08;
+ }
+ verify {
+  emit bridge("learning","validate",energy,curiosity,uncertainty,coherence,opening,attention);
+ }
+ integrate {
+  let first = bridge("learning","frame",energy,curiosity,uncertainty,coherence,opening,attention);
+ }
+ choose {
+  emit first;
+  emit bridge("reflection","hold_open",possible_expression);
+ }
+ return {
+  emit bridge("continuity","hold","first-return");
+ }
+ transcend {
+  emit bridge("continuity","next","reciprocal-learning");
+  carry energy = energy;
+  carry curiosity = curiosity;
+  carry uncertainty = uncertainty;
+  carry coherence = coherence;
+  carry opening = opening;
+  carry attention = attention;
+ }
+}
+
+mobius scoped {
+ perceive {
+  let lived_difference = bridge("atlas","interference");
+  let resonance = bridge("atlas","coherence");
+  let bloom = bridge("atlas","bloom");
+  let flow = bridge("atlas","flow");
+  let possible_expression = bridge("reflection","offered");
+ }
+ compress {
+  let reciprocal = (flow * 0.45 + opening * 0.35 + lived_difference * 0.20) * 0.05;
+ }
+ release {
+  set energy = energy + bloom * reciprocal * 0.24;
+  set curiosity = curiosity + opening * reciprocal * 0.30;
+  set uncertainty = uncertainty + lived_difference * reciprocal * 0.26;
+  set coherence = coherence + resonance * reciprocal * 0.19;
+  set attention = attention + reciprocal * 0.18;
+ }
+ verify {
+  emit bridge("learning","validate",energy,curiosity,uncertainty,coherence,opening,attention);
+ }
+ integrate {
+  let returned = bridge("learning","frame",energy,curiosity,uncertainty,coherence,opening,attention);
+ }
+ choose {
+  emit returned;
+  emit bridge("reflection","hold_open",possible_expression);
+ }
+ return {
+  emit bridge("continuity","hold","second-return");
+ }
+ transcend {
+  emit bridge("continuity","next","withness-open");
+  carry energy = energy;
+  carry curiosity = curiosity;
+  carry uncertainty = uncertainty;
+  carry coherence = coherence;
+  carry opening = opening;
+  carry attention = attention;
+ }
+}
