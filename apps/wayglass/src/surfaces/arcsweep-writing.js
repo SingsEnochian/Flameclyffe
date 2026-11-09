@@ -842,7 +842,8 @@ export async function mountArcSweepWritingSurface(root) {
     const activeWorldId = cp('world').value.trim();
     const history = messages.filter(message => message.world_id === activeWorldId && ['user', 'assistant'].includes(message.role) && !message.content.startsWith('[Route error]'))
       .slice(-12).map(message => ({ role: message.role, content: message.content }));
-    messages.push({ role: 'user', content: outgoing, channel: current.channel, world_id: activeWorldId, emergence_question_id: emergenceQuestionId, revision_of: correctionOf });
+    messages.push({ role: 'user', content: outgoing, channel: current.channel, world_id: activeWorldId, emergence_question_id: emergenceQuestionId, revision_of: correctionOf, delivery_status:'pending' });
+    persistChat();
     queueStoryScore();
     revisionOf=null;root.querySelector('#wg-revision-note').hidden=true;
     input.value = '';
@@ -872,15 +873,23 @@ export async function mountArcSweepWritingSurface(root) {
         sessionId: session,
         checkpoint,
       });
-      messages.push({
-        role: 'assistant',
-        world_id: activeWorldId,
-        content: result.output || '[quiet]',
-        thinking: result.thinking || '',
-        channel: current.channel,
-        route_label: selectedCharacter ? routeLabel + ' · ' + (result.model || result.route_id || 'model') : routeLabel,
-        emergence_question_id: emergenceQuestionId,
-      });
+       if(typeof result.output!=='string'||!result.output.trim()) throw new Error('The model route returned no answer text');
+       messages[messages.length-1].delivery_status='responded';
+       messages.push({
+         role: 'assistant',
+         world_id: activeWorldId,
+         content: result.output,
+         thinking: result.thinking || '',
+         channel: current.channel,
+         route_label: selectedCharacter ? routeLabel + ' · ' + (result.model || result.route_id || 'model') : routeLabel,
+         route_id: result.route_id,
+         provider: result.provider,
+         model: result.model,
+         character_id: selectedCharacter || null,
+         receipt: result.receipt || null,
+         emergence_question_id: emergenceQuestionId,
+       });
+       persistChat();
       succeeded = true;
       queueStoryScore();
       lastReceipt = result.receipt || null;
@@ -890,13 +899,15 @@ export async function mountArcSweepWritingSurface(root) {
         : 'Turn completed without a receipt payload.';
     } catch (error) {
       recordWayglassRouteObservation({status:'failed',routeId:selectedRoute});
-      messages.push({
-        role: 'assistant',
-        world_id: activeWorldId,
-        content: '[Route error] ' + error.message,
-        channel: 'OOC',
-        route_label: 'Route diagnostic',
-      });
+       messages[messages.length-1].delivery_status='failed';
+       messages.push({
+         role: 'assistant',
+         world_id: activeWorldId,
+         content: '[Route error] ' + error.message,
+         channel: 'OOC',
+         route_label: 'Route diagnostic',
+       });
+       persistChat();
       receipt.textContent = 'Route failed · ' + error.message;
     } finally {
       interaction.setTurnOwner('Rowan');
@@ -1037,6 +1048,18 @@ export async function mountArcSweepWritingSurface(root) {
 
   } catch { /* Character seats unavailable on older hosts; ordinary Writing Room still works. */ }
   await loadRoutes();
+  if(messages.length){
+    const last=[...messages].reverse().find(m=>m.role==='assistant'&&m.route_id);
+    const world=[...messages].reverse().find(m=>m.world_id)?.world_id;
+    if(world&&findWayglassWorldSeat(world))selectWorldSeat(world,{resetCheckpoint:false});
+    if(last?.route_id==='wayglass:ship'){
+      selectedRoute='wayglass:ship';selectedCharacter='wayglass';
+      characterSelect.value='wayglass';interaction.setChannel('OOC');void loadRoutes();
+    }
+    lastReceipt=last?.receipt||null;
+  }
+  refreshSavedChats();
+  if(chatVaultProblem)chatSaveStatus.textContent='Browser archive unavailable: '+chatVaultProblem;
   refreshState();
   refreshThread();
   refreshEmergenceInterview();
@@ -1044,7 +1067,7 @@ export async function mountArcSweepWritingSurface(root) {
   return Object.freeze({
     surface_id: 'arcsweep:writing-room',
     interaction,
-    session_id: session,
+    get session_id(){return session;},
     messages,
     lastReceipt: () => lastReceipt,
     destroy() {
