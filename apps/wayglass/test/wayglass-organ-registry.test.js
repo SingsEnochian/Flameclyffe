@@ -7,15 +7,18 @@ import {
   listWayglassOrgans,
   clearWayglassOrgansForTest,
 } from '../src/organ-registry.js';
-import { FIRST_WAYGLASS_ORGANS, presenceOrgan, memoryOrgan, sensoriumOrgan, livingObserverOrgan, voiceConsentOrgan } from '../src/organ-donors.js';
+import { FIRST_WAYGLASS_ORGANS, presenceOrgan, memoryOrgan, sensoriumOrgan, livingObserverOrgan, voiceConsentOrgan, doubleMobiusOrgan, quadEightfoldOrgan } from '../src/organ-donors.js';
 
 test.beforeEach(() => clearWayglassOrgansForTest());
 
 test('registered donor organs share one registry contract and preserve heterogeneous lineage', () => {
   FIRST_WAYGLASS_ORGANS.forEach(registerWayglassOrgan);
   const mounted = listWayglassOrgans();
-  assert.equal(mounted.length, 6);
+  assert.equal(mounted.length, 7);
   assert.equal(mounted[5].organ_id, 'wayglass.organ.gateway-double-mobius');
+  assert.equal(mounted.at(-1).organ_id, 'wayglass.organ.quad-eightfold-gestalt');
+  assert.ok(!quadEightfoldOrgan.authority_ceiling.includes('canon-commit'));
+  assert.equal(typeof quadEightfoldOrgan.adapter.readLatestQuadGestalt, 'function');
   assert.equal(mounted[3].organ_id, 'wayglass.organ.living-observer');
   assert.ok(livingObserverOrgan.lineage.includes('starwell:deep-observer'));
   assert.ok(!livingObserverOrgan.authority_ceiling.includes('canon-commit'));
