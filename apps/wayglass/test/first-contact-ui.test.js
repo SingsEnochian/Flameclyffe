@@ -124,8 +124,8 @@ test('incomplete route attribution is retained for inspection without becoming a
   assert.match(f.q('wc-feedback').textContent,/attribution|route|identity/i);
  }finally{f.restore();}
 });
-test('First Contact requests an actual route contribution and preserves authorship of optional voice notes',async()=>{
- const f=await setup();try{
+test('First Contact requests an actual ship route contribution and preserves authorship of optional voice notes',async()=>{
+ const f=await setup({ship:true});try{
   f.q('wc-voice-notes').value='A warm measured cadence.';
   await f.q('wc-first-contact').dispatch('click');await flush();
   assert.equal(f.calls.filter(call=>call.url==='/api/v1/wayglass/respond').length,0);
