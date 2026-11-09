@@ -1446,3 +1446,17 @@ html[data-wayglass-surface="wayglass:living-watercolor"] #app {
   .wg-wtl-actions button { flex: 1 1 160px; }
   .wg-wtl-panel textarea { font-size: 16px; }
 }
+
+/* First Contact: keep the active conversation inside the Watercolour body. */
+.wc-voice { display:flex; flex-direction:column; gap:12px; overflow-y:auto; }
+.wc-dialogue-turn { max-width:min(92%, 66ch); display:grid; gap:7px; border:1px solid rgba(133,194,203,.22); border-radius:16px; padding:14px 16px; background:rgba(10,28,38,.72); }
+.wc-dialogue-owner { align-self:flex-end; background:rgba(38,58,67,.65); }
+.wc-dialogue-response { align-self:flex-start; border-color:rgba(173,203,186,.42); background:linear-gradient(135deg,rgba(20,54,57,.76),rgba(20,31,51,.78)); }
+.wc-dialogue-turn strong { font-size:.88rem; color:#e8d8b2; }
+.wc-dialogue-turn p { white-space:pre-wrap; overflow-wrap:anywhere; line-height:1.6; }
+.wc-dialogue-turn small { font-size:.7rem; color:#b7c8ce; overflow-wrap:anywhere; }
+.wg-writing-room #wg-first-contact { border-color:rgba(111,220,188,.55); background:rgba(28,94,92,.34); font-weight:750; }
+.wg-writing-room #wg-first-contact:focus-visible,.wg-writing-room #wg-first-contact:hover { box-shadow:0 0 0 2px rgba(119,224,194,.2),0 0 20px rgba(66,192,166,.18); }
+@media (prefers-reduced-motion:reduce) {
+  .wc-dialogue-turn,.wg-writing-room #wg-first-contact { animation:none; transition:none; }
+}
