@@ -1,3 +1,4 @@
+import {shipSoundscape} from '../ship-soundscape.js';
 import './acoustic-room.css';
 import {transition,bearing} from '../acoustic-marker-model.js';
 import {createAcousticAudioEngine} from '../acoustic-audio-engine.js';
@@ -10,6 +11,17 @@ const STORAGE_KEY='wayglass.acoustic-world.return/v0.1';
 export function mountWayglassAcousticRoom(root){
  let world=createWorld(),mirror=null,disposed=false,eventSequence=0,interactions=0;
  let featherStopped=wayglassSomaticSound.snapshot().feather_stopped;
+ const offShipSound=shipSoundscape.subscribe(state=>{
+   if(disposed)return;
+   const button=root.querySelector('[data-wyrdrune-audio]');
+   if(!button)return;
+   button.setAttribute('aria-pressed',String(state.playing));
+   button.textContent=state.playing?'Stop Wyrdrune soundtrack':'Play Wyrdrune soundtrack';
+   button.disabled=!state.score_ready&&!state.playing;
+   root.querySelector('[data-wyrdrune-status]').textContent=state.score_ready
+     ? state.playing?'Wyrdrune playing across rooms.':'Wyrdrune score ready from the current ship session.'
+     :'Compose a Wyrdrune score in Watercolour or Writing Room first.';
+ });
  const audio=createAcousticAudioEngine();
  root.innerHTML=`
  <section class="wg-surface wg-acoustic-room" data-surface="wayglass-acoustic-room">
@@ -48,7 +60,7 @@ export function mountWayglassAcousticRoom(root){
  <button type="button" class="glass-chip" data-intent="request-traverse">Key · Request crossing</button>
  <button type="button" class="glass-chip" data-intent="decline">Decline crossing</button></div>
  <div class="acoustic-options">
- <label><input type="checkbox" data-audio> Enable sound</label>
+ <label><input type="checkbox" data-audio> Enable sound</label>\n <button type="button" class="glass-chip" data-wyrdrune-audio aria-pressed="false">Play Wyrdrune soundtrack</button>\n <p class="acoustic-note" data-wyrdrune-status role="status">A Wyrdrune score can travel here from Watercolour or Writing Room.</p>
  <label><input type="checkbox" data-mono> Mono-safe</label>
  <label><input type="checkbox" data-ambience> Room ambience</label>
  <label><input type="checkbox" data-motion> Reduce motion</label>
@@ -201,6 +213,6 @@ export function mountWayglassAcousticRoom(root){
  globalThis.addEventListener?.(WAYGLASS_FEATHER_EVENT,onSharedFeather);
  root.addEventListener('click',onClick);root.addEventListener('change',onChange);root.addEventListener('input',onInput);root.addEventListener('keydown',onKey);
  root.tabIndex=0;render();
- return ()=>{disposed=true;observer?.disconnect();root.removeEventListener('click',onClick);root.removeEventListener('change',onChange);root.removeEventListener('input',onInput);root.removeEventListener('keydown',onKey);globalThis.removeEventListener?.('resize',onResize);globalThis.removeEventListener?.(WAYGLASS_FEATHER_EVENT,onSharedFeather);audio.dispose();};
+ return ()=>{disposed=true;observer?.disconnect();root.removeEventListener('click',onClick);root.removeEventListener('change',onChange);root.removeEventListener('input',onInput);root.removeEventListener('keydown',onKey);globalThis.removeEventListener?.('resize',onResize);globalThis.removeEventListener?.(WAYGLASS_FEATHER_EVENT,onSharedFeather);audio.dispose();offShipSound();};
 }
 
