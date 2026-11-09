@@ -1,5 +1,5 @@
 import './styles.css';
-import {wayglassTimer,wayglassPerformanceSnapshot} from './performance-diagnostics.js';
+import {wayglassTimer,wayglassPerformanceSnapshot,observeWayglassTiming} from './performance-diagnostics.js';
 import './authorization.css';
 import { openWayglassAuthorization } from './authorization.js';
 import { installWayglassField } from './glass-field.js';
@@ -178,4 +178,6 @@ const roomQuery=new URLSearchParams(globalThis.location?.search||'').get('room')
 const entry=resolveWayglassEntry({available:listWayglassSurfaces(),room:roomQuery});
 await wayglass.mount(entry.surface_id);
 bootFinished();
+// Navigation-origin to first Wayglass room readiness includes module loading.
+if(Number.isFinite(globalThis.performance?.now?.()))observeWayglassTiming('boot:navigation-to-ready',globalThis.performance.now());
 installVoyageInbox();
