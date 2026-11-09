@@ -26,7 +26,7 @@ test('spelling uses native local suggestions, honors code opt-out and owner togg
   const root={querySelectorAll:()=>[ordinary,wtl]};
   assert.equal(applyWayglassSpelling(root),1);
   assert.equal(ordinary.spellcheck,true);
-  assert.equal(ordinary.attrs.get('lang'),'en');
+  assert.equal(ordinary.attrs.get('lang'),'en-GB');
   assert.equal(wtl.spellcheck,false,'Enochian and WTL code never get rewritten by English suggestions');
   const controller=createWayglassSpellingController({document:root});
   assert.equal(controller.enabled,true);
