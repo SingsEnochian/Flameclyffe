@@ -273,7 +273,14 @@ export function mountWayglassAcousticRoom(root,{loadCompositionControls=()=>impo
  globalThis.addEventListener?.(WAYGLASS_FEATHER_EVENT,onSharedFeather);
  root.addEventListener('click',onClick);root.addEventListener('change',onChange);root.addEventListener('input',onInput);root.addEventListener('keydown',onKey);
  root.addEventListener('toggle',onCompositionToggle,true);
- try{const saved=globalThis.localStorage?.getItem(ACOUSTIC_COMPOSITION_STORAGE_KEY);if(saved){compositionRestored=true;score.restore(JSON.parse(saved));$('[data-acoustic-story]').value=score.getStoryText();}}
+ try{const saved=globalThis.localStorage?.getItem(ACOUSTIC_COMPOSITION_STORAGE_KEY);if(saved){
+   compositionRestored=true;
+   if(shipSoundscape.snapshot().playing){
+     // Do not silence music from another room during cold return.
+     const prior=JSON.parse(saved);
+     if(typeof prior?.story_text==='string')$('[data-acoustic-story]').value=prior.story_text;
+   }else{score.restore(JSON.parse(saved));$('[data-acoustic-story]').value=score.getStoryText();}
+ }}
  catch{compositionRestored=true;audio.stop();$('[data-receipt]').textContent='Acoustic score return unavailable; sound remains off.';}
  if(featherStopped)audio.composition.feather();
  root.tabIndex=0;render();
