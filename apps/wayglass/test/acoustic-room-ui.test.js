@@ -124,7 +124,10 @@ test('Feather clears active audio and mounted cleanup releases handlers and cont
   assert.equal(f.$('[data-audio]').checked,false);assert.equal(f.$('[data-ambience]').checked,false);
   assert.ok(f.counts.stops>=3);assert.match(f.$('[data-audio-state]').textContent,/Sound stopped/);
   f.dispose();assert.equal(f.root.listeners.size,0);assert.equal(f.globalListeners.size,0);
-  assert.equal(f.counts.resizeDisconnected,1);assert.equal(f.counts.closed,1);
+  assert.equal(f.counts.resizeDisconnected,1);
+  // The ship owns the one AudioContext across room unmounts. Feather stops
+  // voices; room teardown must not close a shared device used by other rooms.
+  assert.equal(f.counts.closed,0,'Room navigation must not dispose the ship-owned AudioContext');
  }finally{f.restore();}
 });
 test('malformed or corrupted saved state leaves the active room intact',()=>{
