@@ -22,9 +22,10 @@ const cleanRef = (v: unknown) => {
 };
 const sha = async(s:string) => Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s))),
   v => v.toString(16).padStart(2,"0")).join("");
-function resourceUrl(req:Request){
-  const u=new URL(req.url);
-  return u.origin + "/functions/v1/wayglass-chat-mcp";
+function resourceUrl(_req:Request){
+  // Edge proxy may present an internal http origin. OAuth resource IDs must be
+  // the exact public HTTPS URL and match the MCP connector URL.
+  return PROJECT + "/functions/v1/wayglass-chat-mcp";
 }
 function unauthorised(req:Request){
   return json({error:"Owner OAuth sign-in required"},401,{
