@@ -413,3 +413,59 @@ test('unattributed or failed Ship Voice response does not become a stored model 
   assert.equal(history.records[0].role,'rarity');
   assert.equal(history.records.some(x=>x.role==='participant'),false);
 });
+
+test('Codex seat cannot discover Rarity private Wayglass chat tools or read their threads',async()=>{
+  const {file}=tempStore(),bridge=createWayglassMcpBridge({storePath:file,flameIds:[]});
+  const auth={type:'crew-bearer',participant_id:'codex',profile_id:'wayglass-codex-local'};
+  const names=(await bridge.handleRpc({method:'tools/list'},auth)).tools.map(x=>x.name);
+  assert.equal(names.includes('ask_wayglass'),false);
+  assert.equal(names.includes('list_wayglass_chats'),false);
+  assert.equal(names.includes('receive'),false);
+  await assert.rejects(()=>bridge.callTool('list_wayglass_chats',{},auth),/unavailable for this crew seat/);
+  await assert.rejects(()=>bridge.callTool('receive',{target:'wayglass'},auth),/unavailable for this crew seat/);
+});
+
+test('a corrupt MCP archive refuses writes without erasing saved history',async()=>{
+  const {file}=tempStore();const broken='{bad archive';
+  fs.writeFileSync(file,broken);
+  const env={WAYGLASS_MCP_SHIP_CHAT_ENABLED:'1',ARCSWEEP_RUNTIME_TOKEN:'secret-fixture'};
+  let invoked=0;
+  const bridge=createWayglassMcpBridge({storePath:file,env,flameIds:[],
+    fetchImpl:async()=>{invoked++;throw new Error('should never transmit');}});
+  await assert.rejects(()=>bridge.callTool('ask_wayglass',{text:'Hello'},
+    {type:'oauth',participant_id:'rarity'}),/archive is damaged/);
+  assert.equal(invoked,0);
+  assert.equal(fs.readFileSync(file,'utf8'),broken);
+});
+
+test('parallel turns on the same Ship Voice thread cannot skip previous saved reply',async()=>{
+  const {file}=tempStore(),env={
+    WAYGLASS_MCP_SHIP_CHAT_ENABLED:'1',ARCSWEEP_RUNTIME_TOKEN:'test-runtime',
+  };
+  const requests=[];
+  const bridge=createWayglassMcpBridge({storePath:file,env,flameIds:[],
+    fetchImpl:async(_url,init)=>{
+      const body=JSON.parse(init.body);requests.push(body);
+      await new Promise(resolve=>setTimeout(resolve,10));
+      return new Response(JSON.stringify({
+        schema:'wayglass.route-turn/v0.1',route_id:'wayglass:ship',participant_id:'wayglass',
+        provider:'ollama',model:'crow-fixture',output:'Echo: '+body.input,
+        receipt:{character_id:'wayglass',voice_seat_kind:'system-voice-over-external-route',
+          observation_id:'obs:'+requests.length},
+      }),{status:200});
+    }});
+  const auth={type:'oauth',participant_id:'rarity'};
+  const [a,b]=await Promise.all([
+    bridge.callTool('ask_wayglass',{text:'First question'},auth),
+    bridge.callTool('ask_wayglass',{text:'Second question'},auth),
+  ]);
+  assert.equal(a.persistence.saved,true);
+  assert.equal(b.persistence.saved,true);
+  assert.equal(requests[0].history.length,0);
+  assert.equal(requests[1].history.length,2);
+  assert.equal(requests[1].history[1].content,'Echo: First question');
+  const records=(await bridge.receive({target:'wayglass'})).records;
+  assert.deepEqual(records.map(x=>x.text),[
+    'First question','Echo: First question','Second question','Echo: Second question',
+  ]);
+});
