@@ -1,3 +1,4 @@
+import {wayglassTimer} from './performance-diagnostics.js';
 import { authorizationSession } from './authorization-session.js';
 import { publishWatercolorActivity } from './watercolor-bridge.js';
 
