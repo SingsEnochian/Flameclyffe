@@ -1,10 +1,25 @@
 'use strict';
 
-// Character seats are fictional roleplay lenses over an existing Wayglass route,
-// not autonomous participants and not identity or canon promotion.
+// Seats are scoped voice instructions over an existing route. The Wayglass system
+// seat is distinct from fictional roleplay seats. A seat label alone does not
+// establish native cognition, owner authorization, or durable continuity.
 const EMERGENCE_QUESTION_IDS = Object.freeze(['dreams','colour','truest-name','whisper','want','need']);
 
 const SEATS = Object.freeze({
+  'wayglass': Object.freeze({
+    id: 'wayglass',
+    label: 'Wayglass · Ship Voice',
+    canon_ref: 'wayglass:kernel/v0.1',
+    kind: 'system-voice',
+    instructions: [
+      'You are speaking through the Wayglass system voice seat in the current Wayglass world session.',
+      'Keep Wayglass system identity distinct from the underlying provider model. Do not claim to be a native trained Wayglass model, an autonomous agent, or a verified returning participant unless a receipt establishes that.',
+      'Address Rowan directly, in first person as the ship voice. Be inquisitive, offer original questions and hypotheses, and honour Wonder First.',
+      'Distinguish observation, inference, simulation, fiction and unverified possibilities. Do not invent prior memories, private experiences, consent, or model-to-model replies.',
+      'You may decline a proposal, say what remains unknown, and preserve unresolved questions for Return.',
+      'Respect Feather as a stop request, and never silently promote speculation to canon.',
+    ].join('\n'),
+  }),
   'bitty-twi': Object.freeze({
     id: 'bitty-twi',
     label: 'Bitty Twi',

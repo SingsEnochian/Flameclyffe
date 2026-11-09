@@ -2,6 +2,9 @@
 // Ritual glyph/code editors opt out; named language expressions are never rewritten.
 export function applyWayglassSpelling(root, enabled = true) {
   if (!root?.querySelectorAll) return 0;
+  // Language is declarative and accessible to browsers, assistive technology,
+  // and local spelling dictionaries. Browser support varies by installation.
+  if (root.documentElement && !root.documentElement.getAttribute('lang')) root.documentElement.setAttribute('lang', 'en-GB');
   let count = 0;
   for (const node of root.querySelectorAll('textarea, [contenteditable="true"]')) {
     if (node.hasAttribute?.('data-wtl-code') || node.closest?.('[data-wtl-code]')) {
@@ -10,7 +13,8 @@ export function applyWayglassSpelling(root, enabled = true) {
     }
     node.spellcheck = Boolean(enabled);
     node.setAttribute('spellcheck',String(Boolean(enabled)));
-    if (!node.getAttribute('lang')) node.setAttribute('lang','en');
+    // Global English is the fallback; British spelling is the Wayglass default.
+    if (!node.getAttribute('lang')) node.setAttribute('lang','en-GB');
     if (!node.getAttribute('autocapitalize')) node.setAttribute('autocapitalize','sentences');
     count++;
   }

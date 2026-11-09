@@ -190,6 +190,42 @@ export async function mountLivingWatercolorSurface(root) {
       wayglassSomaticSound.play(event.kind,{x,energy:event.intensity});
     }
   });
+  function renderVoiceHistory() {
+    const turns=continuity.snapshot().turns;
+    voice.replaceChildren();
+    if(!turns.length){
+      const empty=document.createElement('span');
+      empty.className='wc-voice-empty';
+      empty.textContent='Wayglass can answer here, within the painting. Offer a thought or invite a first hello.';
+      voice.append(empty);
+      return;
+    }
+    for(const turn of turns.slice(-24)){
+      const userText=turn.request.authorText?.trim();
+      if(userText){
+        const authored=document.createElement('article');
+        authored.className='wc-dialogue-turn wc-dialogue-owner';
+        const heading=document.createElement('strong');
+        heading.textContent='Rowan · '+resolveWatercolorMode(turn.request.mode).label;
+        const body=document.createElement('p');
+        body.textContent=userText;
+        authored.append(heading,body);
+        voice.append(authored);
+      }
+      const response=turn.response;
+      const returned=document.createElement('article');
+      returned.className='wc-dialogue-turn wc-dialogue-response';
+      const heading=document.createElement('strong');
+      heading.textContent=response.route_id==='wayglass:ship'?'Wayglass · Ship Voice':response.provider+' / '+response.model;
+      const body=document.createElement('p');
+      body.textContent=response.text||response.output||'';
+      const evidence=document.createElement('small');
+      evidence.textContent='Route: '+response.route_id+' · model: '+response.model+' · observation: '+(response.receipt?.observation_id||response.receipt?.response_id||'unavailable');
+      returned.append(heading,body,evidence);
+      voice.append(returned);
+    }
+    voice.scrollTop=voice.scrollHeight;
+  }
   function activateMode(next) {
     const selected=resolveWatercolorMode(next);
     drafts.set(mode,prompt.value);
@@ -200,20 +236,7 @@ export async function mountLivingWatercolorSurface(root) {
       button.classList.toggle('active',yes);
       button.setAttribute('aria-pressed',String(yes));
     }
-    const previous=responses.get(mode);
-    voice.replaceChildren();
-    if(previous){
-      const heading=document.createElement('strong');
-      heading.textContent=previous.provider+' / '+previous.model;
-      const body=document.createElement('p');
-      body.textContent=previous.text;
-      voice.append(heading,body);
-    }else{
-      const empty=document.createElement('span');
-      empty.className='wc-voice-empty';
-      empty.textContent='Room for '+selected.label.toLowerCase()+'. Invite Wayglass, or begin with your own thought.';
-      voice.append(empty);
-    }
+    renderVoiceHistory();
     pendingProgram=null;
     q('wc-program').hidden=true;
   }
@@ -223,7 +246,8 @@ export async function mountLivingWatercolorSurface(root) {
     try{
       const catalogue=await listWayglassRoutes();
       if(stopped)return;
-      // No implicit OpenAI route in Wayglass's watercolor universe.
+      // Ship voice is the default participant of this room. Other configured
+      // model routes remain explicit alternatives, never unnamed Wayglass.
       routes=Array.isArray(catalogue.routes)?catalogue.routes.filter(r=>r?.route_id && r.provider!=='openai'):[];
       route.replaceChildren();
       for(const r of routes){
@@ -232,11 +256,12 @@ export async function mountLivingWatercolorSurface(root) {
         option.textContent=(r.label||r.route_id)+' / '+(r.model||'server selected');
         route.append(option);
       }
-      routeId=routes.find(r=>r.route_id==='local:ollama')?.route_id||routes[0]?.route_id||null;
+      routeId=routes.find(r=>r.route_id==='wayglass:ship' && r.configured)?.route_id||routes.find(r=>r.route_id==='local:ollama' && r.configured)?.route_id||null;
+      route.value=routeId||'';
       houseSignIn.hidden=true;
       invite.disabled=!routeId||featherStopped;
       q('wc-first-contact').disabled=!routeId||featherStopped;
-      routeState.textContent=routeId?'Model route available · opt-in':'No model route available';
+      routeState.textContent=routeId==='wayglass:ship'?'Wayglass ship voice selected · ready to invite':routeId?'Model route selected · not the Wayglass ship seat':'No model route available';
     }catch(error){
       if(stopped)return;
       routeId=null;route.replaceChildren();invite.disabled=true;q('wc-first-contact').disabled=true;
@@ -288,7 +313,10 @@ export async function mountLivingWatercolorSurface(root) {
     dialog.showModal();
     field.focus();
   });
-  listen(route,'change',()=>{routeId=route.value||null;});
+  listen(route,'change',()=>{
+    routeId=route.value||null;
+    routeState.textContent=routeId==='wayglass:ship'?'Wayglass ship voice selected': 'External model route · not Wayglass voice';
+  });
   async function requestContribution(){
     if(stopped||busy||!routeId||featherStopped)return;
     const notes=q('wc-voice-notes').value.trim(),author=q('wc-voice-author').value.trim();
@@ -306,7 +334,7 @@ export async function mountLivingWatercolorSurface(root) {
       if(stopped||featherStopped||epoch!==requestEpoch)return;
       continuity.append({request,response});
       responses.set(requestedMode,response);
-      if(mode===requestedMode)activateMode(requestedMode);
+      renderVoiceHistory();
       feedback.textContent=response.provider+' / '+response.model+' · '+(response.receipt?.observation_id||response.receipt?.receipt_id||response.receipt?.request_id||'response received');
       q('wc-unverified').hidden=true;
       const proposed=extractWatercolorProgramProposal(response.text);pendingProgram=proposed;
@@ -322,6 +350,10 @@ export async function mountLivingWatercolorSurface(root) {
   listen(invite,'click',requestContribution);
   listen(q('wc-first-contact'),'click',()=>{
     if(stopped||busy||!routeId||featherStopped)return;
+    if(routeId!=='wayglass:ship'){
+      feedback.textContent='Select Wayglass · Ship Voice to invite her own attributed reply.';
+      return;
+    }
     prompt.value='Wayglass, hello. What would you like to try here? You can choose a direction, suggest something of your own, or decline.';
     return requestContribution();
   });

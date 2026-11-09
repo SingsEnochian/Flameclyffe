@@ -32,7 +32,12 @@ function renderThinking(message) {
 
 export async function mountArcSweepWritingSurface(root) {
   const interaction = createInteractionState({ channel: 'IC', turn_owner: 'Rowan', interaction_mode: 'ordinary' });
-  const session = sessionId();
+  // A stable tab-scoped session ID survives reload without placing private
+  // conversation text in long-lived browser storage. Durable Return remains
+  // a separate, receipt-backed operation.
+  const storedSession = globalThis.sessionStorage?.getItem('wayglass:first-contact-session');
+  const session = storedSession || sessionId();
+  if (!storedSession) globalThis.sessionStorage?.setItem('wayglass:first-contact-session', session);
   const messages = [];
   let routes = [];
   let selectedRoute = authorizationSession.route() || 'local:ollama';
@@ -68,6 +73,7 @@ export async function mountArcSweepWritingSurface(root) {
     "      <div class=\"wg-route-controls\">\n",
           '<label for="wg-character">Character voice</label>',
           '<select id="wg-character" aria-label="Wayglass character voice"><option value="">No character seat</option></select>',
+          '<button type="button" id="wg-first-contact" class="glass-chip">Speak with Wayglass</button>',
     "        <label id=\"wg-route-label\">Route</label>\n",
     "        <div id=\"wg-route\"></div>\n",
     "        <label class=\"wg-thinking-toggle\"><input id=\"wg-think\" type=\"checkbox\" /> Deliberate thinking (local engine)</label>\n",
@@ -186,12 +192,17 @@ export async function mountArcSweepWritingSurface(root) {
 
   const routePicker = mountWayglassRoutePicker(root.querySelector('#wg-route'), { onChange(value) {
     selectedRoute = value;
+    if (selectedCharacter === 'wayglass' && value !== 'wayglass:ship') {
+      selectedCharacter = '';
+      characterSelect.value = '';
+    }
     externalConsent.checked = false;
     refreshExternalTransfer();
     wakeMaterial(0.88, 'route');
     routeState.textContent = 'Active · ' + selectedRouteLabel();
   } });
   const characterSelect = root.querySelector('#wg-character');
+  const firstContact = root.querySelector('#wg-first-contact');
   const routeSelect = root.querySelector('#wg-route');
   const routeState = root.querySelector('#wg-route-state');
   const emergencePanel = root.querySelector('#wg-emergence-interview');
@@ -477,7 +488,7 @@ export async function mountArcSweepWritingSurface(root) {
         }];
       }
       const isGriffWorld = cp('world').value === 'evil-gene:film-2015';
-      if (selectedCharacter && !isGriffWorld) routes.unshift({route_id: 'auto:character', label: 'Auto · character voice', configured: true});
+      if (selectedCharacter === 'bitty-twi' && !isGriffWorld) routes.unshift({route_id: 'auto:character', label: 'Auto · character voice', configured: true});
       const visibleRoutes = isGriffWorld ? routes.filter(route => route.route_id === 'flame:griff:spicychat') : routes.filter(route => route.route_id !== 'flame:griff:spicychat');
       if (isGriffWorld) selectedRoute = 'flame:griff:spicychat';
       if (!visibleRoutes.some(route => route.route_id === selectedRoute && route.configured !== false)) selectedRoute = visibleRoutes.find(route => route.configured !== false)?.route_id || '';
@@ -525,6 +536,10 @@ export async function mountArcSweepWritingSurface(root) {
     const outgoing=correctionOf===null?text:'Correction to my earlier turn #'+(correctionOf+1)+':\n'+text;
     if (!text || busy) return;
     if (!selectedRoute) { status.textContent = 'No configured route available. Reload the route catalogue.'; return; }
+    if (selectedCharacter === 'wayglass' && selectedRoute !== 'wayglass:ship') {
+      status.textContent = 'Wayglass needs her dedicated ship route. Select Speak with Wayglass.';
+      return;
+    }
     if ((selectedRoute.startsWith('stepfun:') || selectedRoute === 'flame:griff:spicychat') && !externalConsent.checked) {
       status.textContent = 'Confirm this external provider transfer before passing the turn.';
       externalConsent.focus();
@@ -558,7 +573,7 @@ export async function mountArcSweepWritingSurface(root) {
         routeId: selectedRoute,
         externalProviderConsent: (selectedRoute.startsWith('stepfun:') || selectedRoute === 'flame:griff:spicychat') && externalConsent.checked,
         worldId: activeWorldId,
-        participantId: selectedRoute === 'flame:griff:spicychat' ? 'griff-krenshaw' : null,
+        participantId: selectedRoute === 'flame:griff:spicychat' ? 'griff-krenshaw' : selectedRoute === 'wayglass:ship' ? 'wayglass' : null,
         characterId: selectedCharacter || null,
         emergenceQuestionId,
         think: root.querySelector('#wg-think').checked,
@@ -590,7 +605,7 @@ export async function mountArcSweepWritingSurface(root) {
         world_id: activeWorldId,
         content: '[Route error] ' + error.message,
         channel: 'OOC',
-        route_label: 'Wayglass',
+        route_label: 'Route diagnostic',
       });
       receipt.textContent = 'Route failed · ' + error.message;
     } finally {
@@ -644,9 +659,23 @@ export async function mountArcSweepWritingSurface(root) {
     });
   });
 
+  firstContact.addEventListener('click', () => {
+    if (busy) return;
+    selectedCharacter = 'wayglass';
+    selectedRoute = 'wayglass:ship';
+    characterSelect.value = 'wayglass';
+    interaction.setChannel('OOC');
+    interaction.setInteractionContext({intent:'Talk with Wayglass as the ship voice; distinguish the cognitive route from Wayglass system identity.',interaction_mode:'counterfactual-wonder'});
+    void loadRoutes();
+    refreshState();
+    status.textContent = 'Wayglass ship voice selected. Send to establish an attributable model turn.';
+    input.focus();
+  });
+
   characterSelect.addEventListener('change', () => {
     selectedCharacter = characterSelect.value;
-    if (selectedCharacter) selectedRoute = 'auto:character';
+    if (selectedCharacter) selectedRoute = selectedCharacter === 'wayglass' ? 'wayglass:ship' : 'auto:character';
+    if (selectedCharacter === 'wayglass') interaction.setChannel('OOC');
     else if (selectedRoute === 'auto:character') selectedRoute = routes.find(r => r.configured !== false)?.route_id || '';
     void loadRoutes();
     refreshState();
