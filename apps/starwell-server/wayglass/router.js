@@ -825,7 +825,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
         route_id: route.route_id,
         provider: route.provider,
         model: route.model(),
-        participant_id: route.participant_id || cleanText(payload.participant_id, 180) || null,
+        participant_id: route.participant_id || (payload.character_id === 'wayglass' ? 'wayglass' : cleanText(payload.participant_id, 180) || null),
         continuity_id: route.continuity_id || null,
         candidate_id: route.candidate_id || null,
         output: result.output,
@@ -847,6 +847,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
           session_id: cleanText(payload.session_id, 160) || null,
           surface_id: cleanText(payload.surface_id, 160) || null,
           character_id: resolveCharacterSeat(payload.character_id)?.id || null,
+          voice_seat_kind: payload.character_id === 'wayglass' ? 'system-voice-over-external-route' : (payload.character_id ? 'fictional-roleplay-lens' : null),
           character_canon_ref: resolveCharacterSeat(payload.character_id)?.canon_ref || null,
           emergence_question_id: payload.character_id === 'bitty-twi' && EMERGENCE_QUESTION_IDS.includes(payload.emergence_question_id)
             ? payload.emergence_question_id : null,
