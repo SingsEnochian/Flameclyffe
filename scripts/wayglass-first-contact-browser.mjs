@@ -119,6 +119,11 @@ async function checkDockNavigation(page,{profile,destination,surfaceSelector}){
  await page.screenshot({path:resolve(output,'dock-map-'+profile+'.png'),fullPage:true});
  await map.locator('[data-surface-id="'+destination+'"]').click();
  await page.locator(surfaceSelector).waitFor();
+ // A completed room crossing now dismisses the atlas without losing drafts.
+ assert.equal(await map.isVisible(),false,'Room crossing must dismiss the ship atlas');
+ assert.equal(await inbox.isVisible(),true,'Room crossing must restore the inbox');
+ await ship.click();
+ assert.equal(await map.isVisible(),true,'Ship switch must still reopen the atlas');
  await ship.click();
  assert.equal(await map.isVisible(),false);
  assert.equal(await inbox.isVisible(),true,'Closing the map must restore the inbox');
