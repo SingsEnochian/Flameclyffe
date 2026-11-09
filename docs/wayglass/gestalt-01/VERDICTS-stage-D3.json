@@ -1,0 +1,26 @@
+{
+  "schema": "wayglass.gestalt-01.verdicts/v1",
+  "preregistration_sha256": "8f5183d6317f5a3e4581ad27c63bb90b1cf000c8ca15621d19a4cbf393a0c3a1",
+  "results": [
+    {
+      "set": "held_out",
+      "commit": "174c33a874379bf97568fce34dfb6f6b83d22014",
+      "trials": 2400,
+      "dirty_tree": false
+    },
+    {
+      "set": "shifted",
+      "commit": "174c33a874379bf97568fce34dfb6f6b83d22014",
+      "trials": 1200,
+      "dirty_tree": false
+    }
+  ],
+  "hypotheses": {
+    "H5": false,
+    "H6": true,
+    "H7": true,
+    "H7b": true,
+    "H8": true,
+    "H9": "underpowered, not tested"
+  }
+}

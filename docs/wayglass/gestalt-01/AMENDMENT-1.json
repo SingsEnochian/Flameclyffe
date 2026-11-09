@@ -1,0 +1,12 @@
+{
+  "schema": "wayglass.gestalt-01.amendment/v1",
+  "amends": "PREREGISTRATION.json (sha256 prefix 36ace7a8111d4760, commit b912aaf)",
+  "registered_by": "Faer Uial, 2026-11-06",
+  "timing": "after one apparatus smoke trial (held_out seed 1001), before main data collection",
+  "observation_that_prompted_it": "In the smoke trial every protocol, including solo, ended identically (no success; tolerant sets of 750 and 305 candidates unchanged over 4 rounds). Diagnosis: a per-position value mask over hundreds of candidates admits every value at every position, so the packets carried no usable information. This is an encoding defect common to all protocols, not a difference between them.",
+  "change": "The 'candidate mask' exchanged at the twist, and carried, is the pairwise mask: for each of the 15 position pairs, the 25-bit set of value combinations present among the sender's candidates. Payload = 15 x 25 bits = 375 bits = 47 raw bytes, inside the unchanged 48-byte budget.",
+  "measurement_clarified": "max_packet_payload_bytes counts raw payload bits rounded up to bytes, not JSON transport encoding.",
+  "applies_to": "all protocols identically",
+  "unchanged": "hypotheses, protocols' definitions, rounds, budgets, task sets, seeds, analysis, invalidation rule, interpretation limits",
+  "smoke_trial_status": "not counted in results; seed 1001 remains in the held_out set and is rerun under the amended encoding like every other task"
+}
