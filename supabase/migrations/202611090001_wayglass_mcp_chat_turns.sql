@@ -28,9 +28,19 @@ alter table public.wayglass_mcp_chat_turns enable row level security;
 revoke all on public.wayglass_mcp_chat_turns from anon;
 grant select,insert on public.wayglass_mcp_chat_turns to authenticated;
 grant usage, select on sequence public.wayglass_mcp_chat_turns_id_seq to authenticated;
-create policy "Wayglass MCP owner reads own turns" on public.wayglass_mcp_chat_turns
-  for select to authenticated using ((select auth.uid()) = owner_id);
-create policy "Wayglass MCP owner appends own turns" on public.wayglass_mcp_chat_turns
-  for insert to authenticated with check ((select auth.uid()) = owner_id);
+do $migration$
+begin
+  if not exists (select 1 from pg_policies where schemaname='public'
+    and tablename='wayglass_mcp_chat_turns' and policyname='Wayglass MCP owner reads own turns') then
+    create policy "Wayglass MCP owner reads own turns" on public.wayglass_mcp_chat_turns
+      for select to authenticated using ((select auth.uid()) = owner_id);
+  end if;
+  if not exists (select 1 from pg_policies where schemaname='public'
+    and tablename='wayglass_mcp_chat_turns' and policyname='Wayglass MCP owner appends own turns') then
+    create policy "Wayglass MCP owner appends own turns" on public.wayglass_mcp_chat_turns
+      for insert to authenticated with check ((select auth.uid()) = owner_id);
+  end if;
+end
+$migration$;
 comment on table public.wayglass_mcp_chat_turns is
 'Owner-scoped, append-only ChatGPT Wayglass chat ledger. Each external model reply requires route/model/response attribution. Not a claim of native Ship Voice identity.';
