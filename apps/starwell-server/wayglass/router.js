@@ -725,7 +725,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     res.setHeader('Cache-Control', 'no-store');
 
     const payload = req.body || {};
-    const autoSeat = payload.route_id === 'auto:character' && ['bitty-twi', 'wayglass'].includes(payload.character_id);
+    const autoSeat = payload.route_id === 'auto:character' && payload.character_id === 'bitty-twi';
     if (payload.route_id === 'auto:character' && !autoSeat) return res.status(400).json({ error: 'Auto character route needs a supported character seat.' });
     // Privacy conscious local-first routing, with an explicit receipt. This is host policy,
     // not an assertion that a character autonomously selected a provider.
@@ -737,12 +737,18 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     const chosen = autoSeat ? preference.find(id => available.some(r => r.route_id === id)) : (payload.route_id || 'openai:gpt');
     const route = resolveWayglassRoute(chosen);
     if (!route) return res.status(404).json({ error: 'No usable Wayglass route.' });
+    if (payload.character_id === 'wayglass' && route.route_id !== 'wayglass:ship') {
+      return res.status(409).json({ error: 'Wayglass ship voice must use its dedicated chat route.' });
+    }
+    if (route.route_id === 'wayglass:ship' && payload.character_id !== 'wayglass') {
+      return res.status(409).json({ error: 'Wayglass chat route requires its named ship voice seat.' });
+    }
     let kernelPreflight;
     try {
       kernelPreflight = inspectWayglassCognitionPreflight({
         route_id: route.route_id,
         world_id: cleanText(payload.world_id, 180) || 'wayglass:home',
-        participant_id: cleanText(payload.participant_id, 180) || null,
+        participant_id: route.route_id === 'wayglass:ship' ? 'wayglass' : cleanText(payload.participant_id, 180) || null,
         waygate_manifest: payload.waygate_manifest ?? null,
         continuation_packet: payload.continuation_packet ?? null,
         stop_receipt: payload.stop_receipt ?? null,
