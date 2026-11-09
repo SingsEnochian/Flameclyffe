@@ -9,7 +9,7 @@ const source = path.join(repoRoot, 'dist', 'arcsweep');
 const destination = path.join(repoRoot, 'apps', 'starwell-server', 'public', 'arcsweep');
 
 const HOST_INJECTION =
-  `<script>window.__hearthgateHost=Object.freeze({host:'hearthgate',version:'0.1.0',hostedSince:Date.now()});</script>`;
+  `<script src="./wayglass-host.js"></script>`;
 
 async function copyTree(from, to) {
   const stat = await fsp.stat(from);
@@ -32,7 +32,9 @@ async function copyTree(from, to) {
   await fsp.rm(destination, { recursive: true, force: true });
   await copyTree(source, destination);
 
-  // Inject Hearthgate host context before the first script tag so it is
+  await fsp.writeFile(path.join(destination, 'wayglass-host.js'), "window.__wayglassHost=Object.freeze({host:'wayglass',version:'0.1.0',hostedSince:Date.now()});window.__hearthgateHost=window.__wayglassHost;\n", 'utf8');
+
+  // Inject Wayglass host context before the first script tag so it is
   // available when the Arcsweep module initialises.
   const indexPath = path.join(destination, 'index.html');
   let html = await fsp.readFile(indexPath, 'utf8');

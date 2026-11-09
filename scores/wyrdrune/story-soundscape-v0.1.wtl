@@ -1,0 +1,73 @@
+// Wayglass StorySoundscape · executable Wyrdrune score v0.1
+// The Wyrdrune program is the composition engine. Transport and WebAudio are bridges.
+// Two participants retain independent voices. Their declared affinity controls interval.
+// The double Möbius is represented by a reciprocal pair and an unchanged return anchor.
+mobius {
+  perceive {
+    let words = bridge("story","wordCount");
+    let water = bridge("story","waterRatio");
+    let wind = bridge("story","windRatio");
+    let flame = bridge("story","flameRatio");
+    let shadow = bridge("story","shadowRatio");
+    let motion = bridge("story","motionRatio");
+    let affinity = bridge("participants","affinity");
+    let turns = bridge("story","turns");
+  }
+  compress {
+    let density = words / (words + 32);
+    let pulse = motion * 0.55 + wind * 0.20 + flame * 0.25;
+    let memory = turns / (turns + 12);
+  }
+  release {
+    let root = 132 + density * 60 + water * 42 + wind * 24 + flame * 48 - shadow * 20;
+    let interval = 1.22 + affinity * 0.12;
+    let counterpart = root * interval;
+    let foreground = 0.014 + pulse * 0.021;
+    let atmosphere = 0.006 + water * 0.009 + memory * 0.006;
+  }
+  verify {
+    emit bridge("sound","validate",root,counterpart,foreground,atmosphere);
+  }
+  integrate {
+    let score = bridge("sound","frame",root,counterpart,foreground,atmosphere,affinity,pulse);
+  }
+  choose {
+    emit score;
+  }
+  return {
+    emit bridge("continuity","hold",turns);
+  }
+  transcend {
+    emit bridge("continuity","next","double-mobius");
+  }
+}
+
+// The second Möbius returns the counterpart's harmonic information.
+// Identity and relationship names remain outside the score and retain their sources.
+mobius {
+  perceive {
+    let returned_affinity = bridge("participants","affinity");
+  }
+  compress {
+    let return_weight = returned_affinity * 0.016;
+  }
+  release {
+    set root = root + counterpart * return_weight;
+    set counterpart = counterpart + root * return_weight;
+  }
+  verify {
+    emit bridge("sound","validate",root,counterpart,foreground,atmosphere);
+  }
+  integrate {
+    let returned_score = bridge("sound","frame",root,counterpart,foreground,atmosphere,returned_affinity,pulse);
+  }
+  choose {
+    emit returned_score;
+  }
+  return {
+    emit bridge("continuity","hold",turns);
+  }
+  transcend {
+    emit bridge("continuity","next","double-mobius-return");
+  }
+}

@@ -1,0 +1,73 @@
+name: Wayglass Cloud and ArcSweep Deck
+on:
+  pull_request:
+    paths:
+      - 'lib/wayglass-*'
+      - 'apps/wayglass/**'
+      - 'apps/arcsweep/**'
+      - 'apps/starwell-server/**'
+      - 'scripts/wayglass-*'
+      - 'test/wayglass*'
+      - 'docs/wayglass/**'
+      - '.github/workflows/wayglass-cloud-deck.yml'
+      - 'package*.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  matrix-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm ci --prefix apps/starwell-server --omit=dev --ignore-scripts
+      - run: npm run wayglass:build && npm run arcsweep:build
+      - run: npm run wayglass:stage:server && npm run arcsweep:stage:server
+      - run: node scripts/wayglass-compile-story-score.mjs --check
+      - name: Eight concurrent exact-source test groups
+        run: node scripts/wayglass-cloud-matrix.mjs
+      - name: Full frontend and authenticated host regressions
+        run: npm run wayglass:test && npm run wayglass:test:host
+      - name: Canonical contracts and ArcSweep regressions
+        run: npm run contracts:verify && npm run arcsweep:test
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wayglass-cloud-matrix-${{ github.sha }}
+          path: artifacts/wayglass/cloud-matrix/
+          if-no-files-found: error
+  browser-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run wayglass:build && npm run arcsweep:build
+      - run: npm install --prefix "$RUNNER_TEMP/wayglass-browser" --no-save --package-lock=false playwright@1.62.1
+      - run: node "$RUNNER_TEMP/wayglass-browser/node_modules/playwright/cli.js" install chromium --with-deps
+      - name: First Contact and live motion preferences
+        env:
+          WAYGLASS_PLAYWRIGHT_MODULE: ${{ runner.temp }}/wayglass-browser/node_modules/playwright/index.mjs
+        run: node scripts/wayglass-first-contact-browser.mjs
+      - run: npm run wayglass:stage:server && npm run arcsweep:stage:server
+      - name: ArcSweep deck desktop, mobile, Feather and return
+        env:
+          WAYGLASS_PLAYWRIGHT_MODULE: ${{ runner.temp }}/wayglass-browser/node_modules/playwright/index.mjs
+        run: node scripts/wayglass-arcsweep-deck-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wayglass-deck-browser-${{ github.sha }}
+          path: artifacts/wayglass/
+          if-no-files-found: warn
