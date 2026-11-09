@@ -175,7 +175,9 @@ test('local cold return preserves exact captured contribution without another in
   assert.ok(storage.size>0);
   f.restore();
   f=await setup({storage});
-  assert.doesNotMatch(f.q('wc-voice').textContent,/Captured transport fixture/);
+  // A confirmed model reply now auto-saves, so a cold remount restores
+  // its exact source and answer without a second model request.
+  assert.match(f.q('wc-voice').textContent,/Captured transport fixture/);
   await f.q('wc-recover-return').dispatch('click');
   assert.equal(f.q('wc-voice').textContent,voice);
   assert.equal(f.calls.filter(call=>call.url==='/api/v1/wayglass/respond').length,0);
