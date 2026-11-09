@@ -32,7 +32,12 @@ function renderThinking(message) {
 
 export async function mountArcSweepWritingSurface(root) {
   const interaction = createInteractionState({ channel: 'IC', turn_owner: 'Rowan', interaction_mode: 'ordinary' });
-  const session = sessionId();
+  // A stable tab-scoped session ID survives reload without placing private
+  // conversation text in long-lived browser storage. Durable Return remains
+  // a separate, receipt-backed operation.
+  const storedSession = globalThis.sessionStorage?.getItem('wayglass:first-contact-session');
+  const session = storedSession || sessionId();
+  if (!storedSession) globalThis.sessionStorage?.setItem('wayglass:first-contact-session', session);
   const messages = [];
   let routes = [];
   let selectedRoute = authorizationSession.route() || 'local:ollama';
