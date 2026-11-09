@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'none'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'; worker-src 'none';">
+  <title>Mythframe Glasshouse · ArcSweep</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">ArcSweep · Cross-Constellation Simulation</p>
+        <h1>Mythframe Glasshouse</h1>
+        <p class="lede">Let Mythframes touch without letting either one overwrite the other.</p>
+      </div>
+      <div class="airlock" aria-label="Sandbox status">
+        <span>NETWORK <b>SEALED</b></span>
+        <span>STORAGE <b>EPHEMERAL</b></span>
+        <span>CANON WRITE <b>NONE</b></span>
+      </div>
+    </header>
+
+    <section class="law" aria-label="Glasshouse laws">
+      <strong>Rhyme ≠ identity.</strong>
+      <span>Shared term ≠ shared subsystem.</span>
+      <span>Sigil similarity ≠ shared meaning.</span>
+      <span>Proposal ≠ adoption.</span>
+    </section>
+
+    <section class="source-grid" aria-label="Source Mythframes">
+      <article class="source source-a">
+        <div class="section-head"><div><span class="lane">SOURCE A</span><h2>Rowan-side packet</h2></div><span class="badge">read-only</span></div>
+        <label for="left-packet">Source-owned snapshot</label>
+        <textarea id="left-packet" spellcheck="false"></textarea>
+      </article>
+      <article class="source source-b">
+        <div class="section-head"><div><span class="lane">SOURCE B</span><h2>Nocturne-side packet</h2></div><span class="badge">read-only</span></div>
+        <label for="right-packet">Source-owned snapshot</label>
+        <textarea id="right-packet" spellcheck="false"></textarea>
+      </article>
+    </section>
+
+    <nav class="controls" aria-label="Sandbox controls">
+      <button id="analyse" type="button">Run collision simulation</button>
+      <button id="export" type="button" class="secondary" disabled>Export proposal receipt</button>
+      <button id="reset" type="button" class="ghost">Reset ephemeral room</button>
+    </nav>
+
+    <section class="results" aria-live="polite">
+      <div class="results-head">
+        <div><span class="lane">SIMULATION ONLY</span><h2>Collision map</h2></div>
+        <p id="status">Load two packets and run the Glasshouse.</p>
+      </div>
+      <div id="summary" class="summary-grid"></div>
+      <div class="result-grid">
+        <article><h3>Possible shared shore</h3><div id="shared" class="stack empty">No simulation yet.</div></article>
+        <article><h3>Keep distinct</h3><div id="distinct" class="stack empty">No simulation yet.</div></article>
+        <article><h3>Sigil rhymes</h3><div id="sigils" class="stack empty">No simulation yet.</div></article>
+        <article><h3>Available routes</h3><div id="routes" class="stack empty">No simulation yet.</div></article>
+      </div>
+    </section>
+
+    <footer>
+      <p>Everything in this room is disposable simulation state. The only export is a proposal receipt with <code>canonMutationAllowed: false</code>.</p>
+    </footer>
+  </main>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
