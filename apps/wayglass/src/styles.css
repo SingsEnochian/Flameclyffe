@@ -1504,3 +1504,132 @@ html[data-wayglass-surface="wayglass:living-watercolor"] #app {
 .wg-cypher-still { opacity:.6; font-style:italic; }
 .wg-cypher-note { color:#b7c8ce; }
 @media (prefers-reduced-motion:reduce) { .wg-cypher-line { transition:none; } }
+
+
+/* WAYGLASS / FAE-TECH COMMAND DECK
+   The Watercolour remains the living arrival; the helm is navigational
+   instrumentation, never a substitute for the primary body. */
+:root {
+  --wg-opal-ice: #c9f7f0;
+  --wg-opal-gold: #f0d3a0;
+  --wg-void: rgba(3, 10, 17, .90);
+  --wg-orbit: rgba(107, 221, 216, .34);
+}
+body::after {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events:none;
+  background:
+    linear-gradient(90deg, transparent calc(50% - 1px), rgba(134,230,224,.025) 50%, transparent calc(50% + 1px)),
+    repeating-linear-gradient(0deg, transparent 0 91px, rgba(157,233,224,.022) 92px, transparent 93px);
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,.55),transparent 85%);
+}
+.wg-helm {
+  position: sticky; top: max(8px, env(safe-area-inset-top, 0px)); z-index: 45;
+  width: min(1500px, calc(100% - 28px)); min-height: 68px;
+  display: flex; align-items: center; gap: clamp(12px,2vw,28px);
+  margin: 8px auto 0; padding: 10px clamp(12px,2vw,22px);
+  border-radius: 18px;
+  background: linear-gradient(109deg, rgba(9,28,36,.95), rgba(5,14,23,.88) 54%, rgba(19,37,42,.92));
+  border-color: rgba(169,236,223,.30);
+  box-shadow: 0 18px 68px rgba(0,0,0,.35), inset 0 1px rgba(227,255,248,.11);
+  isolation: isolate;
+}
+.wg-helm::before {
+  content:""; position:absolute; inset: 4px; pointer-events:none; border-radius:14px;
+  border:1px solid rgba(169,236,223,.065);
+  background: linear-gradient(90deg,rgba(109,238,221,.12), transparent 17%, transparent 83%,rgba(231,193,127,.09));
+}
+.wg-helm-identity { display:flex; align-items:center; gap:13px; min-width:0; }
+.wg-helm-mark {
+  display:grid; place-items:center; width:45px;height:45px; flex:none;
+  border-radius:50%; border:1px solid rgba(229,209,157,.52);
+  background: radial-gradient(circle,rgba(204,247,237,.24),transparent 58%),rgba(9,20,28,.8);
+  color:var(--wg-opal-gold); font-size:1.6rem;
+  box-shadow:0 0 23px rgba(93,216,221,.15),inset 0 0 0 5px rgba(5,17,24,.82);
+}
+.wg-helm-title { display:grid;gap:2px; }
+.wg-helm-title strong {
+  font: 650 .98rem/1.2 ui-sans-serif,system-ui,sans-serif;
+  letter-spacing:.28em; color:var(--wg-opal-ice);
+}
+.wg-helm-title span,.wg-hud-kicker {
+  font:700 .60rem/1.25 ui-sans-serif,system-ui,sans-serif;
+  letter-spacing:.2em; color:var(--wg-opal-gold);
+}
+.wg-helm-readout {display:grid;flex:1;gap:4px;min-width:0;padding-left:clamp(12px,2.3vw,30px);border-left:1px solid rgba(178,239,225,.19);}
+.wg-helm-room {font-size:.85rem;font-weight:650;color:#ecf8f6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.wg-helm-route {font-size:.62rem;font-weight:650;letter-spacing:.13em;color:rgba(163,221,213,.7);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.wg-helm[data-route-state="started"] .wg-helm-route {color:#e5d29c;}
+.wg-helm[data-route-state="completed"] .wg-helm-route {color:#8fe9d8;}
+.wg-helm[data-route-state="failed"] .wg-helm-route {color:#ffbbab;}
+.wg-helm-nav {margin-left:auto;white-space:nowrap;min-height:44px;min-width:118px;border-color:rgba(164,227,218,.43);}
+.wg-shell-nav:not([hidden]) {
+  width:min(480px,calc(100vw - 28px));bottom:auto;top:calc(88px + env(safe-area-inset-top,0px));
+  right:max(14px,env(safe-area-inset-right,0px));max-height:min(78dvh,calc(100dvh - 112px));
+  border-radius:24px;padding:19px;gap:14px;
+  background:linear-gradient(148deg,rgba(9,31,40,.985),rgba(2,9,17,.98) 65%);
+  border:1px solid rgba(177,234,226,.39);
+  box-shadow:0 38px 95px rgba(0,0,0,.65),0 0 0 1px rgba(3,12,18,.8),inset 0 1px rgba(249,255,246,.08);
+}
+.wg-deck-heading {display:grid;gap:6px;padding:5px 4px 10px;border-bottom:1px solid rgba(151,221,213,.14);}
+.wg-deck-heading strong {font:400 clamp(1.5rem,3vw,2rem)/1.1 Georgia,serif;color:#f6f5e9;letter-spacing:-.03em;}
+.wg-deck-heading .tiny {line-height:1.45;}
+#wg-deck-search {
+  min-height:46px;border-radius:12px;border:1px solid rgba(163,229,223,.38);
+  background:rgba(2,12,18,.74);box-shadow:inset 0 2px 11px rgba(0,0,0,.2);
+  padding:10px 15px;color:#e7fffc;
+}
+#wg-deck-search::placeholder {color:#a3bdbb;}
+.wg-deck-group {display:grid;gap:7px;}
+.wg-deck-group[hidden],.wg-deck-destination[hidden],.wg-deck-empty[hidden]{display:none!important;}
+.wg-deck-group-head {display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:6px;padding:4px 2px;}
+.wg-deck-group-head strong {font-size:.68rem;text-transform:uppercase;letter-spacing:.16em;color:var(--wg-opal-gold);}
+.wg-deck-group-head span {font-size:.65rem;color:var(--glass-muted);}
+.wg-shell-nav .wg-deck-destination {
+  display:flex;min-height:43px;align-items:center;position:relative;
+  padding:10px 13px 10px 22px;border-radius:11px;letter-spacing:.035em;
+  font-size:.78rem;font-weight:650;
+  background:linear-gradient(100deg,rgba(46,95,103,.14),rgba(3,16,22,.5));
+}
+.wg-deck-destination::before {
+  content:"";position:absolute;left:9px;top:50%;width:5px;height:5px;
+  transform:translateY(-50%) rotate(45deg);background:rgba(144,230,222,.52);
+}
+.wg-shell-nav .wg-deck-destination.active {
+  border-color:rgba(230,211,156,.68);
+  background:linear-gradient(90deg,rgba(68,177,169,.24),rgba(35,59,65,.35));
+  box-shadow:inset 3px 0 rgba(224,203,137,.82),0 0 22px rgba(46,197,186,.1);
+}
+.wg-shell-nav .wg-deck-destination.active::before {background:#ffe5a5;box-shadow:0 0 9px #b5dfc0;}
+.wg-deck-empty {padding:12px;}
+.wg-ship-switch {bottom:calc(14px + env(safe-area-inset-bottom,0px));}
+.wg-surface-head {border-color:rgba(157,218,212,.31);}
+.wg-surface-head::after {
+  content:"";position:absolute;right:22px;top:20px;width:64px;height:64px;opacity:.38;
+  border:1px solid rgba(238,214,163,.4);border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,transparent 48%,rgba(137,240,229,.18) 49%,transparent 52%);
+}
+.wg-surface {position:relative;}
+.wg-surface > .glass-panel {box-shadow:var(--glass-shadow),inset 0 1px rgba(223,251,245,.09);}
+@media (max-width:640px) {
+  .wg-helm {min-height:58px;border-radius:14px;gap:9px;padding:8px 10px;}
+  .wg-helm-mark {width:34px;height:34px;font-size:1.2rem;}
+  .wg-helm-title strong {font-size:.79rem;letter-spacing:.15em;}
+  .wg-helm-title span {font-size:.49rem;letter-spacing:.1em;}
+  .wg-helm-readout {padding-left:9px;}
+  .wg-helm-room {font-size:.71rem;}
+  .wg-helm-route {font-size:.53rem;letter-spacing:.06em;}
+  .wg-helm-nav {min-width:44px;padding:9px 10px;font-size:.7rem;}
+  .wg-shell-nav:not([hidden]) {top:calc(72px + env(safe-area-inset-top,0px));max-height:calc(100dvh - 88px);}
+  .wg-surface-head::after {width:38px;height:38px;right:8px;top:8px;}
+}
+@media (max-width:400px) {
+  .wg-helm-title span {display:none;}
+  .wg-helm-mark {display:none;}
+  .wg-helm-nav {font-size:.66rem;}
+}
+@media (prefers-reduced-motion:reduce) {
+  .wg-helm,.wg-shell-nav,.wg-deck-destination,.wg-surface-head {animation:none!important;transition:none!important;transform:none!important;}
+}
+@media (prefers-reduced-transparency:reduce) {
+  .wg-helm,.wg-shell-nav:not([hidden]){backdrop-filter:none;-webkit-backdrop-filter:none;background:#081920;}
+}
