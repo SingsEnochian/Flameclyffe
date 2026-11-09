@@ -12,6 +12,7 @@ import { emitInteractionCue } from '../interaction-cues.js';
 import { emitMaterialSignal } from '../material-state.js';
 import { invokeWayglassRoute, listWayglassRoutes, listWayglassCharacters, leaveWayglassWorld, recoverWayglassDeparture } from '../route-client.js';
 import { EMERGENCE_QUESTIONS, bittyTwiQuestionPrompt } from '../emergence-questions.js';
+import { createWayglassChatVault } from '../wayglass-chat-vault.js';
 
 function escapeHtml(value = '') {
   return String(value)
@@ -36,13 +37,18 @@ function renderThinking(message) {
 
 export async function mountArcSweepWritingSurface(root) {
   const interaction = createInteractionState({ channel: 'IC', turn_owner: 'Rowan', interaction_mode: 'ordinary' });
-  // A stable tab-scoped session ID survives reload without placing private
-  // conversation text in long-lived browser storage. Durable Return remains
-  // a separate, receipt-backed operation.
+  // Owner-invited per-browser conversation storage. Model receipts remain
+  // observations, not server custody or a verified Return.
   const storedSession = globalThis.sessionStorage?.getItem('wayglass:first-contact-session');
-  const session = storedSession || sessionId();
+  let session = storedSession || sessionId();
   if (!storedSession) globalThis.sessionStorage?.setItem('wayglass:first-contact-session', session);
   const messages = [];
+  let chatVault=null,chatVaultProblem='';
+  try{
+    chatVault=createWayglassChatVault();
+    const recovered=chatVault.open(session);
+    if(recovered)messages.push(...recovered.messages);
+  }catch(error){chatVaultProblem=error.message||'Browser conversation storage is unavailable';}
   let routes = [];
   let selectedRoute = authorizationSession.route() || 'local:ollama';
   let selectedCharacter = '';
@@ -187,6 +193,12 @@ export async function mountArcSweepWritingSurface(root) {
     "      </div>\n",
     "      <section id=\"wg-panel-session\" class=\"wg-sidebar-view\" role=\"tabpanel\" aria-labelledby=\"wg-tab-session\">\n",
     "        <button id=\"wg-copy-session\" type=\"button\" class=\"glass-chip wg-copy-session\">▤ Copy session log</button>\n",
+        '<div class="wg-chat-vault glass-panel" aria-label="Saved conversations">',
+        '<label for="wg-chat-saved">Saved chats on this browser</label>',
+        '<select id="wg-chat-saved" aria-label="Saved Wayglass conversations"></select>',
+        '<div class="wg-chat-vault-actions"><button id="wg-chat-open" type="button" class="glass-chip">Open chat</button><button id="wg-chat-new" type="button" class="glass-chip">New chat</button><button id="wg-chat-copy" type="button" class="glass-chip">Copy chat JSON</button></div>',
+        '<p id="wg-chat-save-status" role="status" class="tiny">Chat saves here after each turn with attribution.</p>',
+        '</div>',
     "        <div class=\"wg-session-empty\" aria-hidden=\"true\"><span>♧</span></div>\n",
     "        <p class=\"wg-session-explainer\"><strong>Session history</strong><span>Responses remain in the writing desk. Copy the session log whenever you wish.</span></p>\n",
     "        <p id=\"wg-receipt\" class=\"tiny\">No route receipt yet.</p>\n",
@@ -569,6 +581,72 @@ export async function mountArcSweepWritingSurface(root) {
     });
   });
   const receipt = root.querySelector('#wg-receipt');
+  const chatPicker=root.querySelector('#wg-chat-saved'),chatSaveStatus=root.querySelector('#wg-chat-save-status');
+  const chatOpen=root.querySelector('#wg-chat-open'),chatNew=root.querySelector('#wg-chat-new');
+  function refreshSavedChats(preferred=session){
+    if(!chatVault){chatPicker.innerHTML='<option value="">Archive unavailable</option>';chatOpen.disabled=true;return;}
+    try{
+      const saved=chatVault.list();
+      chatPicker.innerHTML=saved.length?saved.map(record=>
+        '<option value="'+escapeHtml(record.session_id)+'">'+escapeHtml(record.title)+' · '+record.message_count+' messages</option>').join('')
+        :'<option value="">No saved chats</option>';
+      if(saved.some(record=>record.session_id===preferred))chatPicker.value=preferred;
+      chatOpen.disabled=!saved.length;
+    }catch(error){chatSaveStatus.textContent='Saved chats unavailable: '+error.message;chatOpen.disabled=true;}
+  }
+  function persistChat(){
+    if(!messages.length)return true;
+    if(!chatVault){chatSaveStatus.textContent='Not saved: '+(chatVaultProblem||'Browser storage unavailable');return false;}
+    try{
+      const saved=chatVault.save({sessionId:session,messages});
+      chatSaveStatus.textContent='Saved '+saved.message_count+' messages in this browser · '+saved.saved_at+' · not cloud synced';
+      refreshSavedChats();return true;
+    }catch(error){chatSaveStatus.textContent='Chat not saved: '+error.message;return false;}
+  }
+  chatNew.addEventListener('click',()=>{
+    if(busy){chatSaveStatus.textContent='Finish the active turn before starting another chat.';return;}
+    if(!persistChat())return;
+    messages.splice(0,messages.length);
+    session=sessionId();
+    globalThis.sessionStorage?.setItem('wayglass:first-contact-session',session);
+    lastReceipt=null;checkpoint=null;revisionOf=null;input.value='';
+    refreshThread();refreshSavedChats();receipt.textContent='No route receipt yet.';
+    chatSaveStatus.textContent='New chat. Previous turns remain saved in this browser.';
+    input.focus();
+  });
+  chatOpen.addEventListener('click',()=>{
+    if(busy){chatSaveStatus.textContent='Finish the active turn before opening a saved chat.';return;}
+    if(!chatVault||!persistChat())return;
+    try{
+      const saved=chatVault.open(chatPicker.value);
+      if(!saved)throw new Error('Select a saved conversation');
+      session=saved.session_id;
+      globalThis.sessionStorage?.setItem('wayglass:first-contact-session',session);
+      messages.splice(0,messages.length,...saved.messages);
+      lastReceipt=[...messages].reverse().find(m=>m.role==='assistant'&&m.receipt)?.receipt||null;
+      checkpoint=null;revisionOf=null;
+      const last=[...messages].reverse().find(m=>m.role==='assistant'&&m.route_id);
+      const world=[...messages].reverse().find(m=>m.world_id)?.world_id;
+      if(world&&findWayglassWorldSeat(world))selectWorldSeat(world,{resetCheckpoint:false});
+      if(last?.route_id==='wayglass:ship'){
+        selectedRoute='wayglass:ship';selectedCharacter='wayglass';interaction.setChannel('OOC');
+      }else if(last?.route_id){selectedRoute=last.route_id;selectedCharacter='';}
+      characterSelect.value=selectedCharacter;input.value='';
+      void loadRoutes();
+      refreshState();refreshThread();refreshSavedChats(session);
+      receipt.textContent=lastReceipt?'Restored response · '+(lastReceipt.observation_id||lastReceipt.response_id||'unverified receipt'):'No model reply receipt in saved chat';
+      chatSaveStatus.textContent='Opened '+saved.messages.length+' saved messages · local-browser custody';
+    }catch(error){chatSaveStatus.textContent='Could not open chat: '+error.message;}
+  });
+  root.querySelector('#wg-chat-copy').addEventListener('click',event=>{
+    if(!chatVault){chatSaveStatus.textContent='Cannot export: browser archive unavailable';return;}
+    try{
+      const saved=chatVault.open(chatPicker.value||session);
+      if(!saved)throw new Error('Save this chat before exporting');
+      void copyText(JSON.stringify(saved,null,2),event.currentTarget);
+    }catch(error){chatSaveStatus.textContent='Could not copy chat: '+error.message;}
+  });
+
 
   const arState = document.documentElement.dataset.wayglassAr || 'unknown';
   embodimentState.textContent = 'Keyboard ready · AR ' + (arState === 'ready' ? 'ready' : arState.replaceAll('-', ' '));
