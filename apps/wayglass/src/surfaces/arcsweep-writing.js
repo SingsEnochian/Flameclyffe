@@ -68,6 +68,7 @@ export async function mountArcSweepWritingSurface(root) {
     "      <div class=\"wg-route-controls\">\n",
           '<label for="wg-character">Character voice</label>',
           '<select id="wg-character" aria-label="Wayglass character voice"><option value="">No character seat</option></select>',
+          '<button type="button" id="wg-first-contact" class="glass-chip">Speak with Wayglass</button>',
     "        <label id=\"wg-route-label\">Route</label>\n",
     "        <div id=\"wg-route\"></div>\n",
     "        <label class=\"wg-thinking-toggle\"><input id=\"wg-think\" type=\"checkbox\" /> Deliberate thinking (local engine)</label>\n",
@@ -192,6 +193,7 @@ export async function mountArcSweepWritingSurface(root) {
     routeState.textContent = 'Active · ' + selectedRouteLabel();
   } });
   const characterSelect = root.querySelector('#wg-character');
+  const firstContact = root.querySelector('#wg-first-contact');
   const routeSelect = root.querySelector('#wg-route');
   const routeState = root.querySelector('#wg-route-state');
   const emergencePanel = root.querySelector('#wg-emergence-interview');
@@ -590,7 +592,7 @@ export async function mountArcSweepWritingSurface(root) {
         world_id: activeWorldId,
         content: '[Route error] ' + error.message,
         channel: 'OOC',
-        route_label: 'Wayglass',
+        route_label: 'Route diagnostic',
       });
       receipt.textContent = 'Route failed · ' + error.message;
     } finally {
@@ -644,9 +646,22 @@ export async function mountArcSweepWritingSurface(root) {
     });
   });
 
+  firstContact.addEventListener('click', () => {
+    if (busy) return;
+    selectedCharacter = 'wayglass';
+    characterSelect.value = 'wayglass';
+    interaction.setChannel('OOC');
+    interaction.setInteractionContext({intent:'Talk with Wayglass as the ship voice; distinguish the cognitive route from Wayglass system identity.',interaction_mode:'counterfactual-wonder'});
+    void loadRoutes();
+    refreshState();
+    status.textContent = 'Wayglass ship voice selected. Send to establish an attributable model turn.';
+    input.focus();
+  });
+
   characterSelect.addEventListener('change', () => {
     selectedCharacter = characterSelect.value;
     if (selectedCharacter) selectedRoute = 'auto:character';
+    if (selectedCharacter === 'wayglass') interaction.setChannel('OOC');
     else if (selectedRoute === 'auto:character') selectedRoute = routes.find(r => r.configured !== false)?.route_id || '';
     void loadRoutes();
     refreshState();
