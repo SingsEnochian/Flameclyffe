@@ -128,12 +128,39 @@ async function checkDockNavigation(page,{profile,destination,surfaceSelector}){
  await inbox.locator('summary').click();
  receipt.scenarios.push({id:'dock-navigation-and-unsent-draft-'+profile,status:'passed',closed_geometry:closed,open_geometry:opened});
 }
+async function checkMotionPreferences(page,{profile,touch=false}){
+ const ship=page.locator('.wg-ship-switch');await ship.click();
+ const toggle=page.locator('[data-motion-toggle]');
+ assert.equal(await toggle.isDisabled(),true,'System reduced-motion must lock the accessible toggle');
+ assert.equal(await toggle.getAttribute('aria-pressed'),'false');
+ await page.emulateMedia({reducedMotion:'no-preference'});
+ await page.waitForFunction(()=>document.querySelector('[data-motion-toggle]')?.disabled===false);
+ assert.equal(await toggle.getAttribute('aria-pressed'),'false','Removing system lock must not restart motion');
+ await toggle.click();assert.equal(await toggle.getAttribute('aria-pressed'),'true');
+ const control=page.locator('[data-surface-id]').first();
+ if(touch){
+   await control.dispatchEvent('pointermove',{pointerType:'touch',clientX:50,clientY:50});
+   await page.evaluate(()=>new Promise(done=>requestAnimationFrame(done)));
+   assert.equal(await control.evaluate(node=>node.style.getPropertyValue('--wg-magnet-x')),'','Touch must not produce magnetic offsets');
+ }else{
+   const bounds=await control.boundingBox();assert.ok(bounds);
+   await page.mouse.move(bounds.x+bounds.width*.7,bounds.y+bounds.height*.7);
+   await page.waitForFunction(()=>document.querySelector('[data-surface-id]')?.style.getPropertyValue('--wg-magnet-x'));
+ }
+ await page.emulateMedia({reducedMotion:'reduce'});
+ await page.waitForFunction(()=>document.documentElement.dataset.wgMotion==='off');
+ assert.equal(await control.evaluate(node=>node.style.getPropertyValue('--wg-magnet-x')),'','A live preference change must clear offsets');
+ assert.equal(await toggle.isDisabled(),true);
+ await ship.click();
+ receipt.scenarios.push({id:'live-motion-preference-and-accessible-toggle-'+profile,status:'passed',touch});
+}
 try{
  browser=await chromium.launch({headless:true});receipt.browser_version=browser.version();
  const context=await prepareContext({viewport:{width:1440,height:1000},reducedMotion:'reduce'});
  const page=await context.newPage();
  await page.goto(origin,{waitUntil:'networkidle'});
  await page.locator('[data-surface="living-watercolor"]').waitFor();
+ await checkMotionPreferences(page,{profile:'desktop'});
  assert.equal(await page.locator('.wg-auth-overlay:visible').count(),0,'Offline watercolor entry must render without provider login');
  const paintingRect=await page.locator('.wc-stage').boundingBox();
  const workbenchRect=await page.locator('.wc-workbench').boundingBox();
@@ -176,6 +203,7 @@ try{
  assert.notEqual(await canvasDigest(page),pigmentBeforeReply,'Captured route events must produce visible pigment');
  assert.match(await page.locator('#wc-feedback').textContent(),/ollama.*captured-first-contact-fixture.*captured-observation:/);
  assert.equal(receipt.requests[0].first_hello_present,true,'First hello must reach the selected host route');
+ assert.match(await page.locator('.wg-motion-status').textContent(),/Route completed/,'Motion status must reflect observed route completion');
  await page.locator('#wc-save-return').click();
  const saved=await localTranscript(page);assert.equal(saved.turns.length,1);
  assert.equal(saved.turns[0].response.receipt.response_id,null);
@@ -224,6 +252,7 @@ try{
  const mobile=await prepareContext({viewport:{width:390,height:844},deviceScaleFactor:1,hasTouch:true,isMobile:true,reducedMotion:'reduce'});
  const touchPage=await mobile.newPage();await touchPage.goto(origin,{waitUntil:'networkidle'});
  const touchCanvas=touchPage.locator('#wc-fluid');await touchCanvas.waitFor();
+ await checkMotionPreferences(touchPage,{profile:'mobile',touch:true});
  assert.equal(await touchPage.locator('.wc-deck').evaluate(el=>el.scrollWidth<=el.clientWidth+1),true,'Mobile contribution controls must fit without horizontal clipping');
  const mobileStage=await touchPage.locator('.wc-stage').boundingBox();
  const mobileWorkbench=await touchPage.locator('.wc-workbench').boundingBox();

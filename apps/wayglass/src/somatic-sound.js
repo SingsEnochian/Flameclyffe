@@ -1,3 +1,5 @@
+import {createSoundComposition} from '../../../lib/wayglass-sound-composition.mjs';
+import {createCompositionProjection} from '../../../lib/wayglass-composition-projection.mjs';
 // Spatially placed, opt-in short original tones for the semi-somatic watercolor.
 // Inspired by movable sound objects, not by any proprietary audio or sound samples.
 // The browser offers stereo panning. Head tracking is NOT presumed available.
@@ -46,6 +48,9 @@ export function createSomaticSoundscape({
   let context=null,master=null,compressor=null,allowAudio=false,allowHaptics=false,featherStopped=false;
   let mono=false,disposed=false,epoch=0,lastError=null,featherReleaseConfirmed=false;
   const liveNodes=new Set();
+  const compositionProjection=createCompositionProjection({getContext:()=>context,getDestination:()=>master,canPlay:()=>context?.state==='running'&&!featherStopped&&!disposed});
+  const composition=createSoundComposition({region:'wayglass-watercolor',eventScope:scope,source_ref:'apps/wayglass/src/somatic-sound.js',onScore:frame=>{setMono(frame.mono);return compositionProjection.render(frame);},
+    enableAudio:async()=>{await enable({audio:true,mono:composition.snapshot().mono});return allowAudio;},stopAudio:()=>compositionProjection.stop()});
   const safeAsync=fn=>{try{Promise.resolve(fn()).catch(()=>{});}catch{}};
   const disconnect=node=>{try{node?.disconnect();}catch{}};
   function releaseVoice(voice){
@@ -56,7 +61,7 @@ export function createSomaticSoundscape({
   function silence(){
     for(const voice of [...liveNodes])releaseVoice(voice);
     if(typeof scope.navigator?.vibrate==='function'){try{scope.navigator.vibrate(0);}catch{}}
-    if(context)safeAsync(()=>context.suspend());
+    if(context&&!composition.snapshot().audio_enabled)safeAsync(()=>context.suspend());
   }
   function stop(){
     ++epoch;allowAudio=false;allowHaptics=false;silence();return snapshot();
@@ -76,7 +81,7 @@ export function createSomaticSoundscape({
     }catch{}
   }
   function feather({notify=true}={}){
-    featherStopped=true;featherReleaseConfirmed=false;allowAudio=false;allowHaptics=false;
+    composition.feather();featherStopped=true;featherReleaseConfirmed=false;allowAudio=false;allowHaptics=false;
     stop();if(notify)broadcast(true);
     return snapshot();
   }
@@ -109,12 +114,13 @@ export function createSomaticSoundscape({
   function releaseFeather({confirmed=false,notify=true}={}){
     if(disposed)throw new Error('Soundscape disposed');
     if(confirmed!==true)throw new Error('Owner confirmation required to release Feather');
-    stop();featherStopped=false;featherReleaseConfirmed=true;if(notify)broadcast(false);
+    stop();composition.releaseFeather({confirmed:true});featherStopped=false;featherReleaseConfirmed=true;if(notify)broadcast(false);
     return snapshot();
   }
   function setMono(value){
     if(disposed)return snapshot();
     mono=Boolean(value);
+    if(composition.snapshot().mono!==mono)composition.setMix({mono});
     for(const voice of liveNodes){if(voice.panner)voice.panner.pan.setValueAtTime(mono?0:voice.pan,context.currentTime);}
     return snapshot();
   }
@@ -165,11 +171,11 @@ export function createSomaticSoundscape({
   scope.addEventListener?.(WAYGLASS_FEATHER_EVENT,onSharedFeather);
   function dispose(){
     if(disposed)return;
-    disposed=true;stop();scope.removeEventListener?.(WAYGLASS_FEATHER_EVENT,onSharedFeather);
+    disposed=true;stop();composition.dispose();compositionProjection.dispose();scope.removeEventListener?.(WAYGLASS_FEATHER_EVENT,onSharedFeather);
     disconnect(master);disconnect(compressor);master=null;compressor=null;
     if(context){const closing=context;context=null;safeAsync(()=>closing.close());}
   }
-  return Object.freeze({enable,play,stop,setMono,feather,releaseFeather,snapshot,dispose});
+  return Object.freeze({composition,enable,play,stop,setMono,feather,releaseFeather,snapshot,dispose});
 }
 
 // Shared by Journey and Living Watercolor so Feather stops the same audio bus.

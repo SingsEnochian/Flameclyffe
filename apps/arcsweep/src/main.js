@@ -1,4 +1,5 @@
 import './styles.css';
+import {mountWayglassSoundComposition} from '../../wayglass/src/surfaces/sound-composition.js';
 import { buildReturnRecord, calculateDrElapsed, calculateRatio, formatDuration, isoNow } from './core.js';
 import { APPLET_CATALOGUE, visibleApplets } from './applets.js';
 import { COLLECTION_ROOM_DEFINITIONS, WORLD_SECTION_DEFINITIONS } from './rooms.js';
@@ -15,6 +16,7 @@ import {
   openAttachment,
   restoreBackup,
   saveState,
+  setStateExtensionSnapshot,
   showDataFolder,
 } from './storage.js';
 import {
@@ -28,6 +30,8 @@ import {
 } from './worlds.js';
 import { CONSTELLATION_VOICES, createInitialPremaqc, invokeConstellationVoices, runFeedbackCycle, syncFeedbackCycle } from './feedback-loop.js';
 import { createEmptyFeedbackQueue, normalizeFeedbackQueue, enqueueFeedbackCycle, acceptFeedbackCycle, archiveFeedbackCycle, discardFeedbackCycle, pendingCycles, feedbackQueueSummary } from './feedback-cycle-queue.js';
+import { installArcSweepDeckBridge } from './wayglass-deck-bridge.js';
+import { stopSomaticCue } from './somatic-runtime.js';
 import { StorySoundscape } from './story-soundscape.js';
 import { resolveWorldweaveAcousticProfile } from './worldweave-acoustics.js';
 import { FIELD_AXES, classifyFieldInstrument, createFieldObservationPremaqc, formatFieldAge, isHostedBrowser } from './field-instrument.js';
@@ -63,8 +67,16 @@ import { syncKelyranSchool } from './kelyran-sync.js';
 import { getKelyranSupabase, kelyranAuthUser, requestKelyranMagicLink, signOutKelyran } from './kelyran-supabase.js';
 
 const app = document.querySelector('#app');
+const wayglassDeckEmbodiment = new URLSearchParams(globalThis.location?.search || '').get('wayglassDeck') === '1';
+if (wayglassDeckEmbodiment) document.title = 'Wayglass · World and continuity deck';
 const storySoundscape = new StorySoundscape();
 let state = await loadState();
+storySoundscape.setWorld(getActiveWorld(state));
+let compositionControls=null;
+try{if(state.wayglassStoryScoreBinding)storySoundscape.storyScoreBinding.restore(state.wayglassStoryScoreBinding);}catch{/* A stale binding cannot silently author relationship declarations. */}
+try{if(state.wayglassSoundComposition)storySoundscape.composition.restore(state.wayglassSoundComposition);else storySoundscape.composition.startGeneration({confirmed:true});}catch{/* Invalid return evidence never starts a score or sound. */}
+storySoundscape.composition.subscribe(()=>{setStateExtensionSnapshot('wayglassSoundComposition',storySoundscape.composition.checkpoint());setStateExtensionSnapshot('wayglassStoryScoreBinding',storySoundscape.storyScoreBinding.checkpoint());});
+setStateExtensionSnapshot('wayglassSoundComposition',storySoundscape.composition.checkpoint());
 let activeRoom = 'portal';
 let selectedWorldId = state.activeWorldId;
 let selectedScriptId = state.scripts[0]?.id || null;
@@ -1087,8 +1099,10 @@ function installHouseglassInteractions() {
 }
 
 function render() {
+  compositionControls?.destroy();compositionControls=null;
   applyPresentation();
   const world = activeWorld();
+  if(storySoundscape.world.worldId!==world.id)storySoundscape.setWorld(world);
   const glassSettings = houseglassSettings();
   const glass = houseglassState();
   syncHouseglassScope();
@@ -1096,10 +1110,16 @@ function render() {
   const unread = glass.receipts.filter((item) => item.reviewStatus === 'unread' && item.status !== 'running').length;
   const glassLaunch = glassSettings.enabled ? `<button type="button" class="houseglass-launch quiet" data-action="houseglass-toggle" aria-expanded="${houseglassOpen}" aria-controls="houseglass"><span aria-hidden="true">▱</span><span>Houseglass</span>${houseglassRunning ? '<i>working</i>' : unread ? `<i>${unread}</i>` : ''}</button>` : '';
   const runtimeLabel = isDesktopRuntime() ? 'Native local store' : isHosted ? 'Hosted browser · local state' : 'Browser development mode';
-  app.innerHTML = `<div class="app-shell"${isHosted ? ' data-hosted' : ''} data-houseglass-open="${houseglassOpen && glassSettings.enabled}" data-houseglass-layout="${attr(glass.layout)}"><aside class="sidebar"><div class="brand"><span class="brand-mark">⌁</span><div><strong>Arcsweep</strong><small>Hearthgate</small></div></div><nav aria-label="Primary Arcsweep rooms">${PRIMARY_NAV.map(([id, label, glyph]) => roomButton(id, label, glyph)).join('')}</nav><div class="sidebar-world"><span>Active portal</span><strong>${escapeHtml(world.name)}</strong><button class="quiet mini" data-room="applet-deck">Arrange applets</button></div>${glassLaunch}<p class="privacy-seal">${runtimeLabel}<br />Relational sync requires a receipted cycle</p></aside><main class="content" data-houseglass-room="${attr(activeRoom)}">${currentView()}<p class="notice" role="status">${escapeHtml(notice)}</p></main>${glassMarkup}${renderReturnDialog()}</div>`;
+  app.innerHTML = `<div class="app-shell"${isHosted ? ' data-hosted' : ''} data-houseglass-open="${houseglassOpen && glassSettings.enabled}" data-houseglass-layout="${attr(glass.layout)}"><aside class="sidebar"><div class="brand"><span class="brand-mark">⌁</span><div><strong>${wayglassDeckEmbodiment ? 'Wayglass' : 'Arcsweep'}</strong><small>${wayglassDeckEmbodiment ? 'World & continuity deck' : 'Hearthgate'}</small></div></div><nav aria-label="Primary Arcsweep rooms">${PRIMARY_NAV.map(([id, label, glyph]) => roomButton(id, label, glyph)).join('')}</nav><div class="sidebar-world"><span>Active portal</span><strong>${escapeHtml(world.name)}</strong><button class="quiet mini" data-room="applet-deck">Arrange applets</button></div>${glassLaunch}<p class="privacy-seal">${runtimeLabel}<br />Relational sync requires a receipted cycle</p></aside><main class="content" data-houseglass-room="${attr(activeRoom)}">${currentView()}<p class="notice" role="status">${escapeHtml(notice)}</p></main>${glassMarkup}${renderReturnDialog()}</div>`;
   installHouseglassSectionScopes();
   mountHouseglassInSection();
   installHouseglassInteractions();
+  if(wayglassDeckEmbodiment||activeRoom==='feedback'){
+    const panel=document.createElement('details');panel.className='wayglass-composition-region';
+    const summary=document.createElement('summary');summary.textContent='Spatial composition · this listening landscape';
+    const controls=document.createElement('div');panel.append(summary,controls);app.querySelector('main.content')?.append(panel);
+    compositionControls=mountWayglassSoundComposition(controls,{composition:storySoundscape.composition,storyBinding:storySoundscape.storyScoreBinding,soundscape:{feather:()=>{storySoundscape.featherStop();globalThis.dispatchEvent(new Event('wayglass:feather-request'));},releaseFeather:args=>storySoundscape.composition.releaseFeather(args)}});
+  }
 }
 
 function formValues(form) {
@@ -1368,7 +1388,7 @@ app.addEventListener('click', async (event) => {
     notice = "Cycle discarded.";
     render(); return;
   }
-  if (action === 'feather-feedback') { storySoundscape.featherStop(); notice = 'Feather received. The chamber and every sound output are paused; nothing was submitted.'; render(); return; }
+  if (action === 'feather-feedback') { storySoundscape.featherStop(); window.dispatchEvent(new CustomEvent('wayglass:feather-request')); notice = 'Feather received. The chamber and every sound output are paused; nothing was submitted.'; render(); return; }
   if (action === 'open-return') returnOpen = true;
   if (action === 'cancel-return') returnOpen = false;
   if (action === 'complete-return') {
@@ -1758,3 +1778,7 @@ setInterval(() => {
 
 if (houseRuntimeToken) ensureBraidLiveUpdates(activeWorld().id);
 render();
+
+// The deck joins only after this real workspace has rendered; no alternate state.
+installArcSweepDeckBridge({composition:storySoundscape.composition,storyBinding:storySoundscape.storyScoreBinding,stopOutput:()=>{storySoundscape.featherStop();stopSomaticCue('Wayglass Feather');},
+  persist:()=>saveState(state,{reason:'wayglass-deck-return'})});

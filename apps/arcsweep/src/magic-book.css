@@ -18,7 +18,10 @@
   background: linear-gradient(90deg, rgba(217,184,107,.14), rgba(82,120,98,.1));
 }
 
-.magic-book-shell[hidden] {
+/* Native closed state must outrank the touch-safe ID selector's display rule.
+   Removing hidden still restores the existing responsive/open Codex layout. */
+.magic-book-shell[hidden],
+#arcsweep-magic-book.magic-book-shell[hidden] {
   display: none !important;
 }
 

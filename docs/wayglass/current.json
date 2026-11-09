@@ -168,6 +168,29 @@
         575
       ],
       "note": "Adds three independent CI gates to the five passed launch gates. Does not assert live provider response or canon/identity authority."
+    },
+    {
+      "branch": "wayglass/cloud-integration-20261108",
+      "target": "wayglass/current",
+      "status": "candidate-local-matrix-passed-browser-and-production-pending",
+      "source_base": "15467ce4ac5dc93d30a80e58302b5bda8597dc07",
+      "source_prs": [
+        535,
+        537,
+        566,
+        570
+      ],
+      "scope": [
+        "selective-current-source-MCP-protocol-port",
+        "trusted-introspection-and-native-router-binding",
+        "resource-bound-private-cold-return",
+        "accessible-motion-and-live-reduced-motion",
+        "cloud-health-with-fail-closed-readiness",
+        "functional-arcsweep-deck",
+        "source-authored-Wyrdrune-double-Mobius-composition",
+        "continuous-addressed-sound-regions-and-declared-affinity"
+      ],
+      "note": "Preserves canonical First Contact/Astra routes. PR570 is superseded by the canonical-based integration review because its branch requires linear history; source branches are preserved. No deployed host SHA, installed Windows build or live participant invocation established."
     }
   ]
 }

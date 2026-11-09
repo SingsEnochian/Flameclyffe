@@ -4,6 +4,7 @@ const http = require('node:http');
 const originalCors = require('cors');
 const originalExpress = require('express');
 const { localCorsOptions } = require('./security/local-boundary');
+const { arcSweepFramePolicy } = require('./security/arcsweep-frame');
 
 const corsPath = require.resolve('cors');
 const expressPath = require.resolve('express');
@@ -24,7 +25,9 @@ function hardenedExpress(...args) {
   app.use((req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Referrer-Policy', 'no-referrer');
-    res.setHeader('X-Frame-Options', 'DENY');
+    // Only the public ArcSweep app may join the same-origin Wayglass deck.
+    // API routes and every other surface retain the existing frame boundary.
+    res.setHeader('X-Frame-Options', arcSweepFramePolicy(req.path));
     res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), usb=(), serial=()');
     if (req.path?.startsWith('/api/')) res.setHeader('Cache-Control', 'no-store');
     next();

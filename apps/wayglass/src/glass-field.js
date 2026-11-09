@@ -228,7 +228,10 @@ export function installWayglassField({ host = document.body } = {}) {
   });
   scene.add(new THREE.Mesh(geometry, material));
 
-  const reduceMotion = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches === true;
+  const motionPreference = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
+  let reduceMotion = motionPreference?.matches === true;
+  let motionEnabled = true;
+  const still = () => reduceMotion || !motionEnabled || document.hidden;
   const pointerTarget = new THREE.Vector2(0.68, 0.3);
   let frame = 0;
   let alive = true;
@@ -249,9 +252,9 @@ export function installWayglassField({ host = document.body } = {}) {
 
   function render(time = 0) {
     const seconds = time * 0.001;
-    uniforms.uTime.value = reduceMotion ? 0 : seconds;
+    uniforms.uTime.value = still() ? 0 : seconds;
 
-    if (!reduceMotion) {
+    if (!still()) {
       uniforms.uPointer.value.lerp(pointerTarget, 0.065);
       const idleFor = performance.now() - lastPointerAt;
       if (idleFor > 950) energyTarget *= 0.965;
@@ -270,12 +273,13 @@ export function installWayglassField({ host = document.body } = {}) {
   }
 
   function animate(time) {
-    if (!alive) return;
+    if (!alive || still()) { frame = 0; return; }
     render(time);
     frame = requestAnimationFrame(animate);
   }
 
   function pointer(event) {
+    if (still() || event.pointerType === 'touch') return;
     const width = Math.max(1, globalThis.innerWidth || 1);
     const height = Math.max(1, globalThis.innerHeight || 1);
     pointerTarget.set(event.clientX / width, 1 - (event.clientY / height));
@@ -288,7 +292,7 @@ export function installWayglassField({ host = document.body } = {}) {
     lastPointerMoveAt = now;
     lastPointerAt = now;
     energyTarget = Math.min(1, energyTarget + 0.12);
-    if (reduceMotion) render();
+    if (still()) render();
   }
 
   function wake(event) {
@@ -302,18 +306,28 @@ export function installWayglassField({ host = document.body } = {}) {
     uniforms.uOwnership.value = Number.isFinite(ownership) ? Math.min(1, Math.max(0, ownership)) : uniforms.uOwnership.value;
     uniforms.uHandoff.value = Number.isFinite(handoff) ? Math.min(1, Math.max(0, handoff)) : 0;
     uniforms.uCanonState.value = detail.canon_state === 'conflicted' ? -1 : detail.canon_state === 'unresolved' ? -0.55 : detail.canon_state === 'verified' ? 1 : 0;
-    if (reduceMotion) {
+    if (still()) {
       render();
       return;
     }
     energyTarget = Math.max(energyTarget, Number.isFinite(strength) ? Math.min(1, Math.max(0, strength)) : 0.72);
   }
 
+  function syncMotion() {
+    if (frame) { cancelAnimationFrame(frame); frame = 0; }
+    render();
+    if (alive && !still()) frame = requestAnimationFrame(animate);
+  }
+  function onMotionPreference(event) { reduceMotion = event.matches === true; syncMotion(); }
+  function onMotion(event) { motionEnabled = event.detail?.enabled === true; syncMotion(); }
+  motionPreference?.addEventListener?.('change', onMotionPreference);
+  globalThis.addEventListener?.('wayglass:motion', onMotion);
+  document.addEventListener?.('visibilitychange', syncMotion);
   globalThis.addEventListener?.('resize', resize, { passive: true });
   globalThis.addEventListener?.('pointermove', pointer, { passive: true });
   globalThis.addEventListener?.('wayglass:material-wake', wake);
   resize();
-  if (!reduceMotion) frame = requestAnimationFrame(animate);
+  if (!still()) frame = requestAnimationFrame(animate);
 
   return Object.freeze({
     wake(strength = 0.72) {
@@ -322,6 +336,9 @@ export function installWayglassField({ host = document.body } = {}) {
     destroy() {
       alive = false;
       cancelAnimationFrame(frame);
+      motionPreference?.removeEventListener?.('change', onMotionPreference);
+      globalThis.removeEventListener?.('wayglass:motion', onMotion);
+      document.removeEventListener?.('visibilitychange', syncMotion);
       globalThis.removeEventListener?.('resize', resize);
       globalThis.removeEventListener?.('pointermove', pointer);
       globalThis.removeEventListener?.('wayglass:material-wake', wake);
