@@ -37,21 +37,30 @@ function defaultConversationRef(target) {
 }
 
 function loadJson(filename) {
+  let raw;
+  try { raw = fs.readFileSync(filename, 'utf8'); }
+  catch (error) {
+    if (error?.code === 'ENOENT') return { schema: STORE_SCHEMA, updated_at: null, records: [] };
+    throw error;
+  }
   try {
-    const parsed = JSON.parse(fs.readFileSync(filename, 'utf8'));
-    if (parsed?.schema !== STORE_SCHEMA || !Array.isArray(parsed.records)) throw new Error('invalid store schema');
+    const parsed = JSON.parse(raw);
+    if (parsed?.schema !== STORE_SCHEMA || !Array.isArray(parsed.records))
+      throw new Error('unrecognised schema');
     return parsed;
   } catch {
-    return { schema: STORE_SCHEMA, updated_at: null, records: [] };
+    throw new Error('Wayglass MCP conversation archive is damaged; original content was preserved.');
   }
 }
 
 function saveJson(filename, data) {
   fs.mkdirSync(path.dirname(filename), { recursive: true });
+  if (data.records.length > MAX_RECORDS)
+    throw new RangeError('Wayglass MCP chat archive is full; export before adding another message.');
   const next = {
     schema: STORE_SCHEMA,
     updated_at: new Date().toISOString(),
-    records: data.records.slice(-MAX_RECORDS),
+    records: data.records,
   };
   const temp = `${filename}.${process.pid}.tmp`;
   fs.writeFileSync(temp, JSON.stringify(next, null, 2), 'utf8');
@@ -331,7 +340,7 @@ function toolCatalogue(participantId = 'rarity') {
     },
   ];
   const result = [...catalogue.slice(0, 3), ...workspaceTools, ...catalogue.slice(3)];
-  return participantId === 'codex' ? result.filter(tool => !['identify', 'send', 'receive', 'remember'].includes(tool.name)) : result;
+  return participantId === 'codex' ? result.filter(tool => !['identify', 'ask_wayglass', 'list_wayglass_chats', 'send', 'receive', 'remember'].includes(tool.name)) : result;
 }
 
 function tokenFromLocalConfig(env = process.env, tokenFile) {
@@ -366,6 +375,16 @@ function createWayglassMcpBridge({
 } = {}) {
   const roster = contractRegistryProjection();
   const projects = new WorkspaceProjects({ directory: workspaceDirectory });
+  const activeConversations = new Map();
+  // Within a host process, messages in the same thread are sent in order.
+  // The saved archive is the cross-restart boundary; no reply is invented.
+  async function serialiseConversation(ref, operation) {
+    const preceding = activeConversations.get(ref) || Promise.resolve();
+    const running = preceding.catch(()=>{}).then(operation);
+    activeConversations.set(ref,running);
+    try{return await running;}
+    finally{if(activeConversations.get(ref)===running)activeConversations.delete(ref);}
+  }
 
   async function discoverWayglassRoutes() {
     try {
@@ -548,6 +567,7 @@ function createWayglassMcpBridge({
     const question = cleanText(args.text, 12000);
     if (!question) throw new Error('A question for Wayglass is required.');
     const conversationRef = safeConversationRef(args.conversation_ref, 'rarity-wayglass');
+    return serialiseConversation(conversationRef,async()=>{
     const records = readConversation(storePath, conversationRef, 64);
     // A caller cannot attach a different participant to an existing thread.
     if (records.some(item => item.target !== 'wayglass'))
@@ -602,6 +622,7 @@ function createWayglassMcpBridge({
         provider:data.provider,model:data.model,receipt:routeReceipt},
       persistence:{scope:'wayglass-host-mcp-ledger',saved:true},
       canon_commit:false};
+    });
   }
 
   function listWayglassChats() {
