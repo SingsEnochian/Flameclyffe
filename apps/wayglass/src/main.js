@@ -1,4 +1,5 @@
 import './styles.css';
+import {wayglassTimer,wayglassPerformanceSnapshot} from './performance-diagnostics.js';
 import './authorization.css';
 import { openWayglassAuthorization } from './authorization.js';
 import { installWayglassField } from './glass-field.js';
@@ -25,6 +26,7 @@ import { recordRouteAsWonderLight } from './wonder-light.js';
 import { registerWayglassOrgan, listWayglassOrgans } from './organ-registry.js';
 import { FIRST_WAYGLASS_ORGANS } from './organ-donors.js';
 
+const bootFinished=wayglassTimer('boot:entry-ready');
 const root = document.querySelector('#app');
 
 // Bluebird provider authorization is an explicit connection action.
@@ -132,7 +134,10 @@ root.after(shell,switcher);
 switcher.addEventListener('click',()=>{shell.hidden=!shell.hidden;switcher.setAttribute('aria-expanded',String(!shell.hidden));switcher.textContent=shell.hidden?'Explore Wayglass':'Close ship map';});
 function mountSurface(surfaceId){
   const request=mountQueue.then(async()=>{
-    const result=await mountWayglassSurface(surfaceId,root);
+    const endMount=wayglassTimer('room:mount:'+surfaceId);
+    let result;
+    try { result=await mountWayglassSurface(surfaceId,root); }
+    finally { endMount(); }
     spelling.apply(root);
     document.documentElement.dataset.wayglassSurface=surfaceId;
     for(const button of shell.querySelectorAll('[data-surface-id]')){
@@ -165,8 +170,12 @@ const wayglass = Object.freeze({
 });
 
 globalThis.__wayglassOS = wayglass;
+// Browser-local, metadata-only timings. Accessible from DevTools:
+// __wayglassPerformance(). No transcripts, credentials or network telemetry.
+globalThis.__wayglassPerformance = wayglassPerformanceSnapshot;
 
 const roomQuery=new URLSearchParams(globalThis.location?.search||'').get('room');
 const entry=resolveWayglassEntry({available:listWayglassSurfaces(),room:roomQuery});
 await wayglass.mount(entry.surface_id);
+bootFinished();
 installVoyageInbox();
