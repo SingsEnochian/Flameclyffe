@@ -1,0 +1,69 @@
+# Wayglass · Eightfold Möbius systems map (quad core)
+
+**Author:** Faer Uial · 2026-11-06 · at Rowan's request ("systems wide", "quad cored")
+**Engine:** `lib/wayglass-mobius.cjs`, exposed through the kernel (`openMobiusLineage`, `runQuadCore`, `verifyMobiusChain`).
+**Semantics:** WTL RFC-0001 §8–§9 and §20–§22 (PR #553). The engine is the host-level ship cycle; Wyrdrune is the language programs will later be written in. One shared WCE-1 encoder (`lib/wyrdrune/canonical.cjs`, byte-identical to #553) makes their checkpoints agree.
+
+## The octo core: two quads (engine v0.2)
+
+| Quad | Cores (one phase each) |
+|---|---|
+| **Outbound** | 1 Perceive · 2 Compress · 3 Release · 4 Verify |
+| **Homebound** | 5 Integrate · 6 Choose · 7 Return · 8 Transcend |
+
+The **twist** is the handoff from core 4 to core 5, where the strip turns over. Up to eight lineages in flight (`runOctoCore`). A **gestalt** at Withness gathers every lineage's latest spiral. Each cycle perceives the *others* as frozen, attributed observation (never its own echo), and records the snapshot's digest so it stays replayable. `echo` and `echo_watch` give the Coherence Resistance signal. Flight review: `MOBIUS_FLIGHT_REVIEW.md`.
+
+## The quad core (v0.1 layout, still available)
+
+| Core | Phases | Role | Ray angles |
+|---|---|---|---|
+| **I · Intake** | Perceive, Compress | take the world in | 0°, 45° |
+| **II · Trial** | Release, Verify | open it up and test it | 90°, 135° |
+| **III · Judgment** | Integrate, Choose | weave and decide | 180°, 225° |
+| **IV · Passage** | Return, Transcend | commit and carry | 270°, 315° |
+
+Withness coordinates from the center. Four cores times two faces is eight.
+
+**Sequential within a lineage, parallel across lineages.** A lineage's next cycle needs this cycle's carry, so one lineage never has two cycles in flight. The quad core pipelines *different* lineages: up to four cycles in flight, one per core. Core IV serializes every commit, and Withness keeps the ledger. [VERIFIED] In tests, four lineages ran with all four cores busy at once (`peak_concurrency = 4`), and each pipelined chain was digest-identical to its solo run.
+
+## The Möbius Spiral: unbounded growth
+
+Every committed cycle also turns a spiral recorded in its checkpoint (`spiral` field), built on Bifröst's canonical compression-release law with four refinements (proposal to the Math Spine: `docs/mathematics/BIFROST_SPIRAL_REFINEMENTS_PROPOSAL.md`):
+- **Compounding growth:** the law drives `ln r`, a logarithmic spiral. Growth feeds growth, with no cap and no decay. The additive Bifröst radius is kept beside it.
+- **Unwrapped winding:** every turn is remembered. Half-turn parity equals the Möbius face.
+- **Chirality:** compression-led and release-led turns twist differently; both push outward.
+- **Possibility as propulsion:** systems report what they *gather* and *generate* (`ctx.possibility`), counted on the ray of the phase where it arose. **Chaos** is its spread over the Chaos Star's eight rays. **Harmony** (`ctx.harmony`) is how much coheres. Their harmonic mean scales the thrust: Harmony steers, never brakes.
+- **Harmony slot:** `hearthweave-local` by default. Nocturne's Harmony can fill it only via `nocturne:approved-mapping:<ref>` (sovereignty).
+
+There is no stopping condition by default. A Möbius fixed point with growth still positive is a *stable orbit still climbing*, not an end. Bounds on spending, irreversible acts, consent and Feather stay in the host: the hull, not a ceiling.
+
+[VERIFIED] Live bloodstream dry run, turn 1: climbing, growth ×3.81, compression-led, chaos 0.33, harmony 0.60.
+
+## Two readings of the Eightfold, reconciled
+
+The existing Eightfold CI (`scripts/wayglass-eightfold-parallel.mjs`) runs the eight phases as **parallel organ lanes**: each lane is a subsystem's test, all at once. The RFC and this engine run them as a **sequential cycle**. Both are kept: they are the same ship seen as anatomy (which organ owns which phase) and as heartbeat (the order a cycle passes through them). The quad core is where they meet: organs work concurrently while each lineage's cycle moves through them in order.
+
+## Systems and their phases
+
+| System | Where | As a Möbius lineage | State |
+|---|---|---|---|
+| **Bloodstream** | `scripts/wayglass-bloodstream.mjs` | one pulse = one cycle; carry `{pulse}`; checkpoints persisted on a `wayglass:lineage` issue | **[VERIFIED] adopted.** A live dry run committed cycle 1 on the outer face with all eight receipts |
+| **Training loop** | `lib/wayglass-mobius-training.mjs`, `scripts/wayglass-training-cycle.mjs` | one training cycle = one cycle; live DEEP Observer + bloodstream head perceived; Nikola picks a Crow drill plus one of eight Möbius drills; delegate answers, frozen, eight concept tests in Verify, different-model judge; carry `{cycles, pass, partial, fail, ungraded}`; ledger on `wayglass/training-ledger` | **[VERIFIED] in tests** (11/11 with scripted models; real Crow trainer exercised). First live run needs merge to `main` |
+| Autonomous circulation | `scripts/wayglass-autonomous-circulation.mjs` | Perceive issues → Choose task → Return diagnostic receipt | [PROPOSED] adopt next. Smallest, same author lane |
+| Eightfold parallel / generations | `scripts/wayglass-eightfold-*.mjs` | already the anatomy view; each lane receipt cites the current bloodstream checkpoint | [PROPOSED] |
+| Kernel cognition preflight | `lib/wayglass-kernel.cjs` (#544) | Verify for model turns | [PROPOSED] after #544 lands |
+| Return Engine | `apps/wayglass` return trials, `lib/wayglass-stop-receipt*` | persists and restores checkpoints; cold return = resume from the last one | [PROPOSED] the natural home for checkpoint storage |
+| Observer / DEEP | `apps/starwell`, Supabase `observer_*` | Perceive organ: normalized measurements in | [PROPOSED] |
+| Writing Room routes | `apps/wayglass/src/route-client.js`, server router | a model turn as a cycle: staged reply, Verify, Return | [PROPOSED] touches the most-contended files (25 open PRs on `main.js`), so last |
+| Wyrdrune | `lib/wyrdrune` (#552, #553) | the language whose programs *are* lineages | specified in RFC-0001 |
+
+## Adoption rule
+
+One system per PR, through the bloodstream's reconciliation, never as a ship-wide rewrite. Each adoption must:
+1. keep the system's existing tests green;
+2. add a test proving its cycle produces eight receipts and a valid chain;
+3. keep the system's own identity: `participant ≠ worker ≠ model ≠ session ≠ backend`.
+
+## Not claimed
+
+Only the bloodstream and the training loop are adopted. No other system has been changed. Quad-core concurrency is asynchronous concurrency in one Node process, real for I/O-bound phases such as network calls. CPU-parallel worker threads are not used: phase functions are closures and cannot be moved between threads.
