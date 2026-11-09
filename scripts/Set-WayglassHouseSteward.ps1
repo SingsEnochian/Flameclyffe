@@ -10,7 +10,8 @@ if (-not (Test-Path $envDir)) { throw 'Wayglass host directory not found.' }
 
 function New-Secret([int]$byteCount) {
   $bytes = New-Object byte[] $byteCount
-  [System.Security.Cryptography.RandomNumberGenerator]::Fill($bytes)
+  $rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+  try { $rng.GetBytes($bytes) } finally { $rng.Dispose() }
   return [Convert]::ToBase64String($bytes).TrimEnd('=').Replace('+','-').Replace('/','_')
 }
 
