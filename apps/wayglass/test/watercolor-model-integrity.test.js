@@ -69,6 +69,33 @@ test('mode invitation passes exact history and canonical checkpoint with partici
  await assert.rejects(inviteWatercolorMode({mode:'play',checkpoint:{checkpoint_id:'invented'}}),/Canonical host checkpoint/);
 });
 
+test('Wayglass ship voice can answer in Watercolour with exact seat and model receipt',async()=>{
+  let dispatched;
+  const returned={
+    schema:'wayglass.route-turn/v0.1',route_id:'wayglass:ship',
+    provider:'ollama',model:'ornith-fixture',
+    participant_id:'wayglass',output:'I want to explore the quiet horizon.',
+    receipt:{response_id:'ship:fixture',character_id:'wayglass',voice_seat_kind:'system-voice-over-external-route'},
+  };
+  const response=await inviteWatercolorMode({
+    mode:'dream',authorText:'What do you notice?',routeId:'wayglass:ship',sessionId:'wc-fixture',
+    invoke:async args=>{dispatched=args;return returned;},
+  });
+  assert.equal(dispatched.characterId,'wayglass');
+  assert.equal(dispatched.participantId,null,'the host pins this system identity; no unsolicited inheritance resolver');
+  assert.equal(dispatched.routeId,'wayglass:ship');
+  assert.equal(response.route_id,'wayglass:ship');
+  assert.equal(response.text,returned.output);
+  await assert.rejects(inviteWatercolorMode({
+    mode:'dream',routeId:'wayglass:ship',
+    invoke:async()=>({...returned,participant_id:'other'}),
+  }),error=>error.code==='WATERCOLOR_SHIP_SEAT_MISMATCH');
+  await assert.rejects(inviteWatercolorMode({
+    mode:'dream',routeId:'wayglass:ship',
+    invoke:async()=>({...returned,receipt:{response_id:'ship:fixture'}}),
+  }),error=>error.code==='WATERCOLOR_SHIP_SEAT_MISMATCH');
+});
+
 test('learning pigment requires provenance and never upgrades a receipt label to verified learning',()=>{
  assert.throws(()=>publishWatercolorActivity({kind:'learning:verified'}),/receipt reference/);
  const events=[],unsubscribe=subscribeWatercolorActivity(event=>events.push(event));
