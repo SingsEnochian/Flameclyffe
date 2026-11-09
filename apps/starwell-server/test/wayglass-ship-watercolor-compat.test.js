@@ -31,8 +31,8 @@ test('Watercolour legacy request derives Wayglass ship seat, preserving steward 
     const unauthorized=await request(body,false);
     assert.equal(unauthorized.status,401);
     const response=await request(body);
-    assert.equal(response.status,200,await response.text().catch(()=>'')); 
     const data=await response.json();
+    assert.equal(response.status,200,JSON.stringify(data));
     assert.equal(data.route_id,'wayglass:ship');
     assert.equal(data.participant_id,'wayglass');
     assert.equal(data.receipt.character_id,'wayglass');
