@@ -49,7 +49,7 @@ const response=(body,{ok=true,status=200}={})=>({ok,status,json:async()=>structu
 const catalogue={routes:[{route_id:'local:ollama',provider:'ollama',model:'ornith-captured',label:'Captured local transport',configured:true}]};
 const capturedTurn={schema:'wayglass.route-turn/v0.1',route_id:'local:ollama',output:'Captured transport fixture: the next question is open.',provider:'ollama',model:'ornith-captured',receipt:{schema:'wayglass.route-receipt/v0.1',observation_id:'capture:first-contact:1'}};
 function deferred(){let resolve;const promise=new Promise(done=>resolve=done);return {promise,resolve};}
-async function setup({respond=async()=>response(capturedTurn),offline=false,storage=new Map()}={}){
+async function setup({respond=async()=>response(capturedTurn),offline=false,storage=new Map(),ship=false}={}){
  if(journeyLedger.snapshot().feather_stopped)journeyLedger.resume({confirmed:true});
  if(wayglassSomaticSound.snapshot().feather_stopped)wayglassSomaticSound.releaseFeather({confirmed:true});
  const descriptors=new Map(),frames=new Map(),calls=[];let sequence=0;
@@ -59,7 +59,10 @@ async function setup({respond=async()=>response(capturedTurn),offline=false,stor
  replace('requestAnimationFrame',callback=>{const id=++sequence;frames.set(id,callback);return id;});
  replace('cancelAnimationFrame',id=>frames.delete(id));
  replace('localStorage',{getItem:key=>storage.get(key)??null,setItem:(key,value)=>storage.set(key,value),removeItem:key=>storage.delete(key)});
- replace('fetch',async(url,options={})=>{calls.push({url,options});if(url==='/api/v1/wayglass/routes'){if(offline)throw new Error('Captured transport unavailable');return response(catalogue);}if(url==='/api/v1/wayglass/respond')return respond(url,options);throw new Error('Unexpected captured request: '+url);});
+ replace('fetch',async(url,options={})=>{calls.push({url,options});if(url==='/api/v1/wayglass/routes'){if(offline)throw new Error('Captured transport unavailable');return response(ship?{routes:[{route_id:'wayglass:ship',provider:'ollama',model:'ornith-captured',label:'Wayglass · Ship Voice',configured:true},...catalogue.routes]}:catalogue);}if(url==='/api/v1/wayglass/respond'){
+    if(ship)return response({...capturedTurn,route_id:'wayglass:ship',participant_id:'wayglass',receipt:{...capturedTurn.receipt,character_id:'wayglass',voice_seat_kind:'system-voice-over-external-route'}});
+    return respond(url,options);
+  }throw new Error('Unexpected captured request: '+url);});
  const root=new Root(),mounted=await mountLivingWatercolorSurface(root);await flush();
  const q=id=>{const element=root.querySelector('#'+id);assert.ok(element,'Missing mounted control '+id);return element;};
  let destroyed=false;
