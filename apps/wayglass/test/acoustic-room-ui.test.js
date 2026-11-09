@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
+import {createShipSoundscape} from '../src/ship-soundscape.js';
 
 // Execute the production mount and its real handlers against a deliberately
 // small DOM adapter. This verifies application wiring; it is not browser,
@@ -56,9 +57,9 @@ function setup({loadCompositionControls,storage:stored=new Map()}={}){
  replace('ResizeObserver',class{observe(){}disconnect(){counts.resizeDisconnected++;}});
  replace('addEventListener',(type,handler)=>globalListeners.set(type,handler));
  replace('removeEventListener',(type,handler)=>{if(globalListeners.get(type)===handler)globalListeners.delete(type);});
- const root=new Root(),dispose=mountWayglassAcousticRoom(root,{loadCompositionControls}),$=selector=>{const element=root.querySelector(selector);assert.ok(element,`missing ${selector}`);return element;};
+ const soundscape=createShipSoundscape(),root=new Root(),dispose=mountWayglassAcousticRoom(root,{loadCompositionControls,soundscape}),$=selector=>{const element=root.querySelector(selector);assert.ok(element,`missing ${selector}`);return element;};
  const packet=()=>JSON.parse($('[data-inspector]').textContent);
- return {root,$,packet,storage,counts,globalListeners,dispose,restore(){dispose();for(const [key,descriptor] of descriptors){if(descriptor)Object.defineProperty(globalThis,key,descriptor);else delete globalThis[key];}}};
+ return {root,$,packet,storage,counts,globalListeners,dispose,restore(){dispose();soundscape.dispose();for(const [key,descriptor] of descriptors){if(descriptor)Object.defineProperty(globalThis,key,descriptor);else delete globalThis[key];}}};
 }
 const near=(actual,expected)=>assert.ok(Math.abs(actual-expected)<1e-10,`${actual} != ${expected}`);
 
@@ -124,7 +125,10 @@ test('Feather clears active audio and mounted cleanup releases handlers and cont
   assert.equal(f.$('[data-audio]').checked,false);assert.equal(f.$('[data-ambience]').checked,false);
   assert.ok(f.counts.stops>=3);assert.match(f.$('[data-audio-state]').textContent,/Sound stopped/);
   f.dispose();assert.equal(f.root.listeners.size,0);assert.equal(f.globalListeners.size,0);
-  assert.equal(f.counts.resizeDisconnected,1);assert.equal(f.counts.closed,1);
+  assert.equal(f.counts.resizeDisconnected,1);
+  // The ship owns the one AudioContext across room unmounts. Feather stops
+  // voices; room teardown must not close a shared device used by other rooms.
+  assert.equal(f.counts.closed,0,'Room navigation must not dispose the ship-owned AudioContext');
  }finally{f.restore();}
 });
 test('malformed or corrupted saved state leaves the active room intact',()=>{
