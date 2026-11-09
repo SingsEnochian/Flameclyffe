@@ -49,7 +49,7 @@ concurrency:
 jobs:
   build-windows-installer:
     name: Build Windows x64 NSIS installer
-    runs-on: windows-latest
+    runs-on: windows-2022
     timeout-minutes: 40
     env:
       CSC_IDENTITY_AUTO_DISCOVERY: "false"
