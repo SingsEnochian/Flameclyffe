@@ -85,8 +85,33 @@ def _votive(name, dedication):
     })
 
 
+UNKNOWN = {"wtl": "unknown"}
+
+
+def _is_unknown(v):
+    return isinstance(v, dict) and len(v) == 1 and v.get("wtl") == "unknown"
+
+
+class HardStop(RuntimeError):
+    """Ends execution outright (budget, denied capability, malformed IR), as in runtime.mjs."""
+
+
+class Verdict(Exception):
+    """A failed require: the cycle rolls back."""
+
+
+def _kind(v):
+    if isinstance(v, bool):
+        return "truth"
+    if isinstance(v, (int, float)):
+        return "number"
+    if isinstance(v, str):
+        return "text"
+    return None
+
+
 def _ident(name):
-    """Same rule as the JS compiler: [\p{L}_][\p{L}\p{N}_]*."""
+    r"""Same rule as the JS compiler: [\p{L}_][\p{L}\p{N}_]*."""
     return (isinstance(name, str) and bool(name)
             and (name[0] == "_" or unicodedata.category(name[0]).startswith("L"))
             and all(c == "_" or unicodedata.category(c)[0] in "LN" for c in name[1:]))
@@ -133,7 +158,13 @@ class Execution:
     def tick(self):
         self.operations += 1
         if self.operations > self.max_operations:
-            raise RuntimeError("WTL operation budget exceeded")
+            raise HardStop("WTL operation budget exceeded")
+
+    @staticmethod
+    def _truth(v, what):
+        if v is True or v is False or _is_unknown(v):
+            return v
+        raise TypeError(what + " requires a truth value")
 
     def expression(self, node):
         self.tick()
@@ -143,6 +174,36 @@ class Execution:
         if kind == "literal":
             value = node["v"]
             return float(value) if isinstance(value, (int, float)) and not isinstance(value, bool) else value
+        if kind == "unknown":
+            return dict(UNKNOWN)
+        if kind == "compare":
+            a = self.expression(node["a"])
+            b = self.expression(node["b"])
+            if _is_unknown(a) or _is_unknown(b):
+                return dict(UNKNOWN)
+            op = node["op"]
+            if op in ("==", "!="):
+                if _kind(a) is None or _kind(b) is None:
+                    raise TypeError("Equality requires numbers, text or truth values")
+                equal = _kind(a) == _kind(b) and a == b
+                return equal if op == "==" else not equal
+            if _kind(a) != "number" or _kind(b) != "number":
+                raise TypeError("Ordering comparison requires numbers")
+            return {"<": a < b, "<=": a <= b, ">": a > b, ">=": a >= b}[op]
+        if kind == "not":
+            v = self._truth(self.expression(node["v"]), "not")
+            return dict(UNKNOWN) if _is_unknown(v) else not v
+        if kind == "logic":
+            op = node["op"]
+            a = self._truth(self.expression(node["a"]), op)
+            b = self._truth(self.expression(node["b"]), op)
+            if op == "and":
+                if a is False or b is False:
+                    return False
+                return dict(UNKNOWN) if _is_unknown(a) or _is_unknown(b) else True
+            if a is True or b is True:
+                return True
+            return dict(UNKNOWN) if _is_unknown(a) or _is_unknown(b) else False
         if kind == "read":
             name = node["name"]
             if name not in self.scope:
@@ -192,16 +253,27 @@ class Execution:
                     raise TypeError("votive(name,dedication) requires two arguments")
                 return _votive(*args)
             if name == "bridge":
-                raise RuntimeError("Bridge capability unavailable: Python backend is pure")
+                raise HardStop("Bridge capability unavailable: Python backend is pure")
             if name == "star":
                 raise RuntimeError("Star trigonometric geometry not yet parity-certified")
             raise NameError("Unknown WTL function " + str(name))
-        raise TypeError("Invalid WTL expression")
+        raise HardStop("Invalid WTL expression")
 
     def execute(self):
         units = self.ir.get("units")
         if not isinstance(units, list):
             raise TypeError("Invalid WTL IR")
+        # A scoped unit is one lineage cycle (see runtime.mjs): staged emits, require,
+        # rollback before Return, halt after it, checkpoints chained to the lineage root.
+        lineage_root = None
+        if self.continuing:
+            lineage_root = digest({"source_hash": self.ir["sourceHash"], "ir_digest": digest(self.ir),
+                                   "seeds": self.register, "participant": None, "intent": None})
+        self.lineage_root = lineage_root
+        self.checkpoints = []
+        self.status = "committed"
+        self.verdict = None
+        self.completed = 0
         for unit_index, unit in enumerate(units):
             if unit.get("k") != "mobius" or len(unit.get("phases", [])) != 8:
                 raise TypeError("Invalid WTL IR")
@@ -217,46 +289,84 @@ class Execution:
                 self.scope = dict(self.register)
             else:
                 self.scope = self.environment
-            for index, phase in enumerate(unit["phases"]):
-                if phase.get("phase") != PHASES[index]:
-                    raise TypeError("Noncanonical Eightfold phase order")
-                self.tick()
-                before = len(self.output)
-                for stmt in phase["body"]:
+            staged = [] if carried else None
+            committed = not carried
+            phase_now = None
+            try:
+                for index, phase in enumerate(unit["phases"]):
+                    if phase.get("phase") != PHASES[index]:
+                        raise TypeError("Noncanonical Eightfold phase order")
+                    phase_now = PHASES[index]
                     self.tick()
-                    kind = stmt["k"]
-                    if kind == "let":
-                        name = stmt["name"]
-                        if name in self.scope:
-                            raise SyntaxError("Duplicate binding " + name)
-                        self.scope[name] = self.expression(stmt["e"])
-                    elif kind == "set":
-                        name = stmt["name"]
-                        if name not in self.scope:
-                            raise NameError("Unknown binding " + name)
-                        self.scope[name] = self.expression(stmt["e"])
-                    elif kind == "emit":
-                        self.output.append(self.expression(stmt["e"]))
-                    elif kind == "carry" and carried and PHASES[index] == "transcend":
-                        out[stmt["name"]] = self.expression(stmt["e"])
-                    else:
-                        raise TypeError("Invalid statement")
-                self.receipts.append({
-                    "phase": PHASES[index],
-                    "emitted": len(self.output) - before,
-                    "operations": self.operations,
-                    "sourceHash": self.ir["sourceHash"],
-                    "principalId": None,
-                })
-            if carried:
-                if out:
-                    self.register = _carry_record(out, "carry")
-                self.crossings.append({
-                    "unit": unit_index,
-                    "carried_in": digest(carried_in),
-                    "carried_out": digest(self.register),
-                    "names": sorted(self.register),
-                })
+                    target = self.output if committed else staged
+                    before = len(target)
+                    for stmt in phase["body"]:
+                        self.tick()
+                        kind = stmt["k"]
+                        if kind == "let":
+                            name = stmt["name"]
+                            if name in self.scope:
+                                raise SyntaxError("Duplicate binding " + name)
+                            self.scope[name] = self.expression(stmt["e"])
+                        elif kind == "set":
+                            name = stmt["name"]
+                            if name not in self.scope:
+                                raise NameError("Unknown binding " + name)
+                            self.scope[name] = self.expression(stmt["e"])
+                        elif kind == "emit":
+                            target.append(self.expression(stmt["e"]))
+                        elif kind == "carry" and carried and PHASES[index] == "transcend":
+                            out[stmt["name"]] = self.expression(stmt["e"])
+                        elif kind == "require" and carried and PHASES[index] == "verify":
+                            value = self.expression(stmt["e"])
+                            if value is True:
+                                pass
+                            elif value is False or _is_unknown(value):
+                                raise Verdict(stmt.get("reason") or
+                                              ("require is unknown" if _is_unknown(value) else "require failed"))
+                            else:
+                                raise TypeError("require needs a truth value")
+                        else:
+                            raise HardStop("Invalid statement")
+                    self.receipts.append({
+                        "phase": PHASES[index],
+                        "emitted": len(target) - before,
+                        "operations": self.operations,
+                        "sourceHash": self.ir["sourceHash"],
+                        "principalId": None,
+                    })
+                    if not committed and PHASES[index] == "return":
+                        self.output.extend(staged)
+                        staged = None
+                        committed = True
+                if carried:
+                    following = _carry_record(out, "carry") if out else self.register
+                    cycle = len(self.checkpoints) + 1
+                    checkpoint = {
+                        "cycle": cycle,
+                        "face": "outer" if cycle % 2 else "inner",
+                        "prev": lineage_root if cycle == 1 else digest(self.checkpoints[-1]),
+                        "state": digest(self.scope),
+                        "carry": digest(following),
+                    }
+                    self.register = following
+                    self.checkpoints.append(checkpoint)
+                    self.crossings.append({
+                        "unit": unit_index,
+                        "carried_in": digest(carried_in),
+                        "carried_out": digest(self.register),
+                        "names": sorted(self.register),
+                    })
+                self.completed += 1
+            except HardStop:
+                raise
+            except Exception as error:
+                if not carried:
+                    raise
+                self.status = "halted" if committed else "rolled-back"
+                self.verdict = {"status": "failed", "unit": unit_index, "phase": phase_now,
+                                "reason": str(error), "committed_output": committed}
+                break
         self.scope = self.environment
         result = {
             "schema": "wyrdrune.execution/v0.1",
@@ -264,7 +374,8 @@ class Execution:
             "output": self.output,
             "bindings": self.environment,
             "receipts": self.receipts,
-            "withness": {"center": "withness", "completedCycles": len(units)},
+            "withness": {"center": "withness",
+                         "completedCycles": self.completed if self.continuing else len(units)},
         }
         if self.continuing:
             result["continuity"] = {
@@ -274,6 +385,10 @@ class Execution:
                 "carry_digest": digest(self.register),
                 "crossings": self.crossings,
             }
+            result["status"] = self.status
+            result["verdict"] = self.verdict
+            result["checkpoints"] = self.checkpoints
+            result["lineage"] = {"root": self.lineage_root, "intent": None}
         return result
 
 
