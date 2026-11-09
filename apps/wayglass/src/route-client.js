@@ -152,6 +152,7 @@ export async function invokeWayglassRoute({
   fetchImpl = fetch,
 } = {}) {
   publishWatercolorActivity({kind:'route:pending',actor:'wayglass:route-client',intensity:0.48});
+  const endRoute=wayglassTimer('model:roundtrip:'+String(routeId||'unknown'));
   try {
   const response = await fetchImpl('/api/v1/wayglass/respond', {
     method: 'POST',
@@ -186,7 +187,7 @@ export async function invokeWayglassRoute({
   } catch (error) {
     publishWatercolorActivity({kind:'route:failed',actor:'wayglass:route-client',intensity:0.44});
     throw error;
-  }
+  } finally { endRoute(); }
 }
 
 export async function queueObserverDevelopmentProposal(proposal, fetchImpl = fetch) {
