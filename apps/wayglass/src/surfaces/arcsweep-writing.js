@@ -616,9 +616,10 @@ export async function mountArcSweepWritingSurface(root) {
   });
   chatOpen.addEventListener('click',()=>{
     if(busy){chatSaveStatus.textContent='Finish the active turn before opening a saved chat.';return;}
+    const requestedSession=chatPicker.value;
     if(!chatVault||!persistChat())return;
     try{
-      const saved=chatVault.open(chatPicker.value);
+      const saved=chatVault.open(requestedSession);
       if(!saved)throw new Error('Select a saved conversation');
       session=saved.session_id;
       globalThis.sessionStorage?.setItem('wayglass:first-contact-session',session);
