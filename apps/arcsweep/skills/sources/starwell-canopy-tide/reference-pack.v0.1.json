@@ -1,0 +1,217 @@
+{
+  "schema": "arcsweep.starwell-reference-palette/v0.1",
+  "palette_id": "starwell-canopy-tide-first-pass-2026-10-18",
+  "title": "The Canopy and the Tide",
+  "title_status": "provisional-working-name",
+  "prepared_on": "2026-10-18",
+  "authority": "rowan-consented-provisional-reference-curation",
+  "world_scope": {
+    "anchor": "Terra Aeterna",
+    "location_relation": "proposed-study-only",
+    "canon_write": false
+  },
+  "primary_board": {
+    "url": "https://www.pinterest.com/rowanwillowart/starwell/",
+    "pin_count_observed": 273,
+    "section_count_observed": 6,
+    "access": "connected-browser-section-index",
+    "section_pin_total_observed": 261,
+    "count_difference_unclassified": 12,
+    "count_difference_note": "Observed section counts total 261 vs parent board total 273; 12-Pin difference is not independently classified as unsectioned."
+  },
+  "selection_policy": {
+    "target_pin_count_min": 12,
+    "target_pin_count_max": 18,
+    "current_shortlisted_pin_count": 8,
+    "rule": "Only individually identified source Pins can be shortlisted; a section URL is a review queue, not a Pin. Shortlist is not canon."
+  },
+  "section_queues": [
+    {
+      "id": "world",
+      "url": "https://www.pinterest.com/rowanwillowart/starwell/world/",
+      "pin_count_observed": 110,
+      "inspection": "section-list-only",
+      "review_status": "queue",
+      "promotion_count": 0
+    },
+    {
+      "id": "colours",
+      "url": "https://www.pinterest.com/rowanwillowart/starwell/colours/",
+      "pin_count_observed": 53,
+      "inspection": "section-list-only",
+      "review_status": "queue",
+      "promotion_count": 0
+    },
+    {
+      "id": "fauna",
+      "url": "https://www.pinterest.com/rowanwillowart/starwell/fauna/",
+      "pin_count_observed": 40,
+      "inspection": "section-list-only",
+      "review_status": "queue",
+      "promotion_count": 0
+    },
+    {
+      "id": "fashion",
+      "url": "https://www.pinterest.com/rowanwillowart/starwell/fashion/",
+      "pin_count_observed": 38,
+      "inspection": "section-list-only",
+      "review_status": "queue",
+      "promotion_count": 0
+    },
+    {
+      "id": "map",
+      "url": "https://www.pinterest.com/rowanwillowart/starwell/map/",
+      "pin_count_observed": 12,
+      "inspection": "section-list-only",
+      "review_status": "queue",
+      "promotion_count": 0
+    },
+    {
+      "id": "animation",
+      "url": "https://www.pinterest.com/rowanwillowart/starwell/animation/",
+      "pin_count_observed": 8,
+      "inspection": "section-list-only",
+      "review_status": "queue",
+      "promotion_count": 0
+    }
+  ],
+  "pins": [
+    {
+      "id": "pin-1066790230708408265",
+      "section": "world",
+      "url": "https://www.pinterest.com/pin/1066790230708408265/",
+      "observed_description": "Floating garden islands, waterfalls, trees and butterflies",
+      "design_use": "Suspended habitats, water movement and a vertical watershed",
+      "status": "shortlisted",
+      "verification": "visible-in-connected-browser-section-excerpt",
+      "creator": "not-verified",
+      "usage_rights": "not-verified",
+      "asset_imported": false,
+      "is_canon": false
+    },
+    {
+      "id": "pin-1066790230708408244",
+      "section": "world",
+      "url": "https://www.pinterest.com/pin/1066790230708408244/",
+      "observed_description": "Futuristic city enclosed by trees and floating water features",
+      "design_use": "Tree-integrated civic infrastructure and constructed water systems",
+      "status": "shortlisted",
+      "verification": "visible-in-connected-browser-section-excerpt",
+      "creator": "not-verified",
+      "usage_rights": "not-verified",
+      "asset_imported": false,
+      "is_canon": false
+    },
+    {
+      "id": "pin-1066790230708408242",
+      "section": "world",
+      "url": "https://www.pinterest.com/pin/1066790230708408242/",
+      "observed_description": "Aerial city with many trees and buildings in the sky",
+      "design_use": "Canopy density, aerial bridges, skyline and layered mobility",
+      "status": "shortlisted",
+      "verification": "visible-in-connected-browser-section-excerpt",
+      "creator": "not-verified",
+      "usage_rights": "not-verified",
+      "asset_imported": false,
+      "is_canon": false
+    },
+    {
+      "id": "pin-1066790230708408169",
+      "section": "world",
+      "url": "https://www.pinterest.com/pin/1066790230708408169/",
+      "observed_description": "Fantasy harbour-city plan, walled island fortress and waterways",
+      "design_use": "Port geometry, defensible shoreline and transport connections",
+      "status": "shortlisted",
+      "verification": "visible-in-connected-browser-section-excerpt",
+      "creator": "not-verified",
+      "usage_rights": "not-verified",
+      "asset_imported": false,
+      "is_canon": false
+    },
+    {
+      "id": "pin-1066790230704181890",
+      "section": "world",
+      "url": "https://www.pinterest.com/pin/1066790230704181890/",
+      "observed_description": "Large tree with branching crown",
+      "design_use": "Branch structure and spatial canopy hierarchy",
+      "status": "shortlisted",
+      "verification": "visible-in-connected-browser-section-excerpt",
+      "creator": "not-verified",
+      "usage_rights": "not-verified",
+      "asset_imported": false,
+      "is_canon": false
+    },
+    {
+      "id": "pin-1066790230708408248",
+      "section": "world",
+      "url": "https://www.pinterest.com/pin/1066790230708408248/",
+      "observed_description": "Oil painting of rocks, surf and sandy shore",
+      "design_use": "Coastal geology and contrasting tidal edge materials",
+      "status": "shortlisted",
+      "verification": "visible-in-connected-browser-section-excerpt",
+      "creator": "not-verified",
+      "usage_rights": "not-verified",
+      "asset_imported": false,
+      "is_canon": false
+    },
+    {
+      "id": "pin-1066790230704965353",
+      "section": "world",
+      "url": "https://www.pinterest.com/pin/1066790230704965353/",
+      "observed_description": "Open illustrated book with house drawing",
+      "design_use": "Storybook architectural scale and spatial notation",
+      "status": "shortlisted",
+      "verification": "visible-in-connected-browser-section-excerpt",
+      "creator": "not-verified",
+      "usage_rights": "not-verified",
+      "asset_imported": false,
+      "is_canon": false
+    },
+    {
+      "id": "pin-1066790230708408154",
+      "section": "world",
+      "url": "https://www.pinterest.com/pin/1066790230708408154/",
+      "observed_description": "Cartography primer with aerial coastal-map imagery",
+      "design_use": "Mapmaking method rather than a geographic source",
+      "status": "shortlisted",
+      "verification": "visible-in-connected-browser-section-excerpt",
+      "creator": "not-verified",
+      "usage_rights": "not-verified",
+      "asset_imported": false,
+      "is_canon": false
+    },
+    {
+      "id": "pin-1066790230708408150",
+      "section": "world",
+      "url": "https://www.pinterest.com/pin/1066790230708408150/",
+      "observed_description": "Amsterdam city map art print",
+      "design_use": "Real-world cartography reference; not a STARWELL place",
+      "status": "hold",
+      "verification": "visible-in-connected-browser-section-excerpt",
+      "creator": "not-verified",
+      "usage_rights": "not-verified",
+      "asset_imported": false,
+      "is_canon": false
+    },
+    {
+      "id": "pin-1066790230708408148",
+      "section": "world",
+      "url": "https://www.pinterest.com/pin/1066790230708408148/",
+      "observed_description": "Abstract black-and-white map with red points",
+      "design_use": "Graphic map aesthetic; not accepted as geography or palette",
+      "status": "hold",
+      "verification": "visible-in-connected-browser-section-excerpt",
+      "creator": "not-verified",
+      "usage_rights": "not-verified",
+      "asset_imported": false,
+      "is_canon": false
+    }
+  ],
+  "source_hygiene": {
+    "no_image_rehosting": true,
+    "no_licence_claims": true,
+    "no_automatic_canon_promotion": true,
+    "missing_section_pin_ids": "await source-specific review",
+    "map_links_are_visual_references_only": true
+  }
+}

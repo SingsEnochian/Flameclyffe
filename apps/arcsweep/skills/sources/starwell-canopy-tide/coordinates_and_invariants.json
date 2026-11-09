@@ -1,0 +1,37 @@
+{
+  "schema": "starwell.cc3-cartographic-study/v0.1",
+  "created_on": "2026-10-18",
+  "name": "The Canopy and the Tide",
+  "scope": "Terra Aeterna, unapproved proposed location study",
+  "units": "metres (1 drawing unit = 1 m)",
+  "origin": "lower-left 0,0",
+  "extent_m": [
+    0,
+    0,
+    24000,
+    16000
+  ],
+  "trace_bitmap_pixels": [
+    2400,
+    1600
+  ],
+  "bitmap_scale_m_per_px": 10,
+  "coordinate_reliability": "original invented geospatial model, not Earth survey",
+  "flows": {
+    "main_river": "west catchment to tidal head, mouth x=12900",
+    "tributary": "north basin joins main at x=8500"
+  },
+  "vertical_datum": "relative invented mean sea level = 0 m, not tidal datum",
+  "design_tide_range_m": "UNSET: future harmonic/tidal benchmark required",
+  "floating_islands": "off map, unresolved levitation/mass/energy/water mechanism",
+  "selected_source_pin_count": 8,
+  "reference_status": "reference-only; no imported pin art",
+  "validation_needed": [
+    "open R2000 DXF in CC3+",
+    "confirm 24000x16000 metric map extents",
+    "import PNG with relative path",
+    "test sheet order and river endpoints",
+    "inspect wetland and shore geometry",
+    "author approval for any canon write"
+  ]
+}

@@ -1,0 +1,160 @@
+{
+  "schema": "arcsweep.starwell-location-study/v0.2",
+  "seed_id": "starwell-canopy-tide-location-study-001",
+  "name": "The Canopy and the Tide",
+  "authority": "proposed-design-only",
+  "status": "provisional",
+  "world_anchor": "Terra Aeterna",
+  "parent_world_link": "hypothesis-for-review",
+  "reference_pack_id": "starwell-canopy-tide-first-pass-2026-10-18",
+  "continuity_questions": {
+    "what_must_survive": [
+      "Vertical relationship among suspended gardens, forest canopy and tidal settlement",
+      "Environmental design shapes everyday cultural life",
+      "Source-to-design provenance preserved",
+      "No silent canon or world-identity merger"
+    ],
+    "what_may_change": [
+      "Landform topology and number of suspended islands",
+      "Placement of civic structures and transport links",
+      "Palette after individual Colour Pins are assessed",
+      "Fauna names and morphology after habitat review"
+    ],
+    "what_can_be_lost": [
+      "Decorative details that do not support a world rule",
+      "Incompatible copied cartography",
+      "Unneeded elements of the initial concept"
+    ],
+    "what_descendants_inherit": [
+      "Zone relationships, hydrology open question, ecological constraints and provenance"
+    ],
+    "what_world_can_teach": [
+      "Worldbuilding decisions can be audited from inspiration through hypothesis to adopted canon"
+    ]
+  },
+  "districts": [
+    {
+      "id": "high-isles",
+      "name": "Suspended Gardens",
+      "function": "upland habitat and experimental agriculture",
+      "status": "proposed",
+      "water_question": "Where does water originate and where does it return?"
+    },
+    {
+      "id": "canopy",
+      "name": "Living Canopy",
+      "function": "multilevel settlement, habitat corridors and maintained grown structures",
+      "status": "proposed",
+      "risk": "storm load and tree-health impacts"
+    },
+    {
+      "id": "port",
+      "name": "Tideport",
+      "function": "estuary market, harbour access and watershed exchange",
+      "status": "proposed",
+      "risk": "flooding and brackish-water intrusion"
+    },
+    {
+      "id": "tidal-edge",
+      "name": "Tidal Edge",
+      "function": "wetlands, nursery habitat and intertidal commons",
+      "status": "proposed",
+      "risk": "erosion and wetland loss"
+    }
+  ],
+  "connections": [
+    {
+      "from": "high-isles",
+      "to": "canopy",
+      "type": "possible vertical access",
+      "confirmed": false
+    },
+    {
+      "from": "canopy",
+      "to": "port",
+      "type": "pedestrian/cargo causeway",
+      "confirmed": false
+    },
+    {
+      "from": "port",
+      "to": "tidal-edge",
+      "type": "river and tidal exchange",
+      "confirmed": false
+    }
+  ],
+  "proposed_fauna": [
+    {
+      "name": "Mistglass Sailwing",
+      "niche": "nectar-feeding canopy pollinator and seed carrier",
+      "habitat": "high-isles/canopy",
+      "status": "original-proposal-unrelated-to-pin-species"
+    },
+    {
+      "name": "Rootveil Glider",
+      "niche": "small arboreal insectivore; sensitive to canopy fragmentation",
+      "habitat": "canopy",
+      "status": "original-proposal-unrelated-to-pin-species"
+    },
+    {
+      "name": "Tideglass Scuttler",
+      "niche": "estuarine detritivore recycling organic debris",
+      "habitat": "tidal-edge",
+      "status": "original-proposal-unrelated-to-pin-species"
+    }
+  ],
+  "palette_hypotheses": [
+    {
+      "name": "deep canopy",
+      "hex": "#142c31"
+    },
+    {
+      "name": "jade tide",
+      "hex": "#6ebaa6"
+    },
+    {
+      "name": "silt gold",
+      "hex": "#d4aa74"
+    },
+    {
+      "name": "mist blue",
+      "hex": "#8199ba"
+    },
+    {
+      "name": "chalkshell",
+      "hex": "#e6e5d6"
+    }
+  ],
+  "palette_notice": "Generated working colours, not sampled from Pinterest Colour Pins",
+  "materials": [
+    "maintained living timber",
+    "salt-tolerant masonry",
+    "woven plant fibre",
+    "lightweight bridge cable (material unresolved)"
+  ],
+  "unresolved_wonder": [
+    "Why are the garden islands suspended, and what are their energy and water budgets?",
+    "How do storms alter vertical transport and habitat corridors?",
+    "What does the settlement cultivate, trade, and protect?",
+    "Which named species appear in source fauna references once reviewed?",
+    "What aspects belong in Terra Aeterna instead of remaining a separate visual experiment?"
+  ],
+  "finish_line": "One navigable spatial schematic with four districts, three credible ecological niches and an auditable reference palette; no canon or live world-route claim.",
+  "stop_point": "Local geomorphic design prepared with 24 × 16 km metric extents. Import/inspect in CC3+ is unverified; no canon changed.",
+  "next_owner": "Rowan (selection and canon authority), ArcSweep Seedhouse (future review only)",
+  "metric_field_map": {
+    "drawing_extent_m": [
+      0,
+      0,
+      24000,
+      16000
+    ],
+    "coordinate_units": "world-local metres, southwest origin",
+    "field_kit": "CC3+ Metric Field Kit · 2026-10-18",
+    "physical_status": "synthetic geomorphic plausibility sketch, not simulated hydrology",
+    "floating_isles_location": "NOT-MAPPED",
+    "map_approval": "requires Rowan CC3+ visual/scale review",
+    "land_reference_geojson": "cc3_map_features_local_m.geojson",
+    "pin_image_rehosting": false
+  },
+  "metrics_note": "Ridgehead 54.9 m, Canopy Terrace 45.8 m, Tideport 12.0 m, Tidal Edge visitor access 7.8 m, all synthetic terrain readings."
+}
