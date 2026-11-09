@@ -25,6 +25,7 @@ import { mountWayglassLibrarySurface } from './surfaces/library.js';
 import { mountWayglassToybox } from './surfaces/toybox.js';
 import { mountWayglassCommonsSurface } from './surfaces/commons.js';
 import { mountWayglassAcousticRoom } from './surfaces/acoustic-room.js';
+import {SHIP_DECK_GROUPS,shipDeckGroup,shipDeckMatches,shipDeckDestinationLabel} from './ship-deck-navigation.js';
 import { mountWayglassQuadGestalt } from './surfaces/quad-eightfold.js';
 import { installQuadFeatherListener, readLatestQuadGestalt, subscribeQuadGestalt } from './quad-eightfold-client.js';
 import { publishWatercolorActivity } from './watercolor-bridge.js';
@@ -150,13 +151,47 @@ const browserEmbodiment = Object.freeze({
 // leave an earlier async surface subscribed after another room has mounted.
 let mountQueue=Promise.resolve();
 const spelling=createWayglassSpellingController({document});
+const surfaces=listWayglassSurfaces();
 const shell=document.createElement('nav');
 shell.id='wg-shell-nav';shell.className='wg-shell-nav glass-panel';
-shell.setAttribute('aria-label','Explore Wayglass');shell.hidden=true;
-for(const surface of listWayglassSurfaces()){
-  const button=document.createElement('button');button.type='button';button.className='glass-chip';
-  button.dataset.surfaceId=surface.surface_id;button.textContent=surface.label;shell.append(button);
+shell.setAttribute('aria-label','Wayglass ship navigation');shell.hidden=true;
+const deckHeading=document.createElement('div');deckHeading.className='wg-deck-heading';
+deckHeading.innerHTML='<span class="wg-hud-kicker">WAYGLASS / NAVIGATION</span><strong>Choose your destination</strong><span class="tiny">Rooms are real working surfaces. No simulated route availability.</span>';
+shell.append(deckHeading);
+const deckSearch=document.createElement('input');
+deckSearch.type='search';deckSearch.id='wg-deck-search';deckSearch.placeholder='Find a room…';
+deckSearch.setAttribute('aria-label','Search Wayglass rooms');
+deckSearch.autocomplete='off';shell.append(deckSearch);
+const deckGroups=new Map();
+for(const group of SHIP_DECK_GROUPS){
+  const section=document.createElement('section');section.className='wg-deck-group';
+  section.dataset.shipGroup=group.id;section.setAttribute('aria-label',group.name);
+  const heading=document.createElement('div');heading.className='wg-deck-group-head';
+  const name=document.createElement('strong');name.textContent=group.name;
+  const description=document.createElement('span');description.textContent=group.description;
+  heading.append(name,description);section.append(heading);shell.append(section);
+  deckGroups.set(group.id,section);
 }
+for(const surface of surfaces){
+  const button=document.createElement('button');button.type='button';button.className='glass-chip wg-deck-destination';
+  button.dataset.surfaceId=surface.surface_id;button.dataset.destinationLabel=surface.label;
+  button.textContent=surface.label;button.setAttribute('aria-pressed','false');
+  deckGroups.get(shipDeckGroup(surface.surface_id)).append(button);
+}
+const deckEmpty=document.createElement('p');deckEmpty.className='tiny wg-deck-empty';
+deckEmpty.textContent='No matching room. Try another name.';deckEmpty.hidden=true;shell.append(deckEmpty);
+function filterDeck(search=deckSearch.value){
+  let visible=0;
+  for(const button of shell.querySelectorAll('[data-surface-id]')){
+    const match=shipDeckMatches({label:button.dataset.destinationLabel,surface_id:button.dataset.surfaceId},search);
+    button.hidden=!match;if(match)visible++;
+  }
+  for(const group of deckGroups.values())
+    group.hidden=!group.querySelector('[data-surface-id]:not([hidden])');
+  deckEmpty.hidden=visible!==0;
+  return visible;
+}
+deckSearch.addEventListener('input',()=>filterDeck());
 const connection=document.createElement('button');connection.type='button';connection.className='glass-chip';
 connection.textContent='Connect Bluebird';connection.addEventListener('click',()=>{void openWayglassAuthorization();});shell.append(connection);
 const spellingButton=document.createElement('button');spellingButton.type='button';spellingButton.className='glass-chip';
@@ -168,10 +203,45 @@ spellingButton.addEventListener('click',()=>{
  spellingButton.setAttribute('aria-pressed',String(next));
 });shell.append(spellingButton);
 const switcher=document.createElement('button');switcher.type='button';switcher.className='wg-ship-switch glass-chip';
-switcher.setAttribute('aria-controls',shell.id);switcher.setAttribute('aria-expanded','false');switcher.textContent='Explore Wayglass';
-root.after(shell,switcher);
+switcher.setAttribute('aria-controls',shell.id);switcher.setAttribute('aria-expanded','false');
+switcher.setAttribute('aria-haspopup','true');switcher.textContent='Explore Wayglass';
+const helm=document.createElement('header');helm.className='wg-helm glass-panel';
+const helmIdentity=document.createElement('div');helmIdentity.className='wg-helm-identity';
+const helmMark=document.createElement('span');helmMark.className='wg-helm-mark';helmMark.setAttribute('aria-hidden','true');helmMark.textContent='✧';
+const helmTitle=document.createElement('div');helmTitle.className='wg-helm-title';
+const helmName=document.createElement('strong');helmName.textContent='WAYGLASS';
+const helmSubtitle=document.createElement('span');helmSubtitle.textContent='LIVING SHIP / ONE UNIVERSE';
+helmTitle.append(helmName,helmSubtitle);helmIdentity.append(helmMark,helmTitle);
+const helmReadout=document.createElement('div');helmReadout.className='wg-helm-readout';
+const roomLabel=document.createElement('span');roomLabel.className='wg-helm-room';roomLabel.textContent='Arriving…';
+const routeLabel=document.createElement('span');routeLabel.className='wg-helm-route';routeLabel.textContent='ROUTE / NO ACTIVITY OBSERVED';
+routeLabel.setAttribute('aria-live','polite');routeLabel.setAttribute('role','status');
+helmReadout.append(roomLabel,routeLabel);
+const helmNav=document.createElement('button');helmNav.type='button';helmNav.className='glass-chip wg-helm-nav';
+helmNav.textContent='⌘  Ship map';helmNav.setAttribute('aria-controls',shell.id);helmNav.setAttribute('aria-expanded','false');
+helm.append(helmIdentity,helmReadout,helmNav);
+root.before(helm);root.after(shell,switcher);
 const motion=installMotionChoreography({root:document.documentElement,controlsHost:shell,contentRoot:root});
-switcher.addEventListener('click',()=>{shell.hidden=!shell.hidden;switcher.setAttribute('aria-expanded',String(!shell.hidden));switcher.textContent=shell.hidden?'Explore Wayglass':'Close ship map';});
+function setDeckOpen(open,{focus=false}={}){
+  shell.hidden=!open;
+  for(const control of [switcher,helmNav])control.setAttribute('aria-expanded',String(open));
+  switcher.textContent=open?'Close ship map':'Explore Wayglass';
+  if(open&&focus)deckSearch.focus();
+  if(!open&&focus)helmNav.focus();
+}
+switcher.addEventListener('click',()=>setDeckOpen(shell.hidden,{focus:true}));
+helmNav.addEventListener('click',()=>setDeckOpen(shell.hidden,{focus:true}));
+document.addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&!shell.hidden){event.preventDefault();setDeckOpen(false,{focus:true});}
+  else if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='k'){
+    event.preventDefault();setDeckOpen(true,{focus:true});
+  }
+});
+subscribeWayglassObserver(record=>{
+  if(!record||!['started','completed','failed'].includes(record.status))return;
+  routeLabel.textContent='ROUTE / '+record.status.toUpperCase()+(record.route_id?' · '+record.route_id:'');
+  helm.dataset.routeState=record.status;
+});
 function mountSurface(surfaceId){
   const request=mountQueue.then(async()=>{
     const result=await mountWayglassSurface(surfaceId,root);
@@ -181,6 +251,8 @@ function mountSurface(surfaceId){
     spelling.apply(root);
     motion?.arrive(root);
     document.documentElement.dataset.wayglassSurface=surfaceId;
+    roomLabel.textContent=shipDeckDestinationLabel(surfaceId,surfaces);
+    setDeckOpen(false);
     for(const button of shell.querySelectorAll('[data-surface-id]')){
       const active=button.dataset.surfaceId===surfaceId;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));
     }
