@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wayglass · Cloud Play</title><meta name="theme-color" content="#12232c">
+<style>
+:root{color-scheme:dark;font-family:system-ui, sans-serif;color:#e7f7f3;background:#101e26}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 15% 10%,#28464d,transparent 42%),radial-gradient(ellipse at 80% 78%,#36334c,transparent 36%),#101e26;min-height:100vh}
+header{padding:17px 24px;border-bottom:1px solid #365962;background:#10262bb3}h1{font:normal 1.9rem Georgia,serif;margin:0}header p{margin:4px 0;color:#c5d4d0}
+.layout{max-width:1250px;margin:auto;padding:15px;display:grid;grid-template-columns:270px 1fr;gap:14px}.pane{background:#162b33e8;border:1px solid #40646a;border-radius:16px;padding:16px;min-width:0}
+h2{font-size:1.05rem;margin:2px 0 12px}input,textarea,button{font:inherit}input,textarea{width:100%;background:#0f232a;color:#f1faf5;border:1px solid #68938f;border-radius:9px;padding:9px}
+label{display:block;margin:10px 0 4px}textarea{min-height:95px;resize:vertical}
+button{cursor:pointer;color:#eaf9f1;background:#31565c;border:1px solid #7ca29a;border-radius:9px;padding:9px 12px}button:hover{background:#406b70}button:disabled{opacity:.5;cursor:wait}button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #c3f3e1;outline-offset:2px}
+.actions{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}#threads{display:grid;gap:6px;max-height:280px;overflow:auto}#threads button{text-align:left;overflow-wrap:anywhere}#threads [aria-current=true]{background:#477f70;border-color:#bce8cd}
+#log{display:flex;flex-direction:column;gap:12px;min-height:270px;max-height:54vh;overflow:auto;padding:12px 0}
+.turn{max-width:94%;border:1px solid #4f7477;border-radius:12px;background:#253e46;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere;align-self:flex-start}
+.turn.user{align-self:flex-end;background:#2a514f}.turn b{display:block;margin-bottom:5px;color:#e7fff1}.turn small{display:block;color:#bbd2cb;font-size:.76rem;margin-top:8px}
+.notice{border-left:3px solid #a4d6c3;background:#233c40;padding:11px;font-size:.92rem;margin:14px 0}.muted{color:#c7d8d3}.hidden{display:none!important}
+#status,#auth-status{min-height:26px;color:#d8f1db;font-size:.9rem}
+@media(max-width:700px){.layout{display:flex;flex-direction:column;padding:8px}.layout aside{order:2}.layout main{order:1}#log{min-height:200px;max-height:45vh}}
+</style></head><body>
+<header><h1>✧ Wayglass · Cloud Play</h1><p>Ask, explore, save and return. An external model rehearsal of the Wayglass conversation flow.</p></header>
+<div class="layout"><aside class="pane">
+<h2>Saved conversations</h2><div class="actions"><button id="new">New chat</button><button id="timeline">🎲 3026 timeline</button></div>
+<nav id="threads" aria-label="Saved chats"></nav><div class="actions"><button id="export">Export JSON</button><button id="remove">Delete chat</button></div>
+<p class="muted"><small>Replies are stored in this browser, not synced across devices. Export to keep an independent copy.</small></p><hr>
+<div id="auth"><h2>Owner sign-in</h2><label>Email<input id="email" type="email" autocomplete="username"></label>
+<label>Password<input id="password" type="password" autocomplete="current-password"></label><div class="actions"><button id="signin">Sign in</button><button id="sendotp">Email code</button></div>
+<label>Email code<input id="otp" inputmode="numeric" autocomplete="one-time-code"></label><button id="verifyotp">Verify code</button><p id="auth-status" role="status">Sign in with your existing project owner account.</p></div>
+<div id="signed" class="hidden"><p>Owner session active</p><button id="signout">Sign out</button></div>
+</aside><main class="pane">
+<h2 id="title">New conversation</h2><div class="notice">This preview talks through a hosted <strong>external Wayglass model route</strong>, not the current local Crow/Ship Voice. Every returned reply shows its actual model and receipt.</div>
+<div id="log" role="log" aria-live="polite"></div>
+<form id="composer"><label for="prompt">What shall we ask?</label><textarea id="prompt" maxlength="3500" placeholder="Wayglass, what if…?"></textarea>
+<label><input type="checkbox" id="consent" style="width:auto"> I approve sending this turn and visible history to the cloud model.</label>
+<div class="actions"><button id="send" type="submit">Ask ✧</button></div><div id="status" role="status">Sign in to begin a cloud conversation.</div></form>
+<small class="muted">Ctrl/⌘ + Enter sends. No canon is changed. No model answer appears unless the provider returns one.</small>
+</main></div>
+<script>
+"use strict";
+const BASE="https://rufrmjyusalnifpegllj.supabase.co",KEY="sb_publishable_z69-aAbQvzFFDRk4SHDYrQ_FuqirkLD",ENDPOINT=BASE+"/functions/v1/wayglass-play-lab",STORE="wayglass-cloud-play-v1";
+const $=x=>document.getElementById(x);
+let sessions=[],active=null,token=null,refreshToken=null,busy=false;
+function message(t){$("status").textContent=t}function authMessage(t){$("auth-status").textContent=t}
+function save(){try{localStorage.setItem(STORE,JSON.stringify(sessions.slice(0,20)));return true}catch(e){message("Save failed: "+e.message);return false}}
+function session(){return sessions.find(x=>x.id===active)}
+function create(){if(busy)return;const t={id:crypto.randomUUID(),title:"New conversation",turns:[]};sessions.unshift(t);sessions=sessions.slice(0,20);active=t.id;save();render();$("prompt").value=""}
+function render(){const nav=$("threads");nav.replaceChildren();for(const t of sessions){const b=document.createElement("button");b.textContent=t.title+" · "+t.turns.length;b.setAttribute("aria-current",String(t.id===active));b.onclick=()=>{if(!busy){active=t.id;render()}};nav.append(b)}
+const t=session();$("title").textContent=t?.title||"New conversation";const log=$("log");log.replaceChildren();if(!t?.turns.length){const p=document.createElement("p");p.textContent="The page is open. Ask something delightful, difficult, or dangerous to an ordinary timeline.";p.className="muted";log.append(p)}
+for(const m of t?.turns||[]){const a=document.createElement("article");a.className="turn "+m.role;const heading=document.createElement("b");heading.textContent=m.role==="user"?"Rowan":"Wayglass · cloud route";const content=document.createElement("div");content.textContent=m.content;a.append(heading,content);if(m.receipt){const f=document.createElement("small");f.textContent=m.receipt.provider+" / "+m.receipt.model+" · "+(m.receipt.response_id||"no provider ID")+" · "+m.receipt.completed_at;a.append(f)}log.append(a)}log.scrollTop=log.scrollHeight}
+async function auth(path,data){const r=await fetch(BASE+"/auth/v1/"+path,{method:"POST",headers:{"apikey":KEY,"content-type":"application/json"},body:JSON.stringify(data)});const x=await r.json().catch(()=>({}));if(!r.ok)throw Error(x.error_description||x.msg||x.error||"Account sign-in failed");return x}
+function signed(x){if(!x.access_token)throw Error("No session returned");token=x.access_token;refreshToken=x.refresh_token||null;sessionStorage.setItem("wg-play-auth",JSON.stringify({token,refreshToken}));$("auth").classList.add("hidden");$("signed").classList.remove("hidden");$("password").value="";message("Owner session present. Ready to ask.") }
+$("signin").onclick=async()=>{try{signed(await auth("token?grant_type=password",{email:$("email").value.trim(),password:$("password").value}))}catch(e){authMessage(e.message)}};
+$("sendotp").onclick=async()=>{try{await auth("otp",{email:$("email").value.trim(),create_user:false});authMessage("Email requested. Your project mail template may send a code or a link.")}catch(e){authMessage(e.message)}};
+$("verifyotp").onclick=async()=>{try{signed(await auth("verify",{email:$("email").value.trim(),token:$("otp").value.trim(),type:"email"}))}catch(e){authMessage(e.message)}};
+$("signout").onclick=()=>{token=null;refreshToken=null;sessionStorage.removeItem("wg-play-auth");$("signed").classList.add("hidden");$("auth").classList.remove("hidden");message("Signed out. Saved chats remain on this browser.")};
+try{const x=JSON.parse(sessionStorage.getItem("wg-play-auth")||"{}");token=x.token||null;refreshToken=x.refreshToken||null;if(token){$("signed").classList.remove("hidden");$("auth").classList.add("hidden")}}catch{}
+$("new").onclick=create;
+$("timeline").onclick=()=>{$("prompt").value="Wayglass, Rowan moved Death's fictional appointment to 3026. Death rolled a natural 1 and became an insurance adjuster. Explore three reversible first-divergence moments through the Eightfold, preserving Rarity, Rowan and Death's choices. Choose a surprising playable opening. What if?";$("prompt").focus()};
+$("export").onclick=()=>{const t=session();if(!t)return;const blob=new Blob([JSON.stringify({schema:"wayglass.cloud-play-chat/v1",...t},null,2)],{type:"application/json"});const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download="wayglass-"+t.id.slice(0,8)+".json";a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)};
+$("remove").onclick=()=>{if(busy||!confirm("Delete this browser-local chat?"))return;sessions=sessions.filter(x=>x.id!==active);active=sessions[0]?.id||null;if(!active)create();else{save();render()}};
+$("composer").onsubmit=async e=>{e.preventDefault();const q=$("prompt").value.trim(),t=session();if(!q||!t||busy)return;if(!token){message("Sign in first.");return}if(!$("consent").checked){message("Please approve the cloud transfer for this turn.");return}
+const history=t.turns.filter(m=>(m.role==="user"||m.role==="assistant")&&m.delivery_status!=="failed").slice(-12).map(m=>({role:m.role,content:m.content}));t.turns.push({role:"user",content:q,delivery_status:"pending"});if(t.title==="New conversation")t.title=q.slice(0,72);save();render();$("prompt").value="";busy=true;$("send").disabled=true;message("Asking the hosted route…");
+try{let r=await fetch(ENDPOINT,{method:"POST",headers:{"authorization":"Bearer "+token,"apikey":KEY,"content-type":"application/json"},body:JSON.stringify({action:"ask",question:q,history,external_provider_consent:true})});let x=await r.json().catch(()=>({}));if(!r.ok)throw Error(x.error||"Provider route failed");if(x.schema!=="wayglass.cloud-play/v0.1"||!x.reply?.text||!x.reply?.receipt)throw Error("Unattributed model return refused");t.turns[t.turns.length-1].delivery_status="responded";t.turns.push({role:"assistant",content:x.reply.text,receipt:x.reply.receipt});save();render();message("Attributed answer saved in this browser.")}catch(err){t.turns[t.turns.length-1].delivery_status="failed";save();render();message("No answer saved: "+err.message)}finally{busy=false;$("send").disabled=false;$("consent").checked=false}};
+$("prompt").onkeydown=e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();$("composer").requestSubmit()}};
+try{const parsed=JSON.parse(localStorage.getItem(STORE)||"[]");if(Array.isArray(parsed))sessions=parsed.filter(x=>x&&typeof x.id==="string"&&Array.isArray(x.turns)).slice(0,20)}catch{}if(!sessions.length)create();else{active=sessions[0].id;render()}
+</script></body></html>
