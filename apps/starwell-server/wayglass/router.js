@@ -724,7 +724,13 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
   router.post('/respond', async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
 
-    const payload = req.body || {};
+    // A named ship route determines its own voice seat, including for
+    // Watercolour clients built before the character_id field was added.
+    // Explicit contradictory seats still fail; House Steward auth still applies.
+    const payload = { ...(req.body || {}) };
+    if (payload.route_id === 'wayglass:ship' && (payload.character_id == null || payload.character_id === '')) {
+      payload.character_id = 'wayglass';
+    }
     const autoSeat = payload.route_id === 'auto:character' && payload.character_id === 'bitty-twi';
     if (payload.route_id === 'auto:character' && !autoSeat) return res.status(400).json({ error: 'Auto character route needs a supported character seat.' });
     // Privacy conscious local-first routing, with an explicit receipt. This is host policy,
@@ -741,7 +747,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       return res.status(409).json({ error: 'Wayglass ship voice must use its dedicated chat route.' });
     }
     if (route.route_id === 'wayglass:ship' && payload.character_id !== 'wayglass') {
-      return res.status(409).json({ error: 'Wayglass chat route requires its named ship voice seat.' });
+      return res.status(409).json({ error: 'Wayglass chat route cannot use a different voice seat.' });
     }
     let kernelPreflight;
     try {
