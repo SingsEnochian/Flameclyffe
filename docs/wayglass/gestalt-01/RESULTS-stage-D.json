@@ -1,0 +1,388 @@
+{
+  "schema": "wayglass.gestalt-01.results/v1",
+  "preregistration_sha256": "36ace7a8111d476079fc6d708898f0e36757fdce9b1a2fda7f607d2394f66aca",
+  "stage": "D (deterministic quads): validates the apparatus, not emergent coordination",
+  "sets": {
+    "held_out": {
+      "tasks": 100,
+      "generation_attempts": 616,
+      "protocols": {
+        "mobius": {
+          "P": 0.02,
+          "invalid": 0,
+          "correct": 0.02,
+          "joint": 0.02,
+          "bytes": 376,
+          "errors_caught": 0.06,
+          "errors_introduced": 0,
+          "bits_retained": 8.86430859703984,
+          "truth_lost": 0,
+          "identity_drift": 0,
+          "development": [
+            {
+              "round": 0,
+              "mean_candidates": 430.515
+            },
+            {
+              "round": 1,
+              "mean_candidates": 249.105
+            },
+            {
+              "round": 2,
+              "mean_candidates": 164.415
+            },
+            {
+              "round": 3,
+              "mean_candidates": 143.495
+            }
+          ]
+        },
+        "bus": {
+          "P": 0,
+          "invalid": 0,
+          "correct": 0,
+          "joint": 0,
+          "bytes": 376,
+          "errors_caught": 0,
+          "errors_introduced": 0,
+          "bits_retained": 2.8567273838037277,
+          "truth_lost": 1,
+          "identity_drift": 0,
+          "development": [
+            {
+              "round": 0,
+              "mean_candidates": 31.97
+            },
+            {
+              "round": 1,
+              "mean_candidates": 4.18
+            },
+            {
+              "round": 2,
+              "mean_candidates": 4.17
+            },
+            {
+              "round": 3,
+              "mean_candidates": 4.17
+            }
+          ]
+        },
+        "bus_transformed": {
+          "P": 0.02,
+          "invalid": 0,
+          "correct": 0.02,
+          "joint": 0.02,
+          "bytes": 376,
+          "errors_caught": 0,
+          "errors_introduced": 0,
+          "bits_retained": 8.86430859703984,
+          "truth_lost": 0,
+          "identity_drift": 0,
+          "development": [
+            {
+              "round": 0,
+              "mean_candidates": 430.515
+            },
+            {
+              "round": 1,
+              "mean_candidates": 249.105
+            },
+            {
+              "round": 2,
+              "mean_candidates": 164.415
+            },
+            {
+              "round": 3,
+              "mean_candidates": 143.495
+            }
+          ]
+        },
+        "mobius_noflip": {
+          "P": 0,
+          "invalid": 0,
+          "correct": 0,
+          "joint": 0,
+          "bytes": 188,
+          "errors_caught": 0.01,
+          "errors_introduced": 0,
+          "bits_retained": 6.9052550802033075,
+          "truth_lost": 0,
+          "identity_drift": 0,
+          "development": [
+            {
+              "round": 0,
+              "mean_candidates": 430.515
+            },
+            {
+              "round": 1,
+              "mean_candidates": 346.675
+            },
+            {
+              "round": 2,
+              "mean_candidates": 346.675
+            },
+            {
+              "round": 3,
+              "mean_candidates": 346.675
+            }
+          ]
+        },
+        "solo": {
+          "P": 0,
+          "invalid": 0,
+          "correct": 0,
+          "joint": 0,
+          "bytes": 0,
+          "errors_caught": 0,
+          "errors_introduced": 0,
+          "bits_retained": 5.945416062026503,
+          "truth_lost": 0,
+          "identity_drift": 0,
+          "development": [
+            {
+              "round": 0,
+              "mean_candidates": 430.515
+            },
+            {
+              "round": 1,
+              "mean_candidates": 430.515
+            },
+            {
+              "round": 2,
+              "mean_candidates": 430.515
+            },
+            {
+              "round": 3,
+              "mean_candidates": 430.515
+            }
+          ]
+        }
+      },
+      "G": {
+        "bus": {
+          "mean": 0.02,
+          "lo": 0,
+          "hi": 0.05,
+          "n": 100
+        },
+        "bus_transformed": {
+          "mean": 0,
+          "lo": 0,
+          "hi": 0,
+          "n": 100
+        },
+        "mobius_noflip": {
+          "mean": 0.02,
+          "lo": 0,
+          "hi": 0.05,
+          "n": 100
+        },
+        "solo": {
+          "mean": 0.02,
+          "lo": 0,
+          "hi": 0.05,
+          "n": 100
+        }
+      },
+      "trials_digest": "wce1:770e7915b141b92eef5cedd3ccd024200afaf1f29c5800d74cd934962abeec33"
+    },
+    "shifted": {
+      "tasks": 100,
+      "generation_attempts": 266,
+      "protocols": {
+        "mobius": {
+          "P": 0.01,
+          "invalid": 0,
+          "correct": 0.01,
+          "joint": 0.01,
+          "bytes": 376,
+          "errors_caught": 0.06,
+          "errors_introduced": 0,
+          "bits_retained": 8.472553838607949,
+          "truth_lost": 0,
+          "identity_drift": 0,
+          "development": [
+            {
+              "round": 0,
+              "mean_candidates": 280.16
+            },
+            {
+              "round": 1,
+              "mean_candidates": 204.605
+            },
+            {
+              "round": 2,
+              "mean_candidates": 168.455
+            },
+            {
+              "round": 3,
+              "mean_candidates": 152.76
+            }
+          ]
+        },
+        "bus": {
+          "P": 0,
+          "invalid": 0,
+          "correct": 0,
+          "joint": 0,
+          "bytes": 376,
+          "errors_caught": 0,
+          "errors_introduced": 0,
+          "bits_retained": 2.0527742718514723,
+          "truth_lost": 1,
+          "identity_drift": 0,
+          "development": [
+            {
+              "round": 0,
+              "mean_candidates": 18.795
+            },
+            {
+              "round": 1,
+              "mean_candidates": 0.95
+            },
+            {
+              "round": 2,
+              "mean_candidates": 0.95
+            },
+            {
+              "round": 3,
+              "mean_candidates": 0.95
+            }
+          ]
+        },
+        "bus_transformed": {
+          "P": 0.01,
+          "invalid": 0,
+          "correct": 0.01,
+          "joint": 0.01,
+          "bytes": 376,
+          "errors_caught": 0,
+          "errors_introduced": 0,
+          "bits_retained": 8.472553838607949,
+          "truth_lost": 0,
+          "identity_drift": 0,
+          "development": [
+            {
+              "round": 0,
+              "mean_candidates": 280.16
+            },
+            {
+              "round": 1,
+              "mean_candidates": 204.605
+            },
+            {
+              "round": 2,
+              "mean_candidates": 168.455
+            },
+            {
+              "round": 3,
+              "mean_candidates": 152.76
+            }
+          ]
+        },
+        "mobius_noflip": {
+          "P": 0,
+          "invalid": 0,
+          "correct": 0,
+          "joint": 0,
+          "bytes": 188,
+          "errors_caught": 0,
+          "errors_introduced": 0,
+          "bits_retained": 6.961325271113328,
+          "truth_lost": 0,
+          "identity_drift": 0,
+          "development": [
+            {
+              "round": 0,
+              "mean_candidates": 280.16
+            },
+            {
+              "round": 1,
+              "mean_candidates": 243.3
+            },
+            {
+              "round": 2,
+              "mean_candidates": 243.3
+            },
+            {
+              "round": 3,
+              "mean_candidates": 243.3
+            }
+          ]
+        },
+        "solo": {
+          "P": 0,
+          "invalid": 0,
+          "correct": 0,
+          "joint": 0,
+          "bytes": 0,
+          "errors_caught": 0,
+          "errors_introduced": 0,
+          "bits_retained": 6.446396726084453,
+          "truth_lost": 0,
+          "identity_drift": 0,
+          "development": [
+            {
+              "round": 0,
+              "mean_candidates": 280.16
+            },
+            {
+              "round": 1,
+              "mean_candidates": 280.16
+            },
+            {
+              "round": 2,
+              "mean_candidates": 280.16
+            },
+            {
+              "round": 3,
+              "mean_candidates": 280.16
+            }
+          ]
+        }
+      },
+      "G": {
+        "bus": {
+          "mean": 0.01,
+          "lo": 0,
+          "hi": 0.03,
+          "n": 100
+        },
+        "bus_transformed": {
+          "mean": 0,
+          "lo": 0,
+          "hi": 0,
+          "n": 100
+        },
+        "mobius_noflip": {
+          "mean": 0.01,
+          "lo": 0,
+          "hi": 0.03,
+          "n": 100
+        },
+        "solo": {
+          "mean": 0.01,
+          "lo": 0,
+          "hi": 0.03,
+          "n": 100
+        }
+      },
+      "trials_digest": "wce1:267eb1caae227b04196507972670cec1dc2194a1e2c628e2cc81605cdabf6038"
+    }
+  },
+  "hypotheses": {
+    "H1": false,
+    "H2": false,
+    "H3": false,
+    "H4": false
+  },
+  "apparatus": {
+    "commit": "5fa5b9921e5b7c3bef09421df105e18beb4219aa",
+    "dirty_tree": false,
+    "node": "v22.23.4",
+    "started": "2026-11-06T19:42:47.890Z",
+    "finished": "2026-11-06T19:45:53.966Z",
+    "trials": 1000,
+    "limit": null
+  }
+}

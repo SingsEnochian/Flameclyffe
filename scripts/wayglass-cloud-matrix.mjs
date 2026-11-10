@@ -12,7 +12,7 @@ const canonical = git('rev-parse','origin/wayglass/current');
 try { execFileSync('git',['merge-base','--is-ancestor',canonical,head],{cwd:root,stdio:'ignore'}); } catch { throw new Error('Canonical development is not an ancestor of this source; reconcile exact head first'); }
 // Server staging intentionally rewrites generated tracked legacy assets.
 // Exclude only those build destinations; all authored source remains exact-head.
-const generated = ['apps/starwell-server/public/arcsweep','apps/starwell-server/wayglass-runtime'];
+const generated = ['apps/starwell-server/public/arcsweep','apps/starwell-server/wayglass-runtime','apps/starwell-server/public/starwell-foundry'];
 const sourcePaths = ['.',...generated.map(p=>':(exclude)'+p)];
 const dirty = () => [git('diff','--name-only','HEAD','--',...sourcePaths),git('ls-files','--others','--exclude-standard','--',...sourcePaths)].filter(Boolean).join('\n');
 if (process.env.WAYGLASS_FEATHER === 'stopped') throw new Error('Feather stopped: no matrix jobs started');

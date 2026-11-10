@@ -1,3 +1,4 @@
+import {wayglassTimer} from './performance-diagnostics.js';
 import { authorizationSession } from './authorization-session.js';
 import { publishWatercolorActivity } from './watercolor-bridge.js';
 
@@ -97,6 +98,16 @@ export async function executeWyrdruneLearning(learning,fetchImpl=fetch,signal=un
   return jsonOrThrow(await fetchImpl('/api/v1/wayglass/wyrdrune/living-learning',{
     method:'POST',headers:JSON_HEADERS,cache:'no-store',signal,
     body:JSON.stringify({learning}),
+  }));
+}
+
+/**
+ * Her verified Living Learning memory from the Return Engine: the latest carry,
+ * verified by the host back to the first record, or a refusal with its reason.
+ */
+export async function readWyrdruneLearningMemory(fetchImpl=fetch,signal=undefined) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/wyrdrune/living-learning/continuity',{
+    method:'GET',headers:{accept:'application/json'},cache:'no-store',signal,
   }));
 }
 
@@ -238,6 +249,7 @@ export async function invokeWayglassRoute({
   fetchImpl = fetch,
 } = {}) {
   publishWatercolorActivity({kind:'route:pending',actor:'wayglass:route-client',intensity:0.48});
+  const endRoute=wayglassTimer('model:roundtrip:'+String(routeId||'unknown'));
   try {
   const response = await fetchImpl('/api/v1/wayglass/respond', {
     method: 'POST',
@@ -272,7 +284,7 @@ export async function invokeWayglassRoute({
   } catch (error) {
     publishWatercolorActivity({kind:'route:failed',actor:'wayglass:route-client',intensity:0.44});
     throw error;
-  }
+  } finally { endRoute(); }
 }
 
 export async function queueObserverDevelopmentProposal(proposal, fetchImpl = fetch) {
@@ -364,3 +376,7 @@ export async function inspectWayglassKernel({
 }
 
 
+
+export async function readWayglassShipInheritance({fetchImpl=fetch}={}){
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/ship/inheritance',{cache:'no-store'}));
+}

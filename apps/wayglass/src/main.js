@@ -1,9 +1,11 @@
+import {wayglassTimer,wayglassPerformanceSnapshot,observeWayglassTiming} from './performance-diagnostics.js';
 import {mountWayglassSoundComposition} from './surfaces/sound-composition.js';
 import {wayglassSomaticSound} from './somatic-sound.js';
 import {wayglassStoryScoreBinding,installWayglassStoryComposition} from './story-score-binding.js';
 import './styles.css';
 import './authorization.css';
 import { openWayglassAuthorization } from './authorization.js';
+import { installWayglassInstallation } from './installation.js';
 import { installWayglassField } from './glass-field.js';
 import { installMotionChoreography } from './motion-choreography.js';
 import { installKeyboardControls } from './keyboard-controls.js';
@@ -37,7 +39,9 @@ import { recordRouteAsWonderLight } from './wonder-light.js';
 import { registerWayglassOrgan, listWayglassOrgans } from './organ-registry.js';
 import { FIRST_WAYGLASS_ORGANS } from './organ-donors.js';
 
+const bootFinished=wayglassTimer('boot:entry-ready');
 const root = document.querySelector('#app');
+installWayglassInstallation({ host: document.body });
 
 // Bluebird provider authorization is an explicit connection action.
 // The local entry and other configured provider routes remain independently usable.
@@ -244,7 +248,8 @@ subscribeWayglassObserver(record=>{
 });
 function mountSurface(surfaceId){
   const request=mountQueue.then(async()=>{
-    const result=await mountWayglassSurface(surfaceId,root);
+    const endMount=wayglassTimer('room:mount:'+surfaceId);
+    let result;try{result=await mountWayglassSurface(surfaceId,root);}finally{endMount();}
     fullSpectrum.setScope({room:surfaceId});
     fullSpectrum.capture({kind:'world',strength:.55,motion:.32,continuity:.82,intent:.65,
       source_ref:'wayglass:room-crossing'});
@@ -300,9 +305,12 @@ const wayglass = Object.freeze({
 });
 
 globalThis.__wayglassOS = wayglass;
+globalThis.__wayglassPerformance=wayglassPerformanceSnapshot;
 
 const roomQuery=new URLSearchParams(globalThis.location?.search||'').get('room');
 const entry=resolveWayglassEntry({available:listWayglassSurfaces(),room:roomQuery});
 await wayglass.mount(entry.surface_id);
+bootFinished();
+if(Number.isFinite(globalThis.performance?.now?.()))observeWayglassTiming('boot:navigation-to-ready',globalThis.performance.now());
 installVoyageInbox();
 installWayglassStoryComposition({observe:subscribeWayglassObserver});

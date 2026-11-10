@@ -1,0 +1,216 @@
+{
+  "schema": "wayglass.gestalt-01.diagnostic/v1",
+  "status": "post hoc, exploratory, no decision rule; D3 registered results unchanged",
+  "set": "held_out",
+  "seeds": [
+    6001,
+    6400
+  ],
+  "k": 7,
+  "rounds": 4,
+  "identifiable_means": "exactly one assignment satisfies all but exactly one constraint of each quad (the task rule): the ceiling for any protocol that does not guess",
+  "summary": {
+    "S": {
+      "tasks": 99,
+      "identifiable": 7,
+      "apparatus_solved": {
+        "identifiable": 0,
+        "unidentifiable": 0
+      },
+      "exactly_one_rule_solved": {
+        "identifiable": 7,
+        "unidentifiable": 0
+      },
+      "exactly_one_rule_wrong_drops": 0,
+      "exactly_one_rule_truth_lost": 0,
+      "identifiable_unsolved_by_apparatus": [
+        {
+          "seed": 6113,
+          "worlds": 1,
+          "identifiable": true,
+          "base": false,
+          "exact": true,
+          "exact_wrong_drops": 0,
+          "exact_truth_lost": false,
+          "final_candidates": [
+            2,
+            2
+          ],
+          "final_candidates_violating_none_of_own": [
+            0,
+            1
+          ]
+        },
+        {
+          "seed": 6141,
+          "worlds": 1,
+          "identifiable": true,
+          "base": false,
+          "exact": true,
+          "exact_wrong_drops": 0,
+          "exact_truth_lost": false,
+          "final_candidates": [
+            2,
+            2
+          ],
+          "final_candidates_violating_none_of_own": [
+            0,
+            1
+          ]
+        },
+        {
+          "seed": 6171,
+          "worlds": 1,
+          "identifiable": true,
+          "base": false,
+          "exact": true,
+          "exact_wrong_drops": 0,
+          "exact_truth_lost": false,
+          "final_candidates": [
+            2,
+            2
+          ],
+          "final_candidates_violating_none_of_own": [
+            1,
+            0
+          ]
+        },
+        {
+          "seed": 6178,
+          "worlds": 1,
+          "identifiable": true,
+          "base": false,
+          "exact": true,
+          "exact_wrong_drops": 0,
+          "exact_truth_lost": false,
+          "final_candidates": [
+            2,
+            2
+          ],
+          "final_candidates_violating_none_of_own": [
+            1,
+            0
+          ]
+        },
+        {
+          "seed": 6195,
+          "worlds": 1,
+          "identifiable": true,
+          "base": false,
+          "exact": true,
+          "exact_wrong_drops": 0,
+          "exact_truth_lost": false,
+          "final_candidates": [
+            2,
+            2
+          ],
+          "final_candidates_violating_none_of_own": [
+            0,
+            1
+          ]
+        },
+        {
+          "seed": 6358,
+          "worlds": 1,
+          "identifiable": true,
+          "base": false,
+          "exact": true,
+          "exact_wrong_drops": 0,
+          "exact_truth_lost": false,
+          "final_candidates": [
+            2,
+            2
+          ],
+          "final_candidates_violating_none_of_own": [
+            1,
+            0
+          ]
+        },
+        {
+          "seed": 6393,
+          "worlds": 1,
+          "identifiable": true,
+          "base": false,
+          "exact": true,
+          "exact_wrong_drops": 0,
+          "exact_truth_lost": false,
+          "final_candidates": [
+            2,
+            2
+          ],
+          "final_candidates_violating_none_of_own": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    "notS": {
+      "tasks": 301,
+      "identifiable": 242,
+      "apparatus_solved": {
+        "identifiable": 239,
+        "unidentifiable": 0
+      },
+      "exactly_one_rule_solved": {
+        "identifiable": 239,
+        "unidentifiable": 0
+      },
+      "exactly_one_rule_wrong_drops": 0,
+      "exactly_one_rule_truth_lost": 0,
+      "identifiable_unsolved_by_apparatus": [
+        {
+          "seed": 6026,
+          "worlds": 1,
+          "identifiable": true,
+          "base": false,
+          "exact": false,
+          "exact_wrong_drops": 0,
+          "exact_truth_lost": false,
+          "final_candidates": [
+            2,
+            9
+          ],
+          "final_candidates_violating_none_of_own": [
+            0,
+            1
+          ]
+        },
+        {
+          "seed": 6097,
+          "worlds": 1,
+          "identifiable": true,
+          "base": false,
+          "exact": false,
+          "exact_wrong_drops": 0,
+          "exact_truth_lost": false,
+          "final_candidates": [
+            2,
+            1
+          ],
+          "final_candidates_violating_none_of_own": [
+            0,
+            0
+          ]
+        },
+        {
+          "seed": 6149,
+          "worlds": 1,
+          "identifiable": true,
+          "base": false,
+          "exact": false,
+          "exact_wrong_drops": 0,
+          "exact_truth_lost": false,
+          "final_candidates": [
+            3,
+            1
+          ],
+          "final_candidates_violating_none_of_own": [
+            0,
+            0
+          ]
+        }
+      ]
+    }
+  }
+}

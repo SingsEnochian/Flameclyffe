@@ -17,6 +17,22 @@
 * { box-sizing: border-box; }
 html, body, #app { min-height: 100%; margin: 0; }
 body { overflow-x: hidden; background: #071014; color: var(--glass-text); }
+body {
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+    env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+}
+.wg-installation {
+  width: min(1120px, calc(100% - 28px));
+  margin: 14px auto;
+  padding: 14px 18px;
+  border-radius: 18px;
+}
+.wg-installation p { line-height: 1.5; }
+.wg-installation[hidden] { display: none; }
+@media (pointer: coarse) {
+  button, select, input { min-height: 44px; }
+  select, input, textarea { font-size: 16px; }
+}
 
 .wayglass-field {
   position: fixed;
@@ -1633,3 +1649,23 @@ body::after {
 @media (prefers-reduced-transparency:reduce) {
   .wg-helm,.wg-shell-nav:not([hidden]){backdrop-filter:none;-webkit-backdrop-filter:none;background:#081920;}
 }
+
+/* Reconciled PR549: expanded desk within the current split painting/workbench. */
+.wc-deck-tools { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.wc-deck.is-expanded {
+ position:fixed; inset:max(12px, env(safe-area-inset-top)) max(12px, 3vw) max(12px, env(safe-area-inset-bottom));
+ z-index:81; width:auto; max-width:none; height:auto; max-height:none; overflow-y:auto;
+ border-radius:24px; padding:clamp(18px, 3vw, 34px); background:rgba(8,27,34,.97);
+ box-shadow:0 28px 100px rgba(0,0,0,.6); align-content:start;
+}
+.wc-deck.is-expanded .wc-voice { min-height:30svh; max-height:48svh; }
+.wc-deck.is-expanded #wc-prompt { min-height:130px; max-height:28svh; }
+@media(max-width:760px){ .wc-deck.is-expanded { inset:8px; border-radius:16px; padding:16px; } }
+
+/* Shared ArcSweep rich text, native Writing Room palette and touch targets. */
+.wg-writing-room .arcsweep-richtext-shell{--text:var(--ink,#e8f0ed);--gold:#d8c398;--green:#a2d4bb;--bg:#0b1e26;--panel-solid:#17313a;}
+.wg-writing-room .richtext-tool{min-height:44px;min-width:44px;}
+.wg-writing-room .arcsweep-richtext-editor{min-height:12rem;color:#e8f0ed;background:#102832;}
+.wg-writing-room .turn-text p{margin:.5em 0;}
+.wg-writing-room .turn-text blockquote{border-left:3px solid #d8c398;padding-left:1em;margin-left:0;}
+.wg-writing-room .turn-text a{color:#b8e4d1;text-decoration:underline;}

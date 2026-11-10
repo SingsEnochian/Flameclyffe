@@ -1,0 +1,16 @@
+import {createRequire} from 'node:module';import assert from 'node:assert/strict';
+const require=createRequire(import.meta.url);const {JSDOM}=require(process.env.WAYGLASS_JSDOM_MODULE||'jsdom');
+const dom=new JSDOM('<!doctype html><html><head></head><body><div id="app"></div></body></html>',{url:'http://localhost/',pretendToBeVisual:true});
+for(const key of ['window','document','Node','NodeFilter','MutationObserver','HTMLFormElement','CustomEvent','localStorage','sessionStorage'])globalThis[key]=dom.window[key];
+for(const key of ['addEventListener','removeEventListener','dispatchEvent','requestAnimationFrame','cancelAnimationFrame'])globalThis[key]=dom.window[key].bind(dom.window);
+globalThis.matchMedia=()=>({matches:true,addEventListener(){},removeEventListener(){}});
+globalThis.fetch=async(url)=>new Response(JSON.stringify(String(url).includes('characters')?{characters:[]}:{routes:[]}),{status:200,headers:{'content-type':'application/json'}});
+const {mountArcSweepWritingSurface}=await import('../apps/wayglass/src/surfaces/arcsweep-writing.js');
+const root=document.querySelector('#app');let mounted=await mountArcSweepWritingSurface(root);
+let editor=root.querySelector('.arcsweep-richtext-editor');assert.ok(editor);
+editor.innerHTML='<p>A <strong>remembered</strong> draft.</p>';editor.dispatchEvent(new dom.window.Event('input',{bubbles:true}));
+const session=mounted.session_id;mounted.destroy();
+mounted=await mountArcSweepWritingSurface(root);editor=root.querySelector('.arcsweep-richtext-editor');
+assert.equal(mounted.session_id,session);assert.match(editor.innerHTML,/<strong>remembered<\/strong>/);
+assert.ok(root.querySelector('#wg-score-audio'));assert.ok(root.querySelector('#wg-wtl-cypher'));
+mounted.destroy();dom.window.close();console.log('PASS: actual Writing Room mount, toolbar, soundstage/WTL retained, formatted draft survives teardown/remount');

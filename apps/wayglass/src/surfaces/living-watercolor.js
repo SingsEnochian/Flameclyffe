@@ -1,5 +1,8 @@
+import {wayglassTimer,wayglassPerformanceSnapshot} from '../performance-diagnostics.js';
+import { loadFoundryBrushes, foundryPigmentSample, FOUNDRY_BRUSH_STORAGE_KEY } from '../foundry-brushes.js';
 import {shipSoundscape} from '../ship-soundscape.js';
 import { createWatercolorFluid } from '../watercolor-fluid.js';
+import { createWatercolorBody, createStrokeFilter } from '../watercolor-body.js';
 import {
   watercolorSnapshot, watercolorProgram, publishWatercolorActivity,
   subscribeWatercolorActivity, proposeWatercolorTouch, configureWatercolorProgram,
@@ -33,6 +36,11 @@ export async function mountLivingWatercolorSurface(root) {
   paused=featherStopped;
   if(featherStopped&&!wayglassSomaticSound.snapshot().feather_stopped)wayglassSomaticSound.feather();
   const reduced=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches??false;
+  // Her body in the water: mass, momentum and breath. Strokes become continuous lines.
+  const body=createWatercolorBody({reduced});
+  const stroke=createStrokeFilter();
+  if(featherStopped)body.freeze();
+  let frameCost=0, frameParity=0;
   root.innerHTML=[
     '<section class="wg-surface wc-surface" data-surface="living-watercolor">',
       '<header class="wg-surface-head glass-panel wc-head">',
@@ -53,9 +61,9 @@ export async function mountLivingWatercolorSurface(root) {
           '<p class="wc-paint-help" id="wc-paint-help">Draw directly on the paper · drag to blend · arrow keys + Enter also work</p>',
         '</div>',
         '<div class="wc-workbench">',
-          '<div class="wc-deck glass-panel" aria-label="Wayglass collaborative expression desk">',
+          '<div class="wc-deck glass-panel" id="wc-deck" aria-label="Wayglass collaborative expression desk">',
             '<div class="wc-deck-header"><div><span class="eyebrow">Voice &amp; work surface</span>',
-            '<h2 id="wc-title">Dream</h2></div><span class="wc-model-state" id="wc-route-state">Checking model routes</span></div>',
+            '<h2 id="wc-title">Dream</h2></div><div class="wc-deck-tools"><span class="wc-model-state" id="wc-route-state">Checking model routes</span><button type="button" class="glass-chip" id="wc-expand" aria-controls="wc-deck" aria-expanded="false">Expand desk</button></div></div>',
             '<div class="wc-modes" role="group" aria-label="Wayglass creative and engineering modes">',
               ...WATERCOLOR_MODES.map(modeButton),
             '</div>',
@@ -64,7 +72,7 @@ export async function mountLivingWatercolorSurface(root) {
               '<span class="wc-voice-empty">An open page. Paint, leave a thought, or invite Wayglass to begin.</span>',
             '</div>',
             '<label class="wc-input-label" for="wc-prompt">Your contribution · optional</label>',
-            '<textarea id="wc-prompt" rows="2" maxlength="3500" placeholder="A question, a colour, a fragment, a possibility…"></textarea>',
+            '<textarea id="wc-prompt" rows="5" maxlength="3500" placeholder="A question, a colour, a fragment, a possibility…"></textarea>',
             '<div class="wc-compose-actions">',
               '<select id="wc-route" aria-label="Wayglass model route"></select>',
               '<button id="wc-invite" type="button" class="send-jewel" disabled>Invite Wayglass</button>',
@@ -88,6 +96,10 @@ export async function mountLivingWatercolorSurface(root) {
             ...PIGMENTS.map(([label,hex])=>'<button type="button" class="wc-pigment" data-wc-pigment="'+hex+'" style="--pigment:'+hex+'" aria-label="'+label+' pigment" aria-pressed="false" title="'+label+'"></button>'),
           '</div>',
           '<label class="wc-color-label" for="wc-color">Custom pigment <input id="wc-color" type="color" value="#c26a46"></label>',
+          '<label for="wc-foundry-brush">Foundry brush</label><select id="wc-foundry-brush"></select>',
+          '<canvas id="wc-foundry-preview" width="256" height="64" role="img" aria-label="Live watercolour brush preview" style="width:100%;height:4rem"></canvas>',
+          '<p id="wc-foundry-status" class="tiny" role="status"></p>',
+          '<a href="/starwell-foundry/glyph-studio/?panel=brush" target="_blank" rel="noopener">Open Brush Foundry</a>',
           '<label for="wc-pressure">Brush saturation <output id="wc-pressure-label">70%</output></label>',
           '<input id="wc-pressure" type="range" min="10" max="100" value="70">',
           '<label for="wc-brush-size">Brush width <output id="wc-brush-size-label">52%</output></label>',
@@ -109,6 +121,7 @@ export async function mountLivingWatercolorSurface(root) {
           '<textarea id="wc-note" rows="3" maxlength="300" placeholder="For example: more gold when something is verified…"></textarea>',
           '<button class="glass-chip" type="button" id="wc-suggest">Place a suggestion</button>',
           '<div class="wc-inspector"><p class="eyebrow">Instrument readings</p>',
+          '<p id="wc-performance" class="tiny"></p>',
             '<dl><div><dt>Fluid</dt><dd id="wc-fluid-status">still</dd></div>',
             '<div><dt>PREMAQC</dt><dd id="wc-premaqc">not connected</dd></div>',
             '<div><dt>Agent events</dt><dd id="wc-events">0</dd></div>',
@@ -132,6 +145,62 @@ export async function mountLivingWatercolorSurface(root) {
   let bitmap=off?.createImageData(fluid.width,fluid.height)||null;
   const color=q('wc-color'),pressure=q('wc-pressure'),brushSize=q('wc-brush-size'),prompt=q('wc-prompt');
   const brushCursor=q('wc-brush-cursor');
+  const desk=q('wc-deck'),expandButton=q('wc-expand');
+  let deskExpanded=false;
+  function setDeskExpanded(next){
+    deskExpanded=Boolean(next);
+    desk.classList.toggle('is-expanded',deskExpanded);
+    expandButton.setAttribute('aria-expanded',String(deskExpanded));
+    expandButton.textContent=deskExpanded?'Restore painting view':'Expand desk';
+  }
+  listen(expandButton,'click',()=>setDeskExpanded(!deskExpanded));
+  listen(root,'keydown',event=>{
+    if(event.key==='Escape'&&deskExpanded){setDeskExpanded(false);expandButton.focus();}
+  });
+
+  const foundrySelect=q('wc-foundry-brush');
+  let foundryBrushes=[], selectedFoundryBrush=null;
+  function previewFoundryBrush(){
+    if(!selectedFoundryBrush)return;
+    const preview=q('wc-foundry-preview'),context=preview.getContext('2d');
+    if(!context)return;
+    const field=createWatercolorFluid({width:256,height:64});
+    for(let i=0;i<32;i++){
+      const t=i/31;
+      const sample=foundryPigmentSample(selectedFoundryBrush,{
+        pressure:.1+.9*Math.sin(Math.PI*t),width:Number(brushSize.value)/100,
+        saturation:Number(pressure.value)/100,
+      });
+      field.inject({x:.08+.84*t,y:.5+Math.sin(t*Math.PI*2)*.12,color:color.value,...sample});
+    }
+    const image=context.createImageData(256,64);
+    image.data.set(field.pixels({background:'#eee8db'}));
+    context.putImageData(image,0,0);field.dispose();
+    preview.setAttribute('aria-label','Live watercolour preview for '+selectedFoundryBrush.name);
+  }
+  function refreshFoundryBrushes(){
+    // Access itself may throw when browser storage is disabled.
+    const storage={getItem:key=>globalThis.localStorage?.getItem(key)};
+    const catalog=loadFoundryBrushes(storage);
+    const selectedId=foundrySelect.value;
+    foundryBrushes=catalog.brushes;
+    foundrySelect.replaceChildren(...foundryBrushes.map(brush=>{
+      const option=document.createElement('option');
+      option.value=brush.id;option.textContent=brush.name;return option;
+    }));
+    selectedFoundryBrush=foundryBrushes.find(brush=>brush.id===selectedId)||foundryBrushes[0];
+    foundrySelect.value=selectedFoundryBrush.id;
+    previewFoundryBrush();
+    q('wc-foundry-status').textContent=catalog.warning||
+      (catalog.source==='saved-foundry'?'Saved Foundry brushes':'Foundation brushes')+
+      ' · Size, opacity and pressure translated to pigment. Shape and grain remain in Foundry.';
+  }
+  refreshFoundryBrushes();
+  for(const control of [color,pressure,brushSize])listen(control,'input',previewFoundryBrush);
+  listen(foundrySelect,'change',()=>{selectedFoundryBrush=foundryBrushes.find(brush=>brush.id===foundrySelect.value)||foundryBrushes[0];previewFoundryBrush();});
+  listen(globalThis,'storage',event=>{if(event.key===FOUNDRY_BRUSH_STORAGE_KEY||event.key===null)refreshFoundryBrushes();});
+  listen(globalThis,'focus',refreshFoundryBrushes);
+
   const pigmentButtons=[...root.querySelectorAll('[data-wc-pigment]')];
   let paperIsDark=false,keyboardCursor={x:.5,y:.5};
   const title=q('wc-title'),intent=q('wc-intent'),voice=q('wc-voice'),feedback=q('wc-feedback');
@@ -157,6 +226,8 @@ export async function mountLivingWatercolorSurface(root) {
   }
   function updateInspector() {
     const s=fluid.snapshot(),data=watercolorSnapshot();
+    const timings=wayglassPerformanceSnapshot(),ms=timings['watercolour:fluid-frame']?.p95_ms;
+    q('wc-performance').textContent=ms==null?'Frame timing not measured':'Frame p95: '+ms+' ms';
     q('wc-fluid-status').textContent=paused?'paused':s.motion>0.003?'flowing':'settling';
     q('wc-premaqc').textContent=data.events.some(e=>e.texture?.data_state==='supplied-observation')?
       'observations present':'not connected';
@@ -181,14 +252,26 @@ export async function mountLivingWatercolorSurface(root) {
       ctx.drawImage(buffer,0,0,canvas.width,canvas.height);
     }
   }
+  // Every display frame, not every 40 ms. The fluid keeps its simulated speed
+  // (one unit per 42 ms); only the smoothness changes. If a device falls behind,
+  // the fluid steps on alternate frames while her body and the paint stay smooth.
   function frame(ts) {
     if(stopped)return;
-    if(!paused&&!reduced && ts-lastFrame>=40){
-      fluid.step(Math.min((ts-lastFrame)/42,1.5));
+    const ms=lastFrame?Math.min(ts-lastFrame,100):16.7;
+    lastFrame=ts;
+    if(!paused&&!reduced&&!globalThis.document?.hidden){
+      const endFrame=wayglassTimer('watercolour:fluid-frame');
+      const begun=globalThis.performance?.now?.()??0;
+      const motion=body.step(ms/1000);
+      const her=activeMode().color;
+      for(const s of motion.strokes)fluid.inject({...s,color:her});
+      frameParity^=1;
+      if(frameCost<14||frameParity)fluid.step(Math.min((frameCost<14?ms:ms*2)/42,1.5));
       paint();
+      frameCost=frameCost*.9+((globalThis.performance?.now?.()??0)-begun)*.1;
+      endFrame();
       elapsed++;
-      if(elapsed%12===0)updateInspector();
-      lastFrame=ts;
+      if(elapsed%30===0)updateInspector();
     }
     animationId=globalThis.requestAnimationFrame(frame);
   }
@@ -409,6 +492,7 @@ export async function mountLivingWatercolorSurface(root) {
     q('wc-pressure-label').textContent=pressure.value+'%';
   });
   function markPigment(){
+    previewFoundryBrush();
     for(const button of pigmentButtons){
       const selected=button.dataset.wcPigment.toLowerCase()===color.value.toLowerCase();
       button.setAttribute('aria-pressed',String(selected));
@@ -523,12 +607,13 @@ export async function mountLivingWatercolorSurface(root) {
       if(featherStopped){
         if(journeyLedger.snapshot().feather_stopped)journeyLedger.resume({confirmed:true});
         wayglassSomaticSound.releaseFeather({confirmed:true});
-        featherStopped=false;
+        featherStopped=false;body.thaw();
         feedback.textContent='Feather released by your explicit choice. Sound remains off.';
       }else{
         if(!journeyLedger.snapshot().feather_stopped)journeyLedger.supportFold('feather');
         wayglassSomaticSound.feather();
         featherStopped=true;paused=true;pointerId=null;lastPointer=null;requestEpoch++;busy=false;
+        body.freeze();stroke.reset();
         feedback.textContent='Feather Stop. Motion, sound, haptics and model invitations paused.';
       }
     } catch(error){feedback.textContent=error.message;}
@@ -563,21 +648,36 @@ export async function mountLivingWatercolorSurface(root) {
     brushCursor.style.top=(pos.y*100)+'%';
     brushCursor.hidden=!visible;
   }
-  function brush(event,position=null){
-    const pos=position||pointerCoords(event);
-    const sensitivity=Number(pressure.value)/100;
-    const force=event.pointerType==='pen'&&event.pressure>0?
-      clamp(event.pressure*sensitivity):sensitivity;
-    const dx=lastPointer?clamp(pos.x-lastPointer.x,-.12,.12)*5:0;
-    const dy=lastPointer?clamp(pos.y-lastPointer.y,-.12,.12)*5:0;
-    const proposal=proposeWatercolorTouch({
-      ...pos,pressure:force,color:color.value,mode:'add-pigment',
-    });
-    fluid.inject({x:proposal.x,y:proposal.y,color:proposal.color,
-      amount:Math.max(.25,proposal.pressure)*1.65,radius:.012+(Number(brushSize.value)/100)*.085,dx,dy});
-    lastPointer=pos;
-    keyboardCursor=pos;
-    positionBrushCursor(pos);
+  function samplesOf(event,position){
+    const list=position?[event]:(event.getCoalescedEvents?.()||[]);
+    return (list.length?list:[event]).map(e=>({
+      ...(position||pointerCoords(e)),
+      t:Number.isFinite(e.timeStamp)?e.timeStamp:(globalThis.performance?.now?.()||0),
+      pressure:e.pointerType==='pen'?clamp(e.pressure??.5):.5,
+    }));
+  }
+  function lay(stamps,pigment){
+    for(const sample of stamps){
+      const mark=foundryPigmentSample(selectedFoundryBrush,{
+        pressure:sample.pressure,width:Number(brushSize.value)/100,
+        saturation:Number(pressure.value)/100,
+      });
+      // Interpolated stamps lay pigment per distance, while Foundry owns pressure response.
+      fluid.inject({x:sample.x,y:sample.y,color:pigment,radius:mark.radius,
+        amount:mark.amount*Math.min(1,.012/(mark.radius*.6)),
+        dx:clamp(sample.vx*.35,-1,1),dy:clamp(sample.vy*.35,-1,1)});
+    }
+  }
+  function brush(event,{starting=false,position=null}={}){
+    const samples=samplesOf(event,position),head=samples[samples.length-1];
+    const proposal=proposeWatercolorTouch({x:head.x,y:head.y,
+      pressure:head.pressure*Number(pressure.value)/100,color:color.value,mode:'add-pigment'});
+    lay(starting?stroke.begin(samples[0]):[],proposal.color);
+    lay(stroke.move(starting?samples.slice(1):samples),proposal.color);
+    body.touch({x:head.x,y:head.y,pressure:head.pressure});
+    lastPointer=head;keyboardCursor={x:head.x,y:head.y};
+    positionBrushCursor(head);
+
     if(reduced||paused)paint();
     updateInspector();
   }
@@ -585,20 +685,29 @@ export async function mountLivingWatercolorSurface(root) {
     if(featherStopped || (event.button!==0 && event.pointerType==='mouse'))return;
     pointerId=event.pointerId;lastPointer=null;
     canvas.setPointerCapture?.(pointerId);
-    brush(event);event.preventDefault();
+    brush(event,{starting:true});event.preventDefault();
   });
   listen(canvas,'pointermove',event=>{
     if(stopped||featherStopped)return;
     positionBrushCursor(pointerCoords(event));
     if(pointerId!==event.pointerId)return;
     // Coalesced Pencil/mouse points preserve the complete trail on fast moves.
-    const samples=typeof event.getCoalescedEvents==='function'?event.getCoalescedEvents():[];
-    for(const sample of samples.length?samples:[event])brush(sample);
+    brush(event);
     event.preventDefault();
   });
   listen(canvas,'pointerleave',()=>{if(pointerId===null)positionBrushCursor(keyboardCursor,false);});
   const endPointer=event=>{
-    if(event.pointerId===pointerId){pointerId=null;lastPointer=null;}
+    if(event.pointerId!==pointerId)return;
+    pointerId=null;lastPointer=null;
+    const flick=stroke.end();
+    body.release();
+    // Let go and the water carries on: the stroke's momentum passes to fluid and body.
+    if(event.type!=='pointercancel'&&flick&&flick.speed>.2&&!reduced&&!featherStopped){
+      const mark=foundryPigmentSample(selectedFoundryBrush,{pressure:.3,width:Number(brushSize.value)/100,saturation:Number(pressure.value)/100});
+      fluid.inject({x:flick.x,y:flick.y,color:color.value,amount:mark.amount*.06,radius:mark.radius,
+        dx:clamp(flick.vx*.5,-1,1),dy:clamp(flick.vy*.5,-1,1)});
+      body.impulse({vx:flick.vx,vy:flick.vy});
+    }
   };
   listen(canvas,'pointerup',endPointer);
   listen(canvas,'pointercancel',endPointer);
@@ -611,7 +720,8 @@ export async function mountLivingWatercolorSurface(root) {
       positionBrushCursor(keyboardCursor);
     }else if(event.key==='Enter'||event.key===' '){
       event.preventDefault();
-      brush({pointerType:'keyboard',pressure:0},keyboardCursor);
+      brush({pointerType:'keyboard',pressure:.5},{starting:true,position:keyboardCursor});
+      stroke.end();body.release();
       paint();updateInspector();
     }
   });
@@ -620,8 +730,9 @@ export async function mountLivingWatercolorSurface(root) {
     synchronizeJourneyFeather(event.detail);
     if(event.detail.stopped){
       featherStopped=true;paused=true;pointerId=null;lastPointer=null;requestEpoch++;busy=false;
+        body.freeze();stroke.reset();
     }else if(event.detail.confirmed===true){
-      featherStopped=false;
+      featherStopped=false;body.thaw();
     }
     reflectSound();updateInspector();
   };
@@ -652,6 +763,7 @@ export async function mountLivingWatercolorSurface(root) {
       fluid.dispose();
     },
     fluid,
+    body,
   };
 }
 

@@ -1,3 +1,4 @@
+import {readWayglassShipInheritance} from '../route-client.js';
 import { listWayglassOrgans } from '../organ-registry.js';
 import { inspectWayglassDoubleMobius } from '../route-client.js';
 
@@ -46,6 +47,7 @@ export async function mountWayglassSystemsSurface(root) {
         '</div>',
         '<p role="status" data-double-mobius-status>Engine route not inspected. Live model availability is separate.</p>',
       '</section>',
+      '<section class="glass-panel" aria-label="Whole-ship inheritance"><h2>Eight systems · one ship</h2><button type="button" class="glass-chip" data-ship-inheritance>Inspect inherited work</button><p role="status" data-ship-inheritance-status>Host inheritance has not been inspected.</p><ul data-ship-inheritance-list></ul></section>',
       '<section class="organ-bay" aria-label="Mounted Wayglass organs">',
         organs.map((organ, index) => [
           '<article class="organ-vessel glass-panel" tabindex="0" data-organ="' + escapeHtml(organ.organ_id) + '" data-organ-kind="' + organKind(organ.organ_id) + '" aria-expanded="false" style="--organ-index:' + index + '">',
@@ -68,6 +70,21 @@ export async function mountWayglassSystemsSurface(root) {
     '</section>'
   ].join('');
 
+  const inheritanceButton=root.querySelector('[data-ship-inheritance]');
+  inheritanceButton?.addEventListener('click',async()=>{
+    const status=root.querySelector('[data-ship-inheritance-status]');
+    inheritanceButton.disabled=true;
+    try{
+      const inventory=await readWayglassShipInheritance();
+      status.textContent='Source '+(inventory.source_sha||'unknown')+' · runtime verification '+inventory.runtime_verification;
+      const list=root.querySelector('[data-ship-inheritance-list]');
+      list.replaceChildren(...inventory.systems.map(system=>{
+        const li=document.createElement('li');
+        li.textContent=system.name+' · '+system.sources.filter(s=>s.status==='source-included').length+'/'+system.sources.length+' sources included · needs: '+system.needs.join('; ');return li;
+      }));
+    }catch(error){status.textContent='Inheritance unavailable: '+error.message;}
+    finally{inheritanceButton.disabled=false;}
+  });
   const inspectButton = root.querySelector('[data-double-mobius-inspect]');
   const engineStatus = root.querySelector('[data-double-mobius-status]');
   inspectButton?.addEventListener('click', async () => {
