@@ -46,9 +46,10 @@ export async function mountAmberRoom(root, {
     '</div></form>',
     '<section class="glass-panel wg-amber-archive" aria-label="Amber local archive">',
     '<h2>Leave · Return</h2>',
-    '<p class="tiny">Only an explicit Save writes the conversation to this browser. Nothing here is cloud-synced or a verified cold Return receipt.</p>',
+    '<p class="tiny">Each completed turn is saved on your private Wayglass host for return across tailnet devices. Save adds a separate local-browser archive. Thinking is never included in either saved chat history.</p>',
     '<div class="wg-amber-actions">',
-    '<button type="button" class="glass-chip" data-amber-save>Save conversation</button>',
+    '<button type="button" class="glass-chip" data-amber-save>Save local archive</button>',
+    '<button type="button" class="glass-chip" data-amber-sync>Reload shared conversation</button>',
     '<button type="button" class="glass-chip" data-amber-new>New conversation</button>',
     '<select data-amber-list aria-label="Saved Amber conversations"><option value="">Saved conversations</option></select>',
     '<button type="button" class="glass-chip" data-amber-open>Open saved</button>',
@@ -61,7 +62,7 @@ export async function mountAmberRoom(root, {
   const status=find('status'), archiveStatus=find('archive-status');
   const doc=root.ownerDocument;
   let disposed=false, busy=false, configured=false, active=null;
-  let session=newId(), messages=[];
+  let session=newId(), messages=[], sharedRevision=null, sharedBlocked=false;
   let vault=null;
   try { vault=createWayglassChatVault({key:ARCHIVE}); }
   catch(error) { archiveStatus.textContent='Local archive unavailable: '+error.message; }
@@ -107,7 +108,7 @@ export async function mountAmberRoom(root, {
   }
   function setBusy(value) {
     busy=value;
-    send.disabled=value||!configured;
+    send.disabled=value||!configured||sharedBlocked;
     input.disabled=value;
   }
   async function sendTurn(event) {
@@ -135,8 +136,9 @@ export async function mountAmberRoom(root, {
         world_id:WORLD,channel:'OOC',route_id:ROUTE,route_label:'Amber',
         character_id:'amber',provider:result.provider,model:result.model,receipt:result.receipt});
       input.value='';render();
+      const remoteStatus=await saveSharedHistory();
       status.textContent='Amber replied · '+result.model+' · '+(result.receipt?.completed_at||'')
-        +' · observation, not canon · not saved';
+        +' · observation, not canon · '+remoteStatus;
     }catch(error){
       if(!controller.signal.aborted&&!disposed)status.textContent='Amber did not answer: '+error.message;
     }finally{
@@ -187,7 +189,7 @@ export async function mountAmberRoom(root, {
   find('save').addEventListener('click',()=>{
     if(!vault){archiveStatus.textContent='Local archive is unavailable.';return;}
     try{
-      const saved=vault.save({sessionId:session,messages});
+      const saved=vault.save({sessionId:session,messages:messages.map(({thinking,...rest})=>rest)});
       archiveStatus.textContent='Saved '+saved.message_count+' turns to this browser · '+saved.saved_at;
       refreshArchive();
     }catch(error){archiveStatus.textContent='Save failed: '+error.message;}
@@ -210,6 +212,53 @@ export async function mountAmberRoom(root, {
       status.textContent='Amber archive reopened · local history available for the next turn';
     }catch(error){archiveStatus.textContent='Open failed: '+error.message;}
   });
+  async function loadSharedHistory(){
+    if(busy){archiveStatus.textContent='Feather or finish the current turn before reloading shared history.';return false;}
+    try {
+      const response=await fetch('/api/v1/wayglass/sessions/amber',{credentials:'same-origin',cache:'no-store'});
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok)throw Error(data.error||'Shared Wayglass conversation is not available.');
+      if(data.schema!=='wayglass.amber-room-session/v1'||data.participant_id!=='wayglass'
+        ||data.speaking_place_id!=='amber'||!Number.isSafeInteger(data.revision)
+        ||!Array.isArray(data.messages))throw Error('Shared Wayglass conversation has invalid identity.');
+      sharedRevision=data.revision;
+      sharedBlocked=false;
+      session=data.session_id||session;
+      messages=data.messages;
+      render();
+      archiveStatus.textContent='Wayglass shared conversation loaded · revision '+sharedRevision
+        +' · '+messages.length+' turns · from the private Windows host';
+      setBusy(false);
+      return true;
+    }catch(error){
+      archiveStatus.textContent='Shared return unavailable: '+error.message;
+      return false;
+    }
+  }
+  async function saveSharedHistory(){
+    if(sharedRevision===null)return 'not host-saved (sign in and reload shared history)';
+    try {
+      const response=await fetch('/api/v1/wayglass/sessions/amber',{
+        method:'PUT',credentials:'same-origin',cache:'no-store',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({revision:sharedRevision,messages:messages.slice(-240).map(m=>({
+          role:m.role,content:m.content,
+          ...(m.role==='assistant'?{model:m.model||'',provider:m.provider||'',route_id:m.route_id||ROUTE}:{})
+        }))}),
+      });
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok){
+        if(response.status===409){sharedBlocked=true;setBusy(false);}
+        throw Error(data.error||'Host save refused.');
+      }
+      sharedRevision=data.revision;
+      return 'saved to private Wayglass host, revision '+sharedRevision;
+    }catch(error){
+      archiveStatus.textContent='Host save failed: '+error.message;
+      return 'NOT saved to host: '+error.message;
+    }
+  }
+  find('sync').addEventListener('click',()=>{void loadSharedHistory();});
   async function refreshRoute(){
     try{
       const routes=(await catalogue()).routes||[];
@@ -257,12 +306,13 @@ export async function mountAmberRoom(root, {
       stewardInput.value='';
       await checkHouseSession();
       await refreshRoute();
+      await loadSharedHistory();
     }catch(error){
       stewardStatus.textContent='Sign-in failed: '+error.message;
     }finally{button.disabled=false;}
   });
   render();refreshArchive();
-  await checkHouseSession();
+  if(await checkHouseSession())await loadSharedHistory();
   await refreshRoute();
   return Object.freeze({surface_id:WORLD,session_id:()=>session,
     destroy(){disposed=true;active?.abort();globalThis.removeEventListener?.('wayglass:feather',feather);}});
