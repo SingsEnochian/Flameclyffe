@@ -22,6 +22,11 @@ export async function mountAmberRoom(root, {
     '<h1>Wayglass · Amber / The Borderlands</h1>',
     '<p class="lede">Wayglass speaking in her Amber room. One model and one Wayglass identity, with room-specific dialogue and continuity.</p>',
     '<nav class="wg-amber-actions"><button type="button" class="glass-chip" data-amber-ship>Visit Wayglass Voice</button></nav>',
+    '<form class="wg-amber-steward" data-amber-steward-form>',
+    '<label for="wg-amber-steward">House Steward sign-in · required for private routes</label>',
+    '<div class="wg-amber-actions"><input id="wg-amber-steward" type="password" autocomplete="current-password" spellcheck="false" placeholder="Private House credential" data-amber-steward-input>',
+    '<button type="submit" class="glass-chip" data-amber-steward-submit>Sign in</button></div>',
+    '<p class="tiny" data-amber-steward-status role="status" aria-live="polite">Checking House session…</p></form>',
     '<p class="tiny" role="status" aria-live="polite" data-amber-status>Checking local route…</p></header>',
     '<section class="glass-panel wg-amber-thread" aria-label="Amber conversation" role="log" aria-live="polite" data-amber-thread></section>',
     '<section class="glass-panel wg-amber-witness" aria-label="Wayglass first conversation witness">',
@@ -205,18 +210,60 @@ export async function mountAmberRoom(root, {
       status.textContent='Amber archive reopened · local history available for the next turn';
     }catch(error){archiveStatus.textContent='Open failed: '+error.message;}
   });
-  render();refreshArchive();
-  try{
-    const routes=(await catalogue()).routes||[];
-    const route=routes.find(item=>item.route_id===ROUTE);
-    configured=route?.configured===true;
-    status.textContent=configured
-      ? 'Amber local route configured · a live reply is not yet verified.'
-      : 'Amber local route unavailable. Set WAYGLASS_AMBER_MODEL to the exact Ollama tag on the Wayglass host.';
-  }catch(error){
-    status.textContent='Route check unavailable (owner sign-in may be required): '+error.message;
+  async function refreshRoute(){
+    try{
+      const routes=(await catalogue()).routes||[];
+      const route=routes.find(item=>item.route_id===ROUTE);
+      configured=route?.configured===true;
+      status.textContent=configured
+        ? 'Wayglass Amber room configured · local Orion reply not yet verified.'
+        : 'Orion spine not configured on this Wayglass host. The local model cannot be substituted silently.';
+    }catch(error){
+      configured=false;
+      status.textContent='Route check unavailable: '+error.message;
+    }
+    setBusy(false);
   }
-  setBusy(false);
+  const stewardForm=find('steward-form');
+  const stewardInput=find('steward-input'), stewardStatus=find('steward-status');
+  async function checkHouseSession(){
+    try {
+      const response=await fetch('/api/v1/house/session',{credentials:'same-origin',cache:'no-store'});
+      const data=await response.json().catch(()=>({}));
+      const signed=response.ok && data.connected===true;
+      stewardStatus.textContent=signed?'House Steward connected · private tailnet session':'Sign in to open Wayglass private routes.';
+      stewardForm.hidden=signed;
+      return signed;
+    }catch {
+      stewardStatus.textContent='House sign-in unavailable. Check the Wayglass host.';
+      return false;
+    }
+  }
+  stewardForm.addEventListener('submit',async event=>{
+    event.preventDefault();
+    const credential=stewardInput.value.trim();
+    if(!credential)return;
+    const button=find('steward-submit');
+    button.disabled=true;
+    stewardStatus.textContent='Checking House Steward credential…';
+    try{
+      const response=await fetch('/api/v1/house/session',{
+        method:'POST',credentials:'same-origin',cache:'no-store',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({credential}),
+      });
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok||data.connected!==true)throw Error(data.error||'House sign-in refused.');
+      stewardInput.value='';
+      await checkHouseSession();
+      await refreshRoute();
+    }catch(error){
+      stewardStatus.textContent='Sign-in failed: '+error.message;
+    }finally{button.disabled=false;}
+  });
+  render();refreshArchive();
+  await checkHouseSession();
+  await refreshRoute();
   return Object.freeze({surface_id:WORLD,session_id:()=>session,
     destroy(){disposed=true;active?.abort();globalThis.removeEventListener?.('wayglass:feather',feather);}});
 }
