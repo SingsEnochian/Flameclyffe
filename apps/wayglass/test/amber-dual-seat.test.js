@@ -6,14 +6,14 @@ const require = createRequire(import.meta.url);
 const { resolveWayglassRoute, publicWayglassRoutes } = require('../../../lib/wayglass-route-registry.cjs');
 const { resolveCharacterSeat, publicCharacterSeats } = require('../../starwell-server/wayglass/character-seats.cjs');
 
-test('Amber and Wayglass are separate participants on the local Ollama provider', () => {
+test('Amber and Ship Voice are two speaking places of one Wayglass participant', () => {
   const amber = resolveWayglassRoute('flame:amber:ollama');
   const ship = resolveWayglassRoute('wayglass:ship');
   assert.ok(amber);
   assert.ok(ship);
   assert.equal(amber.provider, 'ollama');
   assert.equal(ship.provider, 'ollama');
-  assert.equal(amber.participant_id, 'amber');
+  assert.equal(amber.participant_id, 'wayglass');
   assert.equal(ship.participant_id, 'wayglass');
   assert.notEqual(amber.continuity_id, ship.continuity_id);
   assert.notEqual(amber.route_id, ship.route_id);
@@ -62,12 +62,12 @@ test('public route catalogue distinguishes Amber from Wayglass and reports uncon
   }
 });
 
-test("Amber's own seat never inherits the Wayglass ship or fiction seat", () => {
+test("Amber room stays a distinct speaking place of Wayglass", () => {
   const amber = resolveCharacterSeat('amber');
   const wayglass = resolveCharacterSeat('wayglass');
-  assert.equal(amber.kind, 'independent-participant');
+  assert.equal(amber.kind, 'wayglass-speaking-place');
   assert.equal(wayglass.kind, 'system-voice');
-  assert.match(amber.instructions, /not the Wayglass Ship Voice/);
+  assert.match(amber.instructions, /SAME Wayglass participant/);
   assert.match(wayglass.instructions, /system voice seat/);
   assert.ok(publicCharacterSeats().some(seat => seat.id === 'amber'));
 });
