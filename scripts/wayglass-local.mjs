@@ -38,6 +38,20 @@ async function hasWayglassAPI() {
   const response = await get(api);
   return !!response && isWayglassHostHealthy(await response.json().catch(() => ({})));
 }
+async function hasOrionVoiceGate() {
+  try {
+    const response = await fetch('http://127.0.0.1:3000/api/v1/wayglass/respond',{
+      method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({route_id:'flame:amber:ollama',character_id:'amber',participant_id:'wayglass'}),
+      cache:'no-store',signal:AbortSignal.timeout(1600),
+    });
+    const data=await response.json().catch(()=>({}));
+    // This unauthorised test must NOT invoke Ollama; it recognises only our
+    // current Wayglass steward gate. No messages, secrets or model turns sent.
+    return response.status===401 && data.error==='House Steward authorization is required for Wayglass voices.';
+  } catch { return false; }
+}
+
 
 // Diagnose two independent places old versions can hide: a Vite server on 5186
 // and a healthy but pre-Wyrdrune House host on 3000. The route probe is
@@ -178,6 +192,9 @@ async function main() {
   console.log('[Wayglass] OAuth metadata: ' + oauthMetadata);
   console.log('[Wayglass] OAuth pairing code file: ' + oauthPairingFile);
   if (process.argv.includes('--tailnet')) {
+    if (!(await hasOrionVoiceGate())) {
+      throw new Error('Host port 3000 is not this Orion-enabled Wayglass build. Stop the stale host and rerun the launcher.');
+    }
     const staged = await get('http://127.0.0.1:3000/wayglass/');
     if (!staged || !/wayglass/i.test(await staged.text())) {
       throw new Error('Wayglass staged /wayglass/ site was not found on port 3000. Run npm run wayglass:deploy:server.');
