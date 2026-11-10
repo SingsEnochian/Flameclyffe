@@ -65,7 +65,8 @@
     "wayglass:local": "node scripts/wayglass-local.mjs",
     "wayglass:local:doctor": "node scripts/wayglass-local.mjs --doctor",
     "wayglass:shipwide:build": "node scripts/wayglass-shipwide-build.mjs",
-    "wayglass:shipwide:verify": "node scripts/wayglass-shipwide-matrix.mjs"
+    "wayglass:shipwide:verify": "node scripts/wayglass-shipwide-matrix.mjs",
+    "wayglass:sound-palette:check": "node scripts/wayglass-compile-sound-palette.mjs --check"
   },
   "dependencies": {
     "@netlify/blobs": "^10.7.13",

@@ -6,6 +6,7 @@ const run=(args,extra={})=>new Promise((resolve,reject)=>{
  const child=spawn(process.platform==='win32'?'npm.cmd':'npm',args,{cwd:root,env:{...process.env,...extra},stdio:'inherit'});
  child.on('error',reject);child.on('close',code=>code===0?resolve():reject(new Error(args.join(' ')+' exited '+code)));
 });
+await run(['run','wayglass:sound-palette:check']);
 // Three independent outputs build concurrently; stage only a complete build set.
 await Promise.all([run(['run','wayglass:build']),run(['run','arcsweep:build']),run(['run','starwell:build'],{STARWELL_BASE:'/starwell-foundry/'})]);
 await run(['run','wayglass:stage:server']);

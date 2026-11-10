@@ -44,6 +44,8 @@ async function copyTree(from, to) {
   const inventory=buildShipInheritance(repoRoot,{sourceSha:dirty?null:execFileSync('git',['rev-parse','HEAD'],{cwd:repoRoot,encoding:'utf8'}).trim()});
   await fsp.writeFile(path.join(runtime,'ship-inheritance.json'),JSON.stringify(inventory,null,2)+'\n');
 
+  await fsp.copyFile(path.join(repoRoot,'lib/wayglass-sound-palette.catalog.json'),path.join(runtime,'wayglass-sound-palette.catalog.json'));
+
   // WTL preview has local CommonJS dependencies; package the reviewed runtime exactly.
   const wtlDir = path.join(runtime,'wyrdrune');
   await fsp.mkdir(wtlDir,{recursive:true});

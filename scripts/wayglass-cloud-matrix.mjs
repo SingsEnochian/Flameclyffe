@@ -34,7 +34,7 @@ const receipt = {schema:'wayglass.cloud-matrix/v1',source_sha:head,source_tree:t
  deployed_service_verified:false,participant_turn_verified:false,generated_output_exclusions:generated,started_at:new Date().toISOString(),jobs:[],status:'running'};
 async function run([id,directory,pattern]) {
  const selected=await files(directory,pattern);
- if(id==='arcsweep-deck'){selected.push(...await files('test',/^wayglass-(sound-composition|composition-projection|composition-deck-channel|story-score)\.test\.mjs$/),...await files('apps/arcsweep/test',/^(composition-inheritance|story-wyrdrune-score)\.test\.js$/),'apps/starwell-server/test/arcsweep-frame.test.js');}
+ if(id==='arcsweep-deck'){selected.push(...await files('test',/^wayglass-(sound-composition|sound-palette|composition-projection|composition-deck-channel|story-score)\.test\.mjs$/),...await files('apps/arcsweep/test',/^(composition-inheritance|story-wyrdrune-score)\.test\.js$/),'apps/starwell-server/test/arcsweep-frame.test.js');}
  if(!selected.length)return {id,status:'blocked',reason:'No matching tests in exact source'};
  const log=resolve(output,id+'.log');
  return new Promise(resolveJob=>{
