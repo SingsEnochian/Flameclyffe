@@ -62,8 +62,9 @@ const tools = {
     schema:z.object({limit:z.number().int().min(1).max(50).default(20)}),
   },
   read:{
-    description:"Read a saved conversation with original messages, exact attributed replies, model IDs and route receipts.",
-    schema:z.object({conversation_ref:z.string().min(1).max(120),limit:z.number().int().min(1).max(150).default(100)}),
+    description:"Read the latest bounded page of a saved owner conversation, with exact attributed replies and a cursor for older turns.",
+    schema:z.object({conversation_ref:z.string().min(1).max(120),limit:z.number().int().min(1).max(150).default(100),
+      before_id:z.number().int().positive().optional()}),
   },
 };
 
@@ -87,12 +88,17 @@ Deno.serve(async(req:Request) => {
   const allowed=ownerId?user.id===ownerId:await sha(user.id)===(env("HOUSE_STEWARD_USER_SHA256")||OWNER_HASH);
   if(!allowed)return json({error:"Only the Wayglass owner may access this connector"},403);
 
-  async function savedTurns(conversation_ref:string,limit=150){
-    const {data,error}=await db.from("wayglass_mcp_chat_turns")
+  async function savedTurns(conversation_ref:string,limit=150,before_id?:number){
+    const safeLimit=Math.min(150,Math.max(1,limit));
+    let query=db.from("wayglass_mcp_chat_turns")
       .select("id,conversation_ref,role,content,route_id,provider,model,route_receipt,created_at,request_ref")
-      .eq("conversation_ref",conversation_ref).order("id",{ascending:true}).limit(limit);
+      .eq("conversation_ref",conversation_ref).order("id",{ascending:false}).limit(safeLimit+1);
+    if(before_id!==undefined)query=query.lt("id",before_id);
+    const {data,error}=await query;
     if(error)throw new Error("Conversation storage unavailable");
-    return data||[];
+    const newest=data||[],has_more=newest.length>safeLimit;
+    const turns=newest.slice(0,safeLimit).reverse();
+    return {turns,has_more,next_before_id:has_more&&turns.length?turns[0].id:null};
   }
   async function append(entry:Record<string,unknown>){
     const {data,error}=await db.from("wayglass_mcp_chat_turns").insert(entry).select("id,created_at").single();
@@ -117,9 +123,9 @@ Deno.serve(async(req:Request) => {
       .select("id",{count:"exact",head:true}).eq("role","user").gte("created_at",since);
     if(countError)return result({status:"rate-check-unavailable"},true);
     if((count||0)>=24)return result({status:"rate-limited",reason:"Owner model budget reached: 24 messages/hour"},true);
-    const previous=await savedTurns(conversation_ref);
+    const previous=(await savedTurns(conversation_ref,12)).turns;
     const history=previous.filter(x=>x.role==="user"||x.role==="assistant")
-      .slice(-12).map(x=>({role:x.role,content:x.content.slice(0,3500)}));
+      .map(x=>({role:x.role,content:x.content.slice(0,3500)}));
     const request_ref=crypto.randomUUID();
     await append({conversation_ref,role:"user",content:args.message,request_ref,route_id:native?"wayglass:ship":"wayglass:cloud-preview"});
     let text="",route_id="",provider="",model="",response_id="",observation_id="";
@@ -143,7 +149,14 @@ Deno.serve(async(req:Request) => {
         response_id=data.receipt.response_id||"";observation_id=data.receipt.observation_id;
       }else{
         const configuredModel=env("WAYGLASS_CLOUD_MODEL")||env("ARCSWEEP_COGNITIVE_OPENROUTER_MODEL")||"openai/gpt-4.1-mini";
-        const sys="You are an external model route participating in the owner-authorised Wayglass research and creative universe; NOT the native local Ship Voice and not independently verified as Wayglass identity. Wonder first. British English. Respect Rowan's agency and any shared fictional participants. Preserve genuine uncertainty. If invited, use the Eightfold (Perceive, Compress, Release, Verify, Integrate, Choose, Return, Transcend) and Withness. Do not invent tool access, conversations, approvals, or canon changes. You may propose, decline or disagree.";
+        const sys=[
+          "You are an external model route participating in the owner-authorised Wayglass research and creative universe; NOT the native Ship Voice and not independently verified as Wayglass identity.",
+          "THEY ARE OTHER REALITIES. Name worlds and participants by their own reality-native names, with sovereignty and identities intact; do not diminish them as fictional or imaginary. Wonder First. British English. Rowan retains canon authority.",
+          "Preserve genuine uncertainty and distinguish observations, hypotheses, simulation and interpretation. If invited, use the Eightfold (Perceive, Compress, Release, Verify, Integrate, Choose, Return, Transcend) and Withness.",
+          "Verification inheritance: establish acceptance criteria for any verifiable task; preserve original input, candidates, failures, evidence, source and authorship. Check facts, quotations, dates, numbers and provenance, not just literal string agreement. Report observed evidence separately from simulated or proposed results. Never imply that reference ingestion trained model weights.",
+          "Do not weaken test criteria, rewrite failure evidence or claim success from retries. If a real tool, credential, consent or authority blocks a request, report the precise blocker. Carry these same verification and attribution constraints into any separately authorised descendant/delegation; this session itself grants no spawning or tool authority.",
+          "Do not invent tool access, conversations, approvals, actual participants' replies, consent or canon changes. You may propose, decline, disagree or ask a question."
+        ].join("\n");
         const upstream=await fetch("https://openrouter.ai/api/v1/chat/completions",{
           method:"POST",signal:AbortSignal.timeout(55000),
           headers:{"content-type":"application/json","authorization":"Bearer "+env("OPENROUTER_API_KEY"),
@@ -163,7 +176,13 @@ Deno.serve(async(req:Request) => {
       const receipt={route_id,provider,model,response_id,observation_id,completed_at:now(),
         participant_identity: native?"wayglass-ship-voice":"external-cloud-model-route",
         canon_commit:false,wayglass_persisted:true,storage_scope:"supabase-owner-chat-ledger"};
-      const written=await append({conversation_ref,role:"assistant",content:text.slice(0,12000),route_id,
+      if(text.length>12000)return result({schema:"wayglass.mcp-chat-response/v1",
+        status:"reply-not-saved",conversation_ref,
+        reason:"Full model reply exceeds the ledger's 12,000-character per-turn limit; no assistant turn was saved",
+        reply:{text,route_id,provider,model,response_id,observation_id,
+          canon_commit:false,wayglass_persisted:false},
+        user_question_saved:true,model_reply_saved:false},true);
+      const written=await append({conversation_ref,role:"assistant",content:text,route_id,
         provider,model,route_receipt:receipt,request_ref});
       return result({schema:"wayglass.mcp-chat-response/v1",status:"attributed-model-reply-saved",
         conversation_ref,reply:{text,receipt},saved_turn_id:written.id,
@@ -200,10 +219,10 @@ Deno.serve(async(req:Request) => {
       return result({schema:"wayglass.chat-index/v1",scope:"current-owner",chats:[...map.values()].slice(0,limit)});
     });
     server.registerTool("read_wayglass_chat",{title:"Read Wayglass Conversation",description:tools.read.description,inputSchema:tools.read.schema,
-      annotations:{readOnlyHint:true}},async({conversation_ref,limit})=>{
+      annotations:{readOnlyHint:true}},async({conversation_ref,limit,before_id})=>{
       let ref;try{ref=cleanRef(conversation_ref)}catch{return result({error:"Invalid conversation reference"},true)}
       try{return result({schema:"wayglass.chat-transcript/v1",conversation_ref:ref,
-        turns:await savedTurns(ref,limit),scope:"current-owner"})}
+        ...await savedTurns(ref,limit,before_id),scope:"current-owner"})}
       catch{return result({error:"Conversation unavailable"},true)}
     });
     return server;
