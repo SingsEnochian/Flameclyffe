@@ -1,0 +1,28 @@
+name: Wayglass MCP OAuth Public Preflight
+
+on:
+  pull_request:
+    paths:
+      - scripts/wayglass-mcp-oauth-preflight.mjs
+      - test/wayglass/mcp-oauth-preflight.test.mjs
+      - supabase/functions/wayglass-chat-mcp/index.ts
+      - .github/workflows/wayglass-mcp-oauth-preflight.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  public-discovery:
+    name: Read-only OAuth handshake and negative tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify fail-closed discovery contracts
+        run: node --test test/wayglass/mcp-oauth-preflight.test.mjs
+      - name: Inspect deployed public OAuth handshake (no keys or model calls)
+        run: node scripts/wayglass-mcp-oauth-preflight.mjs
