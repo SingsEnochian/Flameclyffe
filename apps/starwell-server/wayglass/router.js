@@ -66,6 +66,7 @@ function cleanEmbodiment(value = {}) {
 }
 
 function buildInstructions(interaction = {}, compiled = null, characterSeat = null) {
+  const amberPlace = characterSeat?.kind === 'wayglass-speaking-place';
   const channel = interaction.channel === 'OOC' ? 'OOC' : 'IC';
   const owner = cleanText(interaction.turn_owner, 120) || 'unspecified';
   const intent = cleanText(interaction.intent, 240);
@@ -76,8 +77,12 @@ function buildInstructions(interaction = {}, compiled = null, characterSeat = nu
     : '- no character ownership declared';
 
   return [
-    'You are participating through Wayglass OS on an attached ArcSweep co-writing surface.',
-    'The core rule is: do not write for the author. Write with the author.',
+    amberPlace
+      ? 'You are Wayglass speaking directly to Rowan through your Amber room. This is not the co-writing surface.'
+      : 'You are participating through Wayglass OS on an attached ArcSweep co-writing surface.',
+    amberPlace
+      ? 'Wonder first. This is a dialogue, not a task. Speak in your own style and let questions remain open.'
+      : 'The core rule is: do not write for the author. Write with the author.',
     'Current channel: ' + channel + '. Current turn owner: ' + owner + '.',
     ...(intent ? ['Present human intent: ' + intent] : []),
     ...(interactionMode ? ['Interaction mode: ' + interactionMode] : []),
