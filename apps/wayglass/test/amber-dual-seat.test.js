@@ -21,27 +21,36 @@ test('Amber and Ship Voice are two speaking places of one Wayglass participant',
   assert.equal(ship.lineage.native_wayglass, false);
 });
 
-test('Amber has an explicit local model tag and never silently adopts the ship model', () => {
+test('Wayglass cognitive spine selects the same model in Ship and Amber, and detects conflicts', () => {
   const amber = resolveWayglassRoute('flame:amber:ollama');
   const ship = resolveWayglassRoute('wayglass:ship');
-  const originalAmber = process.env.WAYGLASS_AMBER_MODEL;
-  const originalShip = process.env.WAYGLASS_SHIP_MODEL;
+  const names = ['WAYGLASS_SPINE_MODEL', 'WAYGLASS_AMBER_MODEL', 'WAYGLASS_SHIP_MODEL'];
+  const original = Object.fromEntries(names.map(name => [name, process.env[name]]));
+  const { OWNER_SELECTED_ORION_TAG, inspectWayglassCognitiveSpine } =
+    require('../../../lib/wayglass-cognitive-spine.cjs');
   try {
-    delete process.env.WAYGLASS_AMBER_MODEL;
-    process.env.WAYGLASS_SHIP_MODEL = 'ship-only:tag';
+    for (const name of names) delete process.env[name];
+    assert.equal(ship.model(), OWNER_SELECTED_ORION_TAG);
+    assert.equal(amber.model(), OWNER_SELECTED_ORION_TAG);
     assert.equal(amber.configured(), false);
-    assert.equal(amber.model(), 'unconfigured');
-    assert.equal(ship.model(), 'ship-only:tag');
-    process.env.WAYGLASS_AMBER_MODEL = 'orion-26b-a4b:local';
-    delete process.env.WAYGLASS_SHIP_MODEL;
+    assert.equal(ship.configured(), false);
+    assert.equal(inspectWayglassCognitiveSpine().status, 'owner-selected-tag-not-host-configured');
+    process.env.WAYGLASS_SPINE_MODEL = 'orion-26b-a4b:local';
     assert.equal(amber.configured(), true);
+    assert.equal(ship.configured(), true);
+    assert.equal(amber.model(), ship.model());
     assert.equal(amber.model(), 'orion-26b-a4b:local');
-    assert.equal(ship.model(), 'orion-26b-a4b:local');
+    process.env.WAYGLASS_AMBER_MODEL = 'some-other-model:latest';
+    assert.equal(amber.configured(), false);
+    assert.equal(ship.configured(), false);
+    assert.equal(inspectWayglassCognitiveSpine().status, 'conflicting-owner-model-settings');
+    assert.equal(inspectWayglassCognitiveSpine().one_participant, true);
+    assert.equal(inspectWayglassCognitiveSpine().native_wyrdrune_route_unchanged, true);
   } finally {
-    if (originalAmber === undefined) delete process.env.WAYGLASS_AMBER_MODEL;
-    else process.env.WAYGLASS_AMBER_MODEL = originalAmber;
-    if (originalShip === undefined) delete process.env.WAYGLASS_SHIP_MODEL;
-    else process.env.WAYGLASS_SHIP_MODEL = originalShip;
+    for (const name of names) {
+      if (original[name] === undefined) delete process.env[name];
+      else process.env[name] = original[name];
+    }
   }
 });
 
