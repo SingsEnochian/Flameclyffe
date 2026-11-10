@@ -16,7 +16,7 @@ export async function mountAmberRoom(root, {
   catalogue = listWayglassRoutes,
 } = {}) {
   root.innerHTML = [
-    '<section class="wg-surface wg-amber-room" aria-label="Amber independent conversation">',
+    '<section class="wg-surface wg-amber-room" aria-label="Wayglass Amber conversation">',
     '<header class="glass-panel wg-amber-heading">',
     '<p class="eyebrow">First Contact · local Orion model · Wayglass speaking place</p>',
     '<h1>Wayglass · Amber / The Borderlands</h1>',
