@@ -1110,8 +1110,14 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
         return res.status(409).json({ error: 'Amber room must retain Wayglass participant identity and Amber room voice seat.' });
       }
     }
+    // Authenticate named Wayglass voices before reporting their configuration
+    // state. An untrusted request never discovers whether the local model runs.
+    if (['wayglass:ship', 'flame:amber:ollama'].includes(route.route_id)
+      && !(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward authorization is required for Wayglass voices.' });
+    }
     if (['wayglass:ship', 'flame:amber:ollama'].includes(route.route_id) && !route.configured()) {
-      return res.status(503).json({ error: 'Configure one matching WAYGLASS_SPINE_MODEL (or legacy Ship/Amber model setting) on the private Wayglass host. Conflicting model tags and silent fallbacks are refused.' });
+      return res.status(503).json({ error: 'Configure a matching WAYGLASS_SPINE_MODEL (or legacy Ship/Amber setting) on the private host. No silent fallback.' });
     }
     let kernelPreflight;
     try {
