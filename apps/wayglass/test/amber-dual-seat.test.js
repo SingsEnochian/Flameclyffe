@@ -45,7 +45,7 @@ test('Amber has an explicit local model tag and never silently adopts the ship m
   }
 });
 
-test('public route catalogue distinguishes Amber from Wayglass and reports unconfigured honestly', () => {
+test('public route catalogue distinguishes Wayglass speaking places and reports unconfigured honestly', () => {
   const original = process.env.WAYGLASS_AMBER_MODEL;
   try {
     delete process.env.WAYGLASS_AMBER_MODEL;
@@ -55,7 +55,7 @@ test('public route catalogue distinguishes Amber from Wayglass and reports uncon
     assert.equal(amber.configured, false);
     assert.equal(amber.connection_verified, false);
     assert.equal(ship.participant_id, 'wayglass');
-    assert.equal(amber.participant_id, 'amber');
+    assert.equal(amber.participant_id, 'wayglass');
   } finally {
     if (original === undefined) delete process.env.WAYGLASS_AMBER_MODEL;
     else process.env.WAYGLASS_AMBER_MODEL = original;
