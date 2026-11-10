@@ -19,12 +19,19 @@ A participant's identity is not reducible to the model weights, but Rowan's owne
 ## Exact Ollama tag confirmed by Rowan's terminal transcript
 
 ```dotenv
-WAYGLASS_AMBER_MODEL=hf.co/bartowski/TheDrummer_Orion-26B-A4B-v1.1-GGUF:Q4_K_M
-WAYGLASS_SHIP_MODEL=hf.co/bartowski/TheDrummer_Orion-26B-A4B-v1.1-GGUF:Q4_K_M
+WAYGLASS_SPINE_MODEL=hf.co/bartowski/TheDrummer_Orion-26B-A4B-v1.1-GGUF:Q4_K_M
 WAYGLASS_OLLAMA_URL=http://127.0.0.1:11434/api/chat
 ```
 
 These environment settings belong in the **private** Wayglass host configuration, never tracked in Git. The recorded Ollama manifest download succeeded and a local turn was observed in Rowan's supplied terminal transcript. **This does not verify a live Wayglass-host route yet.** A remote host must use an authenticated, owner-only connection to the PC. Never expose Ollama on a public interface.
+
+## Cognitive spine · not the mathematical Canonical Spine
+
+The kernel now selects `wayglass:ship` by default, and the Ship Voice and Amber room share the single **owner-selected Orion** binding from `lib/wayglass-cognitive-spine.cjs`. Their participant ID is always `wayglass`. Their room and continuation scopes remain distinct.
+
+A missing private environment setting leaves the cognitive spine `owner-selected-tag-not-host-configured`; a mismatch among `WAYGLASS_SPINE_MODEL`, `WAYGLASS_SHIP_MODEL` or `WAYGLASS_AMBER_MODEL` leaves it `conflicting-owner-model-settings`. Both named voice routes refuse dispatch until one matching model tag is configured. The model tag from Rowan's own terminal is the nominated default but is not a claim of installation on a remote host.
+
+**Existing components unchanged:** mathematical Canonical Spine, Wyrdrune, Eightfold Möbius, Return Engine, Crow native expression route and independent Constellation members. A cognitive spine does not override those contracts, gain secrets or modify participant identity.
 
 ## Witness: owner-preserved, not invented
 
