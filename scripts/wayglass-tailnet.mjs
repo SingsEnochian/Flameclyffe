@@ -127,8 +127,8 @@ async function checkServeConfiguration() {
 async function main(){
   if(Number(process.versions.node.split('.')[0])<24)throw Error('Node 24 or newer required.');
   const state=await tailscale();
-  const dnsName=String(state.Self?.DNSName||'').replace(/\\.$/,'').toLowerCase();
-  if (!/^[a-z0-9-]+(?:\\.[a-z0-9-]+)*\\.ts\\.net$/.test(dnsName))
+  const dnsName=String(state.Self?.DNSName||'').replace(/\.$/,'').toLowerCase();
+  if (!/^[a-z0-9-]+(?:\.[a-z0-9-]+)*\.ts\.net$/.test(dnsName))
     throw Error('Tailscale MagicDNS domain is not available. Enable MagicDNS on the private tailnet.');
   const origin='https://'+dnsName;
   process.env.WAYGLASS_TAILNET_ORIGIN=origin;
