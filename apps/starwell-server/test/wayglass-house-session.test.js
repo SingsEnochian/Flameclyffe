@@ -37,3 +37,23 @@ test('local sign-in attempts are bounded before credentials are verified',async 
   const response=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:'{"credential":"wrong"}'});
   assert.equal(response.status,429);assert.ok(response.headers.get('retry-after'));
 });
+
+test('tailnet House login uses Secure __Host cookie for exactly configured HTTPS origin',async t=>{
+  const env={ARCSWEEP_RUNTIME_TOKEN:'tailnet-fixture-only',WAYGLASS_TAILNET_ORIGIN:'https://rowan-fixture.test.ts.net'};
+  const url=await host(t,env);
+  const login=await fetch(url,{method:'POST',headers:{
+    'content-type':'application/json','host':'rowan-fixture.test.ts.net',
+  },body:JSON.stringify({credential:'tailnet-fixture-only'})});
+  assert.equal(login.status,201);
+  const cookie=login.headers.get('set-cookie')||'';
+  assert.match(cookie,/^__Host-hearthgate_session=/);
+  assert.match(cookie,/; Secure/);
+  assert.match(cookie,/HttpOnly/);
+  const resumed=await fetch(url,{headers:{cookie:cookie.split(';')[0]}});
+  assert.equal(resumed.status,200);
+  const unknown=await fetch(url,{method:'POST',headers:{
+    'content-type':'application/json','host':'unrelated.test.ts.net',
+  },body:JSON.stringify({credential:'tailnet-fixture-only'})});
+  assert.equal(unknown.status,201);
+  assert.match(unknown.headers.get('set-cookie'),/^hearthgate_session=/);
+});
