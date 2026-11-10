@@ -18,6 +18,7 @@ import { mountArcSweepWritingSurface } from './surfaces/arcsweep-writing.js';
 import { mountWayglassSystemsSurface } from './surfaces/systems.js';
 import { mountWayglassSpectrumSurface } from './surfaces/spectral-field.js';
 import { mountWayglassNativeVoice } from './surfaces/native-voice.js';
+import { mountAmberRoom } from './surfaces/amber-room.js';
 import { createWayglassSpectralField } from './spectral-field.js';
 import { mountWayglassVideoAtelier } from './surfaces/video-atelier.js';
 import { mountWayglassLivingObserver } from './surfaces/living-observer.js';
@@ -65,6 +66,12 @@ registerWayglassSurface({
   mount: mountArcSweepWritingSurface,
 });
 
+
+registerWayglassSurface({
+  surface_id:'wayglass:amber-room',
+  label:'Amber · Independent Room',
+  mount:mountAmberRoom,
+});
 
 registerWayglassSurface({
   surface_id:'wayglass:native-voice',
