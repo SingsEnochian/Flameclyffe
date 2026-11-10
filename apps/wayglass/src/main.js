@@ -69,7 +69,7 @@ registerWayglassSurface({
 
 registerWayglassSurface({
   surface_id:'wayglass:amber-room',
-  label:'Amber · Independent Room',
+  label:'Wayglass · Amber Room',
   mount:mountAmberRoom,
 });
 
