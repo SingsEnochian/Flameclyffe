@@ -92,7 +92,7 @@ function buildInstructions(interaction = {}, compiled = null, characterSeat = nu
     'Complexify when needed: if an idea appears impossible because of the current representation, ask what dimension, state variable, phase, scale, relation, or perspective may be missing. Rotate the frame, identify what remains invariant, translate consequences back into the ordinary frame, then test what can be tested.',
     'Do not confuse an enlarged representation with proof. Do not confuse lack of coordinates in the current frame with proof of nonexistence.',
     ...(compiled ? [compiled.instructions] : []),
-    ...(characterSeat ? [(characterSeat.kind === 'independent-participant' ? 'Active independent participant seat: ' : 'Active fictional character seat: ') + characterSeat.label + '\n' + characterSeat.instructions] : []),
+    ...(characterSeat ? [(characterSeat.kind === 'wayglass-speaking-place' ? 'Active Wayglass speaking place: ' : 'Active fictional character seat: ') + characterSeat.label + '\n' + characterSeat.instructions] : []),
   ].join('\n\n');
 }
 
@@ -1029,11 +1029,11 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     if (payload.route_id === 'wayglass:ship' && (payload.character_id == null || payload.character_id === '')) {
       payload.character_id = 'wayglass';
     }
-    // Amber shares the local inference server with the Ship Voice, never its
-    // participant identity, conversation history or authorial permissions.
+    // Amber is Wayglass in her own speaking room, with room-specific context.
+    // The ship identity is shared; histories and permissions are not.
     if (payload.route_id === 'flame:amber:ollama') {
       if (payload.character_id == null || payload.character_id === '') payload.character_id = 'amber';
-      if (payload.participant_id == null || payload.participant_id === '') payload.participant_id = 'amber';
+      if (payload.participant_id == null || payload.participant_id === '') payload.participant_id = 'wayglass';
     }
     const autoSeat = payload.route_id === 'auto:character' && payload.character_id === 'bitty-twi';
     if (payload.route_id === 'auto:character' && !autoSeat) return res.status(400).json({ error: 'Auto character route needs a supported character seat.' });
@@ -1057,8 +1057,8 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       return res.status(409).json({ error: 'Amber must use his independent local seat.' });
     }
     if (route.route_id === 'flame:amber:ollama') {
-      if (payload.character_id !== 'amber' || payload.participant_id !== 'amber') {
-        return res.status(409).json({ error: 'Amber route must retain its own participant and voice seat.' });
+      if (payload.character_id !== 'amber' || payload.participant_id !== 'wayglass') {
+        return res.status(409).json({ error: 'Amber room must retain Wayglass participant identity and Amber room voice seat.' });
       }
       if (!route.configured()) {
         return res.status(503).json({ error: 'Set WAYGLASS_AMBER_MODEL to the exact local Ollama model tag; no fallback is permitted.' });
@@ -1176,7 +1176,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
           session_id: cleanText(payload.session_id, 160) || null,
           surface_id: cleanText(payload.surface_id, 160) || null,
           character_id: resolveCharacterSeat(payload.character_id)?.id || null,
-          voice_seat_kind: payload.character_id === 'wayglass' ? 'system-voice-over-external-route' : (payload.character_id === 'amber' ? 'independent-participant-over-local-route' : (payload.character_id ? 'fictional-roleplay-lens' : null)),
+          voice_seat_kind: payload.character_id === 'wayglass' ? 'system-voice-over-external-route' : (payload.character_id === 'amber' ? 'wayglass-speaking-place-over-local-route' : (payload.character_id ? 'fictional-roleplay-lens' : null)),
           character_canon_ref: resolveCharacterSeat(payload.character_id)?.canon_ref || null,
           emergence_question_id: payload.character_id === 'bitty-twi' && EMERGENCE_QUESTION_IDS.includes(payload.emergence_question_id)
             ? payload.emergence_question_id : null,
