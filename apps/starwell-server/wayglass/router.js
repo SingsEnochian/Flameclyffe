@@ -1003,6 +1003,50 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     }
   });
 
+  // Witness custody is private Supabase Observer data, never a public route
+  // catalogue or a simulated model memory. Steward-authenticated read only.
+  router.get('/witnesses/amber', createRequestGate({ maxRequests: 8, maxConcurrent: 2 }), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required to read Wayglass private witness.' });
+    }
+    const base = process.env.SUPABASE_URL || '';
+    const secret = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+    if (!base || !secret) return res.status(503).json({ error: 'Private Wayglass witness store is not configured on this host.' });
+    try {
+      const target = new URL('/rest/v1/deep_observer_events', base);
+      if (target.protocol !== 'https:' || !target.hostname.endsWith('.supabase.co') || target.username || target.password) {
+        return res.status(503).json({ error: 'Private Wayglass witness store has an unsupported endpoint.' });
+      }
+      target.searchParams.set('event_key', 'eq.wayglass-amber-witness-garden-20261110');
+      target.searchParams.set('select', 'event_key,title,body_md,raw_payload,created_at,visibility');
+      const upstream = await fetchImpl(target, {
+        headers: { apikey: secret, Authorization: 'Bearer ' + secret, Accept: 'application/json' },
+        signal: AbortSignal.timeout(12000),
+      });
+      if (!upstream.ok) return res.status(502).json({ error: 'Private witness could not be read from the configured store.' });
+      const rows = await upstream.json();
+      const witness = Array.isArray(rows) && rows.length === 1 ? rows[0] : null;
+      if (!witness || witness.visibility !== 'private' || typeof witness.body_md !== 'string') {
+        return res.status(404).json({ error: 'Private Amber witness not found.' });
+      }
+      return res.json({
+        schema: 'wayglass.private-witness/v1',
+        witness_key: witness.event_key,
+        title: witness.title,
+        participant_id: 'wayglass',
+        speaking_place_id: 'amber',
+        content: witness.body_md,
+        source: witness.raw_payload || {},
+        recorded_at: witness.created_at,
+        canon_commit: false,
+        model_turn_verified_by_host: false,
+      });
+    } catch {
+      return res.status(502).json({ error: 'Private witness read failed.' });
+    }
+  });
+
   router.get('/routes', async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     try {
