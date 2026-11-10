@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Loopback-only Wayglass launcher. No GPU render, remote publication or automatic model call.
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -65,6 +65,44 @@ export async function probeLocalSoundscape({fetchImpl=globalThis.fetch}={}) {
       ?'current':response.status===404?'stale-or-missing-route':'unverified';
   } catch {}
   return Object.freeze(results);
+}
+
+// Tailnet-only publication. Never invoke Tailscale Funnel, publish Ollama,
+// or route to the Vite development port. Serve a staged, same-origin site.
+export function assessTailnetServeStatus(raw) {
+  if (!raw || !raw.trim()) return 'empty';
+  try {
+    const config = JSON.parse(raw);
+    const web = config.Web || {};
+    const tcp = config.TCP || {};
+    if (!Object.keys(web).length && !Object.keys(tcp).length) return 'empty';
+    const normal = JSON.stringify(config).toLowerCase();
+    return (normal.includes('127.0.0.1:3000') || normal.includes('localhost:3000'))
+      && !normal.includes('"allowfunnel":true') ? 'wayglass' : 'occupied';
+  } catch {
+    return 'unreadable';
+  }
+}
+function enableTailnetServe() {
+  const origin = String(process.env.WAYGLASS_TAILNET_ORIGIN || '');
+  if (!/^https:\/\/[a-z0-9-]+(?:\.[a-z0-9-]+)*\.ts\.net$/i.test(origin)) {
+    throw new Error('Tailnet origin missing or invalid; use Start-Wayglass.ps1 -Tailnet.');
+  }
+  const opts = { encoding: 'utf8', timeout: 25000, windowsHide: true };
+  const prior = spawnSync('tailscale', ['serve','status','--json'], opts);
+  if (prior.error) throw new Error('Tailscale CLI unavailable: ' + prior.error.message);
+  const state = assessTailnetServeStatus(prior.stdout || '');
+  if (state === 'unreadable') throw new Error('Could not inspect existing Tailscale Serve configuration.');
+  if (state === 'occupied') throw new Error('Tailscale Serve already has another configuration; refusing to overwrite it.');
+  if (state !== 'wayglass') {
+    const run = spawnSync('tailscale', ['serve','--bg','3000'], { ...opts, timeout: 50000 });
+    if (run.error || run.status !== 0) {
+      throw new Error('Tailscale Serve could not start: ' + (run.stderr || run.stdout || run.error?.message || 'unknown error').trim().slice(0,500));
+    }
+  }
+  console.log('[Wayglass] PRIVATE TAILNET URL: ' + origin + '/wayglass/');
+  console.log('[Wayglass] Requires the Tailscale app on the other device AND House Steward sign-in.');
+  console.log('[Wayglass] Tailscale Serve is persistent; disable with: tailscale serve --https=443 off');
 }
 
 function stop() {
@@ -135,6 +173,13 @@ async function main() {
   console.log('[Wayglass] ChatGPT MCP local endpoint: ' + mcp);
   console.log('[Wayglass] OAuth metadata: ' + oauthMetadata);
   console.log('[Wayglass] OAuth pairing code file: ' + oauthPairingFile);
+  if (process.argv.includes('--tailnet')) {
+    const staged = await get('http://127.0.0.1:3000/wayglass/');
+    if (!staged || !/wayglass/i.test(await staged.text())) {
+      throw new Error('Wayglass staged /wayglass/ site was not found on port 3000. Run npm run wayglass:deploy:server.');
+    }
+    enableTailnetServe();
+  }
   console.log('Ctrl+C stops this launcher.');
 }
 process.on('SIGINT', () => { stop(); process.exitCode = 0; });
