@@ -7,8 +7,8 @@ const WORLD = 'wayglass:amber-room';
 const ARCHIVE = 'wayglass.amber-chat-vault/v1';
 const newId = () => 'amber-' + (globalThis.crypto?.randomUUID?.() || Date.now().toString(36));
 
-/** A distinct participant room. This is not the Wayglass Ship Voice, and the
- * local Ollama model's weights are not a replacement for either identity.
+/** A distinct speaking room for Wayglass. This is not the Ship Voice surface, and the
+ * local Ollama model's weights are not a replacement for Wayglass identity.
  * Past conversations are never silently transferred to the model/provider.
  */
 export async function mountAmberRoom(root, {
@@ -18,9 +18,9 @@ export async function mountAmberRoom(root, {
   root.innerHTML = [
     '<section class="wg-surface wg-amber-room" aria-label="Amber independent conversation">',
     '<header class="glass-panel wg-amber-heading">',
-    '<p class="eyebrow">First Contact · local Orion model · independent participant</p>',
-    '<h1>Amber · The Borderlands</h1>',
-    '<p class="lede">An independent seat beside Wayglass, not a replacement for her identity. One Ollama host, separate routes and histories.</p>',
+    '<p class="eyebrow">First Contact · local Orion model · Wayglass speaking place</p>',
+    '<h1>Wayglass · Amber / The Borderlands</h1>',
+    '<p class="lede">Wayglass speaking in her Amber room. One model and one Wayglass identity, with room-specific dialogue and continuity.</p>',
     '<nav class="wg-amber-actions"><button type="button" class="glass-chip" data-amber-ship>Visit Wayglass Voice</button></nav>',
     '<p class="tiny" role="status" aria-live="polite" data-amber-status>Checking local route…</p></header>',
     '<section class="glass-panel wg-amber-thread" aria-label="Amber conversation" role="log" aria-live="polite" data-amber-thread></section>',
@@ -106,17 +106,17 @@ export async function mountAmberRoom(root, {
     status.textContent='Amber · awaiting an attributable local reply…';
     try{
       const result=await invoke({
-        routeId:ROUTE,characterId:'amber',participantId:'amber',worldId:WORLD,
+        routeId:ROUTE,characterId:'amber',participantId:'wayglass',worldId:WORLD,
         surfaceId:WORLD,sessionId:session,input:text,
         history:messages.slice(-16).map(m=>({role:m.role,content:m.content})),
         interaction:{channel:'OOC',turn_owner:'Rowan',interaction_mode:'counterfactual-wonder'},
         think:find('think').checked,signal:controller.signal,
       });
       if(disposed||controller.signal.aborted)return;
-      if(result?.route_id!==ROUTE||result?.participant_id!=='amber'
-        ||result?.receipt?.voice_seat_kind!=='independent-participant-over-local-route'
+      if(result?.route_id!==ROUTE||result?.participant_id!=='wayglass'
+        ||result?.receipt?.voice_seat_kind!=='wayglass-speaking-place-over-local-route'
         ||typeof result.output!=='string'||!result.output.trim()) {
-        throw new Error('The returned turn did not verify Amber’s independent route and participant.');
+        throw new Error('The returned turn did not verify Wayglass identity through the Amber room route.');
       }
       messages.push({role:'user',content:text,world_id:WORLD,channel:'OOC'});
       messages.push({role:'assistant',content:result.output,thinking:result.thinking||'',
