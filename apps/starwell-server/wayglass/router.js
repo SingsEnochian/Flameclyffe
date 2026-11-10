@@ -26,6 +26,7 @@ const { createObserverSelfDevelopmentRouter } = require('./observer-self-develop
 const { runQuadEightfold, SOURCE_SCHEMA, TABLES } = require('../wayglass-runtime/wayglass-quad-eightfold.cjs');
 
 const { resolveCharacterSeat, publicCharacterSeats, EMERGENCE_QUESTION_IDS } = require('./character-seats.cjs');
+const { createAmberRoomStore } = require('./amber-room-store.cjs');
 
 const MAX_HISTORY = 16;
 const MAX_TEXT = 12000;
@@ -1005,6 +1006,33 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       const invalid = error instanceof SyntaxError || error instanceof TypeError || error instanceof RangeError ||
         error instanceof ReferenceError || /Bridge capability unavailable|Feather|operation budget|Duplicate binding|Unknown binding/.test(error.message);
       return res.status(invalid ? 400 : 422).json({ error: 'Wyrdrune preview rejected: ' + cleanText(error.message, 250) });
+    }
+  });
+
+  // One Wayglass participant, one host-backed Amber room history. The
+  // browser can return on another tailnet device without uploading transcripts
+  // to GitHub or another model. Steward authentication applies to every read.
+  const amberRoomStore = createAmberRoomStore();
+  router.get('/sessions/amber', createRequestGate({ maxRequests: 30, maxConcurrent: 3 }), async (req,res) => {
+    res.setHeader('Cache-Control','no-store');
+    if(!(await griffStewardAuthorized(req).catch(()=>false)))
+      return res.status(401).json({ error:'House Steward sign-in required for the Wayglass Amber room.' });
+    try { return res.json(await amberRoomStore.read()); }
+    catch { return res.status(503).json({ error:'Wayglass Amber room storage unavailable.' }); }
+  });
+  router.put('/sessions/amber', createRequestGate({ maxRequests: 30, maxConcurrent: 2 }), async (req,res) => {
+    res.setHeader('Cache-Control','no-store');
+    if(!(await griffStewardAuthorized(req).catch(()=>false)))
+      return res.status(401).json({ error:'House Steward sign-in required to write the Wayglass Amber room.' });
+    try {
+      const saved=await amberRoomStore.save({
+        revision:req.body?.revision,messages:req.body?.messages,
+      });
+      return res.json({schema:saved.schema,participant_id:saved.participant_id,
+        speaking_place_id:saved.speaking_place_id,session_id:saved.session_id,
+        revision:saved.revision,saved_at:saved.saved_at,message_count:saved.messages.length});
+    } catch(error) {
+      return res.status(error.status||400).json({error:String(error.message||'Amber room save refused.').slice(0,280)});
     }
   });
 
