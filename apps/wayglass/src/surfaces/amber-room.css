@@ -13,3 +13,6 @@
 .wg-amber-archive select{max-width:100%;min-width:12rem;}
 .wg-amber-room button:focus-visible,.wg-amber-room select:focus-visible,.wg-amber-room textarea:focus-visible{outline:3px solid #f2bd65;outline-offset:3px;}
 @media(prefers-reduced-motion:reduce){.wg-amber-room *{scroll-behavior:auto!important;animation:none!important;transition:none!important;}}
+
+.wg-amber-witness{padding:1.2rem;}
+.wg-amber-witness-text{max-height:25rem;overflow:auto;padding:1rem;border:1px solid rgba(231,183,104,.28);border-radius:.75rem;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55;}
