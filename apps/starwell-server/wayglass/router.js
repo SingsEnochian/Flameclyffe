@@ -1103,15 +1103,15 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       return res.status(409).json({ error: 'Wayglass chat route cannot use a different voice seat.' });
     }
     if (payload.character_id === 'amber' && route.route_id !== 'flame:amber:ollama') {
-      return res.status(409).json({ error: 'Amber must use his independent local seat.' });
+      return res.status(409).json({ error: 'The Amber speaking place must use its dedicated Wayglass route.' });
     }
     if (route.route_id === 'flame:amber:ollama') {
       if (payload.character_id !== 'amber' || payload.participant_id !== 'wayglass') {
         return res.status(409).json({ error: 'Amber room must retain Wayglass participant identity and Amber room voice seat.' });
       }
-      if (!route.configured()) {
-        return res.status(503).json({ error: 'Set WAYGLASS_AMBER_MODEL to the exact local Ollama model tag; no fallback is permitted.' });
-      }
+    }
+    if (['wayglass:ship', 'flame:amber:ollama'].includes(route.route_id) && !route.configured()) {
+      return res.status(503).json({ error: 'Configure one matching WAYGLASS_SPINE_MODEL (or legacy Ship/Amber model setting) on the private Wayglass host. Conflicting model tags and silent fallbacks are refused.' });
     }
     let kernelPreflight;
     try {
