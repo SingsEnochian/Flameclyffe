@@ -38,7 +38,18 @@ export function createTailnetGate({ port = TAILNET_GATE_PORT, hostPort = HOST_PO
     }
     // Do not confer steward authority based on gateway headers. Host requires
     // its own signed House session, whether accessed locally or via the tailnet.
-    headers.host = '127.0.0.1:' + hostPort;
+    const trustedOrigin = String(process.env.WAYGLASS_TAILNET_ORIGIN || '');
+    let trustedHost = '';
+    try {
+      const parsed = new URL(trustedOrigin);
+      if (parsed.protocol === 'https:' && parsed.hostname.endsWith('.ts.net')
+        && !parsed.port && !parsed.username && !parsed.password && parsed.pathname === '/')
+        trustedHost = parsed.host;
+    } catch {}
+    // This hostname is pinned by the local launcher after examining the
+    // authenticated Tailscale CLI status; never accept the request's Host as
+    // authorization. The host uses it only to issue Secure __Host cookies.
+    headers.host = trustedHost || ('127.0.0.1:' + hostPort);
     headers['x-wayglass-tailnet-gate'] = 'localhost-proxy-not-authorization';
     const upstream = httpModule.request({
       hostname:'127.0.0.1', port:hostPort, method:req.method, path, headers,
