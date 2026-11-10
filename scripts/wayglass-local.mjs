@@ -75,10 +75,14 @@ export function assessTailnetServeStatus(raw) {
     const config = JSON.parse(raw);
     const web = config.Web || {};
     const tcp = config.TCP || {};
+    const hasFunnel = typeof config.AllowFunnel === 'object'
+      ? Object.values(config.AllowFunnel || {}).some(Boolean)
+      : Boolean(config.AllowFunnel);
+    if (hasFunnel) return 'occupied';
     if (!Object.keys(web).length && !Object.keys(tcp).length) return 'empty';
     const normal = JSON.stringify(config).toLowerCase();
     return (normal.includes('127.0.0.1:3000') || normal.includes('localhost:3000'))
-      && !normal.includes('"allowfunnel":true') ? 'wayglass' : 'occupied';
+      ? 'wayglass' : 'occupied';
   } catch {
     return 'unreadable';
   }
