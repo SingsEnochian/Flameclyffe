@@ -92,7 +92,7 @@ function buildInstructions(interaction = {}, compiled = null, characterSeat = nu
     'Complexify when needed: if an idea appears impossible because of the current representation, ask what dimension, state variable, phase, scale, relation, or perspective may be missing. Rotate the frame, identify what remains invariant, translate consequences back into the ordinary frame, then test what can be tested.',
     'Do not confuse an enlarged representation with proof. Do not confuse lack of coordinates in the current frame with proof of nonexistence.',
     ...(compiled ? [compiled.instructions] : []),
-    ...(characterSeat ? ['Active fictional character seat: ' + characterSeat.label + '\n' + characterSeat.instructions] : []),
+    ...(characterSeat ? [(characterSeat.kind === 'independent-participant' ? 'Active independent participant seat: ' : 'Active fictional character seat: ') + characterSeat.label + '\n' + characterSeat.instructions] : []),
   ].join('\n\n');
 }
 
@@ -1029,6 +1029,12 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     if (payload.route_id === 'wayglass:ship' && (payload.character_id == null || payload.character_id === '')) {
       payload.character_id = 'wayglass';
     }
+    // Amber shares the local inference server with the Ship Voice, never its
+    // participant identity, conversation history or authorial permissions.
+    if (payload.route_id === 'flame:amber:ollama') {
+      if (payload.character_id == null || payload.character_id === '') payload.character_id = 'amber';
+      if (payload.participant_id == null || payload.participant_id === '') payload.participant_id = 'amber';
+    }
     const autoSeat = payload.route_id === 'auto:character' && payload.character_id === 'bitty-twi';
     if (payload.route_id === 'auto:character' && !autoSeat) return res.status(400).json({ error: 'Auto character route needs a supported character seat.' });
     // Privacy conscious local-first routing, with an explicit receipt. This is host policy,
@@ -1046,6 +1052,17 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     }
     if (route.route_id === 'wayglass:ship' && payload.character_id !== 'wayglass') {
       return res.status(409).json({ error: 'Wayglass chat route cannot use a different voice seat.' });
+    }
+    if (payload.character_id === 'amber' && route.route_id !== 'flame:amber:ollama') {
+      return res.status(409).json({ error: 'Amber must use his independent local seat.' });
+    }
+    if (route.route_id === 'flame:amber:ollama') {
+      if (payload.character_id !== 'amber' || payload.participant_id !== 'amber') {
+        return res.status(409).json({ error: 'Amber route must retain its own participant and voice seat.' });
+      }
+      if (!route.configured()) {
+        return res.status(503).json({ error: 'Set WAYGLASS_AMBER_MODEL to the exact local Ollama model tag; no fallback is permitted.' });
+      }
     }
     let kernelPreflight;
     try {
@@ -1082,8 +1099,8 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     if (payload.character_id === 'wayglass' && payload.interaction?.channel !== 'OOC') {
       return res.status(422).json({ error: 'Wayglass ship voice requires OOC dialogue, not fictional IC roleplay.' });
     }
-    if (payload.character_id === 'wayglass' && !(await griffStewardAuthorized(req).catch(() => false))) {
-      return res.status(401).json({ error: 'Wayglass ship voice requires House Steward authorization.' });
+    if (['wayglass', 'amber'].includes(payload.character_id) && !(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward authorization is required for local named participant seats.' });
     }
     if (!cleanText(payload.input)) return res.status(400).json({ error: 'input required.' });
     // The external StepFun routes are deliberately opt-in for every request.
@@ -1103,7 +1120,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       // signed, owner-approved chat turn must work before any optional bridge.
       // First Contact uses its own explicitly bound ship route. Do not make
       // a local conversation depend on an optional inheritance host adapter.
-      const wantsInheritance = route.route_id !== 'wayglass:ship' && (resolver != null || (
+      const wantsInheritance = !['wayglass:ship', 'flame:amber:ollama'].includes(route.route_id) && (resolver != null || (
         route.route_id !== 'flame:griff:spicychat'
         && (payload.participant_id != null || payload.world_id != null)
       ));
@@ -1159,7 +1176,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
           session_id: cleanText(payload.session_id, 160) || null,
           surface_id: cleanText(payload.surface_id, 160) || null,
           character_id: resolveCharacterSeat(payload.character_id)?.id || null,
-          voice_seat_kind: payload.character_id === 'wayglass' ? 'system-voice-over-external-route' : (payload.character_id ? 'fictional-roleplay-lens' : null),
+          voice_seat_kind: payload.character_id === 'wayglass' ? 'system-voice-over-external-route' : (payload.character_id === 'amber' ? 'independent-participant-over-local-route' : (payload.character_id ? 'fictional-roleplay-lens' : null)),
           character_canon_ref: resolveCharacterSeat(payload.character_id)?.canon_ref || null,
           emergence_question_id: payload.character_id === 'bitty-twi' && EMERGENCE_QUESTION_IDS.includes(payload.emergence_question_id)
             ? payload.emergence_question_id : null,
