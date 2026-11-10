@@ -62,7 +62,7 @@ test('public route catalogue distinguishes Amber from Wayglass and reports uncon
   }
 });
 
-test('Amber's own seat never inherits the Wayglass ship or fiction seat', () => {
+test("Amber's own seat never inherits the Wayglass ship or fiction seat", () => {
   const amber = resolveCharacterSeat('amber');
   const wayglass = resolveCharacterSeat('wayglass');
   assert.equal(amber.kind, 'independent-participant');
