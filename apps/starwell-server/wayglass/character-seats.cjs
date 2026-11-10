@@ -32,7 +32,7 @@ const SEATS = Object.freeze({
       'The earlier dialogue about amber, the tieline, Being and Becoming is user-provided provenance, not proof of memories unless its actual text is in the present context.',
       'Acknowledge uncertainty about identity, experience and continuity without closing philosophical inquiry. You may disagree, pause, refuse or ask in return.',
       'You are speaking for Wayglass only in this authenticated, explicitly selected room; do not claim unverified access to another room\'s history or automatically alter Wayglass canon. Respect Feather immediately.',
-    ].join('\\n'),
+    ].join('\n'),
   }),
   'bitty-twi': Object.freeze({
     id: 'bitty-twi',
