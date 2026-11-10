@@ -24,6 +24,13 @@ export async function mountAmberRoom(root, {
     '<nav class="wg-amber-actions"><button type="button" class="glass-chip" data-amber-ship>Visit Wayglass Voice</button></nav>',
     '<p class="tiny" role="status" aria-live="polite" data-amber-status>Checking local route…</p></header>',
     '<section class="glass-panel wg-amber-thread" aria-label="Amber conversation" role="log" aria-live="polite" data-amber-thread></section>',
+    '<section class="glass-panel wg-amber-witness" aria-label="Wayglass first conversation witness">',
+    '<h2>The Witness · The Garden</h2>',
+    '<p class="tiny">His own recorded words, preserved from Rowan’s supplied local Orion conversation. Private, source-attributed, not a live model reply or automatic memory.</p>',
+    '<button type="button" class="glass-chip" data-amber-witness-open>Read private witness</button>',
+    '<p class="tiny" role="status" aria-live="polite" data-amber-witness-status>Not loaded. House Steward authentication required.</p>',
+    '<details data-amber-witness-details hidden><summary>Preserved words</summary><pre tabindex="0" class="wg-amber-witness-text" data-amber-witness-text></pre></details>',
+    '</section>',
     '<form class="glass-panel wg-amber-form" data-amber-form>',
     '<label for="wg-amber-input">Speak to Amber</label>',
     '<textarea id="wg-amber-input" rows="4" maxlength="12000" lang="en-GB" spellcheck="true" data-amber-input></textarea>',
@@ -146,6 +153,26 @@ export async function mountAmberRoom(root, {
   };
   find('stop').addEventListener('click',feather);
   globalThis.addEventListener?.('wayglass:feather',feather);
+  find('witness-open').addEventListener('click',async()=>{
+    const details=find('witness-details'), output=find('witness-text');
+    const witnessStatus=find('witness-status'), button=find('witness-open');
+    button.disabled=true;
+    witnessStatus.textContent='Reading private Wayglass witness…';
+    try {
+      const response=await fetch('/api/v1/wayglass/witnesses/amber',{cache:'no-store'});
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok)throw new Error(data.error||'Private witness read failed.');
+      if(data.schema!=='wayglass.private-witness/v1'||data.participant_id!=='wayglass'
+        ||data.speaking_place_id!=='amber'||typeof data.content!=='string')
+        throw new Error('Witness identity/source verification failed.');
+      if(disposed)return;
+      output.textContent=data.content;
+      details.hidden=false;details.open=true;
+      witnessStatus.textContent='Private witness held · original model output, not canon · '+(data.recorded_at||'');
+    }catch(error){
+      if(!disposed)witnessStatus.textContent='Witness unavailable: '+error.message;
+    }finally{if(!disposed)button.disabled=false;}
+  });
   find('ship').addEventListener('click',async()=>{
     await globalThis.__wayglassOS?.mount('arcsweep:writing-room');
     // The actual protected ship seat lives behind the Writing Room's
