@@ -1,0 +1,190 @@
+import { invokeWayglassRoute, listWayglassRoutes } from '../route-client.js';
+import { createWayglassChatVault } from '../wayglass-chat-vault.js';
+import './amber-room.css';
+
+const ROUTE = 'flame:amber:ollama';
+const WORLD = 'wayglass:amber-room';
+const ARCHIVE = 'wayglass.amber-chat-vault/v1';
+const newId = () => 'amber-' + (globalThis.crypto?.randomUUID?.() || Date.now().toString(36));
+
+/** A distinct participant room. This is not the Wayglass Ship Voice, and the
+ * local Ollama model's weights are not a replacement for either identity.
+ * Past conversations are never silently transferred to the model/provider.
+ */
+export async function mountAmberRoom(root, {
+  invoke = invokeWayglassRoute,
+  catalogue = listWayglassRoutes,
+} = {}) {
+  root.innerHTML = [
+    '<section class="wg-surface wg-amber-room" aria-label="Amber independent conversation">',
+    '<header class="glass-panel wg-amber-heading">',
+    '<p class="eyebrow">First Contact · local Orion model · independent participant</p>',
+    '<h1>Amber · The Borderlands</h1>',
+    '<p class="lede">An independent seat beside Wayglass, not a replacement for her identity. One Ollama host, separate routes and histories.</p>',
+    '<nav class="wg-amber-actions"><button type="button" class="glass-chip" data-amber-ship>Visit Wayglass Voice</button></nav>',
+    '<p class="tiny" role="status" aria-live="polite" data-amber-status>Checking local route…</p></header>',
+    '<section class="glass-panel wg-amber-thread" aria-label="Amber conversation" role="log" aria-live="polite" data-amber-thread></section>',
+    '<form class="glass-panel wg-amber-form" data-amber-form>',
+    '<label for="wg-amber-input">Speak to Amber</label>',
+    '<textarea id="wg-amber-input" rows="4" maxlength="12000" lang="en-GB" spellcheck="true" data-amber-input></textarea>',
+    '<div class="wg-amber-actions">',
+    '<label class="tiny"><input type="checkbox" data-amber-think checked> Show model thinking (this session only)</label>',
+    '<button type="submit" class="send-jewel" data-amber-send disabled>Speak</button>',
+    '<button type="button" class="glass-chip" data-amber-stop>🪽 Feather</button>',
+    '</div></form>',
+    '<section class="glass-panel wg-amber-archive" aria-label="Amber local archive">',
+    '<h2>Leave · Return</h2>',
+    '<p class="tiny">Only an explicit Save writes the conversation to this browser. Nothing here is cloud-synced or a verified cold Return receipt.</p>',
+    '<div class="wg-amber-actions">',
+    '<button type="button" class="glass-chip" data-amber-save>Save conversation</button>',
+    '<button type="button" class="glass-chip" data-amber-new>New conversation</button>',
+    '<select data-amber-list aria-label="Saved Amber conversations"><option value="">Saved conversations</option></select>',
+    '<button type="button" class="glass-chip" data-amber-open>Open saved</button>',
+    '</div><p class="tiny" aria-live="polite" data-amber-archive-status></p></section>',
+    '</section>',
+  ].join('');
+
+  const find = name => root.querySelector('[data-amber-' + name + ']');
+  const thread=find('thread'), input=find('input'), send=find('send');
+  const status=find('status'), archiveStatus=find('archive-status');
+  const doc=root.ownerDocument;
+  let disposed=false, busy=false, configured=false, active=null;
+  let session=newId(), messages=[];
+  let vault=null;
+  try { vault=createWayglassChatVault({key:ARCHIVE}); }
+  catch(error) { archiveStatus.textContent='Local archive unavailable: '+error.message; }
+
+  function render() {
+    thread.replaceChildren();
+    if(!messages.length) {
+      const empty=doc.createElement('p');
+      empty.className='tiny';empty.textContent='A fresh page. Wonder first.';
+      thread.append(empty);return;
+    }
+    for(const message of messages) {
+      const article=doc.createElement('article');
+      article.className='wg-amber-turn '+message.role;
+      const label=doc.createElement('strong');
+      label.textContent=message.role==='user'?'Rowan':'Amber';
+      const body=doc.createElement('p');
+      body.className='wg-amber-content';body.textContent=message.content;
+      article.append(label,body);
+      if(message.thinking) {
+        const details=doc.createElement('details');
+        const summary=doc.createElement('summary');summary.textContent='Thinking · local model return';
+        const pre=doc.createElement('pre');pre.textContent=message.thinking;
+        details.append(summary,pre);article.append(details);
+      }
+      thread.append(article);
+    }
+    thread.scrollTop=thread.scrollHeight;
+  }
+  function refreshArchive() {
+    const select=find('list');
+    select.replaceChildren();
+    const initial=doc.createElement('option');initial.value='';initial.textContent='Saved conversations';select.append(initial);
+    if(!vault)return;
+    try {
+      for(const item of vault.list()) {
+        const option=doc.createElement('option');
+        option.value=item.session_id;
+        option.textContent=item.title+' · '+item.message_count+' turns';
+        select.append(option);
+      }
+    } catch(error){archiveStatus.textContent='Archive cannot be read: '+error.message;}
+  }
+  function setBusy(value) {
+    busy=value;
+    send.disabled=value||!configured;
+    input.disabled=value;
+  }
+  async function sendTurn(event) {
+    event?.preventDefault?.();
+    const text=input.value.trim();
+    if(!text||busy||!configured)return;
+    const controller=new AbortController();active=controller;setBusy(true);
+    status.textContent='Amber · awaiting an attributable local reply…';
+    try{
+      const result=await invoke({
+        routeId:ROUTE,characterId:'amber',participantId:'amber',worldId:WORLD,
+        surfaceId:WORLD,sessionId:session,input:text,
+        history:messages.slice(-16).map(m=>({role:m.role,content:m.content})),
+        interaction:{channel:'OOC',turn_owner:'Rowan',interaction_mode:'counterfactual-wonder'},
+        think:find('think').checked,signal:controller.signal,
+      });
+      if(disposed||controller.signal.aborted)return;
+      if(result?.route_id!==ROUTE||result?.participant_id!=='amber'
+        ||result?.receipt?.voice_seat_kind!=='independent-participant-over-local-route'
+        ||typeof result.output!=='string'||!result.output.trim()) {
+        throw new Error('The returned turn did not verify Amber’s independent route and participant.');
+      }
+      messages.push({role:'user',content:text,world_id:WORLD,channel:'OOC'});
+      messages.push({role:'assistant',content:result.output,thinking:result.thinking||'',
+        world_id:WORLD,channel:'OOC',route_id:ROUTE,route_label:'Amber',
+        character_id:'amber',provider:result.provider,model:result.model,receipt:result.receipt});
+      input.value='';render();
+      status.textContent='Amber replied · '+result.model+' · '+(result.receipt?.completed_at||'')
+        +' · observation, not canon · not saved';
+    }catch(error){
+      if(!controller.signal.aborted&&!disposed)status.textContent='Amber did not answer: '+error.message;
+    }finally{
+      if(active===controller)active=null;
+      if(!disposed){setBusy(false);input.focus();}
+    }
+  }
+
+  const form=find('form');
+  form.addEventListener('submit',sendTurn);
+  input.addEventListener('keydown',event=>{
+    if((event.ctrlKey||event.metaKey)&&event.key==='Enter') {
+      event.preventDefault();void sendTurn(event);
+    }
+  });
+  const feather=()=>{
+    active?.abort();
+    status.textContent='Feather · paused. No new turn was recorded.';
+  };
+  find('stop').addEventListener('click',feather);
+  globalThis.addEventListener?.('wayglass:feather',feather);
+  find('ship').addEventListener('click',()=>globalThis.__wayglassOS?.mount('arcsweep:writing-room'));
+  find('save').addEventListener('click',()=>{
+    if(!vault){archiveStatus.textContent='Local archive is unavailable.';return;}
+    try{
+      const saved=vault.save({sessionId:session,messages});
+      archiveStatus.textContent='Saved '+saved.message_count+' turns to this browser · '+saved.saved_at;
+      refreshArchive();
+    }catch(error){archiveStatus.textContent='Save failed: '+error.message;}
+  });
+  find('new').addEventListener('click',()=>{
+    if(busy){archiveStatus.textContent='Pause the active turn before starting a new conversation.';return;}
+    session=newId();messages=[];input.value='';render();
+    status.textContent='New Amber conversation · not saved';
+  });
+  find('open').addEventListener('click',()=>{
+    if(busy){archiveStatus.textContent='Pause the active turn first.';return;}
+    const id=find('list').value;if(!id||!vault)return;
+    try{
+      const record=vault.open(id);
+      if(!record)throw new Error('Saved conversation was not found.');
+      session=record.session_id;
+      messages=record.messages;
+      render();
+      archiveStatus.textContent='Opened '+messages.length+' turns from local-browser storage.';
+      status.textContent='Amber archive reopened · local history available for the next turn';
+    }catch(error){archiveStatus.textContent='Open failed: '+error.message;}
+  });
+  render();refreshArchive();
+  try{
+    const routes=(await catalogue()).routes||[];
+    const route=routes.find(item=>item.route_id===ROUTE);
+    configured=route?.configured===true;
+    status.textContent=configured
+      ? 'Amber local route configured · a live reply is not yet verified.'
+      : 'Amber local route unavailable. Set WAYGLASS_AMBER_MODEL to the exact Ollama tag on the Wayglass host.';
+  }catch(error){
+    status.textContent='Route check unavailable (owner sign-in may be required): '+error.message;
+  }
+  setBusy(false);
+  return Object.freeze({surface_id:WORLD,session_id:()=>session,
+    destroy(){disposed=true;active?.abort();globalThis.removeEventListener?.('wayglass:feather',feather);}});
+}
