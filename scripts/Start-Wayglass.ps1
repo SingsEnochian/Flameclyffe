@@ -1,5 +1,5 @@
 # Install missing locked dependencies and launch local Wayglass Observer on Windows.
-param([switch]$Doctor)
+param([switch]$Doctor, [switch]$Tailnet)
 $ErrorActionPreference = 'Stop'
 $Root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 Push-Location $Root
@@ -16,7 +16,37 @@ try {
         npm ci --prefix apps/starwell-server
         if ($LASTEXITCODE -ne 0) { throw 'Hearthgate npm ci failed.' }
     }
+    if ($Tailnet) {
+        if (-not (Get-Command tailscale -ErrorAction SilentlyContinue)) { throw 'Tailscale CLI not found. Install/connect Tailscale on this Windows machine.' }
+        $statusJson = & tailscale status --json
+        if ($LASTEXITCODE -ne 0) { throw 'Tailscale is not connected. Log in with the Tailscale app first.' }
+        $tail = ($statusJson | Out-String | ConvertFrom-Json)
+        $dns = [string]$tail.Self.DNSName
+        $dns = $dns.TrimEnd('.')
+        if ($dns -notmatch '^[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.ts\.net
+    if ($LASTEXITCODE -ne 0) { throw "Launcher exited with code $LASTEXITCODE." }
+} finally { Pop-Location }
+) { throw 'No valid Tailscale MagicDNS name found.' }
+        $origin = "https://$dns"
+        $env:WAYGLASS_TAILNET_ORIGIN = $origin
+        $origins = @(([string]$env:HEARTHGATE_ALLOWED_ORIGINS).Split(',') | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+        if ($origins -notcontains $origin) { $origins += $origin }
+        $env:HEARTHGATE_ALLOWED_ORIGINS = ($origins -join ',')
+        $orion = 'hf.co/bartowski/TheDrummer_Orion-26B-A4B-v1.1-GGUF:Q4_K_M'
+        if (-not (Get-Command ollama -ErrorAction SilentlyContinue)) { throw 'Ollama is not installed or not on PATH.' }
+        & ollama show $orion | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw 'The exact local Orion model was not found. Check ollama list before launching.' }
+        # The three environment names are legacy-compatible aliases of ONE model.
+        $env:WAYGLASS_SPINE_MODEL = $orion
+        $env:WAYGLASS_SHIP_MODEL = $orion
+        $env:WAYGLASS_AMBER_MODEL = $orion
+        if (-not $Doctor) {
+            npm run wayglass:deploy:server
+            if ($LASTEXITCODE -ne 0) { throw 'Wayglass web build or host stage failed. Tailnet Serve was not started.' }
+        }
+    }
     if ($Doctor) { node scripts/wayglass-local.mjs --doctor }
+    elseif ($Tailnet) { node scripts/wayglass-local.mjs --tailnet }
     else { node scripts/wayglass-local.mjs }
     if ($LASTEXITCODE -ne 0) { throw "Launcher exited with code $LASTEXITCODE." }
 } finally { Pop-Location }
