@@ -132,6 +132,11 @@ async function main(){
     throw Error('Tailscale MagicDNS domain is not available. Enable MagicDNS on the private tailnet.');
   const origin='https://'+dnsName;
   process.env.WAYGLASS_TAILNET_ORIGIN=origin;
+  // The secure host's CORS boundary permits only explicit origins; add just
+  // this CLI-verified MagicDNS origin for same-origin tailnet browser requests.
+  const allowed=new Set(String(process.env.HEARTHGATE_ALLOWED_ORIGINS||'').split(',').map(x=>x.trim()).filter(Boolean));
+  allowed.add(origin);
+  process.env.HEARTHGATE_ALLOWED_ORIGINS=[...allowed].join(',');
   console.log('[Wayglass] Tailscale:',state.BackendState,'· machine:',dnsName);
   const model=await localModel();
   console.log('[Wayglass] Verified installed Orion substrate:',model);
