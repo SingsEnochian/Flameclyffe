@@ -54,6 +54,10 @@ async function setup({respond=async()=>response(capturedTurn),offline=false,stor
  if(wayglassSomaticSound.snapshot().feather_stopped)wayglassSomaticSound.releaseFeather({confirmed:true});
  const descriptors=new Map(),frames=new Map(),calls=[];let sequence=0;
  const replace=(key,value)=>{descriptors.set(key,Object.getOwnPropertyDescriptor(globalThis,key));Object.defineProperty(globalThis,key,{configurable:true,writable:true,value});};
+ const windowEvents=new EventTarget();
+ replace('addEventListener',windowEvents.addEventListener.bind(windowEvents));
+ replace('removeEventListener',windowEvents.removeEventListener.bind(windowEvents));
+ replace('dispatchEvent',windowEvents.dispatchEvent.bind(windowEvents));
  replace('document',{createElement:tag=>new Element(tag)});
  replace('matchMedia',()=>({matches:false}));
  replace('requestAnimationFrame',callback=>{const id=++sequence;frames.set(id,callback);return id;});
@@ -189,5 +193,28 @@ test('local cold return preserves exact captured contribution without another in
   assert.equal(nextRequest.session_id,originalRequest.session_id);
   assert.ok(nextRequest.history.some(turn=>turn.role==='user'&&turn.content==='Keep this question open on return.'));
   assert.ok(nextRequest.history.some(turn=>turn.role==='assistant'&&turn.content===capturedTurn.output));
+ }finally{f.restore();}
+});
+
+
+test('Foundry shelf refreshes edited saved brushes and detaches after unmount',async()=>{
+ const f=await setup();try{
+  const {makeBrushLibrary}=await import('../../starwell/src/components/glyph-studio/glyphStudioModel.js');
+  const {FOUNDRY_BRUSH_STORAGE_KEY}=await import('../src/foundry-brushes.js');
+  const library=makeBrushLibrary();library.brushes[0].name='Rowan edited ink';
+  f.storage.set(FOUNDRY_BRUSH_STORAGE_KEY,JSON.stringify(library));
+  const event=new Event('storage');Object.defineProperty(event,'key',{value:FOUNDRY_BRUSH_STORAGE_KEY});
+  globalThis.dispatchEvent(event);
+  assert.equal(f.q('wc-foundry-brush').children[0].textContent,'Rowan edited ink');
+  assert.match(f.q('wc-foundry-status').textContent,/Saved Foundry/);
+  library.brushes[0].name='Second live edit';
+  f.storage.set(FOUNDRY_BRUSH_STORAGE_KEY,JSON.stringify(library));
+  globalThis.dispatchEvent(new Event('focus'));
+  assert.equal(f.q('wc-foundry-brush').children[0].textContent,'Second live edit');
+  f.destroy();
+  library.brushes[0].name='After teardown';
+  f.storage.set(FOUNDRY_BRUSH_STORAGE_KEY,JSON.stringify(library));
+  globalThis.dispatchEvent(new Event('focus'));
+  assert.equal(f.q('wc-foundry-brush').children[0].textContent,'Second live edit');
  }finally{f.restore();}
 });

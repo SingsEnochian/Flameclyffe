@@ -191,6 +191,18 @@
         "continuous-addressed-sound-regions-and-declared-affinity"
       ],
       "note": "Preserves canonical First Contact/Astra routes. PR570 is superseded by the canonical-based integration review because its branch requires linear history; source branches are preserved. No deployed host SHA, installed Windows build or live participant invocation established."
+    },
+    {
+      "branch": "wayglass/foundry-watercolour-20261110",
+      "target": "wayglass/current",
+      "status": "candidate-48-focused-tests-passed-browser-build-deployment-pending",
+      "scope": [
+        "existing-foundry-library-read-only-watercolour-projection",
+        "live-saved-brush-updates",
+        "immediate-fluid-preview",
+        "pressure-size-opacity-pigment"
+      ],
+      "note": "Preserves original brush libraries. External fontmaker collection unidentified; native brush decoders and exhaustive inheritance remain pending."
     }
   ]
 }

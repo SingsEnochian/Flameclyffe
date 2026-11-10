@@ -1,3 +1,4 @@
+import { loadFoundryBrushes, foundryPigmentSample, FOUNDRY_BRUSH_STORAGE_KEY } from '../foundry-brushes.js';
 import {shipSoundscape} from '../ship-soundscape.js';
 import { createWatercolorFluid } from '../watercolor-fluid.js';
 import {
@@ -88,6 +89,10 @@ export async function mountLivingWatercolorSurface(root) {
             ...PIGMENTS.map(([label,hex])=>'<button type="button" class="wc-pigment" data-wc-pigment="'+hex+'" style="--pigment:'+hex+'" aria-label="'+label+' pigment" aria-pressed="false" title="'+label+'"></button>'),
           '</div>',
           '<label class="wc-color-label" for="wc-color">Custom pigment <input id="wc-color" type="color" value="#c26a46"></label>',
+          '<label for="wc-foundry-brush">Foundry brush</label><select id="wc-foundry-brush"></select>',
+          '<canvas id="wc-foundry-preview" width="256" height="64" role="img" aria-label="Live watercolour brush preview" style="width:100%;height:4rem"></canvas>',
+          '<p id="wc-foundry-status" class="tiny" role="status"></p>',
+          '<a href="/glyph-studio/?panel=brush" target="_blank" rel="noopener">Open Brush Foundry</a>',
           '<label for="wc-pressure">Brush saturation <output id="wc-pressure-label">70%</output></label>',
           '<input id="wc-pressure" type="range" min="10" max="100" value="70">',
           '<label for="wc-brush-size">Brush width <output id="wc-brush-size-label">52%</output></label>',
@@ -132,6 +137,49 @@ export async function mountLivingWatercolorSurface(root) {
   let bitmap=off?.createImageData(fluid.width,fluid.height)||null;
   const color=q('wc-color'),pressure=q('wc-pressure'),brushSize=q('wc-brush-size'),prompt=q('wc-prompt');
   const brushCursor=q('wc-brush-cursor');
+  const foundrySelect=q('wc-foundry-brush');
+  let foundryBrushes=[], selectedFoundryBrush=null;
+  function previewFoundryBrush(){
+    if(!selectedFoundryBrush)return;
+    const preview=q('wc-foundry-preview'),context=preview.getContext('2d');
+    if(!context)return;
+    const field=createWatercolorFluid({width:256,height:64});
+    for(let i=0;i<32;i++){
+      const t=i/31;
+      const sample=foundryPigmentSample(selectedFoundryBrush,{
+        pressure:.1+.9*Math.sin(Math.PI*t),width:Number(brushSize.value)/100,
+        saturation:Number(pressure.value)/100,
+      });
+      field.inject({x:.08+.84*t,y:.5+Math.sin(t*Math.PI*2)*.12,color:color.value,...sample});
+    }
+    const image=context.createImageData(256,64);
+    image.data.set(field.pixels({background:'#eee8db'}));
+    context.putImageData(image,0,0);field.dispose();
+    preview.setAttribute('aria-label','Live watercolour preview for '+selectedFoundryBrush.name);
+  }
+  function refreshFoundryBrushes(){
+    // Access itself may throw when browser storage is disabled.
+    const storage={getItem:key=>globalThis.localStorage?.getItem(key)};
+    const catalog=loadFoundryBrushes(storage);
+    const selectedId=foundrySelect.value;
+    foundryBrushes=catalog.brushes;
+    foundrySelect.replaceChildren(...foundryBrushes.map(brush=>{
+      const option=document.createElement('option');
+      option.value=brush.id;option.textContent=brush.name;return option;
+    }));
+    selectedFoundryBrush=foundryBrushes.find(brush=>brush.id===selectedId)||foundryBrushes[0];
+    foundrySelect.value=selectedFoundryBrush.id;
+    previewFoundryBrush();
+    q('wc-foundry-status').textContent=catalog.warning||
+      (catalog.source==='saved-foundry'?'Saved Foundry brushes':'Foundation brushes')+
+      ' · Size, opacity and pressure translated to pigment. Shape and grain remain in Foundry.';
+  }
+  refreshFoundryBrushes();
+  for(const control of [color,pressure,brushSize])listen(control,'input',previewFoundryBrush);
+  listen(foundrySelect,'change',()=>{selectedFoundryBrush=foundryBrushes.find(brush=>brush.id===foundrySelect.value)||foundryBrushes[0];previewFoundryBrush();});
+  listen(globalThis,'storage',event=>{if(event.key===FOUNDRY_BRUSH_STORAGE_KEY||event.key===null)refreshFoundryBrushes();});
+  listen(globalThis,'focus',refreshFoundryBrushes);
+
   const pigmentButtons=[...root.querySelectorAll('[data-wc-pigment]')];
   let paperIsDark=false,keyboardCursor={x:.5,y:.5};
   const title=q('wc-title'),intent=q('wc-intent'),voice=q('wc-voice'),feedback=q('wc-feedback');
@@ -409,6 +457,7 @@ export async function mountLivingWatercolorSurface(root) {
     q('wc-pressure-label').textContent=pressure.value+'%';
   });
   function markPigment(){
+    previewFoundryBrush();
     for(const button of pigmentButtons){
       const selected=button.dataset.wcPigment.toLowerCase()===color.value.toLowerCase();
       button.setAttribute('aria-pressed',String(selected));
@@ -573,8 +622,12 @@ export async function mountLivingWatercolorSurface(root) {
     const proposal=proposeWatercolorTouch({
       ...pos,pressure:force,color:color.value,mode:'add-pigment',
     });
+    const pigment=foundryPigmentSample(selectedFoundryBrush,{
+      pressure:event.pointerType==='pen'?event.pressure:.5,
+      width:Number(brushSize.value)/100,saturation:sensitivity,
+    });
     fluid.inject({x:proposal.x,y:proposal.y,color:proposal.color,
-      amount:Math.max(.25,proposal.pressure)*1.65,radius:.012+(Number(brushSize.value)/100)*.085,dx,dy});
+      amount:pigment.amount,radius:pigment.radius,dx,dy});
     lastPointer=pos;
     keyboardCursor=pos;
     positionBrushCursor(pos);
