@@ -7,6 +7,9 @@ export const TAILNET_GATE_PORT = 32861;
 export const HOST_PORT = 3000;
 
 export function allowedWayglassPath(url) {
+  // Origin-form requests only. An absolute upstream URL must never be
+  // interpreted as a local allowlisted path.
+  if(typeof url!=='string'||!url.startsWith('/')||url.startsWith('//')||/[\\\r\n\0]/.test(url)) return false;
   let pathname;
   try { pathname = new URL(url, 'http://127.0.0.1').pathname; }
   catch { return false; }
