@@ -6,9 +6,9 @@
 
 - A staged, production-built Wayglass interface on the existing loopback-only Starwell host (`http://127.0.0.1:3000/wayglass/`).
 - Two named, steward-authenticated Wayglass voice routes on the **same exact installed Ollama Orion model**, bound by `WAYGLASS_SPINE_MODEL`.
-- Owner-only, tailnet-private HTTPS access to the **whole host at port 3000** via **Tailscale Serve**, not Funnel.
-- Same-origin `/api/v1/wayglass/` requests; only the detected, exact device `https://*.ts.net` origin is appended to `HEARTHGATE_ALLOWED_ORIGINS`.
-- A secure, HTTP-only `__Host-hearthgate_session` browser cookie for that exact configured HTTPS origin.
+- Owner-only, tailnet-private HTTPS access through a **loopback path-filtered gateway on port 32861** via **Tailscale Serve**, not Funnel; Starwell stays on loopback port 3000.
+- Only same-origin `/wayglass/`, `/api/v1/wayglass/`, and `/api/v1/house/session` paths cross the remote gateway. Other Starwell routes, the development Vite server, and Ollama remain local.
+- House Steward cookies remain HttpOnly, SameSite=Strict and are marked Secure at the tailnet gateway's HTTPS boundary. The cookie's exact name is controlled by the host's existing localhost session implementation; it is not evidence of extra authorization.
 
 The published URL is *printed by the launcher*, not guessed: `https://<your-device>.<your-tailnet>.ts.net/wayglass/`. Other devices need their own signed-in Tailscale app and an authorised House Steward login.
 
@@ -28,7 +28,7 @@ git pull --ff-only
 
 Use your actual checkout directory if different. Do **not** throw away uncommitted local changes to run those commands. `git pull --ff-only` refuses a history rewrite.
 
-The launcher installs missing pinned Node dependencies, checks the signed-in Tailscale identity, validates the exact Orion model tag, sets the three compatible private model environment variables for this process, stages the current web app, starts the loopback host and Vite for on-PC development, checks that the host is the Orion-enabled Wayglass, and only then calls `tailscale serve --bg 3000`.
+The launcher installs missing pinned dependencies, verifies Tailscale connectivity and the installed Orion tag, creates a random House credential only if absent (printed locally once), stages Wayglass, starts the secure Starwell host, opens a loopback path-filtered gateway on **32861**, and calls `tailscale serve --bg 32861`. It does not launch Vite or expose the complete Starwell host.
 
 If Tailscale already serves another service or Funnel is active, the launch refuses to overwrite it. In that case, inspect `tailscale serve status` and reconcile the host routing manually. Neither script nor docs calls Funnel.
 
@@ -56,7 +56,7 @@ tailscale serve --https=443 off  # explicitly stop private publishing
 ## Acceptance receipts
 
 1. Source-head Wayglass Check, Wayglass First Contact Browser, Watercolour legacy authorisation and House cookie tests green.
-2. `tailscale serve status` lists private proxy `http://127.0.0.1:3000`, no Funnel.
+2. `tailscale serve status` lists private proxy `http://127.0.0.1:32861`, no Funnel, with the gateway forwarding only approved paths to port 3000.
 3. Phone on same tailnet opens `/wayglass/` over HTTPS. Without House sign-in, named Orion routes return 401.
 4. After sign-in, Ship Voice and Amber room return **same model tag** and `participant_id=wayglass`, with correct, distinct route and session/continuity IDs.
 5. Feather, Save and Return work across a browser reload. A **cold process return** must be separately proven, not inferred from browser storage.
