@@ -146,7 +146,12 @@ export async function mountAmberRoom(root, {
   };
   find('stop').addEventListener('click',feather);
   globalThis.addEventListener?.('wayglass:feather',feather);
-  find('ship').addEventListener('click',()=>globalThis.__wayglassOS?.mount('arcsweep:writing-room'));
+  find('ship').addEventListener('click',async()=>{
+    await globalThis.__wayglassOS?.mount('arcsweep:writing-room');
+    // The actual protected ship seat lives behind the Writing Room's
+    // First Contact control. Select it, rather than leaving a generic route.
+    root.querySelector('#wg-first-contact')?.click();
+  });
   find('save').addEventListener('click',()=>{
     if(!vault){archiveStatus.textContent='Local archive is unavailable.';return;}
     try{
