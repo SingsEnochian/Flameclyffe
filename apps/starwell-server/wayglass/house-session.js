@@ -27,7 +27,16 @@ function createHouseSessionRouter({ environment = process.env, loadSession } = {
         return res.status(401).json({ connected: false, error: 'Steward identity refused.' });
       }
       const session = api.issueHouseSession(env);
-      const request = new Request(`${req.protocol}://${req.get('host')}/api/v1/house/session`);
+      // Tailscale Serve terminates HTTPS on the same device and forwards HTTP
+      // to loopback. Only the exact owner-configured tailnet origin may issue
+      // a Secure __Host cookie; never trust arbitrary X-Forwarded-Proto.
+      let origin = `${req.protocol}://${req.get('host')}`;
+      try {
+        const remote = new URL(String(environment.WAYGLASS_TAILNET_ORIGIN || ''));
+        if (remote.protocol === 'https:' && remote.hostname.endsWith('.ts.net')
+          && remote.host === req.get('host')) origin = remote.origin;
+      } catch { /* local host cookie remains as before */ }
+      const request = new Request(origin + '/api/v1/house/session');
       res.setHeader('Set-Cookie', api.houseSessionCookie(request, session.token, session.ttl));
       return res.status(201).json({ connected: true, role: 'steward', mode: 'credential' });
     } catch (error) { next(error); }
