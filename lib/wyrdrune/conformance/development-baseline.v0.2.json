@@ -1,0 +1,107 @@
+{
+  "schema": "wayglass.wtl-development-baseline/v1",
+  "todo_count": 19,
+  "unclaimed_fixtures": [
+    {
+      "backend": "legacy",
+      "fixture": "L1-comparison-in-verify",
+      "level": "L1"
+    },
+    {
+      "backend": "legacy",
+      "fixture": "L1-verify-failure-rolls-back",
+      "level": "L1"
+    },
+    {
+      "backend": "legacy",
+      "fixture": "L1-unknown-fails-require",
+      "level": "L1"
+    },
+    {
+      "backend": "legacy",
+      "fixture": "L1-require-only-in-verify",
+      "level": "L1"
+    },
+    {
+      "backend": "legacy",
+      "fixture": "L1-division-by-zero-is-a-verdict",
+      "level": "L1"
+    },
+    {
+      "backend": "legacy",
+      "fixture": "L1-units-scope-their-bindings",
+      "level": "L1"
+    },
+    {
+      "backend": "legacy",
+      "fixture": "L1-single-cycle-checkpoint",
+      "level": "L1"
+    },
+    {
+      "backend": "legacy",
+      "fixture": "L2-three-cycles-carry",
+      "level": "L2"
+    },
+    {
+      "backend": "legacy",
+      "fixture": "L2-carry-must-match-seeds",
+      "level": "L2"
+    },
+    {
+      "backend": "legacy",
+      "fixture": "L2-fixed-point",
+      "level": "L2"
+    },
+    {
+      "backend": "legacy",
+      "fixture": "L2-period-two-orbit-is-stable",
+      "level": "L2"
+    },
+    {
+      "backend": "legacy",
+      "fixture": "L2-mid-lineage-rollback",
+      "level": "L2"
+    },
+    {
+      "backend": "legacy",
+      "fixture": "L2-intent-binds-identity",
+      "level": "L2"
+    },
+    {
+      "backend": "lineage",
+      "fixture": "L2-three-cycles-carry",
+      "level": "L2"
+    },
+    {
+      "backend": "lineage",
+      "fixture": "L2-carry-must-match-seeds",
+      "level": "L2"
+    },
+    {
+      "backend": "lineage",
+      "fixture": "L2-fixed-point",
+      "level": "L2"
+    },
+    {
+      "backend": "lineage",
+      "fixture": "L2-period-two-orbit-is-stable",
+      "level": "L2"
+    },
+    {
+      "backend": "lineage",
+      "fixture": "L2-mid-lineage-rollback",
+      "level": "L2"
+    },
+    {
+      "backend": "lineage",
+      "fixture": "L2-intent-binds-identity",
+      "level": "L2"
+    }
+  ],
+  "source_sha256": {
+    "lib/wyrdrune/conformance.test.cjs": "64a882de9d4c42fd64c42b074182b62249423b3c49352ae22304c317c4e58338",
+    "lib/wyrdrune/conformance-lineage.test.cjs": "acd8a13da0ab07308537339d78c627eca0b4c0ba7515eb6d3f04d04bcb3df5dd",
+    "lib/wyrdrune/conformance/wtl-conformance.v0.2.json": "cfd8edd25560846e1a47e2398a6d7ae53f9d93cae915af6213aa866ea1c0af01"
+  },
+  "release_complete": false
+}

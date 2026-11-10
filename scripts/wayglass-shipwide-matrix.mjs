@@ -1,7 +1,11 @@
+import {createHash} from 'node:crypto';
+import {classifyShipVerification} from '../lib/wayglass-verification-status.mjs';
 import {spawn,execFileSync} from 'node:child_process';
-import {readdir,mkdir,writeFile} from 'node:fs/promises';
+import {readdir,mkdir,writeFile,readFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
+const developmentGate=process.argv.includes('--development-gate');
+if(process.argv.slice(2).some(a=>a!=='--development-gate'))throw Error('Unknown verification option');
 const root=fileURLToPath(new URL('../',import.meta.url));
 const git=(...a)=>execFileSync('git',a,{cwd:root,encoding:'utf8'}).trim();
 const generated=['apps/starwell-server/public/arcsweep','apps/starwell-server/wayglass-runtime','apps/starwell-server/public/starwell-foundry'];
@@ -48,5 +52,11 @@ const receipt={schema:'wayglass.shipwide-verification/v1',source_sha:head,source
 receipt.lanes=await Promise.all(lanes.map(run));
 receipt.source_unchanged=head===git('rev-parse','HEAD')&&!dirty();
 receipt.status=!receipt.source_unchanged||receipt.lanes.some(l=>l.status==='failed'||l.status==='blocked')?'failed':receipt.lanes.some(l=>l.status==='incomplete')?'incomplete':'passed';
+const baseline=JSON.parse(await readFile(resolve(root,'lib/wyrdrune/conformance/development-baseline.v0.2.json'),'utf8'));
+const baselineMatched=baseline.schema==='wayglass.wtl-development-baseline/v1'&&baseline.todo_count===baseline.unclaimed_fixtures.length&&
+ (await Promise.all(Object.entries(baseline.source_sha256).map(async([file,sha])=>createHash('sha256').update(await readFile(resolve(root,file))).digest('hex')===sha))).every(Boolean);
+receipt.language_baseline={matched:baselineMatched,expected_todos:baseline.todo_count,source:'lib/wyrdrune/conformance/development-baseline.v0.2.json'};
+Object.assign(receipt,classifyShipVerification(receipt,{baselineMatched,expectedLanguageTodos:baseline.todo_count}));
+receipt.gate_kind=developmentGate?'development-regression':'strict-release';
 receipt.finished_at=new Date().toISOString();await writeFile(resolve(output,'receipt.json'),JSON.stringify(receipt,null,2)+'\n');
-console.log('Whole ship: '+receipt.status);process.exitCode=receipt.status==='passed'?0:1;
+console.log('Whole ship: '+receipt.status);process.exitCode=(developmentGate?receipt.development_status!=='failed':receipt.release_ready)?0:1;

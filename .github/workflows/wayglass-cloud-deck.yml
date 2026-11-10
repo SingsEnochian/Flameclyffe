@@ -36,8 +36,8 @@ jobs:
         run: npm run wayglass:test && npm run wayglass:test:host
       - name: Canonical contracts and ArcSweep regressions
         run: npm run contracts:verify && npm run arcsweep:test
-      - name: All eight functional systems at the same source
-        run: npm run wayglass:shipwide:verify
+      - name: Eight-system regressions and explicit WTL completion report
+        run: npm run wayglass:shipwide:verify -- --development-gate
       - uses: actions/upload-artifact@v4
         if: always()
         with:
