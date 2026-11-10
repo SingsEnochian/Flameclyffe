@@ -50,7 +50,7 @@ function safeHref(value = '') {
   }
 }
 
-function sanitizeRichHtml(html = '') {
+export function sanitizeRichHtml(html = '') {
   const template = document.createElement('template');
   template.innerHTML = String(html);
   const walker = document.createTreeWalker(template.content, NodeFilter.SHOW_ELEMENT);
@@ -94,6 +94,7 @@ function toolbarMarkup() {
 }
 
 function editorLabel(textarea) {
+  if(textarea.getAttribute('aria-label'))return textarea.getAttribute('aria-label');
   const label = textarea.closest('label');
   if (!label) return textarea.name || 'Rich text editor';
   const textNode = [...label.childNodes].find((node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim());
@@ -220,6 +221,28 @@ function upgradeTextarea(textarea) {
     syncSource(editor, textarea);
   });
   editor.addEventListener('focus', () => updateToolbarState(shell));
+  return {shell,editor};
+}
+
+// Reuse the inherited editor with plain provider text and separate presentation HTML.
+export function createRichTextController(textarea) {
+  injectStyles();
+  const {shell,editor}=upgradeTextarea(textarea);
+  editor.lang='en-GB';
+  editor.setAttribute('aria-keyshortcuts',textarea.getAttribute('aria-keyshortcuts')||'Control+B Control+I Control+U');
+  let disabled=false;
+  return Object.freeze({
+    get value(){return editor.innerText??editor.textContent??'';},
+    set value(value){editor.textContent=String(value??'');syncSource(editor,textarea);},
+    get html(){return sanitizeRichHtml(editor.innerHTML);},
+    setHtml(html,fallback=''){if(html)editor.innerHTML=sanitizeRichHtml(html);else editor.textContent=fallback;syncSource(editor,textarea);},
+    get disabled(){return disabled;},
+    set disabled(value){disabled=Boolean(value);editor.contentEditable=String(!disabled);editor.setAttribute('aria-disabled',String(disabled));shell.querySelectorAll('button').forEach(b=>b.disabled=disabled);},
+    focus(){editor.focus();},
+    addEventListener(...args){editor.addEventListener(...args);},
+    removeEventListener(...args){editor.removeEventListener(...args);},
+    destroy(){shell.remove();textarea.classList.remove('richtext-source-field');delete textarea.dataset.richTextUpgraded;},
+  });
 }
 
 function upgradeAll(root = document) {

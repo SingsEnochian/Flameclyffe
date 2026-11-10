@@ -26,6 +26,11 @@ function safeMessage(value) {
     'emergence_question_id', 'delivery_status']) {
     if (typeof value[key] === 'string') result[key] = bounded(value[key], 240);
   }
+  // HTML is presentation only and is sanitised at every editor/render boundary.
+  if(typeof value.rich_text_html==='string'){
+    if(value.rich_text_html.length>48000)throw new RangeError('Rich text turn exceeds its storage limit');
+    result.rich_text_html=value.rich_text_html;
+  }
   if (Number.isSafeInteger(value.revision_of) && value.revision_of >= 0)
     result.revision_of = value.revision_of;
   if (isRecord(value.receipt)) {

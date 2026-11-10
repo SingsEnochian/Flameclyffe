@@ -1,0 +1,202 @@
+{
+  "schema": "wayglass.gestalt-01.diagnostic/v1",
+  "status": "post hoc, exploratory, no decision rule; D3 registered results unchanged",
+  "set": "held_out",
+  "question": "which single change solves each identifiable task the apparatus left unsolved?",
+  "summary": {
+    "convergence time (round budget)": 3,
+    "discarded premise (at most one vs exactly one)": 7
+  },
+  "tasks": [
+    {
+      "seed": 6026,
+      "rounds_8": {
+        "solved": true,
+        "wrong_drops": 0,
+        "truth_lost": false
+      },
+      "exact_channel": {
+        "solved": true,
+        "wrong_drops": 0,
+        "truth_lost": false
+      },
+      "exactly_one_rule": {
+        "solved": false,
+        "wrong_drops": 0,
+        "truth_lost": false
+      },
+      "mechanism": "convergence time (round budget)"
+    },
+    {
+      "seed": 6097,
+      "rounds_8": {
+        "solved": true,
+        "wrong_drops": 0,
+        "truth_lost": false
+      },
+      "exact_channel": {
+        "solved": true,
+        "wrong_drops": 0,
+        "truth_lost": false
+      },
+      "exactly_one_rule": {
+        "solved": false,
+        "wrong_drops": 0,
+        "truth_lost": false
+      },
+      "mechanism": "convergence time (round budget)"
+    },
+    {
+      "seed": 6113,
+      "rounds_8": {
+        "solved": false,
+        "wrong_drops": 0,
+        "truth_lost": false
+      },
+      "exact_channel": {
+        "solved": false,
+        "wrong_drops": 0,
+        "truth_lost": false
+      },
+      "exactly_one_rule": {
+        "solved": true,
+        "wrong_drops": 0,
+        "truth_lost": false
+      },
+      "mechanism": "discarded premise (at most one vs exactly one)"
+    },
+    {
+      "seed": 6141,
+      "rounds_8": {
+        "solved": false,
+        "wrong_drops": 0,
+        "truth_lost": false
+      },
+      "exact_channel": {
+        "solved": false,
+        "wrong_drops": 0,
+        "truth_lost": false
+      },
+      "exactly_one_rule": {
+        "solved": true,
+        "wrong_drops": 0,
+        "truth_lost": false
+      },
+      "mechanism": "discarded premise (at most one vs exactly one)"
+    },
+    {
+      "seed": 6149,
+      "rounds_8": {
+        "solved": true,
+        "wrong_drops": 0,
+        "truth_lost": false
+      },
+      "exact_channel": {
+        "solved": true,
+        "wrong_drops": 0,
+        "truth_lost": false
+      },
+      "exactly_one_rule": {
+        "solved": false,
+        "wrong_drops": 0,
+        "truth_lost": false
+      },
+      "mechanism": "convergence time (round budget)"
+    },
+    {
+      "seed": 6171,
+      "rounds_8": {
+        "solved": false,
+        "wrong_drops": 0,
+        "truth_lost": false
+      },
+      "exact_channel": {
+        "solved": false,
+        "wrong_drops": 0,
+        "truth_lost": false
+      },
+      "exactly_one_rule": {
+        "solved": true,
+        "wrong_drops": 0,
+        "truth_lost": false
+      },
+      "mechanism": "discarded premise (at most one vs exactly one)"
+    },
+    {
+      "seed": 6178,
+      "rounds_8": {
+        "solved": false,
+        "wrong_drops": 0,
+        "truth_lost": false
+      },
+      "exact_channel": {
+        "solved": false,
+        "wrong_drops": 0,
+        "truth_lost": false
+      },
+      "exactly_one_rule": {
+        "solved": true,
+        "wrong_drops": 0,
+        "truth_lost": false
+      },
+      "mechanism": "discarded premise (at most one vs exactly one)"
+    },
+    {
+      "seed": 6195,
+      "rounds_8": {
+        "solved": false,
+        "wrong_drops": 0,
+        "truth_lost": false
+      },
+      "exact_channel": {
+        "solved": false,
+        "wrong_drops": 0,
+        "truth_lost": false
+      },
+      "exactly_one_rule": {
+        "solved": true,
+        "wrong_drops": 0,
+        "truth_lost": false
+      },
+      "mechanism": "discarded premise (at most one vs exactly one)"
+    },
+    {
+      "seed": 6358,
+      "rounds_8": {
+        "solved": false,
+        "wrong_drops": 0,
+        "truth_lost": false
+      },
+      "exact_channel": {
+        "solved": false,
+        "wrong_drops": 0,
+        "truth_lost": false
+      },
+      "exactly_one_rule": {
+        "solved": true,
+        "wrong_drops": 0,
+        "truth_lost": false
+      },
+      "mechanism": "discarded premise (at most one vs exactly one)"
+    },
+    {
+      "seed": 6393,
+      "rounds_8": {
+        "solved": false,
+        "wrong_drops": 0,
+        "truth_lost": false
+      },
+      "exact_channel": {
+        "solved": false,
+        "wrong_drops": 0,
+        "truth_lost": false
+      },
+      "exactly_one_rule": {
+        "solved": true,
+        "wrong_drops": 0,
+        "truth_lost": false
+      },
+      "mechanism": "discarded premise (at most one vs exactly one)"
+    }
+  ]
+}

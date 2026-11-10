@@ -10,6 +10,7 @@ class Element {
  closest(selector){return this.matches(selector)?this:null;}
  setAttribute(k,v){this.attributes[k]=v;}
  append(...children){children.forEach(child=>{child.parent=this;this.children.push(child);});}
+ replaceChildren(...children){this.children=[];this.append(...children);}
  remove(){this.parent.children=this.parent.children.filter(child=>child!==this);}
  getBoundingClientRect(){return{left:100,top:50,width:1000,height:500};}
  setPointerCapture(id){this.captured=id;}
@@ -127,4 +128,15 @@ test('source-program status visibly gates playback and healthy program state cle
  f.state.score_status='pending';f.state.last_error=null;f.emit();assert.match(f.$('[data-composition-status]').textContent,/pending/);assert.equal(f.$('[data-audio-enable]').disabled,true);assert.equal(f.$('[data-composition-error]').textContent,'');
  f.state.score_status='source-score-ready';f.emit();assert.match(f.$('[data-composition-status]').textContent,/source-score-ready/);assert.equal(f.$('[data-audio-enable]').disabled,false);
  f.state.feather_stopped=true;f.emit();assert.equal(f.$('[data-audio-enable]').disabled,true);f.room.destroy();
+});
+
+
+test('instrument, harmony and beat controls update the real layer palette without enabling audio',async()=>{
+ const f=fixture();
+ try{
+  f.$('[data-sound-voice]').value='bell';f.$('[data-sound-chord]').value='minor7';f.$('[data-sound-rhythm]').value='eighths';f.$('[data-sound-bpm]').value='110';f.$('[data-sound-root]').value='220';
+  f.root.dispatch('change',f.$('[data-sound-voice]'));await new Promise(r=>setImmediate(r));
+  assert.deepEqual(f.state.layers[0].palette,{voice:'bell',chord:'minor7',rhythm:'eighths',bpm:110,root_hz:220});
+  assert.equal(f.state.audio_enabled,false);
+ }finally{f.room.destroy();}
 });

@@ -17,10 +17,12 @@ export function createAcousticAudioEngine({AudioContext = null,scope=globalThis}
   let settings = {muted: true, mono: false, ambience: false, bearing: {pan: 0, gain: 1, distance: 1}, score: null};
   const voices = new Set(), presented = new Set();
   const hasAudio=()=>typeof resolveAudioContext()==='function';
-  const compositionProjection=createCompositionProjection({getContext:()=>context,getDestination:()=>graph?.ambience,canPlay:()=>isRunning()&&!settings.muted&&!disposed});
+  const compositionProjection=createCompositionProjection({getContext:()=>context,getDestination:()=>soundDestination(),canPlay:()=>isRunning()&&!settings.muted&&!disposed});
   const composition=createSoundComposition({region:'wayglass-acoustic',source_ref:'apps/wayglass/src/acoustic-audio-engine.js',scene:{id:'acoustic-field',root_hz:110,source_ref:'apps/wayglass/src/acoustic-world-model.js'},
-    onScore:frame=>{settings.mono=frame.mono;project();return compositionProjection.render(frame);},
+    onScore:frame=>{settings.mono=frame.mono;project();return settings.score?true:compositionProjection.render(frame);},
     enableAudio:async()=>{await start();settings.ambience=true;project();return isRunning();},stopAudio:()=>compositionProjection.stop()});
+
+  const offPalette=composition.subscribe(()=>{if(settings.score)project();});
 
   function disconnect(node) { try { node?.disconnect(); } catch {} }
   function releaseVoice(voice) {
@@ -46,13 +48,24 @@ export function createAcousticAudioEngine({AudioContext = null,scope=globalThis}
   function project() {
     if (!graph) return;
     const b = settings.bearing;
+    const paletteLayers=settings.score?composition.snapshot().layers:[];
+    const orchestrated=paletteLayers.some(l=>l.palette);
     smooth(graph.master.gain, settings.muted ? 0 : 0.35);
-    smooth(graph.navigation.gain, (settings.score?.foregroundGain ?? 0.035) * b.gain);
-    smooth(graph.ambience.gain, settings.ambience ? (settings.score?.atmosphereGain ?? 0.008) : 0);
+    smooth(graph.navigation.gain, orchestrated?0:(settings.score?.foregroundGain ?? 0.035) * b.gain);
+    smooth(graph.ambience.gain, orchestrated?0:settings.ambience ? (settings.score?.atmosphereGain ?? 0.008) : 0);
     smooth(graph.status.gain, 0.025);
     if (graph.panner) smooth(graph.panner.pan, settings.mono ? 0 : b.pan);
     smooth(graph.navigationTone.frequency, settings.score?.rootHz ?? (b.distance < 0.25 ? 220 : 176));
     if (settings.score) smooth(graph.ambienceTone.frequency, settings.score.counterpartHz);
+    if(orchestrated)compositionProjection.render({mono:settings.mono,layers:paletteLayers.map((layer,i)=>({...layer,
+      frequency_hz:i%2?settings.score.counterpartHz:settings.score.rootHz,
+      amplitude:i<2?settings.score.foregroundGain:settings.score.atmosphereGain,
+    }))});
+  }
+  function soundDestination(){
+    if(!graph)return null;
+    if(!graph.composition){graph.composition=context.createGain();graph.composition.gain.value=.8;graph.composition.connect(graph.master);}
+    return graph.composition;
   }
   function createGraph() {
     // Register each allocation immediately so any later adapter error is recoverable.
@@ -81,7 +94,7 @@ export function createAcousticAudioEngine({AudioContext = null,scope=globalThis}
     return {supported:hasAudio(), running: active, disposed, status: !hasAudio()?'unsupported':effectiveStatus, muted: settings.muted, mono: settings.mono,
       ambience: settings.ambience, pending: Boolean(pending), lastError,
       buses: {navigation: active && !settings.muted, ambience: active && !settings.muted && settings.ambience,
-        status: active && !settings.muted}, activeSignals: voices.size, presentedEvents: presented.size};
+        status: active && !settings.muted}, palette:compositionProjection.snapshot(),activeSignals: voices.size, presentedEvents: presented.size};
   }
   function start() {
     if (disposed || !hasAudio()) return Promise.resolve(getState());
@@ -134,6 +147,7 @@ export function createAcousticAudioEngine({AudioContext = null,scope=globalThis}
         });
       }
     }
+    if (Boolean(settings.score) !== Boolean(next.score)) compositionProjection.stop();
     settings = next;
     if('mono'in value&&composition.snapshot().mono!==next.mono)composition.setMix({mono:next.mono});
     if(value.ambience===false)composition.disableAudio();
@@ -173,7 +187,7 @@ export function createAcousticAudioEngine({AudioContext = null,scope=globalThis}
   }
   function dispose() {
     if (disposed) return;
-    disposed = true; stop();composition.dispose();compositionProjection.dispose();scope.removeEventListener?.('wayglass:feather',onFeather);
+    disposed = true;offPalette(); stop();composition.dispose();compositionProjection.dispose();scope.removeEventListener?.('wayglass:feather',onFeather);
     try { Promise.resolve(context?.close()).catch(() => {}); } catch {}
   }
   function onFeather(event){if(event.detail?.stopped===true){composition.feather();stop();}else if(event.detail?.stopped===false&&event.detail?.confirmed===true)composition.releaseFeather({confirmed:true});}

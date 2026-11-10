@@ -28,8 +28,7 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts
       - run: npm ci --prefix apps/starwell-server --omit=dev --ignore-scripts
-      - run: npm run wayglass:build && npm run arcsweep:build
-      - run: npm run wayglass:stage:server && npm run arcsweep:stage:server
+      - run: npm run wayglass:shipwide:build
       - run: node scripts/wayglass-compile-story-score.mjs --check
       - name: Eight concurrent exact-source test groups
         run: node scripts/wayglass-cloud-matrix.mjs
@@ -37,11 +36,15 @@ jobs:
         run: npm run wayglass:test && npm run wayglass:test:host
       - name: Canonical contracts and ArcSweep regressions
         run: npm run contracts:verify && npm run arcsweep:test
+      - name: Eight-system regressions and explicit WTL completion report
+        run: npm run wayglass:shipwide:verify -- --development-gate
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: wayglass-cloud-matrix-${{ github.sha }}
-          path: artifacts/wayglass/cloud-matrix/
+          path: |
+            artifacts/wayglass/cloud-matrix/
+            artifacts/wayglass/shipwide/
           if-no-files-found: error
   browser-gate:
     runs-on: ubuntu-latest
@@ -56,6 +59,17 @@ jobs:
       - run: npm run wayglass:build && npm run arcsweep:build
       - run: npm install --prefix "$RUNNER_TEMP/wayglass-browser" --no-save --package-lock=false playwright@1.62.1
       - run: node "$RUNNER_TEMP/wayglass-browser/node_modules/playwright/cli.js" install chromium --with-deps
+      - run: npm install --prefix "$RUNNER_TEMP/wayglass-dom" --no-save --package-lock=false jsdom@26.1.0
+      - run: npm install --prefix "$RUNNER_TEMP/wayglass-audio" --no-save --package-lock=false fake-indexeddb@6.0.0 web-audio-engine@0.13.4
+      - name: Sound palette PCM rendering and imported-sample cold return
+        env:
+          WAYGLASS_WEB_AUDIO_ENGINE_MODULE: ${{ runner.temp }}/wayglass-audio/node_modules/web-audio-engine
+          WAYGLASS_FAKE_INDEXEDDB_MODULE: ${{ runner.temp }}/wayglass-audio/node_modules/fake-indexeddb
+        run: node scripts/wayglass-sound-palette-offline.mjs
+      - name: Native rich-text Writing Room and formatted draft return
+        env:
+          WAYGLASS_JSDOM_MODULE: ${{ runner.temp }}/wayglass-dom/node_modules/jsdom
+        run: node scripts/wayglass-writing-richtext-dom.mjs
       - name: First Contact and live motion preferences
         env:
           WAYGLASS_PLAYWRIGHT_MODULE: ${{ runner.temp }}/wayglass-browser/node_modules/playwright/index.mjs

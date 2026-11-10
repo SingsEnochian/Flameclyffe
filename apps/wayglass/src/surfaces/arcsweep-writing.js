@@ -1,3 +1,4 @@
+import {createRichTextController,sanitizeRichHtml} from '../../../arcsweep/src/rich-text-core.js';
 import { createInteractionState } from '../interaction-state.js';
 import { previewWyrdrune, draftWyrdruneDiscussion } from '../wyrdrune-client.js';
 import { animateWyrdruneCypher } from '../wyrdrune-cypher.js';
@@ -252,7 +253,13 @@ export async function mountArcSweepWritingSurface(root) {
   const ownershipForm = root.querySelector('#wg-ownership-form');
   const ownershipList = root.querySelector('#wg-ownership-list');
   const thread = root.querySelector('#wg-thread');
-  const input = root.querySelector('#wg-input');
+  const input = createRichTextController(root.querySelector('#wg-input'));
+  const draftKey=()=>'wayglass:writing-draft:'+session;
+  let draftProblem='';
+  function restoreDraft(){input.value='';try{const raw=globalThis.sessionStorage?.getItem(draftKey());if(raw){const draft=JSON.parse(raw);input.setHtml(draft.html,draft.text||'');}}catch(error){draftProblem=error.message;}}
+  restoreDraft();
+  const preserveDraft=()=>{try{globalThis.sessionStorage?.setItem(draftKey(),JSON.stringify({text:input.value,html:input.html}));}catch(error){status.textContent='Draft save unavailable: '+error.message;}};
+  input.addEventListener('input',preserveDraft);
   const wtlSource=root.querySelector('#wg-wtl-source'),wtlStatus=root.querySelector('#wg-wtl-status');
   const wtlOutput=root.querySelector('#wg-wtl-output'),wtlDiscuss=root.querySelector('#wg-wtl-discuss');
   const WTL_EXAMPLE="mobius {\n perceive { let light = votive(\"Lantern\",\"An offered guiding light\"); }\n compress { let shape = star(8); }\n release { let letter = angelicLetter(1); }\n verify { emit light; }\n integrate { emit shape; }\n choose { emit letter; }\n return { emit \"held\"; }\n transcend { emit 1; }\n}";
@@ -298,12 +305,12 @@ export async function mountArcSweepWritingSurface(root) {
     const draft=draftWyrdruneDiscussion(lastWTLSource,lastWTLPreview);
     const staged=input.value.trim()?input.value.trim()+'\n\n'+draft:draft;
     if(staged.length>11000){wtlStatus.textContent='Draft exceeds 11000 characters. Shorten the composer first.';return;}
-    input.value=staged;input.focus();
+    input.setHtml((input.value.trim()?input.html:'')+'<p>'+escapeHtml(draft).replaceAll('\n','<br>')+'</p>');preserveDraft();input.focus();
     wtlStatus.textContent='WTL staged. Review, choose your route and press Send when you wish.';
   });
 
   const sharedObserverReading = consumeObserverContextForWriting();
-  if (sharedObserverReading) input.value = sharedObserverReading + '\n\n[My question about this observation:]\n';
+  if(sharedObserverReading){input.setHtml(input.html+'<p>'+escapeHtml(sharedObserverReading).replaceAll('\n','<br>')+'</p><p>[My question about this observation:]</p>');preserveDraft();}
 
   // This UI transports text and renders the Wyrdrune score. It does not
   // implement the musical decisions, which live only in the .wtl program.
@@ -606,10 +613,10 @@ export async function mountArcSweepWritingSurface(root) {
   chatNew.addEventListener('click',()=>{
     if(busy){chatSaveStatus.textContent='Finish the active turn before starting another chat.';return;}
     if(!persistChat())return;
-    messages.splice(0,messages.length);
+    preserveDraft();messages.splice(0,messages.length);
     session=sessionId();
     globalThis.sessionStorage?.setItem('wayglass:first-contact-session',session);
-    lastReceipt=null;checkpoint=null;revisionOf=null;input.value='';
+    lastReceipt=null;checkpoint=null;revisionOf=null;restoreDraft();
     refreshThread();refreshSavedChats();receipt.textContent='No route receipt yet.';
     chatSaveStatus.textContent='New chat. Previous turns remain saved in this browser.';
     input.focus();
@@ -621,7 +628,7 @@ export async function mountArcSweepWritingSurface(root) {
     try{
       const saved=chatVault.open(requestedSession);
       if(!saved)throw new Error('Select a saved conversation');
-      session=saved.session_id;
+      preserveDraft();session=saved.session_id;
       globalThis.sessionStorage?.setItem('wayglass:first-contact-session',session);
       messages.splice(0,messages.length,...saved.messages);
       lastReceipt=[...messages].reverse().find(m=>m.role==='assistant'&&m.receipt)?.receipt||null;
@@ -632,7 +639,7 @@ export async function mountArcSweepWritingSurface(root) {
       if(last?.route_id==='wayglass:ship'){
         selectedRoute='wayglass:ship';selectedCharacter='wayglass';interaction.setChannel('OOC');
       }else if(last?.route_id){selectedRoute=last.route_id;selectedCharacter='';}
-      characterSelect.value=selectedCharacter;input.value='';
+      characterSelect.value=selectedCharacter;restoreDraft();
       void loadRoutes();
       refreshState();refreshThread();refreshSavedChats(session);
       receipt.textContent=lastReceipt?'Restored response · '+(lastReceipt.observation_id||lastReceipt.response_id||'unverified receipt'):'No model reply receipt in saved chat';
@@ -694,7 +701,7 @@ export async function mountArcSweepWritingSurface(root) {
       return '<article class="turn-card ' + message.role + '">' +
         '<header><strong>' + escapeHtml(who) + '</strong><span>' + escapeHtml(message.channel || 'IC') + '</span></header>' +
         renderThinking(message) +
-        '<div class="turn-text">' + escapeHtml(message.content).replaceAll('\n', '<br>') + '</div>' +
+        '<div class="turn-text">' + (message.rich_text_html?sanitizeRichHtml(message.rich_text_html):escapeHtml(message.content).replaceAll('\n', '<br>')) + '</div>' +
         '<footer><button type="button" class="glass-chip" data-copy-reply="' + index + '">Copy reply</button> ' +
         '<button type="button" class="glass-chip" data-copy-through="' + index + '">Copy log through here</button> ' +
         (message.role==='user'?'<button type="button" class="glass-chip" data-wg-revise="'+index+'">Revise my turn</button>':'')+'</footer>' +
@@ -732,7 +739,7 @@ export async function mountArcSweepWritingSurface(root) {
       const index=Number(button.dataset.wgRevise);
       if(!Number.isInteger(index)||messages[index]?.role!=='user')return;
       revisionOf=index;
-      input.value=messages[index].content;
+      input.setHtml(messages[index].rich_text_html,messages[index].content);
       root.querySelector('#wg-revision-note').hidden=false;
       status.textContent='Correcting turn '+(index+1)+'; original will remain in the transcript.';
       input.focus();
@@ -843,11 +850,12 @@ export async function mountArcSweepWritingSurface(root) {
     const activeWorldId = cp('world').value.trim();
     const history = messages.filter(message => message.world_id === activeWorldId && ['user', 'assistant'].includes(message.role) && !message.content.startsWith('[Route error]'))
       .slice(-12).map(message => ({ role: message.role, content: message.content }));
-    messages.push({ role: 'user', content: outgoing, channel: current.channel, world_id: activeWorldId, emergence_question_id: emergenceQuestionId, revision_of: correctionOf, delivery_status:'pending' });
+    messages.push({ role: 'user', content: outgoing, rich_text_html:correctionOf===null?input.html:'<p>Correction to my earlier turn #'+(correctionOf+1)+':</p>'+input.html, channel: current.channel, world_id: activeWorldId, emergence_question_id: emergenceQuestionId, revision_of: correctionOf, delivery_status:'pending' });
     persistChat();
     queueStoryScore();
     revisionOf=null;root.querySelector('#wg-revision-note').hidden=true;
     input.value = '';
+    preserveDraft();
     refreshThread();
     refreshEmergenceInterview();
 
@@ -1080,6 +1088,7 @@ export async function mountArcSweepWritingSurface(root) {
       offShipSound(); // Ship owns the acoustic engine across room changes.
       globalThis.removeEventListener?.(WAYGLASS_FEATHER_EVENT,onSharedFeather);
       routePicker.destroy();
+      preserveDraft();input.removeEventListener('input',preserveDraft);input.destroy();
     },
   });
 }

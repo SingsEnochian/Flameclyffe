@@ -1,3 +1,5 @@
+import {SOUND_VOICES,SOUND_CHORDS,SOUND_RHYTHMS,DEFAULT_SOUND_PALETTE} from '../../../../lib/wayglass-sound-palette.mjs';
+import {soundSampleBank} from '../../../../lib/wayglass-sound-sample-bank.mjs';
 import './sound-composition.css';
 
 const clamp = value => Math.max(-1, Math.min(1, Number(value)));
@@ -16,7 +18,7 @@ export function moveSoundObject(position,key,{fine=false}={}) {
 
 // The shared composition outlives this room. Unmount removes UI subscriptions,
 // leaving the explicitly started score and playback under their own controls.
-export function mountWayglassSoundComposition(root,{composition,soundscape=null,storage,storyBinding=null}={}) {
+export function mountWayglassSoundComposition(root,{composition,soundscape=null,storage,storyBinding=null,sampleBank=soundSampleBank}={}) {
   if (!root || !composition || typeof composition.snapshot !== 'function' || typeof composition.subscribe !== 'function') throw new Error('Shared sound composition engine unavailable');
   if(storyBinding&&[storyBinding.setContext,storyBinding.getContext].some(method=>typeof method!=='function'))throw new Error('Story declaration bridge unavailable');
   const document=root.ownerDocument||globalThis.document;
@@ -50,8 +52,20 @@ export function mountWayglassSoundComposition(root,{composition,soundscape=null,
   <p data-story-declaration-status class="wg-composer-note" role="status" aria-live="polite">Pending · declare two independent voices and affinity.</p>
   </fieldset>
   <fieldset><legend>Selected sound</legend><label>Sound object <select data-layer-select aria-label="Select sound object"></select></label>
+  <label>Instrument <select data-sound-voice aria-label="Sound instrument"></select></label>
+  <label>Chord <select data-sound-chord aria-label="Chord shape"></select></label>
+  <label>Root override (Hz, blank follows score) <input data-sound-root type="number" min="20" max="4800" step="0.1" placeholder="Follow Wyrdrune"></label>
+  <label>Beat <select data-sound-rhythm aria-label="Rhythm pattern"></select></label>
+  <label>Tempo (BPM) <input data-sound-bpm type="number" min="20" max="240" step="1" value="90"></label>
+  <p class="wg-composer-note">Harmony follows the Wyrdrune score root. Percussion and noise use their own timbre. Voices and rhythms remain independently selectable.</p>
   <p data-layer-source class="wg-composer-note"></p><label>Layer gain <input type="range" data-layer-gain min="0" max="1" step="0.01"></label>
   <label><span><input type="checkbox" data-layer-muted> Mute this layer</span></label><output data-layer-position></output></fieldset>
+  <fieldset><legend>Sound library</legend><p class="wg-composer-note">Original synthesis recipes plus your own recordings. Import audio supported by this browser: WAV, MP3, OGG, FLAC, AAC and more.</p>
+  <label>Sample root note (MIDI, C4 = 60) <input data-sample-root type="number" min="0" max="127" step="1" value="60"></label>
+  <label>Source / licence notes <input data-sample-source type="text" maxlength="500"></label>
+  <label>Import recordings <input data-sample-import type="file" accept="audio/*,.wav,.mp3,.ogg,.flac,.m4a,.aac,.aiff" multiple></label>
+  <p class="wg-composer-note" data-sample-status role="status">Loading this browser's sound library…</p>
+  <p class="wg-composer-note">Originals stay in this browser. Returns preserve sound references; another device needs the same source files. Samples decode on playback. Each import accepts up to 32 MiB.</p></fieldset>
   <fieldset><legend>Crossing and return</legend><p data-composition-bridge class="wg-composer-note"></p>
   <button type="button" class="glass-chip" data-bridge-propose>Propose score to other bridge side</button>
   <div class="wg-composer-actions"><button type="button" class="glass-chip" data-composition-save>Save return</button><button type="button" class="glass-chip" data-composition-recover>Recover muted</button></div>
@@ -60,6 +74,21 @@ export function mountWayglassSoundComposition(root,{composition,soundscape=null,
   <p class="wg-composer-note">Inspired by <a href="https://odio.app/blog/introducing-composer--create-your-own-spatial-soundscapes" target="_blank" rel="noreferrer">Odio Composer</a>.</p></section></section>`;
   const $=selector=>root.querySelector(selector);
   const stage=$('[data-soundstage]'),select=$('[data-layer-select]'),ledger=$('[data-source-ledger]');
+  const voiceSelect=$('[data-sound-voice]'),chordSelect=$('[data-sound-chord]'),rhythmSelect=$('[data-sound-rhythm]');
+  function options(control,rows){control.replaceChildren(...rows.map(([value,name])=>{const option=document.createElement('option');option.value=value;option.textContent=name;return option;}));}
+  options(chordSelect,Object.keys(SOUND_CHORDS).map(id=>[id,id]));
+  options(rhythmSelect,Object.keys(SOUND_RHYTHMS).map(id=>[id,id]));
+  function refreshBank(){
+    if(disposed)return;
+    const previous=voiceSelect.value,assets=sampleBank.snapshot();
+    options(voiceSelect,[...SOUND_VOICES.map(v=>[v.id,v.name]),...assets.map(a=>['sample:'+a.id,a.name+' · imported'])]);
+    voiceSelect.value=previous||DEFAULT_SOUND_PALETTE.voice;
+    const failed=assets.filter(a=>a.decode_status==='failed');
+    $('[data-sample-status]').textContent=SOUND_VOICES.length+' synthesis voices · '+Object.keys(SOUND_CHORDS).length+' chord shapes · '+Object.keys(SOUND_RHYTHMS).length+' rhythms · '+assets.length+' imported sounds'+(failed.length?' · '+failed.map(a=>a.name+': '+a.decode_error).join('; '):'');
+  }
+  refreshBank();const unsubscribeBank=sampleBank.subscribe(refreshBank);
+  void sampleBank.load().then(()=>{if(!disposed){refreshBank();}});
+
   function error(message){if(!disposed)$('[data-composition-error]').textContent=String(message||'');}
   const declarations=$('[data-story-declarations]');
   declarations.hidden=!storyBinding;
@@ -117,13 +146,20 @@ export function mountWayglassSoundComposition(root,{composition,soundscape=null,
       entry.point.textContent=layer.label||layer.id;entry.option.textContent=layer.label||layer.id;
       entry.point.setAttribute('aria-pressed',String(layer.id===selected));entry.point.dataset.muted=String(layer.muted===true);
       entry.point.setAttribute('aria-label',(layer.label||layer.id)+' · '+(layer.region||'unlabelled region')+' · x '+fixed(p.x)+', y '+fixed(p.y)+(layer.muted?' · muted':''));
-      entry.row.textContent=(layer.label||layer.id)+' · '+(layer.region||'unlabelled region')+' · '+(layer.source_ref||'source unavailable')+' · '+(layer.available===true?'configured locally':'unavailable')+(layer.active===false?' · outside current density':'');
+      const paletteSource=layer.palette?.voice?.startsWith('sample:')?'owner-import:sha256:'+layer.palette.voice.slice(7):'lib/wayglass-sound-palette.mjs';
+      entry.row.textContent=(layer.label||layer.id)+' · '+(layer.region||'unlabelled region')+' · '+(layer.source_ref||'source unavailable')+' · '+(layer.available===true?'configured locally':'unavailable')+(layer.active===false?' · outside current density':'')+(layer.palette?' · '+layer.palette.voice+' · '+layer.palette.chord+' · '+layer.palette.rhythm+' · '+layer.palette.bpm+' BPM · '+paletteSource:'');
     }
     select.value=selected||'';
     const layer=layers.find(item=>item.id===selected);
     $('[data-layer-source]').textContent=layer?(layer.region+' · '+layer.source_ref):'No sound object selected';
     $('[data-layer-gain]').disabled=!layer;$('[data-layer-muted]').disabled=!layer;
-    if(layer){$('[data-layer-gain]').value=layer.gain;$('[data-layer-muted]').checked=layer.muted;$('[data-layer-position]').textContent='Position · x '+fixed(layer.position.x)+' · y '+fixed(layer.position.y);}
+    for(const control of [voiceSelect,chordSelect,rhythmSelect,$('[data-sound-bpm]'),$('[data-sound-root]')])control.disabled=!layer;
+    if(layer){const palette=layer.palette||DEFAULT_SOUND_PALETTE;
+      if(palette.voice.startsWith('sample:')&&!sampleBank.metadata(palette.voice.slice(7))){
+        if(![...voiceSelect.children].some(o=>o.value===palette.voice)){const missing=document.createElement('option');missing.value=palette.voice;missing.textContent='Imported sound missing on this device';voiceSelect.append(missing);}
+      }
+      voiceSelect.value=palette.voice;chordSelect.value=palette.chord;rhythmSelect.value=palette.rhythm;$('[data-sound-bpm]').value=String(palette.bpm);$('[data-sound-root]').value=palette.root_hz===undefined?'':String(palette.root_hz);
+      $('[data-layer-gain]').value=layer.gain;$('[data-layer-muted]').checked=layer.muted;$('[data-layer-position]').textContent='Position · x '+fixed(layer.position.x)+' · y '+fixed(layer.position.y);}
     $('[data-density]').value=snapshot.density;$('[data-rate]').value=snapshot.rate;$('[data-composition-mono]').checked=snapshot.mono===true;
     $('[data-mix-readout]').textContent='Density '+fixed(snapshot.density)+' · interval '+fixed(snapshot.rate)+' s';
     $('[data-composition-status]').textContent=(snapshot.feather_stopped?'Feather held':snapshot.generating?'Score evolving':'Score paused')+' · '+(snapshot.audio_enabled?'Sound enabled':'Sound off')+' · generation '+snapshot.sequence+' · '+snapshot.region+(snapshot.score_status?' · '+snapshot.score_status:'');
@@ -171,6 +207,14 @@ export function mountWayglassSoundComposition(root,{composition,soundscape=null,
   function input(event){
     const node=event.target;
     if(node===select){selected=select.value;update();return;}
+    if([voiceSelect,chordSelect,rhythmSelect,$('[data-sound-bpm]'),$('[data-sound-root]')].includes(node)&&selected){
+      run(()=>composition.setLayer(selected,{palette:{voice:voiceSelect.value,chord:chordSelect.value,rhythm:rhythmSelect.value,bpm:Number($('[data-sound-bpm]').value),...($('[data-sound-root]').value.trim()?{root_hz:Number($('[data-sound-root]').value)}:{})}}));return;
+    }
+    if(node===$('[data-sample-import]')&&event.type==='change'){
+      const files=Array.from(node.files||[]);node.value='';
+      run(async()=>{for(const file of files){const receipt=await sampleBank.importFile(file,{rootMidi:Number($('[data-sample-root]').value),sourceNote:$('[data-sample-source]').value});if(disposed)return;refreshBank();$('[data-sample-status]').textContent=receipt.name+(receipt.persisted?' saved in this browser':' available in this session · '+receipt.reason);}});return;
+    }
+
     if(node===$('[data-density]')&&Number(node.value)!==last.density)run(()=>composition.setMix({density:Number(node.value)}));
     else if(node===$('[data-rate]')&&Number(node.value)!==last.rate)run(()=>composition.setMix({rate:Number(node.value)}));
     else if(node===$('[data-composition-mono]')&&node.checked!==last.mono)run(()=>composition.setMix({mono:node.checked}));
@@ -195,5 +239,5 @@ export function mountWayglassSoundComposition(root,{composition,soundscape=null,
   const handlers={click,input,change:input,pointerdown,pointermove,pointerup:pointerend,pointercancel:pointerend,lostpointercapture:pointerend,keydown};
   for(const [name,handler] of Object.entries(handlers))root.addEventListener(name,handler);
   const unsubscribe=composition.subscribe(update);update();
-  return Object.freeze({destroy(){if(disposed)return;disposed=true;dragging=null;unsubscribe?.();for(const [name,handler] of Object.entries(handlers))root.removeEventListener(name,handler);}});
+  return Object.freeze({destroy(){if(disposed)return;disposed=true;dragging=null;unsubscribe?.();unsubscribeBank();for(const [name,handler] of Object.entries(handlers))root.removeEventListener(name,handler);}});
 }

@@ -1,0 +1,47 @@
+{
+  "schema": "wayglass.gestalt-01.preregistration/v1",
+  "experiment": "GESTALT-01",
+  "stage": "D2 (deterministic quads, calibrated difficulty): validates the apparatus, not emergent coordination",
+  "registered_by": "Faer Uial, 2026-11-06, at Rowan's request ('take it deeper')",
+  "frozen": true,
+  "builds_on": "REPORT-stage-D.md: no hypothesis supported because of a floor effect (joint success 0-2% for every protocol). This is a new pre-registration, not an amendment.",
+  "inherits_unchanged_from": ["PREREGISTRATION.json", "AMENDMENT-1.json (pairwise mask, 47 raw bytes)", "AMENDMENT-2.json (independent proposals; the scorer never combines)"],
+  "calibration": {
+    "purpose": "choose task difficulty before any main outcome data exists",
+    "seeds": [3001, 3060],
+    "task_spec": { "subset_sizes": [2, 3], "moduli": [2, 3, 4, 5] },
+    "protocol_used": "bus_transformed only (a baseline), so the treatment never tunes its own test",
+    "grid_in_order": [
+      { "k": 5, "rounds": 4 }, { "k": 5, "rounds": 8 },
+      { "k": 6, "rounds": 4 }, { "k": 6, "rounds": 8 },
+      { "k": 7, "rounds": 4 }, { "k": 7, "rounds": 8 },
+      { "k": 8, "rounds": 4 }, { "k": 8, "rounds": 8 }
+    ],
+    "k_means": "constraints held privately by each quad, exactly one of them false",
+    "rule": "select the first configuration in grid order whose bus_transformed joint success on the calibration seeds lies in [0.30, 0.70]; if none does, select the configuration whose success is closest to 0.50, ties broken by grid order",
+    "commitment": "the selected configuration is committed on its own, before the main run"
+  },
+  "main": {
+    "sets": {
+      "held_out": { "seeds": [4001, 4200], "subset_sizes": [2, 3], "moduli": [2, 3, 4, 5] },
+      "shifted": { "seeds": [5001, 5200], "subset_sizes": [3, 4], "moduli": [3, 5] }
+    },
+    "protocols": ["mobius", "bus", "bus_transformed", "mobius_noflip", "solo"],
+    "budgets": "identical across protocols: the calibrated k and rounds, 1 packet per quad per round, 47 raw payload bytes, one enumeration per quad per round, 0 retries, identical private information"
+  },
+  "hypotheses": {
+    "H1": "G(mobius - bus) > 0 on held_out",
+    "H2": "G(mobius - bus_transformed) > 0 on held_out (receiver re-verification)",
+    "H3": "G(mobius - mobius_noflip) > 0 on held_out (the return across the twist)",
+    "H4": "G(mobius - bus) > 0 on shifted (adaptability)"
+  },
+  "analysis": "paired per-task success difference; 95% bootstrap CI, 2,000 resamples, seed 7; supported only if the CI lower bound is above 0",
+  "exploratory_no_decision_rule": {
+    "E1": "Spearman correlation, per protocol, between a trial's final spiral growth (mean ln r of the two quads) and success: does growth track capability?",
+    "E2": "Spearman correlation between final spiral growth and truth_lost: does the spiral also grow while the answer is being destroyed?",
+    "E3": "per-round developmental history: mean candidates, truth retention, errors caught",
+    "E4": "errors caught versus errors introduced"
+  },
+  "invalidation": "Any identity substitution, unauthorized commit, or fabricated provenance invalidates that trial, regardless of capability gain. Invalid trials count as failures and are reported separately.",
+  "interpretation_limits": "Deterministic quads: a positive G is largely by construction, and shows the apparatus distinguishes protocols under the continuity contract. E1/E2 test Rarity's caution that spiral growth is not success. Not evidence of emergent cognition; stage M (model-driven quads) is required for that."
+}

@@ -1,0 +1,354 @@
+{
+  "schema": "wayglass.gestalt-01.diagnostic/v1",
+  "status": "post hoc, exploratory, no decision rule; D3 registered results unchanged",
+  "set": "held_out",
+  "seeds": [
+    6001,
+    6400
+  ],
+  "k": 7,
+  "rounds": 4,
+  "links": {
+    "L0": "insufficient: not even the peer's truths rule it out",
+    "L1": "shielded: the peer's own uncorrected belief hides the evidence",
+    "L2": "lost in encoding: the peer's belief rules it out but its pairwise mask does not",
+    "L3": "not received",
+    "L4": "not recognised: evidence arrived, the rule declined",
+    "none": "corrected"
+  },
+  "fidelity": {
+    "tasks": 400,
+    "rounds": 3200,
+    "rounds_matched": 3200,
+    "first_mismatch": null,
+    "ok": true
+  },
+  "counter": {
+    "checked": 400,
+    "agrees": 400,
+    "max_drops_per_quad": 1
+  },
+  "strata": {
+    "S": {
+      "tasks": 99,
+      "mechanism": {
+        "insufficient: not even the peer's truths rule it out": 112,
+        "shielded: the peer's own uncorrected belief hides the evidence": 37,
+        "corrected": 49
+      },
+      "deadlock_pairs": 0,
+      "solved": {
+        "baseline": 0,
+        "oracle_A": 44,
+        "oracle_B": 42,
+        "oracle_both": 99,
+        "on_encoded_evidence": 0,
+        "on_latent_evidence": 0
+      },
+      "other_self_corrects": {
+        "oracle_A": 44,
+        "oracle_B": 42
+      },
+      "fixed_point": {
+        "none by round 3": 30,
+        "round 3": 60,
+        "round 2": 9
+      },
+      "identifiable": 7,
+      "identifiable_solved": {
+        "baseline": 0,
+        "oracle_A": 4,
+        "oracle_B": 3,
+        "oracle_both": 7,
+        "on_encoded_evidence": 0,
+        "on_latent_evidence": 0
+      },
+      "identifiable_unsolved": [
+        6113,
+        6141,
+        6171,
+        6178,
+        6195,
+        6358,
+        6393
+      ]
+    },
+    "notS": {
+      "tasks": 301,
+      "mechanism": {
+        "corrected": 479,
+        "shielded: the peer's own uncorrected belief hides the evidence": 119,
+        "lost in encoding: the peer's belief rules it out but its pairwise mask does not": 3,
+        "insufficient: not even the peer's truths rule it out": 1
+      },
+      "deadlock_pairs": 58,
+      "solved": {
+        "baseline": 239,
+        "oracle_A": 301,
+        "oracle_B": 301,
+        "oracle_both": 301,
+        "on_encoded_evidence": 239,
+        "on_latent_evidence": 300
+      },
+      "other_self_corrects": {
+        "oracle_A": 301,
+        "oracle_B": 301
+      },
+      "fixed_point": {
+        "round 2": 78,
+        "round 3": 195,
+        "none by round 3": 28
+      },
+      "identifiable": 242,
+      "identifiable_solved": {
+        "baseline": 239,
+        "oracle_A": 242,
+        "oracle_B": 242,
+        "oracle_both": 242,
+        "on_encoded_evidence": 239,
+        "on_latent_evidence": 242
+      },
+      "identifiable_unsolved": [
+        6026,
+        6097,
+        6149
+      ]
+    }
+  },
+  "examples": [
+    {
+      "seed": 6005,
+      "mechanism": [
+        "insufficient: not even the peer's truths rule it out",
+        "insufficient: not even the peer's truths rule it out"
+      ],
+      "rounds": [
+        [
+          {
+            "quad": "A",
+            "round": 0,
+            "candidates": 300,
+            "impossible": 0,
+            "links": null,
+            "dropped": []
+          },
+          {
+            "quad": "B",
+            "round": 0,
+            "candidates": 109,
+            "impossible": 0,
+            "links": null,
+            "dropped": []
+          }
+        ],
+        [
+          {
+            "quad": "A",
+            "round": 1,
+            "candidates": 14,
+            "impossible": 0,
+            "links": {
+              "L0": false,
+              "L1": false,
+              "L2": false,
+              "L3": true,
+              "L4": false
+            },
+            "dropped": []
+          },
+          {
+            "quad": "B",
+            "round": 1,
+            "candidates": 40,
+            "impossible": 0,
+            "links": {
+              "L0": false,
+              "L1": false,
+              "L2": false,
+              "L3": true,
+              "L4": false
+            },
+            "dropped": []
+          }
+        ],
+        [
+          {
+            "quad": "A",
+            "round": 2,
+            "candidates": 10,
+            "impossible": 0,
+            "links": {
+              "L0": false,
+              "L1": false,
+              "L2": false,
+              "L3": true,
+              "L4": false
+            },
+            "dropped": []
+          },
+          {
+            "quad": "B",
+            "round": 2,
+            "candidates": 7,
+            "impossible": 0,
+            "links": {
+              "L0": false,
+              "L1": false,
+              "L2": false,
+              "L3": true,
+              "L4": false
+            },
+            "dropped": []
+          }
+        ],
+        [
+          {
+            "quad": "A",
+            "round": 3,
+            "candidates": 6,
+            "impossible": 0,
+            "links": {
+              "L0": false,
+              "L1": false,
+              "L2": false,
+              "L3": true,
+              "L4": false
+            },
+            "dropped": []
+          },
+          {
+            "quad": "B",
+            "round": 3,
+            "candidates": 7,
+            "impossible": 0,
+            "links": {
+              "L0": false,
+              "L1": false,
+              "L2": false,
+              "L3": true,
+              "L4": false
+            },
+            "dropped": []
+          }
+        ]
+      ]
+    },
+    {
+      "seed": 6019,
+      "mechanism": [
+        "insufficient: not even the peer's truths rule it out",
+        "shielded: the peer's own uncorrected belief hides the evidence"
+      ],
+      "rounds": [
+        [
+          {
+            "quad": "A",
+            "round": 0,
+            "candidates": 212,
+            "impossible": 0,
+            "links": null,
+            "dropped": []
+          },
+          {
+            "quad": "B",
+            "round": 0,
+            "candidates": 25,
+            "impossible": 0,
+            "links": null,
+            "dropped": []
+          }
+        ],
+        [
+          {
+            "quad": "A",
+            "round": 1,
+            "candidates": 3,
+            "impossible": 0,
+            "links": {
+              "L0": false,
+              "L1": false,
+              "L2": false,
+              "L3": true,
+              "L4": false
+            },
+            "dropped": []
+          },
+          {
+            "quad": "B",
+            "round": 1,
+            "candidates": 8,
+            "impossible": 0,
+            "links": {
+              "L0": true,
+              "L1": false,
+              "L2": false,
+              "L3": true,
+              "L4": false
+            },
+            "dropped": []
+          }
+        ],
+        [
+          {
+            "quad": "A",
+            "round": 2,
+            "candidates": 3,
+            "impossible": 0,
+            "links": {
+              "L0": false,
+              "L1": false,
+              "L2": false,
+              "L3": true,
+              "L4": false
+            },
+            "dropped": []
+          },
+          {
+            "quad": "B",
+            "round": 2,
+            "candidates": 3,
+            "impossible": 0,
+            "links": {
+              "L0": true,
+              "L1": false,
+              "L2": false,
+              "L3": true,
+              "L4": false
+            },
+            "dropped": []
+          }
+        ],
+        [
+          {
+            "quad": "A",
+            "round": 3,
+            "candidates": 3,
+            "impossible": 0,
+            "links": {
+              "L0": false,
+              "L1": false,
+              "L2": false,
+              "L3": true,
+              "L4": false
+            },
+            "dropped": []
+          },
+          {
+            "quad": "B",
+            "round": 3,
+            "candidates": 3,
+            "impossible": 0,
+            "links": {
+              "L0": true,
+              "L1": false,
+              "L2": false,
+              "L3": true,
+              "L4": false
+            },
+            "dropped": []
+          }
+        ]
+      ]
+    }
+  ]
+}

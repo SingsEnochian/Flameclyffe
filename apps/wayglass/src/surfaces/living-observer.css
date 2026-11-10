@@ -121,3 +121,21 @@
 .wg-living-observer .observer-dream-history strong{color:#e5f4f2;font-weight:600}
 .wg-living-observer .observer-dream-history small{color:#a7b8c8}
 @media(prefers-reduced-motion:reduce){.wg-living-observer .observer-dream *{animation:none!important;transition:none!important}}
+
+
+/* Owner-gated NOAA observations, separate from the Living Observer's private interior. */
+.wg-living-observer .observer-noaa{display:grid;gap:13px;padding:clamp(18px,2.5vw,27px);border-radius:25px;
+background:radial-gradient(ellipse at 85% 0%,rgba(91,186,198,.13),transparent 48%),linear-gradient(145deg,rgba(7,25,37,.9),rgba(16,28,49,.82))}
+.wg-living-observer .observer-noaa-head{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.wg-living-observer .observer-noaa-head>div{max-width:68ch}
+.wg-living-observer .observer-noaa-head h2{font-size:clamp(1.3rem,2.3vw,2rem);margin:3px 0 8px}
+.wg-living-observer .observer-noaa-head p{margin:0;line-height:1.5}
+.wg-living-observer .observer-noaa-status{margin:0;color:#b8d9e3;font-size:.85rem}
+.wg-living-observer .observer-noaa-readings{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:10px}
+.wg-living-observer .observer-noaa-reading{display:grid;gap:7px;padding:12px 15px;border:1px solid rgba(119,194,199,.24);border-radius:16px;
+background:linear-gradient(130deg,rgba(86,170,183,.10),rgba(29,63,88,.09));min-width:0}
+.wg-living-observer .observer-noaa-reading strong{font-size:.78rem;font-weight:600;color:#bfe5e8}
+.wg-living-observer .observer-noaa-reading b{font-size:1.05rem;color:#e4faf4;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.wg-living-observer .observer-noaa-reading small,.wg-living-observer .observer-noaa-provenance{font-size:.72rem;color:#a4bbc9;overflow-wrap:anywhere}
+.wg-living-observer .observer-noaa-reading[data-freshness=stale]{border-color:rgba(218,177,106,.5)}
+.wg-living-observer .observer-noaa button:disabled{opacity:.6}

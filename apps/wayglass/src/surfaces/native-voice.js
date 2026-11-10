@@ -1,3 +1,4 @@
+import {shipSoundscape} from '../ship-soundscape.js';
 import './native-voice.css';
 import {inviteWayglassVoice} from '../route-client.js';
 import {animateWyrdruneTranslation} from '../wyrdrune-morph.js';
@@ -101,9 +102,16 @@ export function mountWayglassNativeVoice(root,{request=inviteWayglassVoice,
     for(const [i,score] of sounds.entries()){
       const button=root.ownerDocument.createElement('button');
       button.type='button';button.className='glass-chip';
-      button.textContent='Play Wyrdrune sound '+(i+1);
+      button.textContent=score.palette?'Use '+score.palette.voice+' · '+score.palette.chord+' · '+score.palette.rhythm+' in Soundstage':'Play Wyrdrune sound '+(i+1);
       button.addEventListener('click',async()=>{
-        try{const played=await soundPlayer.play(score);
+        try{
+          if(score.palette){
+            const composition=shipSoundscape.audio.composition,layer=composition.snapshot().layers[0];
+            if(!layer)throw new Error('Compose the shared Wyrdrune score in the Soundstage first.');
+            composition.setLayer(layer.id,{palette:score.palette});
+            status.textContent='Wayglass orchestration applied to '+layer.id+'; playback remains under the shared sound controls.';return;
+          }
+          const played=await soundPlayer.play(score);
           if(!disposed)status.textContent='Playing Wayglass sound · '+played.duration_seconds+' seconds.';
         }catch(error){if(!disposed)status.textContent='Sound unavailable: '+error.message;}
       });

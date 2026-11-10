@@ -3,6 +3,8 @@
 const fs = require('node:fs');
 const fsp = require('node:fs/promises');
 const path = require('node:path');
+const { execFileSync } = require('node:child_process');
+const { buildShipInheritance } = require('../../lib/wayglass-ship-inheritance.cjs');
 
 const repoRoot = path.resolve(__dirname, '../..');
 const source = path.join(repoRoot, 'dist', 'wayglass');
@@ -37,6 +39,12 @@ async function copyTree(from, to) {
       await fsp.copyFile(path.join(repoRoot, 'lib', name), path.join(runtime, name));
     }
   }
+
+  const dirty=execFileSync('git',['diff','--name-only','HEAD','--','.',':(exclude)apps/starwell-server/public/arcsweep',':(exclude)apps/starwell-server/wayglass-runtime'],{cwd:repoRoot,encoding:'utf8'}).trim();
+  const inventory=buildShipInheritance(repoRoot,{sourceSha:dirty?null:execFileSync('git',['rev-parse','HEAD'],{cwd:repoRoot,encoding:'utf8'}).trim()});
+  await fsp.writeFile(path.join(runtime,'ship-inheritance.json'),JSON.stringify(inventory,null,2)+'\n');
+
+  await fsp.copyFile(path.join(repoRoot,'lib/wayglass-sound-palette.catalog.json'),path.join(runtime,'wayglass-sound-palette.catalog.json'));
 
   // WTL preview has local CommonJS dependencies; package the reviewed runtime exactly.
   const wtlDir = path.join(runtime,'wyrdrune');

@@ -79,3 +79,17 @@ test('full archive does not silently discard older session records',()=>{
   assert.throws(()=>vault.save({sessionId:'overflow',messages:[{role:'user',content:'test'}]}),/archive full/);
   assert.equal(vault.list().length,MAX_CHAT_SESSIONS);
 });
+
+
+test('rich-text turns survive cold return and oversized formatting preserves the archive',()=>{
+ const storage=makeStorage(),vault=createWayglassChatVault({storage});
+ const messages=dialogue();messages[0].rich_text_html='<p><strong>Wayglass</strong>, what if?</p>';
+ vault.save({sessionId:'rich-return',messages});
+ const reopened=createWayglassChatVault({storage}).open('rich-return');
+ assert.equal(reopened.messages[0].rich_text_html,messages[0].rich_text_html);
+ assert.equal(reopened.messages[0].content,messages[0].content);
+ const before=storage.getItem(WAYGLASS_CHAT_VAULT_KEY);
+ messages[0].rich_text_html='x'.repeat(48001);
+ assert.throws(()=>vault.save({sessionId:'rich-return',messages}),/storage limit/);
+ assert.equal(storage.getItem(WAYGLASS_CHAT_VAULT_KEY),before);
+});

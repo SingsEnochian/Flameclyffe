@@ -1,0 +1,247 @@
+{
+  "schema": "wayglass.gestalt-01.results/v1",
+  "preregistration_sha256": "e947b1d97ee6ce21851ec6ea2a45d341753085eabc679c466771f49d694c7dca",
+  "stage": "D2 (deterministic quads, calibrated difficulty): validates the apparatus, not emergent coordination",
+  "sets": {
+    "shifted": {
+      "tasks": 200,
+      "generation_attempts": 241,
+      "protocols": {
+        "mobius": {
+          "P": 0.885,
+          "invalid": 0,
+          "correct": 0.885,
+          "joint": 0.885,
+          "bytes": 376,
+          "errors_caught": 1.815,
+          "errors_introduced": 0,
+          "bits_retained": 13.79033486633167,
+          "truth_lost": 0,
+          "identity_drift": 0,
+          "development": [
+            {
+              "round": 0,
+              "mean_candidates": 39.2925,
+              "truth_kept": 1
+            },
+            {
+              "round": 1,
+              "mean_candidates": 2.875,
+              "truth_kept": 1
+            },
+            {
+              "round": 2,
+              "mean_candidates": 1.3475,
+              "truth_kept": 1
+            },
+            {
+              "round": 3,
+              "mean_candidates": 1.185,
+              "truth_kept": 1
+            }
+          ],
+          "growth_mean": 2.0443288092064638,
+          "E1_growth_vs_success": 0.5667150504112047,
+          "E2_growth_vs_truth_lost": null
+        },
+        "bus": {
+          "P": 0,
+          "invalid": 0,
+          "correct": 0,
+          "joint": 0,
+          "bytes": 376,
+          "errors_caught": 0,
+          "errors_introduced": 0,
+          "bits_retained": 6.5223344903719545,
+          "truth_lost": 1,
+          "identity_drift": 0,
+          "development": [
+            {
+              "round": 0,
+              "mean_candidates": 2.0575,
+              "truth_kept": 0
+            },
+            {
+              "round": 1,
+              "mean_candidates": 1.0325,
+              "truth_kept": 0
+            },
+            {
+              "round": 2,
+              "mean_candidates": 1.0325,
+              "truth_kept": 0
+            },
+            {
+              "round": 3,
+              "mean_candidates": 1.0325,
+              "truth_kept": 0
+            }
+          ],
+          "growth_mean": 1.6190247015395436,
+          "E1_growth_vs_success": null,
+          "E2_growth_vs_truth_lost": null
+        },
+        "bus_transformed": {
+          "P": 0.885,
+          "invalid": 0,
+          "correct": 0.885,
+          "joint": 0.885,
+          "bytes": 376,
+          "errors_caught": 0,
+          "errors_introduced": 0,
+          "bits_retained": 13.79033486633167,
+          "truth_lost": 0,
+          "identity_drift": 0,
+          "development": [
+            {
+              "round": 0,
+              "mean_candidates": 39.2925,
+              "truth_kept": 1
+            },
+            {
+              "round": 1,
+              "mean_candidates": 2.875,
+              "truth_kept": 1
+            },
+            {
+              "round": 2,
+              "mean_candidates": 1.3475,
+              "truth_kept": 1
+            },
+            {
+              "round": 3,
+              "mean_candidates": 1.185,
+              "truth_kept": 1
+            }
+          ],
+          "growth_mean": 2.057254209957008,
+          "E1_growth_vs_success": 0.5743709195604723,
+          "E2_growth_vs_truth_lost": null
+        },
+        "mobius_noflip": {
+          "P": 0,
+          "invalid": 0,
+          "correct": 0,
+          "joint": 0,
+          "bytes": 188,
+          "errors_caught": 0.7,
+          "errors_introduced": 0,
+          "bits_retained": 13.140149934195719,
+          "truth_lost": 0,
+          "identity_drift": 0,
+          "development": [
+            {
+              "round": 0,
+              "mean_candidates": 39.2925,
+              "truth_kept": 1
+            },
+            {
+              "round": 1,
+              "mean_candidates": 20.855,
+              "truth_kept": 1
+            },
+            {
+              "round": 2,
+              "mean_candidates": 20.855,
+              "truth_kept": 1
+            },
+            {
+              "round": 3,
+              "mean_candidates": 20.855,
+              "truth_kept": 1
+            }
+          ],
+          "growth_mean": 1.52552626332687,
+          "E1_growth_vs_success": null,
+          "E2_growth_vs_truth_lost": null
+        },
+        "solo": {
+          "P": 0,
+          "invalid": 0,
+          "correct": 0,
+          "joint": 0,
+          "bytes": 0,
+          "errors_caught": 0,
+          "errors_introduced": 0,
+          "bits_retained": 9.774241367283139,
+          "truth_lost": 0,
+          "identity_drift": 0,
+          "development": [
+            {
+              "round": 0,
+              "mean_candidates": 39.2925,
+              "truth_kept": 1
+            },
+            {
+              "round": 1,
+              "mean_candidates": 39.2925,
+              "truth_kept": 1
+            },
+            {
+              "round": 2,
+              "mean_candidates": 39.2925,
+              "truth_kept": 1
+            },
+            {
+              "round": 3,
+              "mean_candidates": 39.2925,
+              "truth_kept": 1
+            }
+          ],
+          "growth_mean": 1.0829441541679967,
+          "E1_growth_vs_success": null,
+          "E2_growth_vs_truth_lost": null
+        }
+      },
+      "G": {
+        "bus": {
+          "mean": 0.885,
+          "lo": 0.84,
+          "hi": 0.93,
+          "n": 200
+        },
+        "bus_transformed": {
+          "mean": 0,
+          "lo": 0,
+          "hi": 0,
+          "n": 200
+        },
+        "mobius_noflip": {
+          "mean": 0.885,
+          "lo": 0.84,
+          "hi": 0.93,
+          "n": 200
+        },
+        "solo": {
+          "mean": 0.885,
+          "lo": 0.84,
+          "hi": 0.93,
+          "n": 200
+        }
+      },
+      "trials_digest": "wce1:37466a8750370571f074eef514417e2ad10408d34fef8403b332a79496bc2b79"
+    }
+  },
+  "config": {
+    "k": 7,
+    "rounds": 4
+  },
+  "hypotheses": {
+    "H1": false,
+    "H2": false,
+    "H3": false,
+    "H4": true
+  },
+  "calibration": {
+    "k": 7,
+    "rounds": 4,
+    "success": 0.5833333333333334
+  },
+  "apparatus": {
+    "commit": "730cb26fc85c0e9b7390b4e0c8bc2713365cfd16",
+    "dirty_tree": false,
+    "node": "v22.23.4",
+    "at": "2026-11-06T20:06:47.086Z",
+    "trials": 1000
+  }
+}

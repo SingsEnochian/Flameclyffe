@@ -191,6 +191,43 @@
         "continuous-addressed-sound-regions-and-declared-affinity"
       ],
       "note": "Preserves canonical First Contact/Astra routes. PR570 is superseded by the canonical-based integration review because its branch requires linear history; source branches are preserved. No deployed host SHA, installed Windows build or live participant invocation established."
+    },
+    {
+      "branch": "wayglass/foundry-watercolour-20261110",
+      "target": "wayglass/current",
+      "status": "candidate-48-focused-tests-passed-browser-build-deployment-pending",
+      "scope": [
+        "existing-foundry-library-read-only-watercolour-projection",
+        "live-saved-brush-updates",
+        "immediate-fluid-preview",
+        "pressure-size-opacity-pigment"
+      ],
+      "note": "Preserves original brush libraries. External fontmaker collection unidentified; native brush decoders and exhaustive inheritance remain pending."
+    },
+    {
+      "branch": "wayglass/shipwide-integration-20261110",
+      "target": "wayglass/current",
+      "status": "candidate-concurrent-eight-system-verification-pending",
+      "source_base": "088c8fba77f9ad0fdc19d2c716863e8f1464ea48",
+      "source_prs": [
+        604,
+        603,
+        602,
+        600,
+        579,
+        578,
+        560,
+        549,
+        548,
+        586
+      ],
+      "scope": [
+        "all-eight-functional-systems",
+        "verified-learning-carry-to-ship-voice",
+        "shared-source-inventory-and-systems-inspection",
+        "combined-three-app-build-and-concurrent-verification"
+      ],
+      "note": "Source inclusion does not establish autonomy, deployment or WTL v1 completeness. Live model/tool/return gates remain explicit."
     }
   ]
 }

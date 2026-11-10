@@ -1,7 +1,7 @@
 import { authoriseHouseRequest } from '../../netlify/functions/_shared/house-session.mjs';
 
 const ROUTES = new Map([
-  ['routes', ['GET']], ['kernel', ['GET']], ['kernel/enter', ['POST']],
+  ['routes', ['GET']], ['ship/inheritance',['GET']], ['observer/noaa',['GET']], ['wyrdrune/living-learning/continuity',['GET']], ['kernel', ['GET']], ['kernel/enter', ['POST']],
   ['kernel/leave', ['POST']], ['kernel/double-mobius', ['GET', 'POST']], ['wyrdrune/story-soundscape', ['POST']], ['wyrdrune/full-spectrum', ['POST']], ['wyrdrune/resonance-atlas', ['POST']], ['wyrdrune/living-learning', ['POST']], ['wyrdrune/native-voice', ['POST']], ['respond', ['POST']], ['voyage/messages', ['GET', 'POST']],
 ]);
 const json = (status, body) => Response.json(body, { status, headers: { 'cache-control': 'no-store' } });
