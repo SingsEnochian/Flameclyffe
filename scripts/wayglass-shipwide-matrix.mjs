@@ -27,7 +27,7 @@ const lanes=[
  ['observer', [['apps/wayglass/test',/^wayglass-(living-observer.*|noaa-live|learning-memory-client)\.test\.js$/],['test/wayglass',/^noaa.*\.test\.cjs$/],['apps/arcsweep/test',/^noaa-mobius-chaos-benchmark\.test\.js$/]]],
  ['agency', [['test',/^wayglass-(bloodstream|mobius-training)\.test\.mjs$/],['apps/wayglass/test',/^(agent-self-naming|wayglass-participation|wayglass-universe-visitors)\.test\.js$/]]],
  ['return', [['test/wayglass',/^(?!noaa|quad).*\.test\.cjs$/],['apps/wayglass/test',/^(watercolor-continuity|wayglass-stop-receipt|wayglass-return-engine-trial|wayglass-universe)\.test\.js$/],['apps/starwell-server/test',/^wayglass-learning-memory\.test\.js$/]]],
- ['host', [['test',/^wayglass-(mcp-.*|cloud-host|presentation-recovery)\.test\.cjs$/],['apps/starwell-server/test',/^wayglass-(ship-inheritance|primary-entry|mcp-bridge)\.test\.js$/],['apps/wayglass/test',/^(installation|wayglass-gateway|hearthgate-server-bundle)\.test\.js$/]]],
+ ['host', [['test',/^wayglass-(mcp-.*|cloud-host|presentation-recovery)\.test\.cjs$/],['test/wayglass',/^mcp-oauth-preflight\.test\.mjs$/],['apps/starwell-server/test',/^wayglass-(ship-inheritance|primary-entry|mcp-bridge)\.test\.js$/],['apps/wayglass/test',/^(installation|wayglass-gateway|hearthgate-server-bundle)\.test\.js$/]]],
 ];
 async function run([id,specs]){
  const files=[...new Set((await Promise.all(specs.map(([d,p])=>select(d,p)))).flat())];
