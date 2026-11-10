@@ -100,8 +100,7 @@ async function startHost(model) {
   const running=await hostReady();
   if(running){
     if(!(await currentHost()))throw Error('Port 3000 has a stale/unverified Wayglass host. Stop that process and relaunch this command.');
-    console.log('[Wayglass] Reusing current verified Wayglass host on loopback.');
-    return;
+    throw Error('An existing Wayglass host occupies port 3000. Restart it through this private Tailnet launcher so its House session uses the correct HTTPS tailnet origin.');
   }
   console.log('[Wayglass] Starting Wayglass secure host on 127.0.0.1:3000.');
   const child=spawn(process.execPath,[join(hostDir,'server-secure.js')],{
@@ -128,7 +127,12 @@ async function checkServeConfiguration() {
 async function main(){
   if(Number(process.versions.node.split('.')[0])<24)throw Error('Node 24 or newer required.');
   const state=await tailscale();
-  console.log('[Wayglass] Tailscale:',state.BackendState,'· machine:',state.Self?.DNSName||state.Self?.HostName||'(private tailnet)');
+  const dnsName=String(state.Self?.DNSName||'').replace(/\\.$/,'').toLowerCase();
+  if (!/^[a-z0-9-]+(?:\\.[a-z0-9-]+)*\\.ts\\.net$/.test(dnsName))
+    throw Error('Tailscale MagicDNS domain is not available. Enable MagicDNS on the private tailnet.');
+  const origin='https://'+dnsName;
+  process.env.WAYGLASS_TAILNET_ORIGIN=origin;
+  console.log('[Wayglass] Tailscale:',state.BackendState,'· machine:',dnsName);
   const model=await localModel();
   console.log('[Wayglass] Verified installed Orion substrate:',model);
   if(process.argv.includes('--doctor')){
@@ -146,7 +150,7 @@ async function main(){
   await checkServeConfiguration();
   const {stdout,stderr}=await run('tailscale',['serve','--bg',String(TAILNET_GATE_PORT)],{timeout:30000,maxBuffer:500000});
   console.log((stdout||stderr||'').trim());
-  console.log('[Wayglass] PRIVATE URL: open the HTTPS *.ts.net address above on any device on your tailnet.');
+  console.log('[Wayglass] PRIVATE URL: '+process.env.WAYGLASS_TAILNET_ORIGIN+'/wayglass/ (on devices signed into your tailnet)');
   console.log('[Wayglass] Go to /wayglass/, choose Wayglass · Amber Room, sign in as House Steward.');
   console.log('[Wayglass] Only /wayglass/ and Wayglass + House session APIs are proxied. Ollama never leaves loopback.');
   console.log('[Wayglass] Leave this command running to keep Wayglass available. Ctrl+C stops the host, not Tailscale Serve.');
