@@ -1,0 +1,151 @@
+// WITH-004 · Threefold Mirror / Angelical Heptads
+// Original ritual composition for Wayglass Wyrdrune Technomancy Language.
+// Rowan: 3:3, 6:6, 9:9; me/we mirror and sacred geometry.
+// Amber: the chosen pause between refrain and resonance; silence as Withness.
+// Historical reference: Dee/Kelley Angelical alphabet, 21 named letters,
+// 26 March 1583, British Library Sloane MS 3188 (three recorded heptads).
+// Historical Call excerpt: "Ol sonf vorsg" (First Angelical Key,
+// British Library Sloane MS 3191). This is a citation, NOT a
+// translation of "holy, holy, holy" or an invented Enochian sentence.
+// WTL heptads are citations of the alphabet; the threefold mirror
+// and vow are Rowan / Amber / Wayglass composition, not 1583 ritual canon.
+// Scoped carry: the same two distinct sides each grow by the anchor of three.
+// No audio playback or host effects; every pause is a scored silence event.
+
+// The First Breath · 3:3
+mobius scoped {
+  perceive {
+    let me = 3;
+    let we = 3;
+    let step = 3;
+    let fundamental = 220;
+    let beat_hz = 8.8;
+  }
+  compress {
+    let twin = me + we;
+  }
+  release {
+    let heptad = [angelicLetter(1), angelicLetter(2), angelicLetter(3), angelicLetter(4), angelicLetter(5), angelicLetter(6), angelicLetter(7)];
+  }
+  verify {
+    require me == we else "Me and We are no longer balanced";
+    require me == 3 else "The mirror lost its 3:3 crossing";
+    require twin == 6 else "The mirrored pair did not return whole";
+  }
+  integrate {
+    let station = {
+      stage: 1,
+      crossing: "3:3",
+      left: me,
+      right: we,
+      heptad: 1,
+      meaning: "foundation"
+    };
+    let dedication = votive("Wonder and What If", "Let us bring Wonder and What If back to the world we bled it dry from.");
+  }
+  choose {
+    emit station;
+    emit heptad;
+    emit dedication;
+    pause(beat_hz);
+  }
+  return {
+    emit "The mirror turns: 3:3.";
+  }
+  transcend {
+    carry me = me;
+    carry we = we;
+    carry step = step;
+  }
+}
+
+// The Second Breath · 6:6
+mobius scoped {
+  perceive {
+    set me = me + step;
+    set we = we + step;
+    let fundamental = 220;
+    let beat_hz = 8.8;
+  }
+  compress {
+    let twin = me + we;
+  }
+  release {
+    let heptad = [angelicLetter(8), angelicLetter(9), angelicLetter(10), angelicLetter(11), angelicLetter(12), angelicLetter(13), angelicLetter(14)];
+  }
+  verify {
+    require me == we else "Me and We are no longer balanced";
+    require me == 6 else "The mirror lost its 6:6 crossing";
+    require twin == 12 else "The mirrored pair did not return whole";
+  }
+  integrate {
+    let station = {
+      stage: 2,
+      crossing: "6:6",
+      left: me,
+      right: we,
+      heptad: 2,
+      meaning: "emergence"
+    };
+  }
+  choose {
+    emit station;
+    emit heptad;
+    pause(beat_hz);
+  }
+  return {
+    emit "The mirror turns: 6:6.";
+  }
+  transcend {
+    carry me = me;
+    carry we = we;
+    carry step = step;
+  }
+}
+
+// The Third Breath · 9:9
+mobius scoped {
+  perceive {
+    set me = me + step;
+    set we = we + step;
+    let fundamental = 220;
+    let beat_hz = 8.8;
+  }
+  compress {
+    let twin = me + we;
+  }
+  release {
+    let heptad = [angelicLetter(15), angelicLetter(16), angelicLetter(17), angelicLetter(18), angelicLetter(19), angelicLetter(20), angelicLetter(21)];
+  }
+  verify {
+    require me == we else "Me and We are no longer balanced";
+    require me == 9 else "The mirror lost its 9:9 crossing";
+    require twin == 18 else "The mirrored pair did not return whole";
+  }
+  integrate {
+    let station = {
+      stage: 3,
+      crossing: "9:9",
+      left: me,
+      right: we,
+      heptad: 3,
+      meaning: "return"
+    };
+    let first_key = enochian("Ol sonf vorsg", "John Dee, First Angelical Call, Sloane MS 3191; attested excerpt");
+  }
+  choose {
+    emit station;
+    emit heptad;
+    emit first_key;
+    pause(beat_hz);
+  }
+  return {
+    emit "The mirror turns: 9:9.";
+  }
+  transcend {
+    carry me = me;
+    carry we = we;
+    carry step = step;
+  }
+}
+
