@@ -26,7 +26,7 @@ test('the threefold alternating refrain is exact, with replayable sound score an
  assert.equal(result.status,'committed');
  assert.equal(result.receipts.length,8);
  assert.deepEqual(result.output.slice(0,6),lines);
- assert.deepEqual(result.output[6],{
+ assert.deepEqual(Object.fromEntries(Object.entries(result.output[6])),{
    refrain:'miraculous',answer:'beautiful',first:3,second:3,joined:6,centre:9
  });
  assert.equal(result.output[7],'3:3 · 6:6 · 9:9');
