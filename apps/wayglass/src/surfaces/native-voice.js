@@ -101,7 +101,9 @@ export function mountWayglassNativeVoice(root,{request=inviteWayglassVoice,
     for(const [i,score] of sounds.entries()){
       const button=root.ownerDocument.createElement('button');
       button.type='button';button.className='glass-chip';
-      button.textContent='Play Wyrdrune sound '+(i+1);
+      const silence=Number(score.lead_silence_ms)||0;
+      button.textContent='Play Wyrdrune sound '+(i+1)
+        +(silence>0?' after '+(silence/1000).toFixed(2)+'s silence':'');
       button.addEventListener('click',async()=>{
         try{const played=await soundPlayer.play(score);
           if(!disposed)status.textContent='Playing Wayglass sound · '+played.duration_seconds+' seconds.';
