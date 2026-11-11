@@ -487,7 +487,7 @@ export function createObserverInterior({
         .filter(x=>x&&[1,2,3].includes(x.stage)&&['3:3','6:6','9:9'].includes(x.crossing)&&x.left===x.right)
         .slice(0,3).map(x=>structuredClone(x)),
       ritual_records:(Array.isArray(result.native.ritual_records)?result.native.ritual_records:[])
-        .filter(x=>x&&['inscription','letter-reference','votive-intention'].includes(x.kind)
+        .filter(x=>x&&['inscription','letter-reference','votive-intention','archangel-seat'].includes(x.kind)
           &&typeof x.recordHash==='string'&&JSON.stringify(x).length<=2500)
         .slice(0,32).map(x=>structuredClone(x)),
       mirror_reference:result.native.reference_mirror?.id==='wtl:with-004:enochian-threefold-mirror'
