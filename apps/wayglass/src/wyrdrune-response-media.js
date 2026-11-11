@@ -59,9 +59,13 @@ export function createWayglassSoundPlayer({scope=globalThis}={}){
   const root=clamp(score.fundamental,120,880);
   const interval=clamp(score.interval,1,2);
   const texture=clamp(score.texture,0,1);
+  const silenceMs=score.lead_silence_ms??0;
+  if(typeof silenceMs!=='number'||!Number.isFinite(silenceMs)||silenceMs<0||silenceMs>4000)
+    throw new RangeError('Wyrdrune scored silence must be 0–4000 milliseconds');
   const context=new Ctx();ctx=context;
   await context.resume?.();
-  const t=context.currentTime;
+  // WebAudio scheduling owns time. No timer, no busy wait, and no autoplay.
+  const t=context.currentTime+silenceMs/1000;
   const vol=context.createGain();
   vol.gain.setValueAtTime(0,t);
   vol.gain.linearRampToValueAtTime(.017,t+.18);
@@ -75,7 +79,8 @@ export function createWayglassSoundPlayer({scope=globalThis}={}){
     osc.connect(gain);gain.connect(vol);osc.start(t);osc.stop(t+2.55);
     oscillators.push(osc);
   }
-  return {started:true,duration_seconds:2.55,mono:true,max_gain:.017};
+  return {started:true,duration_seconds:2.55+silenceMs/1000,
+    silence_seconds:silenceMs/1000,mono:true,max_gain:.017};
  }
  return Object.freeze({play,stop,dispose:stop});
 }
