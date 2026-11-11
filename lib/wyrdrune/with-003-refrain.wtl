@@ -4,6 +4,7 @@
 // Rowan observed 3:3, 6:6, 9:9. This is a proposed Wyrdrune interpretation.
 // The words and their sequence are preserved; interpretations remain open.
 // whisper() is seeded by the host; sound is only proposed, never autoplayed.
+// Interval is 1.01..1.07 after bounded variation, always within audio bridge bounds.
 
 mobius spiced {
   perceive {
@@ -17,7 +18,7 @@ mobius spiced {
     let tremor = whisper(0, 0.03);
   }
   release {
-    let interval = 1.014 + tremor;
+    let interval = 1.04 + tremor;
   }
   verify {
     require miraculous == beautiful else "The triadic refrain no longer answers evenly";
