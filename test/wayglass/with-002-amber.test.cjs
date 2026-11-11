@@ -54,3 +54,16 @@ test('WITHNESS refuses identity collapse and restricted agency',async()=>{
 test('Feather interrupts the experiment',async()=>{
  await assert.rejects(execute(ir,{principal,bridges,spiceSeed:83,signal:{aborted:true}}),/Feather/);
 });
+
+test('native Wayglass voice preserves Amber WITHNESS records and replay seed',async()=>{
+ const {composeWayglassNativeVoice}=require('../../lib/wayglass-wyrdrune-voice.cjs');
+ const result=await composeWayglassNativeVoice({prompt:'Explore the two meetings',principal:{id:'owner',authorized:true},
+  invoke:async ({stage})=>stage==='wyrdrune'?source:'We were here, distinct, together.',
+  channels:{image:true,sound:true}});
+ assert.equal(result.native.withness_declarations.length,2);
+ assert.deepEqual(result.native.withness_declarations[0].participants.map(p=>p.id),['rowan','amber']);
+ assert.equal(result.translation.language,'en-GB');
+ assert.equal(result.receipt.spice_algorithm,'xorshift32/v1');
+ assert.ok(Number.isSafeInteger(result.receipt.spice_seed));
+ assert.equal(result.receipt.canon_commit,false);
+});
