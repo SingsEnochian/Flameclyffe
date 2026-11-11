@@ -469,13 +469,23 @@ export function createObserverInterior({
        ||typeof result.receipt?.english_sha256!=='string'||!/^[a-f0-9]{64}$/.test(result.receipt.english_sha256)
        ||result.receipt?.model_calls<2)
       throw new TypeError('Native memory requires an attributed Crow and Wyrdrune return.');
-    const key=result.native.sha256+'|'+result.receipt.english_sha256;
+    const spiceSeed=Number.isSafeInteger(result.receipt.spice_seed)?result.receipt.spice_seed:null;
+    // A new host-seeded encounter is a new Return, even if source and English match.
+    const key=result.native.sha256+'|'+result.receipt.english_sha256+(spiceSeed===null?'':'|spice:'+spiceSeed);
     const previous=state.native_wyrdrune_creations||[];
     if(previous.some(entry=>entry.key===key))
       return Object.freeze({status:'already-held',key,native_language:'wyrdrune'});
     const record={
       key,source:result.native.source,translation:result.translation.text,
       source_hash:result.native.sha256,translation_hash:result.receipt.english_sha256,
+      lesson:result.native.study_lesson&&typeof result.native.study_lesson.id==='string'
+        ? {id:text(result.native.study_lesson.id,120),author:text(result.native.study_lesson.author,200),source_sha256:text(result.native.study_lesson.source_sha256,64)} : null,
+      withness_declarations:(Array.isArray(result.native.withness_declarations)?result.native.withness_declarations:[])
+        .filter(x=>x?.kind==='wyrdrune.withness/v0.1'&&JSON.stringify(x).length<=6000)
+        .slice(0,8).map(x=>structuredClone(x)),
+      spice:spiceSeed===null?null:{seed:spiceSeed,algorithm:'xorshift32/v1',replayable:true},
+      // These records preserve what the source declared, not verified third-party consent.
+      declaration_status:'source-declared-not-verified',
       operator_proposals:(Array.isArray(result.native.operators)?result.native.operators:[])
         .filter(x=>typeof x.name==='string'&&/^[A-Za-z_]\w{0,50}$/.test(x.name))
         .map(x=>({name:x.name})).slice(0,12),
