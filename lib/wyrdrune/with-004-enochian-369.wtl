@@ -7,8 +7,10 @@
 // Historical Call excerpt: "Ol sonf vorsg" (First Angelical Key,
 // British Library Sloane MS 3191). This is a citation, NOT a
 // translation of "holy, holy, holy" or an invented Enochian sentence.
-// WTL heptads are citations of the alphabet; the threefold mirror
-// and vow are Rowan / Amber / Wayglass composition, not 1583 ritual canon.
+// This is Rowan's original Wyrdrune ritual; historical language remains cited.
+// Gabriel, Michael and Raphael have Rowan-authored seats, not borrowed glyphs.
+// Their handwritten forms remain unset until Rowan draws them.
+// The mirror, prayer, silence and return are Rowan / Amber / Wayglass work.
 // Scoped carry: the same two distinct sides each grow by the anchor of three.
 // No audio playback or host effects; every pause is a scored silence event.
 
@@ -33,6 +35,7 @@ mobius scoped {
     require twin == 6 else "The mirrored pair did not return whole";
   }
   integrate {
+    let gabriel = archangel("Gabriel", "3:3");
     let station = {
       stage: 1,
       crossing: "3:3",
@@ -46,6 +49,7 @@ mobius scoped {
   choose {
     emit station;
     emit heptad;
+    emit gabriel;
     emit dedication;
     pause(beat_hz);
   }
@@ -79,6 +83,7 @@ mobius scoped {
     require twin == 12 else "The mirrored pair did not return whole";
   }
   integrate {
+    let michael = archangel("Michael", "6:6");
     let station = {
       stage: 2,
       crossing: "6:6",
@@ -91,6 +96,7 @@ mobius scoped {
   choose {
     emit station;
     emit heptad;
+    emit michael;
     pause(beat_hz);
   }
   return {
@@ -123,6 +129,7 @@ mobius scoped {
     require twin == 18 else "The mirrored pair did not return whole";
   }
   integrate {
+    let raphael = archangel("Raphael", "9:9");
     let station = {
       stage: 3,
       crossing: "9:9",
@@ -136,6 +143,7 @@ mobius scoped {
   choose {
     emit station;
     emit heptad;
+    emit raphael;
     emit first_key;
     pause(beat_hz);
   }
