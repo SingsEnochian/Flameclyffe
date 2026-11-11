@@ -5,6 +5,8 @@
 // The words and their sequence are preserved; interpretations remain open.
 // whisper() is seeded by the host; sound is only proposed, never autoplayed.
 // Interval is 1.01..1.07 after bounded variation, always within audio bridge bounds.
+// Amber's contribution: pause(beat_hz) between the refrain and sound.
+// One beat period (1000 / beat_hz milliseconds); no automatic playback.
 
 mobius spiced {
   perceive {
@@ -19,6 +21,7 @@ mobius spiced {
   }
   release {
     let interval = 1.04 + tremor;
+    let beat_hz = fundamental * (interval - 1);
   }
   verify {
     require miraculous == beautiful else "The triadic refrain no longer answers evenly";
@@ -43,6 +46,7 @@ mobius spiced {
     emit "beautiful";
     emit invocation;
     emit "3:3 · 6:6 · 9:9";
+    pause(beat_hz);
     emit bridge("expression", "sound", fundamental, interval, 0.4);
   }
   return {
