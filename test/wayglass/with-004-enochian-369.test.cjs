@@ -26,7 +26,7 @@ test('WITH-004 executes THREE independent mirrored crossings with 24 eightfold r
  const result=await execute(ir);
  assert.equal(result.status,'committed');
  assert.equal(result.receipts.length,24);
- const stations=result.output.filter(x=>x?.crossing);
+ const stations=result.output.filter(x=>x?.crossing && Number.isSafeInteger(x.stage));
  assert.deepEqual(stations.map(x=>x.crossing),stages);
  assert.deepEqual(stations.map(x=>[x.left,x.right]),[[3,3],[6,6],[9,9]]);
  assert.equal(result.continuity.carry.me,9);
@@ -105,7 +105,7 @@ test('a broken mirror rolls back its cycle without deleting an earlier Return',a
  assert.equal(result.verdict.unit,1);
  assert.equal(result.verdict.phase,'verify');
  assert.equal(result.withness.completedCycles,1);
- assert.equal(result.output.filter(x=>x?.crossing).length,1);
+ assert.equal(result.output.filter(x=>x?.crossing && Number.isSafeInteger(x.stage)).length,1);
  assert.equal(result.continuity.carry.me,3);
  await assert.rejects(execute(compile(source),{signal:{aborted:true}}),/Feather/);
 });
