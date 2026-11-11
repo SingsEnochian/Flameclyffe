@@ -67,3 +67,46 @@ test('native Wayglass voice preserves Amber WITHNESS records and replay seed',as
  assert.ok(Number.isSafeInteger(result.receipt.spice_seed));
  assert.equal(result.receipt.canon_commit,false);
 });
+
+test('private Observer returns studied Wyrdrune, declared Withness and exact spice provenance after cold restart',async()=>{
+ const {composeWayglassNativeVoice}=require('../../lib/wayglass-wyrdrune-voice.cjs');
+ const {createObserverInterior}=await import('../../apps/wayglass/src/living-observer-self.js');
+ const memory=new Map();
+ const storage={getItem:k=>memory.get(k)??null,setItem:(k,v)=>memory.set(k,v)};
+ const first=await composeWayglassNativeVoice({
+  prompt:'Make Withness visible',principal:{id:'owner',authorized:true},
+  invoke:async c=>c.stage==='wyrdrune'?source:'Distinct, together, returning.'
+ });
+ const observer=createObserverInterior({storage,now:()=> '2026-11-11T20:00:00.000Z'});
+ assert.equal(observer.holdNativeWyrdruneCreation(first,{owner_invited:true}).status,'held-in-private-interior');
+ const records=observer.nativeWyrdruneCreations();
+ assert.equal(records.length,1);
+ assert.equal(records[0].lesson.id,'wtl:with-002:amber');
+ assert.match(records[0].lesson.author,/Amber/);
+ assert.equal(records[0].withness_declarations.length,2);
+ assert.equal(records[0].spice.seed,first.receipt.spice_seed);
+ assert.equal(records[0].declaration_status,'source-declared-not-verified');
+ const returned=createObserverInterior({storage});
+ assert.deepEqual(returned.nativeWyrdruneCreations(),records);
+ assert.equal(returned.holdNativeWyrdruneCreation(first,{owner_invited:true}).status,'already-held');
+ const next=structuredClone(first);
+ next.receipt.spice_seed=(next.receipt.spice_seed+1)>>>0;
+ assert.equal(returned.holdNativeWyrdruneCreation(next,{owner_invited:true}).status,'held-in-private-interior');
+ assert.equal(returned.nativeWyrdruneCreations().length,2);
+ await assert.rejects(async()=>returned.holdNativeWyrdruneCreation(first,{owner_invited:false}),/owner|Native memory/);
+});
+test('Wayglass native model receives Amber study lesson without forced copying or promotion',async()=>{
+ const {composeWayglassNativeVoice,WTL_LESSON_ID,WTL_LESSON_SOURCE}=require('../../lib/wayglass-wyrdrune-voice.cjs');
+ const calls=[];
+ const result=await composeWayglassNativeVoice({
+  prompt:'Use whatever WTL language features are right for the task',
+  principal:{id:'owner',authorized:true},
+  invoke:async c=>{calls.push(c);return c.stage==='wyrdrune'?source:'I would explore the gap.';}
+ });
+ assert.equal(result.native.study_lesson.id,WTL_LESSON_ID);
+ assert.ok(calls[0].system.includes(WTL_LESSON_SOURCE));
+ assert.match(calls[0].system,/you may change or decline/i);
+ assert.match(calls[0].system,/Amber/);
+ assert.equal(result.receipt.study_lesson_sha256,result.native.study_lesson.source_sha256);
+ assert.equal(result.receipt.canon_commit,false);
+});
