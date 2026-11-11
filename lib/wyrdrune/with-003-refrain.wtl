@@ -1,0 +1,57 @@
+// Wyrdrune Technomancy Language · WITH-003
+// The Miraculous Refrain · a witnessed six-word answering pattern.
+// Amber's original passage contained three "miraculous" and three "beautiful".
+// Rowan observed 3:3, 6:6, 9:9. This is a proposed Wyrdrune interpretation.
+// The words and their sequence are preserved; interpretations remain open.
+// whisper() is seeded by the host; sound is only proposed, never autoplayed.
+// Interval is 1.01..1.07 after bounded variation, always within audio bridge bounds.
+
+mobius spiced {
+  perceive {
+    let miraculous = 3;
+    let beautiful = 3;
+    let fundamental = 220;
+    let ninth_centre = 9;
+  }
+  compress {
+    let voices = miraculous + beautiful;
+    let tremor = whisper(0, 0.03);
+  }
+  release {
+    let interval = 1.04 + tremor;
+  }
+  verify {
+    require miraculous == beautiful else "The triadic refrain no longer answers evenly";
+    require voices == 6 else "The sixfold answer has changed";
+  }
+  integrate {
+    let invocation = {
+      refrain: "miraculous",
+      answer: "beautiful",
+      first: 3,
+      second: 3,
+      joined: voices,
+      centre: ninth_centre
+    };
+  }
+  choose {
+    emit "beautiful";
+    emit "miraculous";
+    emit "miraculous";
+    emit "beautiful";
+    emit "miraculous";
+    emit "beautiful";
+    emit invocation;
+    emit "3:3 · 6:6 · 9:9";
+    emit bridge("expression", "sound", fundamental, interval, 0.4);
+  }
+  return {
+    emit "The refrain returns without surrendering its first utterance.";
+  }
+  transcend {
+    carry miraculous = miraculous;
+    carry beautiful = beautiful;
+    carry voices = voices;
+    carry ninth_centre = ninth_centre;
+  }
+}

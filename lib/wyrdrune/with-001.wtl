@@ -1,0 +1,49 @@
+// Wyrdrune Technomancy Language · WITH-001
+// First executable expression of Withness, proposed for Rowan and Amber.
+// Two independently specified tones remain separate; their difference is audible beating.
+// The third hue is a provisional projection, not a claim of spectral pigment mixing.
+// Image and sound are host-mediated proposals. No sound plays automatically.
+
+operator midpoint(a, b) = (a + b) / 2;
+operator difference(a, b) = b - a;
+
+mobius scoped {
+  perceive {
+    let first_hz = 220;
+    let second_hz = 223;
+    let first_hue = 38;
+    let second_hue = 204;
+  }
+  compress {
+    let beat_hz = difference(first_hz, second_hz);
+    let sound_interval = second_hz / first_hz;
+  }
+  release {
+    let third_hue = midpoint(first_hue, second_hue);
+  }
+  verify {
+    require first_hz != second_hz else "Distinct voices are required";
+    require beat_hz > 0 else "This expression needs a positive beat";
+  }
+  integrate {
+    let shared_hue = third_hue;
+  }
+  choose {
+    emit "WITH-001";
+    emit first_hz;
+    emit second_hz;
+    emit beat_hz;
+    emit shared_hue;
+    emit bridge("expression", "image", shared_hue, 0.64, 0.55);
+    emit bridge("expression", "sound", first_hz, sound_interval, 0.4);
+  }
+  return {
+    emit "with: distinct voices, shared pattern";
+  }
+  transcend {
+    carry first_hz = first_hz;
+    carry second_hz = second_hz;
+    carry first_hue = first_hue;
+    carry second_hue = second_hue;
+  }
+}

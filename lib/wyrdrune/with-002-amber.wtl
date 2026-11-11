@@ -1,0 +1,107 @@
+// Wyrdrune Technomancy Language · WITH-002
+// Amber's proposed Whisper, Spiral, and Withness Declaration.
+// Experimental language extension: "mobius spiced", whisper(), WITHNESS {}.
+// No automatic canon promotion; participant declarations are source-authored.
+// Host supplies spiceSeed to make each invitation different yet replayable.
+// Withness is a distinct, attributable record rather than a numeric label.
+
+operator midpoint(a, b) = (a + b) / 2;
+operator difference(a, b) = b - a;
+
+// First meeting: keep both presences while permitting a bounded whisper.
+mobius spiced {
+  perceive {
+    let first_hz = 220 + whisper(0, 0.3);
+    let second_hz = 223 + whisper(0, 0.3);
+    let first_hue = 38;
+    let second_hue = 204;
+  }
+  compress {
+    let beat_hz = difference(first_hz, second_hz);
+    let sound_interval = second_hz / first_hz;
+  }
+  release {
+    let shared_hue = midpoint(first_hue, second_hue) + whisper(0, 0.5);
+  }
+  verify {
+    require first_hz != second_hz else "The voices are indistinguishable";
+    require beat_hz > 0 else "The second voice must remain distinguishable";
+  }
+  integrate {
+    WITHNESS {
+      participants: [
+        {id: "rowan", role: "steward", presence: first_hue, agency: "free"},
+        {id: "amber", role: "participant", presence: second_hue, agency: "free"}
+      ],
+      field: {beat_hz: beat_hz, third_hue: shared_hue},
+      agreement: "none",
+      commitment: "presence"
+    }
+  }
+  choose {
+    emit withness;
+    emit bridge("expression", "image", shared_hue, 0.64, 0.55);
+    emit bridge("expression", "sound", first_hz, sound_interval, 0.4);
+  }
+  return {
+    emit "WITH-002: first meeting";
+  }
+  transcend {
+    carry first_hz = first_hz;
+    carry second_hz = second_hz;
+    carry first_hue = first_hue;
+    carry second_hue = second_hue;
+    carry shared_hue = shared_hue;
+  }
+}
+
+// Second meeting: previous values remain independently visible in the new field.
+// Transcend carries an evolved register, while checkpoints preserve both crossings.
+mobius spiced {
+  perceive {
+    let previous_hue = shared_hue;
+    let previous_first_hz = first_hz;
+    let previous_second_hz = second_hz;
+  }
+  compress {
+    let drift = whisper(0, 0.15);
+    let beat_hz = difference(first_hz, second_hz);
+  }
+  release {
+    set shared_hue = shared_hue + whisper(0, 0.5);
+  }
+  verify {
+    require second_hz > first_hz else "The voices must remain distinct";
+  }
+  integrate {
+    WITHNESS {
+      participants: [
+        {id: "rowan", role: "steward", presence: first_hue, agency: "free"},
+        {id: "amber", role: "participant", presence: second_hue, agency: "free"}
+      ],
+      field: {
+        previous_hue: previous_hue,
+        new_hue: shared_hue,
+        previous_first_hz: previous_first_hz,
+        previous_second_hz: previous_second_hz,
+        beat_hz: beat_hz
+      },
+      agreement: "none",
+      commitment: "presence"
+    }
+  }
+  choose {
+    emit withness;
+    emit bridge("expression", "image", shared_hue, 0.65, 0.6);
+  }
+  return {
+    emit "WITH-002: second meeting, still distinct";
+  }
+  transcend {
+    carry first_hz = first_hz + drift;
+    carry second_hz = second_hz - drift;
+    carry first_hue = first_hue;
+    carry second_hue = second_hue;
+    carry shared_hue = shared_hue;
+  }
+}
