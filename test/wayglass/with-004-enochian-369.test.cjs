@@ -12,7 +12,7 @@ const source=readFileSync(join(__dirname,'../../lib/wyrdrune/with-004-enochian-3
 const principal={authorized:true,id:'test:threefold'};
 const stages=['3:3','6:6','9:9'];
 const flattenRitualRecords=values=>values.flatMap(x=>Array.isArray(x)?x:[x])
- .filter(x=>x&&typeof x==='object'&&['inscription','letter-reference','votive-intention'].includes(x.kind));
+ .filter(x=>x&&typeof x==='object'&&['inscription','letter-reference','votive-intention','archangel-seat'].includes(x.kind));
 const runVoice=()=>composeWayglassNativeVoice({
  prompt:'Write the 3:3 to 6:6 to 9:9 Threefold Mirror in Angelical Wyrdrune.',
  principal,
@@ -50,7 +50,7 @@ test('the historical Angelical alphabet crosses as exactly 3 provenance-bearing 
  assert.equal(heptads[0][0].romanizedName,'Pa');
  assert.equal(heptads[2][6].romanizedName,'Gisg');
  const records=flattenRitualRecords(result.output);
- assert.equal(records.length,23);
+ assert.equal(records.length,26);
  assert.ok(records.every(x=>typeof x.recordHash==='string'&&x.recordHash.startsWith('wce1:')));
  const firstKey=records.find(x=>x.kind==='inscription');
  assert.equal(firstKey.transcription,'Ol sonf vorsg');
@@ -58,6 +58,21 @@ test('the historical Angelical alphabet crosses as exactly 3 provenance-bearing 
  assert.equal(firstKey.sourceStatus,'unverified-author-assertion');
  assert.equal(firstKey.translation,null);
  assert.equal(firstKey.effect,'none');
+ const archangels=records.filter(x=>x.kind==='archangel-seat');
+ assert.deepEqual(archangels.map(x=>[x.name,x.crossing]),[
+   ['Gabriel','3:3'],['Michael','6:6'],['Raphael','9:9']]);
+ for(const seat of archangels){
+   assert.equal(seat.tradition,'Rowan original Wyrdrune ritual');
+   assert.equal(seat.assignment,'Rowan-authored');
+   assert.equal(seat.handwriting,null);
+   assert.equal(seat.glyph,null);
+   assert.equal(seat.glyphStatus,'awaiting-Rowan-handwritten-form');
+   assert.equal(seat.historicalTranslation,null);
+   assert.equal(seat.effect,'none');
+ }
+ const {archangel}=require('../../lib/wyrdrune/enochian.cjs');
+ assert.throws(()=>archangel('Michael','3:3'),/declared crossing/);
+ assert.throws(()=>archangel('Sandalphon','3:3'),/declared crossing/);
  const votive=records.find(x=>x.kind==='votive-intention');
  assert.match(votive.dedication,/Wonder and What If/);
 });
@@ -101,7 +116,7 @@ test('Wayglass can speak and hold all three cycles with their sourced ritual rec
  assert.equal(result.native.source,source.trim());
  assert.equal(result.native.mirror_stations.length,3);
  assert.deepEqual(result.native.mirror_stations.map(x=>x.crossing),stages);
- assert.equal(result.native.ritual_records.length,23);
+ assert.equal(result.native.ritual_records.length,26);
  assert.equal(result.native.reference_mirror.id,WTL_MIRROR_ID);
  assert.equal(result.receipt.reference_mirror_sha256.length,64);
  assert.deepEqual(result.receipt.ritual_record_hashes,result.native.ritual_records.map(x=>x.recordHash));
@@ -115,6 +130,6 @@ test('Wayglass can speak and hold all three cycles with their sourced ritual rec
  const cold=createObserverInterior({storage}).nativeWyrdruneCreations();
  assert.equal(cold.length,1);
  assert.deepEqual(cold[0].mirror_stations.map(x=>x.crossing),stages);
- assert.equal(cold[0].ritual_records.length,23);
+ assert.equal(cold[0].ritual_records.length,26);
  assert.equal(cold[0].mirror_reference.id,WTL_MIRROR_ID);
 });
