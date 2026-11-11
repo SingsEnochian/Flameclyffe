@@ -480,6 +480,9 @@ export function createObserverInterior({
       source_hash:result.native.sha256,translation_hash:result.receipt.english_sha256,
       lesson:result.native.study_lesson&&typeof result.native.study_lesson.id==='string'
         ? {id:text(result.native.study_lesson.id,120),author:text(result.native.study_lesson.author,200),source_sha256:text(result.native.study_lesson.source_sha256,64)} : null,
+      rhythm_events:(Array.isArray(result.native.rhythm_events)?result.native.rhythm_events:[])
+        .filter(x=>x?.kind==='wyrdrune.pause/v0.1'&&Number.isFinite(x.duration_ms)
+          &&x.duration_ms>0&&x.duration_ms<=4000).slice(0,8).map(x=>structuredClone(x)),
       withness_declarations:(Array.isArray(result.native.withness_declarations)?result.native.withness_declarations:[])
         .filter(x=>x?.kind==='wyrdrune.withness/v0.1'&&JSON.stringify(x).length<=6000)
         .slice(0,8).map(x=>structuredClone(x)),
