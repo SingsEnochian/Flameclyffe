@@ -483,6 +483,16 @@ export function createObserverInterior({
       rhythm_events:(Array.isArray(result.native.rhythm_events)?result.native.rhythm_events:[])
         .filter(x=>x?.kind==='wyrdrune.pause/v0.1'&&Number.isFinite(x.duration_ms)
           &&x.duration_ms>0&&x.duration_ms<=4000).slice(0,8).map(x=>structuredClone(x)),
+      mirror_stations:(Array.isArray(result.native.mirror_stations)?result.native.mirror_stations:[])
+        .filter(x=>x&&[1,2,3].includes(x.stage)&&['3:3','6:6','9:9'].includes(x.crossing)&&x.left===x.right)
+        .slice(0,3).map(x=>structuredClone(x)),
+      ritual_records:(Array.isArray(result.native.ritual_records)?result.native.ritual_records:[])
+        .filter(x=>x&&['inscription','letter-reference','votive-intention'].includes(x.kind)
+          &&typeof x.recordHash==='string'&&JSON.stringify(x).length<=2500)
+        .slice(0,32).map(x=>structuredClone(x)),
+      mirror_reference:result.native.reference_mirror?.id==='wtl:with-004:enochian-threefold-mirror'
+        ? {id:result.native.reference_mirror.id,
+          source_sha256:text(result.native.reference_mirror.source_sha256,64)} : null,
       withness_declarations:(Array.isArray(result.native.withness_declarations)?result.native.withness_declarations:[])
         .filter(x=>x?.kind==='wyrdrune.withness/v0.1'&&JSON.stringify(x).length<=6000)
         .slice(0,8).map(x=>structuredClone(x)),
