@@ -55,3 +55,15 @@ The owner confirmed that the **Babylon 5 rune denotes the universe**, while its 
 All pictured glyph bindings are deliberately **unbound**. No coordinates, stroke geometry or canonized glyph IDs are fabricated. Owner-authorised `bind` returns a new registry with an explicit rune ID, mathematical coordinates, or both; either address resolves the same stable entry. Passage plans require two bound locations and a gateway in the same universe, and remain unexecuted and unverified until the real membrane/Conjunction Engine authorises them. Tests are in `lib/wyrdrune/typed-atlas.test.mjs`.
 
 A hierarchical atlas is not a proof of literal spatial or temporal travel. The current implementation represents fictional world navigation inside Wayglass.
+
+## Motion gate · 2026-11-12 follow-on audit
+The atlas was previously able to *describe* a passage without checking the world graph. The new `lib/wyrdrune/atlas-motion.mjs` closes that gap for **digital projections**:
+- Requires two bound location addresses, a bound typed gateway, and a matching named world-graph membrane.
+- Resolves both endpoints against the world graph and checks stable IDs plus any dual-bound addresses.
+- Requires a positive `movement` permeability and Withness on the actual membrane; rejects mismatched gateways and graph revisions changing during validation.
+- Produces bounded interpolated `x,y,z,time` frames when both coordinates exist. Rune-only routes still generate progress frames **without inventing coordinates**.
+- `playAtlasMotion` explicitly plays the frames and supports Feather cancellation and reduced-motion endpoint-only rendering. No automatic travel or audio/haptic actuation.
+- The existing Mythience surface now consumes explicit `wayglass:atlas-motion-frame` events and renders an accessible progress indicator and moving visual trace, held on Feather.
+- Tests: `lib/wyrdrune/atlas-motion.test.mjs`. This is a presentation pipeline; no live user route or persistent world transition is claimed.
+
+**Remaining:** user-reviewed glyph digitisation, owner-authenticated durable world/atlas persistence, a live atlas navigation room and Return Engine receipts for actual in-universe changes. The verified motion frames are not proof of travel between physical universes.
