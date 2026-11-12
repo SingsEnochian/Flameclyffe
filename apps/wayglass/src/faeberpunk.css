@@ -29,3 +29,19 @@
 @media (prefers-reduced-motion: reduce) {
   .wg-fae-inscription { transition: none; }
 }
+
+/* Wyrdrune's local light expression reaches the ship helm, not just its room. */
+:root[data-wg-fae-phase='active'] .wg-helm {
+  border-color: rgb(var(--wg-fae-emerald) / calc(.18 + var(--wg-fae-light) * .45));
+  transition: border-color var(--wg-fae-transition) ease;
+}
+:root[data-wg-fae-phase='active'] .wg-helm-mark {
+  box-shadow: 0 0 calc(8px + var(--wg-fae-light) * 22px) rgb(var(--wg-fae-emerald) / .23), inset 0 0 0 5px rgba(5,17,24,.82);
+  transition: box-shadow var(--wg-fae-transition) ease;
+}
+:root[data-wg-fae-phase='active'] .wg-helm-readout {
+  border-left-color: rgb(var(--wg-fae-hazel) / calc(.14 + var(--wg-fae-pigment) * .4));
+}
+@media (prefers-reduced-motion:reduce) {
+  :root .wg-helm, :root .wg-helm-mark {transition:none!important}
+}
