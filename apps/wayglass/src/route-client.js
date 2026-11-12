@@ -1,5 +1,6 @@
 import { authorizationSession } from './authorization-session.js';
 import { publishWatercolorActivity } from './watercolor-bridge.js';
+import { emitMaterialSignal } from './material-state.js';
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
@@ -238,6 +239,7 @@ export async function invokeWayglassRoute({
   fetchImpl = fetch,
 } = {}) {
   publishWatercolorActivity({kind:'route:pending',actor:'wayglass:route-client',intensity:0.48});
+  emitMaterialSignal({mode:'handoff',strength:0.35,canon_state:'unresolved'});
   try {
   const response = await fetchImpl('/api/v1/wayglass/respond', {
     method: 'POST',
@@ -267,10 +269,15 @@ export async function invokeWayglassRoute({
     }),
   });
   const data = await jsonOrThrow(response);
-  if (data?.schema === 'wayglass.route-turn/v0.1') publishWatercolorActivity({kind:'route:responded',actor:'wayglass:route-client',receipt:data.receipt||null,intensity:0.72});
+  if (data?.schema === 'wayglass.route-turn/v0.1') {
+    publishWatercolorActivity({kind:'route:responded',actor:'wayglass:route-client',receipt:data.receipt||null,intensity:0.72});
+    // Presentation only: a transport response is not a verified Return or canon decision.
+    emitMaterialSignal({mode:'rest',strength:0,canon_state:'unresolved'});
+  }
   return data;
   } catch (error) {
     publishWatercolorActivity({kind:'route:failed',actor:'wayglass:route-client',intensity:0.44});
+    emitMaterialSignal({mode:'rest',strength:0,canon_state:'unresolved'});
     throw error;
   }
 }
