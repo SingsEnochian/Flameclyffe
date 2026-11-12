@@ -1,0 +1,31 @@
+name: Wyrdrune Relational Integration
+on:
+  pull_request:
+    paths:
+      - 'lib/wyrdrune/**'
+      - 'apps/wayglass/src/mythience-expression.js'
+      - 'apps/wayglass/test/mythience-expression.test.js'
+      - '.github/workflows/wyrdrune-relational-integration.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  relational:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Check canonical native runtime syntax and isolated relational programme
+        run: |
+          node --check lib/wyrdrune/runtime.mjs
+          node --check lib/wyrdrune/relational-worlds.mjs
+          node --test lib/wyrdrune/relational-worlds.test.mjs
+      - name: Verify existing native Wyrdrune and sensory parity
+        run: |
+          node --test lib/wyrdrune/*.test.mjs lib/wyrdrune/*.test.cjs apps/wayglass/test/mythience-expression.test.js
+      - name: Verify existing Return and Withness contracts
+        run: |
+          node --test test/wayglass/with-001.test.cjs test/wayglass/with-002-amber.test.cjs test/wayglass/eightfold-cold-return.test.cjs
