@@ -259,8 +259,10 @@ function mountSurface(surfaceId){
     document.documentElement.dataset.wayglassSurface=surfaceId;
     roomLabel.textContent=shipDeckDestinationLabel(surfaceId,surfaces);
     // This is a completed local room mount, not a provider response or crossing.
-    emitMaterialSignal({mode:'wake',strength:.65,intent:.5,handoff_progress:1,channel:'OOC'});
-    globalThis.dispatchEvent?.(new CustomEvent('wayglass:faeberpunk-cue',{detail:{kind:'chamber'}}));
+    if(!faeberpunk?.snapshot().feather_stopped){
+      emitMaterialSignal({mode:'wake',strength:.65,intent:.5,handoff_progress:1,channel:'OOC'});
+      globalThis.dispatchEvent?.(new CustomEvent('wayglass:faeberpunk-cue',{detail:{kind:'chamber'}}));
+    }
     setDeckOpen(false);
     for(const button of shell.querySelectorAll('[data-surface-id]')){
       const active=button.dataset.surfaceId===surfaceId;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));
