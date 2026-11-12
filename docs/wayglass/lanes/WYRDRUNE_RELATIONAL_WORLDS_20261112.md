@@ -46,3 +46,12 @@ These lenses may influence a sensory projection only when selected. They must no
 - Run CI and browser/hardware tests on the exact PR head. No production merge, model response, live crossing or ritual outcome is claimed.
 
 **Withness:** The world may be addressed by a sigil or a coordinate; the relationship may give birth to a branch; its authorship and boundaries remain attributable.
+
+## Typed Atlas addendum: Babylon 5 hierarchy (owner confirmation)
+The owner confirmed that the **Babylon 5 rune denotes the universe**, while its internal sigils denote destinations, affiliations or passage mechanisms **inside** that universe. A location rune is not itself a universe. This is a semantic classification, not a claim that the pictured white-ink strokes have been digitised.
+
+`lib/wyrdrune/typed-atlas.mjs` implements a typed `TypedRuneAtlas` and pure native `atlasRef(universeId,entryId)` WTL constructor. Entries can be `universe`, `location`, `affiliation`, `gateway` or `undetermined`. The initial Babylon 5 study registry contains Minbar, Centauri Prime, Narn and Z'ha'dum as locations; Rangers, Psi Corps and Earth Alliance as affiliations; Jumpgate as a traversal mechanism. Vorlon, Shadows and Earth Gate remain `undetermined` pending author confirmation.
+
+All pictured glyph bindings are deliberately **unbound**. No coordinates, stroke geometry or canonized glyph IDs are fabricated. Owner-authorised `bind` returns a new registry with an explicit rune ID, mathematical coordinates, or both; either address resolves the same stable entry. Passage plans require two bound locations and a gateway in the same universe, and remain unexecuted and unverified until the real membrane/Conjunction Engine authorises them. Tests are in `lib/wyrdrune/typed-atlas.test.mjs`.
+
+A hierarchical atlas is not a proof of literal spatial or temporal travel. The current implementation represents fictional world navigation inside Wayglass.
