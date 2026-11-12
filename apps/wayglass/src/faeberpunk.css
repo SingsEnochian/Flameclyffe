@@ -10,6 +10,8 @@
   display: grid;
   gap: .2rem;
   max-width: min(100%, 34rem);
+  max-height: 12rem;
+  overflow: auto;
   padding: .65rem .85rem;
   border: 1px solid rgb(var(--wg-fae-hazel) / .45);
   border-radius: .7rem;
