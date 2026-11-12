@@ -13,7 +13,7 @@ mobius {
     let passage = bridge("atlas","plan",origin,destination);
   }
   verify {
-    emit passage.membraneVerified;
+    emit bridge("atlas","verify",passage);
   }
   integrate {
     let voice = whisperPhrase("A world may be approached without erasing its boundaries.",0.65);
