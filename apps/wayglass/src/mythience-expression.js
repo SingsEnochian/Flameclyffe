@@ -34,7 +34,7 @@ export async function evaluateMythienceExpression({source,controls,signal}={}){
       affinity:({arguments:args})=>{if(args.length)throw new TypeError('Unexpected affinity arguments');return affinity;},
       validate:({arguments:args})=>{
         if(args.length!==6)throw new TypeError('Expected six WTL expression values');
-        const bounds=[[.1,.8],[165,225],[164.81,304.81],[184,397],[-1,1],[.2,.85]];
+        const bounds=[[.1,.8],[165,225],[164.81,304.81],[184,397],[-1,1],[.2,.851]];
         args.forEach((value,i)=>finite(value,...bounds[i],'WTL expression '+i));
         return 'validated-local-projection';
       },
@@ -49,7 +49,7 @@ export async function evaluateMythienceExpression({source,controls,signal}={}){
     ||result.output[2]!=='local-preview'||typeof result.output[3]!=='string'
     ||!frame||typeof frame!=='object')throw new TypeError('Incomplete Wyrdrune execution');
   const bounds={light:[.1,.8],hue:[165,225],frequency_hz:[164.81,304.81],
-    counterpart_hz:[184,397],pan:[-1,1],pulse:[.2,.85]};
+    counterpart_hz:[184,397],pan:[-1,1],pulse:[.2,.851]};
   const values={};
   for(const [key,[min,max]] of Object.entries(bounds))values[key]=finite(frame[key],min,max,key);
   if(result.receipts.length!==8||result.withness?.completedCycles!==1)
