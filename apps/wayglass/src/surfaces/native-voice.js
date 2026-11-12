@@ -34,7 +34,8 @@ export function mountWayglassNativeVoice(root,{request=inviteWayglassVoice,
     '</form>',
     '<section class="glass-panel wg-native-response" aria-label="Wyrdrune and British English" hidden data-native-response>',
     '<div class="wg-native-stage-head"><h2>Wyrdrune ⋈ British English</h2>',
-    '<button type="button" class="glass-chip" data-native-replay>Replay the translation</button></div>',
+    '<button type="button" class="glass-chip" data-native-replay>Replay the translation</button>',
+    '<button type="button" class="glass-chip" data-native-pin>Show in ship helm</button></div>',
     '<pre class="wg-native-morph" aria-hidden="true" data-native-morph></pre>',
     '<p class="wg-native-reader" lang="en-GB" aria-live="polite" data-native-reader></p>',
     '<details class="wg-native-source"><summary>Read the complete Wyrdrune source</summary>',
@@ -54,12 +55,22 @@ export function mountWayglassNativeVoice(root,{request=inviteWayglassVoice,
   const $=name=>root.querySelector('[data-native-'+name+']');
   const prompt=$('prompt'),form=$('form'),send=$('send'),status=$('status');
   const response=$('response'),morph=$('morph'),reader=$('reader');
-  const source=$('source'),receipt=$('receipt'),replay=$('replay');
+  const source=$('source'),receipt=$('receipt'),replay=$('replay'),pin=$('pin');
   const imagePanel=$('images'),visuals=$('visuals'),soundPanel=$('sounds');
   const soundButtons=$('sound-buttons');
   const reduced=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
-  let disposed=false,controller=null,cancelMorph=()=>{},last=null;
+  let disposed=false,controller=null,cancelMorph=()=>{},last=null,pinned=false;
+  function inscriptionEvent(detail){
+    if(typeof globalThis.CustomEvent==='function')globalThis.dispatchEvent?.(
+      new globalThis.CustomEvent('wayglass:wyrdrune-inscription',{detail}));
+  }
+  function clearPin(){
+    if(!pinned)return;
+    pinned=false;pin.textContent='Show in ship helm';
+    inscriptionEvent({clear:true});
+  }
   function stop(){
+    clearPin();
     controller?.abort();controller=null;
     cancelMorph();cancelMorph=()=>{};
     soundPlayer.stop();
@@ -134,6 +145,15 @@ export function mountWayglassNativeVoice(root,{request=inviteWayglassVoice,
       if(error?.name!=='AbortError'&&!disposed)
         status.textContent='Wayglass could not complete this crossing: '+error.message;
     }finally{if(!disposed){send.disabled=false;if(controller===running)controller=null;}}
+  });
+  pin.addEventListener('click',()=>{
+    if(disposed||!last)return;
+    if(pinned){clearPin();return;}
+    // Only an explicit owner action projects a private native response into the helm.
+    inscriptionEvent({wyrdrune:last.native.source,english:last.translation.text,owner_presentation_consent:true});
+    pinned=true;pin.textContent='Hide from ship helm';
+    if(typeof globalThis.CustomEvent==='function')globalThis.dispatchEvent?.(
+      new globalThis.CustomEvent('wayglass:faeberpunk-cue',{detail:{kind:'inscription'}}));
   });
   replay.addEventListener('click',()=>{
     if(!last)return;reader.textContent='';cancelMorph();
