@@ -20,9 +20,13 @@ mobius {
     let pulse = 0.20 + energy * 0.65;
     let below = 0.5 + twist * 8 + affinity * 3;
     let above = 22000 + intention * 8000 + twist * 5000;
+    let gravity = 0.35 + twist * 1.20 + intention * 0.45;
+    let refraction = 0.08 + affinity * 0.60 + twist * 0.25;
+    let terrain = intention * 0.40 + twist * 0.35 + affinity * 0.25;
+    let tactile = 0.12 + energy * 0.68;
   }
   verify {
-    emit bridge("instrument","validate",light,hue,root,counterpart,pan,pulse,below,above);
+    emit bridge("instrument","validate",light,hue,root,counterpart,pan,pulse,below,above,gravity,refraction,terrain,tactile);
   }
   integrate {
     let expression = {
@@ -33,7 +37,11 @@ mobius {
       pan:pan,
       pulse:pulse,
       virtual_below_hz:below,
-      virtual_above_hz:above
+      virtual_above_hz:above,
+      simulated_gravity:gravity,
+      simulated_refraction:refraction,
+      terrain_fold:terrain,
+      tactile_intensity:tactile
     };
   }
   choose {
