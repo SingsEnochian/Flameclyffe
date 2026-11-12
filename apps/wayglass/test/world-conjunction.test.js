@@ -26,7 +26,8 @@ test('closed membrane and duplicate world addresses fail Verify',async()=>{
   for(const params of [{permeability:0},{a:'same',b:'same'}]){
     const result=await run(params);
     assert.equal(result.output.length,0);
-    assert.ok(result.receipts.some(x=>x.phase==='verify'));
+    assert.equal(result.status,'rolled-back');
+    assert.equal(result.verdict.phase,'verify');
   }
 });
 test('unavailable resolver fails closed without fabricating a crossing',async()=>{
