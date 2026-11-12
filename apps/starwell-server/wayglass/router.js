@@ -19,6 +19,9 @@ const { composeWayglassNativeVoice } = require('../wayglass-runtime/wayglass-wyr
 const { enterWayglassWorld } = require('../wayglass-runtime/wayglass-world-entry.cjs');
 const { createWayglassDeparture } = require('../wayglass-runtime/wayglass-stop-receipt.cjs');
 const { createDepartureStore } = require('../wayglass-runtime/wayglass-departure-store.cjs');
+const { createLineageStore } = require('../wayglass-runtime/wayglass-lineage-store.cjs');
+// Wayglass's own Living Learning lineage: her learning memory, not a person's record.
+const LIVING_LEARNING_LINEAGE = 'wyrdrune:living-learning';
 const { inspectDoubleMobius, traverseDoubleMobius } = require('../wayglass-runtime/wayglass-double-mobius.cjs');
 const { createModelObservation } = require('../wayglass-runtime/wayglass-model-observation.cjs');
 const { createWayglassLibraryRouter } = require('./research-library');
@@ -525,7 +528,7 @@ async function readQuadSourcesFromSupabase(fetchImpl=globalThis.fetch){
   return {schema:SOURCE_SCHEMA,observed_at,channels};
 }
 
-function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThis.fetch, departureStore = createDepartureStore() } = {}) {
+function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThis.fetch, departureStore = createDepartureStore(), lineageStore = createLineageStore() } = {}) {
   const router = express.Router();
   // Stable, public, metadata-free process readiness. Never use the private
   // /routes catalogue as a health probe (401 is expected without House auth).
@@ -920,17 +923,45 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     if(!(await griffStewardAuthorized(req).catch(()=>false))){
       return res.status(401).json({error:'House Steward sign-in required for native Wyrdrune learning.'});
     }
+    let result;
     try{
-      return res.json(await executeLivingLearning(req.body?.learning,{
+      result=await executeLivingLearning(req.body?.learning,{
         principal:{authorized:true},
-      }));
+      });
     }catch(error){
       return res.status(400).json({
         schema:'wayglass.wyrdrune-living-learning-error/v0.1',
         error:cleanText(error?.message||'Native Wyrdrune learning rejected this crossing.',240),
       });
     }
+    // The Return Engine remembers what crossed. A persistence failure is reported,
+    // never hidden, and never turns a verified learning return into an error.
+    let return_record;
+    try{
+      return_record=lineageStore.append({lineage:LIVING_LEARNING_LINEAGE,participant_id:'wayglass',
+        source_hash:result.source_hash,input_hash:result.input_hash,lineage_root:result.continuity.lineage_root,
+        carry:result.continuity.carry,carry_digest:result.continuity.carry_digest,checkpoints:result.continuity.checkpoints});
+    }catch(error){
+      return_record={persisted:false,reason:cleanText(error?.message||'Lineage memory unavailable.',240)};
+    }
+    return res.json({...result,return_record});
   });
+
+  // Her verified learning memory, for a cold return on any device. Verified back to
+  // the first record, or refused with the reason; never reconstructed.
+  router.get('/wyrdrune/living-learning/continuity', createRequestGate({maxRequests:30,maxConcurrent:2}), async(req,res)=>{
+    res.setHeader('Cache-Control','no-store');
+    if(!(await griffStewardAuthorized(req).catch(()=>false))){
+      return res.status(401).json({error:'House Steward sign-in required for native Wyrdrune learning.'});
+    }
+    try{
+      return res.json({schema:'wayglass.wyrdrune-learning-memory/v0.1',...lineageStore.verify(LIVING_LEARNING_LINEAGE,'wayglass')});
+    }catch(error){
+      return res.status(500).json({schema:'wayglass.wyrdrune-learning-memory/v0.1',status:'refused',
+        reason:cleanText(error?.message||'Lineage memory unreadable.',240)});
+    }
+  });
+
 
   router.post('/wyrdrune/resonance-atlas', createRequestGate({ maxRequests: 30, maxConcurrent: 2 }), async(req,res)=>{
     res.setHeader('Cache-Control','no-store');
