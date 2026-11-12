@@ -33,12 +33,14 @@ test('one material signal coordinates light and pigment with still fallback',()=
   f.bridge.destroy();
 });
 test('Wyrdrune and English remain separate text, with no HTML interpolation or invented translation',()=>{
-  const f=fixture();f.scope.emit('wayglass:wyrdrune-inscription',{wyrdrune:'ᚹ <script>',english:'Read <not execute>'});
+  const f=fixture();f.scope.emit('wayglass:wyrdrune-inscription',{wyrdrune:'ᚹ <script>',english:'Read <not execute>',owner_presentation_consent:true});
   assert.equal(f.host.children[0].children[0].textContent,'ᚹ <script>');
   assert.equal(f.host.children[0].children[1].textContent,'Read <not execute>');
   assert.equal(f.bridge.snapshot().inscription.english,'Read <not execute>');
   f.scope.emit('wayglass:wyrdrune-inscription',{wyrdrune:'ᚹ'});
-  assert.equal(f.bridge.snapshot().inscription.english,'Read <not execute>');f.bridge.destroy();
+  assert.equal(f.bridge.snapshot().inscription.english,'Read <not execute>');
+  f.scope.emit('wayglass:wyrdrune-inscription',{clear:true});
+  assert.equal(f.bridge.snapshot().inscription,null);assert.equal(f.host.children[0].hidden,true);f.bridge.destroy();
 });
 test('audio/haptics are never started by passive material signals; cues route only through opt-in soundscape',()=>{
   const f=fixture();f.scope.emit('wayglass:material-wake',{mode:'return'});assert.deepEqual(f.plays,[]);
