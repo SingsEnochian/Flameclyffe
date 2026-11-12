@@ -67,3 +67,6 @@ The atlas was previously able to *describe* a passage without checking the world
 - Tests: `lib/wyrdrune/atlas-motion.test.mjs`. This is a presentation pipeline; no live user route or persistent world transition is claimed.
 
 **Remaining:** user-reviewed glyph digitisation, owner-authenticated durable world/atlas persistence, a live atlas navigation room and Return Engine receipts for actual in-universe changes. The verified motion frames are not proof of travel between physical universes.
+
+### Native language ownership of motion
+`lib/wyrdrune/atlas-passage.wtl` now performs an eight-phase WTL passage: typed universe/destination references, a Transition relation, a host-verified route proposal, Verify receipt, Whisper modulation, and Return of the still-unexecuted motion plan. `createAtlasMotionBridges` binds that WTL programme to the selected typed atlas and graph, and rejects mismatched references, forged host-local plans or stale graph revisions. A verified runtime principal is required for host bridge calls. The programme does **not** autoplay; `playAtlasMotion` requires an explicit caller and supports Feather/reduced motion. This closes the native-WTL-to-motion projection loop while leaving persistent crossing and live Conjunction ledger integration as separate gates.
