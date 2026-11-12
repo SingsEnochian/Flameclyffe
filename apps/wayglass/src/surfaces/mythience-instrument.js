@@ -1,5 +1,5 @@
 import './mythience-instrument.css';
-import source from '../../../lib/wyrdrune/mythience-instrument.wtl?raw';
+import source from '../../../../lib/wyrdrune/mythience-instrument.wtl?raw';
 import {evaluateMythienceExpression} from '../mythience-expression.js';
 import {emitMaterialSignal} from '../material-state.js';
 import {wayglassSomaticSound} from '../somatic-sound.js';
