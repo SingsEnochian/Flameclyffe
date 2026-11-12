@@ -106,3 +106,35 @@ test('voice capacity is bounded and ended voices release all audio nodes',async(
   const osc=f.nodes.find(n=>n.typeName==='oscillator');osc.onended();assert.equal(f.sound.snapshot().active_voices,3);
   assert.equal(osc.disconnected,true);assert.equal(f.sound.play('agent:active'),true);f.sound.dispose();
 });
+
+const mythFrame=Object.freeze({schema:'wayglass.wyrdrune-mythience-expression/v1',
+  frequency_hz:220,counterpart_hz:264,pan:.7,pulse:.5});
+test('Wyrdrune two-voice sonification requires audio opt-in and uses exact score frequencies',async()=>{
+  const f=fixture();assert.equal(f.sound.playExpression(mythFrame),false);
+  assert.equal(f.contexts.length,0);
+  await f.sound.enable({audio:true,mono:false});
+  assert.equal(f.sound.playExpression(mythFrame),true);
+  const oscillators=f.nodes.filter(n=>n.typeName==='oscillator');
+  assert.deepEqual(oscillators.map(n=>n.frequency.value),[220,264]);
+  assert.equal(f.nodes.find(n=>n.typeName==='panner').pan.value,.7);
+  assert.equal(f.sound.snapshot().active_voices,1);
+  oscillators[0].onended();assert.equal(f.sound.snapshot().active_voices,0);
+  assert.ok(oscillators.every(n=>n.disconnected));f.sound.dispose();
+});
+test('Wyrdrune playback is mono-safe and Feather cuts both voices',async()=>{
+  const f=fixture();await f.sound.enable({audio:true,mono:true});
+  assert.equal(f.sound.playExpression(mythFrame),true);
+  assert.equal(f.nodes.find(n=>n.typeName==='panner').pan.value,0);
+  f.sound.feather();assert.equal(f.sound.snapshot().active_voices,0);
+  assert.ok(f.nodes.filter(n=>n.typeName==='oscillator').every(n=>n.disconnected));
+  assert.equal(f.sound.playExpression(mythFrame),false);
+  f.sound.releaseFeather({confirmed:true});
+  assert.equal(f.sound.playExpression(mythFrame),false);f.sound.dispose();
+});
+test('Wyrdrune audio rejects forged or out-of-range frames',async()=>{
+  const f=fixture();await f.sound.enable({audio:true});
+  for(const frame of [{...mythFrame,schema:'unknown'}, {...mythFrame,frequency_hz:Infinity},
+    {...mythFrame,counterpart_hz:20001},{...mythFrame,pan:2}])
+    assert.throws(()=>f.sound.playExpression(frame),/Wyrdrune/);
+  assert.equal(f.nodes.filter(n=>n.typeName==='oscillator').length,0);f.sound.dispose();
+});
