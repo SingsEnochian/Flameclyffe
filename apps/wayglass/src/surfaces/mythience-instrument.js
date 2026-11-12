@@ -106,7 +106,7 @@ export function mountWayglassMythienceInstrument(root,{
       const angle=i*Math.PI/4-Math.PI/2;
       return [cx+radius*Math.cos(angle),cy+radius*Math.sin(angle)];
     });
-    return pts.map(([x,y],i)=>(i?'L':'M')+x.toFixed(2)+' '+y.toFixed(2)).join(' ')+' Z';
+    return pts.map(([x,y])=>'M '+cx+' '+cy+' L '+x.toFixed(2)+' '+y.toFixed(2)).join(' ');
   }
   function paint(frame){
     const twist=(frame.pan+1)/2;
