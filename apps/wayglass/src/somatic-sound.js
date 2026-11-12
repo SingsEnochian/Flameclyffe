@@ -44,9 +44,10 @@ export function soundObjectForEvent(kind,{x=null,energy=0.5}={}){
 export function createSomaticSoundscape({
   scope=globalThis,
   getAudioContext=()=>scope.AudioContext||scope.webkitAudioContext,
+  now=()=>Date.now(),
 }={}){
   let context=null,master=null,compressor=null,allowAudio=false,allowHaptics=false,featherStopped=false;
-  let mono=false,disposed=false,epoch=0,lastError=null,featherReleaseConfirmed=false;
+  let mono=false,disposed=false,epoch=0,lastError=null,featherReleaseConfirmed=false,lastTactileAt=-Infinity;
   const liveNodes=new Set();
   const compositionProjection=createCompositionProjection({getContext:()=>context,getDestination:()=>master,canPlay:()=>context?.state==='running'&&!featherStopped&&!disposed});
   const composition=createSoundComposition({region:'wayglass-watercolor',eventScope:scope,source_ref:'apps/wayglass/src/somatic-sound.js',onScore:frame=>{setMono(frame.mono);return compositionProjection.render(frame);},
@@ -199,8 +200,30 @@ export function createSomaticSoundscape({
       return true;
     }catch{releaseVoice(voice);return false;}
   }
+  // Independent opt-in. No AudioContext needed, and no vibration during drag.
+  // The Vibration API is absent on many iOS devices: return unsupported, never fake it.
+  function setHaptics(enabled){
+    if(disposed||featherStopped)return false;
+    const supported=typeof scope.navigator?.vibrate==='function';
+    allowHaptics=Boolean(enabled)&&supported;
+    if(!allowHaptics&&supported){try{scope.navigator.vibrate(0);}catch{}}
+    return allowHaptics;
+  }
+  function feelExpression(frame){
+    if(disposed||featherStopped||!allowHaptics||typeof scope.navigator?.vibrate!=='function')return false;
+    if(frame?.schema!=='wayglass.wyrdrune-mythience-expression/v1')throw new TypeError('Verified Wyrdrune tactile expression required');
+    const intensity=frame.tactile_intensity;
+    if(typeof intensity!=='number'||!Number.isFinite(intensity)||intensity<.12||intensity>.801)
+      throw new RangeError('Invalid Wyrdrune tactile intensity');
+    const instant=now();
+    if(typeof instant!=='number'||!Number.isFinite(instant)||instant-lastTactileAt<350)return false;
+    lastTactileAt=instant;
+    const duration=Math.round(5+intensity*20);
+    try{return scope.navigator.vibrate([duration,45,Math.max(5,Math.round(duration*.6))])!==false;}
+    catch{return false;}
+  }
   function snapshot(){return Object.freeze({
-    schema:SOMATIC_SOUND_SCHEMA,audio_enabled:allowAudio,
+    schema:SOMATIC_SOUND_SCHEMA,audio_enabled:allowAudio,haptics_supported:typeof scope.navigator?.vibrate==='function',
     haptics_enabled:allowHaptics,feather_stopped:featherStopped,feather_release_confirmed:featherReleaseConfirmed,mono,disposed,active_voices:liveNodes.size,
     status:disposed?'disposed':featherStopped?'feather-stopped':lastError?'error':allowAudio?context?.state||'running':'stopped',last_error:lastError,
     output:'opt-in-original-synthesized-cues',head_tracking:'not-connected',
@@ -218,7 +241,7 @@ export function createSomaticSoundscape({
     disconnect(master);disconnect(compressor);master=null;compressor=null;
     if(context){const closing=context;context=null;safeAsync(()=>closing.close());}
   }
-  return Object.freeze({composition,enable,play,playExpression,stop,setMono,feather,releaseFeather,snapshot,dispose});
+  return Object.freeze({composition,enable,play,playExpression,feelExpression,setHaptics,stop,setMono,feather,releaseFeather,snapshot,dispose});
 }
 
 // Shared by Journey and Living Watercolor so Feather stops the same audio bus.
