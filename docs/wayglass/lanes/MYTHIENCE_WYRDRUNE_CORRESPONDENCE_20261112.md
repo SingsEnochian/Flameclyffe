@@ -40,3 +40,8 @@
 - **Magic and Mythience:** WTL intention and geometric correspondences are executable. The owner interprets ritual significance; simulation numbers and provenance are never overwritten by an interpretation.
 - Added regression tests for unified sensorium frame, WTL virtual physics, tactile throttling, explicit opt-in, unsupported-device fallback and Feather.
 - **Next acceptance:** full exact-head Wayglass CI, then physical browser/device verification of sound, haptics, touch and reduced-motion. No release signoff from source changes alone.
+
+## Cross-lane watercolour integration (same candidate train)
+- `sensorium-watercolor.js` converts a validated WTL sensorium frame into deterministic six-digit pigment, position, momentum and radius for the existing fluid engine. It uses gravity/refraction/terrain/light/pan from the native WTL execution, not a parallel JS score.
+- `living-watercolor.js` listens while mounted and active, and injects the projected pigment into the existing fluid. Paused/Feather state prevents injection; teardown removes the listener. This is **local presentation only** and does not create an Observer activity event, model contribution, continuity receipt or external-provider request.
+- `sensorium-watercolor.test.js` runs the native WTL score, projects to a sensorium frame, then injects into the actual fluid engine. Includes malformed and forged-event rejection. Exact-head CI is required for signoff.
