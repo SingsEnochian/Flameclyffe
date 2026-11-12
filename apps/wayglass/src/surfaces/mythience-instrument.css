@@ -1,0 +1,31 @@
+.wg-mythience{max-width:1180px;margin-inline:auto;min-width:0;gap:1rem}
+.wg-mythience>.glass-panel,.wg-mythience .myth-layout>.glass-panel{border-radius:1.4rem;padding:clamp(1rem,2.5vw,1.6rem)}
+.myth-head{background:linear-gradient(135deg,rgba(11,26,30,.95),rgba(26,43,48,.75),rgba(87,68,44,.24))}
+.wg-mythience h1{font-size:clamp(2.3rem,6vw,4.6rem)}
+.myth-layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(300px,.9fr);gap:1rem;align-items:start}
+.myth-field-panel,.myth-console{min-width:0;display:grid;gap:1rem}
+.myth-field{position:relative;min-height:16rem;aspect-ratio:480/380;display:grid;place-items:center;overflow:hidden;border-radius:1.1rem;touch-action:none;cursor:crosshair;
+  border:1px solid rgba(177,207,189,.28);background:radial-gradient(ellipse at 50% 47%,hsl(var(--myth-hue,190) 40% 18% / .55),rgba(5,13,18,.95) 68%);
+  color:hsl(var(--myth-hue,190) 66% 72%);box-shadow:inset 0 0 4rem rgba(3,9,13,.78),0 0 1.5rem rgba(61,130,125,.08)}
+.myth-field:focus-visible{outline:3px solid #a4e1d8;outline-offset:4px}
+.myth-field svg{width:100%;height:auto;max-height:34rem;pointer-events:none}
+.myth-field [data-myth-geometry]{filter:drop-shadow(0 0 .32rem currentColor)}
+.myth-stage-label{position:absolute;left:1rem;top:1rem;letter-spacing:.22em;font-size:.62rem;font-weight:800;color:rgba(232,246,237,.65);pointer-events:none}
+.myth-controls{display:grid;gap:.8rem}
+.myth-controls label{display:grid;grid-template-columns:minmax(7rem,1fr) minmax(7rem,2fr) 3rem;align-items:center;gap:.6rem;font-size:.88rem}
+.myth-controls input{padding:0;accent-color:#9bdbbc;cursor:pointer}
+.myth-controls output{font:700 .78rem ui-monospace,monospace;text-align:right}
+.myth-actions,.myth-lenses{display:flex;gap:.5rem;flex-wrap:wrap}
+.myth-console h2,.myth-console h3{margin:.3rem 0}
+.myth-console p{margin:.3rem 0 .8rem;line-height:1.55}
+.myth-readings{display:grid;gap:.55rem}
+.myth-readings>div{padding:.7rem .85rem;border-left:2px solid rgba(160,221,192,.45);background:rgba(8,20,24,.55);border-radius:.4rem}
+.myth-readings strong{font-size:.8rem;color:#d9c698}
+.myth-readings p{font-size:.9rem}
+.myth-trace{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.35rem .9rem;margin:0;padding-left:1.3rem;font: .78rem/1.6 ui-monospace,monospace}
+.myth-source summary{cursor:pointer;font-weight:650}
+.myth-source pre{max-height:20rem;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;background:rgba(4,12,17,.8);border-radius:.8rem;padding:.8rem;color:#b8e2c9;font-size:.75rem;line-height:1.6}
+.wg-mythience [hidden]{display:none!important}
+@media(max-width:850px){.myth-layout{grid-template-columns:1fr}}
+@media(max-width:480px){.myth-controls label{grid-template-columns:1fr 3rem}.myth-controls input{grid-column:1/-1;grid-row:2}.myth-trace{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.myth-field,.myth-field *{animation:none!important;transition:none!important;filter:none!important}}
