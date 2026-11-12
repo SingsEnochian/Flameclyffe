@@ -35,7 +35,7 @@ export function mountWayglassNativeVoice(root,{request=inviteWayglassVoice,
     '<section class="glass-panel wg-native-response" aria-label="Wyrdrune and British English" hidden data-native-response>',
     '<div class="wg-native-stage-head"><h2>Wyrdrune ⋈ British English</h2>',
     '<button type="button" class="glass-chip" data-native-replay>Replay the translation</button>',
-    '<button type="button" class="glass-chip" data-native-pin>Show in ship helm</button></div>',
+    '<button type="button" class="glass-chip" data-native-pin disabled>Show in ship helm</button></div>',
     '<pre class="wg-native-morph" aria-hidden="true" data-native-morph></pre>',
     '<p class="wg-native-reader" lang="en-GB" aria-live="polite" data-native-reader></p>',
     '<details class="wg-native-source"><summary>Read the complete Wyrdrune source</summary>',
@@ -70,6 +70,7 @@ export function mountWayglassNativeVoice(root,{request=inviteWayglassVoice,
     inscriptionEvent({clear:true});
   }
   function stop(){
+    pin.disabled=true;
     clearPin();
     controller?.abort();controller=null;
     cancelMorph();cancelMorph=()=>{};
@@ -77,7 +78,7 @@ export function mountWayglassNativeVoice(root,{request=inviteWayglassVoice,
     if(!disposed)status.textContent='Feather · paused. No sound is playing.';
   }
   function reveal(result){
-    last=result;response.hidden=false;
+    last=result;response.hidden=false;pin.disabled=false;
     // This is the owner's explicit invitation. Keep the actual WTL work and
     // her own English response in the one private Observer, not a JS paraphrase.
     let held=null;
