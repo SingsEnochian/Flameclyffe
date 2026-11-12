@@ -1,0 +1,32 @@
+// Wyrdrune relational Conjunction · Eightfold native programme v0.1
+// The WTL programme owns the orchestration; the host owns durable storage,
+// authenticated mutation authority and world-address resolution.
+// A possibility field is not a prediction. No crossing or hardware actuation.
+mobius {
+  perceive {
+    let worlds = bridge("worlds","selected");
+    let target = bridge("worlds","target");
+  }
+  compress {
+    let constellation = runeRelation("eightfold-possibility",worlds);
+  }
+  release {
+    let proposal = bridge("worlds","preview",target);
+  }
+  verify {
+    emit bridge("worlds","verify",proposal);
+  }
+  integrate {
+    let voice = whisperPhrase("Let distinct worlds meet without erasure.",0.65);
+  }
+  choose {
+    emit constellation;
+    emit voice;
+  }
+  return {
+    emit bridge("worlds","commit",proposal);
+  }
+  transcend {
+    emit "Possibility can open a branch; its history belongs to itself.";
+  }
+}
