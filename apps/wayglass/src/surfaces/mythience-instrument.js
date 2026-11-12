@@ -18,7 +18,7 @@ export function mountWayglassMythienceInstrument(root,{
   soundscape=wayglassSomaticSound,
   scope=globalThis,
 }={}){
-  let disposed=false,stopped=soundscape.snapshot().feather_stopped,sequence=0,last=null,lens='wonder',dragging=false;
+  let disposed=false,stopped=soundscape.snapshot().feather_stopped,sequence=0,last=null,lens='wonder',dragging=false,active=null;
   const doc=root.ownerDocument||scope.document;
   root.innerHTML=`
   <section class="wg-surface wg-mythience" aria-label="Mythience Wyrdrune instrument">
@@ -128,15 +128,22 @@ export function mountWayglassMythienceInstrument(root,{
   }
   async function weave(){
     if(disposed||stopped){setStatus('Feather holds the instrument. Release deliberately before weaving.');return;}
+    active?.abort();
+    const controller=new AbortController();
+    active=controller;
     const ticket=++sequence;
     const input={...controls};
     try{
-      const frame=await evaluate({source,controls:input});
-      if(disposed||stopped||ticket!==sequence)return;
+      const frame=await evaluate({source,controls:input,signal:controller.signal});
+      if(disposed||stopped||controller.signal.aborted||ticket!==sequence)return;
       last=frame;paint(frame);
       emitMaterialSignal({mode:'inscription',strength:frame.light,intent:input.intention,ownership:input.twist,handoff_progress:input.affinity,channel:'OOC'});
       setStatus('Wyrdrune executed · eight phases · local projection · sound remains your choice.');
-    }catch(error){if(!disposed&&ticket===sequence){last=null;setStatus('Wyrdrune execution failed: '+error.message);}}
+    }catch(error){
+      if(!disposed&&!stopped&&!controller.signal.aborted&&ticket===sequence){
+        last=null;setStatus('Wyrdrune execution failed: '+error.message);
+      }
+    }finally{if(active===controller)active=null;}
   }
   function update(name,value){
     if(stopped)return;
@@ -169,7 +176,7 @@ export function mountWayglassMythienceInstrument(root,{
   stage.addEventListener('pointerdown',down);stage.addEventListener('pointermove',move);
   stage.addEventListener('pointerup',up);stage.addEventListener('pointercancel',up);stage.addEventListener('keydown',keydown);
   function onFeather(event){
-    if(event.detail?.stopped===true){stopped=true;sequence++;dragging=false;last=null;setStatus('Feather Stop. Expression and sound held.');}
+    if(event.detail?.stopped===true){stopped=true;sequence++;active?.abort();active=null;dragging=false;last=null;setStatus('Feather Stop. Expression and sound held.');}
     else if(event.detail?.stopped===false&&event.detail.confirmed===true){stopped=false;setStatus('Feather released. Sound remains off; weave deliberately to resume.');}
   }
   scope.addEventListener?.('wayglass:feather',onFeather);
@@ -207,7 +214,7 @@ export function mountWayglassMythienceInstrument(root,{
     surface_id:'wayglass:mythience-instrument',
     snapshot:()=>Object.freeze({stopped,controls:{...controls},lens,frame:last}),
     destroy(){
-      if(disposed)return;disposed=true;sequence++;dragging=false;
+      if(disposed)return;disposed=true;sequence++;active?.abort();active=null;dragging=false;
       root.removeEventListener('click',onClick);
       stage.removeEventListener('pointerdown',down);stage.removeEventListener('pointermove',move);
       stage.removeEventListener('pointerup',up);stage.removeEventListener('pointercancel',up);stage.removeEventListener('keydown',keydown);
