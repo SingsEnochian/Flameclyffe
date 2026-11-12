@@ -22,7 +22,7 @@ mobius scoped {
     require possible_exchange and both_present else "Conjunction needs distinct worlds and permeable Void";
   }
   integrate {
-    WITHNESS {participants:[world_a,world_b],relationship:"distinct-and-connected"};
+    WITHNESS {participants:[{id:world_a,role:"origin-world",presence:"resolved",agency:"free"},{id:world_b,role:"encounter-world",presence:"resolved",agency:"free"}],field:"permeable-Void",agreement:"not-assumed",commitment:"none"};
   }
   choose {
     emit conjunction;
