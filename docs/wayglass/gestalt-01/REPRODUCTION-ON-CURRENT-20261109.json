@@ -1,0 +1,26 @@
+{
+  "schema": "wayglass.gestalt-01.reproduction/v1",
+  "context": "GESTALT-01 records ported onto wayglass/current (2026-11-09); each stage re-derived under current code before porting",
+  "base": "wayglass/current @ 088c8fba77f9ad0fdc19d2c716863e8f1464ea48",
+  "reproductions": [
+    {
+      "of": "RESULTS-stage-D.json (held_out)",
+      "identical": true,
+      "trials_digest": "see RESULTS-stage-D.json; re-derived identically",
+      "command": "node scripts/gestalt-01-d2.mjs reproduce-d held_out"
+    },
+    {
+      "of": "RESULTS-stage-D2-held_out.json",
+      "identical": true,
+      "trials_digest": "wce1:a82229d68861dcd9ef87d990a503eea1085e6d57aaa6d00f5756597c19f839a9",
+      "command": "node scripts/gestalt-01-d3.mjs reproduce-d2"
+    }
+  ],
+  "apparatus": {
+    "commit": "088c8fba77f9ad0fdc19d2c716863e8f1464ea48",
+    "dirty_tree": true,
+    "node": "v22.23.4",
+    "at": "2026-11-09T21:33:26.318Z",
+    "note": "dirty_tree true because the port itself was uncommitted at run time; the apparatus files (lib/gestalt-01.mjs, lib/wayglass-crossing.cjs, lib/wayglass-mobius.cjs, lib/wyrdrune/canonical.cjs) are byte-identical to the D3 branch"
+  }
+}

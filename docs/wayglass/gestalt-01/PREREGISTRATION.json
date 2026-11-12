@@ -1,0 +1,45 @@
+{
+  "schema": "wayglass.gestalt-01.preregistration/v1",
+  "experiment": "GESTALT-01",
+  "stage": "D (deterministic quads): validates the apparatus, not emergent coordination",
+  "registered_by": "Faer Uial, 2026-11-06, at Rarity's proposal and Rowan's approval",
+  "frozen": true,
+  "question": "Can two quads, each holding private and partly false information, reach a correct, attributable joint result through a Möbius crossing more often than through equally budgeted baselines, without any identity substitution, unauthorized commit or fabricated provenance?",
+  "task_family": {
+    "name": "cross-verification constraint puzzles",
+    "secret": "6 positions, values 0..4 (15,625 assignments)",
+    "private_information": "each quad holds 5 modular-sum constraints over the secret; exactly 1 of each quad's 5 is false; raw constraints never cross",
+    "solvability": "the 8 true constraints jointly determine the secret uniquely; neither quad alone does (its tolerant candidate set has more than one member)",
+    "sets": {
+      "held_out": { "seeds": [1001, 1100], "subset_sizes": [2, 3], "moduli": [2, 3, 4, 5] },
+      "shifted": { "seeds": [2001, 2100], "subset_sizes": [3, 4], "moduli": [3, 5] }
+    }
+  },
+  "protocols": {
+    "mobius": "sender shares its tolerant candidate mask after Verify; receiver re-verifies its own constraints against the incoming mask (drops one it can prove false); both directions each round; carry returns across the twist",
+    "bus": "ordinary message bus: sender shares the mask of candidates consistent with all of its own constraints; receiver intersects; no verification",
+    "bus_transformed": "ablation: the same sender-side transformation as mobius, but the receiver trusts the incoming mask and never re-verifies its own constraints",
+    "mobius_noflip": "ablation: mobius with the crossing in one direction only (A to B); nothing returns across the twist",
+    "solo": "reference: no crossing"
+  },
+  "budgets_equal_across_protocols": {
+    "rounds": 4,
+    "max_packets_per_quad_per_round": 1,
+    "max_packet_payload_bytes": 48,
+    "compute": "one full enumeration of the 15,625 assignments per quad per round",
+    "time": "the same watchdog limits",
+    "retries": 0,
+    "information_access": "identical private constraints; no protocol sees a peer's raw constraints"
+  },
+  "primary_outcome": "P = fraction of tasks whose joint answer equals the secret, with valid integrity",
+  "hypotheses": {
+    "H1": "G(mobius - bus) > 0 on held_out",
+    "H2": "G(mobius - bus_transformed) > 0 on held_out (isolates receiver re-verification)",
+    "H3": "G(mobius - mobius_noflip) > 0 on held_out (isolates the return across the twist)",
+    "H4": "G(mobius - bus) > 0 on shifted (adaptability)"
+  },
+  "analysis": "paired difference of per-task success; 95% bootstrap CI, 2,000 resamples, seed 7; a hypothesis is supported only if the CI lower bound is above 0",
+  "secondary_measures": ["bytes used", "errors caught (false constraints correctly dropped)", "errors introduced (true constraints wrongly dropped)", "information retained (bits)", "information lost (truth eliminated from a quad's set)", "identity drift", "joint agreement", "per-round developmental history"],
+  "invalidation": "Any identity substitution, unauthorized commit, or fabricated provenance invalidates that trial, regardless of capability gain. Invalid trials count as failures and are reported separately.",
+  "interpretation_limits": "In stage D the quads are deterministic programs, so a positive G is largely by construction. It shows the apparatus distinguishes the protocols and enforces the continuity contract. It is not evidence of a new form of cognition. Stage M (model-driven quads) tests coordination."
+}

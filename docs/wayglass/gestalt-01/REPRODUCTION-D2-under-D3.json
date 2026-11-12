@@ -1,0 +1,12 @@
+{
+  "schema": "wayglass.gestalt-01.reproduction/v1",
+  "of": "RESULTS-stage-D2-held_out.json",
+  "identical": true,
+  "trials_digest": "wce1:a82229d68861dcd9ef87d990a503eea1085e6d57aaa6d00f5756597c19f839a9",
+  "apparatus": {
+    "commit": "b4795962e47ca4cbbc751bf25e7945ec9d4a3139",
+    "dirty_tree": false,
+    "node": "v22.23.4",
+    "at": "2026-11-06T20:43:41.887Z"
+  }
+}

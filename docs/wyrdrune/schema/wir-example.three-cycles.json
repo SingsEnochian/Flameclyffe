@@ -1,0 +1,153 @@
+{
+ "schema": "wyrdrune.wir/v0.2",
+ "source_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+ "lineages": [
+  {
+   "name": null,
+   "intent": null,
+   "strict": true,
+   "seeds": [
+    {
+     "name": "energy",
+     "src": "%0"
+    }
+   ],
+   "seed_body": [
+    {
+     "op": "const",
+     "dst": "%0",
+     "type": "Num",
+     "value": 1
+    }
+   ],
+   "bound": {
+    "cycles": 3,
+    "until": null
+   },
+   "phases": [
+    {
+     "index": 1,
+     "phase": "perceive",
+     "angle": 0,
+     "implicit": false,
+     "effects": [],
+     "body": []
+    },
+    {
+     "index": 2,
+     "phase": "compress",
+     "angle": 45,
+     "implicit": false,
+     "effects": [],
+     "body": []
+    },
+    {
+     "index": 3,
+     "phase": "release",
+     "angle": 90,
+     "implicit": false,
+     "effects": [],
+     "body": []
+    },
+    {
+     "index": 4,
+     "phase": "verify",
+     "angle": 135,
+     "implicit": false,
+     "effects": [],
+     "body": [
+      {
+       "op": "read",
+       "dst": "%1",
+       "name": "energy"
+      },
+      {
+       "op": "const",
+       "dst": "%2",
+       "type": "Num",
+       "value": 0
+      },
+      {
+       "op": "bin",
+       "dst": "%3",
+       "fn": "gt",
+       "a": "%1",
+       "b": "%2"
+      },
+      {
+       "op": "require",
+       "src": "%3"
+      }
+     ]
+    },
+    {
+     "index": 5,
+     "phase": "integrate",
+     "angle": 180,
+     "implicit": false,
+     "effects": [],
+     "body": []
+    },
+    {
+     "index": 6,
+     "phase": "choose",
+     "angle": 225,
+     "implicit": false,
+     "effects": [],
+     "body": []
+    },
+    {
+     "index": 7,
+     "phase": "return",
+     "angle": 270,
+     "implicit": false,
+     "effects": [],
+     "body": [
+      {
+       "op": "read",
+       "dst": "%4",
+       "name": "energy"
+      },
+      {
+       "op": "emit",
+       "src": "%4"
+      }
+     ]
+    },
+    {
+     "index": 8,
+     "phase": "transcend",
+     "angle": 315,
+     "implicit": false,
+     "effects": [],
+     "body": [
+      {
+       "op": "read",
+       "dst": "%5",
+       "name": "energy"
+      },
+      {
+       "op": "const",
+       "dst": "%6",
+       "type": "Num",
+       "value": 2
+      },
+      {
+       "op": "bin",
+       "dst": "%7",
+       "fn": "mul",
+       "a": "%5",
+       "b": "%6"
+      },
+      {
+       "op": "carry",
+       "name": "energy",
+       "src": "%7"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rites": []
+}
