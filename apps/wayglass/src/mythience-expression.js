@@ -33,8 +33,8 @@ export async function evaluateMythienceExpression({source,controls,signal}={}){
       twist:({arguments:args})=>{if(args.length)throw new TypeError('Unexpected twist arguments');return twist;},
       affinity:({arguments:args})=>{if(args.length)throw new TypeError('Unexpected affinity arguments');return affinity;},
       validate:({arguments:args})=>{
-        if(args.length!==8)throw new TypeError('Expected eight WTL expression values');
-        const bounds=[[.1,.8],[165,225],[164.81,304.81],[184,397],[-1,1],[.2,.851],[.5,11.5],[22000,35000]];
+        if(args.length!==12)throw new TypeError('Expected twelve WTL expression values');
+        const bounds=[[.1,.8],[165,225],[164.81,304.81],[184,397],[-1,1],[.2,.851],[.5,11.5],[22000,35000],[.35,2.001],[.08,.931],[0,1],[.12,.801]];
         args.forEach((value,i)=>finite(value,...bounds[i],'WTL expression '+i));
         return 'validated-local-projection';
       },
@@ -50,7 +50,9 @@ export async function evaluateMythienceExpression({source,controls,signal}={}){
     ||!frame||typeof frame!=='object')throw new TypeError('Incomplete Wyrdrune execution');
   const bounds={light:[.1,.8],hue:[165,225],frequency_hz:[164.81,304.81],
     counterpart_hz:[184,397],pan:[-1,1],pulse:[.2,.851],
-    virtual_below_hz:[.5,11.5],virtual_above_hz:[22000,35000]};
+    virtual_below_hz:[.5,11.5],virtual_above_hz:[22000,35000],
+    simulated_gravity:[.35,2.001],simulated_refraction:[.08,.931],
+    terrain_fold:[0,1],tactile_intensity:[.12,.801]};
   const values={};
   for(const [key,[min,max]] of Object.entries(bounds))values[key]=finite(frame[key],min,max,key);
   if(result.receipts.length!==8||result.withness?.completedCycles!==1)
