@@ -1,0 +1,36 @@
+// Wyrdrune relational-world conjunction v0.1: executable research fixture.
+// World rune and coordinates are distinct, owner-supplied address forms.
+// The host resolves either form; this programme never invents or persists worlds.
+// A Third Body is only a candidate until a separate authorised Return transaction.
+mobius scoped {
+  perceive {
+    let world_a = bridge("worlds","resolve","rune","owner:world-a");
+    let world_b = bridge("worlds","resolve","coordinates","owner:world-b");
+    let permeability = bridge("worlds","permeability");
+  }
+  compress {
+    let possible_exchange = permeability > 0;
+    let both_present = world_a != world_b;
+  }
+  release {
+    let conjunction = {kind:"wyrdrune.conjunction-candidate/v0.1",
+      void_membrane:permeability,connection:"reciprocal",
+      transition:"bidirectional-space-time",world_a:world_a,world_b:world_b,
+      third_body:"candidate",eightfold:"possibility"};
+  }
+  verify {
+    require possible_exchange and both_present else "Conjunction needs distinct worlds and permeable Void";
+  }
+  integrate {
+    WITHNESS {participants:[world_a,world_b],relationship:"distinct-and-connected"};
+  }
+  choose {
+    emit conjunction;
+  }
+  return {
+    emit {status:"candidate-not-created",source:"owner-supplied-world-addresses"};
+  }
+  transcend {
+    emit "What if the Third Body persists after both parent worlds separate?";
+  }
+}
