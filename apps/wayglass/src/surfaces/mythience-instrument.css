@@ -29,3 +29,23 @@
 @media(max-width:850px){.myth-layout{grid-template-columns:1fr}}
 @media(max-width:480px){.myth-controls label{grid-template-columns:1fr 3rem}.myth-controls input{grid-column:1/-1;grid-row:2}.myth-trace{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.myth-field,.myth-field *{animation:none!important;transition:none!important;filter:none!important}}
+
+/* The same WTL frame changes the virtual world's refraction and depth.
+   These are bounded simulated optics, not physical gravity or photometry. */
+.myth-field {
+  background:
+    radial-gradient(ellipse at 50% 48%,hsl(var(--myth-hue,190) 60% 28% / .34),transparent 47%),
+    repeating-linear-gradient(163deg,transparent 0 32px,hsl(var(--myth-hue,190) 48% 70% / .035) 33px 34px,transparent 35px 65px),
+    radial-gradient(ellipse at 50% 47%,hsl(var(--myth-hue,190) 40% 18% / .65),rgba(5,13,18,.95) 72%);
+}
+.myth-field [data-myth-terrain] {
+  stroke:hsl(var(--myth-hue,190) 75% 80%);
+  filter:drop-shadow(0 0 6px hsl(var(--myth-hue,190) 70% 65% / .55));
+}
+.myth-field [data-myth-orbit-a],.myth-field [data-myth-orbit-b] {
+  stroke-width:2.5;
+  transition:transform 180ms ease-out;
+}
+@media(prefers-reduced-motion:reduce){
+  .myth-field [data-myth-orbit-a],.myth-field [data-myth-orbit-b] {transition:none!important}
+}
