@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {createWyrdruneRuntime} from '../../../lib/wyrdrune/runtime.mjs';
-import {canonicalWce1Digest} from '../../../lib/wyrdrune/canonical.cjs';
+import canonical from '../../../lib/wyrdrune/canonical.cjs';
 const source=readFileSync(new URL('../../../lib/wyrdrune/world-conjunction.wtl',import.meta.url),'utf8');
-const runtime=createWyrdruneRuntime({hashSource:s=>createHash('sha256').update(s).digest('hex'),continuityDigest:canonicalWce1Digest});
+const runtime=createWyrdruneRuntime({hashSource:s=>createHash('sha256').update(s).digest('hex'),continuityDigest:canonical.digest});
 const run=({permeability=.5,a='world-A',b='world-B'}={})=>runtime.execute(runtime.compile(source),{
   principal:{id:'test-owner',authorized:true},
   bridges:{worlds:{
