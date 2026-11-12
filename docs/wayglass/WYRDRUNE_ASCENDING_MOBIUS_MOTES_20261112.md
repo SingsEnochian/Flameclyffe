@@ -67,3 +67,24 @@ The budget is finite, and exceeding it fails closed.
 
 **Withness:** identity remains distinct; relationship changes the motion;
 Return carries the difference. Magic opens another turn of Wonder.
+
+## Play to work to play
+The local terminal voyage is now a genuine native-WTL exercise, not a mock
+visualisation. Run `npm run wayglass:play:motes` and choose **wonder**, **touch**,
+**shape** or **listen**. Each invited action is converted to a bounded,
+source-hashed observation by `lib/wayglass-mote-play.cjs`, then executed by
+`ascending-motes.wtl` through the authenticated development-only adapter.
+The response shows the new carried state, eight phase receipts, input hash,
+and invitation to play again. `feather` ends the local session.
+
+For a noninteractive four-turn sample use
+`npm run wayglass:play:motes:demo`. The new
+`lib/wyrdrune/mote-play.test.cjs` covers all four actions, deterministic
+replay, distinct provenance, denied inputs, Feather and changed carry.
+
+**Boundary:** this is an interactive terminal development toy, not the
+installed browser/Unity room, and its principal is deliberately local to
+the process. No network request, model call or durable world write occurs.
+The next playable milestone is to bind the exact same native WTL result to
+the existing Toybox Mote Herd and watercolour body with a real authorised
+server session, instead of duplicating the mathematics in browser JavaScript.
