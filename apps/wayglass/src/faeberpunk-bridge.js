@@ -82,8 +82,10 @@ export function installFaeberpunkBridge({
   }
   function onPreference(event) { reducedMotion = event.matches === true; render(); }
   function onInscription(event) {
-    if (disposed || stopped) return;
+    if (disposed) return;
     const detail = event?.detail;
+    if (detail?.clear === true) { inscription = null; if (panel) panel.hidden = true; lastSignal = { mode: 'rest', strength: 0 }; render(); return; }
+    if (stopped || detail?.owner_presentation_consent !== true) return;
     // No transliteration, inferred English, or fabricated WTL source.
     if (typeof detail?.wyrdrune !== 'string' || !detail.wyrdrune.trim() ||
         typeof detail?.english !== 'string' || !detail.english.trim()) return;
