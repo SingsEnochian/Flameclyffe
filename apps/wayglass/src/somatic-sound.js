@@ -56,7 +56,8 @@ export function createSomaticSoundscape({
   function releaseVoice(voice){
     liveNodes.delete(voice);
     if(voice.oscillator){voice.oscillator.onended=null;try{voice.oscillator.stop();}catch{}}
-    disconnect(voice.oscillator);disconnect(voice.gainNode);disconnect(voice.panner);
+    if(voice.counterpart){voice.counterpart.onended=null;try{voice.counterpart.stop();}catch{}}
+    disconnect(voice.oscillator);disconnect(voice.counterpart);disconnect(voice.gainNode);disconnect(voice.panner);
   }
   function silence(){
     for(const voice of [...liveNodes])releaseVoice(voice);
@@ -156,6 +157,48 @@ export function createSomaticSoundscape({
       return false;
     }
   }
+  // Two voices supplied by a validated executable Wyrdrune score.
+  // This function never starts AudioContext, never overrides Feather, and
+  // never promotes local score values to environmental measurements.
+  function playExpression(frame){
+    if(disposed||featherStopped)return false;
+    if(frame?.schema!=='wayglass.wyrdrune-mythience-expression/v1')throw new TypeError('Verified Wyrdrune expression required');
+    const bounded=(value,min,max,name)=>{
+      if(typeof value!=='number'||!Number.isFinite(value)||value<min||value>max)
+        throw new RangeError('Invalid Wyrdrune '+name);
+      return value;
+    };
+    const frequency=bounded(frame.frequency_hz,100,880,'frequency');
+    const counterpart=bounded(frame.counterpart_hz,100,1000,'counterpart');
+    const pan=bounded(frame.pan,-1,1,'pan');
+    const pulse=bounded(frame.pulse,0,1,'pulse');
+    if(!allowAudio||!context||context.state!=='running'||liveNodes.size>=4)return false;
+    const voice={oscillator:null,counterpart:null,gainNode:null,panner:null,pan};
+    liveNodes.add(voice);
+    try{
+      const now=context.currentTime,duration=.15+pulse*.17;
+      voice.oscillator=context.createOscillator();
+      voice.counterpart=context.createOscillator();
+      voice.gainNode=context.createGain();
+      voice.panner=typeof context.createStereoPanner==='function'?context.createStereoPanner():null;
+      voice.oscillator.type='sine';voice.counterpart.type='sine';
+      voice.oscillator.frequency.setValueAtTime(frequency,now);
+      voice.counterpart.frequency.setValueAtTime(counterpart,now);
+      voice.gainNode.gain.setValueAtTime(.00001,now);
+      voice.gainNode.gain.linearRampToValueAtTime(.012,now+.012);
+      voice.gainNode.gain.exponentialRampToValueAtTime(.00001,now+duration);
+      voice.oscillator.connect(voice.gainNode);
+      voice.counterpart.connect(voice.gainNode);
+      if(voice.panner){
+        voice.panner.pan.setValueAtTime(mono?0:pan,now);
+        voice.gainNode.connect(voice.panner).connect(master);
+      }else voice.gainNode.connect(master);
+      voice.oscillator.onended=()=>releaseVoice(voice);
+      voice.oscillator.start(now);voice.counterpart.start(now);
+      voice.oscillator.stop(now+duration+.01);voice.counterpart.stop(now+duration+.01);
+      return true;
+    }catch{releaseVoice(voice);return false;}
+  }
   function snapshot(){return Object.freeze({
     schema:SOMATIC_SOUND_SCHEMA,audio_enabled:allowAudio,
     haptics_enabled:allowHaptics,feather_stopped:featherStopped,feather_release_confirmed:featherReleaseConfirmed,mono,disposed,active_voices:liveNodes.size,
@@ -175,7 +218,7 @@ export function createSomaticSoundscape({
     disconnect(master);disconnect(compressor);master=null;compressor=null;
     if(context){const closing=context;context=null;safeAsync(()=>closing.close());}
   }
-  return Object.freeze({composition,enable,play,stop,setMono,feather,releaseFeather,snapshot,dispose});
+  return Object.freeze({composition,enable,play,playExpression,stop,setMono,feather,releaseFeather,snapshot,dispose});
 }
 
 // Shared by Journey and Living Watercolor so Feather stops the same audio bus.
