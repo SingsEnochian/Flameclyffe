@@ -1,0 +1,40 @@
+// Wyrdrune Relational Growth · native WTL proposal cycle v0.1
+// The WTL programme owns every state transition. The host only validates typed
+// relations, identifies sources and provides non-compositional bridges.
+// No inferred rune meaning, world creation, model utterance or canon adoption.
+mobius scoped {
+  perceive {
+    let novelty = bridge("relations","novelty");
+    let coherence = bridge("relations","coherence");
+    let recurrence = bridge("relations","recurrence");
+    let uncertainty = bridge("relations","uncertainty");
+    let previous_resonance = resonance;
+    let previous_openness = openness;
+  }
+  compress {
+    let evidence = coherence * 0.60 + recurrence * 0.40;
+    let possibility = novelty * 0.55 + uncertainty * 0.45;
+  }
+  release {
+    let emerging_resonance = previous_resonance * 0.45 + evidence * 0.35 + novelty * 0.20;
+    let emerging_openness = previous_openness * 0.50 + possibility * 0.50;
+  }
+  verify {
+    require emerging_resonance >= 0 and emerging_resonance <= 1 else "resonance escaped its declared field";
+    require emerging_openness >= 0 and emerging_openness <= 1 else "openness escaped its declared field";
+  }
+  integrate {
+    let candidate = bridge("relations","candidate",emerging_resonance,emerging_openness);
+  }
+  choose {
+    emit candidate;
+  }
+  return {
+    emit bridge("relations","return","candidate-only");
+  }
+  transcend {
+    carry resonance = emerging_resonance;
+    carry openness = emerging_openness;
+    emit "What new relationship is possible without erasing either origin?";
+  }
+}
