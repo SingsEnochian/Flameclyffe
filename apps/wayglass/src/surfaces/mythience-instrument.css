@@ -54,7 +54,7 @@
 /* Owner-invoked atlas route projection: visible motion, never physical travel. */
 .myth-field::after{
   content:"";position:absolute;z-index:1;pointer-events:none;
-  left:calc(8% + var(--atlas-motion-progress,0) * 78%);
+  left:calc(8% + var(--atlas-motion-offset,0%));
   top:7%;height:86%;width:2px;border-radius:99px;
   background:linear-gradient(transparent,rgba(200,246,220,.85),transparent);
   box-shadow:0 0 18px rgba(133,235,208,.5);
@@ -67,5 +67,5 @@
 .myth-atlas-motion progress{width:100%;height:.55rem;accent-color:#a4e1d8}
 .myth-atlas-motion output{font-size:.75rem;color:#c4d9d1}
 @media(prefers-reduced-motion:reduce){
-  .myth-field::after{transition:none!important;transform:none!important}
+  .myth-field::after{display:none!important;transition:none!important;transform:none!important}
 }
