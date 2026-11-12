@@ -207,7 +207,7 @@ export function mountWayglassMythienceInstrument(root,{
     $('atlas-motion').hidden=false;
     $('atlas-progress').value=percent;
     $('atlas-copy').textContent='Digital passage '+percent+'% · simulated position only';
-    stage.style.setProperty('--atlas-motion-progress',String(frame.progress));
+    stage.style.setProperty('--atlas-motion-offset',(frame.progress*78).toFixed(2)+'%');
     stage.style.setProperty('--atlas-motion-active','1');
   }
   scope.addEventListener?.('wayglass:atlas-motion-frame',onAtlasMotion);
