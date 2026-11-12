@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#050e14"><meta name="description" content="Wayglass Media Foundry: accountable models, media science, applets, and route status.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<title>Wayglass · Media Foundry</title>
+<link rel="stylesheet" href="../src/harmonic-observatory/ui.css"><link rel="stylesheet" href="../src/media-foundry/style.css">
+</head><body>
+<div class="app-frame"><aside class="wg-rail" aria-label="Wayglass deck navigation">
+  <div class="wg-mark" aria-hidden="true">◈</div><div class="rail-sep"></div>
+  <a class="rail-link current" href="#foundry" aria-label="Media Foundry overview">✦</a>
+  <a class="rail-link" href="#models" aria-label="Model catalogue">◉</a>
+  <a class="rail-link" href="#routes" aria-label="Host routes">⌁</a>
+  <a class="rail-link" href="#applets" aria-label="Applets">▦</a>
+  <a class="rail-link" href="../harmonic-observatory/" aria-label="Harmonic Observatory">♫</a>
+  <div class="rail-bottom">WAYGLASS · MODEL SYSTEMS</div>
+</aside><div class="wg-shell">
+<header class="wg-topbar"><div class="wg-brand"><strong>WAYGLASS</strong><span> / MODEL &amp; MEDIA FOUNDRY</span></div>
+ <div class="top-state"><i class="state-dot" aria-hidden="true"></i><span>Local catalogue</span><span class="top-pill">No model calls</span><a class="top-link" href="https://github.com/SingsEnochian/Flameclyffe/pull/474" target="_blank" rel="noopener noreferrer">Source ↗</a></div></header>
+<nav class="wg-deck-nav" aria-label="Foundry sections"><a class="deck-chip selected" aria-current="location" href="#foundry">Foundry</a><a class="deck-chip" href="#models">Models</a><a class="deck-chip" href="#routes">Routes</a><a class="deck-chip" href="#applets">Applets</a><a class="deck-chip" href="../harmonic-observatory/">Harmonic Observatory ↗</a><span class="deck-context">✧ Evidence before activation</span></nav>
+<main id="foundry"><section class="wg-hero hero glass-panel"><div class="hero-copy">
+<p class="eyebrow">STARWELL / WAYGLASS · SELECTIVE MODEL BINDING</p><h1>Media<br><em>Foundry.</em></h1>
+<p class="lede">Voice, cinema and interface craft aboard one ship. Review evidence, select a candidate, then design one reversible experiment. A catalogue entry never becomes a working engine just because it appears here.</p>
+<div class="hero-caption"><span class="tag">Model provenance</span><span class="tag">Local-first</span><span class="tag">Provider consent</span><span class="tag">Return markers</span></div></div>
+<div class="hero-field" aria-hidden="true"><div class="field-orbit o1"></div><div class="field-orbit o2"></div><div class="field-orbit o3"></div><div class="field-sigil"><svg viewBox="0 0 200 200" fill="none"><path d="M100 8L179 54 179 146 100 192 21 146 21 54Z" stroke="#83d5dd" stroke-opacity=".55"/><path d="M100 8v184M21 54l158 92M179 54L21 146M100 8l79 138-158 0Z" stroke="#ad91ec" stroke-opacity=".6"/><circle cx="100" cy="100" r="35" stroke="#b8f3f3" stroke-opacity=".4"/><path d="M100 62l32 38-32 38-32-38Z" fill="#5bc9ce" fill-opacity=".28" stroke="#a4e5ea"/></svg></div><span class="field-sub">DESIGN · TEST · REMEMBER</span></div></section>
+<div class="sectionline" id="models"><h2>Engines &amp; research</h2><span>Sources are discovered, not connected</span></div>
+<section class="glass-panel foundry-controls" aria-label="Catalogue controls">
+<label>Discipline<select id="discipline"><option value="all">All foundry disciplines</option><option value="speech">Speech and voices</option><option value="image">Cinematic images</option><option value="interface">UI and interface</option><option value="reasoning">Reasoning and security</option><option value="research">Science and datasets</option></select></label>
+<label>Find a model<input id="model-query" type="search" placeholder="e.g. Kokoro, SDXL, UIUX" autocomplete="off"></label><span id="model-count" class="foundry-count" aria-live="polite"></span>
+</section>
+<div class="foundry-model-layout"><section class="foundry-catalogue" aria-label="Reviewed media candidates"><div id="model-grid" class="foundry-model-grid"></div></section>
+<aside class="glass-panel foundry-inspector" aria-labelledby="inspector-title"><p class="eyebrow">CANDIDATE INSPECTOR</p><h2 id="inspector-title">Select an engine</h2><p id="inspector-summary" class="sub">The evidence, requirements and experiment plan will appear here.</p><div id="inspector-meta"></div>
+<h3>Before first run</h3><ol id="inspector-steps"></ol>
+<div class="foundry-actions"><a id="source-open" class="btn" href="https://huggingface.co/models" rel="noopener noreferrer" target="_blank">Review source ↗</a><button id="trial-export" class="btn primary" type="button" disabled>↓ Export test plan</button></div>
+<p id="plan-status" class="hint" role="status" aria-live="polite">Nothing connected or downloaded.</p></aside></div>
+<div class="sectionline" id="routes"><h2>Route desk</h2><span>Owner-authenticated Wayglass host</span></div>
+<section class="glass-panel foundry-route-bay"><div><h3>Known route declarations</h3><p class="sub">The Wayglass host owns route authority. This page can inspect its metadata on request, but cannot borrow credentials, open sessions, or call a model.</p><div id="route-known"></div></div>
+<div class="route-live"><h3>Actual host response</h3><p class="sub">An explicit read of <code>/api/v1/wayglass/routes</code>. Requires the route service to be running on the same origin or through the existing local proxy.</p><button class="btn" id="inspect-routes" type="button">Inspect available host routes</button><div id="route-status" role="status" aria-live="polite">Not queried. No live availability has been asserted.</div><div id="route-results"></div></div></section>
+<div class="sectionline" id="applets"><h2>Applets by deck</h2><span>Re-use existing instruments, do not clone their engines</span></div>
+<section class="glass-panel foundry-applets"><div id="applet-grid" class="foundry-applet-grid"></div><p class="hint">External/dependent applets may require their separate build or authenticated Wayglass host; an entry here is navigation, not a new implementation.</p></section>
+<div class="sectionline"><h2>Discovery windows</h2><span>Research is a source, not an endpoint</span></div><section id="discovery" class="glass-panel foundry-discovery"></section>
+</main><footer class="wg-footer"><span>Hearthgate · observations and hypotheses are separate · No server-side media generation claimed</span><span class="foot-mark">WONDER FIRST · RECEIPTS ALWAYS ✧</span></footer>
+</div></div><script type="module" src="../src/media-foundry/main.js"></script></body></html>

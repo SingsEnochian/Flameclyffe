@@ -1,0 +1,17 @@
+{
+  "schema": "wayglass.mathematics-manifest/v1",
+  "updated": "2026-10-16",
+  "governing": "hearthgate.math-spine/v1.8",
+  "entries": [
+    {"id":"hearthgate.braided-spine","version":"1.8","authority":"governing","source":"docs/HEARTHGATE_BRAIDED_SPINE_V1.8.md"},
+    {"id":"hearthgate.compression-release","version":"1.0.0","authority":"active-companion","source":"docs/mathematics/HEARTHGATE_COMPRESSION_RELEASE_MATHEMATICS_SPINE.md"},
+    {"id":"hearthgate.math-spine-packet","version":"1","authority":"runtime-contract","source":"apps/starwell/src/math-spine/math-spine-packet.js"},
+    {"id":"hearthgate.v18-primitives","version":"1.8.0","authority":"runtime-implementation","source":"apps/starwell/src/math-spine/v18-primitives.js"},
+    {"id":"hearthgate.live-math-spine","version":"1","authority":"runtime-adapter","source":"apps/starwell/src/math-spine/live-math-spine.js"},
+    {"id":"observer.audio-mathematics","version":"1.8","authority":"active-inheritance","source":"docs/observer/OBSERVER_AUDIO_MATHEMATICS.md"},
+    {"id":"deep.math-spine","version":"1.8","authority":"active-inheritance","source":"starwell/deep-observer/DEEP_Math_Spine.md"},
+    {"id":"arcsweep.heimdall-foldwatch","version":"1","authority":"pending-pr-285","source":"apps/arcsweep/src/heimdall-foldwatch.js","ref":"arcsweep-heimdall-foldwatch-swarm"},
+    {"id":"wayglass.foldwatch-handoff","version":"1","authority":"pending-pr-285","source":"apps/arcsweep/src/heimdall-wayglass-handoff.js","ref":"arcsweep-heimdall-foldwatch-swarm"},
+    {"id":"legacy.pre-v1.8","version":"pre-1.8","authority":"historical-replay-only","source":"docs/archive/mathematics/pre-v1.8/README.md"}
+  ]
+}
