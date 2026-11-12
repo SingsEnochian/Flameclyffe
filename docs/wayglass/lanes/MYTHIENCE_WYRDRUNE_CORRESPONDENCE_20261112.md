@@ -31,3 +31,12 @@
 5. Check Wayglass build and exact PR head CI before integration; do not conflate release deployment with a source branch.
 
 **Withness:** three registers, one owner-controlled instrument, no hidden canon promotion.
+
+## Sensorium expansion: somatic digital world, not a decorative interface
+- The **same native WTL Eightfold execution** now emits bounded `simulated_gravity`, `simulated_refraction`, `terrain_fold` and `tactile_intensity`, in addition to the prior light, spectral and sound fields. A new `wayglass:sensorium-frame` event carries a frozen, validated local projection for other rooms to subscribe to. It is not a world measurement, physical actuator command, model message or canon receipt.
+- The Mythience field changes reciprocal-orbit geometry, simulated terrain horizon and refraction in response to the WTL frame. This manipulates **digital reality**, not external physical laws. Gesture, touch, keyboard and slider routes all execute the same WTL source.
+- **Tactile output:** `setHaptics(true)` independently opts into device vibration where the browser supports it; `feelExpression(frame)` issues a brief bounded pattern only on the user's deliberate **Experience Wyrdrune** action, throttled at 350 ms minimum. Dragging does not vibrate. Haptics never create AudioContext, and sound is separately opted in. Feather stops all output and release leaves both channels off.
+- **Device limitation:** browser Vibration API support varies; iPad/iOS browser vibration is often unavailable. A real Osia 3 or haptic-device integration requires separately authenticated, device-specific routing and testing. No hardware-specific output is claimed here.
+- **Magic and Mythience:** WTL intention and geometric correspondences are executable. The owner interprets ritual significance; simulation numbers and provenance are never overwritten by an interpretation.
+- Added regression tests for unified sensorium frame, WTL virtual physics, tactile throttling, explicit opt-in, unsupported-device fallback and Feather.
+- **Next acceptance:** full exact-head Wayglass CI, then physical browser/device verification of sound, haptics, touch and reduced-motion. No release signoff from source changes alone.
