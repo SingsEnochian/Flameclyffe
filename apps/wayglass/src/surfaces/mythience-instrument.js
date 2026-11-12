@@ -3,11 +3,12 @@ import source from '../../../../lib/wyrdrune/mythience-instrument.wtl?raw';
 import {evaluateMythienceExpression} from '../mythience-expression.js';
 import {emitMaterialSignal} from '../material-state.js';
 import {wayglassSomaticSound} from '../somatic-sound.js';
+import {emitSensoriumFrame} from '../sensorium-frame.js';
 
 const LENSES=Object.freeze({
   wonder:{heading:'Wonder · What if?',text:'What if a single gesture could alter the shape of a room, the relationship of two voices and the questions carried into Return? These are possibilities, not observations.'},
-  science:{heading:'Science · What can be tested?',text:'Three owner-controlled numbers enter the executable Wyrdrune programme. Its Eightfold trace yields bounded hue, light, pulse and audible frequencies. This is a deterministic local simulation, not a measurement of the world.'},
-  mythience:{heading:'Mythience · What does it mean?',text:'The hand chooses an intention. The fold offers a correspondence. Two voices remain distinct while their interval changes. The witness gives the encounter meaning without rewriting the measurements.'},
+  science:{heading:'Science · What can be tested?',text:'Three owner-controlled numbers enter the executable Wyrdrune programme. Its Eightfold trace yields bounded hue, light, pulse, audible frequencies, virtual gravity, refraction and tactile intensity. This is a deterministic local simulation, not a measurement of the world.'},
+  mythience:{heading:'Mythience · What does it mean?',text:'The hand chooses an intention. The fold offers a correspondence. Two voices remain distinct as a digital terrain changes its gravity and refraction. The witness gives the encounter meaning without inventing measurements.'},
 });
 const clamp=n=>Math.max(0,Math.min(1,n));
 const fixed=n=>Number(n).toFixed(2);
@@ -32,7 +33,7 @@ export function mountWayglassMythienceInstrument(root,{
       <p class="eyebrow">Wayglass / Wyrdrune / Mythience</p>
       <h1>The Correspondence Engine</h1>
       <p class="lede">Touch the geometry. Shape the light. Give two voices a relationship. Wyrdrune computes the expression; you choose its meaning.</p>
-      <p class="tiny">Local owner-controlled instrument. No model invocation, environmental measurement, canon change or external transmission. Sound is silent until enabled and played.</p>
+      <p class="tiny">Local owner-controlled instrument. No model invocation, environmental measurement, canon change or external transmission. Sound and vibration are silent until independently enabled and deliberately played. Vibration depends on device support.</p>
     </header>
     <div class="myth-layout">
       <section class="glass-panel myth-field-panel" aria-label="Interactive Wyrdrune field">
@@ -47,6 +48,7 @@ export function mountWayglassMythienceInstrument(root,{
               <ellipse data-myth-orbit-a cx="240" cy="190" rx="110" ry="65" stroke-opacity=".75" stroke-width="2.5"/>
               <ellipse data-myth-orbit-b cx="240" cy="190" rx="110" ry="65" stroke-opacity=".52" stroke-width="2" transform="rotate(90 240 190)"/>
               <path data-myth-star stroke-width="2.5" stroke-opacity=".92"/>
+              <path data-myth-terrain stroke-width="1.5" stroke-opacity=".64" stroke-dasharray="6 5"/>
               <circle cx="240" cy="190" r="17" fill="#142c32" stroke="#f4d9a2" stroke-width="2"/>
               <circle cx="240" cy="190" r="4" fill="#f4d9a2" stroke="none"/>
             </g>
@@ -63,7 +65,8 @@ export function mountWayglassMythienceInstrument(root,{
         <div class="myth-actions">
           <button type="button" class="glass-chip" data-myth-weave>Weave expression</button>
           <button type="button" class="glass-chip" data-myth-audio>Enable sound</button>
-          <button type="button" class="glass-chip" data-myth-play>Hear Wyrdrune</button>
+          <button type="button" class="glass-chip" data-myth-haptics aria-pressed="false">Enable vibration</button>
+          <button type="button" class="glass-chip" data-myth-play>Experience Wyrdrune</button>
           <button type="button" class="glass-chip" data-myth-mono aria-pressed="true">Mono-safe</button>
           <button type="button" class="glass-chip" data-myth-silence>Silence</button>
           <button type="button" class="glass-chip" data-myth-feather>🪽 Feather Stop</button>
@@ -94,7 +97,7 @@ export function mountWayglassMythienceInstrument(root,{
     </div>
   </section>`;
   const $=key=>root.querySelector('[data-myth-'+key+']');
-  const status=$('status'),stage=$('stage'),star=$('star'),halo=$('halo'),orbitA=$('orbit-a'),orbitB=$('orbit-b');
+  const status=$('status'),stage=$('stage'),star=$('star'),halo=$('halo'),orbitA=$('orbit-a'),orbitB=$('orbit-b'),terrain=$('terrain');
   const controls={intention:.55,twist:.5,affinity:.5};
   const inputs=Object.fromEntries(Object.keys(controls).map(key=>[key,root.querySelector('[data-myth-input="'+key+'"]')]));
   const outputs=Object.fromEntries(Object.keys(controls).map(key=>[key,root.querySelector('[data-myth-out="'+key+'"]')]));
@@ -114,13 +117,20 @@ export function mountWayglassMythienceInstrument(root,{
     star.setAttribute('d',starPath(radius));
     halo.setAttribute('opacity',fixed(frame.light));
     halo.setAttribute('rx',String(radius+24));halo.setAttribute('ry',String(radius+24));
-    orbitA.setAttribute('transform','rotate('+fixed(twist*180)+' 240 190)');
-    orbitB.setAttribute('transform','rotate('+fixed(90+twist*180)+' 240 190)');
+    const warp=frame.simulated_refraction,gravity=frame.simulated_gravity;
+    const squeeze=1-(gravity-.35)*.13,stretch=1+warp*.20;
+    orbitA.setAttribute('transform','translate(240 190) rotate('+fixed(twist*180)+') scale('+fixed(stretch)+' '+fixed(squeeze)+') translate(-240 -190)');
+    orbitB.setAttribute('transform','translate(240 190) rotate('+fixed(90+twist*180)+') scale('+fixed(squeeze)+' '+fixed(stretch)+') translate(-240 -190)');
+    const lift=frame.terrain_fold*58,well=gravity*24;
+    terrain.setAttribute('d','M 36 '+fixed(265-lift)+' Q 120 '+fixed(240+well)+' 190 '+fixed(265-lift/2)+' T 310 '+fixed(255+well)+' T 444 '+fixed(265-lift));
     stage.style.setProperty('--myth-hue',fixed(frame.hue));
     stage.style.setProperty('--myth-light',fixed(frame.light));
     stage.style.setProperty('--myth-pulse',fixed(frame.pulse));
-    $('plain').textContent='The fold is '+Math.round(twist*100)+'% open; two audible voices are '+fixed(frame.frequency_hz)+' Hz and '+fixed(frame.counterpart_hz)+' Hz.';
-    $('formal').textContent='WTL '+frame.trace.length+'/8 phases · light '+fixed(frame.light)+' · hue '+fixed(frame.hue)+'° · pan '+fixed(frame.pan)+' · virtual below '+fixed(frame.virtual_below_hz)+' Hz / above '+Math.round(frame.virtual_above_hz)+' Hz (not emitted) · local simulation only.';
+    stage.style.setProperty('--myth-gravity',fixed(frame.simulated_gravity));
+    stage.style.setProperty('--myth-refraction',fixed(frame.simulated_refraction));
+    stage.style.setProperty('--myth-terrain',fixed(frame.terrain_fold));
+    $('plain').textContent='The fold is '+Math.round(twist*100)+'% open. Digital gravity is '+fixed(frame.simulated_gravity)+'×, terrain folds '+Math.round(frame.terrain_fold*100)+'%, and two audible voices are '+fixed(frame.frequency_hz)+' Hz and '+fixed(frame.counterpart_hz)+' Hz.';
+    $('formal').textContent='WTL '+frame.trace.length+'/8 phases · light '+fixed(frame.light)+' · hue '+fixed(frame.hue)+'° · pan '+fixed(frame.pan)+' · virtual below '+fixed(frame.virtual_below_hz)+' Hz / above '+Math.round(frame.virtual_above_hz)+' Hz (not emitted) · refraction '+fixed(frame.simulated_refraction)+' · tactile '+fixed(frame.tactile_intensity)+' · local simulation only.';
     $('hearth').textContent='The geometry carries an intention and two distinct voices. The return asks: '+frame.question;
     $('trace').replaceChildren(...frame.trace.map((item,i)=>{
       const li=doc.createElement('li');li.textContent=phases[i]+' · '+item.operations+' operations';return li;
@@ -137,8 +147,9 @@ export function mountWayglassMythienceInstrument(root,{
       const frame=await evaluate({source,controls:input,signal:controller.signal});
       if(disposed||stopped||controller.signal.aborted||ticket!==sequence)return;
       last=frame;paint(frame);
+      emitSensoriumFrame(frame,{scope});
       emitMaterialSignal({mode:'inscription',strength:frame.light,intent:input.intention,ownership:input.twist,handoff_progress:input.affinity,channel:'OOC'});
-      setStatus('Wyrdrune executed · eight phases · local projection · sound remains your choice.');
+      setStatus('Wyrdrune executed · eight phases · gravity, terrain, light and sound share one expression. Output channels remain your choice.');
     }catch(error){
       if(!disposed&&!stopped&&!controller.signal.aborted&&ticket===sequence){
         last=null;setStatus('Wyrdrune execution failed: '+error.message);
@@ -198,15 +209,27 @@ export function mountWayglassMythienceInstrument(root,{
       const mono=button.getAttribute('aria-pressed')!=='true';button.setAttribute('aria-pressed',String(mono));
       button.textContent=mono?'Mono-safe':'Stereo';soundscape.setMono(mono);return;
     }
-    if(button.hasAttribute('data-myth-silence')){soundscape.stop();setStatus('Sound silenced.');return;}
+    if(button.hasAttribute('data-myth-silence')){soundscape.stop();$('haptics').setAttribute('aria-pressed','false');setStatus('Sound and vibration silenced.');return;}
+    if(button.hasAttribute('data-myth-haptics')){
+      const next=button.getAttribute('aria-pressed')!=='true';
+      const enabled=soundscape.setHaptics(next);
+      button.setAttribute('aria-pressed',String(enabled));
+      button.textContent=enabled?'Vibration enabled':'Enable vibration';
+      setStatus(enabled?'Vibration armed. Press Experience Wyrdrune to feel a brief pulse.':next?'Vibration unavailable on this device. Visual and sound channels still work.':'Vibration off.');
+      return;
+    }
     if(button.hasAttribute('data-myth-audio')){
       const mono=$('mono').getAttribute('aria-pressed')==='true';
+      const vibrationWasEnabled=$('haptics').getAttribute('aria-pressed')==='true';
       const state=await soundscape.enable({audio:true,mono});
-      setStatus(state.audio_enabled?'Audio enabled. Press Hear Wyrdrune to listen.':'Audio unavailable: '+(state.last_error||state.status));return;
+      if(vibrationWasEnabled)soundscape.setHaptics(true);
+      setStatus(state.audio_enabled?'Audio enabled. Press Experience Wyrdrune to listen.':'Audio unavailable: '+(state.last_error||state.status));return;
     }
     if(button.hasAttribute('data-myth-play')){
       if(!last){setStatus('Weave a Wyrdrune expression first.');return;}
-      setStatus(soundscape.playExpression(last)?'Playing two bounded Wyrdrune voices.':'Enable audio first, or release Feather.');
+      const heard=soundscape.playExpression(last);
+      const felt=soundscape.feelExpression(last);
+      setStatus(heard&&felt?'Sound and vibration expressing one Wyrdrune frame.':heard?'Playing two Wyrdrune voices.':felt?'Wyrdrune vibration expressed.':'Enable sound or supported vibration first, or release Feather.');
     }
   };
   root.addEventListener('click',onClick);
