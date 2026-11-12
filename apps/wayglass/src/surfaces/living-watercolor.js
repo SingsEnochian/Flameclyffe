@@ -10,6 +10,8 @@ import { listWayglassRoutes } from '../route-client.js';
 import { signInHouseSteward } from '../house-steward-session.js';
 import { wayglassSomaticSound, SOUND_EVENTS, WAYGLASS_FEATHER_EVENT } from '../somatic-sound.js';
 import {createWatercolorContinuity} from '../watercolor-continuity.js';
+import {SENSORIUM_FRAME_EVENT} from '../sensorium-frame.js';
+import {sensoriumWatercolorImpulse} from '../sensorium-watercolor.js';
 import { journeyLedger } from '../journey-before-destination.js';
 import {synchronizeJourneyFeather} from './journey-before-destination.js';
 
@@ -38,7 +40,7 @@ export async function mountLivingWatercolorSurface(root) {
       '<header class="wg-surface-head glass-panel wc-head">',
         '<div><p class="eyebrow">Wayglass · Living Observer</p>',
         '<h1>The Living Watercolor</h1>',
-        '<nav class="wc-room-links" aria-label="Wayglass rooms"><button type="button" class="glass-chip" data-wc-room="wayglass:acoustic-room">Acoustic Room</button><button type="button" class="glass-chip" data-wc-room="arcsweep:writing-room">Writing Room</button><button type="button" class="glass-chip" data-wc-room="wayglass:journey-before-destination">Journey</button></nav>',
+        '<nav class="wc-room-links" aria-label="Wayglass rooms"><button type="button" class="glass-chip" data-wc-room="wayglass:acoustic-room">Acoustic Room</button><button type="button" class="glass-chip" data-wc-room="wayglass:mythience-instrument">Mythience</button><button type="button" class="glass-chip" data-wc-room="arcsweep:writing-room">Writing Room</button><button type="button" class="glass-chip" data-wc-room="wayglass:journey-before-destination">Journey</button></nav>',
         '<p class="lede">A place to meet, paint, speak, and choose what comes next together.</p></div>',
         '<div class="wc-head-signal"><span class="wc-status-light" aria-hidden="true"></span>',
         '<strong id="wc-link">Awaiting activity</strong>',
@@ -208,6 +210,17 @@ export async function mountLivingWatercolorSurface(root) {
       wayglassSomaticSound.play(event.kind,{x,energy:event.intensity});
     }
   });
+  // WTL local-world optics can colour the watercolour without impersonating
+  // Observer evidence, creating a model turn, or silently persisting a receipt.
+  const onSensorium=event=>{
+    if(stopped||featherStopped||paused)return;
+    try{
+      const impulse=sensoriumWatercolorImpulse(event.detail);
+      fluid.inject(impulse);
+      if(reduced)paint();
+    }catch{/* Ignore malformed or untrusted presentation events. */}
+  };
+  globalThis.addEventListener?.(SENSORIUM_FRAME_EVENT,onSensorium);
   function renderVoiceHistory() {
     const turns=continuity.snapshot().turns;
     voice.replaceChildren();
@@ -647,6 +660,7 @@ export async function mountLivingWatercolorSurface(root) {
       offActivity();offShipSound();
       for(const remove of cleanups.splice(0))remove();
       globalThis.removeEventListener?.(WAYGLASS_FEATHER_EVENT,onFeather);
+      globalThis.removeEventListener?.(SENSORIUM_FRAME_EVENT,onSensorium);
       wayglassSomaticSound.stop();
       globalThis.cancelAnimationFrame?.(animationId);
       fluid.dispose();

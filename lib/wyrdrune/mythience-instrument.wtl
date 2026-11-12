@@ -1,0 +1,56 @@
+// Mythience Instrument · Wyrdrune executable local expression v0.1
+// Owner-controlled numeric inputs. No network, model inference, or canon promotion.
+// Eightfold projection: geometry shapes colour, audible harmony and the Return question.
+mobius {
+  perceive {
+    let intention = bridge("instrument","intention");
+    let twist = bridge("instrument","twist");
+    let affinity = bridge("instrument","affinity");
+  }
+  compress {
+    let energy = intention * 0.55 + twist * 0.25 + affinity * 0.20;
+    let fold = twist * 0.65 + affinity * 0.35;
+  }
+  release {
+    let hue = 165 + fold * 60;
+    let light = 0.10 + energy * 0.70;
+    let root = 164.81 + intention * 80 + affinity * 60;
+    let counterpart = root * (1.12 + twist * 0.18);
+    let pan = twist * 2 - 1;
+    let pulse = 0.20 + energy * 0.65;
+    let below = 0.5 + twist * 8 + affinity * 3;
+    let above = 22000 + intention * 8000 + twist * 5000;
+    let gravity = 0.35 + twist * 1.20 + intention * 0.45;
+    let refraction = 0.08 + affinity * 0.60 + twist * 0.25;
+    let terrain = intention * 0.40 + twist * 0.35 + affinity * 0.25;
+    let tactile = 0.12 + energy * 0.68;
+  }
+  verify {
+    emit bridge("instrument","validate",light,hue,root,counterpart,pan,pulse,below,above,gravity,refraction,terrain,tactile);
+  }
+  integrate {
+    let expression = {
+      light:light,
+      hue:hue,
+      frequency_hz:root,
+      counterpart_hz:counterpart,
+      pan:pan,
+      pulse:pulse,
+      virtual_below_hz:below,
+      virtual_above_hz:above,
+      simulated_gravity:gravity,
+      simulated_refraction:refraction,
+      terrain_fold:terrain,
+      tactile_intensity:tactile
+    };
+  }
+  choose {
+    emit expression;
+  }
+  return {
+    emit bridge("instrument","return","local-preview");
+  }
+  transcend {
+    emit "What if geometry changed the sound while the witness kept the meaning?";
+  }
+}

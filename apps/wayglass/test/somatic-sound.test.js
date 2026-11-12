@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createSomaticSoundscape,soundObjectForEvent,WAYGLASS_FEATHER_EVENT} from '../src/somatic-sound.js';
 
-function fixture({deferred=false,failResume=false,failAllocation=Infinity,noPanner=false}={}){
+function fixture({deferred=false,failResume=false,failAllocation=Infinity,noPanner=false,clock=()=>Date.now()}={}){
   const scope=new EventTarget(),haptics=[],contexts=[],nodes=[],resumes=[];
   scope.navigator={vibrate:value=>{haptics.push(value);return true;}};
   let allocations=0;
@@ -27,7 +27,7 @@ function fixture({deferred=false,failResume=false,failAllocation=Infinity,noPann
     createStereoPanner(){const n=node('panner');n.pan=new Param();return n;}
     createOscillator(){const n=node('oscillator');n.frequency=new Param();n.started=0;n.stopped=0;n.start=()=>n.started++;n.stop=()=>n.stopped++;return n;}
   }
-  const sound=createSomaticSoundscape({scope,getAudioContext:()=>Context});
+  const sound=createSomaticSoundscape({scope,getAudioContext:()=>Context,now:clock});
   function dispatch(detail){const event=new Event(WAYGLASS_FEATHER_EVENT);Object.defineProperty(event,'detail',{value:detail});scope.dispatchEvent(event);}
   return {sound,scope,haptics,contexts,nodes,resumes,dispatch};
 }
@@ -105,4 +105,77 @@ test('voice capacity is bounded and ended voices release all audio nodes',async(
   assert.equal(f.sound.play('agent:active'),false);
   const osc=f.nodes.find(n=>n.typeName==='oscillator');osc.onended();assert.equal(f.sound.snapshot().active_voices,3);
   assert.equal(osc.disconnected,true);assert.equal(f.sound.play('agent:active'),true);f.sound.dispose();
+});
+
+const mythFrame=Object.freeze({schema:'wayglass.wyrdrune-mythience-expression/v1',
+  frequency_hz:220,counterpart_hz:264,pan:.7,pulse:.5});
+test('Wyrdrune two-voice sonification requires audio opt-in and uses exact score frequencies',async()=>{
+  const f=fixture();assert.equal(f.sound.playExpression(mythFrame),false);
+  assert.equal(f.contexts.length,0);
+  await f.sound.enable({audio:true,mono:false});
+  assert.equal(f.sound.playExpression(mythFrame),true);
+  const oscillators=f.nodes.filter(n=>n.typeName==='oscillator');
+  assert.deepEqual(oscillators.map(n=>n.frequency.value),[220,264]);
+  assert.equal(f.nodes.find(n=>n.typeName==='panner').pan.value,.7);
+  assert.equal(f.sound.snapshot().active_voices,1);
+  oscillators[0].onended();assert.equal(f.sound.snapshot().active_voices,0);
+  assert.ok(oscillators.every(n=>n.disconnected));f.sound.dispose();
+});
+test('Wyrdrune playback is mono-safe and Feather cuts both voices',async()=>{
+  const f=fixture();await f.sound.enable({audio:true,mono:true});
+  assert.equal(f.sound.playExpression(mythFrame),true);
+  assert.equal(f.nodes.find(n=>n.typeName==='panner').pan.value,0);
+  f.sound.feather();assert.equal(f.sound.snapshot().active_voices,0);
+  assert.ok(f.nodes.filter(n=>n.typeName==='oscillator').every(n=>n.disconnected));
+  assert.equal(f.sound.playExpression(mythFrame),false);
+  f.sound.releaseFeather({confirmed:true});
+  assert.equal(f.sound.playExpression(mythFrame),false);f.sound.dispose();
+});
+test('Wyrdrune audio rejects forged or out-of-range frames',async()=>{
+  const f=fixture();await f.sound.enable({audio:true});
+  for(const frame of [{...mythFrame,schema:'unknown'}, {...mythFrame,frequency_hz:Infinity},
+    {...mythFrame,counterpart_hz:20001},{...mythFrame,pan:2}])
+    assert.throws(()=>f.sound.playExpression(frame),/Wyrdrune/);
+  assert.equal(f.nodes.filter(n=>n.typeName==='oscillator').length,0);f.sound.dispose();
+});
+
+test('sensorium haptics are independent, brief, throttled and explicitly opted in',()=>{
+  let tick=1000;const f=fixture({clock:()=>tick});
+  const frame={...mythFrame,tactile_intensity:.5};
+  assert.equal(f.sound.feelExpression(frame),false);
+  assert.equal(f.sound.setHaptics(true),true);
+  assert.equal(f.contexts.length,0,'vibration does not create an AudioContext');
+  assert.equal(f.sound.feelExpression(frame),true);
+  const pulse=f.haptics.at(-1);assert.ok(Array.isArray(pulse));
+  assert.ok(pulse[0]<=25&&pulse[2]<=25);
+  assert.equal(f.sound.feelExpression(frame),false,'no rapid retrigger');
+  tick+=350;assert.equal(f.sound.feelExpression(frame),true);
+  assert.equal(f.sound.setHaptics(false),false);
+  assert.equal(f.sound.feelExpression(frame),false);
+  f.sound.dispose();
+});
+test('Feather stops tactile output and release requires new explicit vibration opt-in',()=>{
+  let tick=1000;const f=fixture({clock:()=>tick});
+  const frame={...mythFrame,tactile_intensity:.65};
+  f.sound.setHaptics(true);assert.equal(f.sound.feelExpression(frame),true);
+  f.sound.feather();tick+=500;
+  assert.equal(f.haptics.at(-1),0);
+  assert.equal(f.sound.feelExpression(frame),false);
+  assert.equal(f.sound.setHaptics(true),false);
+  f.sound.releaseFeather({confirmed:true});
+  assert.equal(f.sound.feelExpression(frame),false);
+  assert.equal(f.sound.snapshot().haptics_enabled,false);f.sound.dispose();
+});
+test('invalid tactile frame is rejected and unsupported devices never claim vibration',()=>{
+  const f=fixture();f.sound.setHaptics(true);
+  for(const frame of [{...mythFrame,tactile_intensity:Infinity},{...mythFrame,tactile_intensity:2},
+    {...mythFrame,tactile_intensity:.5,schema:'forged'}])
+    assert.throws(()=>f.sound.feelExpression(frame),/Wyrdrune/);
+  f.sound.dispose();
+  const scope=new EventTarget();scope.navigator={};
+  const sound=createSomaticSoundscape({scope,getAudioContext:()=>null});
+  assert.equal(sound.setHaptics(true),false);
+  assert.equal(sound.snapshot().haptics_supported,false);
+  assert.equal(sound.feelExpression({...mythFrame,tactile_intensity:.5}),false);
+  sound.dispose();
 });
