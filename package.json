@@ -49,6 +49,8 @@
     "everos:store": "node sandbox/everos/store-memory.mjs",
     "everos:search": "node sandbox/everos/search-memory.mjs",
     "wayglass:dev": "vite --config apps/wayglass/vite.config.js",
+    "wayglass:play:motes": "node scripts/wayglass-mote-play.mjs",
+    "wayglass:play:motes:demo": "node scripts/wayglass-mote-play.mjs --demo",
     "wayglass:build": "vite build --config apps/wayglass/vite.config.js",
     "wayglass:preview": "vite preview --config apps/wayglass/vite.config.js",
     "wayglass:test": "node --test apps/wayglass/test/*.test.js test/wayglass/*.test.cjs test/wayglass-mobius*.test.mjs lib/wyrdrune/*.test.cjs lib/wayglass-wyrdrune-ritual.test.cjs lib/wayglass-wyrdrune-soundscape.test.cjs lib/wayglass-wyrdrune-spectrum.test.cjs lib/wayglass-wyrdrune-atlas.test.cjs lib/wayglass-wyrdrune-learning.test.cjs lib/wayglass-wyrdrune-voice.test.cjs lib/wayglass-route-models.test.cjs",
