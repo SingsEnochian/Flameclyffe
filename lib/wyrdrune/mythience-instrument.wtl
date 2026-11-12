@@ -18,9 +18,11 @@ mobius {
     let counterpart = root * (1.12 + twist * 0.18);
     let pan = twist * 2 - 1;
     let pulse = 0.20 + energy * 0.65;
+    let below = 0.5 + twist * 8 + affinity * 3;
+    let above = 22000 + intention * 8000 + twist * 5000;
   }
   verify {
-    emit bridge("instrument","validate",light,hue,root,counterpart,pan,pulse);
+    emit bridge("instrument","validate",light,hue,root,counterpart,pan,pulse,below,above);
   }
   integrate {
     let expression = {
@@ -29,7 +31,9 @@ mobius {
       frequency_hz:root,
       counterpart_hz:counterpart,
       pan:pan,
-      pulse:pulse
+      pulse:pulse,
+      virtual_below_hz:below,
+      virtual_above_hz:above
     };
   }
   choose {
