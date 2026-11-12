@@ -13,6 +13,8 @@ test('native Wyrdrune executes all eight phases and preserves local epistemic re
   assert.equal(frame.model_response,false);assert.equal(frame.return_marker,'local-preview');
   assert.match(frame.source_label,/^local-fnv1a32:/);
   assert.ok(frame.frequency_hz>100&&frame.counterpart_hz>frame.frequency_hz);
+  assert.ok(frame.virtual_below_hz<20);
+  assert.ok(frame.virtual_above_hz>20000);
 });
 test('owner manipulation changes light, geometry and two independent audible pitches',async()=>{
   const low=await evaluateMythienceExpression({source,controls:{intention:0,twist:0,affinity:0}});
@@ -33,6 +35,6 @@ test('Feather-aborted Wyrdrune evaluation cannot issue an expression',async()=>{
   await assert.rejects(evaluateMythienceExpression({source,controls,signal:controller.signal}),/Feather/);
 });
 test('modified WTL without validation cannot masquerade as an expression',async()=>{
-  const altered=source.replace('emit bridge("instrument","validate",light,hue,root,counterpart,pan,pulse);','emit "not-validated";');
+  const altered=source.replace('emit bridge("instrument","validate",light,hue,root,counterpart,pan,pulse,below,above);','emit "not-validated";');
   await assert.rejects(evaluateMythienceExpression({source:altered,controls}),/Incomplete Wyrdrune execution/);
 });
