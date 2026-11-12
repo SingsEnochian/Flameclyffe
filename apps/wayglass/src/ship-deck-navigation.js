@@ -12,6 +12,7 @@ const DESTINATIONS=Object.freeze({
   'wayglass:journey-before-destination':'contact',
   'arcsweep:deck':'creation',
   'wayglass:sound-composition':'creation',
+  'wayglass:mythience-instrument':'creation',
   'wayglass:acoustic-room':'creation',
   'wayglass:video-atelier':'creation',
   'wayglass:living-observer':'observation',
