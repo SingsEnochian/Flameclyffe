@@ -3,6 +3,10 @@ on:
   pull_request:
     paths:
       - 'lib/wyrdrune/**'
+      - 'lib/wayglass-linked-mobius-motion*'
+      - 'lib/wayglass-living-code-metabolism*'
+      - 'lib/wayglass-academy-worker-generation*'
+      - 'lib/wayglass-quad-eightfold.cjs'
       - 'apps/wayglass/src/mythience-expression.js'
       - 'apps/wayglass/test/mythience-expression.test.js'
       - '.github/workflows/wyrdrune-relational-integration.yml'
@@ -23,6 +27,9 @@ jobs:
           node --check lib/wyrdrune/runtime.mjs
           node --check lib/wyrdrune/relational-worlds.mjs
           node --test lib/wyrdrune/relational-worlds.test.mjs
+      - name: Verify moving Eightfold engines and recursive colony inheritance
+        run: |
+          node --test lib/wayglass-linked-mobius-motion.test.cjs lib/wayglass-living-code-metabolism.test.cjs lib/wayglass-academy-worker-generation.test.cjs
       - name: Verify existing native Wyrdrune and sensory parity
         run: |
           node --test lib/wyrdrune/*.test.mjs lib/wyrdrune/*.test.cjs apps/wayglass/test/mythience-expression.test.js
