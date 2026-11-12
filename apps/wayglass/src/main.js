@@ -2,6 +2,9 @@ import {mountWayglassSoundComposition} from './surfaces/sound-composition.js';
 import {wayglassSomaticSound} from './somatic-sound.js';
 import {wayglassStoryScoreBinding,installWayglassStoryComposition} from './story-score-binding.js';
 import './styles.css';
+import './faeberpunk.css';
+import { installFaeberpunkBridge } from './faeberpunk-bridge.js';
+import { emitMaterialSignal } from './material-state.js';
 import './authorization.css';
 import { openWayglassAuthorization } from './authorization.js';
 import { installWayglassField } from './glass-field.js';
@@ -222,6 +225,9 @@ helmNav.textContent='⌘  Ship map';helmNav.setAttribute('aria-controls',shell.i
 helm.append(helmIdentity,helmReadout,helmNav);
 root.before(helm);root.after(shell,switcher);
 const motion=installMotionChoreography({root:document.documentElement,controlsHost:shell,contentRoot:root});
+// A single semantic material signal can be projected into light, legible Wyrdrune
+// inscriptions and opt-in cues without inventing an agent or a route receipt.
+const faeberpunk=installFaeberpunkBridge({root:document.documentElement,inscriptionHost:helmReadout,soundscape:wayglassSomaticSound});
 function setDeckOpen(open,{focus=false}={}){
   shell.hidden=!open;
   for(const control of [switcher,helmNav])control.setAttribute('aria-expanded',String(open));
@@ -252,6 +258,9 @@ function mountSurface(surfaceId){
     motion?.arrive(root);
     document.documentElement.dataset.wayglassSurface=surfaceId;
     roomLabel.textContent=shipDeckDestinationLabel(surfaceId,surfaces);
+    // This is a completed local room mount, not a provider response or crossing.
+    emitMaterialSignal({mode:'wake',strength:.65,intent:.5,handoff_progress:1,channel:'OOC'});
+    globalThis.dispatchEvent?.(new CustomEvent('wayglass:faeberpunk-cue',{detail:{kind:'chamber'}}));
     setDeckOpen(false);
     for(const button of shell.querySelectorAll('[data-surface-id]')){
       const active=button.dataset.surfaceId===surfaceId;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));
@@ -297,6 +306,7 @@ const wayglass = Object.freeze({
   reply: replyToVoyage,
   doubleMobius: Object.freeze({ inspect: inspectWayglassDoubleMobius, traverse: traverseWayglassDoubleMobius }),
   fullSpectrum,
+  faeberpunk:()=>faeberpunk?.snapshot(),
 });
 
 globalThis.__wayglassOS = wayglass;
