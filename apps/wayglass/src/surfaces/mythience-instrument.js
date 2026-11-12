@@ -56,6 +56,11 @@ export function mountWayglassMythienceInstrument(root,{
           </svg>
           <span class="myth-stage-label" aria-hidden="true">SKÝRUNOR · EIGHTFOLD</span>
         </div>
+        <div class="myth-atlas-motion" data-myth-atlas-motion hidden aria-live="off">
+          <label for="myth-atlas-progress">Atlas passage · simulated</label>
+          <progress id="myth-atlas-progress" data-myth-atlas-progress max="100" value="0"></progress>
+          <output data-myth-atlas-copy>Awaiting a verified Wyrdrune route.</output>
+        </div>
         <p class="tiny" id="myth-stage-help">Drag, touch or use arrow keys on the field. Left/right adjusts fold; up/down adjusts intention. Every change runs the same Wyrdrune programme. Reduced-motion mode keeps the geometry readable and still.</p>
         <div class="myth-controls">
           <label>Intention <input data-myth-input="intention" type="range" min="0" max="1" step=".01" value=".55"><output data-myth-out="intention">0.55</output></label>
@@ -187,9 +192,25 @@ export function mountWayglassMythienceInstrument(root,{
   stage.addEventListener('pointerdown',down);stage.addEventListener('pointermove',move);
   stage.addEventListener('pointerup',up);stage.addEventListener('pointercancel',up);stage.addEventListener('keydown',keydown);
   function onFeather(event){
-    if(event.detail?.stopped===true){stopped=true;sequence++;active?.abort();active=null;dragging=false;last=null;$('haptics').setAttribute('aria-pressed','false');$('haptics').textContent='Enable vibration';setStatus('Feather Stop. Expression, sound and vibration held.');}
+    if(event.detail?.stopped===true){stage.style.setProperty('--atlas-motion-active','0');stopped=true;sequence++;active?.abort();active=null;dragging=false;last=null;$('haptics').setAttribute('aria-pressed','false');$('haptics').textContent='Enable vibration';setStatus('Feather Stop. Expression, sound and vibration held.');}
     else if(event.detail?.stopped===false&&event.detail.confirmed===true){stopped=false;setStatus('Feather released. Sound remains off; weave deliberately to resume.');}
   }
+  // Consume only explicit, verified-looking *projection* frames; never use them as authority.
+  // Feather prevents the visual passage from advancing until deliberately released.
+  function onAtlasMotion(event){
+    const frame=event.detail;
+    if(disposed||stopped||frame?.schema!=='wyrdrune.atlas-motion-frame/v1'||
+      frame.executed!==false||frame.physicalActuation!==false||
+      frame.positionIsSimulated!==true||typeof frame.progress!=='number'||
+      !Number.isFinite(frame.progress)||frame.progress<0||frame.progress>1)return;
+    const percent=Math.round(frame.progress*100);
+    $('atlas-motion').hidden=false;
+    $('atlas-progress').value=percent;
+    $('atlas-copy').textContent='Digital passage '+percent+'% · simulated position only';
+    stage.style.setProperty('--atlas-motion-progress',String(frame.progress));
+    stage.style.setProperty('--atlas-motion-active','1');
+  }
+  scope.addEventListener?.('wayglass:atlas-motion-frame',onAtlasMotion);
   scope.addEventListener?.('wayglass:feather',onFeather);
   const onClick=async event=>{
     const button=event.target.closest?.('button');
@@ -242,6 +263,7 @@ export function mountWayglassMythienceInstrument(root,{
       stage.removeEventListener('pointerdown',down);stage.removeEventListener('pointermove',move);
       stage.removeEventListener('pointerup',up);stage.removeEventListener('pointercancel',up);stage.removeEventListener('keydown',keydown);
       scope.removeEventListener?.('wayglass:feather',onFeather);
+      scope.removeEventListener?.('wayglass:atlas-motion-frame',onAtlasMotion);
     },
   });
 }
