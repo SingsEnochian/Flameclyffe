@@ -120,7 +120,7 @@ export function mountWayglassMythienceInstrument(root,{
     stage.style.setProperty('--myth-light',fixed(frame.light));
     stage.style.setProperty('--myth-pulse',fixed(frame.pulse));
     $('plain').textContent='The fold is '+Math.round(twist*100)+'% open; two audible voices are '+fixed(frame.frequency_hz)+' Hz and '+fixed(frame.counterpart_hz)+' Hz.';
-    $('formal').textContent='WTL '+frame.trace.length+'/8 phases · light '+fixed(frame.light)+' · hue '+fixed(frame.hue)+'° · pan '+fixed(frame.pan)+' · local simulation only.';
+    $('formal').textContent='WTL '+frame.trace.length+'/8 phases · light '+fixed(frame.light)+' · hue '+fixed(frame.hue)+'° · pan '+fixed(frame.pan)+' · virtual below '+fixed(frame.virtual_below_hz)+' Hz / above '+Math.round(frame.virtual_above_hz)+' Hz (not emitted) · local simulation only.';
     $('hearth').textContent='The geometry carries an intention and two distinct voices. The return asks: '+frame.question;
     $('trace').replaceChildren(...frame.trace.map((item,i)=>{
       const li=doc.createElement('li');li.textContent=phases[i]+' · '+item.operations+' operations';return li;
