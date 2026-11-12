@@ -187,7 +187,7 @@ export function mountWayglassMythienceInstrument(root,{
   stage.addEventListener('pointerdown',down);stage.addEventListener('pointermove',move);
   stage.addEventListener('pointerup',up);stage.addEventListener('pointercancel',up);stage.addEventListener('keydown',keydown);
   function onFeather(event){
-    if(event.detail?.stopped===true){stopped=true;sequence++;active?.abort();active=null;dragging=false;last=null;setStatus('Feather Stop. Expression and sound held.');}
+    if(event.detail?.stopped===true){stopped=true;sequence++;active?.abort();active=null;dragging=false;last=null;$('haptics').setAttribute('aria-pressed','false');$('haptics').textContent='Enable vibration';setStatus('Feather Stop. Expression, sound and vibration held.');}
     else if(event.detail?.stopped===false&&event.detail.confirmed===true){stopped=false;setStatus('Feather released. Sound remains off; weave deliberately to resume.');}
   }
   scope.addEventListener?.('wayglass:feather',onFeather);
