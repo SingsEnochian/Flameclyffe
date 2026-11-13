@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {createMythienceJourney} from '../src/mythience-journey.js';
+import {createMythienceJourney,wayglassMythienceJourney} from '../src/mythience-journey.js';
 const hash='a'.repeat(64),other='b'.repeat(64);
 function crossing({id='traveller:a',input_hash=hash,from='universe:one',to='universe:two',crossings=1,charge=.7}={}){
   return {status:'candidate-returned',input_hash,source_hash:'wtl:crossing',
@@ -104,4 +104,15 @@ test('Feather discards only the pending proposal and keeps earlier carried linea
   assert.equal(paused.history.length,1);
   assert.equal(paused.seeds.crossings,1);
   assert.equal(paused.traveller_id,'traveller:a');
+});
+
+test('the ship shares one tab-local journey across room mounts without adopting pending candidates',()=>{
+  const first=wayglassMythienceJourney(),second=wayglassMythienceJourney();
+  assert.equal(first,second);
+  first.reset();
+  first.offer(crossing(),{traveller_id:'traveller:a'});
+  assert.equal(second.snapshot().history.length,0);
+  first.carry();
+  assert.equal(second.snapshot().history.length,1);
+  first.reset();
 });
