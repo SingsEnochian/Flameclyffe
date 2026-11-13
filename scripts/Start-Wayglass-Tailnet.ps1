@@ -62,7 +62,7 @@ function Assert-NoExistingShare($config) {
         throw 'Tailscale already has a TCP Serve/Funnel route. Refusing to overwrite it.'
     }
 }
-$status = Read-TailscaleJson @('status','--json')
+$status = Read-TailscaleJson -Arguments @('status','--json')
 if ($status.BackendState -ne 'Running' -or -not $status.Self.DNSName) {
     throw 'Tailscale must be signed in and connected on this Windows machine.'
 }
