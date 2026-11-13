@@ -45,6 +45,7 @@ test('shipwide runtime runs independent participant lineages through the eightfo
   const result = await runtime.run({ cycles: 2 });
   assert.equal(result.schema, SCHEMA);
   assert.equal(result.status, 'completed');
+  assert.equal(result.outcome, 'all-committed');
   assert.equal(result.layout, 'eightfold-octo-two-quad');
   assert.equal(result.center, 'withness');
   assert.equal(result.participants.length, 2);
@@ -103,6 +104,7 @@ test('Feather request during a cycle stops at a phase boundary without inventing
   });
   const result = await runtime.run();
   assert.equal(result.status, 'completed');
+  assert.equal(result.outcome, 'settled-with-noncommitted-lineages');
   assert.equal(result.participants[0].status, 'feather-stopped');
   assert.equal(result.participants[0].checkpoint, null);
   assert.equal(runtime.get('bird').presence, 'resting');
