@@ -100,6 +100,18 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
   const carryButton=root.querySelector('[data-mythience-carry]');
   const hearButton=root.querySelector('[data-mythience-hear]');
   const feelButton=root.querySelector('[data-mythience-feel]');
+  function invalidateProposal(){
+    if(!active)return;
+    if(controller){controller.abort();controller=null;button.disabled=false;
+      hybridButton.disabled=journey.snapshot().abilities.length<2;}
+    journey.discard();sensory.stop();lastReading=null;
+    carryButton.disabled=true;hearButton.disabled=true;feelButton.disabled=true;
+    receipt.textContent='';
+    status.textContent='Fields changed. Invite Wyrdrune again to receive a new proposal.';
+    scene.setFields(fieldValues());
+  }
+  form.addEventListener('input',invalidateProposal);
+  form.addEventListener('change',invalidateProposal);
   for(const slider of form.querySelectorAll('input[type=range]')){
     slider.addEventListener('input',()=>{
       form.querySelector('[data-value="'+slider.name+'"]').textContent=Number(slider.value).toFixed(2);
