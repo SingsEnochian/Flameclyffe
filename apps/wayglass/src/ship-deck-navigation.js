@@ -22,6 +22,7 @@ const DESTINATIONS=Object.freeze({
   'wayglass:library':'commons',
   'wayglass:commons':'commons',
   'wayglass:toybox':'commons',
+  'wayglass:mythience-crossing':'creation',
 });
 export function shipDeckGroup(surfaceId){return DESTINATIONS[surfaceId]||'commons';}
 export function shipDeckMatches({label='',surface_id=''},search=''){

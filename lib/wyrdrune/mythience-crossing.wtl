@@ -1,0 +1,55 @@
+// MYTHIENCE 001: intention + shifting + membrane + translation.
+// Science-inspired interface model, mythic crossing grammar, executable WTL.
+// A candidate crossing is NOT a claim of physical multiverse travel.
+mobius scoped {
+  perceive {
+    let intention = bridge("mythience","intention");
+    let shifting = bridge("mythience","shifting");
+    let porosity = bridge("mythience","porosity");
+    let resonance = bridge("mythience","resonance");
+    let compatibility = bridge("mythience","compatibility");
+    let experience_count = bridge("mythience","experience_count");
+    let traveller_consent = bridge("mythience","traveller_consent");
+    let origin_consent = bridge("mythience","origin_consent");
+    let destination_consent = bridge("mythience","destination_consent");
+    let old_crossings = crossings;
+    let old_attunement = attunement;
+    let old_charge = charge;
+  }
+  compress {
+    let alignment = intention * shifting * (0.5 + resonance * 0.5);
+    let membrane = porosity * (0.25 + alignment * 0.75);
+  }
+  release {
+    let permeability = membrane * (0.5 + old_attunement * 0.5);
+    let native_expression = permeability * compatibility;
+    let experience_bonus = (1 - native_expression) * (experience_count / (experience_count + 8)) * 0.15;
+    let translated_expression = native_expression + experience_bonus;
+    let crossing_cost = 0.1 + (1 - permeability) * 0.3 + (1 - compatibility) * 0.1;
+    let next_charge = old_charge - crossing_cost;
+    let next_attunement = old_attunement * 0.8 + translated_expression * 0.2;
+    let next_crossings = old_crossings + 1;
+  }
+  verify {
+    require traveller_consent and origin_consent and destination_consent else "Three-way crossing consent required";
+    require permeability >= 0.25 else "Membrane insufficiently permeable";
+    require translated_expression >= 0.12 else "Ability cannot manifest in destination";
+    require next_charge >= 0 else "Insufficient crossing charge";
+    require translated_expression <= 1 else "Translation outside bounded field";
+  }
+  integrate {
+    let candidate = bridge("mythience","candidate",permeability,translated_expression,crossing_cost,next_attunement,next_charge,next_crossings);
+  }
+  choose {
+    emit candidate;
+  }
+  return {
+    emit bridge("mythience","return","proposal-only");
+  }
+  transcend {
+    carry crossings = next_crossings;
+    carry attunement = next_attunement;
+    carry charge = next_charge;
+    emit "What can this traveller now translate between worlds?";
+  }
+}
