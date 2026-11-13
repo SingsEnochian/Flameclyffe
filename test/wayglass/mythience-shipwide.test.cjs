@@ -21,6 +21,9 @@ test('Mythience is carried by authenticated server and staged native WTL',()=>{
   assert.match(router,/griffStewardAuthorized/);
   assert.match(router,/proposeCrossing/);
   assert.match(stage,/mythience-crossing\.wtl/);
+  assert.match(stage,/mythience-hybrid\.wtl/);
+  assert.match(router,/mythience-hybrid/);
+  assert.match(router,/proposeHybrid/);
 });
 test('Mythience touches Watercolour, Toybox and shared return without fabricating canon',()=>{
   const bridge=source('apps/wayglass/src/watercolor-bridge.js');
