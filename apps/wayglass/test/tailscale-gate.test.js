@@ -30,3 +30,14 @@ test('encoded traversal and double-encoding cannot cross the route boundary',()=
   '/wayglass/..%5capi','/wayglass/%252Fapi'
  ]) assert.equal(allowedWayglassPath(path),false,path);
 });
+
+// A reverse proxy must not rely on an upstream's number of decode passes.
+test('recursive percent encoding and invalid upstream configuration fail closed',()=>{
+ for(const path of ['/wayglass/%2525252e%2525252e/private',
+   '/wayglass/%252520private','/wayglass/%25','/api/v1/house/session/%252fadmin']) {
+  assert.equal(allowedWayglassPath(path),false,path);
+ }
+ for(const hostPort of [0,80,65536,32862,NaN,3000.5]) {
+  assert.throws(()=>createTailnetGate({port:32862,hostPort}),TypeError);
+ }
+});
