@@ -85,7 +85,7 @@ lib/wyrdrune/tensor-wtl-bridge.cjs exposes four owner-authorised operations:
 
 lib/wyrdrune/tensor-engine.wtl is an executable WTL demonstration. It composes pointwise arithmetic, derives a WGSL kernel, evaluates the CPU reference, differentiates a scalar reduction, verifies, emits the result, and carries the result through Transcend. The existing Wyrdrune runtime owns the Eightfold phase cycle; the numerical engine does not duplicate it.
 
-Feather/abort is checked at the bridge, interpreter and WebGPU dispatch boundaries. The engine has no ambient filesystem, network, provider, persistence or canon-write capability. WebGPU is an explicit caller-selected backend; absence returns unavailable rather than pretending the CPU path was a GPU run.
+Wayglass exposes the explicit browser executor as __wayglassOS.tensor.dispatch(plan, feeds). It is not called automatically by room entry or page load. Feather/abort is checked at the bridge, interpreter and WebGPU dispatch boundaries. The engine has no ambient filesystem, network, provider, persistence or canon-write capability. WebGPU is an explicit caller-selected backend; absence returns unavailable rather than pretending the CPU path was a GPU run.
 
 ## Verification
 

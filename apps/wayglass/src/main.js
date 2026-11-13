@@ -36,6 +36,7 @@ import { subscribeWayglassObserver } from './living-observer-model.js';
 import { recordRouteAsWonderLight } from './wonder-light.js';
 import { registerWayglassOrgan, listWayglassOrgans } from './organ-registry.js';
 import { FIRST_WAYGLASS_ORGANS } from './organ-donors.js';
+import { dispatchWyrdruneTensorKernel } from './tensor-webgpu.js';
 
 const root = document.querySelector('#app');
 
@@ -296,6 +297,9 @@ const wayglass = Object.freeze({
   recoverDeparture: recoverWayglassDeparture,
   reply: replyToVoyage,
   doubleMobius: Object.freeze({ inspect: inspectWayglassDoubleMobius, traverse: traverseWayglassDoubleMobius }),
+  // Explicit numerical execution capability. Callers must provide a derived plan and feeds;
+  // no kernel dispatch occurs on room entry or merely by loading the ship.
+  tensor: Object.freeze({ dispatch: dispatchWyrdruneTensorKernel, backend: 'explicit-webgpu' }),
   fullSpectrum,
 });
 
