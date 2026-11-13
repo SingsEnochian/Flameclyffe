@@ -187,3 +187,22 @@ test('a forged phase receipt container cannot masquerade as eight phases',()=>{
   assert.throws(()=>journey.offer(forged,{traveller_id:'traveller:a'}),/incomplete identity or provenance/);
   assert.deepEqual(journey.snapshot(),before);
 });
+
+test('Eightfold receipts must preserve all eight ordered phase identities',()=>{
+  const journey=createMythienceJourney();
+  journey.offer(crossing(),{traveller_id:'traveller:a'});
+  const before=journey.snapshot();
+  const malformed=[
+    Array.from({length:8},()=>({phase:0})),
+    Array.from({length:8},(_,i)=>({phase:7-i})),
+    Array.from({length:8},(_,i)=>i===4?null:{phase:i}),
+    Array.from({length:8},(_,i)=>i===4?'verify':{phase:i})
+  ];
+  for(const phase_receipts of malformed){
+    const forged=crossing({input_hash:other});
+    forged.phase_receipts=phase_receipts;
+    assert.throws(()=>journey.offer(forged,{traveller_id:'traveller:a'}),/incomplete identity or provenance/);
+    assert.deepEqual(journey.snapshot(),before);
+  }
+  assert.equal(journey.carry().history.length,1);
+});
