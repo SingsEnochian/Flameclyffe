@@ -8,7 +8,9 @@ test('remote gateway admits only Wayglass and House sign-in paths',()=>{
  }
  for(const path of ['/api/boxfire/status','/mcp','/api/v1/chat','/api/v1/flames',
   '//evil.example/wayglass/','/wayglass/%2e%2e/api/boxfire/status','http://evil.example/wayglass/',
-  '/wayglass\\api/boxfire','/wayglass%0d%0aevil']){
+  '/wayglass\\api/boxfire','/wayglass%0d%0aevil',
+  '/wayglass/%2Fapi','/wayglass/%5capi','/wayglass/%2e%2e',
+  '/wayglass/%252e%252e','/wayglass/./asset','/wayglass/../api/v1/house/session']){
   assert.equal(allowedWayglassPath(path),false,path);
  }
 });
