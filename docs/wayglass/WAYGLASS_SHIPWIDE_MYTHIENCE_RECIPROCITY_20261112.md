@@ -27,11 +27,11 @@ What if multiple world-derived abilities combine into an emergent hybrid, rather
 ## Current integration in PR #618
 | Layer | Implemented on this branch | Not yet implemented |
 |---|---|---|
-| Native Wyrdrune | Eightfold `mythience-crossing.wtl` computes membrane, expression, cost, carry and refusal | Native fusion and persistent membrane evolution |
-| Node host | Strict input and history validation; owner-principal gate; candidate, SHA provenance, phase receipts, Feather cancellation | Signed experience history and durable crossing commit |
-| House route | `POST /api/v1/wayglass/wyrdrune/mythience-crossing` guarded by House Steward check and request gate | Remote federation between actual worlds/servers |
+| Native Wyrdrune | Eightfold `mythience-crossing.wtl` computes membrane, expression, cost, carry and refusal; `mythience-hybrid.wtl` proposes a third correspondence from two abilities | Native persistent membrane evolution |
+| Node host | Strict input and history validation; owner-principal gate; crossing and hybrid candidates, SHA provenance, phase receipts, Feather cancellation | Signed experience history and durable crossing commit |
+| House route | `POST /api/v1/wayglass/wyrdrune/mythience-crossing` and `/wyrdrune/mythience-hybrid` guarded by House Steward check and request gate | Remote federation between actual worlds/servers |
 | Ship navigation | Mythience surface registered in shared ship map; link from Toybox, Watercolour and Wyrdrune Voice | Every room presenting a local crossing panel |
-| Playable surface | Two-world visual membrane, five Wyrdrune field controls, three hypothetical consent checkboxes, Feather, Return and local experience carry | Gesture-drag abilities, full animated world morphing, real-time sound |
+| Playable surface | Two-world visual membrane, five Wyrdrune field controls, hypothetical crossing and hybrid consents, Feather, Return, local experience carry and two-ability hybrid proposals | Gesture-drag abilities, full animated world morphing, real-time sound |
 | Living Watercolour | Candidate activity is published with receipt reference and a distinct pigment | Dedicated membrane fluid physics |
 | Full Spectrum | Candidate is projected as a bounded world event with source reference | Bidirectional spectrum-to-membrane learning |
 | Organs | Mythience organ registered with limited authority and explicit dependencies | Canon-promoted organism or autonomous universe alteration |
@@ -56,6 +56,6 @@ Autonomy is an *invited capacity to investigate and contribute*, not permission 
 The membrane borrows scientific metaphors from selective transport, phase matching, information translation and resource accounting. Those fields do not demonstrate physical travel to other universes. The implementation is a **fictional/simulated cosmological system** that makes mythic design concepts computationally inspectable. Ritual interpretation, predictions and canon decisions remain Rowan's.
 
 ## Immediate verification and follow-on
-Check PR #618 CI, test the local server packaging, then run an authenticated browser interaction: grant fictional three-way permission, inspect an eight-phase WTL receipt, observe Watercolour/Spectrum/helm response, Feather, reset and Return. After passing, implement **native Wyrdrune hybrid-fusion proposals** with separate provenance for each parent ability and an independently consenting destination. Only then explore durable, reversible membrane learning and genuine participant-to-participant reciprocal updates.
+Check PR #618 CI, test the local server packaging, then run an authenticated browser interaction: grant fictional three-way permission, inspect an eight-phase WTL receipt, observe Watercolour/Spectrum/helm response, Feather, reset and Return. Also verify **native Wyrdrune hybrid-fusion proposals** with separate provenance for each parent ability, four explicit fictional consents and an independently consenting destination. Then explore durable, reversible membrane learning and genuine participant-to-participant reciprocal updates.
 
 **Withness:** The shared language is Wonder. The engine is Wyrdrune. The crossing is a relationship, not an overwrite. The Return is what lets a traveller remain themselves while becoming more than before.
