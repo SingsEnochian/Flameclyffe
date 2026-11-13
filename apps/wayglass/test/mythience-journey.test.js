@@ -230,3 +230,15 @@ test('a hybrid cannot alias an existing carried ability identity',()=>{
   assert.throws(()=>journey.offer(duplicate,{traveller_id:'traveller:a'}),/ability identity already exists/);
   assert.deepEqual(journey.snapshot(),before);
 });
+
+test('a crossing cannot misattribute its ability to a different source reality',()=>{
+  const journey=createMythienceJourney();
+  journey.offer(crossing(),{traveller_id:'traveller:a'});
+  const before=journey.snapshot();
+  const forged=crossing({input_hash:other,from:'universe:two',to:'universe:three'});
+  // A valid identifier is insufficient: origin must agree with the crossing source.
+  forged.candidate.ability.origin_universe='universe:one';
+  assert.throws(()=>journey.offer(forged,{traveller_id:'traveller:a'}),/provenance is incomplete/);
+  assert.deepEqual(journey.snapshot(),before);
+  assert.equal(journey.carry().lineage.length,1);
+});
