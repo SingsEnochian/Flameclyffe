@@ -1,5 +1,5 @@
 import './mythience-crossing.css';
-import {proposeMythienceCrossing,mythienceSnapshot,clearMythience} from '../mythience-client.js';
+import {proposeMythienceCrossing,proposeMythienceHybrid,mythienceSnapshot,clearMythience} from '../mythience-client.js';
 
 const esc=v=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;')
   .replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
@@ -15,6 +15,7 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
   let active=true,controller=null,serial=0;
   let seeds={crossings:0,attunement:0.5,charge:1};
   let history=[];
+  let abilities=[];
   root.innerHTML=[
     '<section class="wg-surface wg-mythience" data-surface="wayglass-mythience">',
     '<header class="glass-panel wg-mythience-heading"><p class="eyebrow">Wayglass · Wyrdrune · Mythience</p>',
@@ -28,6 +29,7 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
     '<label>Origin universe<input name="origin" required maxlength="100" value="universe:wayglass" pattern="[a-zA-Z0-9][a-zA-Z0-9._:/-]*"></label>',
     '<label>Destination universe<input name="destination" required maxlength="100" value="universe:aurora" pattern="[a-zA-Z0-9][a-zA-Z0-9._:/-]*"></label>',
     '<label>Ability identifier<input name="ability" required maxlength="100" value="ability:starlight" pattern="[a-zA-Z0-9][a-zA-Z0-9._:/-]*"></label>',
+    '<label>Ability source universe (optional)<input name="ability_source" maxlength="100" placeholder="Current origin if blank"></label>',
     '<label>Ability modality<select name="modality"><option value="magic">Magic</option><option value="technology">Technology</option><option value="hybrid">Hybrid</option></select></label>',
     '<fieldset class="wg-mythience-fields"><legend>Membrane field</legend>',
     ...controls.map(([key,label,description])=>'<label>'+label+
@@ -39,8 +41,11 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
     '<label><input type="checkbox" name="traveller_consent"> Traveller opts in</label>',
     '<label><input type="checkbox" name="origin_consent"> Fictional origin opts in</label>',
     '<label><input type="checkbox" name="destination_consent"> Fictional destination opts in</label>',
+    '<label><input type="checkbox" name="first_consent"> First parent ability opts into hybridisation</label>',
+    '<label><input type="checkbox" name="second_consent"> Second parent ability opts into hybridisation</label>',
     '</fieldset>',
     '<div class="wg-mythience-actions"><button type="submit" class="send-jewel">Ask Wyrdrune</button>',
+    '<button type="button" class="glass-chip" data-mythience-hybrid disabled>Weave hybrid from two encounters</button>',
     '<button type="button" class="glass-chip" data-mythience-feather>🪽 Feather</button>',
     '<button type="button" class="glass-chip" data-mythience-reset>New journey</button></div>',
     '<p class="tiny" role="status" aria-live="polite" data-mythience-status>Waiting for an invitation. Nothing crosses automatically.</p>',
@@ -62,6 +67,7 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
   const receipt=root.querySelector('[data-mythience-receipt]');
   const membrane=root.querySelector('[data-mythience-membrane]');
   const button=form.querySelector('[type=submit]');
+  const hybridButton=root.querySelector('[data-mythience-hybrid]');
   for(const slider of form.querySelectorAll('input[type=range]')){
     slider.addEventListener('input',()=>{form.querySelector('[data-value="'+slider.name+'"]').textContent=Number(slider.value).toFixed(2);});
   }
@@ -73,6 +79,12 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
       return;
     }
     const c=result.candidate;
+    if(Array.isArray(c.parents)){
+      membrane.style.setProperty('--membrane-open',String(clamp(c.expression)));
+      reading.textContent='A third ability has been proposed from '+c.parents.map(p=>p.id+' ('+p.origin_universe+')').join(' and ')+'.';
+      receipt.textContent='Hybrid '+c.id+' · Expression '+Math.round(c.expression*100)+'% · Synergy '+Math.round(c.synergy*100)+'% · Eightfold receipts '+result.phase_receipts.length+' · No canon commit';
+      return;
+    }
     membrane.style.setProperty('--membrane-open',String(clamp(c.permeability)));
     reading.textContent='A proposed translation of '+c.ability.id+' from '+c.ability.origin_universe+
       ' into '+c.to+' has expression '+Math.round(c.expression*100)+'%. Identity and provenance remain intact.';
@@ -94,7 +106,7 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
     if(origin===destination){status.textContent='Choose two distinct universes.';return;}
     const requestBody={
       traveller_id:id('traveller'),origin_universe:origin,destination_universe:destination,
-      ability:{id:id('ability'),origin_universe:origin,modality:id('modality')},
+      ability:{id:id('ability'),origin_universe:id('ability_source')||origin,modality:id('modality')},
       history:[...history],field,
       consent:{traveller:data.has('traveller_consent'),origin:data.has('origin_consent'),
         destination:data.has('destination_consent')},
@@ -109,6 +121,9 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
       if(result.status==='candidate-returned'){
         // Preview-only continuity. No history or seed is persisted or automatically adopted.
         seeds=result.carry;
+        abilities=[...abilities,{id:result.candidate.ability.id,origin_universe:result.candidate.ability.origin_universe,
+          modality:result.candidate.ability.modality,expression:result.candidate.expression}].slice(-32);
+        hybridButton.disabled=abilities.length<2;
         history=[...history,{id:'experience:'+String(serial),origin_universe:origin,
           destination_universe:destination,expression:result.candidate.expression}].slice(-32);
       }
@@ -116,11 +131,33 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
       if(active)status.textContent=controller.signal.aborted?'Feather: paused.':error.message;
     }finally{controller=null;if(active)button.disabled=false;}
   });
+  hybridButton.addEventListener('click',async()=>{
+    if(!active||controller||abilities.length<2)return;
+    const data=new FormData(form),field=Object.fromEntries(
+      ['intention','shifting','resonance','compatibility'].map(k=>[k,Number(data.get(k))]));
+    const [first,second]=abilities.slice(-2);
+    controller=new AbortController();hybridButton.disabled=true;button.disabled=true;
+    status.textContent='Wyrdrune is examining an emergent third correspondence…';
+    try{
+      const result=await proposeMythienceHybrid({request:{
+        traveller_id:String(data.get('traveller')||'').trim(),
+        destination_universe:String(data.get('destination')||'').trim(),first,second,field,
+        consent:{traveller:data.has('traveller_consent'),first:data.has('first_consent'),
+          second:data.has('second_consent'),destination:data.has('destination_consent')},
+        event_id:'encounter:hybrid'+String(++serial),
+      },seeds,signal:controller.signal});
+      if(!active||controller.signal.aborted)return;
+      render(result);
+      status.textContent=result.status==='candidate-returned'?'Third correspondence proposed. No canon committed.':'Hybrid invitation refused.';
+      if(result.status==='candidate-returned')seeds=result.carry;
+    }catch(error){if(active)status.textContent=controller.signal.aborted?'Feather: paused.':error.message;}
+    finally{controller=null;if(active){button.disabled=false;hybridButton.disabled=abilities.length<2;}}
+  });
   root.querySelector('[data-mythience-feather]').addEventListener('click',()=>{
     controller?.abort();status.textContent='Feather: paused. No further changes.';
   });
   root.querySelector('[data-mythience-reset]').addEventListener('click',()=>{
-    controller?.abort();controller=null;seeds={crossings:0,attunement:0.5,charge:1};history=[];serial=0;
+    controller?.abort();controller=null;seeds={crossings:0,attunement:0.5,charge:1};history=[];abilities=[];serial=0;hybridButton.disabled=true;
     clearMythience();membrane.style.setProperty('--membrane-open','0');
     reading.textContent='A fresh possibility. Nothing has been carried forward.';
     receipt.textContent='';status.textContent='New journey, no adopted history.';button.disabled=false;
