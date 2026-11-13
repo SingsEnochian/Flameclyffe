@@ -13,7 +13,7 @@ export function allowedWayglassPath(url) {
   // Reject encoded separators, dot segments and ambiguous path decoding before
   // forwarding the ORIGINAL request target to the upstream HTTP server.
   const rawPath=url.split('?')[0];
-  if(/%(?:2f|5c|2e|00|0a|0d)/i.test(rawPath)||/%25(?:2f|5c|2e)/i.test(rawPath)) return false;
+  if(/%(?:2f|5c|2e|00|0a|0d|25)/i.test(rawPath)) return false;
   if(rawPath.split('/').some(part=>part==='.'||part==='..')) return false;
   let pathname;
   try { pathname = new URL(url, 'http://127.0.0.1').pathname; }
@@ -25,6 +25,7 @@ export function allowedWayglassPath(url) {
 
 export function createTailnetGate({ port = TAILNET_GATE_PORT, hostPort = HOST_PORT, httpModule = http } = {}) {
   if (!Number.isSafeInteger(port) || port < 1024 || port > 65535) throw new TypeError('Invalid tailnet gate port');
+  if (!Number.isSafeInteger(hostPort) || hostPort < 1024 || hostPort > 65535 || hostPort === port) throw new TypeError('Invalid Wayglass host port');
   const gateway = httpModule.createServer((req, res) => {
     const path = String(req.url || '/');
     if (path === '/') {
