@@ -98,7 +98,7 @@ test('Feather discards only the pending proposal and keeps earlier carried linea
   const journey=createMythienceJourney();
   journey.offer(crossing(),{traveller_id:'traveller:a'});journey.carry();
   const next=crossing({input_hash:other,from:'universe:two',to:'universe:three',crossings:2,charge:.55});
-  next.candidate.ability.id='ability:prism';
+  next.candidate.ability={id:'ability:prism',origin_universe:'universe:two',modality:'technology'};
   journey.offer(next,{traveller_id:'traveller:a'});
   const paused=journey.discard();
   assert.equal(paused.pending,null);
@@ -212,7 +212,7 @@ test('a second crossing cannot alias an existing carried ability identity',()=>{
   const journey=createMythienceJourney();
   journey.offer(crossing(),{traveller_id:'traveller:a'});journey.carry();
   const before=journey.snapshot();
-  const duplicate=crossing({input_hash:other,from:'universe:two',to:'universe:three',crossings:2,charge:.5});
+  const duplicate=crossing({input_hash:other,from:'universe:one',to:'universe:three',crossings:2,charge:.5});
   assert.throws(()=>journey.offer(duplicate,{traveller_id:'traveller:a'}),/ability identity already exists/);
   assert.deepEqual(journey.snapshot(),before);
 });
