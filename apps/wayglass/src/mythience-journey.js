@@ -21,7 +21,7 @@ export function createMythienceJourney(){
   function offer(result,{traveller_id,expected_revision}={}){
     if(expected_revision!==undefined&&expected_revision!==revision)fail('Stale encounter proposal: journey changed');
     if(typeof traveller_id!=='string'||!traveller_id.trim())fail('Traveller identity required');
-    if(travellerId&&travellerId!==traveller_id)
+    if((travellerId&&travellerId!==traveller_id)||(pending&&pending.traveller_id!==traveller_id))
       fail('This journey belongs to another traveller. Start a new journey first.');
     if(!result||!['candidate-returned','denied'].includes(result.status))
       fail('Unrecognised Wyrdrune proposal');
@@ -30,6 +30,8 @@ export function createMythienceJourney(){
     if(!c||c.traveller_id!==traveller_id||typeof result.input_hash!=='string'||
       !/^[0-9a-f]{64}$/.test(result.input_hash)||result.phase_receipts?.length!==8)
       fail('Wyrdrune candidate has incomplete identity or provenance');
+    if(c.parents!==undefined&&!Array.isArray(c.parents))
+      fail('Hybrid parent provenance must be a pair');
     const kind=Array.isArray(c.parents)?'hybrid':'crossing';
     if(!bounded(c.expression)||!c.ability&&!c.parents)
       fail('Candidate is missing translated ability');
