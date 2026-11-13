@@ -197,3 +197,33 @@ test('native voice invitation requests Wayglass-authored WTL, en-GB and optional
    prompt:'What if?',channels:{image:true,sound:false},
  });
 });
+
+
+test('Astra route lifecycle drives FAEberpunk presentation without claiming model or canon authority', async () => {
+  const previousEvent = globalThis.CustomEvent;
+  const previousDispatch = globalThis.dispatchEvent;
+  const events = [];
+  globalThis.CustomEvent = class { constructor(type, options) { this.type = type; this.detail = options.detail; } };
+  globalThis.dispatchEvent = event => { if (event.type === 'wayglass:material-wake') events.push(event.detail); };
+  try {
+    const result = await invokeWayglassRoute({
+      routeId: 'local:ollama', input: 'test', externalProviderConsent: false,
+      fetchImpl: async () => response(200, { schema: 'wayglass.route-turn/v0.1', receipt: { id: 'synthetic' } }),
+    });
+    assert.equal(result.schema, 'wayglass.route-turn/v0.1');
+    assert.deepEqual(events.map(event => event.mode), ['handoff', 'rest']);
+    assert.ok(events.every(event => event.canon_state === 'unresolved'));
+    events.length = 0;
+    await assert.rejects(() => invokeWayglassRoute({
+      routeId: 'local:ollama', input: 'test',
+      fetchImpl: async () => response(403, { error: 'Owner authorization required' }),
+    }), /Owner authorization required/);
+    assert.deepEqual(events.map(event => event.mode), ['handoff', 'rest']);
+    assert.ok(events.every(event => event.canon_state === 'unresolved'));
+  } finally {
+    if (previousEvent === undefined) delete globalThis.CustomEvent;
+    else globalThis.CustomEvent = previousEvent;
+    if (previousDispatch === undefined) delete globalThis.dispatchEvent;
+    else globalThis.dispatchEvent = previousDispatch;
+  }
+});

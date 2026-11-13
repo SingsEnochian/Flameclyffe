@@ -1,0 +1,31 @@
+// Wyrdrune Atlas Passage 001 · movement through a verified digital membrane.
+// The WTL expression chooses a relationship. The host verifies a route.
+// A Return emits an unexecuted motion plan; playback needs a deliberate gesture.
+mobius {
+  perceive {
+    let origin = atlasRef("b5","b5:minbar");
+    let destination = atlasRef("b5","b5:narn");
+  }
+  compress {
+    let relation = runeRelation("transition",["b5:minbar","b5:narn"]);
+  }
+  release {
+    let passage = bridge("atlas","plan",origin,destination);
+  }
+  verify {
+    emit bridge("atlas","verify",passage);
+  }
+  integrate {
+    let voice = whisperPhrase("A world may be approached without erasing its boundaries.",0.65);
+  }
+  choose {
+    emit relation;
+    emit voice;
+  }
+  return {
+    emit passage;
+  }
+  transcend {
+    emit "Possibility moves; a route is not an arrival.";
+  }
+}
