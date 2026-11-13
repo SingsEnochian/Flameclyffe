@@ -177,3 +177,13 @@ test('a hybrid cannot use the same carried parent twice',()=>{
   assert.throws(()=>journey.offer(forged,{traveller_id:'traveller:a'}),/parents are not in/);
   assert.deepEqual(journey.snapshot(),before);
 });
+
+test('a forged phase receipt container cannot masquerade as eight phases',()=>{
+  const journey=createMythienceJourney();
+  journey.offer(crossing(),{traveller_id:'traveller:a'});
+  const before=journey.snapshot();
+  const forged=crossing({input_hash:other});
+  forged.phase_receipts={length:8};
+  assert.throws(()=>journey.offer(forged,{traveller_id:'traveller:a'}),/incomplete identity or provenance/);
+  assert.deepEqual(journey.snapshot(),before);
+});
