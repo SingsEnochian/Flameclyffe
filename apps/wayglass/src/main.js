@@ -246,6 +246,8 @@ subscribeMythience(encounter=>{
   const result=encounter.result;
   routeLabel.textContent='MYTHIENCE / '+(result.status==='candidate-returned'?'CANDIDATE':'REFUSED');
   helm.dataset.mythienceState=result.status;
+  if(result.status==='candidate-returned')fullSpectrum.capture({kind:'world',strength:result.candidate.permeability,motion:result.candidate.expression,
+    continuity:.9,intent:.9,source_ref:'wayglass:mythience-candidate-only'});
 });
 subscribeWayglassObserver(record=>{
   if(!record||!['started','completed','failed'].includes(record.status))return;
