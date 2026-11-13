@@ -18,14 +18,14 @@ export function createMythienceJourney(){
       seeds,history,abilities,lineage,pending,revision,scope:'in-session-preview-only',
       physical_crossing:false,canon_adopted:false});
   }
-  function offer(result,{traveller_id}={}){
+  function offer(result,{traveller_id,expected_revision}={}){
+    if(expected_revision!==undefined&&expected_revision!==revision)fail('Stale encounter proposal: journey changed');
     if(typeof traveller_id!=='string'||!traveller_id.trim())fail('Traveller identity required');
     if(travellerId&&travellerId!==traveller_id)
       fail('This journey belongs to another traveller. Start a new journey first.');
-    pending=null;
     if(!result||!['candidate-returned','denied'].includes(result.status))
       fail('Unrecognised Wyrdrune proposal');
-    if(result.status==='denied')return snapshot();
+    if(result.status==='denied'){pending=null;revision++;return snapshot();}
     const c=result.candidate;
     if(!c||c.traveller_id!==traveller_id||typeof result.input_hash!=='string'||
       !/^[0-9a-f]{64}$/.test(result.input_hash)||result.phase_receipts?.length!==8)
@@ -59,11 +59,13 @@ export function createMythienceJourney(){
     if(carry.charge>seeds.charge)fail('Candidate cannot mint charge');
     const experienceId='experience:'+result.input_hash.slice(0,32);
     if(history.some(h=>h.id===experienceId))fail('This encounter has already been carried');
+    revision++;
     pending={kind,traveller_id,experience_id:experienceId,source_hash:result.source_hash,
       input_hash:result.input_hash,carry,candidate:copy(c)};
     return snapshot();
   }
-  function carry(){
+  function carry({expected_revision}={}){
+    if(expected_revision!==undefined&&expected_revision!==revision)fail('Stale carry: journey changed');
     if(!pending)fail('No proposed encounter to carry');
     const p=pending,c=p.candidate;
     if(travellerId&&travellerId!==p.traveller_id)fail('Traveller identity mismatch');
