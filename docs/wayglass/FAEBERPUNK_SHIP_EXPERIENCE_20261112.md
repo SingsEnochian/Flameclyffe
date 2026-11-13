@@ -4,6 +4,8 @@ Status: implemented in PR #618 as an incremental, reviewable interface pass; not
 
 ## Primary source contracts
 
+- Rowan's 2026-11-05 `Wayglass_Astra_Handoff_COMPLETE_v2.md` (owner-supplied Library handoff): Faeberpunk/Cyberpunk means living refractive glass, spatial consoles, functional holographic layers and dynamic sacred geometry; Universal Codex and Wyrdrune are canonical names. This source is a design directive, not proof of code deployment.
+
 - `docs/architecture/WAYGLASS_OS_V0_1.md`: stone = structure, metal = mechanism, glass = state, living ink = life/information; Wayglass identity is not the renderer; AR and touch are capability-negotiated; Return requires provenance.
 - `docs/reference/inspiration-ledger.md`: named external CodePen references and the explicit rule to adapt mechanics and mood, not copy demos. Preserve original links and creator credit.
 - `apps/wayglass/src/styles.css`: pre-existing mineral palette, labradorite angle-fire, black-glass optical mass, living watercolour and semantic motion choreography.
