@@ -1,0 +1,23 @@
+.wg-mythience{display:grid;gap:1rem}
+.wg-mythience-heading,.wg-mythience-console,.wg-mythience-outcome{padding:1.2rem}
+.wg-mythience-heading h1{font-family:Georgia,serif;font-size:clamp(2rem,4vw,3.5rem);font-weight:500}
+.wg-mythience-grid{display:grid;grid-template-columns:minmax(18rem,.95fr) minmax(18rem,1.05fr);gap:1rem}
+.wg-mythience-console{display:grid;gap:.75rem;align-content:start}
+.wg-mythience-console label{display:grid;gap:.3rem}
+.wg-mythience-console input:not([type=checkbox]),.wg-mythience-console select{width:100%;min-width:0}
+.wg-mythience-console fieldset{display:grid;gap:.65rem;border:1px solid rgba(164,223,222,.22);border-radius:1rem;padding:.85rem}
+.wg-mythience-console fieldset label:has(input[type=checkbox]){display:flex;align-items:center}
+.wg-mythience-fields label{grid-template-columns:1fr auto;align-items:center}
+.wg-mythience-fields small{grid-column:1/-1;opacity:.72}
+.wg-mythience-fields input{grid-column:1;accent-color:#87d9d3}
+.wg-mythience-fields output{grid-column:2}
+.wg-mythience-actions{display:flex;flex-wrap:wrap;gap:.6rem}
+.wg-mythience-outcome{display:grid;gap:1rem;align-content:start}
+.wg-mythience-worlds{display:flex;align-items:center;justify-content:space-between;gap:.3rem;min-height:17rem;border-radius:1rem;overflow:hidden;background:radial-gradient(ellipse at center,rgba(66,119,130,.18),rgba(5,12,28,.7))}
+.wg-mythience-world{width:35%;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;text-align:center;font-size:.9rem;box-shadow:inset 0 0 3rem rgba(192,235,241,.16),0 0 2rem rgba(107,185,195,.2)}
+.wg-mythience-origin{background:radial-gradient(circle at 40% 40%,#5eabb4,#183950 70%,#091324)}
+.wg-mythience-destination{background:radial-gradient(circle at 40% 40%,#d5a87e,#6c527d 70%,#10142b)}
+.wg-mythience-membrane{--membrane-open:0;align-self:stretch;flex:1;min-width:2rem;background:repeating-linear-gradient(105deg,rgba(151,228,219,calc(.08 + var(--membrane-open)*.45)) 0 2px,transparent 2px 9px);filter:drop-shadow(0 0 12px rgba(158,230,223,.35));opacity:calc(.2 + var(--membrane-open)*.8)}
+.wg-mythience-receipt{overflow-wrap:anywhere;line-height:1.5}
+@media(max-width:800px){.wg-mythience-grid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.wg-mythience *{transition:none!important;animation:none!important}}
