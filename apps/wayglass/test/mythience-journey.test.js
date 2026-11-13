@@ -242,3 +242,16 @@ test('a crossing cannot misattribute its ability to a different source reality',
   assert.deepEqual(journey.snapshot(),before);
   assert.equal(journey.carry().lineage.length,1);
 });
+
+test('malformed hybrid parent entries fail closed without replacing a valid proposal',()=>{
+  const journey=createMythienceJourney();
+  journey.offer(crossing(),{traveller_id:'traveller:a'});
+  const before=journey.snapshot();
+  for(const entry of [null,undefined,7,'forged',[],{}]){
+    const forged=hybrid();
+    forged.candidate.parents=[entry,{id:'ability:light',origin_universe:'universe:one'}];
+    assert.throws(()=>journey.offer(forged,{traveller_id:'traveller:a'}),/Hybrid identity or parent provenance/);
+    assert.deepEqual(journey.snapshot(),before);
+  }
+  assert.equal(journey.carry().history.length,1);
+});
