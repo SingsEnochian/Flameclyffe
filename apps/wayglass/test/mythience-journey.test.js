@@ -97,8 +97,9 @@ test('a forged source or missing origin cannot enter the local lineage',()=>{
 test('Feather discards only the pending proposal and keeps earlier carried lineage',()=>{
   const journey=createMythienceJourney();
   journey.offer(crossing(),{traveller_id:'traveller:a'});journey.carry();
-  journey.offer(crossing({input_hash:other,from:'universe:two',to:'universe:three',crossings:2,charge:.55}),
-    {traveller_id:'traveller:a'});
+  const next=crossing({input_hash:other,from:'universe:two',to:'universe:three',crossings:2,charge:.55});
+  next.candidate.ability.id='ability:prism';
+  journey.offer(next,{traveller_id:'traveller:a'});
   const paused=journey.discard();
   assert.equal(paused.pending,null);
   assert.equal(paused.history.length,1);
