@@ -7,7 +7,7 @@ test('Wyrdrune-derived audible tone stays bounded and deterministic',()=>{
   assert.ok(high.rootHz>low.rootHz);
   assert.ok(high.secondHz>low.secondHz);
   assert.ok(high.volume<=.04);
-  assert.deepEqual(high,mythienceTone({expression:3,permeability:Infinity}));
+  assert.deepEqual(high,mythienceTone({expression:3,permeability:3}));
 });
 test('audio and haptics do not activate on creation',async()=>{
   let called=0;
