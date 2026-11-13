@@ -10,6 +10,11 @@ export function allowedWayglassPath(url) {
   // Origin-form requests only. An absolute upstream URL must never be
   // interpreted as a local allowlisted path.
   if(typeof url!=='string'||!url.startsWith('/')||url.startsWith('//')||/[\\\r\n\0]/.test(url)) return false;
+  // Reject encoded separators, dot segments and ambiguous path decoding before
+  // forwarding the ORIGINAL request target to the upstream HTTP server.
+  const rawPath=url.split('?')[0];
+  if(/%(?:2f|5c|2e|00|0a|0d)/i.test(rawPath)||/%25(?:2f|5c|2e)/i.test(rawPath)) return false;
+  if(rawPath.split('/').some(part=>part==='.'||part==='..')) return false;
   let pathname;
   try { pathname = new URL(url, 'http://127.0.0.1').pathname; }
   catch { return false; }
