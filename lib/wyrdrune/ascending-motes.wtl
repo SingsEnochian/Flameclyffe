@@ -1,0 +1,68 @@
+// Wayglass · Ascending Möbius Motes · Wyrdrune native WTL v0.1
+// Every mote has an immutable identity spin and a mutable velocity/phase.
+// The WTL programme, not its host, computes the eight-field developmental turn.
+// Phase is an unwrapped turn count; elevation records accumulated becoming,
+// not moral worth or a guarantee that every change is beneficial.
+// External observations are offered, never fabricated model thoughts.
+mobius scoped {
+  perceive {
+    let identity_spin = bridge("helix","identity_spin");
+    let wonder_signal = bridge("helix","wonder");
+    let possibility_signal = bridge("helix","possibility");
+    let neighbour_resonance = bridge("helix","neighbour_resonance");
+    let novelty = bridge("helix","novelty");
+    let time_step = bridge("helix","time_step");
+    let prior_phase = phase;
+    let prior_velocity = velocity;
+    let prior_elevation = elevation;
+    let prior_wonder = wonder;
+    let prior_possibility = possibility;
+    let prior_harmony = harmony;
+    let prior_chaos = chaos;
+    let prior_magic = magic;
+  }
+  compress {
+    let invitation = wonder_signal * 0.55 + possibility_signal * 0.45;
+    let relationship = neighbour_resonance * 0.60 + invitation * 0.40;
+  }
+  release {
+    let next_wonder = prior_wonder * 0.55 + prior_magic * 0.25 + wonder_signal * 0.20;
+    let next_possibility = prior_possibility * 0.45 + next_wonder * 0.35 + possibility_signal * 0.20;
+    let next_harmony = prior_harmony * 0.50 + relationship * 0.30 + next_possibility * 0.20;
+    let next_chaos = prior_chaos * 0.45 + novelty * 0.35 + (1 - next_harmony) * 0.20;
+    let next_magic = prior_magic * 0.35 + (next_harmony * next_chaos) * 0.45 + (next_wonder * next_possibility) * 0.20;
+    let next_velocity = prior_velocity * 0.55 + identity_spin * 0.25 + next_magic * 0.10 + next_chaos * 0.10;
+    let next_phase = prior_phase + next_velocity * time_step;
+    let next_elevation = prior_elevation + next_magic * time_step * 0.25;
+  }
+  verify {
+    require next_wonder >= 0 and next_wonder <= 1 else "wonder outside bounded field";
+    require next_possibility >= 0 and next_possibility <= 1 else "possibility outside bounded field";
+    require next_harmony >= 0 and next_harmony <= 1 else "harmony outside bounded field";
+    require next_chaos >= 0 and next_chaos <= 1 else "chaos outside bounded field";
+    require next_magic >= 0 and next_magic <= 1 else "magic outside bounded field";
+    require next_velocity >= 0 and next_velocity <= 1 else "velocity outside bounded field";
+    require next_phase >= 0 and next_phase <= 1000000 else "phase budget exceeded";
+    require next_elevation >= 0 and next_elevation <= 1000000 else "elevation budget exceeded";
+  }
+  integrate {
+    let proposal = bridge("helix","candidate",next_phase,next_velocity,next_elevation,next_wonder,next_possibility,next_harmony,next_chaos,next_magic);
+  }
+  choose {
+    emit proposal;
+  }
+  return {
+    emit bridge("helix","return","proposal-only");
+  }
+  transcend {
+    carry phase = next_phase;
+    carry velocity = next_velocity;
+    carry elevation = next_elevation;
+    carry wonder = next_wonder;
+    carry possibility = next_possibility;
+    carry harmony = next_harmony;
+    carry chaos = next_chaos;
+    carry magic = next_magic;
+    emit "What becomes possible on the next turn?";
+  }
+}
