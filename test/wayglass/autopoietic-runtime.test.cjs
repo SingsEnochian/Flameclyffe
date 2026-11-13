@@ -52,7 +52,7 @@ test('shipwide runtime runs independent participant lineages through the eightfo
   assert.equal(result.authority.model_invocation, false);
   assert.equal(result.authority.identity_commit, false);
   assert.equal(result.authority.canon_commit, false);
-  assert.match(result.receipt_hash, /^[a-f0-9]{64}$/);
+  assert.match(result.receipt_hash, /^wce1:[a-f0-9]{64}$/);
   assert.equal(result.receipt_hash, digest(Object.fromEntries(Object.entries(result).filter(([k]) => k !== 'receipt_hash'))));
   for (const participant of result.participants) {
     assert.equal(participant.status, 'committed');
