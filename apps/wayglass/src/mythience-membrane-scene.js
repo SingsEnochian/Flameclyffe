@@ -69,9 +69,9 @@ export function mountMythienceMembraneScene(canvas,{onShift=()=>{},reducedMotion
     ctx.fillStyle='rgba(235,246,244,.85)';
     ctx.font='600 11px system-ui,sans-serif';ctx.textAlign='center';
     ctx.fillText(state.observed?'WY RDRUNE / RECEIPT':'INTENTION / SHIFTING',cx,Math.max(18,cy-r*1.65));
-    if(motion()&&request){frame++;raf=request(draw);}
+    if(motion()&&request){frame++;raf=request(draw);}else raf=0;
   }
-  const redraw=()=>{if(!motion()){if(raf&&cancel)cancel(raf);raf=0;}draw();};
+  const redraw=()=>{if(raf&&cancel)cancel(raf);raf=0;draw();};
   const pointer=event=>{
     if(!active)return;
     const rect=canvas.getBoundingClientRect();
@@ -86,7 +86,8 @@ export function mountMythienceMembraneScene(canvas,{onShift=()=>{},reducedMotion
     event.preventDefault();
     const current=state.alignment;
     const v=event.key==='Home'?0:event.key==='End'?1:
-      clamp((Number(canvas.dataset.shiftValue)||current)+(event.key==='ArrowRight'?.05:-.05));
+      clamp((Number.isFinite(Number(canvas.dataset.shiftValue))?Number(canvas.dataset.shiftValue):current)+
+        (event.key==='ArrowRight'?.05:-.05));
     onShift(Math.round(v*100)/100);
   };
   const visibility=()=>{if(motion()&&!raf)draw();else if(!motion())redraw();};
