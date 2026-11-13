@@ -144,3 +144,24 @@ test('Feather invalidates outstanding asynchronous revision tokens',()=>{
   assert.throws(()=>journey.offer(crossing(),{
     traveller_id:'traveller:a',expected_revision:rev}),/Stale encounter/);
 });
+
+test('a second traveller cannot replace a pending invitation before the first carry',()=>{
+  const journey=createMythienceJourney();
+  journey.offer(crossing(),{traveller_id:'traveller:a'});
+  const before=journey.snapshot();
+  assert.throws(()=>journey.offer(crossing({id:'traveller:b',input_hash:other}),{
+    traveller_id:'traveller:b'}),/another traveller/);
+  assert.deepEqual(journey.snapshot(),before);
+  assert.equal(journey.carry().traveller_id,'traveller:a');
+});
+test('malformed hybrid parent containers fail without mutating the pending invitation',()=>{
+  const journey=createMythienceJourney();
+  journey.offer(crossing(),{traveller_id:'traveller:a'});
+  const before=journey.snapshot();
+  for(const parents of [null,{},'forged']){
+    const malformed=crossing({input_hash:other});
+    malformed.candidate.parents=parents;
+    assert.throws(()=>journey.offer(malformed,{traveller_id:'traveller:a'}),/parent provenance/);
+    assert.deepEqual(journey.snapshot(),before);
+  }
+});
