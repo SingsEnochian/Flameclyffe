@@ -1,4 +1,5 @@
 import './mythience-crossing.css';
+import {createMythienceJourney} from '../mythience-journey.js';
 import {proposeMythienceCrossing,proposeMythienceHybrid,mythienceSnapshot,clearMythience} from '../mythience-client.js';
 
 const esc=v=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;')
@@ -13,9 +14,7 @@ const controls=[
 ];
 export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={}){
   let active=true,controller=null,serial=0;
-  let seeds={crossings:0,attunement:0.5,charge:1};
-  let history=[];
-  let abilities=[];
+  const journey=createMythienceJourney();
   root.innerHTML=[
     '<section class="wg-surface wg-mythience" data-surface="wayglass-mythience">',
     '<header class="glass-panel wg-mythience-heading"><p class="eyebrow">Wayglass · Wyrdrune · Mythience</p>',
@@ -46,6 +45,7 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
     '</fieldset>',
     '<div class="wg-mythience-actions"><button type="submit" class="send-jewel">Ask Wyrdrune</button>',
     '<button type="button" class="glass-chip" data-mythience-hybrid disabled>Weave hybrid from two encounters</button>',
+    '<button type="button" class="glass-chip" data-mythience-carry disabled>Carry this possibility (preview)</button>',
     '<button type="button" class="glass-chip" data-mythience-feather>🪽 Feather</button>',
     '<button type="button" class="glass-chip" data-mythience-reset>New journey</button></div>',
     '<p class="tiny" role="status" aria-live="polite" data-mythience-status>Waiting for an invitation. Nothing crosses automatically.</p>',
@@ -68,6 +68,7 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
   const membrane=root.querySelector('[data-mythience-membrane]');
   const button=form.querySelector('[type=submit]');
   const hybridButton=root.querySelector('[data-mythience-hybrid]');
+  const carryButton=root.querySelector('[data-mythience-carry]');
   for(const slider of form.querySelectorAll('input[type=range]')){
     slider.addEventListener('input',()=>{form.querySelector('[data-value="'+slider.name+'"]').textContent=Number(slider.value).toFixed(2);});
   }
@@ -95,8 +96,8 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
       ' · Eightfold phases '+result.phase_receipts.length+
       ' · Return '+esc(result.return_marker?.status||'proposal-only')+'</p>';
   }
-  const prior=mythienceSnapshot()?.result;
-  if(prior)render(prior);
+  // A previous room's snapshot is observable, but not this traveller's lineage.
+  // Re-entering a room never silently adopts another encounter.
   form.addEventListener('submit',async event=>{
     event.preventDefault();if(!active||controller)return;
     const data=new FormData(form);
@@ -104,39 +105,43 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
     const field=Object.fromEntries(controls.map(([key])=>[key,Number(data.get(key))]));
     const origin=id('origin'),destination=id('destination');
     if(origin===destination){status.textContent='Choose two distinct universes.';return;}
+    const current=journey.snapshot();
+    if(current.traveller_id&&current.traveller_id!==id('traveller')){
+      status.textContent='This journey belongs to '+current.traveller_id+'. Choose New journey to change traveller.';
+      return;
+    }
     const requestBody={
       traveller_id:id('traveller'),origin_universe:origin,destination_universe:destination,
       ability:{id:id('ability'),origin_universe:id('ability_source')||origin,modality:id('modality')},
-      history:[...history],field,
+      history:current.history,field,
       consent:{traveller:data.has('traveller_consent'),origin:data.has('origin_consent'),
         destination:data.has('destination_consent')},
       event_id:'encounter:'+String(++serial),
     };
-    controller=new AbortController();button.disabled=true;status.textContent='Inviting Wyrdrune to evaluate the membrane…';
+    const flight=new AbortController();controller=flight;button.disabled=true;hybridButton.disabled=true;carryButton.disabled=true;
+    status.textContent='Inviting Wyrdrune to evaluate the membrane…';
     try{
-      const result=await request({request:requestBody,seeds,signal:controller.signal});
-      if(!active||controller.signal.aborted)return;
+      const result=await request({request:requestBody,seeds:current.seeds,signal:flight.signal});
+      if(!active||controller!==flight||flight.signal.aborted)return;
+      journey.offer(result,{traveller_id:id('traveller')});
       render(result);
       status.textContent=result.status==='candidate-returned'?'Candidate returned. No crossing committed.':'Threshold refused.';
-      if(result.status==='candidate-returned'){
-        // Preview-only continuity. No history or seed is persisted or automatically adopted.
-        seeds=result.carry;
-        abilities=[...abilities,{id:result.candidate.ability.id,origin_universe:result.candidate.ability.origin_universe,
-          modality:result.candidate.ability.modality,expression:result.candidate.expression}].slice(-32);
-        hybridButton.disabled=abilities.length<2;
-        history=[...history,{id:'experience:'+String(serial),origin_universe:origin,
-          destination_universe:destination,expression:result.candidate.expression}].slice(-32);
-      }
+      carryButton.disabled=result.status!=='candidate-returned';
     }catch(error){
       if(active)status.textContent=controller.signal.aborted?'Feather: paused.':error.message;
-    }finally{controller=null;if(active)button.disabled=false;}
+    }finally{if(controller===flight){controller=null;if(active){button.disabled=false;
+      hybridButton.disabled=journey.snapshot().abilities.length<2;}}}
   });
   hybridButton.addEventListener('click',async()=>{
-    if(!active||controller||abilities.length<2)return;
+    const current=journey.snapshot();
+    if(!active||controller||current.abilities.length<2)return;
+    if(current.traveller_id!==String(form.elements.traveller.value).trim()){
+      status.textContent='The traveller has changed. Start a new journey before weaving.';return;
+    }
     const data=new FormData(form),field=Object.fromEntries(
       ['intention','shifting','resonance','compatibility'].map(k=>[k,Number(data.get(k))]));
-    const [first,second]=abilities.slice(-2);
-    controller=new AbortController();hybridButton.disabled=true;button.disabled=true;
+    const [first,second]=current.abilities.slice(-2);
+    const flight=new AbortController();controller=flight;hybridButton.disabled=true;button.disabled=true;carryButton.disabled=true;
     status.textContent='Wyrdrune is examining an emergent third correspondence…';
     try{
       const result=await proposeMythienceHybrid({request:{
@@ -145,19 +150,34 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
         consent:{traveller:data.has('traveller_consent'),first:data.has('first_consent'),
           second:data.has('second_consent'),destination:data.has('destination_consent')},
         event_id:'encounter:hybrid'+String(++serial),
-      },seeds,signal:controller.signal});
-      if(!active||controller.signal.aborted)return;
+      },seeds:current.seeds,signal:flight.signal});
+      if(!active||controller!==flight||flight.signal.aborted)return;
+      journey.offer(result,{traveller_id:current.traveller_id});
       render(result);
       status.textContent=result.status==='candidate-returned'?'Third correspondence proposed. No canon committed.':'Hybrid invitation refused.';
-      if(result.status==='candidate-returned')seeds=result.carry;
+      carryButton.disabled=result.status!=='candidate-returned';
     }catch(error){if(active)status.textContent=controller.signal.aborted?'Feather: paused.':error.message;}
-    finally{controller=null;if(active){button.disabled=false;hybridButton.disabled=abilities.length<2;}}
+    finally{if(controller===flight){controller=null;if(active){button.disabled=false;
+      hybridButton.disabled=journey.snapshot().abilities.length<2;}}}
+  });
+  carryButton.addEventListener('click',()=>{
+    if(!active||controller)return;
+    try{
+      const state=journey.carry();
+      carryButton.disabled=true;
+      hybridButton.disabled=state.abilities.length<2;
+      status.textContent='Carried in this preview only: '+state.abilities.at(-1).id+
+        '. '+state.abilities.length+' abilities, '+state.history.length+' experiences. No canon commit.';
+    }catch(error){status.textContent=error.message;}
   });
   root.querySelector('[data-mythience-feather]').addEventListener('click',()=>{
-    controller?.abort();status.textContent='Feather: paused. No further changes.';
+    controller?.abort();controller=null;journey.discard();
+    button.disabled=false;carryButton.disabled=true;
+    hybridButton.disabled=journey.snapshot().abilities.length<2;
+    status.textContent='Feather: paused. Uncarried proposals set aside; carried previews remain.';
   });
   root.querySelector('[data-mythience-reset]').addEventListener('click',()=>{
-    controller?.abort();controller=null;seeds={crossings:0,attunement:0.5,charge:1};history=[];abilities=[];serial=0;hybridButton.disabled=true;
+    controller?.abort();controller=null;journey.reset();serial=0;hybridButton.disabled=true;carryButton.disabled=true;
     clearMythience();membrane.style.setProperty('--membrane-open','0');
     reading.textContent='A fresh possibility. Nothing has been carried forward.';
     receipt.textContent='';status.textContent='New journey, no adopted history.';button.disabled=false;
