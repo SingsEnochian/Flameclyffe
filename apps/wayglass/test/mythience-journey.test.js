@@ -116,3 +116,31 @@ test('the ship shares one tab-local journey across room mounts without adopting 
   assert.equal(second.snapshot().history.length,1);
   first.reset();
 });
+
+test('a stale asynchronous Wyrdrune result cannot replace a newer proposal',()=>{
+  const journey=createMythienceJourney(),start=journey.snapshot().revision;
+  journey.offer(crossing(),{traveller_id:'traveller:a',expected_revision:start});
+  const newer=journey.snapshot();
+  assert.equal(newer.revision,start+1);
+  assert.throws(()=>journey.offer(crossing({input_hash:other}),{
+    traveller_id:'traveller:a',expected_revision:start}),/Stale encounter/);
+  assert.equal(journey.snapshot().pending.input_hash,hash);
+  assert.throws(()=>journey.carry({expected_revision:start}),/Stale carry/);
+  assert.equal(journey.carry({expected_revision:newer.revision}).history.length,1);
+});
+test('invalid candidate does not destroy an earlier valid pending proposal',()=>{
+  const journey=createMythienceJourney();
+  journey.offer(crossing(),{traveller_id:'traveller:a'});
+  const before=journey.snapshot();
+  const forged=crossing({input_hash:other});
+  forged.candidate.ability.origin_universe='';
+  assert.throws(()=>journey.offer(forged,{traveller_id:'traveller:a'}),/provenance/);
+  assert.deepEqual(journey.snapshot(),before);
+  assert.equal(journey.carry().history.length,1);
+});
+test('Feather invalidates outstanding asynchronous revision tokens',()=>{
+  const journey=createMythienceJourney(),rev=journey.snapshot().revision;
+  journey.discard();
+  assert.throws(()=>journey.offer(crossing(),{
+    traveller_id:'traveller:a',expected_revision:rev}),/Stale encounter/);
+});
