@@ -1,0 +1,205 @@
+{
+  "schema": "wayglass.observer.research-case/v0.1",
+  "id": "FAA-TELECOM-2026-11-13",
+  "title": "FAA national ground stop: telecommunications / SMART boundary investigation",
+  "event_date": "2026-11-13",
+  "prepared_date": "2026-11-13",
+  "state": "open-unresolved",
+  "integration_status": "proposal-source-only-not-ingested-into-live-observer",
+  "epistemic_rule": "Publicly documented statements and news reports are not live FAA telemetry. No inferred causal edge may be promoted without an attributable independent source and observable evidence.",
+  "sources": [
+    {
+      "id": "faa-smart-launch",
+      "kind": "faa-primary",
+      "date": "2026-09-21",
+      "url": "https://www.faa.gov/newsroom/trumps-transportation-secretary-sean-p-duffy-delivers-state-art-air-traffic-control",
+      "level": "L2-document"
+    },
+    {
+      "id": "faa-smart-expansion",
+      "kind": "faa-primary",
+      "date": "2026-11-10",
+      "url": "https://www.faa.gov/newsroom/statements/general-statements",
+      "level": "L2-document"
+    },
+    {
+      "id": "faa-smart-factsheet",
+      "kind": "faa-primary",
+      "date": "2026-07-01-or-earlier-unknown",
+      "url": "https://www.faa.gov/newsroom/SMART_One-Pager.pdf",
+      "level": "L2-document"
+    },
+    {
+      "id": "ap-faa-outage",
+      "kind": "news-reporting",
+      "date": "2026-11-13",
+      "url": "https://apnews.com/article/flights-halted-airports-faa-f81b0904331dafad6133f291e5f531a8",
+      "level": "L2-report"
+    },
+    {
+      "id": "ap-faa-live",
+      "kind": "news-reporting",
+      "date": "2026-11-13",
+      "url": "https://apnews.com/article/6aaa6bd4991ef22eb0c3baa6961a91d1",
+      "level": "L2-report"
+    },
+    {
+      "id": "ms365-incident-mirror",
+      "kind": "service-status-mirror",
+      "date": "2026-11-12",
+      "url": "https://mailservices.isc.upenn.edu/computing/email/penno365/alerts/ms-incidents.html",
+      "level": "L2-published-status"
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "status": "documented",
+      "text": "The FAA introduced the AI-supported SMART platform in September 2026; it combines around 200 data streams into an advisory planning system.",
+      "sources": [
+        "faa-smart-launch",
+        "faa-smart-factsheet"
+      ]
+    },
+    {
+      "id": "F2",
+      "status": "documented",
+      "text": "On Nov 10 the FAA announced expansion of SMART's use to airspace managed by all 22 centers; the announcement alone does not establish exact deployment times or code changes per center.",
+      "sources": [
+        "faa-smart-expansion"
+      ]
+    },
+    {
+      "id": "F3",
+      "status": "documented",
+      "text": "The FAA described a centrally based SMART team passing validated planning recommendations through the Air Traffic Control System Command Center for local consideration; this does not establish operation of pilot/controller radio systems.",
+      "sources": [
+        "faa-smart-expansion",
+        "faa-smart-factsheet"
+      ]
+    },
+    {
+      "id": "F4",
+      "status": "reported",
+      "text": "Nov 13 nationwide ground stop followed communications problems affecting regional ATC systems; investigators had not established the initial fault/cause at the time of this case capture.",
+      "sources": [
+        "ap-faa-outage",
+        "ap-faa-live"
+      ]
+    },
+    {
+      "id": "F5",
+      "status": "reported",
+      "text": "Officials said investigators would examine whether SMART's rollout played a role, without establishing any connection.",
+      "sources": [
+        "ap-faa-outage"
+      ]
+    },
+    {
+      "id": "F6",
+      "status": "reported",
+      "text": "Microsoft 365 experienced a separate Nov 12 service incident. Status notes describe unresponsive servers, shifted load and network/configuration investigations. Shared infrastructure with FAA is not demonstrated.",
+      "sources": [
+        "ms365-incident-mirror"
+      ]
+    }
+  ],
+  "topology": {
+    "public_known_path": [
+      "SMART planning cloud",
+      "FAA SMART specialists in Washington DC",
+      "ATCSCC Command Center, Warrenton VA",
+      "regional facility leadership (considers recommendation)"
+    ],
+    "separate_path": "Pilot-controller telecommunications (precise topology unpublished in these sources)",
+    "links": [
+      {
+        "from": "SMART planning",
+        "to": "ATCSCC recommendations",
+        "status": "documented-advisory",
+        "sources": [
+          "faa-smart-expansion"
+        ]
+      },
+      {
+        "from": "SMART planning",
+        "to": "pilot-controller communications",
+        "status": "unknown-not-established",
+        "sources": []
+      },
+      {
+        "from": "Microsoft 365 incident",
+        "to": "FAA telecom incident",
+        "status": "unknown-not-established",
+        "sources": []
+      }
+    ]
+  },
+  "competing_hypotheses": [
+    {
+      "id": "H1",
+      "label": "Independent telecom infrastructure malfunction",
+      "status": "unverified",
+      "test": "Obtain FAA incident timeline, network carrier faults and radio gateway logs; verify first failure preceded any SMART dependency.",
+      "disproves": "Traceable prior SMART-associated change is necessary for the failure"
+    },
+    {
+      "id": "H2",
+      "label": "Shared support-service/configuration dependency",
+      "status": "unverified",
+      "test": "Compare IAM/DNS/network routing/time sync/change control between SMART and voice/backhaul layers; require specific common component and matching fault times.",
+      "disproves": "Documented isolation and unchanged shared services during onset"
+    },
+    {
+      "id": "H3",
+      "label": "SMART-associated load or integration interaction",
+      "status": "unverified",
+      "test": "Compare authenticated production deployment timing, telemetry and change windows with first communications failures; seek repeatable mechanism.",
+      "disproves": "System isolation plus independent telecom failure reproduces without SMART"
+    },
+    {
+      "id": "H4",
+      "label": "External interference or cyberattack",
+      "status": "unverified",
+      "test": "Await investigation with signatures, artefacts, forensic network records and attribution; avoid treating absence of early indication as proof of impossibility.",
+      "disproves": "Confirmed nonmalicious mechanical/configuration root cause"
+    },
+    {
+      "id": "H5",
+      "label": "Shared Microsoft dependency",
+      "status": "unverified",
+      "test": "Identify actual FAA operational reliance on impacted Microsoft services or a common lower-layer network provider, with timestamp correlation and topology.",
+      "disproves": "Demonstrated separate infrastructure and distinct initiating faults"
+    }
+  ],
+  "eightfold": [
+    "Perceive source statements",
+    "Compress shared scope versus actual components",
+    "Release competing explanations",
+    "Verify dated logs, topology, falsifiers",
+    "Integrate distinct Microsoft incident without conflation",
+    "Choose first-fault and shared-dependency investigation",
+    "Return with append-only revisions and receipts",
+    "Transcend via resilience and fail-independent design"
+  ],
+  "withness": "Protect people and safety-critical operational decisions; no speculative causal declaration; no automated aircraft control action.",
+  "acceptance": [
+    "Source-backed facts retain exact links, dates and evidence labels.",
+    "No source establishes a causal SMART-to-telecom or Microsoft-to-FAA edge.",
+    "Public announcement scope is not treated as deployment/runtime proof.",
+    "Actual instrument logs are marked unavailable, not fabricated.",
+    "No live Wayglass runtime, deployment or independent model voice is claimed.",
+    "Later findings append a correction with provenance rather than overwrite this snapshot."
+  ],
+  "unknowns": [
+    "Exact onset, failure domain and first failing component",
+    "Which centre subsystems/frequencies/pathways failed versus survived",
+    "Which shared services, if any, are used between SMART and ATC communications",
+    "Precise SMART change/release times and rollback or isolation results",
+    "Whether Microsoft and FAA used any common affected operational infrastructure"
+  ],
+  "links_to_wayglass": [
+    "https://github.com/SingsEnochian/Flameclyffe/issues/583",
+    "https://github.com/SingsEnochian/Flameclyffe/issues/528"
+  ]
+}
