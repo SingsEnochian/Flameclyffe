@@ -206,3 +206,26 @@ test('Eightfold receipts must preserve all eight ordered phase identities',()=>{
   }
   assert.equal(journey.carry().history.length,1);
 });
+
+test('a second crossing cannot alias an existing carried ability identity',()=>{
+  const journey=createMythienceJourney();
+  journey.offer(crossing(),{traveller_id:'traveller:a'});journey.carry();
+  const before=journey.snapshot();
+  const duplicate=crossing({input_hash:other,from:'universe:two',to:'universe:three',crossings:2,charge:.5});
+  assert.throws(()=>journey.offer(duplicate,{traveller_id:'traveller:a'}),/ability identity already exists/);
+  assert.deepEqual(journey.snapshot(),before);
+});
+
+test('a hybrid cannot alias an existing carried ability identity',()=>{
+  const journey=createMythienceJourney();
+  journey.offer(crossing(),{traveller_id:'traveller:a'});journey.carry();
+  const second=crossing({input_hash:other,from:'universe:two',to:'universe:three',crossings:2,charge:.55});
+  second.candidate.ability={id:'ability:prism',origin_universe:'universe:two',modality:'technology'};
+  journey.offer(second,{traveller_id:'traveller:a'});journey.carry();
+  const before=journey.snapshot();
+  const duplicate=hybrid();
+  duplicate.candidate.id='ability:prism';
+  duplicate.candidate.destination_universe='universe:two';
+  assert.throws(()=>journey.offer(duplicate,{traveller_id:'traveller:a'}),/ability identity already exists/);
+  assert.deepEqual(journey.snapshot(),before);
+});
