@@ -40,6 +40,36 @@ function Assert-FullShip {
     } catch {
         throw 'The full Wayglass UI is not staged at localhost:3000/wayglass/. Nothing has been shared.'
     }
+    # A configured House session returns 401 without credentials. A 503 means
+    # no Steward secret is configured, so the private remote sign-in is unusable.
+    $houseCode = 0
+    try {
+        $house = Invoke-WebRequest -Uri "$Origin/api/v1/house/session" -TimeoutSec 5 -UseBasicParsing
+        $houseCode = [int]$house.StatusCode
+    } catch {
+        if ($_.Exception.Response) {
+            $houseCode = [int]$_.Exception.Response.StatusCode
+        }
+    }
+    if ($houseCode -ne 401) {
+        throw 'House Steward sign-in is not ready (expected an unauthenticated 401). Nothing has been shared.'
+    }
+}
+function Assert-AllowedTailnetOrigin([string]$expectedOrigin) {
+    # CORS preflight proves an existing host actually started with the verified
+    # tailnet origin. It does not authenticate anyone.
+    try {
+        $headers = @{
+            Origin = $expectedOrigin
+            'Access-Control-Request-Method' = 'POST'
+            'Access-Control-Request-Headers' = 'content-type'
+        }
+        $response = Invoke-WebRequest -Uri "$Origin/api/v1/house/session" -Method OPTIONS -Headers $headers -TimeoutSec 5 -UseBasicParsing
+        $actual = [string]$response.Headers['Access-Control-Allow-Origin']
+        if ($actual -ne $expectedOrigin) { throw 'Tailnet origin not allowed by the running host.' }
+    } catch {
+        throw 'The existing host does not admit the verified Tailnet HTTPS origin. Restart the host with this Tailnet launcher before publishing.'
+    }
 }
 function Get-ServeConfig {
     # Status JSON may have an empty TCP/Web map. Refuse to modify an existing
@@ -97,15 +127,36 @@ $major = [int]((node --version).TrimStart('v').Split('.')[0])
 if ($major -lt 24) { throw 'Node.js 24 or newer is required.' }
 Push-Location $Root
 try {
-    Write-Host '[Wayglass] Building and staging the complete Wayglass UI on the local host.'
-    & npm run wayglass:deploy:server
-    if ($LASTEXITCODE -ne 0) { throw 'Wayglass staging failed. Nothing has been shared.' }
-    Assert-FullShip
-    Write-Host '[Wayglass] Staged full ship verified. Starting the restricted Wayglass gateway.'
-    Write-Host '[Wayglass] No unrelated STARWELL API, MCP, Ollama or filesystem routes are exposed.'
     $env:WAYGLASS_TAILNET_ORIGIN = "https://$hostname"
     $env:HEARTHGATE_ALLOWED_ORIGINS = ((@($env:HEARTHGATE_ALLOWED_ORIGINS -split ',') |
         Where-Object { $_ -and $_.Trim() }) + @($env:WAYGLASS_TAILNET_ORIGIN) | Select-Object -Unique) -join ','
+    Write-Host '[Wayglass] Building and staging the complete Wayglass UI on the local host.'
+    & npm run wayglass:deploy:server
+    if ($LASTEXITCODE -ne 0) { throw 'Wayglass staging failed. Nothing has been shared.' }
+    if (Read-LocalHealth) {
+        Assert-AllowedTailnetOrigin $env:WAYGLASS_TAILNET_ORIGIN
+    } else {
+        $serverDir = Join-Path $Root 'apps/starwell-server'
+        if (-not (Test-Path (Join-Path $serverDir 'node_modules/express'))) {
+            throw 'Hearthgate dependencies missing. Nothing has been shared.'
+        }
+        Write-Host '[Wayglass] Starting secure Hearthgate on loopback with the verified Tailnet origin.'
+        $hostProcess = Start-Process -FilePath (Get-Command node).Source -ArgumentList 'server-secure.js' -WorkingDirectory $serverDir -PassThru
+        $ready = $false
+        for ($attempt=0; $attempt -lt 40; $attempt++) {
+            if (Read-LocalHealth) { $ready = $true; break }
+            if ($hostProcess.HasExited) { break }
+            Start-Sleep -Milliseconds 350
+        }
+        if (-not $ready) {
+            if (-not $hostProcess.HasExited) { Stop-Process -Id $hostProcess.Id -Force }
+            throw 'Secure Hearthgate did not become healthy. Nothing has been shared.'
+        }
+        Assert-AllowedTailnetOrigin $env:WAYGLASS_TAILNET_ORIGIN
+    }
+    Assert-FullShip
+    Write-Host '[Wayglass] Staged full ship verified. Starting the restricted Wayglass gateway.'
+    Write-Host '[Wayglass] No unrelated STARWELL API, MCP, Ollama or filesystem routes are exposed.'
     & node scripts/wayglass-tailnet-serve.mjs
     if ($LASTEXITCODE -ne 0) { throw 'Tailscale Serve exited with an error. Nothing is verified live.' }
 } finally {
