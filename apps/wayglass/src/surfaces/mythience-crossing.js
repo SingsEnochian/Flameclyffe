@@ -84,6 +84,7 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
     cosmos.setAttribute('aria-valuenow',String(Math.round(value*100)));
     cosmos.setAttribute('aria-valuetext',Math.round(value*100)+' percent Shifting');
     scene.setFields(fieldValues());
+    invalidateProposal();
   }});
   scene.setFields(fieldValues());
   const updateWorldLabels=()=>{
