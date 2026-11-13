@@ -24,6 +24,7 @@ const { createModelObservation } = require('../wayglass-runtime/wayglass-model-o
 const { createWayglassLibraryRouter } = require('./research-library');
 const { createObserverSelfDevelopmentRouter } = require('./observer-self-development');
 const { proposeCrossing } = require('../wayglass-runtime/wayglass-mythience-crossing.cjs');
+const { proposeHybrid } = require('../wayglass-runtime/wayglass-mythience-fusion.cjs');
 const { runQuadEightfold, SOURCE_SCHEMA, TABLES } = require('../wayglass-runtime/wayglass-quad-eightfold.cjs');
 
 const { resolveCharacterSeat, publicCharacterSeats, EMERGENCE_QUESTION_IDS } = require('./character-seats.cjs');
@@ -860,6 +861,20 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
   // verified Wyrdrune expression operations, never host-invented narration.
   // Mythience is a shipwide Wyrdrune simulation route. The server, not the
   // client, verifies House Steward authorization. No crossing is committed.
+  router.post('/wyrdrune/mythience-hybrid',createRequestGate({maxRequests:24,maxConcurrent:2}),async(req,res)=>{
+    res.setHeader('Cache-Control','no-store');
+    if(!(await griffStewardAuthorized(req).catch(()=>false)))
+      return res.status(401).json({error:'House Steward sign-in required for Mythience hybrid exploration.'});
+    try{
+      return res.json(await proposeHybrid(req.body?.request,{
+        principal:{id:'house:steward',authorized:true},seeds:req.body?.seeds,
+      }));
+    }catch(error){
+      return res.status(400).json({schema:'mythience.hybrid-error/v0.1',
+        error:cleanText(error?.message||'Hybrid proposal refused.',240)});
+    }
+  });
+
   router.post('/wyrdrune/mythience-crossing',createRequestGate({maxRequests:24,maxConcurrent:2}),async(req,res)=>{
     res.setHeader('Cache-Control','no-store');
     if(!(await griffStewardAuthorized(req).catch(()=>false)))
