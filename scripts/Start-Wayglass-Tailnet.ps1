@@ -54,11 +54,16 @@ function Get-ServeConfig {
 }
 function Assert-NoExistingShare($config) {
     if ($null -eq $config) { return }
-    if ($config.AllowFunnel) { throw 'A Funnel configuration is present. Refusing to alter or publish it.' }
-    if ($null -ne $config.Web -and @($config.Web.PSObject.Properties).Count -gt 0) {
+    $properties = @($config.PSObject.Properties.Name)
+    if (($properties -contains 'AllowFunnel') -and $config.AllowFunnel) {
+        throw 'A Funnel configuration is present. Refusing to alter or publish it.'
+    }
+    if (($properties -contains 'Web') -and $null -ne $config.Web -and
+        @($config.Web.PSObject.Properties).Count -gt 0) {
         throw 'Tailscale already serves another web route. Refusing to overwrite it.'
     }
-    if ($null -ne $config.TCP -and @($config.TCP.PSObject.Properties).Count -gt 0) {
+    if (($properties -contains 'TCP') -and $null -ne $config.TCP -and
+        @($config.TCP.PSObject.Properties).Count -gt 0) {
         throw 'Tailscale already has a TCP Serve/Funnel route. Refusing to overwrite it.'
     }
 }
@@ -99,7 +104,7 @@ try {
     & tailscale serve --bg 3000
     if ($LASTEXITCODE -ne 0) { throw 'Tailscale Serve failed; check Tailscale HTTPS/MagicDNS setup.' }
     $current = Get-ServeConfig
-    if ($null -eq $current -or $null -eq $current.Web) {
+    if ($null -eq $current -or -not (@($current.PSObject.Properties.Name) -contains 'Web')) {
         throw 'Tailscale Serve did not return a verifiable web configuration.'
     }
     # Tailscale CLI is the authority for the URL; never publish via Funnel.
