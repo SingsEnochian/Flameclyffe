@@ -72,9 +72,10 @@ export function createMythienceJourney(){
     abilities=nextAbilities;lineage=nextLineage;pending=null;revision++;
     return snapshot();
   }
+  function discard(){pending=null;revision++;return snapshot();}
   function reset(){
     travellerId=null;seeds=copy(SEEDS);history=[];abilities=[];lineage=[];pending=null;revision++;
     return snapshot();
   }
-  return Object.freeze({snapshot,offer,carry,reset});
+  return Object.freeze({snapshot,offer,carry,discard,reset});
 }
