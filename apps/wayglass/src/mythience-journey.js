@@ -33,6 +33,19 @@ export function createMythienceJourney(){
     const kind=Array.isArray(c.parents)?'hybrid':'crossing';
     if(!bounded(c.expression)||!c.ability&&!c.parents)
       fail('Candidate is missing translated ability');
+    if(typeof result.source_hash!=='string'||!result.source_hash.trim())
+      fail('Wyrdrune source provenance is required');
+    const validId=v=>typeof v==='string'&&/^[a-zA-Z0-9][a-zA-Z0-9._:/-]{0,127}$/.test(v);
+    if(kind==='crossing'){
+      if(!validId(c.from)||!validId(c.to)||!c.ability||
+        !validId(c.ability.id)||!validId(c.ability.origin_universe)||
+        !validId(c.ability.modality)||c.from===c.to)
+        fail('Crossing identity or ability provenance is incomplete');
+    }else{
+      if(!validId(c.id)||!validId(c.destination_universe)||c.parents.length!==2||
+        c.parents.some(a=>!validId(a.id)||!validId(a.origin_universe)))
+        fail('Hybrid identity or parent provenance is incomplete');
+    }
     if(kind==='hybrid'){
       if(c.parents.length!==2||!abilities.some(a=>a.id===c.parents[0].id&&a.origin_universe===c.parents[0].origin_universe)||
         !abilities.some(a=>a.id===c.parents[1].id&&a.origin_universe===c.parents[1].origin_universe))
