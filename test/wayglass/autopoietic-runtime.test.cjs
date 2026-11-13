@@ -3,6 +3,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { createAutopoieticRuntime, SCHEMA } = require('../../lib/wayglass-autopoietic-runtime.cjs');
 const { digest } = require('../../lib/wyrdrune/canonical.cjs');
+const kernel = require('../../lib/wayglass-kernel.cjs');
 
 function phases(participantId, { perceive } = {}) {
   return {
@@ -19,6 +20,11 @@ function phases(participantId, { perceive } = {}) {
     transcend: async ctx => ({ memory: ctx.carried.memory + 1 }),
   };
 }
+
+test('canonical Wayglass kernel exposes the shipwide autopoietic runtime', () => {
+  assert.equal(kernel.createAutopoieticRuntime, createAutopoieticRuntime);
+  assert.equal(kernel.MOBIUS_PHASES.length, 8);
+});
 
 test('shipwide runtime runs independent participant lineages through the eightfold octo core', async () => {
   const runtime = createAutopoieticRuntime();
