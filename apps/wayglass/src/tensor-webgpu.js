@@ -1,4 +1,7 @@
 import kernelDivination from '../../../lib/wyrdrune/kernel-divination.cjs';
+import canonical from '../../../lib/wyrdrune/canonical.cjs';
+
+const { digest } = canonical;
 
 /**
  * Analyse a Wyrdrune tensor graph and, for GPU policies, probe the browser adapter.
@@ -127,6 +130,9 @@ export async function dispatchWyrdruneTensorKernel(plan, feeds, options = {}) {
     for (const value of typed) if (!Number.isFinite(value)) throw new RangeError('WebGPU feed ' + input.id + ' exceeds f32 range');
     normalized.set(input.id, typed);
   }
+  const normalizedFeeds = Object.create(null);
+  for (const input of inputBindings) normalizedFeeds[input.id] = Array.from(normalized.get(input.id));
+  const feedsDigest = digest(normalizedFeeds);
 
   const outputLength = product(plan.outputShape);
   if (outputLength !== product(descriptors.output.shape)) throw new RangeError('Kernel output shape metadata mismatch');
@@ -231,6 +237,8 @@ export async function dispatchWyrdruneTensorKernel(plan, feeds, options = {}) {
       status: 'executed',
       engine: plan.engine,
       backend: 'webgpu',
+      outputId: plan.output,
+      feedsDigest,
       kernelFingerprint: plan.kernelFingerprint,
       programFingerprint: plan.programFingerprint,
       output: { shape: [...plan.outputShape], dtype: 'f32', values },
