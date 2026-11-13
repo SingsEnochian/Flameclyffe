@@ -49,7 +49,8 @@ export function createMythienceJourney(){
         fail('Hybrid identity or parent provenance is incomplete');
     }
     if(kind==='hybrid'){
-      if(c.parents.length!==2||!abilities.some(a=>a.id===c.parents[0].id&&a.origin_universe===c.parents[0].origin_universe)||
+      if(c.parents.length!==2||(c.parents[0].id===c.parents[1].id&&c.parents[0].origin_universe===c.parents[1].origin_universe)||
+        !abilities.some(a=>a.id===c.parents[0].id&&a.origin_universe===c.parents[0].origin_universe)||
         !abilities.some(a=>a.id===c.parents[1].id&&a.origin_universe===c.parents[1].origin_universe))
         fail('Hybrid parents are not in this traveller\'s carried lineage');
     }
