@@ -1,0 +1,18 @@
+.wg-amber-room{display:grid;gap:1rem;max-width:78rem;margin:0 auto;padding:1rem;}
+.wg-amber-heading,.wg-amber-form,.wg-amber-archive{padding:1.2rem;}
+.wg-amber-heading h1{margin:.2rem 0 .4rem;font-size:clamp(1.7rem,4vw,2.6rem);}
+.wg-amber-actions{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-top:.75rem;}
+.wg-amber-actions label{display:inline-flex;align-items:center;gap:.45rem;}
+.wg-amber-thread{padding:1rem;min-height:15rem;max-height:min(60vh,46rem);overflow-y:auto;overscroll-behavior:contain;}
+.wg-amber-turn{padding:.9rem 1rem;border-inline-start:3px solid rgba(227,174,79,.5);margin-block:.6rem;border-radius:.5rem;background:rgba(17,28,35,.38);}
+.wg-amber-turn.user{border-inline-start-color:rgba(118,184,200,.65);}
+.wg-amber-content{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.65;}
+.wg-amber-turn details{margin-top:.65rem;}
+.wg-amber-turn pre{max-height:16rem;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-size:.8rem;}
+.wg-amber-form textarea{box-sizing:border-box;width:100%;min-height:7rem;resize:vertical;}
+.wg-amber-archive select{max-width:100%;min-width:12rem;}
+.wg-amber-room button:focus-visible,.wg-amber-room select:focus-visible,.wg-amber-room textarea:focus-visible{outline:3px solid #f2bd65;outline-offset:3px;}
+@media(prefers-reduced-motion:reduce){.wg-amber-room *{scroll-behavior:auto!important;animation:none!important;transition:none!important;}}
+
+.wg-amber-witness{padding:1.2rem;}
+.wg-amber-witness-text{max-height:25rem;overflow:auto;padding:1rem;border:1px solid rgba(231,183,104,.28);border-radius:.75rem;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55;}

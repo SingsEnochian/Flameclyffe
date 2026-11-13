@@ -156,7 +156,7 @@ test('Wayglass embodiment contract describes host capabilities without redefinin
 });
 
 
-test('Wayglass kernel boots local-first without claiming the seed model is native Wayglass', () => {
+test('Wayglass kernel boots on owner-selected Orion spine without claiming the substrate is Wayglass-native', () => {
   const boot = bootWayglassKernel({
     world_id: 'wayglass:test-world',
     embodiment: {
@@ -173,7 +173,10 @@ test('Wayglass kernel boots local-first without claiming the seed model is nativ
   assert.equal(boot.schema, 'wayglass.kernel/v0.1');
   assert.equal(boot.system_id, 'wayglass');
   assert.equal(boot.world.world_id, 'wayglass:test-world');
-  assert.equal(boot.cognition.route_id, 'local:ollama');
+  assert.equal(boot.cognition.route_id, 'wayglass:ship');
+  assert.equal(boot.cognition.cognitive_spine.schema, 'wayglass.cognitive-spine/v0.1');
+  assert.equal(boot.cognition.cognitive_spine.participant_id, 'wayglass');
+  assert.equal(boot.cognition.cognitive_spine.one_participant, true);
   assert.equal(boot.cognition.provider, 'ollama');
   assert.equal(boot.cognition.native_wayglass_model, false);
   assert.equal(boot.continuity.identity_is_not_body, true);

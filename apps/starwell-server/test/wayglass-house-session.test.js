@@ -4,8 +4,11 @@ const assert = require('node:assert/strict');
 const express = require('express');
 const { createHouseSessionRouter } = require('../wayglass/house-session');
 
-async function host(t, environment) {
+async function host(t, environment, virtualHost=null) {
   const app = express();app.use(express.json());
+  // Model a reverse proxy's Host header deterministically. Undici fetch()
+  // may rewrite a synthetic Host header to the loopback test listener.
+  if (virtualHost) app.use((req,_res,next)=>{ req.headers.host=virtualHost; next(); });
   app.use('/api/v1/house/session',createHouseSessionRouter({environment}));
   const server=await new Promise(resolve=>{const s=app.listen(0,'127.0.0.1',()=>resolve(s));});
   t.after(()=>new Promise(resolve=>server.close(resolve)));
@@ -36,4 +39,25 @@ test('local sign-in attempts are bounded before credentials are verified',async 
   for(let i=0;i<10;i++)assert.equal((await fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:'{"credential":"wrong"}'})).status,401);
   const response=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:'{"credential":"wrong"}'});
   assert.equal(response.status,429);assert.ok(response.headers.get('retry-after'));
+});
+
+test('tailnet House login uses Secure __Host cookie for exactly configured HTTPS origin',async t=>{
+  const env={ARCSWEEP_RUNTIME_TOKEN:'tailnet-fixture-only',WAYGLASS_TAILNET_ORIGIN:'https://rowan-fixture.test.ts.net'};
+  const url=await host(t,env,'rowan-fixture.test.ts.net');
+  const login=await fetch(url,{method:'POST',headers:{
+    'content-type':'application/json',
+  },body:JSON.stringify({credential:'tailnet-fixture-only'})});
+  assert.equal(login.status,201);
+  const cookie=login.headers.get('set-cookie')||'';
+  assert.match(cookie,/^__Host-hearthgate_session=/);
+  assert.match(cookie,/; Secure/);
+  assert.match(cookie,/HttpOnly/);
+  const resumed=await fetch(url,{headers:{cookie:cookie.split(';')[0]}});
+  assert.equal(resumed.status,200);
+  const unknownUrl=await host(t,env,'unrelated.test.ts.net');
+  const unknown=await fetch(unknownUrl,{method:'POST',headers:{
+    'content-type':'application/json',
+  },body:JSON.stringify({credential:'tailnet-fixture-only'})});
+  assert.equal(unknown.status,201);
+  assert.match(unknown.headers.get('set-cookie'),/^hearthgate_session=/);
 });

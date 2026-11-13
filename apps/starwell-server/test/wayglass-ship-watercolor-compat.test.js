@@ -7,8 +7,10 @@ const {createWayglassRouter}=require('../wayglass/router');
 
 test('Watercolour legacy request derives Wayglass ship seat, preserving steward gate and receipts',async()=>{
   const previous=process.env.ARCSWEEP_RUNTIME_TOKEN;
+  const previousSpine=process.env.WAYGLASS_SPINE_MODEL;
   const token='fixture-wayglass-steward-only';
   process.env.ARCSWEEP_RUNTIME_TOKEN=token;
+  process.env.WAYGLASS_SPINE_MODEL='orion-test:fixture';
   const seen=[];
   const app=express();
   app.use(express.json());
@@ -48,5 +50,7 @@ test('Watercolour legacy request derives Wayglass ship seat, preserving steward 
     await new Promise(resolve=>server.close(resolve));
     if(previous===undefined)delete process.env.ARCSWEEP_RUNTIME_TOKEN;
     else process.env.ARCSWEEP_RUNTIME_TOKEN=previous;
+    if(previousSpine===undefined)delete process.env.WAYGLASS_SPINE_MODEL;
+    else process.env.WAYGLASS_SPINE_MODEL=previousSpine;
   }
 });

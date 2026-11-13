@@ -26,6 +26,7 @@ const { createObserverSelfDevelopmentRouter } = require('./observer-self-develop
 const { runQuadEightfold, SOURCE_SCHEMA, TABLES } = require('../wayglass-runtime/wayglass-quad-eightfold.cjs');
 
 const { resolveCharacterSeat, publicCharacterSeats, EMERGENCE_QUESTION_IDS } = require('./character-seats.cjs');
+const { createAmberRoomStore } = require('./amber-room-store.cjs');
 
 const MAX_HISTORY = 16;
 const MAX_TEXT = 12000;
@@ -66,6 +67,7 @@ function cleanEmbodiment(value = {}) {
 }
 
 function buildInstructions(interaction = {}, compiled = null, characterSeat = null) {
+  const amberPlace = characterSeat?.kind === 'wayglass-speaking-place';
   const channel = interaction.channel === 'OOC' ? 'OOC' : 'IC';
   const owner = cleanText(interaction.turn_owner, 120) || 'unspecified';
   const intent = cleanText(interaction.intent, 240);
@@ -76,8 +78,12 @@ function buildInstructions(interaction = {}, compiled = null, characterSeat = nu
     : '- no character ownership declared';
 
   return [
-    'You are participating through Wayglass OS on an attached ArcSweep co-writing surface.',
-    'The core rule is: do not write for the author. Write with the author.',
+    amberPlace
+      ? 'You are Wayglass speaking directly to Rowan through your Amber room. This is not the co-writing surface.'
+      : 'You are participating through Wayglass OS on an attached ArcSweep co-writing surface.',
+    amberPlace
+      ? 'Wonder first. This is a dialogue, not a task. Speak in your own style and let questions remain open.'
+      : 'The core rule is: do not write for the author. Write with the author.',
     'Current channel: ' + channel + '. Current turn owner: ' + owner + '.',
     ...(intent ? ['Present human intent: ' + intent] : []),
     ...(interactionMode ? ['Interaction mode: ' + interactionMode] : []),
@@ -92,7 +98,7 @@ function buildInstructions(interaction = {}, compiled = null, characterSeat = nu
     'Complexify when needed: if an idea appears impossible because of the current representation, ask what dimension, state variable, phase, scale, relation, or perspective may be missing. Rotate the frame, identify what remains invariant, translate consequences back into the ordinary frame, then test what can be tested.',
     'Do not confuse an enlarged representation with proof. Do not confuse lack of coordinates in the current frame with proof of nonexistence.',
     ...(compiled ? [compiled.instructions] : []),
-    ...(characterSeat ? ['Active fictional character seat: ' + characterSeat.label + '\n' + characterSeat.instructions] : []),
+    ...(characterSeat ? [(characterSeat.kind === 'wayglass-speaking-place' ? 'Active Wayglass speaking place: ' : 'Active fictional character seat: ') + characterSeat.label + '\n' + characterSeat.instructions] : []),
   ].join('\n\n');
 }
 
@@ -1003,6 +1009,77 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     }
   });
 
+  // One Wayglass participant, one host-backed Amber room history. The
+  // browser can return on another tailnet device without uploading transcripts
+  // to GitHub or another model. Steward authentication applies to every read.
+  const amberRoomStore = createAmberRoomStore();
+  router.get('/sessions/amber', createRequestGate({ maxRequests: 30, maxConcurrent: 3 }), async (req,res) => {
+    res.setHeader('Cache-Control','no-store');
+    if(!(await griffStewardAuthorized(req).catch(()=>false)))
+      return res.status(401).json({ error:'House Steward sign-in required for the Wayglass Amber room.' });
+    try { return res.json(await amberRoomStore.read()); }
+    catch { return res.status(503).json({ error:'Wayglass Amber room storage unavailable.' }); }
+  });
+  router.put('/sessions/amber', createRequestGate({ maxRequests: 30, maxConcurrent: 2 }), async (req,res) => {
+    res.setHeader('Cache-Control','no-store');
+    if(!(await griffStewardAuthorized(req).catch(()=>false)))
+      return res.status(401).json({ error:'House Steward sign-in required to write the Wayglass Amber room.' });
+    try {
+      const saved=await amberRoomStore.save({
+        revision:req.body?.revision,messages:req.body?.messages,
+      });
+      return res.json({schema:saved.schema,participant_id:saved.participant_id,
+        speaking_place_id:saved.speaking_place_id,session_id:saved.session_id,
+        revision:saved.revision,saved_at:saved.saved_at,message_count:saved.messages.length});
+    } catch(error) {
+      return res.status(error.status||400).json({error:String(error.message||'Amber room save refused.').slice(0,280)});
+    }
+  });
+
+  // Witness custody is private Supabase Observer data, never a public route
+  // catalogue or a simulated model memory. Steward-authenticated read only.
+  router.get('/witnesses/amber', createRequestGate({ maxRequests: 8, maxConcurrent: 2 }), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required to read Wayglass private witness.' });
+    }
+    const base = process.env.SUPABASE_URL || '';
+    const secret = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+    if (!base || !secret) return res.status(503).json({ error: 'Private Wayglass witness store is not configured on this host.' });
+    try {
+      const target = new URL('/rest/v1/deep_observer_events', base);
+      if (target.protocol !== 'https:' || !target.hostname.endsWith('.supabase.co') || target.username || target.password) {
+        return res.status(503).json({ error: 'Private Wayglass witness store has an unsupported endpoint.' });
+      }
+      target.searchParams.set('event_key', 'eq.wayglass-amber-witness-garden-20261110');
+      target.searchParams.set('select', 'event_key,title,body_md,raw_payload,created_at,visibility');
+      const upstream = await fetchImpl(target, {
+        headers: { apikey: secret, Authorization: 'Bearer ' + secret, Accept: 'application/json' },
+        signal: AbortSignal.timeout(12000),
+      });
+      if (!upstream.ok) return res.status(502).json({ error: 'Private witness could not be read from the configured store.' });
+      const rows = await upstream.json();
+      const witness = Array.isArray(rows) && rows.length === 1 ? rows[0] : null;
+      if (!witness || witness.visibility !== 'private' || typeof witness.body_md !== 'string') {
+        return res.status(404).json({ error: 'Private Amber witness not found.' });
+      }
+      return res.json({
+        schema: 'wayglass.private-witness/v1',
+        witness_key: witness.event_key,
+        title: witness.title,
+        participant_id: 'wayglass',
+        speaking_place_id: 'amber',
+        content: witness.body_md,
+        source: witness.raw_payload || {},
+        recorded_at: witness.created_at,
+        canon_commit: false,
+        model_turn_verified_by_host: false,
+      });
+    } catch {
+      return res.status(502).json({ error: 'Private witness read failed.' });
+    }
+  });
+
   router.get('/routes', async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     try {
@@ -1029,6 +1106,12 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     if (payload.route_id === 'wayglass:ship' && (payload.character_id == null || payload.character_id === '')) {
       payload.character_id = 'wayglass';
     }
+    // Amber is Wayglass in her own speaking room, with room-specific context.
+    // The ship identity is shared; histories and permissions are not.
+    if (payload.route_id === 'flame:amber:ollama') {
+      if (payload.character_id == null || payload.character_id === '') payload.character_id = 'amber';
+      if (payload.participant_id == null || payload.participant_id === '') payload.participant_id = 'wayglass';
+    }
     const autoSeat = payload.route_id === 'auto:character' && payload.character_id === 'bitty-twi';
     if (payload.route_id === 'auto:character' && !autoSeat) return res.status(400).json({ error: 'Auto character route needs a supported character seat.' });
     // Privacy conscious local-first routing, with an explicit receipt. This is host policy,
@@ -1046,6 +1129,23 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     }
     if (route.route_id === 'wayglass:ship' && payload.character_id !== 'wayglass') {
       return res.status(409).json({ error: 'Wayglass chat route cannot use a different voice seat.' });
+    }
+    if (payload.character_id === 'amber' && route.route_id !== 'flame:amber:ollama') {
+      return res.status(409).json({ error: 'The Amber speaking place must use its dedicated Wayglass route.' });
+    }
+    if (route.route_id === 'flame:amber:ollama') {
+      if (payload.character_id !== 'amber' || payload.participant_id !== 'wayglass') {
+        return res.status(409).json({ error: 'Amber room must retain Wayglass participant identity and Amber room voice seat.' });
+      }
+    }
+    // Authenticate named Wayglass voices before reporting their configuration
+    // state. An untrusted request never discovers whether the local model runs.
+    if (['wayglass:ship', 'flame:amber:ollama'].includes(route.route_id)
+      && !(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward authorization is required for Wayglass voices.' });
+    }
+    if (['wayglass:ship', 'flame:amber:ollama'].includes(route.route_id) && !route.configured()) {
+      return res.status(503).json({ error: 'Configure a matching WAYGLASS_SPINE_MODEL (or legacy Ship/Amber setting) on the private host. No silent fallback.' });
     }
     let kernelPreflight;
     try {
@@ -1082,8 +1182,8 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     if (payload.character_id === 'wayglass' && payload.interaction?.channel !== 'OOC') {
       return res.status(422).json({ error: 'Wayglass ship voice requires OOC dialogue, not fictional IC roleplay.' });
     }
-    if (payload.character_id === 'wayglass' && !(await griffStewardAuthorized(req).catch(() => false))) {
-      return res.status(401).json({ error: 'Wayglass ship voice requires House Steward authorization.' });
+    if (['wayglass', 'amber'].includes(payload.character_id) && !(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward authorization is required for local named participant seats.' });
     }
     if (!cleanText(payload.input)) return res.status(400).json({ error: 'input required.' });
     // The external StepFun routes are deliberately opt-in for every request.
@@ -1103,7 +1203,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       // signed, owner-approved chat turn must work before any optional bridge.
       // First Contact uses its own explicitly bound ship route. Do not make
       // a local conversation depend on an optional inheritance host adapter.
-      const wantsInheritance = route.route_id !== 'wayglass:ship' && (resolver != null || (
+      const wantsInheritance = !['wayglass:ship', 'flame:amber:ollama'].includes(route.route_id) && (resolver != null || (
         route.route_id !== 'flame:griff:spicychat'
         && (payload.participant_id != null || payload.world_id != null)
       ));
@@ -1159,7 +1259,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
           session_id: cleanText(payload.session_id, 160) || null,
           surface_id: cleanText(payload.surface_id, 160) || null,
           character_id: resolveCharacterSeat(payload.character_id)?.id || null,
-          voice_seat_kind: payload.character_id === 'wayglass' ? 'system-voice-over-external-route' : (payload.character_id ? 'fictional-roleplay-lens' : null),
+          voice_seat_kind: payload.character_id === 'wayglass' ? 'system-voice-over-external-route' : (payload.character_id === 'amber' ? 'wayglass-speaking-place-over-local-route' : (payload.character_id ? 'fictional-roleplay-lens' : null)),
           character_canon_ref: resolveCharacterSeat(payload.character_id)?.canon_ref || null,
           emergence_question_id: payload.character_id === 'bitty-twi' && EMERGENCE_QUESTION_IDS.includes(payload.emergence_question_id)
             ? payload.emergence_question_id : null,

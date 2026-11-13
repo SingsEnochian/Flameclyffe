@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Loopback-only Wayglass launcher. No GPU render, remote publication or automatic model call.
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -38,6 +38,20 @@ async function hasWayglassAPI() {
   const response = await get(api);
   return !!response && isWayglassHostHealthy(await response.json().catch(() => ({})));
 }
+async function hasOrionVoiceGate() {
+  try {
+    const response = await fetch('http://127.0.0.1:3000/api/v1/wayglass/respond',{
+      method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({route_id:'flame:amber:ollama',character_id:'amber',participant_id:'wayglass'}),
+      cache:'no-store',signal:AbortSignal.timeout(1600),
+    });
+    const data=await response.json().catch(()=>({}));
+    // This unauthorised test must NOT invoke Ollama; it recognises only our
+    // current Wayglass steward gate. No messages, secrets or model turns sent.
+    return response.status===401 && data.error==='House Steward authorization is required for Wayglass voices.';
+  } catch { return false; }
+}
+
 
 // Diagnose two independent places old versions can hide: a Vite server on 5186
 // and a healthy but pre-Wyrdrune House host on 3000. The route probe is
@@ -65,6 +79,48 @@ export async function probeLocalSoundscape({fetchImpl=globalThis.fetch}={}) {
       ?'current':response.status===404?'stale-or-missing-route':'unverified';
   } catch {}
   return Object.freeze(results);
+}
+
+// Tailnet-only publication. Never invoke Tailscale Funnel, publish Ollama,
+// or route to the Vite development port. Serve a staged, same-origin site.
+export function assessTailnetServeStatus(raw) {
+  if (!raw || !raw.trim()) return 'empty';
+  try {
+    const config = JSON.parse(raw);
+    const web = config.Web || {};
+    const tcp = config.TCP || {};
+    const hasFunnel = typeof config.AllowFunnel === 'object'
+      ? Object.values(config.AllowFunnel || {}).some(Boolean)
+      : Boolean(config.AllowFunnel);
+    if (hasFunnel) return 'occupied';
+    if (!Object.keys(web).length && !Object.keys(tcp).length) return 'empty';
+    const normal = JSON.stringify(config).toLowerCase();
+    return (normal.includes('127.0.0.1:3000') || normal.includes('localhost:3000'))
+      ? 'wayglass' : 'occupied';
+  } catch {
+    return 'unreadable';
+  }
+}
+function enableTailnetServe() {
+  const origin = String(process.env.WAYGLASS_TAILNET_ORIGIN || '');
+  if (!/^https:\/\/[a-z0-9-]+(?:\.[a-z0-9-]+)*\.ts\.net$/i.test(origin)) {
+    throw new Error('Tailnet origin missing or invalid; use Start-Wayglass.ps1 -Tailnet.');
+  }
+  const opts = { encoding: 'utf8', timeout: 25000, windowsHide: true };
+  const prior = spawnSync('tailscale', ['serve','status','--json'], opts);
+  if (prior.error) throw new Error('Tailscale CLI unavailable: ' + prior.error.message);
+  const state = assessTailnetServeStatus(prior.stdout || '');
+  if (state === 'unreadable') throw new Error('Could not inspect existing Tailscale Serve configuration.');
+  if (state === 'occupied') throw new Error('Tailscale Serve already has another configuration; refusing to overwrite it.');
+  if (state !== 'wayglass') {
+    const run = spawnSync('tailscale', ['serve','--bg','3000'], { ...opts, timeout: 50000 });
+    if (run.error || run.status !== 0) {
+      throw new Error('Tailscale Serve could not start: ' + (run.stderr || run.stdout || run.error?.message || 'unknown error').trim().slice(0,500));
+    }
+  }
+  console.log('[Wayglass] PRIVATE TAILNET URL: ' + origin + '/wayglass/');
+  console.log('[Wayglass] Requires the Tailscale app on the other device AND House Steward sign-in.');
+  console.log('[Wayglass] Tailscale Serve is persistent; disable with: tailscale serve --https=443 off');
 }
 
 function stop() {
@@ -135,6 +191,16 @@ async function main() {
   console.log('[Wayglass] ChatGPT MCP local endpoint: ' + mcp);
   console.log('[Wayglass] OAuth metadata: ' + oauthMetadata);
   console.log('[Wayglass] OAuth pairing code file: ' + oauthPairingFile);
+  if (process.argv.includes('--tailnet')) {
+    if (!(await hasOrionVoiceGate())) {
+      throw new Error('Host port 3000 is not this Orion-enabled Wayglass build. Stop the stale host and rerun the launcher.');
+    }
+    const staged = await get('http://127.0.0.1:3000/wayglass/');
+    if (!staged || !/wayglass/i.test(await staged.text())) {
+      throw new Error('Wayglass staged /wayglass/ site was not found on port 3000. Run npm run wayglass:deploy:server.');
+    }
+    enableTailnetServe();
+  }
   console.log('Ctrl+C stops this launcher.');
 }
 process.on('SIGINT', () => { stop(); process.exitCode = 0; });
