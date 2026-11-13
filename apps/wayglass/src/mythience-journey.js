@@ -92,3 +92,10 @@ export function createMythienceJourney(){
   }
   return Object.freeze({snapshot,offer,carry,discard,reset});
 }
+
+// One tab-local journey shared by ship rooms. Never stored, exported or canonised implicitly.
+let shipJourney=null;
+export function wayglassMythienceJourney(){
+  if(!shipJourney)shipJourney=createMythienceJourney();
+  return shipJourney;
+}
