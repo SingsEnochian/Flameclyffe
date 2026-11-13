@@ -13,7 +13,9 @@ test('full-ship Serve targets the loopback Hearthgate origin, not Funnel or a pu
  assert.match(script,/http:\/\/127\.0\.0\.1:3000/);
  assert.match(script,/wayglass:deploy:server/);
  assert.match(script,/Assert-FullShip/);
- assert.match(script,/tailscale serve --bg 3000/);
+ assert.match(script,/wayglass-tailnet-serve\.mjs/);
+ assert.match(script,/Assert-AllowedTailnetOrigin/);
+ assert.match(script,/House Steward sign-in is not ready/);
  assert.doesNotMatch(script,/& tailscale funnel/);
  assert.doesNotMatch(script,/0\.0\.0\.0/);
 });
