@@ -59,3 +59,16 @@ The membrane borrows scientific metaphors from selective transport, phase matchi
 Check PR #618 CI, test the local server packaging, then run an authenticated browser interaction: grant fictional three-way permission, inspect an eight-phase WTL receipt, observe Watercolour/Spectrum/helm response, Feather, reset and Return. Also verify **native Wyrdrune hybrid-fusion proposals** with separate provenance for each parent ability, four explicit fictional consents and an independently consenting destination. Then explore durable, reversible membrane learning and genuine participant-to-participant reciprocal updates.
 
 **Withness:** The shared language is Wonder. The engine is Wyrdrune. The crossing is a relationship, not an overwrite. The Return is what lets a traveller remain themselves while becoming more than before.
+
+## Continuity refinement: explicit Carry and identity isolation
+The in-browser Mythience journey now uses `apps/wayglass/src/mythience-journey.js` as a separate, testable local state machine. It deliberately distinguishes **a proposed encounter** from **an explicitly carried experience**.
+
+- `offer`: receive a candidate and check traveller identity, source hash, Eightfold phase receipts, ability origin, parent provenance, charge and crossing count. A proposal does not mutate the traveller's carried state.
+- `carry`: a distinct user action that admits the candidate into **session-only preview** history, abilities and provenance-bearing lineage. Hybrid abilities preserve references to both parents, retain the traveller and can become inputs to later proposals. This is not a durable or canonical grant.
+- `discard` / Feather: abandon the pending candidate while keeping earlier carried local previews and their Return anchor.
+- `reset`: explicitly begin a new traveller journey with fresh seeds, clearing local preview lineage.
+- Traveller isolation: once a journey is bound to one traveller, changing the identifier cannot inherit the prior traveller's abilities without a new journey.
+- Race-safe requests: each network flight has its own AbortController identity; a late response after Feather or reset cannot silently apply to a newer encounter.
+- Visible ancestry: the Mythience room now displays the latest carried abilities, source universes and hybrid parents.
+
+Tests: `apps/wayglass/test/mythience-journey.test.js`. The contract deliberately keeps the source and canon boundaries explicit. Next steps: independently signed experience receipts, real participant invitations, durable but reversible route membrane history, and an authenticated browser E2E that exercises the whole journey.
