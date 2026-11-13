@@ -1,6 +1,6 @@
 import './mythience-crossing.css';
 import {createMythienceJourney} from '../mythience-journey.js';
-import {proposeMythienceCrossing,proposeMythienceHybrid,mythienceSnapshot,clearMythience} from '../mythience-client.js';
+import {proposeMythienceCrossing,proposeMythienceHybrid,clearMythience} from '../mythience-client.js';
 
 const esc=v=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;')
   .replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
@@ -57,6 +57,8 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
     '<div class="wg-mythience-world wg-mythience-destination">Destination</div></div>',
     '<p data-mythience-reading>What might pass through, and what must remain distinct?</p>',
     '<div data-mythience-receipt class="wg-mythience-receipt" role="log" aria-live="polite"></div>',
+    '<section class="wg-mythience-lineage" aria-label="Traveller continuity"><h3>Carried possibilities</h3>',
+    '<p data-mythience-lineage aria-live="polite">Nothing carried yet. Proposals await your choice.</p></section>',
     '<p class="tiny">Only a candidate returns. Withness preserves the source and refusal. The traveller, route membrane and host world remain separate lineages.</p>',
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:living-watercolor">See the Living Watercolour</button>',
     '</section></div></section>'
@@ -65,12 +67,21 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
   const status=root.querySelector('[data-mythience-status]');
   const reading=root.querySelector('[data-mythience-reading]');
   const receipt=root.querySelector('[data-mythience-receipt]');
+  const lineage=root.querySelector('[data-mythience-lineage]');
   const membrane=root.querySelector('[data-mythience-membrane]');
   const button=form.querySelector('[type=submit]');
   const hybridButton=root.querySelector('[data-mythience-hybrid]');
   const carryButton=root.querySelector('[data-mythience-carry]');
   for(const slider of form.querySelectorAll('input[type=range]')){
     slider.addEventListener('input',()=>{form.querySelector('[data-value="'+slider.name+'"]').textContent=Number(slider.value).toFixed(2);});
+  }
+  function renderLineage(){
+    const state=journey.snapshot();
+    if(!state.abilities.length){lineage.textContent='Nothing carried yet. Proposals await your choice.';return;}
+    const latest=state.lineage.slice(-4).map(item=>item.ability.id+' from '+
+      item.ability.origin_universe+(item.kind==='hybrid'?' (hybrid of '+item.parent_refs.map(p=>p.id).join(' + ')+')':'')).join(' · ');
+    lineage.textContent=state.traveller_id+' · '+state.abilities.length+' carried possibilities · '+latest+
+      ' · Session preview only, never canon.';
   }
   function render(result){
     if(result.status==='denied'){
@@ -168,6 +179,7 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
       hybridButton.disabled=state.abilities.length<2;
       status.textContent='Carried in this preview only: '+state.abilities.at(-1).id+
         '. '+state.abilities.length+' abilities, '+state.history.length+' experiences. No canon commit.';
+      renderLineage();
     }catch(error){status.textContent=error.message;}
   });
   root.querySelector('[data-mythience-feather]').addEventListener('click',()=>{
@@ -178,7 +190,7 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
   });
   root.querySelector('[data-mythience-reset]').addEventListener('click',()=>{
     controller?.abort();controller=null;journey.reset();serial=0;hybridButton.disabled=true;carryButton.disabled=true;
-    clearMythience();membrane.style.setProperty('--membrane-open','0');
+    clearMythience();renderLineage();membrane.style.setProperty('--membrane-open','0');
     reading.textContent='A fresh possibility. Nothing has been carried forward.';
     receipt.textContent='';status.textContent='New journey, no adopted history.';button.disabled=false;
   });
