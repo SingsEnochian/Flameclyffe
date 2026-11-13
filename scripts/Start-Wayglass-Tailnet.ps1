@@ -1,6 +1,7 @@
 # Wayglass full-ship private Tailscale Serve entrance for Windows.
 # Read-only by default. No Funnel, router port opening, public preview or credentials.
 # Tailscale Serve is tailnet-private, not automatically owner-only: verify ACLs first.
+# Route through the dedicated Wayglass gate, NEVER expose all of STARWELL.
 [CmdletBinding()]
 param(
     [switch]$Publish,
@@ -100,17 +101,13 @@ try {
     & npm run wayglass:deploy:server
     if ($LASTEXITCODE -ne 0) { throw 'Wayglass staging failed. Nothing has been shared.' }
     Assert-FullShip
-    Write-Host '[Wayglass] Staged full ship verified; enabling private Tailscale Serve.'
-    & tailscale serve --bg 3000
-    if ($LASTEXITCODE -ne 0) { throw 'Tailscale Serve failed; check Tailscale HTTPS/MagicDNS setup.' }
-    $current = Get-ServeConfig
-    if ($null -eq $current -or -not (@($current.PSObject.Properties.Name) -contains 'Web')) {
-        throw 'Tailscale Serve did not return a verifiable web configuration.'
-    }
-    # Tailscale CLI is the authority for the URL; never publish via Funnel.
-    Write-Host '[Wayglass] Private tailnet route configured:' $privateUrl
-    Write-Host '[Wayglass] Open on iPad with Tailscale connected. This does not yet prove iPad acceptance.'
-    Write-Host '[Wayglass] To disable this dedicated Serve route: tailscale serve --https=443 off'
+    Write-Host '[Wayglass] Staged full ship verified. Starting the restricted Wayglass gateway.'
+    Write-Host '[Wayglass] No unrelated STARWELL API, MCP, Ollama or filesystem routes are exposed.'
+    $env:WAYGLASS_TAILNET_ORIGIN = "https://$hostname"
+    $env:HEARTHGATE_ALLOWED_ORIGINS = ((@($env:HEARTHGATE_ALLOWED_ORIGINS -split ',') |
+        Where-Object { $_ -and $_.Trim() }) + @($env:WAYGLASS_TAILNET_ORIGIN) | Select-Object -Unique) -join ','
+    & node scripts/wayglass-tailnet-serve.mjs
+    if ($LASTEXITCODE -ne 0) { throw 'Tailscale Serve exited with an error. Nothing is verified live.' }
 } finally {
     Pop-Location
 }
