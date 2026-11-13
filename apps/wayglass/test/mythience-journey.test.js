@@ -165,3 +165,15 @@ test('malformed hybrid parent containers fail without mutating the pending invit
     assert.deepEqual(journey.snapshot(),before);
   }
 });
+
+test('a hybrid cannot use the same carried parent twice',()=>{
+  const journey=createMythienceJourney();
+  journey.offer(crossing(),{traveller_id:'traveller:a'});journey.carry();
+  const forged=hybrid();
+  forged.carry.crossings=1;
+  forged.candidate.parents=[{id:'ability:light',origin_universe:'universe:one'},
+    {id:'ability:light',origin_universe:'universe:one'}];
+  const before=journey.snapshot();
+  assert.throws(()=>journey.offer(forged,{traveller_id:'traveller:a'}),/parents are not in/);
+  assert.deepEqual(journey.snapshot(),before);
+});
