@@ -1,5 +1,6 @@
 import './mythience-crossing.css';
 import {wayglassMythienceJourney} from '../mythience-journey.js';
+import {mountMythienceMembraneScene} from '../mythience-membrane-scene.js';
 import {proposeMythienceCrossing,proposeMythienceHybrid,clearMythience} from '../mythience-client.js';
 
 const esc=v=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;')
@@ -52,9 +53,9 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
     '</form>',
     '<section class="glass-panel wg-mythience-outcome" aria-label="Mythience crossing preview">',
     '<h2>Between the worlds</h2>',
-    '<div class="wg-mythience-worlds" aria-hidden="true"><div class="wg-mythience-world wg-mythience-origin">Origin</div>',
+    '<div class="wg-mythience-worlds"><canvas class="wg-mythience-cosmos" data-mythience-cosmos tabindex="0" role="slider" aria-label="Tune Shifting with a finger, Pencil or arrow keys" aria-valuemin="0" aria-valuemax="100" aria-valuenow="90" aria-valuetext="90 percent Shifting"></canvas><div class="wg-mythience-world wg-mythience-origin" data-mythience-origin>Origin</div>',
     '<div class="wg-mythience-membrane" data-mythience-membrane></div>',
-    '<div class="wg-mythience-world wg-mythience-destination">Destination</div></div>',
+    '<div class="wg-mythience-world wg-mythience-destination" data-mythience-destination>Destination</div></div>',
     '<p data-mythience-reading>What might pass through, and what must remain distinct?</p>',
     '<div data-mythience-receipt class="wg-mythience-receipt" role="log" aria-live="polite"></div>',
     '<section class="wg-mythience-lineage" aria-label="Traveller continuity"><h3>Carried possibilities</h3>',
@@ -69,11 +70,38 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
   const receipt=root.querySelector('[data-mythience-receipt]');
   const lineage=root.querySelector('[data-mythience-lineage]');
   const membrane=root.querySelector('[data-mythience-membrane]');
+  const cosmos=root.querySelector('[data-mythience-cosmos]');
+  const shiftSlider=form.elements.shifting;
+  const fieldValues=()=>Object.fromEntries(controls.map(([key])=>[key,Number(form.elements[key].value)]));
+  const scene=mountMythienceMembraneScene(cosmos,{onShift:value=>{
+    shiftSlider.value=String(value);
+    form.querySelector('[data-value="shifting"]').textContent=value.toFixed(2);
+    cosmos.setAttribute('aria-valuenow',String(Math.round(value*100)));
+    cosmos.setAttribute('aria-valuetext',Math.round(value*100)+' percent Shifting');
+    scene.setFields(fieldValues());
+  }});
+  scene.setFields(fieldValues());
+  const updateWorldLabels=()=>{
+    const from=form.elements.origin.value.trim()||'Origin';
+    const to=form.elements.destination.value.trim()||'Destination';
+    root.querySelector('[data-mythience-origin]').textContent=from;
+    root.querySelector('[data-mythience-destination]').textContent=to;
+    scene.setWorlds(from,to);
+  };
+  updateWorldLabels();
+  for(const name of ['origin','destination'])form.elements[name].addEventListener('input',updateWorldLabels);
   const button=form.querySelector('[type=submit]');
   const hybridButton=root.querySelector('[data-mythience-hybrid]');
   const carryButton=root.querySelector('[data-mythience-carry]');
   for(const slider of form.querySelectorAll('input[type=range]')){
-    slider.addEventListener('input',()=>{form.querySelector('[data-value="'+slider.name+'"]').textContent=Number(slider.value).toFixed(2);});
+    slider.addEventListener('input',()=>{
+      form.querySelector('[data-value="'+slider.name+'"]').textContent=Number(slider.value).toFixed(2);
+      scene.setFields(fieldValues());
+      if(slider.name==='shifting'){
+        cosmos.setAttribute('aria-valuenow',String(Math.round(Number(slider.value)*100)));
+        cosmos.setAttribute('aria-valuetext',Math.round(Number(slider.value)*100)+' percent Shifting');
+      }
+    });
   }
   function renderLineage(){
     const state=journey.snapshot();
@@ -88,16 +116,19 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
       reading.textContent='The threshold refused this encounter. A refusal is a meaningful return.';
       receipt.textContent=result.reason||'Crossing declined';
       membrane.style.setProperty('--membrane-open','0');
+      scene.setOutcome({permeability:0,expression:0});
       return;
     }
     const c=result.candidate;
     if(Array.isArray(c.parents)){
       membrane.style.setProperty('--membrane-open',String(clamp(c.expression)));
+      scene.setOutcome({permeability:c.expression,expression:c.expression});
       reading.textContent='A third ability has been proposed from '+c.parents.map(p=>p.id+' ('+p.origin_universe+')').join(' and ')+'.';
       receipt.textContent='Hybrid '+c.id+' · Expression '+Math.round(c.expression*100)+'% · Synergy '+Math.round(c.synergy*100)+'% · Eightfold receipts '+result.phase_receipts.length+' · No canon commit';
       return;
     }
     membrane.style.setProperty('--membrane-open',String(clamp(c.permeability)));
+    scene.setOutcome({permeability:c.permeability,expression:c.expression});
     reading.textContent='A proposed translation of '+c.ability.id+' from '+c.ability.origin_universe+
       ' into '+c.to+' has expression '+Math.round(c.expression*100)+'%. Identity and provenance remain intact.';
     receipt.innerHTML='<p><strong>Withness:</strong> candidate only, no actual crossing or canon change</p>'+
@@ -194,12 +225,12 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
   });
   root.querySelector('[data-mythience-reset]').addEventListener('click',()=>{
     controller?.abort();controller=null;journey.reset();serial=0;hybridButton.disabled=true;carryButton.disabled=true;
-    clearMythience();renderLineage();membrane.style.setProperty('--membrane-open','0');
+    clearMythience();renderLineage();membrane.style.setProperty('--membrane-open','0');scene.setFields(fieldValues());
     reading.textContent='A fresh possibility. Nothing has been carried forward.';
     receipt.textContent='';status.textContent='New journey, no adopted history.';button.disabled=false;
   });
   root.querySelectorAll('[data-wayglass-room]').forEach(el=>el.addEventListener('click',()=>globalThis.__wayglassOS?.mount(el.dataset.wayglassRoom)));
   return Object.freeze({surface_id:'wayglass:mythience-crossing',destroy(){
-    active=false;controller?.abort();journey.discard();
+    active=false;controller?.abort();journey.discard();scene.destroy();
   }});
 }
