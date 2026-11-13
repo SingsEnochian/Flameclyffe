@@ -56,6 +56,13 @@ export function createMythienceJourney(){
         !abilities.some(a=>a.id===c.parents[1].id&&a.origin_universe===c.parents[1].origin_universe))
         fail('Hybrid parents are not in this traveller\'s carried lineage');
     }
+    // Carried ability references are identity keys for future hybrid parent selection.
+    // Reject collisions rather than silently making an ancestor ambiguous.
+    const proposedAbility=kind==='hybrid'
+      ?{id:c.id,origin_universe:c.destination_universe}
+      :{id:c.ability.id,origin_universe:c.ability.origin_universe};
+    if(abilities.some(a=>a.id===proposedAbility.id&&a.origin_universe===proposedAbility.origin_universe))
+      fail('Carried ability identity already exists in this traveller\'s lineage');
     const carry=checkedCarry(result.carry);
     if(kind==='crossing'&&carry.crossings!==seeds.crossings+1)
       fail('Crossing sequence does not follow this traveller\'s Return anchor');
