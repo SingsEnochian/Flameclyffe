@@ -47,7 +47,7 @@ export function createMythienceJourney(){
         fail('Crossing identity or ability provenance is incomplete');
     }else{
       if(!validId(c.id)||!validId(c.destination_universe)||c.parents.length!==2||
-        c.parents.some(a=>!validId(a.id)||!validId(a.origin_universe)))
+        c.parents.some(a=>!a||typeof a!=='object'||Array.isArray(a)||!validId(a.id)||!validId(a.origin_universe)))
         fail('Hybrid identity or parent provenance is incomplete');
     }
     if(kind==='hybrid'){
