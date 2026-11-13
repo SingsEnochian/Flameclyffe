@@ -84,3 +84,24 @@ test('snapshot is detached from mutable internal state',()=>{
   assert.equal(journey.snapshot().seeds.charge,1);
   assert.equal(journey.snapshot().history.length,0);
 });
+
+test('a forged source or missing origin cannot enter the local lineage',()=>{
+  const journey=createMythienceJourney();
+  const missing=crossing();delete missing.source_hash;
+  assert.throws(()=>journey.offer(missing,{traveller_id:'traveller:a'}),/source provenance/);
+  const noOrigin=crossing();delete noOrigin.candidate.ability.origin_universe;
+  assert.throws(()=>journey.offer(noOrigin,{traveller_id:'traveller:a'}),/provenance is incomplete/);
+  assert.equal(journey.snapshot().history.length,0);
+  assert.equal(journey.snapshot().pending,null);
+});
+test('Feather discards only the pending proposal and keeps earlier carried lineage',()=>{
+  const journey=createMythienceJourney();
+  journey.offer(crossing(),{traveller_id:'traveller:a'});journey.carry();
+  journey.offer(crossing({input_hash:other,from:'universe:two',to:'universe:three',crossings:2,charge:.55}),
+    {traveller_id:'traveller:a'});
+  const paused=journey.discard();
+  assert.equal(paused.pending,null);
+  assert.equal(paused.history.length,1);
+  assert.equal(paused.seeds.crossings,1);
+  assert.equal(paused.traveller_id,'traveller:a');
+});
