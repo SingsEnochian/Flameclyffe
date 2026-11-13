@@ -56,7 +56,7 @@ The CPU reference interpreter is the executable correctness baseline. It support
 
 Reverse-mode automatic differentiation currently supports every differentiable operation in the IR: pointwise arithmetic, transcendental functions, sum, matrix multiplication, transpose, reshape and affine view. The differentiated result must be scalar. Gradients are accumulated in f64 and returned with the program fingerprint and feed digest.
 
-The current interpreter is JavaScript. The existing Wyrdrune Python backend remains separate; cross-backend tensor parity is a later milestone, not a claim of this prototype.
+The JavaScript and Python reference interpreters are independently implemented. Python consumes the same compiled IR, verifies its WCE-1 fingerprint, and returns a separately attributed result. The cross-backend suite compares program/feed digests, operation counts, shapes, precision and numeric outputs. Transcendental comparisons use explicit tolerances because host math libraries may differ in their last bits.
 
 ## Kernel derivation
 
@@ -94,7 +94,7 @@ Run:
     node --test lib/wyrdrune/tensor-engine.test.cjs
     npm run wayglass:test
 
-The test suite covers IR validation and fingerprinting, broadcasting, affine views, reductions, matrix multiplication, analytic and finite-difference gradients, reverse-mode matrix gradients, WGSL fusion and fallback, precision overflow, budgets, stop signals, bridge authorization and execution through the native Wyrdrune runtime.
+The test suite covers IR validation and fingerprinting, broadcasting, affine views, reductions, matrix multiplication, analytic and finite-difference gradients, reverse-mode matrix gradients, WGSL fusion and fallback, precision overflow, budgets, stop signals, bridge authorization, execution through the native Wyrdrune runtime, and independent JavaScript/Python tensor parity.
 
 ## Next engineering gates
 
