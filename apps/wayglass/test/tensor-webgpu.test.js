@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
-import { dispatchWyrdruneTensorKernel } from '../src/tensor-webgpu.js';
+import { divineWayglassTensorKernel, dispatchWyrdruneTensorKernel } from '../src/tensor-webgpu.js';
 
 const require = createRequire(import.meta.url);
 const { deriveTensorKernel } = require('../../../lib/wyrdrune/tensor-lowering.cjs');
@@ -157,4 +157,63 @@ test('Feather stop and malformed feeds prevent WebGPU dispatch', async () => {
   await assert.rejects(dispatchWyrdruneTensorKernel(plan, { x: [2] }, {
     gpu: mock.gpu, bufferUsage: mock.usage, mapMode: mock.mapMode,
   }), /expected 2/);
+});
+
+
+test('Wayglass kernel divination probes WebGPU only when a GPU policy requests it', async () => {
+  let probes = 0;
+  const gpu = {
+    async requestAdapter() {
+      probes += 1;
+      return {
+        info: { description: 'Divination test adapter' },
+        limits: {
+          maxComputeWorkgroupSizeX: 64,
+          maxComputeInvocationsPerWorkgroup: 64,
+          maxStorageBufferBindingSize: 4096,
+          maxBufferSize: 8192,
+          maxUniformBufferBindingSize: 256,
+          maxComputeWorkgroupsPerDimension: 65535,
+          maxStorageBuffersPerShaderStage: 8,
+        },
+      };
+    },
+  };
+  const ordinary = await divineWayglassTensorKernel(program, 'square', {}, { gpu });
+  assert.equal(probes, 0);
+  assert.equal(ordinary.decision.selectedBackend, 'webgpu');
+  assert.equal(ordinary.decision.webgpuCapability.available, false);
+
+  const selected = await divineWayglassTensorKernel(
+    program, 'square', { policy: 'gpu-if-available' }, { gpu },
+  );
+  assert.equal(probes, 1);
+  assert.equal(selected.decision.selectedBackend, 'webgpu');
+  assert.equal(selected.decision.webgpuCapability.source, 'browser-adapter-probe');
+  assert.equal(selected.decision.webgpuCapability.adapterDescription, 'Divination test adapter');
+  assert.equal(selected.withness.executionOccurred, false);
+});
+
+test('Wayglass GPU-required divination returns no plan when no adapter exists', async () => {
+  let probes = 0;
+  const result = await divineWayglassTensorKernel(
+    program, 'square', { policy: 'gpu-required' }, {
+      gpu: { async requestAdapter() { probes += 1; return null; } },
+    },
+  );
+  assert.equal(probes, 1);
+  assert.equal(result.status, 'no-eligible-kernel');
+  assert.equal(result.selectedPlan, null);
+  assert.equal(result.withness.gpuExecuted, false);
+});
+
+test('caller-supplied WebGPU availability is respected without a second probe', async () => {
+  let probes = 0;
+  const result = await divineWayglassTensorKernel(
+    program, 'square',
+    { policy: 'gpu-if-available', capabilities: { webgpu: { available: false } } },
+    { gpu: { async requestAdapter() { probes += 1; return {}; } } },
+  );
+  assert.equal(probes, 0);
+  assert.equal(result.decision.selectedBackend, 'cpu-reference');
 });

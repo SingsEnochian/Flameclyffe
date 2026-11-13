@@ -24,7 +24,7 @@ mobius scoped {
     };
   }
   compress {
-    let kernel = bridge("tensor", "derive", programme, "score");
+    let divination = bridge("tensor", "divine", programme, "score");
   }
   release {
     let result = bridge("tensor", "evaluate", programme, feeds);
@@ -37,7 +37,7 @@ mobius scoped {
   }
   choose {
     emit result;
-    emit kernel;
+    emit divination;
     emit gradient;
   }
   return {

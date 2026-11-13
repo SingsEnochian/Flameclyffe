@@ -1,3 +1,47 @@
+import kernelDivination from '../../../lib/wyrdrune/kernel-divination.cjs';
+
+/**
+ * Analyse a Wyrdrune tensor graph and, for GPU policies, probe the browser adapter.
+ * Adapter probing is explicit: best-derivable and reference-first never request one.
+ * The returned plan is not executed; dispatch remains a separate user-directed action.
+ */
+export async function divineWayglassTensorKernel(program, output, request = {}, environment = {}) {
+  if (!request || typeof request !== 'object' || Array.isArray(request)) {
+    throw new TypeError('Kernel divination request must be a record');
+  }
+  const policy = request.policy ?? 'best-derivable';
+  const suppliedCapabilities = request.capabilities ?? {};
+  if (!suppliedCapabilities || typeof suppliedCapabilities !== 'object' || Array.isArray(suppliedCapabilities)) {
+    throw new TypeError('Kernel capabilities must be a record');
+  }
+  const suppliedWebGpu = suppliedCapabilities.webgpu ?? {};
+  if (!suppliedWebGpu || typeof suppliedWebGpu !== 'object' || Array.isArray(suppliedWebGpu)) {
+    throw new TypeError('WebGPU capabilities must be a record');
+  }
+
+  let webgpu = { ...suppliedWebGpu };
+  if ((policy === 'gpu-if-available' || policy === 'gpu-required') &&
+      !Object.hasOwn(webgpu, 'available')) {
+    const gpu = environment.gpu ?? globalThis.navigator?.gpu;
+    const adapter = await gpu?.requestAdapter?.({ powerPreference: environment.powerPreference ?? 'high-performance' });
+    webgpu = {
+      ...webgpu,
+      available: Boolean(adapter),
+      source: 'browser-adapter-probe',
+      adapterDescription: adapter?.info?.description || null,
+      maxComputeWorkgroupSizeX: adapter?.limits?.maxComputeWorkgroupSizeX,
+      maxComputeInvocationsPerWorkgroup: adapter?.limits?.maxComputeInvocationsPerWorkgroup,
+      maxStorageBufferBindingSize: adapter?.limits?.maxStorageBufferBindingSize,
+      maxBufferSize: adapter?.limits?.maxBufferSize,
+      maxUniformBufferBindingSize: adapter?.limits?.maxUniformBufferBindingSize,
+      maxComputeWorkgroupsPerDimension: adapter?.limits?.maxComputeWorkgroupsPerDimension,
+      maxStorageBuffersPerShaderStage: adapter?.limits?.maxStorageBuffersPerShaderStage,
+    };
+  }
+  const capabilities = { ...suppliedCapabilities, webgpu };
+  return kernelDivination.divineTensorKernel(program, output, { ...request, capabilities });
+}
+
 const RESULT_SCHEMA = 'wyrdrune.tensor-device-result/v0.1';
 const KERNEL_SCHEMA = 'wyrdrune.tensor-kernel/v0.1';
 const MAX_ELEMENTS = 1_000_000;

@@ -19,11 +19,11 @@ The engine is a numerical organ, not a second language or identity system. Wyrdr
                   |
          Typed Tensor IR (WCE-1 fingerprint)
            /         |           \
-      CPU reference  Reverse AD   Kernel derivation
+      CPU reference  Reverse AD   Kernel Divination
            |            |              |
-        values       gradients      WGSL compute source
+        values       gradients    analysed candidates
            \            |              /
-            source-bound result / plan receipts
+             source-bound result / plan receipts
 
 The host supplies the verified principal and optional stop signal. The bridge independently checks owner authorisation. A missing principal is denied.
 
@@ -74,27 +74,54 @@ The following stay on the CPU reference path in v0.1:
 
 An explicit browser adapter now exists at apps/wayglass/src/tensor-webgpu.js. It validates buffers and shapes, compiles WGSL, dispatches the compute pass, reads back values and checks the atomic error flag. It never silently falls back to CPU. The current automated suite uses a mocked WebGPU device; no physical-device or browser-GPU execution is claimed yet. CUDA, Metal, Rust/WASM, distributed mesh, autotuner, memory planner and automatic precision search remain future work.
 
+## Kernel divination
+
+`lib/wyrdrune/kernel-divination.cjs` adds **Wyrdrune Kernel Divination (WKD)** as a deterministic analysis and plan-selection layer above the lowerer.
+
+It reads only the reachable Tensor IR subgraph for the requested output and returns:
+
+- operation inventory, dtype, shapes, topology family and operation counts;
+- fused-node information when the current WGSL lowerer can derive a pointwise kernel;
+- bounded logical operation and byte estimates, explicitly not latency or throughput predictions;
+- CPU-reference and WGSL candidate records with concrete eligibility reasons;
+- a selected plan under an explicit policy;
+- a deterministic WCE-1 divination fingerprint and an eightfold diagnostic trace, with Withness anchoring the source fingerprint and recording that execution has not occurred.
+
+Policies:
+
+| Policy | Selection rule |
+| --- | --- |
+| `best-derivable` (default) | Select WGSL when a supported kernel can be derived, otherwise CPU reference |
+| `reference-first` | Select CPU reference even when WGSL is derivable |
+| `gpu-if-available` | Select WGSL only after an adapter is confirmed and supplied limits pass; otherwise CPU reference |
+| `gpu-required` | Return no eligible plan unless WGSL is supported and an adapter is confirmed within limits |
+
+The browser wrapper probes `navigator.gpu.requestAdapter()` only for the two GPU policies, unless the caller supplied an explicit capability record. Adapter presence and reported limits are a capability snapshot, not a device execution receipt. Divination never compiles, dispatches, times or benchmarks a kernel. Dispatch remains a separate explicit action.
+
+The eightfold trace is a diagnostic account of how the plan was derived; it does not replace or duplicate the Wyrdrune runtime's own Eightfold execution cycle. “Divination” names the interpretive layer, not a claim of prophecy or predicted performance.
+
 ## Wyrdrune bridge
 
-lib/wyrdrune/tensor-wtl-bridge.cjs exposes four owner-authorised operations:
+lib/wyrdrune/tensor-wtl-bridge.cjs exposes five owner-authorised operations:
 
 - tensor.inspect(program) returns the validated IR inventory.
 - tensor.evaluate(program, feeds) runs the CPU reference interpreter.
 - tensor.derive(program, output) returns a WGSL plan or explicit CPU fallback.
+- tensor.divine(program, output[, request]) analyses the reachable graph, compares candidates and returns a source-bound plan receipt.
 - tensor.differentiate(program, output, wrt, feeds) returns a reverse-mode gradient.
 
-lib/wyrdrune/tensor-engine.wtl is an executable WTL demonstration. It composes pointwise arithmetic, derives a WGSL kernel, evaluates the CPU reference, differentiates a scalar reduction, verifies, emits the result, and carries the result through Transcend. The existing Wyrdrune runtime owns the Eightfold phase cycle; the numerical engine does not duplicate it.
+lib/wyrdrune/tensor-engine.wtl is an executable WTL demonstration. It composes pointwise arithmetic, performs Kernel Divination, evaluates the CPU reference, differentiates a scalar reduction, verifies, emits the result, and carries the result through Transcend. The existing Wyrdrune runtime owns the Eightfold phase cycle; the numerical engine does not duplicate it.
 
-Wayglass exposes the explicit browser executor as __wayglassOS.tensor.dispatch(plan, feeds). It is not called automatically by room entry or page load. Feather/abort is checked at the bridge, interpreter and WebGPU dispatch boundaries. The engine has no ambient filesystem, network, provider, persistence or canon-write capability. WebGPU is an explicit caller-selected backend; absence returns unavailable rather than pretending the CPU path was a GPU run.
+Wayglass exposes Kernel Divination as __wayglassOS.tensor.divine(program, output, request) and explicit browser execution as __wayglassOS.tensor.dispatch(plan, feeds). GPU adapter probing occurs only when a GPU policy is requested; no dispatch occurs automatically on room entry or page load. Feather/abort is checked at the bridge, divination, interpreter and WebGPU dispatch boundaries. The engine has no ambient filesystem, network, provider, persistence or canon-write capability. WebGPU is an explicit caller-selected backend; absence returns unavailable rather than pretending the CPU path was a GPU run.
 
 ## Verification
 
 Run:
 
-    node --test lib/wyrdrune/tensor-engine.test.cjs
+    node --test lib/wyrdrune/tensor-engine.test.cjs lib/wyrdrune/tensor-cross-backend.test.cjs lib/wyrdrune/kernel-divination.test.cjs
     npm run wayglass:test
 
-The test suite covers IR validation and fingerprinting, broadcasting, affine views, reductions, matrix multiplication, analytic and finite-difference gradients, reverse-mode matrix gradients, WGSL fusion and fallback, precision overflow, budgets, stop signals, bridge authorization, execution through the native Wyrdrune runtime, independent JavaScript/Python tensor parity, WebGPU buffer construction, shader-compilation failure handling, dispatch, readback, atomic error handling and Feather stop.
+The test suite covers IR validation and fingerprinting, broadcasting, affine views, reductions, matrix multiplication, analytic and finite-difference gradients, reverse-mode matrix gradients, WGSL fusion and fallback, precision overflow, budgets, stop signals, bridge authorization, execution through the native Wyrdrune runtime, independent JavaScript/Python tensor parity, Kernel Divination policies, topology classification, candidate selection and capability gates, WebGPU buffer construction, shader-compilation failure handling, dispatch, readback, atomic error handling and Feather stop.
 
 ## Next engineering gates
 

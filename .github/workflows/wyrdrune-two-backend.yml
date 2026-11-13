@@ -28,11 +28,12 @@ jobs:
           node --check lib/wyrdrune/tensor-engine.cjs
           node --check lib/wyrdrune/tensor-autodiff.cjs
           node --check lib/wyrdrune/tensor-lowering.cjs
+          node --check lib/wyrdrune/kernel-divination.cjs
           node --check lib/wyrdrune/tensor-wtl-bridge.cjs
           python3 -m py_compile lib/wyrdrune/canonical.py lib/wyrdrune/pure-backend.py lib/wyrdrune/tensor-python.py
       - name: WTL native, Enochian and RFC L0 conformance
         run: node --test lib/wyrdrune/wyrdrune.test.cjs lib/wyrdrune/enochian.test.cjs lib/wyrdrune/conformance.test.cjs
-      - name: Native Wyrdrune tensor engine, reverse AD, WGSL derivation and Python parity
-        run: node --test lib/wyrdrune/tensor-engine.test.cjs lib/wyrdrune/tensor-cross-backend.test.cjs
+      - name: Native Wyrdrune tensor engine, reverse AD, kernel divination, WGSL derivation and Python parity
+        run: node --test lib/wyrdrune/tensor-engine.test.cjs lib/wyrdrune/tensor-cross-backend.test.cjs lib/wyrdrune/kernel-divination.test.cjs
       - name: Python and JavaScript WTL parity
         run: node --test lib/wyrdrune/cross-backend.parity.cjs
