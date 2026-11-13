@@ -1,6 +1,7 @@
 import './mythience-crossing.css';
 import {wayglassMythienceJourney} from '../mythience-journey.js';
 import {mountMythienceMembraneScene} from '../mythience-membrane-scene.js';
+import {createMythienceSensory} from '../mythience-sensory.js';
 import {proposeMythienceCrossing,proposeMythienceHybrid,clearMythience} from '../mythience-client.js';
 
 const esc=v=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;')
@@ -16,6 +17,8 @@ const controls=[
 export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={}){
   let active=true,controller=null,serial=0;
   const journey=wayglassMythienceJourney();
+  const sensory=createMythienceSensory();
+  let lastReading=null;
   root.innerHTML=[
     '<section class="wg-surface wg-mythience" data-surface="wayglass-mythience">',
     '<header class="glass-panel wg-mythience-heading"><p class="eyebrow">Wayglass · Wyrdrune · Mythience</p>',
@@ -47,6 +50,8 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
     '<div class="wg-mythience-actions"><button type="submit" class="send-jewel">Ask Wyrdrune</button>',
     '<button type="button" class="glass-chip" data-mythience-hybrid disabled>Weave hybrid from two encounters</button>',
     '<button type="button" class="glass-chip" data-mythience-carry disabled>Carry this possibility (preview)</button>',
+    '<button type="button" class="glass-chip" data-mythience-hear disabled>Hear the membrane</button>',
+    '<button type="button" class="glass-chip" data-mythience-feel disabled>Feel the threshold</button>',
     '<button type="button" class="glass-chip" data-mythience-feather>🪽 Feather</button>',
     '<button type="button" class="glass-chip" data-mythience-reset>New journey</button></div>',
     '<p class="tiny" role="status" aria-live="polite" data-mythience-status>Waiting for an invitation. Nothing crosses automatically.</p>',
@@ -93,6 +98,8 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
   const button=form.querySelector('[type=submit]');
   const hybridButton=root.querySelector('[data-mythience-hybrid]');
   const carryButton=root.querySelector('[data-mythience-carry]');
+  const hearButton=root.querySelector('[data-mythience-hear]');
+  const feelButton=root.querySelector('[data-mythience-feel]');
   for(const slider of form.querySelectorAll('input[type=range]')){
     slider.addEventListener('input',()=>{
       form.querySelector('[data-value="'+slider.name+'"]').textContent=Number(slider.value).toFixed(2);
@@ -113,6 +120,7 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
   }
   function render(result){
     if(result.status==='denied'){
+      lastReading=null;hearButton.disabled=true;feelButton.disabled=true;sensory.stop();
       reading.textContent='The threshold refused this encounter. A refusal is a meaningful return.';
       receipt.textContent=result.reason||'Crossing declined';
       membrane.style.setProperty('--membrane-open','0');
@@ -120,6 +128,8 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
       return;
     }
     const c=result.candidate;
+    lastReading={expression:c.expression,permeability:c.permeability??c.expression};
+    hearButton.disabled=false;feelButton.disabled=false;
     if(Array.isArray(c.parents)){
       membrane.style.setProperty('--membrane-open',String(clamp(c.expression)));
       scene.setOutcome({permeability:c.expression,expression:c.expression});
@@ -164,6 +174,7 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
         destination:data.has('destination_consent')},
       event_id:'encounter:'+String(++serial),
     };
+    lastReading=null;hearButton.disabled=true;feelButton.disabled=true;sensory.stop();
     const flight=new AbortController();controller=flight;button.disabled=true;hybridButton.disabled=true;carryButton.disabled=true;
     status.textContent='Inviting Wyrdrune to evaluate the membrane…';
     try{
@@ -187,6 +198,7 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
     const data=new FormData(form),field=Object.fromEntries(
       ['intention','shifting','resonance','compatibility'].map(k=>[k,Number(data.get(k))]));
     const [first,second]=current.abilities.slice(-2);
+    lastReading=null;hearButton.disabled=true;feelButton.disabled=true;sensory.stop();
     const flight=new AbortController();controller=flight;hybridButton.disabled=true;button.disabled=true;carryButton.disabled=true;
     status.textContent='Wyrdrune is examining an emergent third correspondence…';
     try{
@@ -217,20 +229,32 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
       renderLineage();
     }catch(error){status.textContent=error.message;}
   });
+  hearButton.addEventListener('click',async()=>{
+    if(!active||!lastReading)return;
+    const outcome=await sensory.hear(lastReading);
+    if(active)status.textContent=outcome.played?'Wyrdrune-derived tone played on request.':outcome.reason;
+  });
+  feelButton.addEventListener('click',()=>{
+    if(!active||!lastReading)return;
+    const outcome=sensory.feel(lastReading);
+    status.textContent=outcome.felt?'Threshold haptic played on request.':outcome.reason||'Haptics unavailable.';
+  });
   root.querySelector('[data-mythience-feather]').addEventListener('click',()=>{
-    controller?.abort();controller=null;journey.discard();
+    controller?.abort();controller=null;journey.discard();sensory.stop();lastReading=null;
+    hearButton.disabled=true;feelButton.disabled=true;
     button.disabled=false;carryButton.disabled=true;
     hybridButton.disabled=journey.snapshot().abilities.length<2;
     status.textContent='Feather: paused. Uncarried proposals set aside; carried previews remain.';
   });
   root.querySelector('[data-mythience-reset]').addEventListener('click',()=>{
     controller?.abort();controller=null;journey.reset();serial=0;hybridButton.disabled=true;carryButton.disabled=true;
+    sensory.stop();lastReading=null;hearButton.disabled=true;feelButton.disabled=true;
     clearMythience();renderLineage();membrane.style.setProperty('--membrane-open','0');scene.setFields(fieldValues());
     reading.textContent='A fresh possibility. Nothing has been carried forward.';
     receipt.textContent='';status.textContent='New journey, no adopted history.';button.disabled=false;
   });
   root.querySelectorAll('[data-wayglass-room]').forEach(el=>el.addEventListener('click',()=>globalThis.__wayglassOS?.mount(el.dataset.wayglassRoom)));
   return Object.freeze({surface_id:'wayglass:mythience-crossing',destroy(){
-    active=false;controller?.abort();journey.discard();scene.destroy();
+    active=false;controller?.abort();journey.discard();scene.destroy();void sensory.destroy();
   }});
 }
