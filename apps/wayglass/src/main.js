@@ -23,6 +23,8 @@ import { mountWayglassVideoAtelier } from './surfaces/video-atelier.js';
 import { mountWayglassLivingObserver } from './surfaces/living-observer.js';
 import { mountWayglassLibrarySurface } from './surfaces/library.js';
 import { mountWayglassToybox } from './surfaces/toybox.js';
+import { mountMythienceCrossing } from './surfaces/mythience-crossing.js';
+import { subscribeMythience, mythienceSnapshot } from './mythience-client.js';
 import { mountWayglassCommonsSurface } from './surfaces/commons.js';
 import { mountWayglassAcousticRoom } from './surfaces/acoustic-room.js';
 import {SHIP_DECK_GROUPS,shipDeckGroup,shipDeckMatches,shipDeckDestinationLabel} from './ship-deck-navigation.js';
@@ -131,6 +133,8 @@ registerWayglassSurface({
   mount: mountWayglassLibrarySurface,
 });
 
+registerWayglassSurface({surface_id:'wayglass:mythience-crossing',label:'Wayglass · Mythience Membrane',mount:mountMythienceCrossing});
+
 registerWayglassSurface({
   surface_id: 'wayglass:toybox',
   label: 'Wayglass · Toybox',
@@ -237,6 +241,12 @@ document.addEventListener('keydown',event=>{
     event.preventDefault();setDeckOpen(true,{focus:true});
   }
 });
+subscribeMythience(encounter=>{
+  if(!encounter)return;
+  const result=encounter.result;
+  routeLabel.textContent='MYTHIENCE / '+(result.status==='candidate-returned'?'CANDIDATE':'REFUSED');
+  helm.dataset.mythienceState=result.status;
+});
 subscribeWayglassObserver(record=>{
   if(!record||!['started','completed','failed'].includes(record.status))return;
   routeLabel.textContent='ROUTE / '+record.status.toUpperCase()+(record.route_id?' · '+record.route_id:'');
@@ -296,6 +306,7 @@ const wayglass = Object.freeze({
   recoverDeparture: recoverWayglassDeparture,
   reply: replyToVoyage,
   doubleMobius: Object.freeze({ inspect: inspectWayglassDoubleMobius, traverse: traverseWayglassDoubleMobius }),
+  mythience: Object.freeze({inspect:mythienceSnapshot,subscribe:subscribeMythience,open:()=>mountSurface('wayglass:mythience-crossing')}),
   fullSpectrum,
 });
 
