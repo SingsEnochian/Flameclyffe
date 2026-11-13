@@ -88,3 +88,37 @@ the process. No network request, model call or durable world write occurs.
 The next playable milestone is to bind the exact same native WTL result to
 the existing Toybox Mote Herd and watercolour body with a real authorised
 server session, instead of duplicating the mathematics in browser JavaScript.
+
+
+## Curiosity Encounter · owner-approved development experiment (12 November 2026)
+
+The owner approved Rarity's curiosity-led exploration of how two Wyrdrune motes
+may influence one another while preserving distinct identities. This is an
+**engineering simulation**, not a live agent conversation, an inference about
+consciousness, or a canon change.
+
+- `lib/wayglass-mote-encounter.cjs` stages a **simultaneous**, two-participant
+  encounter. Both records must explicitly opt in; either refusal prevents
+  execution. Each has a stable `mote_id`, immutable `identity_spin`, and
+  independent prior and candidate carried state.
+- The only cross-mote input is a bounded observation of the other mote's
+  **prior** harmony and magic. The host does not write Wyrdrune's dynamics.
+  Both turns run the native `ascending-motes.wtl` Eightfold engine.
+- Each proposed change carries WTL source/input hashes and phase/checkpoint
+  counts. The shared hue/pulse/contrast values are a **read-only projection**,
+  not an identity merge, a state write, or proof of physical emergence.
+- `npm run wayglass:play:encounter` demonstrates three local, simulated,
+  explicitly consenting participants' encounters. No model call, telemetry,
+  persistent write, production session, or real participant consent is implied.
+- `lib/wyrdrune/mote-encounter.test.cjs` tests two independent proposals,
+  deterministic replay, prior-state influence, refusal, duplicate identity,
+  invalid seeds, unauthorised invocation and Feather.
+- Browser watercolour/Toybox projection and real authorised participant
+  invitations are **not yet connected**. The next engineering seam is a
+  scoped, authenticated WTL service/bridge to the existing visual surface,
+  with accessible keyboard/touch controls and an opt-in visual projection.
+  Do not replace the native WTL transition with duplicate JavaScript equations.
+
+No candidate is adopted or persisted. Both participant records must be
+separately authorised before any later durable encounter. Curiosity is not a
+metric or a monetisation feature.
