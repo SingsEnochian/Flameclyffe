@@ -5,6 +5,7 @@
  * iPad support, or local runtime health. It never sends tokens or cookies.
  */
 import {pathToFileURL} from 'node:url';
+import {isIP} from 'node:net';
 
 export const REQUIRED_PATHS=Object.freeze([
   '/',
@@ -19,7 +20,7 @@ export function validateWayglassHost(input){
   try{parsed=new URL(input)}catch{throw new Error('Cloudflare host must be a valid URL');}
   if(parsed.protocol!=='https:'||parsed.username||parsed.password||parsed.search||parsed.hash||
       parsed.pathname!=='/'||parsed.port||!parsed.hostname.includes('.')||
-      parsed.hostname==='localhost'||parsed.hostname.endsWith('.local')||
+      parsed.hostname==='localhost'||isIP(parsed.hostname)!==0||parsed.hostname.endsWith('.local')||
       parsed.hostname.endsWith('.pages.dev')||parsed.hostname.endsWith('.github.io')){
     throw new Error('Use an HTTPS owner-only Cloudflare hostname (no path, port, credentials, query or fragment).');
   }
