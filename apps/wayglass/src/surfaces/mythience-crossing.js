@@ -1,5 +1,5 @@
 import './mythience-crossing.css';
-import {createMythienceJourney} from '../mythience-journey.js';
+import {wayglassMythienceJourney} from '../mythience-journey.js';
 import {proposeMythienceCrossing,proposeMythienceHybrid,clearMythience} from '../mythience-client.js';
 
 const esc=v=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;')
@@ -14,7 +14,7 @@ const controls=[
 ];
 export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={}){
   let active=true,controller=null,serial=0;
-  const journey=createMythienceJourney();
+  const journey=wayglassMythienceJourney();
   root.innerHTML=[
     '<section class="wg-surface wg-mythience" data-surface="wayglass-mythience">',
     '<header class="glass-panel wg-mythience-heading"><p class="eyebrow">Wayglass · Wyrdrune · Mythience</p>',
@@ -107,8 +107,12 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
       ' · Eightfold phases '+result.phase_receipts.length+
       ' · Return '+esc(result.return_marker?.status||'proposal-only')+'</p>';
   }
-  // A previous room's snapshot is observable, but not this traveller's lineage.
-  // Re-entering a room never silently adopts another encounter.
+  // Only explicitly carried previews survive room changes. Pending proposals do not.
+  journey.discard();
+  const arrival=journey.snapshot();
+  if(arrival.traveller_id)form.elements.traveller.value=arrival.traveller_id;
+  renderLineage();
+  hybridButton.disabled=arrival.abilities.length<2;
   form.addEventListener('submit',async event=>{
     event.preventDefault();if(!active||controller)return;
     const data=new FormData(form);
@@ -139,7 +143,7 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
       status.textContent=result.status==='candidate-returned'?'Candidate returned. No crossing committed.':'Threshold refused.';
       carryButton.disabled=result.status!=='candidate-returned';
     }catch(error){
-      if(active)status.textContent=controller.signal.aborted?'Feather: paused.':error.message;
+      if(active&&controller===flight)status.textContent=flight.signal.aborted?'Feather: paused.':error.message;
     }finally{if(controller===flight){controller=null;if(active){button.disabled=false;
       hybridButton.disabled=journey.snapshot().abilities.length<2;}}}
   });
@@ -167,7 +171,7 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
       render(result);
       status.textContent=result.status==='candidate-returned'?'Third correspondence proposed. No canon committed.':'Hybrid invitation refused.';
       carryButton.disabled=result.status!=='candidate-returned';
-    }catch(error){if(active)status.textContent=controller.signal.aborted?'Feather: paused.':error.message;}
+    }catch(error){if(active&&controller===flight)status.textContent=flight.signal.aborted?'Feather: paused.':error.message;}
     finally{if(controller===flight){controller=null;if(active){button.disabled=false;
       hybridButton.disabled=journey.snapshot().abilities.length<2;}}}
   });
@@ -196,6 +200,6 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
   });
   root.querySelectorAll('[data-wayglass-room]').forEach(el=>el.addEventListener('click',()=>globalThis.__wayglassOS?.mount(el.dataset.wayglassRoom)));
   return Object.freeze({surface_id:'wayglass:mythience-crossing',destroy(){
-    active=false;controller?.abort();
+    active=false;controller?.abort();journey.discard();
   }});
 }
