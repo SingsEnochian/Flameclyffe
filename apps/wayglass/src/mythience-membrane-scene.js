@@ -15,7 +15,8 @@ export function mountMythienceMembraneScene(canvas,{onShift=()=>{},reducedMotion
   if(!canvas?.getContext)throw new TypeError('A canvas is required');
   const ctx=canvas.getContext('2d');
   let active=true,frame=0,raf=0,dragging=false;
-  let state=membraneVisualState(),origin='Origin',destination='Destination';
+  let fields={intention:.5,shifting:.5,porosity:.5,resonance:.5,compatibility:.5};
+  let state=membraneVisualState(fields),origin='Origin',destination='Destination';
   const reduced=reducedMotion??Boolean(globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches);
   const motion=()=>!reduced&&globalThis.document?.visibilityState!=='hidden';
   const request=globalThis.requestAnimationFrame?.bind(globalThis);
@@ -98,10 +99,10 @@ export function mountMythienceMembraneScene(canvas,{onShift=()=>{},reducedMotion
   globalThis.addEventListener?.('resize',redraw);
   draw();
   return Object.freeze({
-    setFields(fields){state=membraneVisualState(fields);canvas.dataset.shiftValue=String(fields.shifting??.5);redraw();},
-    setOutcome({permeability=null,expression=null}={}){state=membraneVisualState({...state,
-      intention:state.intention,resonance:state.phase,permeability,expression,
-      shifting:Number(canvas.dataset.shiftValue)||.5});redraw();},
+    setFields(next){fields={...fields,...next};state=membraneVisualState(fields);
+      canvas.dataset.shiftValue=String(fields.shifting);redraw();},
+    setOutcome({permeability=null,expression=null}={}){
+      state=membraneVisualState({...fields,permeability,expression});redraw();},
     setWorlds(from,to){origin=String(from);destination=String(to);canvas.dataset.worlds=origin+' → '+destination;},
     destroy(){active=false;if(raf&&cancel)cancel(raf);
       canvas.removeEventListener('pointerdown',down);canvas.removeEventListener('pointermove',move);
