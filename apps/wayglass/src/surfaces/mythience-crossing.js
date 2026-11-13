@@ -252,13 +252,16 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
     const outcome=sensory.feel(lastReading);
     status.textContent=outcome.felt?'Threshold haptic played on request.':outcome.reason||'Haptics unavailable.';
   });
-  root.querySelector('[data-mythience-feather]').addEventListener('click',()=>{
+  function featherStop(){
     controller?.abort();controller=null;journey.discard();sensory.stop();lastReading=null;
     hearButton.disabled=true;feelButton.disabled=true;
     button.disabled=false;carryButton.disabled=true;
     hybridButton.disabled=journey.snapshot().abilities.length<2;
     status.textContent='Feather: paused. Uncarried proposals set aside; carried previews remain.';
-  });
+  }
+  root.querySelector('[data-mythience-feather]').addEventListener('click',featherStop);
+  const onShipFeather=event=>{if(event.detail?.stopped===true&&active)featherStop();};
+  globalThis.addEventListener('wayglass:feather',onShipFeather);
   root.querySelector('[data-mythience-reset]').addEventListener('click',()=>{
     controller?.abort();controller=null;journey.reset();serial=0;hybridButton.disabled=true;carryButton.disabled=true;
     sensory.stop();lastReading=null;hearButton.disabled=true;feelButton.disabled=true;
@@ -268,6 +271,7 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
   });
   root.querySelectorAll('[data-wayglass-room]').forEach(el=>el.addEventListener('click',()=>globalThis.__wayglassOS?.mount(el.dataset.wayglassRoom)));
   return Object.freeze({surface_id:'wayglass:mythience-crossing',destroy(){
-    active=false;controller?.abort();journey.discard();scene.destroy();void sensory.destroy();
+    active=false;globalThis.removeEventListener('wayglass:feather',onShipFeather);
+    controller?.abort();journey.discard();scene.destroy();void sensory.destroy();
   }});
 }
