@@ -21,3 +21,23 @@
 .wg-mythience-receipt{overflow-wrap:anywhere;line-height:1.5}
 @media(max-width:800px){.wg-mythience-grid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.wg-mythience *{transition:none!important;animation:none!important}}
+
+/* The membrane is an instrument: touch and Pencil shape the preview, never grant passage. */
+.wg-mythience-worlds{position:relative;isolation:isolate;min-height:clamp(18rem,37vw,26rem)}
+.wg-mythience-cosmos{position:absolute;inset:0;width:100%;height:100%;z-index:1;touch-action:none;cursor:crosshair;border-radius:1rem}
+.wg-mythience-cosmos:focus-visible{outline:3px solid #a9f2e1;outline-offset:-5px}
+.wg-mythience-world{position:relative;z-index:2;pointer-events:none;width:31%;aspect-ratio:auto;min-height:4.5rem;padding:.5rem;
+  border-radius:.8rem;background:rgba(5,12,28,.5);box-shadow:none;font-size:clamp(.65rem,1.7vw,.9rem);
+  font-weight:700;overflow-wrap:anywhere;max-width:11rem;line-height:1.3}
+.wg-mythience-origin,.wg-mythience-destination{background:rgba(5,12,28,.54)}
+.wg-mythience-membrane{pointer-events:none;opacity:0}
+.wg-mythience-lineage{border:1px solid rgba(158,230,223,.22);border-radius:1rem;padding:.9rem;
+  background:rgba(7,20,30,.55);overflow-wrap:anywhere}
+.wg-mythience-lineage h3{font-size:1rem;margin:0 0 .45rem}
+.wg-mythience-lineage p{margin:0;line-height:1.6}
+@media(max-width:800px){
+ .wg-mythience-worlds{min-height:18rem}
+ .wg-mythience-world{width:32%;font-size:.73rem}
+ .wg-mythience-actions button{min-height:44px}
+}
+@media(prefers-reduced-motion:reduce){.wg-mythience-cosmos{scroll-behavior:auto}}
