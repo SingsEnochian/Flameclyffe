@@ -122,4 +122,18 @@ export const quadEightfoldOrgan = createWayglassOrgan({
 });
 
 
-export const FIRST_WAYGLASS_ORGANS = Object.freeze([presenceOrgan, memoryOrgan, sensoriumOrgan, livingObserverOrgan, voiceConsentOrgan, doubleMobiusOrgan, quadEightfoldOrgan]);
+export const mythienceOrgan = createWayglassOrgan({
+  organ_id:'wayglass.organ.mythience-membrane',
+  lineage:['wayglass:mythience-permeability-membrane','wayglass:wyrdrune-eightfold-phases','wayglass:return-engine'],
+  maturity:'PARTIAL',
+  capabilities:['mythience.intention','mythience.shifting','mythience.membrane.preview','mythience.ability.translate','mythience.lineage.propose','mythience.hybrid.wonder'],
+  routes:['/api/v1/wayglass/wyrdrune/mythience-crossing'],
+  authority_ceiling:['propose-crossing','render-local-visualisation','carry-declared-history-in-session'],
+  receipt_schemas:['mythience.crossing/v0.1','mythience.ability-translation/v0.1'],
+  dependencies:['wayglass.organ.memory-flight-recorder','wayglass.organ.living-observer'],
+  continuity_hooks:['traveller-identity-anchor','ability-origin-provenance','eightfold-phase-receipts','withness-return'],
+  embodiment_hooks:['feather-aborts-crossing','keyboard-only-controls','no-automatic-audio'],
+  evidence:['lib/wyrdrune/mythience-crossing.test.cjs','test/wayglass/mythience-shipwide.test.cjs'],
+});
+
+export const FIRST_WAYGLASS_ORGANS = Object.freeze([presenceOrgan, memoryOrgan, sensoriumOrgan, livingObserverOrgan, voiceConsentOrgan, doubleMobiusOrgan, quadEightfoldOrgan, mythienceOrgan]);
