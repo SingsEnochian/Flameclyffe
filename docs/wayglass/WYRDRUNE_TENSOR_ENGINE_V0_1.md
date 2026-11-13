@@ -62,7 +62,7 @@ The JavaScript and Python reference interpreters are independently implemented. 
 
 WGSL v0.1 lowers a reachable f32 elementwise DAG into one compute dispatch with a 64-thread workgroup and broadcast-aware input indexing.
 
-The result is deliberately labelled generated-not-compiled. It contains binding metadata, output shape, a row-major comprehension domain, fused node IDs, logical byte estimates and a WCE-1 kernel fingerprint.
+The derived source is deliberately labelled generated-not-compiled. It contains binding metadata, output shape, a row-major comprehension domain, fused node IDs, logical byte estimates, a WCE-1 kernel fingerprint and an atomic error flag. Every computed value is checked for finiteness; if any invocation reports an error, the host discards the entire output.
 
 The following stay on the CPU reference path in v0.1:
 
@@ -72,7 +72,7 @@ The following stay on the CPU reference path in v0.1:
 - non-scalar embedded constants;
 - operations outside the elementwise lowering set.
 
-**No GPU execution is claimed.** WGSL has not yet been compiled or dispatched on WebGPU, CUDA, Metal or the laptop GPU. There is no Rust/WASM backend, distributed mesh, autotuner, memory planner or automatic precision search yet.
+An explicit browser adapter now exists at apps/wayglass/src/tensor-webgpu.js. It validates buffers and shapes, compiles WGSL, dispatches the compute pass, reads back values and checks the atomic error flag. It never silently falls back to CPU. The current automated suite uses a mocked WebGPU device; no physical-device or browser-GPU execution is claimed yet. CUDA, Metal, Rust/WASM, distributed mesh, autotuner, memory planner and automatic precision search remain future work.
 
 ## Wyrdrune bridge
 
@@ -85,7 +85,7 @@ lib/wyrdrune/tensor-wtl-bridge.cjs exposes four owner-authorised operations:
 
 lib/wyrdrune/tensor-engine.wtl is an executable WTL demonstration. It composes pointwise arithmetic, derives a WGSL kernel, evaluates the CPU reference, differentiates a scalar reduction, verifies, emits the result, and carries the result through Transcend. The existing Wyrdrune runtime owns the Eightfold phase cycle; the numerical engine does not duplicate it.
 
-Feather/abort is checked at the bridge and interpreter boundary. The engine has no ambient filesystem, network, provider, persistence or canon-write capability.
+Feather/abort is checked at the bridge, interpreter and WebGPU dispatch boundaries. The engine has no ambient filesystem, network, provider, persistence or canon-write capability. WebGPU is an explicit caller-selected backend; absence returns unavailable rather than pretending the CPU path was a GPU run.
 
 ## Verification
 
@@ -94,12 +94,12 @@ Run:
     node --test lib/wyrdrune/tensor-engine.test.cjs
     npm run wayglass:test
 
-The test suite covers IR validation and fingerprinting, broadcasting, affine views, reductions, matrix multiplication, analytic and finite-difference gradients, reverse-mode matrix gradients, WGSL fusion and fallback, precision overflow, budgets, stop signals, bridge authorization, execution through the native Wyrdrune runtime, and independent JavaScript/Python tensor parity.
+The test suite covers IR validation and fingerprinting, broadcasting, affine views, reductions, matrix multiplication, analytic and finite-difference gradients, reverse-mode matrix gradients, WGSL fusion and fallback, precision overflow, budgets, stop signals, bridge authorization, execution through the native Wyrdrune runtime, independent JavaScript/Python tensor parity, WebGPU buffer construction, shader-compilation failure handling, dispatch, readback, atomic error handling and Feather stop.
 
 ## Next engineering gates
 
 1. Verify this exact head in CI and retain failures.
-2. Add an independent WGSL validator and WebGPU execution test; compare output against the CPU reference with explicit tolerances.
+2. Run the explicit WebGPU adapter on a real browser/device; validate WGSL compilation and compare output against both CPU references with explicit tolerances.
 3. Add reduction and tiled matrix-multiplication lowerings only after reference parity and device measurements.
 4. Add Rust/WASM parity against WCE-1 vectors and shared tensor fixtures.
 5. Profile the actual target devices before selecting tile sizes, workgroups, memory strategies or precision.
