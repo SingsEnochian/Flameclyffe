@@ -5,6 +5,7 @@ import { divineWayglassTensorKernel, dispatchWyrdruneTensorKernel } from '../src
 
 const require = createRequire(import.meta.url);
 const { deriveTensorKernel } = require('../../../lib/wyrdrune/tensor-lowering.cjs');
+const { executeTensorIR } = require('../../../lib/wyrdrune/tensor-engine.cjs');
 
 const program = {
   schema: 'wyrdrune.tensor-ir/v0.1',
@@ -14,7 +15,7 @@ const program = {
 };
 const plan = deriveTensorKernel(program, 'square');
 
-function mockWebGpu(expectedValues, errorFlag = 0, shaderMessages = []) {
+function mockWebGpu(expectedValues, errorFlag = 0, shaderMessages = [], targetPlan = plan) {
   const usage = { STORAGE: 1, COPY_DST: 2, COPY_SRC: 4, UNIFORM: 8, MAP_READ: 16 };
   const mapMode = { READ: 1 };
   let dispatchCount = 0;
@@ -71,8 +72,8 @@ function mockWebGpu(expectedValues, errorFlag = 0, shaderMessages = []) {
       },
       submit(commands) {
         const command = commands[0];
-        const outputBinding = plan.bindings.find(item => item.id === 'output').binding;
-        const statusBinding = plan.bindings.find(item => item.id === 'errorFlag').binding;
+        const outputBinding = targetPlan.bindings.find(item => item.id === 'output').binding;
+        const statusBinding = targetPlan.bindings.find(item => item.id === 'errorFlag').binding;
         const outputBuffer = command.bindEntries.find(item => item.binding === outputBinding).resource.buffer;
         const statusBuffer = command.bindEntries.find(item => item.binding === statusBinding).resource.buffer;
         new Float32Array(outputBuffer.data).set(expectedValues);
@@ -122,6 +123,29 @@ test('WebGPU adapter discards the whole result when the shader error flag is set
     /non-finite result; discard the entire output/,
   );
   assert.equal(mock.device.destroyed, true);
+});
+
+
+test('WebGPU feed provenance binds unused and non-GPU program inputs too', async () => {
+  const extendedProgram = {
+    schema: 'wyrdrune.tensor-ir/v0.1',
+    inputs: [
+      { id: 'x', shape: [2], dtype: 'f32' },
+      { id: 'unused', shape: [1], dtype: 'f64' },
+    ],
+    nodes: [{ id: 'square', op: 'mul', args: ['x', 'x'] }],
+    outputs: ['square'],
+  };
+  const extendedPlan = deriveTensorKernel(extendedProgram, 'square');
+  const extendedFeeds = { x: [2, 3], unused: [Math.PI] };
+  const mock = mockWebGpu([4, 9], 0, [], extendedPlan);
+  const deviceResult = await dispatchWyrdruneTensorKernel(extendedPlan, extendedFeeds, {
+    gpu: mock.gpu, bufferUsage: mock.usage, mapMode: mock.mapMode,
+  });
+  const referenceResult = executeTensorIR(extendedProgram, extendedFeeds);
+  assert.equal(deviceResult.feedsDigest, referenceResult.feedsDigest);
+  assert.equal(deviceResult.outputId, 'square');
+  assert.deepEqual(deviceResult.output.values, [4, 9]);
 });
 
 test('WebGPU absence is explicit and never silently invokes the CPU backend', async () => {

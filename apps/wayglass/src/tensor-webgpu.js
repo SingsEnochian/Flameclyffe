@@ -98,6 +98,35 @@ function validatePlan(plan) {
     throw new TypeError('Kernel plan does not contain a compute shader');
   }
   if (!Array.isArray(plan.bindings)) throw new TypeError('Kernel plan bindings are missing');
+  const expectedFingerprint = plan.programInputs === undefined
+    ? digest({ programFingerprint: plan.programFingerprint, output: plan.output, wgsl: plan.wgsl })
+    : digest({
+        programFingerprint: plan.programFingerprint,
+        output: plan.output,
+        wgsl: plan.wgsl,
+        programInputs: plan.programInputs,
+      });
+  if (plan.kernelFingerprint !== expectedFingerprint) throw new TypeError('Kernel plan fingerprint does not match its executable metadata');
+  if (plan.programInputs !== undefined) {
+    if (!Array.isArray(plan.programInputs)) throw new TypeError('Kernel plan program inputs are malformed');
+    const ids = new Set();
+    for (const input of plan.programInputs) {
+      if (!input || typeof input.id !== 'string' || ids.has(input.id) ||
+          !Array.isArray(input.shape) || !['f32', 'f64'].includes(input.dtype)) {
+        throw new TypeError('Kernel plan program input metadata is malformed');
+      }
+      ids.add(input.id);
+      product(input.shape);
+    }
+    for (const binding of plan.bindings.filter(item => item.access === 'read')) {
+      const input = plan.programInputs.find(item => item.id === binding.id);
+      if (!input || input.dtype !== binding.dtype ||
+          input.shape.length !== binding.shape.length ||
+          input.shape.some((dimension, index) => dimension !== binding.shape[index])) {
+        throw new TypeError('Kernel input binding is not bound to the program input manifest');
+      }
+    }
+  }
   const output = plan.bindings.find(item => item.id === 'output' && item.access === 'read_write');
   const errorFlag = plan.bindings.find(item => item.id === 'errorFlag' && item.access === 'atomic-u32');
   const params = plan.bindings.find(item => item.id === 'params' && item.access === 'uniform');
@@ -116,22 +145,31 @@ export async function dispatchWyrdruneTensorKernel(plan, feeds, options = {}) {
   if (!feeds || typeof feeds !== 'object' || Array.isArray(feeds)) throw new TypeError('WebGPU feeds must be a record');
 
   const inputBindings = plan.bindings.filter(item => item.access === 'read');
-  const expected = new Set(inputBindings.map(item => item.id));
+  const gpuInputs = new Map(inputBindings.map(input => [input.id, input]));
+  const programInputs = Array.isArray(plan.programInputs)
+    ? plan.programInputs
+    : inputBindings.map(input => ({ id: input.id, shape: input.shape, dtype: input.dtype }));
+  const expected = new Set(programInputs.map(item => item.id));
   for (const key of Object.keys(feeds)) if (!expected.has(key)) throw new TypeError('Unexpected WebGPU feed ' + key);
+
   const normalized = new Map();
-  for (const input of inputBindings) {
+  const normalizedFeeds = Object.create(null);
+  for (const input of programInputs) {
     if (!Object.hasOwn(feeds, input.id)) throw new ReferenceError('Missing WebGPU feed ' + input.id);
     const values = flatten(feeds[input.id]);
     const expectedLength = product(input.shape);
     if (values.length !== expectedLength) {
       throw new RangeError('WebGPU feed ' + input.id + ' has ' + values.length + ' values; expected ' + expectedLength);
     }
-    const typed = new Float32Array(values);
-    for (const value of typed) if (!Number.isFinite(value)) throw new RangeError('WebGPU feed ' + input.id + ' exceeds f32 range');
-    normalized.set(input.id, typed);
+    if (input.dtype !== 'f32' && input.dtype !== 'f64') throw new TypeError('Unsupported program feed dtype ' + input.dtype);
+    const typed = input.dtype === 'f64' ? new Float64Array(values) : new Float32Array(values);
+    for (const value of typed) if (!Number.isFinite(value)) throw new RangeError('WebGPU feed ' + input.id + ' exceeds ' + input.dtype + ' range');
+    normalizedFeeds[input.id] = Array.from(typed);
+    if (gpuInputs.has(input.id)) {
+      if (input.dtype !== 'f32') throw new TypeError('WebGPU v0.1 only dispatches f32 inputs');
+      normalized.set(input.id, typed);
+    }
   }
-  const normalizedFeeds = Object.create(null);
-  for (const input of inputBindings) normalizedFeeds[input.id] = Array.from(normalized.get(input.id));
   const feedsDigest = digest(normalizedFeeds);
 
   const outputLength = product(plan.outputShape);
