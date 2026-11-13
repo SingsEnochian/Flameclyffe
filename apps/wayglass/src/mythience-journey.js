@@ -43,7 +43,7 @@ export function createMythienceJourney(){
     if(kind==='crossing'){
       if(!validId(c.from)||!validId(c.to)||!c.ability||
         !validId(c.ability.id)||!validId(c.ability.origin_universe)||
-        !validId(c.ability.modality)||c.from===c.to)
+        !validId(c.ability.modality)||c.from===c.to||c.ability.origin_universe!==c.from)
         fail('Crossing identity or ability provenance is incomplete');
     }else{
       if(!validId(c.id)||!validId(c.destination_universe)||c.parents.length!==2||
