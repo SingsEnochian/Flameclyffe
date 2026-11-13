@@ -21,3 +21,12 @@ test('gateway only binds loopback and uses a dedicated port',()=>{
  assert.equal(typeof gate.listen,'function');
  assert.equal(typeof gate.close,'function');
 });
+
+test('encoded traversal and double-encoding cannot cross the route boundary',()=>{
+ for(const path of [
+  '/wayglass/%252fapi','/wayglass/%255capi','/wayglass/%252e%252e',
+  '/wayglass/%2E%2E/private','/wayglass/%00','/wayglass/%0A',
+  '/wayglass/%0D','/wayglass/..%2Fapi','/wayglass/%2e./api',
+  '/wayglass/..%5capi','/wayglass/%252Fapi'
+ ]) assert.equal(allowedWayglassPath(path),false,path);
+});
