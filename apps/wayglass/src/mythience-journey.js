@@ -28,7 +28,9 @@ export function createMythienceJourney(){
     if(result.status==='denied'){pending=null;revision++;return snapshot();}
     const c=result.candidate;
     if(!c||c.traveller_id!==traveller_id||typeof result.input_hash!=='string'||
-      !/^[0-9a-f]{64}$/.test(result.input_hash)||!Array.isArray(result.phase_receipts)||result.phase_receipts.length!==8)
+      !/^[0-9a-f]{64}$/.test(result.input_hash)||!Array.isArray(result.phase_receipts)||result.phase_receipts.length!==8||
+      !result.phase_receipts.every((receipt,index)=>receipt&&typeof receipt==='object'&&
+        !Array.isArray(receipt)&&receipt.phase===index))
       fail('Wyrdrune candidate has incomplete identity or provenance');
     if(c.parents!==undefined&&!Array.isArray(c.parents))
       fail('Hybrid parent provenance must be a pair');
