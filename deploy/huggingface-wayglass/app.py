@@ -23,7 +23,7 @@ def ready():
     if not (GATEWAY and TOKEN and OWNER_USER and OWNER_PASSWORD):
         return False
     parsed = urllib.parse.urlparse(GATEWAY)
-    return parsed.scheme == "https" and bool(parsed.hostname) and not parsed.username and not parsed.password and not parsed.fragment and not parsed.query and parsed.path.endswith("/respond") and not parsed.path.startswith("//") and parsed.port not in (0,)
+    return parsed.scheme == "https" and bool(parsed.hostname) and not parsed.username and not parsed.password and not parsed.fragment and not parsed.query and parsed.path.endswith("/respond") and not parsed.path.startswith("//")
 
 
 def call_kernel(message, history):
