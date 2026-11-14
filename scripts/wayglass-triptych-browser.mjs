@@ -91,6 +91,9 @@ try{
   await context.route('**/*',async route=>{
    const url=new URL(route.request().url());
    if(url.origin!==origin){await route.abort('blockedbyclient');return;}
+   if(url.pathname==='/api/v1/wayglass/routes'){
+    await route.fulfill({status:200,json:{schema:'wayglass.route-catalogue/v0.1',routes:[{route_id:'wayglass:ship',provider:'ollama',model:'captured-first-contact-fixture',label:'Wayglass · Ship Voice',participant_id:'wayglass',continuity_id:'wayglass:ship',configured:true}]}});return;
+   }
    if(url.pathname.startsWith('/api/')){await route.fulfill({status:503,json:{error:'Browser only; no model invoked'}});return;}
    await route.continue();
   });
