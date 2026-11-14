@@ -1,6 +1,6 @@
 'use strict';
 const express=require('express');
-const {createAlteredTimelineStore}=require('../../../lib/wayglass-altered-timeline-store.cjs');
+const {createAlteredTimelineStore}=require('../wayglass-runtime/wayglass-altered-timeline-store.cjs');
 const {createRequestGate}=require('../security/wayglass-request-gate');
 
 function sameOriginWrite(req){
