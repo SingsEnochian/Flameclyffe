@@ -260,7 +260,8 @@ try{
  assert.equal(await page.locator('.wc-deck').evaluate(el=>el.scrollWidth<=el.clientWidth+1),true,'Desktop contribution controls must fit without horizontal clipping');
  assert.notEqual(await canvasDigest(page),pigmentBeforeReply,'Captured route events must produce visible pigment');
  assert.match(await page.locator('#wc-feedback').textContent(),/ollama.*captured-first-contact-fixture.*captured-observation:/);
- assert.equal(receipt.requests[0].first_hello_present,true,'First hello must reach the selected host route');
+ assert.equal(receipt.requests.find(item=>item.route_id===fixtureRoute.route_id && item.first_hello_present===true)?.first_hello_present,true,
+   'First hello must reach the selected host route even when First Touch requests occur earlier');
  assert.match(await page.locator('.wg-motion-status').textContent(),/Route completed/,'Motion status must reflect observed route completion');
  await page.locator('#wc-save-return').click();
  const saved=await localTranscript(page);assert.equal(saved.turns.length,1);
