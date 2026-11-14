@@ -107,15 +107,15 @@ export function mountMythienceMembraneScene(canvas,{onShift=()=>{},reducedMotion
     const v=clamp((event.clientX-rect.left)/Math.max(1,rect.width));
     onShift(Math.round(v*20)/20);
   };
-  const down=event=>{dragging=true;canvas.setPointerCapture?.(event.pointerId);pointer(event);};
+  const down=event=>{if(event.isPrimary===false||event.button>0)return;dragging=true;canvas.setPointerCapture?.(event.pointerId);pointer(event);};
   const move=event=>{if(dragging)pointer(event);};
-  const up=()=>{dragging=false;};
+  const up=event=>{dragging=false;if(event?.pointerId!==undefined&&canvas.hasPointerCapture?.(event.pointerId))canvas.releasePointerCapture?.(event.pointerId);};
   const key=event=>{
     if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
     event.preventDefault();
-    const current=state.alignment;
+    const current=clamp(fields.shifting);
     const v=event.key==='Home'?0:event.key==='End'?1:
-      clamp((Number.isFinite(Number(canvas.dataset.shiftValue))?Number(canvas.dataset.shiftValue):current)+
+      clamp((Number.isFinite(Number(canvas.dataset?.shiftValue))?Number(canvas.dataset.shiftValue):current)+
         (event.key==='ArrowRight'?.05:-.05));
     onShift(Math.round(v*100)/100);
   };
@@ -132,7 +132,7 @@ export function mountMythienceMembraneScene(canvas,{onShift=()=>{},reducedMotion
     setOutcome({permeability=null,expression=null}={}){
       state=membraneVisualState({...fields,permeability,expression});redraw();},
     setWorlds(from,to){origin=String(from);destination=String(to);canvas.dataset.worlds=origin+' → '+destination;},
-    destroy(){active=false;if(raf&&cancel)cancel(raf);
+    destroy(){active=false;dragging=false;if(raf&&cancel)cancel(raf);
       canvas.removeEventListener('pointerdown',down);canvas.removeEventListener('pointermove',move);
       canvas.removeEventListener('pointerup',up);canvas.removeEventListener('pointercancel',up);
       canvas.removeEventListener('keydown',key);globalThis.document?.removeEventListener?.('visibilitychange',visibility);
