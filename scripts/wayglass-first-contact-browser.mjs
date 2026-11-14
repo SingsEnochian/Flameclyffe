@@ -315,9 +315,29 @@ try{
  await page.locator('[data-codex-translate]').click();
  assert.match(await page.locator('[data-codex-english]').textContent(),/Perceive|perceive|source|code/i,
    'Native Wyrdrune must give an English reading without invoking a model');
- await page.locator('[data-codex-room="wayglass:living-watercolor"]').click();
+ await page.screenshot({path:resolve(output,'faeberpunk-codex-desktop.png'),fullPage:true});
+ // The same source-level design system must connect a real editor and a real
+ // Observer, not just draw a Codex screen. The manuscript is local-only.
+ await page.locator('[data-codex-room="arcsweep:writing-room"]').click();
+ const manuscript=page.locator('[data-manuscript-editor]');
+ await manuscript.waitFor();
+ await manuscript.fill('An opaline moon over the living ship.');
+ await page.locator('[data-manuscript-stage]').click();
+ assert.match(await page.locator('#wg-input').inputValue(),/An opaline moon over the living ship/);
+ assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('wayglass:manuscript-local/v1'))?.schema),
+  'wayglass:manuscript-local/v1','Rich manuscript must retain a local-only draft');
+ await page.screenshot({path:resolve(output,'faeberpunk-writing-desktop.png'),fullPage:true});
+ await page.locator('[data-wayglass-room="wayglass:living-observer"]').first().click();
+ await page.locator('.fae-observer-evidence').waitFor();
+ assert.ok((await page.locator('[data-fae-observer-source]').textContent()).trim().length>0,
+  'Observer must expose its selected instrument source');
+ assert.match(await page.locator('[data-fae-observer-quad]').textContent(),/Not observed|reported channels/);
+ await page.locator('[data-observer-focus]').nth(1).click();
+ await page.screenshot({path:resolve(output,'faeberpunk-observer-desktop.png'),fullPage:true});
+ await page.locator('[data-wayglass-room="wayglass:living-watercolor"]').first().click();
  await page.locator('#wc-fluid').waitFor();
- receipt.scenarios.push({id:'faepunk-worktable-universal-codex-native-wyrdrune-translation',status:'passed'});
+ receipt.scenarios.push({id:'faepunk-four-room-codex-writing-observer-watercolour-passage',status:'passed',
+  rich_text:'browser-local',observation:'source-labelled'});
  await context.close();
 
  const mobile=await prepareContext({viewport:{width:390,height:844},deviceScaleFactor:1,hasTouch:true,isMobile:true,reducedMotion:'reduce'});
