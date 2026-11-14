@@ -1,0 +1,85 @@
+{
+  "schema": "wayglass.build-preflight/v0.1",
+  "head_ref": "rarity/wayglass-eightfold-build-preflight-20261114",
+  "changed_systems": [
+    "scripts/wayglass-",
+    ".github/workflows/wayglass-",
+    "docs/wayglass/",
+    "test/wayglass-"
+  ],
+  "existing_systems": "The canonical development branch already has design, wonder and spine verification commands.",
+  "root_problem": "An evergreen example-only preflight allows new architecture changes to pass without their own review.",
+  "reuse_decision": "Extend the existing design and CI workflow rather than introducing another architecture authority.",
+  "integration_impact": "The preflight applies across kernel, native Wyrdrune, sensory UI, Observer, Return and cloud host changes.",
+  "complete_operation": "Require a branch-specific changed preflight file covering all changed system paths on each Wayglass pull request.",
+  "verification_plan": "Run Node unit tests and GitHub Actions PR-scoped checks with both positive and missing-manifest negative cases.",
+  "return_continuity": "Preserve the reviewed head ref and exact changed file scope in versioned repository evidence.",
+  "remaining_boundaries": "The workflow is not a model worker and does not establish live browser, provider, deployment or runtime verification.",
+  "withness_wholeness": "One shared review contract catches duplicated architecture across the full ship without replacing existing engines.",
+  "existing_evidence": [
+    "WAYGLASS_CURRENT.md",
+    "docs/wayglass/WAYGLASS_CORE_RULE.md",
+    "package.json",
+    ".github/workflows/wayglass-check.yml"
+  ],
+  "decision": "extend",
+  "verification_commands": [
+    "node --test test/wayglass-build-preflight.test.cjs",
+    "node --test test/wayglass-pr-preflight.test.cjs"
+  ],
+  "live_verified": false,
+  "faeberpunk": {
+    "materials_interactions": {
+      "status": "blocked",
+      "evidence": "This PR only modifies the architecture acceptance gate; no visual or browser implementation is claimed."
+    },
+    "watercolour_entry": {
+      "status": "blocked",
+      "evidence": "This PR only modifies the architecture acceptance gate; no visual or browser implementation is claimed."
+    },
+    "eightfold_mobius": {
+      "status": "blocked",
+      "evidence": "This PR only modifies the architecture acceptance gate; no visual or browser implementation is claimed."
+    },
+    "harmony_chaos": {
+      "status": "blocked",
+      "evidence": "This PR only modifies the architecture acceptance gate; no visual or browser implementation is claimed."
+    },
+    "codex_rich_text": {
+      "status": "blocked",
+      "evidence": "This PR only modifies the architecture acceptance gate; no visual or browser implementation is claimed."
+    },
+    "real_route_presence": {
+      "status": "blocked",
+      "evidence": "This PR only modifies the architecture acceptance gate; no visual or browser implementation is claimed."
+    },
+    "sensory_accessibility": {
+      "status": "blocked",
+      "evidence": "This PR only modifies the architecture acceptance gate; no visual or browser implementation is claimed."
+    },
+    "feather_return": {
+      "status": "blocked",
+      "evidence": "This PR only modifies the architecture acceptance gate; no visual or browser implementation is claimed."
+    },
+    "before_after": {
+      "status": "blocked",
+      "evidence": "This PR only modifies the architecture acceptance gate; no visual or browser implementation is claimed."
+    },
+    "browser_ipad": {
+      "status": "blocked",
+      "evidence": "This PR only modifies the architecture acceptance gate; no visual or browser implementation is claimed."
+    },
+    "accessibility": {
+      "status": "blocked",
+      "evidence": "This PR only modifies the architecture acceptance gate; no visual or browser implementation is claimed."
+    },
+    "ci": {
+      "status": "changed",
+      "evidence": "CI contract updated to require FAEberpunk evidence on every Wayglass PR; execution remains pending."
+    },
+    "blocked": {
+      "status": "blocked",
+      "evidence": "This PR only modifies the architecture acceptance gate; no visual or browser implementation is claimed."
+    }
+  }
+}

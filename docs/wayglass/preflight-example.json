@@ -1,0 +1,22 @@
+{
+  "schema": "wayglass.build-preflight/v0.1",
+  "existing_systems": "The existing Starwell MCP bridge and OAuth peer already expose authenticated MCP routes.",
+  "root_problem": "The current task must use the existing authenticated bridge rather than invent another adapter.",
+  "reuse_decision": "Extend the existing bridge, reusing its identity, transport, tool catalogue and persistence.",
+  "integration_impact": "Review Starwell routes, OAuth scopes, Wayglass kernel, crew workspaces and Return Engine receipts.",
+  "complete_operation": "Implement the full feature, tests and integration verification in a coherent change set.",
+  "verification_plan": "Run relevant Node tests and exercise authenticated success, denial and revocation against a test host.",
+  "return_continuity": "Keep attributable author, stop receipt, provenance, and next owner across service restart.",
+  "remaining_boundaries": "Production deployment, live provider routes and ChatGPT registration remain unverified until receipts exist.",
+  "withness_wholeness": "The change improves existing connected architecture and avoids a competing second MCP bridge.",
+  "existing_evidence": [
+    "apps/starwell-server/wayglass/mcp-bridge.js",
+    "apps/starwell-server/wayglass/oauth-peer.js",
+    "apps/starwell-server/server.js"
+  ],
+  "decision": "extend",
+  "verification_commands": [
+    "node --test apps/starwell-server/test/wayglass-mcp*.test.js"
+  ],
+  "live_verified": false
+}
