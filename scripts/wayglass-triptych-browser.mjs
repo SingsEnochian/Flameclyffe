@@ -52,6 +52,7 @@ async function mountLift(page,profile){
   await toggle.click();
   assert.equal(await toggle.getAttribute('aria-pressed'),'true');
   const firstRoom=page.locator('[data-surface-id]').first();
+  await firstRoom.scrollIntoViewIfNeeded();
   const box=await firstRoom.boundingBox();
   assert.ok(box,'Ship control bounding box must exist');
   const x=box.x+box.width*.7,y=box.y+box.height*.7;
