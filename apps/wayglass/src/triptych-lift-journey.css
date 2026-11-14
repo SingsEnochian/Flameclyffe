@@ -287,3 +287,14 @@
   .wg-lift-station-dot{border:2px solid Highlight}
   .wg-lift-stations button[aria-current="step"]{outline:2px solid Highlight}
 }
+
+/* On this inhabitable route, host utility docks occupy their own berth rather than
+   floating across the lift's touch controls. Preserve both tools and their drafts. */
+:root[data-wayglass-surface="wayglass:triptych-lift"] .wg-ship-switch {
+  position:relative;inset:auto;display:block;width:fit-content;
+  margin:1rem auto 0;z-index:101;
+}
+:root[data-wayglass-surface="wayglass:triptych-lift"] .wg-voyage-inbox {
+  position:relative;inset:auto;box-sizing:border-box;
+  margin:1rem auto 1.5rem;max-height:65vh;
+}
