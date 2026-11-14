@@ -3,6 +3,7 @@ import {inviteWayglassVoice} from '../route-client.js';
 import {animateWyrdruneTranslation} from '../wyrdrune-morph.js';
 import {createWayglassImage,createWayglassSoundPlayer} from '../wyrdrune-response-media.js';
 import {getSharedWayglassObserverInterior} from '../living-observer-self.js';
+import {wayglassSomaticSound} from '../somatic-sound.js';
 
 export function mountWayglassNativeVoice(root,{request=inviteWayglassVoice,
   soundPlayer=createWayglassSoundPlayer()}={}){
@@ -35,7 +36,8 @@ export function mountWayglassNativeVoice(root,{request=inviteWayglassVoice,
     '</form>',
     '<section class="glass-panel wg-native-response" aria-label="Wyrdrune and British English" hidden data-native-response>',
     '<div class="wg-native-stage-head"><h2>Wyrdrune ⋈ British English</h2>',
-    '<button type="button" class="glass-chip" data-native-replay>Replay the translation</button></div>',
+    '<button type="button" class="glass-chip" data-native-replay>Replay the translation</button>',
+    '<button type="button" class="glass-chip wg-cypher-skip" data-native-skip disabled>Reveal English now</button></div>',
     '<pre class="wg-native-morph" aria-hidden="true" data-native-morph></pre>',
     '<p class="wg-native-reader" lang="en-GB" aria-live="polite" data-native-reader></p>',
     '<details class="wg-native-source"><summary>Read the complete Wyrdrune source</summary>',
@@ -55,14 +57,15 @@ export function mountWayglassNativeVoice(root,{request=inviteWayglassVoice,
   const $=name=>root.querySelector('[data-native-'+name+']');
   const prompt=$('prompt'),form=$('form'),send=$('send'),status=$('status');
   const response=$('response'),morph=$('morph'),reader=$('reader');
-  const source=$('source'),receipt=$('receipt'),replay=$('replay');
+  const source=$('source'),receipt=$('receipt'),replay=$('replay'),skip=$('skip');
   const imagePanel=$('images'),visuals=$('visuals'),soundPanel=$('sounds');
   const soundButtons=$('sound-buttons');
-  const reduced=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
+  const reduced=()=>globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
+  const featherHeld=()=>wayglassSomaticSound.snapshot().feather_stopped;
   let disposed=false,controller=null,cancelMorph=()=>{},last=null;
   function stop(){
     controller?.abort();controller=null;
-    cancelMorph();cancelMorph=()=>{};
+    cancelMorph();cancelMorph=()=>{};skip.disabled=true;
     soundPlayer.stop();
     if(!disposed)status.textContent='Feather · paused. No sound is playing.';
   }
@@ -80,12 +83,14 @@ export function mountWayglassNativeVoice(root,{request=inviteWayglassVoice,
     reader.textContent='';cancelMorph();
     cancelMorph=animateWyrdruneTranslation(morph,{
       source:result.native.source,translation:result.translation.text,
-      reducedMotion:reduced,onComplete:()=>{
+      reducedMotion:reduced(),onComplete:()=>{
         if(disposed)return;
+        skip.disabled=true;
         reader.textContent=result.translation.text;
         status.textContent='Wayglass returned in Wyrdrune and British English.';
       },
     });
+    skip.disabled=morph.getAttribute('data-cypher-state')!=='reading';
     const proposed=(Array.isArray(result.native.operators)?result.native.operators:[]);
     receipt.textContent='Wayglass / Crow · Wyrdrune '+result.native.sha256.slice(0,12)
       +' · '+result.receipt.model_calls+' model turns'
@@ -106,7 +111,7 @@ export function mountWayglassNativeVoice(root,{request=inviteWayglassVoice,
       button.textContent='Play Wyrdrune sound '+(i+1)
         +(silence>0?' after '+(silence/1000).toFixed(2)+'s silence':'');
       button.addEventListener('click',async()=>{
-        try{const played=await soundPlayer.play(score);
+        try{if(featherHeld())return;const played=await soundPlayer.play(score);
           if(!disposed)status.textContent='Playing Wayglass sound · '+played.duration_seconds+' seconds.';
         }catch(error){if(!disposed)status.textContent='Sound unavailable: '+error.message;}
       });
@@ -114,7 +119,7 @@ export function mountWayglassNativeVoice(root,{request=inviteWayglassVoice,
     }
   }
   form.addEventListener('submit',async event=>{
-    event.preventDefault();if(disposed)return;
+    event.preventDefault();if(disposed||featherHeld())return;
     stop();
     const running=new AbortController();
     controller=running;send.disabled=true;
@@ -137,12 +142,20 @@ export function mountWayglassNativeVoice(root,{request=inviteWayglassVoice,
     }finally{if(!disposed){send.disabled=false;if(controller===running)controller=null;}}
   });
   replay.addEventListener('click',()=>{
-    if(!last)return;reader.textContent='';cancelMorph();
+    if(!last||disposed||featherHeld())return;
+    reader.textContent='';cancelMorph();
     cancelMorph=animateWyrdruneTranslation(morph,{
       source:last.native.source,translation:last.translation.text,
-      reducedMotion:reduced,
-      onComplete:()=>{if(!disposed)reader.textContent=last.translation.text;},
+      reducedMotion:reduced(),
+      onComplete:()=>{
+        if(!disposed){skip.disabled=true;reader.textContent=last.translation.text;}
+      },
     });
+    skip.disabled=morph.getAttribute('data-cypher-state')!=='reading';
+  });
+  skip.addEventListener('click',()=>{
+    if(featherHeld()||disposed)return;
+    cancelMorph.reveal?.();
   });
   $('stop').addEventListener('click',stop);
   $('silence').addEventListener('click',()=>{

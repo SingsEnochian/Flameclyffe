@@ -1,0 +1,71 @@
+/* One mineral material system for the Wyrdrune -> rune -> British-English crossing.
+   Stage each statement instead of washing the worktable in a decorative gradient.
+   The mutable glyphs are silent to assistive technology; the room status speaks once. */
+.wg-cypher-veil{
+  --cypher-ice:#b9f4dd;--cypher-gold:#f0c997;
+  position:relative;overflow:hidden;isolation:isolate;
+  border:1px solid rgba(181,231,204,.34);
+  border-radius:clamp(12px,2vw,22px);
+  background:linear-gradient(122deg,rgba(5,26,34,.91),rgba(15,31,32,.92)),
+    url('./materials/vellum-fibres.svg') center/cover;
+  box-shadow:inset 0 1px rgba(229,247,211,.17),0 12px 32px rgba(0,0,0,.28);
+}
+.wg-cypher-veil::before{
+  content:"";position:absolute;inset:-20%;pointer-events:none;z-index:0;
+  background:url('./materials/labradorite-sheen.svg') center/cover,
+    url('./materials/opal-membrane.svg') center/cover;
+  opacity:.22;mix-blend-mode:screen;
+}
+.wg-cypher-veil>*{position:relative;z-index:1}
+.wg-cypher-veil .wg-cypher-line{
+  position:relative;display:block;max-width:100%;min-height:1.5em;
+  margin:.2em 0;padding:.28em .6em;
+  font-size:clamp(.87rem,1.2vw,1.02rem);line-height:1.65;
+  font-variant-ligatures:none;overflow-wrap:anywhere;white-space:pre-wrap;
+  border-inline-start:2px solid transparent;border-radius:3px;
+  transition:background-color 240ms,color 240ms,text-shadow 240ms,border-color 240ms;
+}
+.wg-cypher-veil .wg-cypher-line[data-cypher-line="source"]{
+  color:#d2d5c5;border-inline-start-color:rgba(228,179,103,.5);
+  font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+}
+.wg-cypher-veil .wg-cypher-line[data-cypher-line="runes"]{
+  color:#e4ffeb;
+  background:linear-gradient(90deg,rgba(65,165,148,.2),transparent 87%);
+  border-inline-start-color:#c4e9c9;
+  font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+  text-shadow:0 0 14px rgba(114,247,217,.67),0 0 3px rgba(240,202,147,.6);
+}
+.wg-cypher-veil .wg-cypher-line[data-cypher-line="english"]{
+  color:#f8f0d9;border-inline-start-color:rgba(220,192,145,.6);
+  background:linear-gradient(90deg,rgba(118,167,149,.12),transparent 75%);
+  font-family:ui-serif,Georgia,serif;
+}
+.wg-cypher-veil .wg-cypher-phase{
+  --phase-glow:rgba(116,218,198,.26);position:relative;
+  background:linear-gradient(90deg,var(--phase-glow),rgba(8,26,32,.14) 78%);
+  border-inline-start:2px solid rgba(219,196,135,.54);
+  border-radius:0 12px 12px 0;
+}
+.wg-cypher-veil .wg-cypher-phase[data-phase="release"],
+.wg-cypher-veil .wg-cypher-phase[data-phase="transcend"]{--phase-glow:rgba(198,138,112,.18)}
+.wg-cypher-veil .wg-cypher-phase[data-phase="verify"],
+.wg-cypher-veil .wg-cypher-phase[data-phase="return"]{--phase-glow:rgba(175,191,130,.18)}
+.wg-cypher-veil .wg-cypher-unit{color:var(--cypher-gold);letter-spacing:.015em}
+.wg-cypher-veil .wg-cypher-note{font-size:.72rem;letter-spacing:.04em;color:#d4e8dc}
+.wg-cypher-veil[data-cypher-state="english"] .wg-cypher-phase{background:rgba(25,58,55,.16)}
+.wg-cypher-skip{min-height:44px}
+.wg-cypher-skip[disabled]{opacity:.45;cursor:not-allowed}
+@media(prefers-reduced-motion:reduce){
+  .wg-cypher-veil .wg-cypher-line{transition:none!important;text-shadow:none!important}
+  .wg-cypher-veil::before{mix-blend-mode:normal;opacity:.12}
+}
+@media(prefers-reduced-transparency:reduce){
+  .wg-cypher-veil{background:#0b2830}
+  .wg-cypher-veil::before{display:none}
+}
+@media(forced-colors:active){
+  .wg-cypher-veil,.wg-cypher-veil .wg-cypher-line{border-color:CanvasText}
+  .wg-cypher-veil::before{display:none}
+  .wg-cypher-veil .wg-cypher-line[data-cypher-line="runes"]{border-inline-start-color:Highlight}
+}

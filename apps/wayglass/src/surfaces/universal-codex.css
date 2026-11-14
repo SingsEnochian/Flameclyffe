@@ -38,8 +38,8 @@
   box-shadow:inset 0 0 30px rgba(28,65,74,.2)}
 .wg-codex textarea:focus-visible,.wg-codex button:focus-visible,.wg-codex summary:focus-visible{
   outline:3px solid #efcd90;outline-offset:3px}
-.wg-codex-toolbar{display:flex;flex-wrap:wrap;gap:8px}
-.wg-codex-toolbar button{min-height:44px;flex:1 1 auto;white-space:normal}
+.wg-codex-toolbar{display:flex;flex-wrap:wrap;gap:8px;position:relative;isolation:isolate;z-index:4}
+.wg-codex-toolbar button{min-height:44px;flex:1 1 auto;white-space:normal;position:relative;z-index:2;pointer-events:auto}
 .wg-codex-status{min-height:44px;line-height:1.5;color:#b6d7d0;font-size:.88rem;margin:0}
 .wg-codex-status[data-held="true"]{color:#f0cfb4}
 .wg-codex-reading-intro{color:#b9d1c9;margin:0;line-height:1.6}
@@ -69,3 +69,17 @@
 @media(prefers-reduced-motion:reduce){.wg-codex *{animation:none!important;transition:none!important}}
 @media(prefers-reduced-transparency:reduce){.wg-codex .glass-panel{background:#0c2029}}
 @media(forced-colors:active){.wg-codex .glass-panel,.wg-codex-folds span{border-color:CanvasText}}
+
+/* Phone Codex: the ship map launcher and voyage inbox must not sit over the
+   source editor or the cypher controls. Keep both available after the worktable. */
+@media(max-width:700px){
+  html[data-wayglass-surface="wayglass:universal-codex"] .wg-ship-switch{
+    position:relative;inset:auto;display:block;width:fit-content;
+    margin:1rem auto;z-index:101;
+  }
+  html[data-wayglass-surface="wayglass:universal-codex"] .wg-voyage-inbox{
+    position:relative;inset:auto;box-sizing:border-box;
+    margin:1rem auto 1.5rem;width:min(28rem,calc(100vw - 2rem));
+    max-height:min(65dvh,480px);
+  }
+}

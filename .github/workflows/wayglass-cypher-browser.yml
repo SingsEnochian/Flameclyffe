@@ -1,0 +1,41 @@
+name: Wayglass Living Cypher Browser
+on:
+  pull_request:
+    paths:
+      - 'apps/wayglass/src/wyrdrune-*'
+      - 'apps/wayglass/src/surfaces/universal-codex*'
+      - 'apps/wayglass/src/surfaces/arcsweep-writing.js'
+      - 'apps/wayglass/test/wyrdrune-cypher.test.js'
+      - 'scripts/wayglass-cypher-browser.mjs'
+      - '.github/workflows/wayglass-cypher-browser.yml'
+      - 'package*.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  chromium:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run wayglass:build
+      - name: Install pinned browser harness
+        run: npm install --prefix "$RUNNER_TEMP/wayglass-browser" --no-save --package-lock=false playwright@1.62.1
+      - name: Install Chromium dependencies
+        run: node "$RUNNER_TEMP/wayglass-browser/node_modules/playwright/cli.js" install chromium --with-deps
+      - name: Wyrdrune -> runes -> en-GB in real browser
+        env:
+          WAYGLASS_PLAYWRIGHT_MODULE: ${{ runner.temp }}/wayglass-browser/node_modules/playwright/index.mjs
+        run: node scripts/wayglass-cypher-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wayglass-cypher-browser-${{ github.sha }}
+          path: artifacts/wayglass/cypher-browser/
+          if-no-files-found: warn
+          retention-days: 30

@@ -76,3 +76,40 @@ test('sound is original bounded mono synthesis and starts only from an explicit 
  player.stop();assert.ok(traces.closed>=1);
  player.dispose();
 });
+
+test('native-voice cypher has user-driven reveal, Feather restore and motion-safe finish',()=>{
+ const node=()=>({textContent:'',attrs:{},setAttribute(k,v){this.attrs[k]=v}});
+ const timers=new Map(),listeners=new Map();let next=0,completed=0;
+ const scope={
+   setTimeout(fn){const id=++next;timers.set(id,fn);return id;},
+   clearTimeout(id){timers.delete(id);},
+   addEventListener(key,fn){listeners.set(key,fn);},
+   removeEventListener(key){listeners.delete(key);},
+   fire(key,detail){listeners.get(key)?.({detail});},
+ };
+ const first=node();
+ const cancel=animateWyrdruneTranslation(first,{source:'native Wyrdrune',
+   translation:'Written in British English.',scope,onComplete:()=>completed++});
+ assert.equal(first.attrs['data-cypher-line'],'source');
+ assert.equal(first.attrs['data-cypher-state'],'reading');
+ cancel.reveal();
+ assert.equal(first.textContent,'Written in British English.');
+ assert.equal(first.attrs.lang,'en-GB');
+ assert.equal(completed,1);assert.equal(timers.size,0);
+ cancel.reveal();assert.equal(completed,1);
+ const second=node();
+ const leave=animateWyrdruneTranslation(second,{source:'native still held',
+   translation:'This must not appear on Feather.',scope,onComplete:()=>completed++});
+ scope.fire('wayglass:feather',{stopped:true});
+ assert.equal(second.textContent,'native still held');
+ assert.equal(second.attrs['data-cypher-state'],'stopped');
+ assert.equal(timers.size,0);
+ leave.reveal();assert.equal(completed,1);
+ const third=node();
+ animateWyrdruneTranslation(third,{source:'native',translation:'English',
+   scope,onComplete:()=>completed++});
+ scope.fire('wayglass:motion',{enabled:false});
+ assert.equal(third.attrs['data-cypher-state'],'english');
+ assert.equal(third.textContent,'English');assert.equal(timers.size,0);
+ assert.equal(completed,2);
+});

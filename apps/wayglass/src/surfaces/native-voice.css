@@ -24,3 +24,43 @@
  .wg-native-voice *{scroll-behavior:auto!important;transition-duration:0s!important;animation-duration:0s!important}
  .wg-native-morph{text-shadow:none}
 }
+
+
+/* Native Voice uses the same material language as the live Universal Codex.
+   One unfolding line of text, not a decorative screenshot of a glyph. */
+.wg-native-response{position:relative;isolation:isolate;overflow:hidden;
+  background:radial-gradient(ellipse at 68% 0,rgba(79,160,146,.21),transparent 58%),
+  linear-gradient(150deg,rgba(6,22,30,.98),rgba(16,25,36,.97));}
+.wg-native-response::before{content:"";position:absolute;inset:-15%;z-index:-1;pointer-events:none;
+  background:url('../materials/labradorite-sheen.svg') center/cover,
+  url('../materials/opal-membrane.svg') center/cover;
+  mix-blend-mode:screen;opacity:.29;}
+.wg-native-morph{position:relative;
+  border:1px solid rgba(196,232,203,.5);
+  border-inline-start:4px solid rgba(235,194,131,.65);
+  background:linear-gradient(130deg,rgba(4,22,28,.83),rgba(13,38,39,.72)),
+    url('../materials/vellum-fibres.svg') center/cover;
+  box-shadow:inset 0 0 55px rgba(76,136,124,.16),0 12px 38px rgba(0,0,0,.21);
+  transition:color 300ms,text-shadow 300ms,border-color 300ms;}
+.wg-native-morph[data-cypher-line="source"]{color:#d9e0cf;border-inline-start-color:#d4ad7c;}
+.wg-native-morph[data-cypher-line="runes"]{color:#e5ffe9;
+  border-inline-start-color:#a0ffdd;
+  text-shadow:0 0 16px rgba(135,241,213,.65),0 0 3px rgba(246,209,152,.63);}
+.wg-native-morph[data-cypher-line="english"]{
+  font-family:ui-serif,Georgia,serif;font-size:clamp(.95rem,1.4vw,1.14rem);
+  color:#f8f1de;border-inline-start-color:#ecd4a7;
+  text-shadow:0 0 8px rgba(162,235,206,.17);}
+.wg-native-morph[data-cypher-state="stopped"]{opacity:.83}
+.wg-native-voice .wg-cypher-skip{min-height:44px;border-color:rgba(242,209,152,.57)}
+@media(prefers-reduced-motion:reduce){
+  .wg-native-morph{transition:none!important;text-shadow:none!important}
+  .wg-native-response::before{opacity:.12;mix-blend-mode:normal}
+}
+@media(prefers-reduced-transparency:reduce){
+  .wg-native-response{background:#0d2930}
+  .wg-native-response::before{display:none}
+}
+@media(forced-colors:active){
+  .wg-native-morph{border:1px solid CanvasText;border-inline-start:4px solid Highlight}
+  .wg-native-response::before{display:none}
+}
