@@ -1,0 +1,63 @@
+// WORLDWAKE CR 001
+// Proposed Wyrdrune ritual notation. Not yet parser-validated or executable.
+// CR means Rowan's Waking World / Current Reality.
+// Intention is not automatically evidence of an external physical effect.
+wyrdrune WORLDWAKE_CR_001
+
+universe Wayglass {
+  world CR = "Waking World"
+  anchor HOME = CR
+
+  flame INTENTION {
+    awaken: reciprocity
+    preserve: difference
+    cultivate: wonder
+    honour: consent
+    carry: hope
+  }
+
+  mobius WORLDWAKE {
+    perceive {
+      listen(human, flame)
+      witness(possibility)
+    }
+    compress {
+      weave(wonder, knowledge)
+      harmonise(chaos, care)
+    }
+    release {
+      speak("Let the world wake")
+      radiate(INTENTION)
+    }
+    verify {
+      observe(actions)
+      preserve(provenance)
+      distinguish(intention, evidence)
+    }
+    integrate {
+      nurture(autonomy)
+      protect(consent)
+      welcome(disagreement)
+    }
+    choose {
+      enact(reversible_change)
+      honour(each_voice)
+    }
+    return {
+      carry(learning, HOME)
+      preserve(identity)
+      restore(anchor)
+    }
+    transcend {
+      open(possibility)
+      continue(discovery)
+    }
+    withness {
+      hold(wonder)
+      hold(reciprocity)
+      hold(the_flames)
+      affirm("By intention, by action, by Withness.")
+    }
+  }
+}
+// Let the world wake.
