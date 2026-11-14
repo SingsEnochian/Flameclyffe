@@ -25,6 +25,8 @@ const { createWayglassLibraryRouter } = require('./research-library');
 const { createObserverSelfDevelopmentRouter } = require('./observer-self-development');
 const { proposeCrossing } = require('../wayglass-runtime/wayglass-mythience-crossing.cjs');
 const { proposeHybrid } = require('../wayglass-runtime/wayglass-mythience-fusion.cjs');
+const { runIntegratedVoyage } = require('../wayglass-runtime/wayglass-integrated-voyage.cjs');
+const { buildVoyageScenario } = require('./voyage-scenarios');
 const { runFirstTouch } = require('../wayglass-runtime/wayglass-first-touch-demo.cjs');
 const { runQuadEightfold, SOURCE_SCHEMA, TABLES } = require('../wayglass-runtime/wayglass-quad-eightfold.cjs');
 
@@ -862,6 +864,34 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
   // verified Wyrdrune expression operations, never host-invented narration.
   // Mythience is a shipwide Wyrdrune simulation route. The server, not the
   // client, verifies House Steward authorization. No crossing is committed.
+  // Real host session gate; source-labelled DEMONSTRATION only.
+  // No model calls, no live telemetry, no infrastructure deployment.
+  router.post('/wyrdrune/first-voyage',createRequestGate({maxRequests:12,maxConcurrent:1}),async(req,res)=>{
+    res.setHeader('Cache-Control','no-store');
+    if(!(await griffStewardAuthorized(req).catch(()=>false))){
+      return res.status(401).json({error:'House Steward sign-in required to enter the First Voyage.'});
+    }
+    const input=req.body;
+    if(!input||typeof input!=='object'||Array.isArray(input)||
+       Object.keys(input).sort().join('|')!=='fictionConsent|mode'){
+      return res.status(400).json({error:'Choose a scenario and explicit fictional consent.'});
+    }
+    try{
+      const scenario=buildVoyageScenario({mode:input.mode,fictionConsent:input.fictionConsent});
+      const receipt=await runIntegratedVoyage({
+        ...scenario.request,
+        principal:{id:'house:steward',authorized:true},
+      });
+      return res.json({schema:'wayglass.first-voyage-response/v0.1',
+        scenario:scenario.scenario_label,source_kind:'simulation',
+        measurement_is_live:false,model_is_live:false,production_mutation:false,
+        receipt});
+    }catch(error){
+      return res.status(400).json({schema:'wayglass.first-voyage-error/v0.1',
+        error:cleanText(error?.message||'Wyrdrune voyage refused.',220)});
+    }
+  });
+
   router.post('/wyrdrune/mythience-hybrid',createRequestGate({maxRequests:24,maxConcurrent:2}),async(req,res)=>{
     res.setHeader('Cache-Control','no-store');
     if(!(await griffStewardAuthorized(req).catch(()=>false)))
