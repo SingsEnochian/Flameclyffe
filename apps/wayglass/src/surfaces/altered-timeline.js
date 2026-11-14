@@ -139,7 +139,7 @@ export function mountWayglassAlteredTimeline(root,{
   const form=q('altered-form'),status=q('alt-status'),originalTrack=q('alt-original-track'),
     childTrack=q('alt-child-track'),ripples=q('alt-ripples'),held=q('alt-withness');
   let original=null,changes=[],branchId=null,createdAt=null,current=null,working=false,closed=false;
-  let evidence=[],hostReceipt=null,houseBranches=[];
+  let evidence=[],hostReceipt=null,houseBranches=[],pendingReturn=null;
   const feather=()=>wayglassSomaticSound.snapshot().feather_stopped;
   function setStatus(value){if(!closed)status.textContent=value;}
   function render(){
@@ -340,14 +340,14 @@ export function mountWayglassAlteredTimeline(root,{
   q('alt-host-branch').addEventListener('change',render);
   q('alt-host-save').addEventListener('click',async()=>{
     if(!current||feather()||working)return;
-    working=true;render();setStatus('Verifying Wyrdrune and checkpointing with the signed House host…');
+    working=true;pendingReturn=new AbortController();render();setStatus('Verifying Wyrdrune and checkpointing with the signed House host…');
     try{
       const result=await saveAlteredTimelineHost({
         snapshot:{original,changes,branchId,createdAt,evidence},
         expectedStorageId:hostReceipt?.storage_id||null,
-        signal:{get aborted(){return closed||feather();}},
+        signal:pendingReturn.signal,
       });
-      if(closed||feather())throw new Error('Feather interrupted the Return acknowledgement');
+      if(closed||feather())throw new Error('Feather interrupted the Return acknowledgement; inspect the House catalogue before retrying');
       if(result?.receipt?.persisted!==true||result.receipt.verified!==true||
          result.receipt.branch_id!==branchId)
         throw new Error('House did not return a verified checkpoint receipt');
@@ -355,16 +355,16 @@ export function mountWayglassAlteredTimeline(root,{
       setStatus('Host checkpoint verified · revision '+hostReceipt.revision+
         '. Return available from an authenticated browser on this persistent House host.');
     }catch(error){setStatus('House checkpoint not confirmed: '+error.message);}
-    finally{working=false;render();}
+    finally{pendingReturn=null;working=false;render();}
   });
   q('alt-host-restore').addEventListener('click',async()=>{
     if(feather()||working)return;
     const selected=q('alt-host-branch').value;
     if(!selected)return;
-    working=true;render();setStatus('Recovering authenticated House checkpoint…');
+    working=true;pendingReturn=new AbortController();render();setStatus('Recovering authenticated House checkpoint…');
     try{
       const result=await restoreAlteredTimelineHost({branchId:selected,
-        signal:{get aborted(){return closed||feather();}}});
+        signal:pendingReturn.signal});
       if(closed||feather())throw new Error('Feather interrupted the Return');
       const snapshot=result.snapshot;
       const experiment=buildAlteredTimeline({
@@ -381,7 +381,7 @@ export function mountWayglassAlteredTimeline(root,{
       setStatus('Returned from House revision '+hostReceipt.revision+
         '. Original provenance, alterations and evidence restored.');
     }catch(error){setStatus('House Return could not be verified: '+error.message);}
-    finally{working=false;render();}
+    finally{pendingReturn=null;working=false;render();}
   });
   q('alt-feather').addEventListener('click',()=>{
     wayglassSomaticSound.feather();
@@ -391,8 +391,8 @@ export function mountWayglassAlteredTimeline(root,{
     wayglassSomaticSound.releaseFeather({confirmed:true});
     setStatus('Feather deliberately released. New changes still require their own choice.');render();
   });
-  const onFeather=()=>{if(!closed)render();};
+  const onFeather=()=>{if(feather())pendingReturn?.abort();if(!closed)render();};
   scope.addEventListener?.(WAYGLASS_FEATHER_EVENT,onFeather);
   render();
-  return ()=>{closed=true;scope.removeEventListener?.(WAYGLASS_FEATHER_EVENT,onFeather);};
+  return ()=>{closed=true;pendingReturn?.abort();scope.removeEventListener?.(WAYGLASS_FEATHER_EVENT,onFeather);};
 }
