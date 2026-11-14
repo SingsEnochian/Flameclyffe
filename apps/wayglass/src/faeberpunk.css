@@ -412,7 +412,8 @@ html[data-wayglass-surface="wayglass:living-watercolor"] #app{
    Text remains accessible when expanded. No route or inbox behaviour is altered. */
 .wg-voyage-inbox{
   right:clamp(13px,2.5vw,40px);
-  bottom:calc(28px + env(safe-area-inset-bottom,0px));
+  /* Keep the inbox entirely above the persistent ship switch on desktop. */
+  bottom:calc(88px + env(safe-area-inset-bottom,0px));
   width:min(390px,calc(100vw - 26px));padding:9px 13px;
   color:#dcf0e5;
   background:radial-gradient(circle at 15% 5%,rgba(92,171,145,.24),transparent 70%),
