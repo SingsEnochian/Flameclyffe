@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Opaline membrane with iridescent veins">
+<defs>
+ <radialGradient id="opal" cx=".49" cy=".43" r=".66"><stop stop-color="#9bedd9" stop-opacity=".46"/><stop offset=".23" stop-color="#166a72" stop-opacity=".12"/><stop offset=".66" stop-color="#8b61a7" stop-opacity=".20"/><stop offset="1" stop-color="#020a13" stop-opacity="0"/></radialGradient>
+ <linearGradient id="prism" x1="0" x2="1" y1="0" y2=".6"><stop stop-color="#a9f9da" stop-opacity="0"/><stop offset=".21" stop-color="#9be9cb" stop-opacity=".19"/><stop offset=".41" stop-color="#e9c39b" stop-opacity=".31"/><stop offset=".58" stop-color="#8dbce1" stop-opacity=".13"/><stop offset=".83" stop-color="#ca95da" stop-opacity=".26"/><stop offset="1" stop-color="#85ffe1" stop-opacity="0"/></linearGradient>
+ <filter id="vein" x="-25%" y="-25%" width="150%" height="150%"><feTurbulence type="fractalNoise" baseFrequency=".006 .018" numOctaves="3" seed="13" result="bend"/><feDisplacementMap in="SourceGraphic" in2="bend" scale="48" xChannelSelector="R" yChannelSelector="G"/></filter>
+ <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".52" numOctaves="3" seed="14" stitchTiles="stitch" result="grain"/><feColorMatrix in="grain" type="matrix" values="0 0 0 0 .43 0 0 0 0 .83 0 0 0 0 .7 0 0 0 .12 0"/></filter>
+ <filter id="glow"><feGaussianBlur stdDeviation="12"/></filter>
+</defs>
+<rect width="1440" height="900" fill="url(#opal)"/>
+<g fill="none" stroke="url(#prism)" stroke-width="13" filter="url(#glow)">
+ <path d="M-130 560 C160 128 320 200 530 442 S901 817 1175 490 S1500 160 1630 289"/>
+ <path d="M-105 210 C188 500 290 330 538 138 S960 289 1130 670 S1400 802 1590 570"/>
+</g>
+<g fill="none" stroke="url(#prism)" stroke-width="2.2" filter="url(#vein)" opacity=".76">
+ <path d="M-130 560 C160 128 320 200 530 442 S901 817 1175 490 S1500 160 1630 289"/>
+ <path d="M-105 210 C188 500 290 330 538 138 S960 289 1130 670 S1400 802 1590 570"/>
+ <path d="M-170 650 C220 80 430 635 720 408 S1130 88 1570 245"/>
+ <path d="M-150 50 C188 380 430 -30 780 200 S1122 730 1570 460"/>
+ <path d="M-170 810 C290 458 630 997 951 730 S1270 290 1590 645"/>
+</g>
+<g fill="none" stroke="#d2e9d2" opacity=".17" stroke-width=".8">
+ <path d="M-60 245L220 135 443 290 520 516 759 570 938 400 1201 498 1490 283"/>
+ <path d="M-40 740L220 540 420 687 659 616 842 826 1099 661 1440 773"/>
+ <path d="M130 0L220 135 320 0 M443 290L540 100 720 220 759 570 938 400 920 146 1099 80 1201 498"/>
+ <path d="M520 516L420 687 220 540 220 135 M759 570L842 826 1099 661 1201 498"/>
+</g>
+<rect width="1440" height="900" filter="url(#grain)" opacity=".31"/>
+</svg>
