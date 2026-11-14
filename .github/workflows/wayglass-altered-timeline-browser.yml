@@ -1,0 +1,47 @@
+name: Wayglass Altered Timeline Browser
+on:
+  pull_request:
+    paths:
+      - 'apps/arcsweep/src/altered-timeline.js'
+      - 'apps/arcsweep/test/altered-timeline.test.js'
+      - 'apps/wayglass/src/altered-timeline-score.js'
+      - 'apps/wayglass/src/surfaces/altered-timeline.*'
+      - 'apps/wayglass/src/main.js'
+      - 'apps/wayglass/src/ship-deck-navigation.js'
+      - 'apps/wayglass/src/wayglass-entry.js'
+      - 'apps/wayglass/test/altered-timeline-wyrdrune.test.js'
+      - 'lib/wyrdrune/altered-timeline.wtl'
+      - 'scripts/wayglass-altered-timeline-browser.mjs'
+      - '.github/workflows/wayglass-altered-timeline-browser.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  chromium:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Core and native Wyrdrune behavioural tests
+        run: node --test apps/arcsweep/test/altered-timeline.test.js apps/wayglass/test/altered-timeline-wyrdrune.test.js
+      - run: npm run wayglass:build
+      - name: Install pinned browser harness
+        run: npm install --prefix "$RUNNER_TEMP/wayglass-browser" --no-save --package-lock=false playwright@1.62.1
+      - name: Install Chromium dependencies
+        run: node "$RUNNER_TEMP/wayglass-browser/node_modules/playwright/cli.js" install chromium --with-deps
+      - name: Real Chrome desktop/mobile fork, undo, Feather and cold reload
+        env:
+          WAYGLASS_PLAYWRIGHT_MODULE: ${{ runner.temp }}/wayglass-browser/node_modules/playwright/index.mjs
+        run: node scripts/wayglass-altered-timeline-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wayglass-altered-timeline-browser-${{ github.sha }}
+          path: artifacts/wayglass/altered-timeline-browser/
+          if-no-files-found: warn
+          retention-days: 30
