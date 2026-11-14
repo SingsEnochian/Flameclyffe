@@ -1,0 +1,24 @@
+name: Crow Trainer Harmony Live CI
+on:
+  pull_request:
+    paths:
+      - 'lib/wayglass-crow-trainer-cohort.cjs'
+      - 'lib/wayglass-harmony-chaos-mission.cjs'
+      - 'lib/wayglass-crow-trainer-ollama.cjs'
+      - 'test/wayglass-crow-trainer-cohort.test.cjs'
+      - 'test/wayglass-harmony-chaos-mission.test.cjs'
+      - 'test/wayglass-crow-trainer-ollama.test.cjs'
+      - '.github/workflows/crow-trainer-harmony.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  crow-trainer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Execute native Wyrdrune, Harmony and mocked Ollama route tests
+        run: node --test test/wayglass-crow-trainer-cohort.test.cjs test/wayglass-harmony-chaos-mission.test.cjs test/wayglass-crow-trainer-ollama.test.cjs
