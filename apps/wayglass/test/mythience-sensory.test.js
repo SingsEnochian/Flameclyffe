@@ -19,3 +19,21 @@ test('audio and haptics do not activate on creation',async()=>{
   assert.equal(called,1);
   await sensory.destroy();
 });
+
+test('Feather stop during pending audio resume prevents late oscillator playback',async()=>{
+  let release,started=0;
+  const resumePromise=new Promise(resolve=>{release=resolve;});
+  class SuspendedAudio {
+    constructor(){this.state='suspended';this.currentTime=0;}
+    resume(){return resumePromise;}
+    createOscillator(){started++;throw new Error('must not create oscillator after stop');}
+  }
+  const sensory=createMythienceSensory({AudioContextCtor:SuspendedAudio,vibrate:()=>true});
+  const pending=sensory.hear({expression:.8,permeability:.6});
+  sensory.stop();
+  release();
+  const result=await pending;
+  assert.equal(result.played,false);
+  assert.equal(started,0);
+  await sensory.destroy();
+});
