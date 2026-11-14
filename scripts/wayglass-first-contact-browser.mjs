@@ -425,7 +425,7 @@ try{
  await tabletToggle.tap();
  const tabletDock=await tabletPage.locator('.wc-workbench').boundingBox();
  const tabletBody=await tabletPage.locator('.wc-stage').boundingBox();
- assert.ok(tabletDock && tabletBody && tabletDock.y>=tabletBody.bottom-1,
+ assert.ok(tabletDock && tabletBody && tabletDock.y>=tabletBody.y+tabletBody.height-1,
   'The iPad instrument dock must unfold below, never over the Pencil canvas');
  await tabletPage.screenshot({path:resolve(output,'faeberpunk-ipad-instruments.png'),fullPage:true});
  receipt.scenarios.push({id:'ipad-first-living-materials-and-nonoccluding-drawer',status:'passed',
