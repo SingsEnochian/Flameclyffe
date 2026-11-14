@@ -116,3 +116,6 @@ export function coherenceCaseSummary(receipt = {}) {
     source_refs: [...list(receipt.source_refs)],
   });
 }
+
+// The existing Coherence Spine is the one public timeline comparison entry point.
+export { TIMELINE_EVIDENCE_SCHEMA, compareTimelineEvidence } from './timeline-evidence-comparison.js';
