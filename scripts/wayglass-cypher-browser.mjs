@@ -49,8 +49,18 @@ async function checkCodex(page,profile){
  const reading=page.locator('[data-codex-english]');
  assert.equal(await reading.getAttribute('aria-live'),'off');
  await page.locator('[data-codex-translate]').click();
- await page.waitForFunction(()=>document.querySelector('[data-codex-english]')?.getAttribute('data-cypher-state')==='reading');
- await page.waitForFunction(()=>document.querySelector('[data-codex-english] [data-cypher-line="runes"]'));
+ await page.waitForTimeout(120);
+ const observed=await page.evaluate(()=>({
+   cypher:document.querySelector('[data-codex-english]')?.getAttribute('data-cypher-state'),
+   status:document.querySelector('[data-codex-status]')?.textContent,
+   sample:document.querySelector('[data-codex-english]')?.textContent?.slice(0,170),
+   media:matchMedia('(prefers-reduced-motion: reduce)').matches,
+   wayglassMotion:document.documentElement.dataset.wgMotion,
+   runeCount:document.querySelectorAll('[data-codex-english] [data-cypher-line="runes"]').length,
+ }));
+ receipt['codex_'+profile]=observed;
+ assert.equal(observed.cypher,'reading','Codex must enter visible glyph passage: '+JSON.stringify(observed));
+ assert.ok(observed.runeCount>0,'Visible glyph intermediate missing: '+JSON.stringify(observed));
  const material=await reading.evaluate(el=>({
   background:getComputedStyle(el,'::before').backgroundImage,
   state:el.getAttribute('data-cypher-state'),
