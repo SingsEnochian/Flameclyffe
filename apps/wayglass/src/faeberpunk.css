@@ -1,0 +1,104 @@
+/* Wayglass FAEberpunk design pass: stone = structure, metal = mechanism,
+   glass = observable state, living ink = activity. Layered on the existing
+   mineral tokens, never replacing Wayglass organs or their styles.
+   Source lineage: docs/architecture/WAYGLASS_OS_V0_1.md;
+   docs/reference/inspiration-ledger.md (Liquid Glass, Tactile Controls,
+   Holographic Particle Morphing, Gesture Neural Universe). No copied demo CSS. */
+:root{
+  --fae-obsidian:#060d12;--fae-moss:#4e927c;--fae-opal:#b1e8e0;
+  --fae-aurora:#89b7c7;--fae-amber:#edc78e;--fae-ink:#e9f4ee;
+  --fae-etch:rgba(173,226,215,.24);--fae-recess:rgba(4,11,18,.77);
+  --fae-edge:rgba(229,207,154,.22);--fae-focus:#e9cf9c;
+}
+html{scroll-padding-top:110px}
+body{background-color:var(--fae-obsidian)}
+.wg-helm{overflow:visible;position:sticky;border:1px solid var(--fae-etch);
+  background:linear-gradient(105deg,rgba(8,26,31,.97),rgba(5,13,22,.94) 58%,rgba(24,39,41,.96));
+  box-shadow:0 17px 52px rgba(0,0,0,.5),inset 0 1px rgba(241,255,241,.15)}
+.wg-helm::after{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;
+  pointer-events:none;background:linear-gradient(112deg,transparent 10%,rgba(126,222,210,.055) 29%,
+    transparent 49%,rgba(230,181,131,.06) 76%,transparent 93%)}
+.wg-helm-mark{position:relative;color:var(--fae-amber);
+  background:radial-gradient(circle at 32% 25%,rgba(205,255,237,.24),transparent 52%),
+    conic-gradient(from 20deg,rgba(57,146,146,.25),rgba(24,31,54,.9),rgba(188,128,78,.21),rgba(57,146,146,.25))}
+.wg-helm-mark::after{content:"";position:absolute;inset:-4px;border:1px solid rgba(211,189,140,.26);
+  border-radius:50%;pointer-events:none}
+.wg-helm-title strong{color:var(--fae-ink)}
+.wg-helm-readout{min-width:90px}
+.wg-helm-loci{display:flex;align-items:center;justify-content:center;gap:4px;flex-wrap:wrap;min-width:0}
+.wg-locus{position:relative;min-height:44px;min-width:52px;padding:8px 11px;
+  display:grid;justify-items:center;gap:4px;white-space:nowrap;
+  color:#c1d6d2;background:linear-gradient(170deg,rgba(31,62,65,.22),rgba(6,15,24,.55));
+  border:1px solid transparent;border-radius:12px;font-size:.72rem;font-weight:700;letter-spacing:.015em}
+.wg-locus .wg-locus-glyph{font:500 1.05rem/1 Georgia,serif;color:var(--fae-amber)}
+.wg-locus:hover{border-color:rgba(173,226,215,.4);background:rgba(36,85,85,.26)}
+.wg-locus[aria-current="page"]{color:#fff7e5;border-color:rgba(233,207,156,.57);
+  background:radial-gradient(ellipse at 50% 0,rgba(162,223,205,.21),transparent 70%),
+    linear-gradient(170deg,rgba(31,65,68,.58),rgba(9,20,28,.8));
+  box-shadow:inset 0 1px rgba(255,246,209,.16),0 0 24px rgba(88,204,184,.1)}
+.wg-locus[aria-current="page"]::after{content:"";position:absolute;bottom:3px;width:15px;height:2px;
+  border-radius:99px;background:var(--fae-amber)}
+.wg-helm-feather{min-height:44px;border-color:rgba(225,189,155,.38);color:#f2d8c7}
+.wg-helm-feather[data-held="true"]{background:#39201c;border-color:#f1b7a0;color:#fff5ec}
+.wg-shell-nav:not([hidden]){background:linear-gradient(155deg,rgba(12,29,34,.98),rgba(4,12,21,.99) 65%);
+  border-color:var(--fae-etch)}
+.wg-deck-group-head{border-bottom:1px solid rgba(175,219,201,.12);padding-bottom:7px}
+.wg-deck-group-head strong{color:var(--fae-amber)}
+.wg-shell-nav .wg-deck-destination{min-height:46px}
+.wg-surface>.glass-panel,.wc-deck,.wc-controls{border-color:var(--fae-etch)}
+.wg-surface h1{color:#f7f5e9;text-wrap:balance}
+.wg-surface h2{color:#ecf3e9}
+.wg-surface .eyebrow{color:#b2e2d3}
+.wg-surface .lede{color:#c6d8d1}
+.wg-surface :is(button,input,select,textarea,summary):focus-visible,
+.wg-helm :is(button,input):focus-visible,
+.wg-shell-nav :is(button,input):focus-visible{
+  outline:3px solid var(--fae-focus);outline-offset:3px}
+.wg-surface button:disabled{opacity:.57;cursor:not-allowed;filter:saturate(.7)}
+.wg-surface :is(button,.glass-panel){-webkit-tap-highlight-color:rgba(171,222,203,.14)}
+.wc-stage{border-color:rgba(220,199,157,.6)}
+.wc-deck,.wc-controls{background:linear-gradient(145deg,rgba(17,41,44,.93),rgba(6,17,26,.95))}
+.wc-modes .wc-mode[aria-pressed="true"]{border-color:var(--fae-amber);color:#fff2d4}
+.wg-mythience-worlds{border:1px solid var(--fae-etch);
+  background:radial-gradient(ellipse at 50% 50%,rgba(66,123,119,.25),transparent 63%),#08131e}
+.wg-mythience-cosmos{filter:drop-shadow(0 0 15px rgba(127,214,195,.11))}
+.wg-mythience-console fieldset{border-color:var(--fae-etch)}
+.wg-mythience-fields input[type=range]{accent-color:var(--fae-moss)}
+@media(min-width:1320px){
+ .wg-helm{width:min(1660px,calc(100% - 36px))}
+ html[data-wayglass-surface="wayglass:living-watercolor"] #app{width:min(1600px,calc(100% - 36px))}
+}
+@media(max-width:1180px){
+ .wg-helm{flex-wrap:wrap;row-gap:7px}
+ .wg-helm-loci{order:3;width:100%;justify-content:space-between;
+   padding-top:5px;border-top:1px solid rgba(173,226,215,.12)}
+ .wg-locus{flex:1 1 0}
+}
+@media(max-width:640px){
+ .wg-helm{margin-top:4px;width:calc(100% - 16px);padding:7px 8px;gap:7px}
+ .wg-helm-readout{flex:1 1 30%}
+ .wg-helm-loci{gap:2px}
+ .wg-locus{min-width:0;min-height:46px;padding:6px 3px;font-size:.61rem}
+ .wg-locus .wg-locus-glyph{font-size:.94rem}
+ .wg-helm-feather{min-width:44px;padding:8px;font-size:.65rem}
+ .wg-helm-nav{min-width:44px;padding:8px;font-size:.65rem}
+ .wg-shell-nav:not([hidden]){top:calc(122px + env(safe-area-inset-top,0px));
+   max-height:calc(100dvh - 140px)}
+ html{scroll-padding-top:155px}
+}
+@media(max-width:390px){
+ .wg-helm-loci{order:3}
+ .wg-locus{font-size:.55rem}
+ .wg-helm-feather{font-size:.6rem}
+}
+@media(prefers-reduced-motion:reduce){
+ .wg-helm-loci *,.wg-helm::after,.wg-mythience-cosmos{animation:none!important;transition:none!important}
+}
+@media(prefers-reduced-transparency:reduce){
+ .wg-helm,.wg-shell-nav:not([hidden]),.wc-deck,.wc-controls{backdrop-filter:none;-webkit-backdrop-filter:none;
+   background:#0b1a20}
+}
+@media(forced-colors:active){
+ .wg-locus[aria-current="page"],.wg-helm-feather[data-held="true"]{border:2px solid Highlight}
+ .wg-locus .wg-locus-glyph{color:ButtonText}
+}

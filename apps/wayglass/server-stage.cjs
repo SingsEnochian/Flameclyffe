@@ -41,9 +41,21 @@ async function copyTree(from, to) {
   // WTL preview has local CommonJS dependencies; package the reviewed runtime exactly.
   const wtlDir = path.join(runtime,'wyrdrune');
   await fsp.mkdir(wtlDir,{recursive:true});
-  for(const file of ['canonical.cjs','enochian.cjs','wyrdrune.cjs','ritual-ledger.cjs','runtime.mjs','story-soundscape.wtl','full-spectrum.wtl','resonance-atlas.wtl','living-learning.wtl','with-001.wtl','with-002-amber.wtl','with-003-refrain.wtl','with-004-enochian-369.wtl']){
+  for(const file of ['canonical.cjs','enochian.cjs','wyrdrune.cjs','ritual-ledger.cjs','runtime.mjs','story-soundscape.wtl','full-spectrum.wtl','resonance-atlas.wtl','living-learning.wtl','with-001.wtl','with-002-amber.wtl','with-003-refrain.wtl','with-004-enochian-369.wtl','mythience-crossing.wtl','mythience-hybrid.wtl','coevolution-repair.wtl','coevolution-expand.wtl']){
     await fsp.copyFile(path.join(repoRoot,'lib','wyrdrune',file),path.join(wtlDir,file));
   }
+
+  // Wyrdrune tensor IR, CPU reference, assurance and divination are host-side
+  // numerical instruments for the integrated voyage. Never copy tests or execute
+  // GPU code merely because a host was staged.
+  for (const file of await fsp.readdir(path.join(repoRoot, 'lib', 'wyrdrune'))) {
+    if ((file.startsWith('tensor-') && file.endsWith('.cjs') && !file.includes('.test.'))
+        || file === 'kernel-divination.cjs') {
+      await fsp.copyFile(path.join(repoRoot, 'lib', 'wyrdrune', file), path.join(wtlDir, file));
+    }
+  }
+  await fsp.copyFile(path.join(repoRoot, 'lib', 'wyrdrune', 'tensor-engine.wtl'),
+    path.join(wtlDir, 'tensor-engine.wtl'));
 
   await fsp.rm(destination, { recursive: true, force: true });
   await copyTree(source, destination);
