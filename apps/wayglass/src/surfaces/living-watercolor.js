@@ -104,7 +104,7 @@ export async function mountLivingWatercolorSurface(root) {
           '<input id="wc-pressure" type="range" min="10" max="100" value="70">',
           '<label for="wc-brush-size">Brush width <output id="wc-brush-size-label">52%</output></label>',
           '<input id="wc-brush-size" type="range" min="10" max="100" value="52">',
-          '<div class="wc-tool-buttons"><button id="wc-paper" type="button" class="glass-chip" aria-pressed="false">Dark paper</button><button id="wc-clear-paint" type="button" class="glass-chip">Clear painting</button></div>',
+          '<div class="wc-tool-buttons"><button id="wc-paper" type="button" class="glass-chip" aria-pressed="true">Light paper</button><button id="wc-clear-paint" type="button" class="glass-chip">Clear painting</button></div>',
           '<div class="wc-tool-buttons">',
             '<button id="wc-flow" class="glass-chip active" type="button" aria-pressed="true">Fluid on</button>',
             '<button id="wc-clear-note" class="glass-chip" type="button">New suggestion</button>',
@@ -148,7 +148,7 @@ export async function mountLivingWatercolorSurface(root) {
   const touchModeButtons=[...root.querySelectorAll('[data-wc-touch-mode]')];
   let touchMode='repair',touchAbort=null,touchEpoch=0;
   const pigmentButtons=[...root.querySelectorAll('[data-wc-pigment]')];
-  let paperIsDark=false,keyboardCursor={x:.5,y:.5};
+  let paperIsDark=true,keyboardCursor={x:.5,y:.5};
   const title=q('wc-title'),intent=q('wc-intent'),voice=q('wc-voice'),feedback=q('wc-feedback');
   const route=q('wc-route'),routeState=q('wc-route-state'),invite=q('wc-invite');
   const houseSignIn=q('wc-house-signin');
@@ -684,6 +684,9 @@ export async function mountLivingWatercolorSurface(root) {
     synchronizeJourneyFeather(event.detail);
     if(event.detail.stopped){
       featherStopped=true;paused=true;pointerId=null;lastPointer=null;requestEpoch++;busy=false;
+      touchEpoch++;touchAbort?.abort();touchAbort=null;touchOrb.disabled=true;
+      root.querySelector('.wc-faepunk-touch').dataset.running='false';
+      touchStatus.textContent='Feather held. The touch engine is paused.';
     }else if(event.detail.confirmed===true){
       featherStopped=false;
       touchOrb.disabled=false;
