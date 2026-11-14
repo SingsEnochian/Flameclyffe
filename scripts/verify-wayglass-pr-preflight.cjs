@@ -17,6 +17,21 @@ function verify({changed,headRef,root=process.cwd()}){
     const plan=JSON.parse(fs.readFileSync(filename,'utf8'));
     errors.push(...validate(plan,root));
     if(plan.head_ref!==headRef)errors.push('head_ref must match PR head branch');
+    // FAEberpunk is a shipwide patrol obligation, including backend-only changes.
+    // Claims are evidence-labelled; CI cannot impersonate browser or model runs.
+    const fae=plan.faeberpunk;
+    if(!fae || typeof fae!=='object')errors.push('faeberpunk: shipwide acceptance matrix required');
+    else {
+      for(const field of ['materials_interactions','watercolour_entry','eightfold_mobius','harmony_chaos','codex_rich_text','real_route_presence','sensory_accessibility','feather_return','before_after','browser_ipad','accessibility','ci','blocked']){
+        const item=fae[field];
+        if(!item || !['changed','unchanged','blocked','not_applicable'].includes(item.status) || typeof item.evidence!=='string' || item.evidence.trim().length<20)
+          errors.push('faeberpunk.'+field+': status and substantive evidence required');
+      }
+      if(fae.browser_ipad?.status==='changed' && !fae.browser_ipad?.receipt)
+        errors.push('faeberpunk.browser_ipad: verified change requires browser receipt');
+      if(fae.before_after?.status==='changed' && !fae.before_after?.receipt)
+        errors.push('faeberpunk.before_after: visible change requires before/after receipt');
+    }
     if(!Array.isArray(plan.changed_systems)||!relevantChanges.every(file=>plan.changed_systems.some(prefix=>typeof prefix==='string'&&file.startsWith(prefix))))errors.push('changed_systems must cover every changed Wayglass file');
   }catch(e){errors.push('Cannot parse PR preflight: '+e.message);}
   return errors;
