@@ -6,7 +6,7 @@ const validId=(value,name)=>{if(typeof value!=='string'||!ID.test(value))throw n
 const safeAsset=a=>{
  if(!a||typeof a!=='object')throw new TypeError('asset required');
  const kind=validId(a.kind,'kind');
- if(!['video','audio','spatial','image','telemetry'].includes(kind))throw new TypeError('unsupported asset kind');
+ if(!['video','audio','transcription','spatial','image','telemetry'].includes(kind))throw new TypeError('unsupported asset kind');
  const sha256=typeof a.sha256==='string'&&/^[a-f0-9]{64}$/i.test(a.sha256)?a.sha256.toLowerCase():null;
  if(!sha256)throw new TypeError('content hash required');
  return Object.freeze({asset_id:validId(a.asset_id,'asset_id'),kind,sha256,bytes:Number.isSafeInteger(a.bytes)&&a.bytes>=0?a.bytes:null});
