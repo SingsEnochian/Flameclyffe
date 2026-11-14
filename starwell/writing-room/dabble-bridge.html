@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Writing Room · Dabble Bridge</title>
+<style>
+:root{color-scheme:dark;font:16px/1.55 system-ui;background:#091419;color:#edf3ed}
+body{max-width:940px;margin:auto;padding:1.5rem} h1,h2{font-family:Georgia,serif;color:#e9c785}
+.panel{border:1px solid #43605c;border-radius:18px;padding:1.2rem;margin:1rem 0;background:#14242a}
+button,a.button{display:inline-block;margin:.3rem;padding:.55rem .8rem;background:#214b42;color:#fff;border:1px solid #76bca3;border-radius:10px;cursor:pointer}
+button:disabled{opacity:.45;cursor:default}a{color:#9ce6c8}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:26rem;overflow:auto;background:#071113;padding:1rem;border-radius:12px;text-align:left}
+small{color:#b5c9c1}li{margin:.3rem 0}input{max-width:100%}
+:focus-visible{outline:3px solid #e9c785;outline-offset:3px}button:hover,a.button:hover{background:#326e5d}button:disabled{cursor:not-allowed}
+.steps{display:flex;gap:.6rem;flex-wrap:wrap;padding:0;list-style:none}.steps a{display:inline-block;padding:.45rem .7rem;border:1px solid #43605c;border-radius:999px;text-decoration:none}.steps a:hover{border-color:#e9c785}
+#details{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.88rem}#preview{tab-size:2}#file{display:block;margin:.7rem 0;padding:.7rem;border:1px dashed #76bca3;border-radius:12px;width:100%}@media(max-width:600px){body{padding:.8rem}.panel{padding:.85rem}button,a.button{margin:.2rem 0;width:100%;text-align:center}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style></head><body>
+<p><a href="./">← Writing Room</a></p>
+<h1>Dabble · Manuscript Bridge</h1>
+<nav aria-label="Import steps"><ol class="steps"><li><a href="#sign-in">1 · Sign in</a></li><li><a href="#choose">2 · Import</a></li><li><a href="#source">3 · Verify</a></li><li><a href="#read">4 · Read</a></li></ol></nav>
+<p>A user-invoked, read-only doorway for Dabble Markdown exports. Nothing is uploaded, sent to an AI model, or written back to Dabble by this page.</p>
+<section class="panel" id="sign-in"><h2>1. Sign in to Dabble</h2><p><a class="button" href="https://accounts.dabblewriter.com/auth/login" target="_blank" rel="noopener noreferrer">Open official Dabble sign-in ↗</a></p><p>After signing in, open your book, chapter, or scene, choose <strong>Export to… → Markdown</strong>, then return to this tab. Your Dabble sign-in remains with Dabble; it does not grant this bridge account access.</p></section>
+<section class="panel" id="choose"><h2>2. Choose a manuscript export</h2>
+<p>Export your manuscript or chapter as Markdown from Dabble, then select the file here. Maximum 2 MB.</p>
+<label for="file">Local manuscript export</label> <input id="file" type="file" accept=".md,.markdown,.txt,text/markdown,text/plain">
+<p role="status" id="status" aria-live="polite">No manuscript loaded.</p>
+</section>
+<section class="panel" id="source"><h2>3. Source receipt</h2><div id="details">Waiting for an authorised file selection.</div>
+<button id="clear" disabled>Clear loaded manuscript</button><button id="copyHash" disabled>Copy SHA-256</button><button id="receipt" disabled>Download provenance receipt</button><button id="original" disabled>Download unchanged Markdown</button><button id="pin" disabled>Keep read-only copy in Writing Room</button><p id="shelfStatus" role="status" aria-live="polite">Not saved to the Writing Room. Storage requires your explicit action.</p><p><a href="./#dabble-shelf">Open the Writing Room manuscript shelf</a></p>
+</section>
+<section class="panel" id="read"><h2>4. Read without rewriting</h2><p><small>Headings are indexed, not used to change the original file. Content below is displayed as text, never executed as HTML.</small></p><ol id="sections"></ol><pre id="preview">No text loaded.</pre></section>
+<p><small>Prototype boundary: the chosen file stays in this browser unless you explicitly keep it in this browser’s IndexedDB manuscript shelf. Model access, server sync, live Dabble API access, and write-back are not implemented or claimed.</small></p>
+<script type="module">
+import { importMarkdown } from './dabble-import.mjs';
+import { keepManuscript } from './dabble-shelf.mjs';
+const $ = id => document.getElementById(id);
+let record = null;
+function clearView(message='No manuscript loaded.') {
+  record=null; $('receipt').disabled=$('original').disabled=$('pin').disabled=$('copyHash').disabled=$('clear').disabled=true;
+  $('shelfStatus').textContent='Not saved to the Writing Room. Storage requires your explicit action.';
+  $('preview').textContent='No text loaded.'; $('sections').replaceChildren(); $('details').textContent='Waiting for an authorised file selection.';
+  $('status').textContent=message;
+}
+$('clear').addEventListener('click',()=>{ $('file').value=''; clearView('Loaded manuscript cleared from this page. Previously saved shelf copies are unchanged.'); });
+$('copyHash').addEventListener('click',async()=>{if(!record)return;try{await navigator.clipboard.writeText(record.sha256);$('status').textContent='SHA-256 copied. Original manuscript remains unchanged.';}catch{$('status').textContent='Clipboard unavailable. The full SHA-256 remains in the source receipt.';}});
+function download(name, text, type) {
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  const a = document.createElement('a'); a.href = url; a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+}
+$('file').addEventListener('change', async event => {
+  clearView();
+  const file = event.target.files?.[0]; if (!file) { $('status').textContent = 'No manuscript loaded.'; return; }
+  try {
+    $('status').textContent = 'Reading selected file locally…';
+    if (file.size > 2_000_000) throw new Error('File exceeds 2 MB');
+    record = await importMarkdown({name:file.name,text:await file.text()});
+    const { content, sections, ...metadata } = record;
+    $('details').textContent = JSON.stringify(metadata,null,2);
+    $('preview').textContent = content;
+    for (const section of sections) { const li=document.createElement('li'); li.textContent = section.title + ' · line ' + section.line; $('sections').append(li); }
+    $('status').textContent = 'Loaded locally. SHA-256 '+record.sha256.slice(0,16)+'…; '+sections.length+' indexed headings.';
+    $('receipt').disabled = $('original').disabled = $('pin').disabled = $('copyHash').disabled = $('clear').disabled = false;
+  } catch (error) { clearView('Import blocked: '+error.message); }
+});
+$('pin').addEventListener('click', async () => {
+  if (!record) return;
+  try { $('pin').disabled = true; await keepManuscript(record); $('shelfStatus').textContent = 'Saved in this browser only. Open the manuscript shelf to read it. No model or external server has been contacted.'; }
+  catch(error) { $('shelfStatus').textContent = 'Could not keep a local copy: '+error.message; }
+  finally { $('pin').disabled = !record; }
+});
+$('receipt').addEventListener('click', () => { if (!record) return; const {content,...receipt}=record; download(record.filename+'.receipt.json',JSON.stringify(receipt,null,2),'application/json'); });
+$('original').addEventListener('click', () => { if (record) download(record.filename,record.content,'text/markdown'); });
+</script></body></html>
