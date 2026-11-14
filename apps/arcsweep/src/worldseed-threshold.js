@@ -32,6 +32,23 @@ export function detectWorldseedThreshold({ world, seed, cycle = null, observedAt
   const foldActive = Boolean(fold.active);
   const foldIndex = finite(jacobian.fold_index ?? fold.index);
   const replayMatched = cycle?.replay_receipt?.matched;
+  // Passive projection only. The browser must never invent or approve Fold Witness evidence.
+  const witness = cycle?.fold_witness || null;
+  const foldWitnessDiagnostic = witness?.schema === 'wayglass.fold-witness/v0.1'
+    && witness.world_id === world.id
+    && witness.model_kind === 'narrative-projection' || witness?.schema === 'wayglass.fold-witness/v0.1'
+    && witness.world_id === world.id
+    && witness.model_kind === 'toy-jacobian'
+    ? {
+      witnessId: witness.witness_id ?? null,
+      modelKind: witness.model_kind,
+      sourceCount: witness.analysis?.source_count ?? null,
+      observedOutputCount: witness.analysis?.output_count ?? null,
+      ambiguousOutputCount: witness.analysis?.ambiguous_output_count ?? null,
+      status: 'pending-independent-inspection',
+      grantsAuthority: false,
+    }
+    : null;
   const beforeSequence = cycle?.premaqc_before?.sequence ?? null;
   const afterSequence = cycle?.premaqc_after?.sequence ?? null;
   const thresholdRules = (seed.sections?.thresholds || []).map((record) => ({
@@ -67,6 +84,7 @@ export function detectWorldseedThreshold({ world, seed, cycle = null, observedAt
       afterSequence,
     },
     thresholdRules,
+    foldWitnessDiagnostic,
     branchDraft: branchCandidate ? {
       mode: 'experimental',
       childName: `${world.name || world.id} · Threshold Branch`,
