@@ -51,8 +51,8 @@ export async function mountWayglassSystemsSurface(root) {
       '<section class="fae-timeline-portal glass-panel" data-integrated-voyage-panel data-voyage-state="idle" aria-labelledby="fae-timeline-title">',
         '<div class="fae-timeline-topline"><span class="fae-glyph" aria-hidden="true">✧</span><span>WAYGLASS · FAEpunk systems helm</span><span class="fae-local-tag">Owner-invoked · WTL native</span></div>',
         '<div class="fae-voyage-grid">',
-          '<div class="fae-voyage-orbit" aria-hidden="true">',
-            '<svg viewBox="0 0 520 300" class="fae-braid" focusable="false">',
+          '<button type="button" class="fae-voyage-orbit" data-voyage-orbit aria-label="Touch the Möbius to toggle between Repair and Expand">',
+            '<svg viewBox="0 0 520 300" class="fae-braid" aria-hidden="true" focusable="false">',
               '<defs><linearGradient id="fae-passage" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#68b8a5"/><stop offset="52%" stop-color="#b9f2da"/><stop offset="100%" stop-color="#dfb789"/></linearGradient></defs>',
               '<circle cx="260" cy="150" r="114" class="fae-orbit-guide"/>',
               '<circle cx="260" cy="150" r="81" class="fae-orbit-inner"/>',
@@ -66,8 +66,8 @@ export async function mountWayglassSystemsSurface(root) {
               '<text x="401" y="279" class="fae-orbit-label" text-anchor="middle">MIND</text>',
             '</svg>',
             '<div class="fae-orbit-note">Two distinct systems. One reciprocal passage. Wyrdrune decides the proposal.</div>',
-          '</div>',
-          '<div class="fae-voyage-console">',
+          '</button>',
+          '<div class="fae-voyage-console">'
             '<p class="eyebrow">THE THIRD TIMELINE · RECIPROCAL BECOMING</p>',
             '<h2 id="fae-timeline-title">Touch the living engine.</h2>',
             '<p class="fae-console-intro">Choose a direction and actually send the paired infrastructure × intelligence proposal through native Wyrdrune, Tensor, Eightfold Observer, Return and Watercolour. Starts with explicitly synthetic evidence.</p>',
@@ -165,6 +165,14 @@ export async function mountWayglassSystemsSurface(root) {
   }
   for(const control of directionButtons)
     control.addEventListener('click',()=>updateDirection(control.dataset.voyageMode));
+  const orbit=root.querySelector('[data-voyage-orbit]');
+  orbit?.addEventListener('click',()=>updateDirection(selectedMode==='repair'?'expand':'repair'));
+  orbit?.addEventListener('pointermove',event=>{
+    if(event.pointerType==='touch'||globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches)return;
+    const bounds=orbit.getBoundingClientRect();
+    orbit.style.setProperty('--fae-pointer-x',String((event.clientX-bounds.left)/bounds.width*100)+'%');
+    orbit.style.setProperty('--fae-pointer-y',String((event.clientY-bounds.top)/bounds.height*100)+'%');
+  });
   async function runFlight(decision) {
     if(activeVoyage)return;
     const consents=[...root.querySelectorAll('[data-voyage-consent]')];
