@@ -1,0 +1,355 @@
+/* Wayglass FAEberpunk / material architecture III.
+   This intentionally changes the COMPOSITION, not just its colours.
+   Four authored, local procedural SVG material assets ship with the build.
+   The painting remains a real interactive canvas; the mineral layers are
+   decorative, click-through and NOT evidence of cognition or telemetry. */
+:root{
+  --material-deep-void:#020b11;
+  --material-opal-glass:#92efdc;
+  --material-copper-edge:#ddb57e;
+  --material-labradorite:#20798a;
+  --material-glint:#edf9e9;
+  --material-shadow:0 26px 90px rgba(0,5,11,.64);
+}
+html[data-wayglass-surface="wayglass:living-watercolor"] body{
+  background:
+    radial-gradient(ellipse at 58% 23%,rgba(29,91,106,.18),transparent 58%),
+    radial-gradient(ellipse at 11% 68%,rgba(72,54,91,.22),transparent 54%),
+    #020b11;
+}
+html[data-wayglass-surface="wayglass:living-watercolor"] #app{
+  width:min(1900px,calc(100% - 20px));
+  padding-top:3px;
+}
+.wc-surface{isolation:isolate}
+/* Desktop: an inhabitable membrane; all other workstations dock above it.
+   No persistent header row and no permanently displacing right-hand column. */
+@media(min-width:1110px){
+  .wc-surface{position:relative;display:block;min-height:max(760px,calc(100dvh - 28px));}
+  .wc-surface .wc-composition{
+    display:block;position:relative;width:100%;
+    min-height:max(760px,calc(100dvh - 28px));
+  }
+  .wc-surface .wc-stage{
+    width:100%;height:max(760px,calc(100dvh - 28px));
+    min-height:760px;max-height:none;
+    border-radius:clamp(28px,3vw,48px);
+  }
+  .wc-surface .wc-head{
+    position:absolute;z-index:8;
+    left:clamp(46px,6vw,100px);top:clamp(50px,7vh,104px);
+    width:min(560px,40%);display:grid;grid-template-columns:1fr;
+    align-content:start;gap:8px;padding:0;
+    border:0;border-radius:0;background:none;
+    box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;
+    pointer-events:none;
+  }
+  .wc-surface .wc-head :is(button,a,select){pointer-events:auto}
+  .wc-surface .wc-head h1{
+    font-size:clamp(3.8rem,6vw,7.4rem);
+    max-width:9ch;letter-spacing:-.075em;line-height:.82;
+    color:#f5f3dc;text-shadow:0 3px 5px #00121c,0 15px 36px #00121c,
+      0 0 65px rgba(153,233,190,.44);
+  }
+  .wc-surface .wc-head .eyebrow{
+    color:#e7d4a8;text-shadow:0 2px 9px #000;
+  }
+  .wc-surface .wc-head .lede{
+    max-width:30ch;font:400 clamp(1rem,1.3vw,1.3rem)/1.4 Georgia,serif;
+    color:#f0f6e8;text-shadow:0 2px 16px #00121c;
+  }
+  .wc-surface .wc-head-signal{
+    display:flex;align-items:center;flex-wrap:wrap;gap:11px;
+    justify-content:start;margin-top:12px;padding:11px 14px;
+    width:max-content;max-width:95%;border-radius:999px;
+    border:1px solid rgba(226,237,195,.48);
+    background:rgba(3,19,30,.76);
+    box-shadow:inset 0 1px rgba(233,252,220,.14),0 13px 33px rgba(0,0,0,.35);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  }
+  .wc-surface .wc-head-signal .tiny{
+    width:100%;font-size:.64rem;
+  }
+  .wc-surface .wc-room-links{
+    display:flex;max-width:450px;flex-wrap:wrap;
+    gap:8px;pointer-events:auto;
+  }
+  .wc-surface .wc-room-links button{
+    min-height:44px;border:1px solid rgba(245,218,159,.52);
+    border-radius:99px;background:rgba(5,22,31,.74);
+    color:#f6edd0;box-shadow:0 8px 22px rgba(0,0,0,.33);
+  }
+  .wc-surface .wc-workbench{
+    position:absolute;z-index:9;
+    top:clamp(30px,5vh,75px);bottom:30px;
+    right:clamp(26px,3.8vw,65px);
+    width:min(410px,31%);
+    display:flex;flex-direction:column;align-items:stretch;gap:12px;
+    padding:0;
+    overflow-y:auto;overflow-x:hidden;
+    scrollbar-color:rgba(178,220,186,.5) transparent;
+    scrollbar-width:thin;
+    mask-image:linear-gradient(to bottom,#000 0%,#000 93%,transparent 100%);
+  }
+  .wc-surface .wc-deck,.wc-surface .wc-controls{
+    position:relative;flex:0 0 auto;
+    border:2px solid rgba(228,201,143,.68);
+    border-radius:25px;
+    background-image:url('./materials/labradorite-sheen.svg'),
+      linear-gradient(138deg,rgba(7,26,32,.95),rgba(2,14,24,.96));
+    background-size:cover,cover;background-position:center;
+    background-blend-mode:soft-light,normal;
+    box-shadow:inset 0 1px rgba(239,255,220,.3),
+      inset 0 -6px 25px rgba(0,0,0,.37),var(--material-shadow),
+      0 0 0 6px rgba(13,40,42,.51);
+    backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  }
+  .wc-surface .wc-deck::before,.wc-surface .wc-controls::before{
+    content:"";position:absolute;inset:7px;
+    border:1px solid rgba(237,220,172,.3);
+    border-radius:17px;pointer-events:none;
+    box-shadow:inset 0 1px rgba(222,248,217,.13);
+  }
+  .wc-surface .wc-deck{min-height:440px}
+  .wc-surface .wc-controls{padding:24px}
+  .wc-surface .wc-faepunk-touch{
+    position:absolute;z-index:10;right:auto;
+    left:clamp(30%,35%,45%);bottom:clamp(40px,6vh,90px);
+    transform:translateX(-50%);
+    width:min(425px,34vw);min-height:200px;
+    background-image:url('./materials/copper-etching.svg'),
+      linear-gradient(155deg,rgba(4,26,33,.91),rgba(3,15,23,.97));
+    background-size:cover,cover;background-blend-mode:soft-light,normal;
+    box-shadow:inset 0 1px rgba(250,232,187,.25),
+      inset 0 -14px 35px rgba(0,9,14,.48),0 25px 70px rgba(0,0,0,.59),
+      0 0 55px rgba(94,204,193,.2);
+  }
+  .wc-surface .wc-paint-help{
+    position:absolute;top:24px;bottom:auto;left:48%;max-width:235px;
+    background:rgba(5,23,29,.73);color:#f1eecf;
+    border:1px solid rgba(237,212,161,.43);
+    text-shadow:0 2px 12px #000;
+  }
+  .wc-surface .wc-stage-meta{
+    top:auto;bottom:32px;left:34px;color:#f0d5a6;
+    text-shadow:0 2px 11px #000;
+  }
+  /* The old horizontal navigation bar is now part of the helm, not a
+     screen-width panel midway down the painting. */
+  .wg-helm{
+    position:fixed;left:25px;right:auto;top:auto;bottom:17px;
+    width:min(835px,calc(100vw - 50px));margin:0;
+    z-index:90;border:2px solid rgba(220,191,132,.49);
+    border-radius:22px;background-image:url('./materials/copper-etching.svg'),
+      linear-gradient(120deg,rgba(4,23,28,.95),rgba(6,20,28,.97));
+    background-size:cover;background-blend-mode:soft-light,normal;
+    box-shadow:inset 0 1px rgba(248,239,207,.25),0 21px 47px rgba(0,0,0,.62);
+  }
+}
+/* The membrane is a composited material ABOVE the opaque painting backing.
+   This is what was missing in v2: old materials were hidden under the canvas. */
+.wc-surface .wc-stage{
+  position:relative;isolation:isolate;
+  background:#071921;
+  border:7px solid transparent;
+  background-image:linear-gradient(#071921,#071921),
+     linear-gradient(136deg,#f2dab0 0%,#1f5757 18%,#c0f4dd 37%,
+       #72577c 55%,#e9b16d 78%,#224e5b 100%);
+  background-origin:padding-box,border-box;
+  background-clip:padding-box,border-box;
+  box-shadow:0 38px 100px rgba(0,0,0,.68),
+    inset 0 0 0 3px rgba(250,220,170,.17),
+    inset 0 0 65px rgba(97,170,158,.14),
+    0 0 55px rgba(70,177,165,.16);
+}
+.wc-surface .wc-fluid{
+  z-index:0;filter:contrast(1.09) saturate(1.34);
+}
+.wc-surface .wc-stage::before{
+  content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  opacity:.74;
+  background-image:url('./materials/opal-membrane.svg');
+  background-size:cover;background-position:center center;
+  mix-blend-mode:screen;
+}
+.wc-surface .wc-stage::after{
+  content:"";position:absolute;inset:11px;z-index:2;pointer-events:none;
+  border-radius:inherit;
+  border:2px solid rgba(224,245,206,.28);
+  box-shadow:inset 0 0 0 1px rgba(1,15,25,.67),
+    0 0 24px rgba(160,230,217,.17);
+  background:radial-gradient(ellipse at 53% 7%,rgba(255,251,217,.13),transparent 49%);
+}
+.wc-surface .wc-stage :is(button,textarea,select){z-index:5}
+.wc-surface .wc-stage .wc-faepunk-touch{
+  border-color:#e1b986;
+  outline:1px solid rgba(213,248,220,.2);outline-offset:6px;
+}
+.wc-surface .wc-faepunk-orb{
+  background-image:url('./materials/opal-membrane.svg'),
+    radial-gradient(circle at 40% 28%,#b9ffdc,#2f9191 45%,#101d30 78%);
+  background-size:cover,cover;background-blend-mode:screen,normal;
+  border:3px solid #f7d8a4;
+  box-shadow:0 0 0 6px rgba(201,171,112,.19),
+    inset -15px -18px 23px rgba(4,18,28,.75),
+    inset 7px 9px 15px rgba(233,255,226,.49),
+    0 0 34px rgba(124,244,201,.39);
+}
+.wc-surface .wc-faepunk-orb-halo{color:#fff1c5;text-shadow:0 1px 9px #00131d}
+/* Real mineral faces, not a single radial gradient over every card. */
+.wg-codex .wg-codex-head,
+.wg-codex .wg-codex-editor,
+.wg-codex .wg-codex-reading,
+.wg-living-observer .observer-head,
+.wg-living-observer .observer-console,
+.wg-writing-room .wg-surface-head,
+.wg-writing-room .wg-writing-main,
+.wg-writing-room .wg-session-sidebar{
+  position:relative;
+  background-image:url('./materials/labradorite-sheen.svg'),
+    linear-gradient(137deg,#0c2931,#050f19);
+  background-size:cover,cover;
+  background-blend-mode:soft-light,normal;
+  border:2px solid rgba(223,191,133,.54);
+  box-shadow:inset 0 1px rgba(255,241,203,.27),
+    inset 1px 0 rgba(182,235,215,.22),
+    inset 0 -13px 27px rgba(2,6,11,.28),
+    0 25px 55px rgba(0,0,0,.35);
+}
+.wg-codex .wg-codex-editor{
+  border-radius:30px 14px 14px 32px;
+  transform:perspective(1700px) rotateY(1.1deg);
+  transform-origin:right center;
+}
+.wg-codex .wg-codex-reading{
+  border-radius:14px 32px 32px 14px;
+  transform:perspective(1700px) rotateY(-1.1deg);
+  transform-origin:left center;
+}
+.wg-codex .wg-codex-worktable{gap:15px;position:relative}
+.wg-codex .wg-codex-worktable::after{
+  content:"";pointer-events:none;position:absolute;top:16px;bottom:14px;
+  left:calc(51.5% - 7px);width:20px;z-index:4;
+  border-left:2px solid rgba(255,230,177,.38);
+  border-right:1px solid rgba(173,238,208,.37);
+  background-image:url('./materials/copper-etching.svg'),
+    linear-gradient(90deg,#1c2e31,#b68d5b,#1c2c32);
+  background-size:cover;background-blend-mode:soft-light;
+  box-shadow:0 0 18px rgba(0,0,0,.55),inset 0 0 5px #d7b887;
+}
+.wg-codex textarea{
+  background-image:linear-gradient(175deg,rgba(3,18,27,.9),rgba(8,43,44,.78)),
+    url('./materials/labradorite-sheen.svg');
+  background-size:cover;background-blend-mode:normal,screen;
+  border:2px solid rgba(145,224,201,.53);
+  box-shadow:inset 0 0 36px rgba(2,8,16,.6),0 0 22px rgba(111,217,195,.09);
+}
+.wg-codex .wg-codex-sigil::before{
+  background-image:url('./materials/opal-membrane.svg'),
+    radial-gradient(circle at 40% 40%,rgba(174,255,225,.55),rgba(5,26,31,.9));
+  background-size:cover,cover;background-blend-mode:screen,normal;
+  box-shadow:inset 0 0 40px rgba(0,8,25,.68),0 0 30px rgba(98,225,195,.4),
+    0 0 0 12px rgba(135,211,172,.1);
+}
+.wg-living-observer .observer-stage{
+  background-image:url('./materials/opal-membrane.svg'),
+    radial-gradient(circle at 53% 47%,#205c68,#040e1a 72%);
+  background-size:cover,cover;background-blend-mode:screen,normal;
+  border:7px solid transparent;
+  background-clip:padding-box,border-box;
+  box-shadow:inset 0 0 54px rgba(1,4,12,.89),
+    inset 0 0 0 2px rgba(234,207,147,.3),0 25px 78px rgba(0,0,0,.5);
+}
+.wg-living-observer .observer-console{
+  background-image:url('./materials/copper-etching.svg'),
+    linear-gradient(145deg,rgba(16,51,52,.93),rgba(5,17,27,.96));
+  background-size:cover,cover;background-blend-mode:soft-light,normal;
+}
+.fae-observer-evidence{
+  background-image:url('./materials/copper-etching.svg'),
+    linear-gradient(95deg,rgba(6,24,32,.95),rgba(17,49,51,.91));
+  background-size:cover,cover;background-blend-mode:soft-light,normal;
+  border:2px solid rgba(232,197,136,.64);
+  box-shadow:inset 0 1px rgba(255,247,213,.29),0 13px 35px rgba(0,0,0,.25);
+}
+/* Materially different writing surface: rough hand-laid vellum, not an
+   untextured gradient pretending to be old paper. */
+.fae-manuscript-page{
+  background-image:url('./materials/vellum-fibres.svg')!important;
+  background-size:cover!important;
+  border:3px solid #ceaa72;
+  border-radius:6px 15px 10px 6px;
+  box-shadow:inset 0 0 40px rgba(122,84,42,.19),
+     inset 8px 0 11px rgba(93,66,38,.12),
+     0 14px 0 -6px #b5a684,0 26px 40px rgba(0,0,0,.39);
+  color:#2b403e;
+}
+.fae-manuscript>summary{
+  background-image:url('./materials/copper-etching.svg');
+  background-size:cover;background-blend-mode:soft-light;
+  border-bottom:2px solid rgba(242,217,173,.55);
+}
+.wg-writing-room .wg-writing-main{
+  background-image:url('./materials/labradorite-sheen.svg'),
+    linear-gradient(137deg,#123439,#050e1a);
+  background-size:cover,cover;background-blend-mode:soft-light,normal;
+}
+.wg-writing-room .wg-thread{
+  border:2px solid rgba(200,182,125,.48);
+  border-radius:18px;
+  box-shadow:inset 0 0 25px rgba(0,4,18,.45);
+}
+/* Mobile and portrait layouts remain functional and do not block painting.
+   They still receive all four real materials and substantially different UI. */
+@media(max-width:1109px){
+  .wc-surface .wc-head{
+    position:relative;z-index:3;border:0;box-shadow:none;
+    background-image:url('./materials/labradorite-sheen.svg'),
+      linear-gradient(120deg,rgba(4,19,27,.95),rgba(9,40,40,.96));
+    background-blend-mode:soft-light,normal;
+    border-radius:20px;
+  }
+  .wc-surface .wc-stage{min-height:clamp(490px,66svh,800px)}
+  .wc-surface .wc-workbench{
+    position:static;display:grid;grid-template-columns:minmax(0,1fr);
+    width:100%;overflow:visible;mask-image:none;
+  }
+  .wc-surface .wc-deck,.wc-surface .wc-controls{
+    background-image:url('./materials/labradorite-sheen.svg'),
+      linear-gradient(137deg,rgba(6,28,37,.96),rgba(4,15,23,.97));
+    background-size:cover,cover;background-blend-mode:soft-light,normal;
+    border:2px solid rgba(213,180,120,.55);
+  }
+  .wc-surface .wc-faepunk-touch{
+    background-image:url('./materials/copper-etching.svg'),
+      linear-gradient(155deg,rgba(6,24,32,.94),rgba(3,15,23,.98));
+    background-size:cover,cover;background-blend-mode:soft-light,normal;
+  }
+  .wg-codex .wg-codex-worktable::after{display:none}
+  .wg-codex .wg-codex-editor,.wg-codex .wg-codex-reading{transform:none;border-radius:24px}
+}
+@media(max-width:650px){
+  .wc-surface .wc-stage{min-height:clamp(480px,68svh,690px)}
+  .wc-surface .wc-stage::before{opacity:.56}
+  .wc-surface .wc-stage::after{inset:5px;border-width:1px}
+  .wc-surface .wc-head h1{font-size:clamp(2.5rem,12vw,4.3rem)}
+  .wc-surface .wc-faepunk-touch{bottom:10px}
+  .wc-surface .wc-paint-help{top:61px}
+  .wg-codex .wg-codex-head{min-height:0}
+}
+/* Respect sensory needs: materials remain visible with no shimmer motion. */
+@media(prefers-reduced-motion:reduce){
+  .wg-codex .wg-codex-editor,.wg-codex .wg-codex-reading{transform:none!important}
+  .wc-surface .wc-faepunk-orb{animation:none!important}
+}
+@media(prefers-reduced-transparency:reduce){
+  .wc-surface .wc-head-signal,.wc-surface .wc-deck,.wc-surface .wc-controls,
+  .wg-codex .wg-codex-editor,.wg-codex .wg-codex-reading{
+    backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+  }
+}
+@media(forced-colors:active){
+  .wc-surface .wc-stage,.fae-manuscript-page,
+  .wg-codex .wg-codex-editor,.wg-codex .wg-codex-reading{border:2px solid CanvasText}
+  .wc-surface .wc-stage::before{display:none}
+}
