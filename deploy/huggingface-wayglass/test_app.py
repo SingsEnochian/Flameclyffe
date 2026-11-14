@@ -16,7 +16,7 @@ class SpaceContractTests(unittest.TestCase):
         self.assertIn('parsed.path.endswith("/respond")', source)
     def test_actual_response_contract(self):
         source = APP.read_text(encoding="utf-8")
-        self.assertIn('data.get("output", "No reply")', source)
+        self.assertIn('data.get("output")', source)
         self.assertIn('data["receipt"]["observation_id"]', source)
         self.assertNotIn('data["receipt_id"]', source)
     def test_transport_rejects_redirects_and_invalid_receipts(self):
