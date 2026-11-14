@@ -49,3 +49,25 @@ test('secondary pointers cannot shift the membrane',()=>{
   assert.deepEqual(shifts,[.5]);
   scene.destroy();
 });
+
+test('active drag ignores foreign pointers and stops after lost capture',()=>{
+  const listeners=new Map(),shifts=[];
+  const canvas={dataset:{},getContext:()=>null,
+    addEventListener:(name,fn)=>listeners.set(name,fn),
+    removeEventListener:(name)=>listeners.delete(name),
+    getBoundingClientRect:()=>({left:0,width:200}),
+    setPointerCapture(){},hasPointerCapture:()=>false};
+  const scene=mountMythienceMembraneScene(canvas,{onShift:value=>shifts.push(value),reducedMotion:true});
+  const emit=(name,pointerId,clientX)=>listeners.get(name)({pointerId,clientX,isPrimary:true,button:0});
+  emit('pointerdown',11,20);
+  emit('pointermove',22,180);
+  assert.deepEqual(shifts,[.1],'foreign pointer must not change active drag');
+  emit('pointerup',22,180);
+  emit('pointermove',11,80);
+  assert.deepEqual(shifts,[.1,.4],'foreign pointerup must not cancel owner drag');
+  emit('lostpointercapture',11,80);
+  emit('pointermove',11,160);
+  assert.deepEqual(shifts,[.1,.4],'lost capture must terminate drag');
+  scene.destroy();
+  assert.equal(listeners.size,0);
+});
