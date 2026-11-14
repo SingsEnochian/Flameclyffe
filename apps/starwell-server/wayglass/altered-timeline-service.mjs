@@ -56,7 +56,7 @@ export async function validateAlteredTimelineCheckpoint(data){
   const originals=new Map();
   for(const event of original.events){
     if(!text(event?.id,120)||!text(event?.title,1600)||
-       !text(event?.at,10)||!/^\\d{4}-\\d{2}-\\d{2}$/.test(event.at)||
+       !text(event?.at,10)||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(event.at)||
        Number.isNaN(Date.parse(event.at))||
        new Date(event.at).toISOString().slice(0,10)!==event.at||
        !Array.isArray(event.source_refs)||!event.source_refs.length||
