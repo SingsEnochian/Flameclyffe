@@ -3,13 +3,9 @@
 // Only user actions change stations, start audio, or enter a real ship surface.
 // The browser renders acoustics; Wyrdrune supplies frequencies and topology.
 import {wayglassSomaticSound} from './somatic-sound.js';
+import {LIFT_ROOMS,liftStep,liftSelection} from './triptych-lift-state.mjs';
 import './triptych-lift-journey.css';
 
-export const LIFT_ROOMS=Object.freeze([
-  'wayglass:living-watercolor',
-  'wayglass:journey-before-destination',
-  'wayglass:living-observer',
-]);
 const DESCRIPTIONS=Object.freeze([
   'A vast mineral shaft wakes beneath your feet. Down is a promise, not a prison.',
   'The chamber turns along a curved ribbon. The horizon moves; your place remains yours.',
@@ -17,18 +13,6 @@ const DESCRIPTIONS=Object.freeze([
 ]);
 const ORIENTATIONS=Object.freeze(['Vertical ascent','Reciprocal turn','Reframed arrival']);
 const clampIndex=value=>Math.max(0,Math.min(2,value));
-
-export function liftStep(current,direction){
-  if(!Number.isInteger(current)||current<0||current>2)throw new RangeError('Unknown chamber index');
-  if(!Number.isInteger(direction)||Math.abs(direction)>2)throw new RangeError('Invalid lift direction');
-  return clampIndex(current+direction);
-}
-export function liftSelection(plan,index){
-  const panel=plan?.panels?.[index];
-  if(!panel||panel.destination!==LIFT_ROOMS[index])
-    throw new TypeError('Lift route is not a declared, allowlisted ship destination.');
-  return panel;
-}
 
 function makeScene(){
   return [
