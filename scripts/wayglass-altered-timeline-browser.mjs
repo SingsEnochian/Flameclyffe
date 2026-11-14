@@ -49,7 +49,7 @@ async function verify(page,profile){
  assert.match(await original.innerText(),/fictional council debates/);
  assert.match(await altered.innerText(),/unwritten/);
  await page.screenshot({path:resolve(out,profile+'-original.png'),fullPage:true});
- await page.locator('[data-alt-strength]').fill('80');
+ await page.locator('[data-alt-strength]').evaluate(el=>{el.value='80';el.dispatchEvent(new Event('input',{bubbles:true}));});
  assert.equal(await page.locator('[data-alt-strength-output]').innerText(),'80%');
  await page.locator('[data-alt-introduce]').click();
  await page.waitForFunction(()=>document.querySelector('[data-surface="altered-timeline"]')?.dataset.alteredState==='branched');
