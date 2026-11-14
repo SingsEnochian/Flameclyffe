@@ -8,17 +8,20 @@ export function mythienceTone({expression=0,permeability=0}={}){
 }
 export function createMythienceSensory({AudioContextCtor=globalThis.AudioContext||globalThis.webkitAudioContext,
   vibrate=globalThis.navigator?.vibrate?.bind(globalThis.navigator)}={}){
-  let context=null,voices=[];
+  let context=null,voices=[],generation=0,destroyed=false;
   function stop(){
+    generation++;
     for(const voice of voices){try{voice.stop()}catch{}try{voice.disconnect()}catch{}}
     voices=[];try{vibrate?.(0)}catch{}
   }
   async function hear(reading){
     if(!AudioContextCtor)return {played:false,reason:'Audio is unavailable on this device'};
-    stop();
+    if(destroyed)return {played:false,reason:'Audio instrument closed'};
+    stop();const ticket=generation;
     try{
       if(!context)context=new AudioContextCtor();
       if(context.state==='suspended')await context.resume();
+      if(destroyed||ticket!==generation)return {played:false,reason:'Audio request stopped'};
       const tone=mythienceTone(reading);
       const now=context.currentTime;
       for(const [hz,weight] of [[tone.rootHz,1],[tone.secondHz,.42]]){
@@ -36,11 +39,12 @@ export function createMythienceSensory({AudioContextCtor=globalThis.AudioContext
     }catch(error){stop();return {played:false,reason:error?.message||'Audio unavailable'};}
   }
   function feel(reading){
+    if(destroyed)return {felt:false,reason:'Haptics instrument closed'};
     if(typeof vibrate!=='function')return {felt:false,reason:'Haptics unavailable on this device'};
     const e=clamp(reading?.expression);
     try{return {felt:Boolean(vibrate([25+Math.round(e*30),65,20+Math.round(e*20)]))};}
     catch{return {felt:false,reason:'Haptics unavailable on this device'};}
   }
-  async function destroy(){stop();if(context){const c=context;context=null;try{await c.close()}catch{}}}
+  async function destroy(){destroyed=true;stop();if(context){const c=context;context=null;try{await c.close()}catch{}}}
   return Object.freeze({hear,feel,stop,destroy});
 }
