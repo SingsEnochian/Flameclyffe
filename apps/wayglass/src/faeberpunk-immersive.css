@@ -479,3 +479,79 @@ html[data-wayglass-surface="wayglass:living-watercolor"] #app{
   .wc-surface .wc-paint-help{bottom:17px;left:17px;max-width:240px}
   .wc-surface .wc-stage::before{opacity:.72}
 }
+
+
+/* Clarity under either pigment paper. A diffused, non-rectangular dark-glass
+   lens follows the title without turning it back into a dashboard card. */
+@media(min-width:701px){
+  .wc-surface .wc-head{isolation:isolate}
+  .wc-surface .wc-head::before{
+    content:"";position:absolute;z-index:-1;pointer-events:none;
+    inset:-33px -17px -28px -40px;
+    background:radial-gradient(ellipse at 37% 34%,
+      rgba(2,16,24,.96),rgba(3,20,29,.82) 38%,rgba(4,20,27,.57) 57%,
+      transparent 84%);
+    filter:blur(6px);
+  }
+}
+/* The ship's first room uses a genuinely new keel-navigation architecture.
+   It removes the giant horizontal toolbar from the painting foreground. */
+@media(min-width:1110px){
+  html[data-wayglass-surface="wayglass:living-watercolor"] .wg-helm{
+    position:fixed;top:auto;bottom:25px;left:18px;right:auto;
+    display:flex;flex-direction:column;align-items:stretch;justify-content:start;
+    width:148px;max-width:148px;min-width:148px;
+    height:auto;min-height:0;max-height:calc(100svh - 40px);
+    padding:15px 12px;gap:10px;margin:0;
+    border:2px solid rgba(228,194,131,.64);
+    border-radius:35px;
+    background-image:url('./materials/copper-etching.svg'),
+      linear-gradient(155deg,rgba(3,25,30,.94),rgba(5,15,23,.98));
+    background-size:cover,cover;background-blend-mode:soft-light,normal;
+    box-shadow:inset 0 1px rgba(247,242,206,.3),
+      inset 0 -9px 27px rgba(0,8,13,.6),
+      0 20px 45px rgba(0,0,0,.65);
+  }
+  html[data-wayglass-surface="wayglass:living-watercolor"] .wg-helm-identity{
+    display:grid;justify-items:center;gap:6px;margin-bottom:2px;
+    text-align:center;
+  }
+  html[data-wayglass-surface="wayglass:living-watercolor"] .wg-helm-title strong{
+    font-size:.70rem;letter-spacing:.13em;line-height:1.2;
+  }
+  html[data-wayglass-surface="wayglass:living-watercolor"] .wg-helm-title span,
+  html[data-wayglass-surface="wayglass:living-watercolor"] .wg-helm-readout{
+    display:none;
+  }
+  html[data-wayglass-surface="wayglass:living-watercolor"] .wg-helm-mark{
+    display:grid;place-items:center;width:38px;height:38px;
+    font-size:1.4rem;
+  }
+  html[data-wayglass-surface="wayglass:living-watercolor"] .wg-helm-loci{
+    display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+    align-items:stretch;gap:5px;width:100%;order:initial;
+    padding:0;margin:0;
+  }
+  html[data-wayglass-surface="wayglass:living-watercolor"] .wg-locus{
+    display:grid;justify-items:center;align-content:center;gap:3px;
+    min-height:55px;min-width:0;max-width:100%;
+    padding:6px 2px;
+    border-radius:13px;font-size:.6rem;line-height:1.13;
+  }
+  html[data-wayglass-surface="wayglass:living-watercolor"] .wg-locus-glyph{
+    font-size:1.21rem;line-height:1.15;
+  }
+  html[data-wayglass-surface="wayglass:living-watercolor"] .wg-helm-feather,
+  html[data-wayglass-surface="wayglass:living-watercolor"] .wg-helm-nav{
+    width:100%;min-height:45px;min-width:0;
+    padding:7px 5px;text-align:center;font-size:.66rem;
+    white-space:normal;
+  }
+}
+/* iPad bottom navigation must never sit on the active Touch engine. */
+@media (min-width:701px) and (max-width:1109px){
+  .wc-surface .wc-faepunk-touch{bottom:clamp(125px,14svh,184px)}
+}
+@media(max-width:700px){
+  .wc-surface .wc-faepunk-touch{bottom:clamp(100px,13svh,150px)}
+}
