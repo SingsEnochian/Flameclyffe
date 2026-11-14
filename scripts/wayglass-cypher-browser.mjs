@@ -63,7 +63,7 @@ async function checkCodex(page,profile){
  assert.equal(await reading.getAttribute('data-cypher-state'),'english');
  const coded=reading.locator('.wg-cypher-line');
  assert.ok(await coded.count()>=8);
- assert.equal(await coded.filter({has:page.locator('[data-cypher-line="runes"]')}).count(),0);
+ assert.equal(await reading.locator('[data-cypher-line="runes"]').count(),0);
  assert.equal(await coded.first().getAttribute('lang'),'en-GB');
  assert.equal(await source.inputValue(),original,'Reading must not mutate WTL source');
  await page.screenshot({path:resolve(output,profile+'-cypher-english.png'),fullPage:true});
