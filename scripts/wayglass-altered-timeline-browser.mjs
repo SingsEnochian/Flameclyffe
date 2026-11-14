@@ -52,7 +52,14 @@ async function verify(page,profile){
  await page.locator('[data-alt-strength]').evaluate(el=>{el.value='80';el.dispatchEvent(new Event('input',{bubbles:true}));});
  assert.equal(await page.locator('[data-alt-strength-output]').innerText(),'80%');
  await page.locator('[data-alt-introduce]').click();
- await page.waitForFunction(()=>document.querySelector('[data-surface="altered-timeline"]')?.dataset.alteredState==='branched');
+ await page.waitForFunction(()=>{
+   const room=document.querySelector('[data-surface="altered-timeline"]');
+   const status=room?.querySelector('[data-alt-status]')?.textContent||'';
+   return room?.dataset.alteredState==='branched'||status.startsWith('Change not introduced:');
+ },null,{timeout:15000});
+ const firstStatus=await page.locator('[data-alt-status]').innerText();
+ assert.equal(await room.getAttribute('data-altered-state'),'branched',
+  'Altered Timeline did not branch: '+firstStatus);
  assert.match(await original.innerText(),/fictional council debates/,'Source must remain unchanged');
  assert.match(await altered.innerText(),/limited pilot with independent audits/);
  assert.equal(await room.locator('[data-alt-ripples] meter').count(),4);
