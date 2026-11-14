@@ -39,9 +39,10 @@ export function createAtlasDreamJob({transport,record=()=>{}}={}){
     }
     if(operation?.done!==true)return Object.freeze({status:'running',operation_id:job.operation_id});
     if(operation.error){observe(job,'failed');return Object.freeze({status:'failed',operation_id:job.operation_id});}
-    observe(job,'available');
-    return Object.freeze({status:'dream-local-available',operation_id:job.operation_id,
-      asset_ids:Object.freeze((operation.response?.frames||[]).map(f=>safe(f.imageAsset?.assetId)).filter(Boolean))});
+    const asset_ids=Object.freeze((operation.response?.frames||[]).map(f=>safe(f.imageAsset?.assetId)).filter(Boolean));
+    // Record the result's identity, never the image bytes or private dream prompt.
+    observe(job,'available',{asset_ids,asset_count:asset_ids.length});
+    return Object.freeze({status:'dream-local-available',operation_id:job.operation_id,asset_ids});
   }
   async function feather(idempotency_key){
     const job=jobs.get(idempotency_key);if(!job)return false;
