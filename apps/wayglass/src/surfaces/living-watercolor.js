@@ -146,7 +146,7 @@ export async function mountLivingWatercolorSurface(root) {
   const brushCursor=q('wc-brush-cursor');
   const touchOrb=q('wc-first-touch'),touchStatus=q('wc-touch-status');
   const touchModeButtons=[...root.querySelectorAll('[data-wc-touch-mode]')];
-  let touchMode='repair',touchAbort=null,touchEpoch=0;
+  let touchMode='repair',touchAbort=null,touchEpoch=0,touchPressure=null;
   const pigmentButtons=[...root.querySelectorAll('[data-wc-pigment]')];
   let paperIsDark=true,keyboardCursor={x:.5,y:.5};
   const title=q('wc-title'),intent=q('wc-intent'),voice=q('wc-voice'),feedback=q('wc-feedback');
@@ -648,6 +648,19 @@ export async function mountLivingWatercolorSurface(root) {
         :'Bloom: Wyrdrune will test reciprocal growth with simulated headroom.';
     });
   }
+  listen(touchOrb,'pointerdown',event=>{
+    if(stopped||featherStopped)return;
+    // Touch/Pencil pressure is taken from the physical gesture if supported.
+    // A mouse, switch, or keyboard activation uses the brush saturation slider.
+    if((event.pointerType==='touch'||event.pointerType==='pen') &&
+       Number.isFinite(event.pressure)&&event.pressure>0){
+      touchPressure=clamp(event.pressure,.1,1);
+      touchOrb.dataset.gesture=event.pointerType;
+    }else{
+      touchPressure=null;
+      touchOrb.dataset.gesture='button';
+    }
+  });
   listen(touchOrb,'click',async()=>{
     if(stopped||featherStopped||touchAbort)return;
     const token=++touchEpoch,controller=new AbortController();
@@ -657,7 +670,7 @@ export async function mountLivingWatercolorSurface(root) {
     touchStatus.textContent='Wyrdrune · Perceive → Verify → Return. Synthetic voyage running…';
     try{
       const {host}=await touchWayglass({
-        mode:touchMode,touch:Number(pressure.value)/100,signal:controller.signal,
+        mode:touchMode,touch:touchPressure??Number(pressure.value)/100,signal:controller.signal,
       });
       if(stopped||featherStopped||token!==touchEpoch)return;
       const delta=host.tensor?.delta?.[0];
@@ -675,7 +688,7 @@ export async function mountLivingWatercolorSurface(root) {
         touchStatus.textContent='No Return: '+String(error?.message||'First Touch unavailable').slice(0,190);
       }
     }finally{
-      if(token===touchEpoch){touchAbort=null;touchOrb.disabled=featherStopped||stopped;
+      if(token===touchEpoch){touchAbort=null;touchPressure=null;touchOrb.disabled=featherStopped||stopped;
         root.querySelector('.wc-faepunk-touch').dataset.running='false';}
     }
   });
