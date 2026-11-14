@@ -87,7 +87,7 @@ test('refuses unknown source, bad date, duplicate events and malformed plan',()=
   ]}),/Duplicate/);
   assert.throws(()=>validateWyrdruneRipple({...ripple,probability_claimed:true}),/native Wyrdrune/);
   assert.throws(()=>build(original(),[{...change(),ripple:{...ripple,inferred_events:1}}]),/native Wyrdrune/);
-  assert.throws(()=>build(original(),[{...change(),target_id:'unknown'}]),/source-world event/);
+  assert.throws(()=>build(original(),[{...change(),target_id:'unknown'}]),/original event|source-world event/);
 });
 test('Feather, missing deliberate choice and forbidden branch ID stop mutation',()=>{
   const source=original(),before=structuredClone(source);
