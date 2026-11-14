@@ -106,7 +106,7 @@ try{
    ?{viewport:{width:1440,height:960},reducedMotion:'no-preference'}
    :{viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'no-preference'});
   await context.route('**/*',async route=>{
-   const url=new URL(route.request().url);
+   const url=new URL(route.request().url());
    if(url.origin!==origin){await route.abort('blockedbyclient');return;}
    if(url.pathname.startsWith('/api/')){await route.fulfill({status:503,json:{error:'Browser fixture; no provider invoked'}});return;}
    await route.continue();
