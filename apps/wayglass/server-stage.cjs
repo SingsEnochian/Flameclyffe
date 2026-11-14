@@ -46,9 +46,17 @@ async function copyTree(from, to) {
   for (const file of ['tensor-engine.cjs','tensor-ir.cjs']) {
     await fsp.copyFile(path.join(repoRoot,'lib','wyrdrune',file),path.join(wtlDir,file));
   }
-  for(const file of ['canonical.cjs','enochian.cjs','wyrdrune.cjs','ritual-ledger.cjs','runtime.mjs','story-soundscape.wtl','full-spectrum.wtl','resonance-atlas.wtl','living-learning.wtl','with-001.wtl','with-002-amber.wtl','with-003-refrain.wtl','with-004-enochian-369.wtl','tensor-ir.cjs','tensor-engine.cjs','tensor-autodiff.cjs','tensor-lowering.cjs','tensor-assurance.cjs','tensor-wtl-bridge.cjs','kernel-divination.cjs','tensor-engine.wtl','coevolution-repair.wtl','coevolution-expand.wtl','mythience-crossing.wtl','mythience-hybrid.wtl']){
+  for(const file of ['canonical.cjs','enochian.cjs','wyrdrune.cjs','ritual-ledger.cjs','runtime.mjs','story-soundscape.wtl','full-spectrum.wtl','resonance-atlas.wtl','living-learning.wtl','with-001.wtl','with-002-amber.wtl','with-003-refrain.wtl','with-004-enochian-369.wtl','tensor-ir.cjs','tensor-engine.cjs','tensor-autodiff.cjs','tensor-lowering.cjs','tensor-assurance.cjs','tensor-wtl-bridge.cjs','kernel-divination.cjs','tensor-engine.wtl','coevolution-repair.wtl','coevolution-expand.wtl','mythience-crossing.wtl','mythience-hybrid.wtl','altered-timeline.wtl']){
     await fsp.copyFile(path.join(repoRoot,'lib','wyrdrune',file),path.join(wtlDir,file));
   }
+
+  // The House Return comparator is pure ESM. Stage it as an independent
+  // source-verified module so an installed Hearthgate never imports applets or
+  // expects to find the source checkout on the owner's computer.
+  await fsp.copyFile(
+    path.join(repoRoot,'apps','arcsweep','src','timeline-evidence-comparison.js'),
+    path.join(runtime,'timeline-evidence-comparison.mjs'),
+  );
 
   await fsp.rm(destination, { recursive: true, force: true });
   await copyTree(source, destination);
