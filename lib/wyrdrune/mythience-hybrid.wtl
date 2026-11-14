@@ -1,0 +1,50 @@
+// MYTHIENCE 002: two provenance-bearing world abilities may yield a third.
+// The WTL engine calculates an emergent candidate, never a literal power grant.
+mobius scoped {
+  perceive {
+    let first = bridge("mythience","first_expression");
+    let second = bridge("mythience","second_expression");
+    let intention = bridge("mythience","intention");
+    let shifting = bridge("mythience","shifting");
+    let resonance = bridge("mythience","resonance");
+    let compatibility = bridge("mythience","compatibility");
+    let traveller = bridge("mythience","traveller_consent");
+    let first_owner = bridge("mythience","first_consent");
+    let second_owner = bridge("mythience","second_consent");
+    let destination = bridge("mythience","destination_consent");
+    let old_crossings = crossings;
+    let old_attunement = attunement;
+    let old_charge = charge;
+  }
+  compress {
+    let alignment = intention * shifting * (0.5 + resonance * 0.5);
+    let pair = (first + second) * 0.5;
+  }
+  release {
+    let synergy = first * second * alignment * compatibility;
+    let emergence = pair * 0.45 + synergy * 0.55;
+    let cost = 0.12 + (1 - compatibility) * 0.18;
+    let next_charge = old_charge - cost;
+    let next_attunement = old_attunement * 0.8 + emergence * 0.2;
+  }
+  verify {
+    require traveller and first_owner and second_owner and destination else "All four hybrid invitations are required";
+    require emergence >= 0.12 else "No compatible hybrid expression emerged";
+    require next_charge >= 0 else "Insufficient charge for hybrid exploration";
+  }
+  integrate {
+    let hybrid = bridge("mythience","hybrid",emergence,synergy,cost,next_attunement,next_charge);
+  }
+  choose {
+    emit hybrid;
+  }
+  return {
+    emit "proposal-only";
+  }
+  transcend {
+    carry crossings = old_crossings;
+    carry attunement = next_attunement;
+    carry charge = next_charge;
+    emit "What new correspondence has this encounter made possible?";
+  }
+}

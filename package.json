@@ -63,7 +63,8 @@
     "wayglass:hearthgate": "npm run wayglass:deploy:server && npm --prefix apps/starwell-server run start:core",
     "prewayglass:test": "npm run wayglass:deploy:server",
     "wayglass:local": "node scripts/wayglass-local.mjs",
-    "wayglass:local:doctor": "node scripts/wayglass-local.mjs --doctor"
+    "wayglass:local:doctor": "node scripts/wayglass-local.mjs --doctor",
+    "wayglass:cloudflare:preflight": "node scripts/wayglass-cloudflare-preflight.mjs"
   },
   "dependencies": {
     "@netlify/blobs": "^10.7.13",
