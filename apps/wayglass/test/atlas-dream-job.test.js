@@ -13,7 +13,10 @@ test('Atlas dream idempotency and dream-local result',async()=>{
  const result=await job.wait('same');
  assert.equal(result.status,'dream-local-available');
  assert.deepEqual(result.asset_ids,['asset-one']);
- assert.equal(receipts.some(x=>x.stage==='available'),true);
+ const outputReceipt=receipts.find(x=>x.stage==='available');
+ assert.deepEqual(outputReceipt.asset_ids,['asset-one']);
+ assert.equal(outputReceipt.asset_count,1);
+ assert.equal(JSON.stringify(outputReceipt).includes('contextFrames'),false);
 });
 test('Feather preserves a late completion without adoption',async()=>{
  const receipts=[];let resolveWait;let cancelCalls=0;
