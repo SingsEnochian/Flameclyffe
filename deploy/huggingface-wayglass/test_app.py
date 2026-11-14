@@ -139,6 +139,33 @@ class SpaceContractTests(unittest.TestCase):
         for code in (301, 302, 303, 307, 308):
             self.assertIsNone(handler.redirect_request(None, None, code, "", {}, "https://untrusted.test/"))
 
+
+    def test_redirect_http_error_is_not_followed_or_presented_as_speech(self):
+        import urllib.error
+        import urllib.request
+        request = urllib.request.Request(self.app.GATEWAY)
+        redirect = urllib.error.HTTPError(self.app.GATEWAY, 302, "Found", {"Location": "https://untrusted.test/collect"}, None)
+        with patch.object(self.app.OPENER, "open", side_effect=redirect) as opener:
+            response = self.app.call_kernel("Hello", [])
+        self.assertIn("unreachable", response)
+        self.assertNotIn("Verified response", response)
+        self.assertEqual(opener.call_count, 1)
+
+    def test_gateway_http_failures_do_not_create_synthetic_responses(self):
+        import urllib.error
+        for code in (401, 403, 429, 500, 503):
+            with self.subTest(code=code):
+                error = urllib.error.HTTPError(self.app.GATEWAY, code, "Denied", {}, None)
+                with patch.object(self.app.OPENER, "open", side_effect=error):
+                    result = self.app.call_kernel("Hello", [])
+                self.assertIn("unreachable", result)
+                self.assertNotIn("Observation:", result)
+
+    def test_gradio_messages_contract_is_explicit(self):
+        source = APP.read_text(encoding="utf-8")
+        self.assertIn('type="messages"', source)
+        self.assertIn('gr.ChatInterface(fn=call_kernel', source)
+
     def test_gradio_contract_source(self):
         source = APP.read_text(encoding="utf-8")
         self.assertIn('api_name=False', source)
