@@ -181,11 +181,11 @@ jobs:
           test -f _site/wayglass-preview/index.html
           test -f _site/wayglass-preview/DEVELOPMENT-SOURCE-SHA.txt
           sed -i 's#</head>#<meta name="robots" content="noindex,nofollow"></head>#' _site/wayglass-preview/index.html
-          printf '%s\n' \\
-            'Wayglass FAEberpunk preview, public UI only; House host is NOT attached.' \\
-            "Wayglass source: $(cat _site/wayglass-preview/DEVELOPMENT-SOURCE-SHA.txt)" \\
-            "Publisher: $GITHUB_SHA" \\
-            > _site/wayglass-preview/PREVIEW-RECEIPT.txt
+          cat > _site/wayglass-preview/PREVIEW-RECEIPT.txt <<EOF
+          Wayglass FAEberpunk preview, public UI only; House host is NOT attached.
+          Wayglass source: $(cat _site/wayglass-preview/DEVELOPMENT-SOURCE-SHA.txt)
+          Publisher: $GITHUB_SHA
+          EOF
 
           mkdir -p _site/pocket-concordance-lens
           cp -R dist/pocket-concordance-lens/* _site/pocket-concordance-lens/
