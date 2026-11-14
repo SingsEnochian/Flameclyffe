@@ -32,6 +32,7 @@ import { subscribeMythience, mythienceSnapshot } from './mythience-client.js';
 import { mountWayglassCommonsSurface } from './surfaces/commons.js';
 import { mountWayglassAcousticRoom } from './surfaces/acoustic-room.js';
 import {SHIP_DECK_GROUPS,shipDeckGroup,shipDeckMatches,shipDeckDestinationLabel} from './ship-deck-navigation.js';
+import {mountWayglassTriptychLift} from './triptych-lift.js';
 import {faeberpunkLocusLinks,faeberpunkLocusForRoom} from './faeberpunk-loci.js';
 import { mountWayglassQuadGestalt } from './surfaces/quad-eightfold.js';
 import { installQuadFeatherListener, readLatestQuadGestalt, subscribeQuadGestalt } from './quad-eightfold-client.js';
@@ -65,6 +66,7 @@ const fullSpectrum = createWayglassSpectralField();
 registerWayglassSurface({surface_id:'wayglass:sound-composition',label:'Wayglass · Spatial Soundstage',mount:root=>mountWayglassSoundComposition(root,{composition:wayglassSomaticSound.composition,soundscape:wayglassSomaticSound,storyBinding:wayglassStoryScoreBinding})});
 registerWayglassSurface({surface_id:WAYGLASS_ENTRY_SURFACE,label:'Living Watercolor',mount:mountLivingWatercolorSurface});
 registerWayglassSurface({surface_id:'wayglass:journey-before-destination',label:'Journey Before Destination',mount:mountJourneyBeforeDestinationSurface});
+registerWayglassSurface({surface_id:'wayglass:triptych-lift',label:'The Möbius Lift · Triptych navigation',mount:root=>mountWayglassTriptychLift(root,{navigate:navigateAndFocus})});
 
 registerWayglassSurface({surface_id:'arcsweep:deck',label:'Wayglass · World and Continuity Deck',mount:mountArcSweepDeckSurface});
 

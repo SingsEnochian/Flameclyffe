@@ -1,0 +1,300 @@
+/* WAYGLASS · The Möbius Lift · FAEberpunk IV
+   The stage is one navigable spatial environment. This is not a card grid.
+   Existing authored mineral textures remain the material source of truth. */
+.wg-lift{
+  --wg-lift-copper:#caa680;--wg-lift-sea:#7fc7b2;--wg-lift-text:#f8f1dd;
+  --wg-lift-turn:0deg;--wg-lift-height:35px;--wg-lift-glow:.50;
+  --wg-lift-glass-scale:.92;--wg-lift-window-hue:145deg;--wg-lift-move:0px;
+  position:relative;isolation:isolate;min-height:680px;height:clamp(680px,84vh,1120px);
+  overflow:hidden;border:1px solid rgba(206,177,132,.35);border-radius:clamp(18px,3vw,32px);
+  color:var(--wg-lift-text);
+  background:
+    radial-gradient(ellipse at 50% -30%,rgba(80,162,151,.45),transparent 64%),
+    radial-gradient(ellipse at 50% 68%,rgba(35,95,92,.55),transparent 60%),
+    linear-gradient(155deg,#040f14 5%,#081921 42%,#101b1e 70%,#040d10);
+  box-shadow:inset 0 0 80px #010a0d,0 16px 100px rgba(0,0,0,.2);
+}
+.wg-lift[data-station="twist"]{
+  --wg-lift-turn:78deg;--wg-lift-height:-10px;--wg-lift-glow:.95;
+  --wg-lift-glass-scale:1.12;--wg-lift-window-hue:194deg;--wg-lift-move:-30px;
+}
+.wg-lift[data-station="arrival"]{
+  --wg-lift-turn:168deg;--wg-lift-height:-80px;--wg-lift-glow:.68;
+  --wg-lift-glass-scale:1.24;--wg-lift-window-hue:244deg;--wg-lift-move:-92px;
+}
+.wg-lift::before{
+  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:url('./materials/opal-membrane.svg') center/cover,
+    url('./materials/labradorite-sheen.svg') center/cover;
+  mix-blend-mode:screen;opacity:.30;
+}
+.wg-lift::after{
+  content:"";position:absolute;inset:0;z-index:8;pointer-events:none;
+  background:linear-gradient(90deg,rgba(0,10,12,.32),transparent 12% 88%,rgba(0,10,12,.32)),
+    linear-gradient(0deg,rgba(3,10,13,.7),transparent 24%);
+}
+.wg-lift-membrane{
+  position:absolute;inset:-22% -12%;z-index:0;pointer-events:none;
+  background:conic-gradient(from 15deg at 54% 44%,transparent,rgba(179,225,204,.09) 18%,transparent 25%,
+    rgba(220,163,110,.13) 39%,transparent 49%,rgba(129,218,198,.08) 63%,transparent 73%);
+  opacity:.8;transform:rotate(var(--wg-lift-turn)) scale(1.18);
+  transition:transform 2100ms cubic-bezier(.15,.65,.2,1);
+}
+.wg-lift-mast,.wg-lift-console,.wg-lift-keel{position:relative;z-index:10}
+.wg-lift-mast{
+  display:flex;justify-content:space-between;align-items:start;gap:1rem;
+  padding:clamp(18px,3.2vw,38px) clamp(18px,3.6vw,48px) 0;
+}
+.wg-lift-kicker{
+  display:block;font-size:.69rem;letter-spacing:.19em;text-transform:uppercase;
+  font-weight:650;color:#e6c59a;
+}
+.wg-lift-mast h1{
+  font-size:clamp(2.15rem,4.7vw,5.3rem);letter-spacing:-.065em;
+  line-height:1.05;font-weight:550;margin:.45rem 0 .3rem;color:#ffefd8;
+  text-shadow:0 0 26px rgba(193,243,223,.26);
+}
+.wg-lift-subhead{font-size:clamp(.9rem,1.4vw,1.15rem);max-width:44ch;margin:0;color:#d5e8df}
+.wg-lift-bearing{display:flex;align-items:center;gap:.9rem;background:rgba(4,17,20,.45);
+  border-block:1px solid rgba(202,167,115,.4);padding:.8rem 1rem;min-width:195px}
+.wg-lift-bearing strong{font-size:.93rem;font-weight:500}
+.wg-lift-bearing-mark{
+  font-size:2.5rem;color:#b6e6d4;line-height:1;display:block;
+  transform:rotate(var(--wg-lift-turn));transition:transform 1800ms cubic-bezier(.2,.7,.2,1);
+}
+.wg-lift-world{
+  position:absolute;inset:8% 0 16%;z-index:3;outline:none;overflow:hidden;
+  perspective:1000px;touch-action:pan-y;
+}
+.wg-lift-world:focus-visible{outline:2px solid #e3c68c;outline-offset:-7px}
+.wg-lift-stars{
+  position:absolute;inset:0;opacity:.9;pointer-events:none;
+  background-image:
+    radial-gradient(circle,rgba(238,231,201,.95) .6px,transparent 1.3px),
+    radial-gradient(circle,rgba(164,231,209,.6) .8px,transparent 1.6px),
+    radial-gradient(ellipse at 51% 50%,rgba(78,138,126,.35),transparent 65%);
+  background-size:79px 113px,137px 151px,100% 100%;
+  background-position:15px 32px,65px 8px,0 0;
+  transform:translateY(var(--wg-lift-move)) scale(1.06);transition:transform 1900ms;
+}
+.wg-lift-shaft{
+  position:absolute;inset:-22% -7%;pointer-events:none;
+  transform:rotateY(calc(var(--wg-lift-turn) * .12)) translateY(var(--wg-lift-move));
+  transition:transform 2100ms cubic-bezier(.15,.65,.2,1);
+}
+.wg-lift-shaft::before,.wg-lift-shaft::after{
+  content:"";position:absolute;top:0;bottom:0;width:18%;
+  background:url('./materials/copper-etching.svg') center/cover,
+    repeating-linear-gradient(90deg,#11292e 0 10px,#42645e 12px 15px,#091c24 18px 30px);
+  border-inline:2px solid rgba(227,202,155,.65);
+  box-shadow:0 0 52px #02090a,inset 0 0 38px rgba(39,150,134,.35);
+  opacity:.75;
+}
+.wg-lift-shaft::before{left:0;transform:skewY(-6deg)}
+.wg-lift-shaft::after{right:0;transform:skewY(6deg)}
+.wg-lift-rib{
+  position:absolute;left:19%;right:19%;height:2px;
+  background:linear-gradient(90deg,transparent,rgba(221,170,116,.7),rgba(148,232,202,.6),transparent);
+  box-shadow:0 0 19px rgba(171,237,209,.4);
+}
+.wg-lift-rib:nth-child(1){top:19%}
+.wg-lift-rib:nth-child(2){top:36%}
+.wg-lift-rib:nth-child(3){top:61%}
+.wg-lift-rib:nth-child(4){top:82%}
+.wg-lift-vault{
+  position:absolute;left:50%;top:37%;width:min(82vw,810px);
+  aspect-ratio:900/640;transform:translate(-50%,-50%) translateY(var(--wg-lift-height))
+    rotateY(calc(var(--wg-lift-turn) * .22)) scale(var(--wg-lift-glass-scale));
+  transform-style:preserve-3d;transition:transform 2100ms cubic-bezier(.15,.65,.2,1);
+}
+.wg-lift-architecture{
+  position:absolute;inset:0;width:100%;height:100%;z-index:2;
+  overflow:visible;filter:drop-shadow(0 0 15px rgba(152,228,198,.42));
+}
+.wg-lift-arch-outer{fill:none;stroke:url(#wg-lift-copper);stroke-width:21}
+.wg-lift-arch-inner{fill:none;stroke:url(#wg-lift-opal);stroke-width:26}
+.wg-lift-arch-filament{fill:none;stroke:#c7efe0;stroke-opacity:.36;stroke-width:4}
+.wg-lift-filament{
+  fill:none;stroke:url(#wg-lift-opal);stroke-width:10;stroke-linecap:round;
+  opacity:var(--wg-lift-glow);
+  transform:rotate(calc(var(--wg-lift-turn) * .38));transform-origin:450px 350px;
+  transition:transform 1900ms,opacity 1400ms;
+}
+.wg-lift-filament.second{stroke-width:4;opacity:.63;transform:rotate(calc(var(--wg-lift-turn) * -.25))}
+.wg-lift-portal{
+  position:absolute;left:24%;right:24%;top:15%;bottom:0;z-index:0;border-radius:47% 47% 0 0 / 26% 26% 0 0;
+  background:radial-gradient(ellipse at 50% 30%,rgba(158,220,199,.8),transparent 8%),
+    radial-gradient(ellipse at 50% 36%,rgba(80,156,144,.2),transparent 53%),
+    linear-gradient(180deg,#06131b,#16343b 57%,#0a1d25);
+  box-shadow:inset 0 0 60px rgba(0,0,0,.9),0 0 50px rgba(126,219,194,.18);
+  overflow:hidden;
+}
+.wg-lift-portal::before{
+  content:"";position:absolute;inset:-38% -25%;
+  background:conic-gradient(from 80deg,transparent 15%,rgba(126,198,186,.4) 23%,transparent 32%,
+    rgba(229,193,140,.29) 49%,transparent 66%,rgba(135,220,204,.2) 79%,transparent 90%);
+  transform:rotate(calc(var(--wg-lift-turn) * 1.1));transition:transform 2100ms;
+  filter:blur(15px);
+}
+.wg-lift-portal-depth{
+  position:absolute;inset:20% 17% -15%;
+  border:1px solid rgba(172,238,217,.22);
+  box-shadow:0 0 0 17px rgba(89,135,132,.10),0 0 0 45px rgba(133,174,154,.055),
+    0 0 0 73px rgba(133,174,154,.025),inset 0 0 30px rgba(159,231,211,.19);
+  border-radius:50% 50% 0 0 / 30% 30% 0 0;
+  transition:transform 1800ms;
+}
+.wg-lift[data-station="twist"] .wg-lift-portal-depth{transform:rotate(17deg) skewY(-9deg)}
+.wg-lift[data-station="arrival"] .wg-lift-portal-depth{transform:scale(.75) rotate(-12deg)}
+.wg-lift-iris{
+  position:absolute;left:50%;top:42%;width:20%;aspect-ratio:1;z-index:1;
+  border:2px solid rgba(211,242,220,.45);border-radius:50%;
+  transform:translate(-50%,-50%) rotate(var(--wg-lift-turn));
+  box-shadow:0 0 30px rgba(181,242,213,.5),inset 0 0 27px rgba(142,230,208,.36);
+  transition:transform 2000ms,box-shadow 1700ms;
+}
+.wg-lift-iris::after{content:"";position:absolute;inset:21%;border:1px solid rgba(227,207,153,.55);
+  border-radius:50%;background:radial-gradient(circle,rgba(226,247,211,.95),rgba(67,161,147,.42) 21%,transparent 70%)}
+.wg-lift-iris span{position:absolute;left:49.5%;top:-24%;height:148%;width:1px;background:rgba(208,239,219,.35);transform-origin:50% 50%}
+.wg-lift-iris span:nth-child(2){transform:rotate(60deg)}
+.wg-lift-iris span:nth-child(3){transform:rotate(120deg)}
+.wg-lift-floor{
+  position:absolute;left:-24%;right:-24%;bottom:-44%;height:72%;
+  transform:rotateX(76deg) translateY(var(--wg-lift-move));
+  transform-origin:center top;
+  background:radial-gradient(ellipse at 50% 15%,rgba(174,235,213,.55),transparent 33%),
+    repeating-radial-gradient(ellipse at 50% 0,rgba(206,181,117,.44) 0 2px,transparent 3px 38px),
+    repeating-linear-gradient(90deg,transparent 0 7%,rgba(122,208,195,.26) 7.5%,transparent 8%);
+  box-shadow:0 0 120px #020b0d;transition:transform 2100ms;
+}
+.wg-lift-spindle{
+  position:absolute;left:50%;top:39%;width:1px;height:46%;
+  background:linear-gradient(rgba(235,207,137,.9),transparent);
+  box-shadow:0 0 20px rgba(210,239,207,.6);opacity:.4;
+}
+.wg-lift-direction{
+  position:absolute;top:66%;left:50%;transform:translateX(-50%);
+  color:#d2eadd;letter-spacing:.28em;font-size:.7rem;white-space:nowrap;
+  opacity:.65;text-shadow:0 0 15px #2da58d;
+}
+.wg-lift-console{
+  position:absolute;left:clamp(16px,3.5vw,44px);right:clamp(16px,3.5vw,44px);
+  bottom:clamp(50px,5.8vw,73px);
+  display:grid;grid-template-columns:minmax(230px,1fr) auto;gap:1rem 1.6rem;align-items:end;
+  padding:1.1rem 1.5rem 1.2rem;
+  background:linear-gradient(105deg,rgba(4,18,22,.88),rgba(8,29,31,.76),rgba(5,22,25,.91)),
+    url('./materials/vellum-fibres.svg') center/cover;
+  border-block:1px solid rgba(218,185,135,.43);
+  box-shadow:0 7px 35px rgba(0,0,0,.42),inset 0 1px 0 rgba(225,249,224,.08);
+  backdrop-filter:blur(11px);
+}
+.wg-lift-count{font-size:.7rem;letter-spacing:.16em;color:#e2bf90}
+.wg-lift-description h2{font-size:clamp(1.4rem,2.7vw,2.6rem);font-weight:500;margin:.2rem 0;line-height:1.1}
+.wg-lift-description p{max-width:52ch;color:#e0e9e1;font-size:.9rem;line-height:1.35;margin:.3rem 0}
+.wg-lift-stations{display:flex;gap:.4rem;align-self:center;justify-content:center}
+.wg-lift-stations button{
+  display:flex;flex-direction:column;align-items:center;gap:.3rem;
+  padding:.35rem .6rem;min-width:72px;cursor:pointer;border:0;color:#c9dbd4;
+  font:inherit;font-size:.72rem;background:transparent;
+}
+.wg-lift-station-dot{width:19px;height:19px;border:2px solid rgba(208,180,125,.75);
+  display:block;transform:rotate(45deg);background:rgba(70,135,124,.24)}
+.wg-lift-stations button[aria-current="step"] .wg-lift-station-dot{
+  background:#b6e8d2;box-shadow:0 0 22px rgba(160,243,208,.68);border-color:#ebd29f
+}
+.wg-lift-stations button[aria-current="step"]{color:#fff4dc}
+.wg-lift-controls{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:.55rem}
+.wg-lift-controls button{
+  font:inherit;font-size:.85rem;background:rgba(15,37,41,.85);border:1px solid rgba(182,209,195,.48);
+  color:#f4eadb;border-radius:.45rem;padding:.65rem .9rem;cursor:pointer;min-height:42px
+}
+.wg-lift-controls button.wg-lift-primary{
+  background:linear-gradient(115deg,rgba(63,122,110,.94),rgba(30,78,79,.95));
+  border-color:#b2ead4;flex:1 1 170px
+}
+.wg-lift-controls button.wg-lift-enter{
+  background:rgba(122,74,47,.34);border-color:#deb38a
+}
+.wg-lift-controls button.wg-lift-feather{margin-left:auto;border-color:#d9bea0}
+.wg-lift-audio-label{display:inline-flex;gap:.45rem;align-items:center;font-size:.83rem;
+  background:rgba(12,31,33,.74);padding:.45rem .65rem;min-height:42px}
+.wg-lift-audio-label input{accent-color:#87d7bd;width:1.05rem;height:1.05rem}
+.wg-lift button:focus-visible,.wg-lift input:focus-visible{
+  outline:3px solid #ffe2a2;outline-offset:3px
+}
+.wg-lift button:disabled{opacity:.48;cursor:not-allowed}
+.wg-lift-keel{
+  position:absolute;left:clamp(16px,3.5vw,44px);right:clamp(16px,3.5vw,44px);
+  bottom:15px;display:flex;gap:1.5rem;justify-content:space-between;align-items:center;
+  font-size:.76rem;color:#bed5ca;min-height:24px
+}
+.wg-lift-source{font-size:.67rem;color:#e1c597;white-space:nowrap}
+.wg-lift[data-feather="held"] .wg-lift-vault,
+.wg-lift[data-feather="held"] .wg-lift-membrane{filter:grayscale(.55);opacity:.65}
+@media(hover:hover) and (prefers-reduced-motion:no-preference){
+  .wg-lift:not([data-reduced-motion="true"]) .wg-lift-iris{animation:wg-lift-breath 9s ease-in-out infinite alternate}
+  .wg-lift:not([data-reduced-motion="true"]) .wg-lift-stars{animation:wg-lift-star-drift 20s ease-in-out infinite alternate}
+}
+@keyframes wg-lift-breath{
+  from{box-shadow:0 0 12px rgba(181,242,213,.28),inset 0 0 13px rgba(142,230,208,.2)}
+  to{box-shadow:0 0 48px rgba(181,242,213,.66),inset 0 0 39px rgba(142,230,208,.44)}
+}
+@keyframes wg-lift-star-drift{to{background-position:32px 64px,111px -27px,0 0}}
+@media(max-width:900px){
+  .wg-lift{min-height:720px;height:clamp(720px,92svh,1000px)}
+  .wg-lift-mast{padding:20px 24px 0}
+  .wg-lift-bearing{min-width:145px;padding:.55rem}
+  .wg-lift-bearing-mark{font-size:1.8rem}
+  .wg-lift-vault{top:39%;width:min(104vw,780px)}
+  .wg-lift-console{bottom:50px;grid-template-columns:1fr;padding:.9rem 1rem;gap:.4rem}
+  .wg-lift-stations{grid-row:2;justify-content:space-around}
+  .wg-lift-controls{gap:.38rem}
+  .wg-lift-controls button{padding:.55rem .7rem}
+}
+@media(max-width:600px){
+  .wg-lift{height:clamp(720px,95svh,1000px);min-height:720px;border-radius:16px}
+  .wg-lift-mast{padding:15px 17px 0}
+  .wg-lift-mast h1{font-size:clamp(2rem,9vw,3rem)}
+  .wg-lift-bearing{display:none}
+  .wg-lift-subhead{font-size:.83rem;max-width:37ch}
+  .wg-lift-world{inset:12% 0 26%}
+  .wg-lift-vault{top:38%;width:135vw}
+  .wg-lift-direction{top:63%;font-size:.58rem}
+  .wg-lift-console{bottom:53px;left:11px;right:11px;gap:.38rem;padding:.7rem .75rem}
+  .wg-lift-description h2{font-size:1.52rem}
+  .wg-lift-description p{font-size:.8rem;line-height:1.24}
+  .wg-lift-stations button{min-width:64px;padding:.2rem .3rem}
+  .wg-lift-controls button{font-size:.76rem;min-height:42px}
+  .wg-lift-controls button.wg-lift-primary{flex:1 1 130px}
+  .wg-lift-controls button.wg-lift-feather{margin-left:0}
+  .wg-lift-audio-label{font-size:.75rem}
+  .wg-lift-keel{left:15px;right:15px;bottom:8px;font-size:.65rem;align-items:flex-end}
+  .wg-lift-source{max-width:90px;overflow-wrap:anywhere;white-space:normal;text-align:right}
+}
+@media(prefers-reduced-motion:reduce){
+  .wg-lift *, .wg-lift *::before,.wg-lift *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+.wg-lift[data-reduced-motion="true"] *,.wg-lift[data-reduced-motion="true"] *::before,
+.wg-lift[data-reduced-motion="true"] *::after{animation:none!important;transition:none!important}
+@media(prefers-reduced-transparency:reduce){
+  .wg-lift-console{backdrop-filter:none;background:#0b2629}
+  .wg-lift::before,.wg-lift-membrane{opacity:.18}
+}
+@media(forced-colors:active){
+  .wg-lift,.wg-lift-console,.wg-lift-controls button,.wg-lift-stations button{forced-color-adjust:auto;border:1px solid CanvasText}
+  .wg-lift::before,.wg-lift::after,.wg-lift-membrane,.wg-lift-world{filter:none}
+  .wg-lift-world,.wg-lift-shaft,.wg-lift-vault,.wg-lift-floor,.wg-lift-stars{opacity:.45}
+  .wg-lift-station-dot{border:2px solid Highlight}
+  .wg-lift-stations button[aria-current="step"]{outline:2px solid Highlight}
+}
+
+/* On this inhabitable route, host utility docks occupy their own berth rather than
+   floating across the lift's touch controls. Preserve both tools and their drafts. */
+:root[data-wayglass-surface="wayglass:triptych-lift"] .wg-ship-switch {
+  position:relative;inset:auto;display:block;width:fit-content;
+  margin:1rem auto 0;z-index:101;
+}
+:root[data-wayglass-surface="wayglass:triptych-lift"] .wg-voyage-inbox {
+  position:relative;inset:auto;box-sizing:border-box;
+  margin:1rem auto 1.5rem;max-height:65vh;
+}

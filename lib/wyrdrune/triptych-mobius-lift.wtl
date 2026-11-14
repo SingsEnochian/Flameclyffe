@@ -1,0 +1,84 @@
+// WAYGLASS · THREEFOLD MÖBIUS LIFT · native Wyrdrune score and navigation semantics
+// Rowan's graphite triptych, 2026-11-14: monolith, twist, arrival.
+// Musical frequencies are compositional choices, not measured properties of the drawing.
+// Surface destinations are existing ship rooms; WTL proposes a route, never navigates or
+// starts an audio device on its own. The host gates navigation and audio by user gesture.
+// Both cycles are executable by the Wyrdrune runtime, without JS inventing a second score.
+
+mobius {
+  perceive {
+    let shaft_hz = 65.41;
+    let sea_hz = 98.00;
+    let lift_ratio = 2;
+    let arrival_ratio = 1.1225;
+    let maximum_gain = 0.11;
+  }
+  compress {
+    let twist_hz = shaft_hz * lift_ratio;
+    let arrival_hz = twist_hz * arrival_ratio;
+    let wave_period = 7.8;
+  }
+  release {
+    let shaft_gain = maximum_gain * 0.55;
+    let twist_gain = maximum_gain * 0.81;
+    let arrival_gain = maximum_gain * 0.46;
+  }
+  verify {
+    emit {kind:"threefold-geometry",panels:3,distinct_voices:true};
+  }
+  integrate {
+    let ascent_hz = (shaft_hz + twist_hz) / 2;
+  }
+  choose {
+    emit {kind:"outer-mobius",shaft_hz:shaft_hz,ascent_hz:ascent_hz,twist_hz:twist_hz};
+  }
+  return {
+    emit "outer face returns orientation and acoustic anchors unchanged";
+  }
+  transcend {
+    emit "navigation requests remain uncommitted until explicit choice";
+  }
+}
+
+mobius {
+  perceive {
+    let return_hz = (arrival_hz + sea_hz) / 2;
+  }
+  compress {
+    let reciprocal = shaft_hz / arrival_hz;
+  }
+  release {
+    let gentle_return_hz = return_hz * reciprocal;
+  }
+  verify {
+    emit {kind:"inner-verification",safe_gain:maximum_gain,reciprocal:reciprocal};
+  }
+  integrate {
+    let room_count = 3;
+  }
+  choose {
+    emit {
+      schema:"wayglass.triptych-lift/v0.1",
+      composition:"The Mobius Lift",
+      room_count:room_count,
+      period_seconds:wave_period,
+      autoplay:false,
+      reversible:true,
+      topology:"monolith-twist-arrival",
+      panels:[
+        {id:"monolith",label:"The Monolith",destination:"wayglass:living-watercolor",
+         orientation:"vertical",root_hz:shaft_hz,upper_hz:sea_hz,gain:shaft_gain},
+        {id:"twist",label:"The Twist",destination:"wayglass:journey-before-destination",
+         orientation:"curving",root_hz:twist_hz,upper_hz:ascent_hz,gain:twist_gain},
+        {id:"arrival",label:"The Arrival",destination:"wayglass:living-observer",
+         orientation:"reframed",root_hz:arrival_hz,upper_hz:gentle_return_hz,gain:arrival_gain}
+      ]
+    };
+  }
+  return {
+    emit "arrival returns to a known ship room; no other reality is entered without authority";
+  }
+  transcend {
+    emit {kind:"withness",sources:"Rowan graphite triptych, 2026-11-14",status:"compositional"};
+  }
+}

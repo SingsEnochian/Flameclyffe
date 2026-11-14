@@ -167,7 +167,8 @@ async function checkMotionPreferences(page,{profile,touch=false}){
    await page.evaluate(()=>new Promise(done=>requestAnimationFrame(done)));
    assert.equal(await control.evaluate(node=>node.style.getPropertyValue('--wg-magnet-x')),'','Touch must not produce magnetic offsets');
  }else{
-   const bounds=await control.boundingBox();assert.ok(bounds);
+   await control.scrollIntoViewIfNeeded();
+    const bounds=await control.boundingBox();assert.ok(bounds);
    await page.mouse.move(bounds.x+bounds.width*.7,bounds.y+bounds.height*.7);
    await page.waitForFunction(()=>document.querySelector('[data-surface-id]')?.style.getPropertyValue('--wg-magnet-x'));
  }
