@@ -14,6 +14,7 @@ const DESTINATIONS=Object.freeze({
   'arcsweep:deck':'creation',
   'wayglass:sound-composition':'creation',
   'wayglass:triptych-lift':'creation',
+  'wayglass:altered-timeline':'creation',
   'wayglass:acoustic-room':'creation',
   'wayglass:video-atelier':'creation',
   'wayglass:living-observer':'observation',
