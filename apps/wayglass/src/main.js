@@ -17,6 +17,7 @@ import { createWayglassSpellingController } from './spelling-assistance.js';
 import { mountWayglassSurface, registerWayglassSurface, listWayglassSurfaces } from './surface-registry.js';
 import { mountArcSweepDeckSurface } from './surfaces/arcsweep-deck.js';
 import { mountArcSweepWritingSurface } from './surfaces/arcsweep-writing.js';
+import {mountUniversalCodex} from './surfaces/universal-codex.js';
 import { mountWayglassSystemsSurface } from './surfaces/systems.js';
 import { mountWayglassSpectrumSurface } from './surfaces/spectral-field.js';
 import { mountWayglassNativeVoice } from './surfaces/native-voice.js';
@@ -72,6 +73,8 @@ registerWayglassSurface({
   label: 'ArcSweep · Writing Room',
   mount: mountArcSweepWritingSurface,
 });
+
+registerWayglassSurface({surface_id:'wayglass:universal-codex',label:'Wayglass · Universal Codex',mount:mountUniversalCodex});
 
 
 registerWayglassSurface({surface_id:'wayglass:universal-codex',label:'Wayglass · Universal Codex',mount:mountUniversalCodex});
