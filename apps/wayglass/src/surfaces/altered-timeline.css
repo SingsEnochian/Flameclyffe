@@ -108,3 +108,31 @@
     animation:none!important;transition:none!important;
   }
 }
+
+/* House Return and source comparison use the same mineral-glass vocabulary. */
+.wg-altered-house{
+  display:grid;gap:10px;min-width:0;border:1px solid rgba(171,214,203,.32);
+  border-radius:15px;padding:12px;background:rgba(64,119,111,.10)
+}
+.wg-altered-house legend{color:#e5c9a2;font-weight:700;padding:0 5px}
+.wg-altered-house button,.wg-altered-house select{max-width:100%;min-height:42px}
+.wg-altered-evidence{
+  margin-top:18px;border:1px solid rgba(159,212,207,.22);
+  border-radius:16px;padding:16px;background:linear-gradient(135deg,rgba(13,42,51,.5),rgba(48,37,56,.35))
+}
+.wg-altered-evidence h3{margin-top:0}
+.wg-altered-evidence form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.wg-altered-evidence form label{display:grid;gap:5px;font-weight:600;color:#e9f2ed}
+.wg-altered-evidence :is(select,input){
+  min-width:0;width:100%;box-sizing:border-box;background:rgba(13,24,37,.92);
+  border:1px solid rgba(183,229,217,.34);border-radius:10px;
+  padding:10px;color:#f2faf5;font:inherit
+}
+.wg-altered-evidence button{grid-column:1/-1;min-height:42px}
+.wg-altered-evidence :is(button,input,select):focus-visible{outline:3px solid #e5c9a2;outline-offset:3px}
+.wg-altered-evidence-reading{margin-top:8px}
+.wg-altered-evidence [data-alt-evidence-reading] p{
+  margin:7px 0;padding:6px 8px;border-left:2px solid #a8f1e4;
+  overflow-wrap:anywhere
+}
+@media(max-width:480px){.wg-altered-evidence form{grid-template-columns:1fr}}
