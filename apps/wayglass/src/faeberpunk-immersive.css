@@ -353,3 +353,62 @@ html[data-wayglass-surface="wayglass:living-watercolor"] #app{
   .wg-codex .wg-codex-editor,.wg-codex .wg-codex-reading{border:2px solid CanvasText}
   .wc-surface .wc-stage::before{display:none}
 }
+
+
+/* Spatial UX III: never let a drawer steal the painted world.
+   Closed by default on desktop; opening reallocates actual layout width.
+   The living membrane stays full-bleed in the first frame. */
+.wc-surface .wc-instruments-toggle{
+  display:none;
+  position:absolute;z-index:12;top:19px;right:20px;
+  min-height:50px;min-width:147px;
+  border:2px solid rgba(241,214,159,.85);
+  border-radius:100px;
+  background-image:url('./materials/copper-etching.svg'),
+    linear-gradient(145deg,#594738,#122d35 60%,#07141f);
+  background-size:cover,cover;background-blend-mode:soft-light,normal;
+  box-shadow:inset 0 1px rgba(254,250,218,.4),
+    inset 0 0 18px rgba(12,16,19,.47),0 13px 30px rgba(0,0,0,.55);
+  color:#fff2ce;font:700 .82rem/1.2 system-ui,sans-serif;
+  letter-spacing:.04em;cursor:pointer;
+}
+.wc-surface .wc-instruments-toggle[aria-expanded="true"]{
+  border-color:#a8f3d8;color:#d7ffe9;
+  background-image:url('./materials/labradorite-sheen.svg'),
+    linear-gradient(130deg,#154a55,#061823);
+}
+.wc-surface .wc-instruments-toggle:focus-visible{
+  outline:3px solid #ffe0a7;outline-offset:4px;
+}
+@media(min-width:1110px){
+  .wc-surface .wc-instruments-toggle{display:inline-flex;align-items:center;justify-content:center}
+  .wc-surface .wc-workbench{display:none;}
+  .wc-surface .wc-focus-paint{top:80px;right:20px}
+  .wc-surface.wc-instruments-open .wc-composition{
+    display:grid;grid-template-columns:minmax(0,1fr) minmax(355px,420px);
+    gap:clamp(13px,1.8vw,26px);align-items:start;
+  }
+  .wc-surface.wc-instruments-open .wc-stage{
+    width:100%;height:max(760px,calc(100dvh - 28px));
+  }
+  .wc-surface.wc-instruments-open .wc-workbench{
+    position:relative;z-index:4;top:auto;bottom:auto;right:auto;left:auto;
+    width:100%;height:max(760px,calc(100dvh - 28px));
+    display:flex;flex-direction:column;gap:13px;
+    overflow-y:auto;overflow-x:hidden;mask-image:none;
+  }
+  .wc-surface.wc-instruments-open .wc-head{
+    width:min(475px,32%);
+  }
+  .wc-surface.wc-instruments-open .wc-head h1{
+    font-size:clamp(3.2rem,5vw,6rem);
+  }
+  .wc-surface.wc-instruments-open .wc-faepunk-touch{
+    left:50%;width:min(365px,55%);
+  }
+  .wc-surface.wc-focus .wc-workbench{display:none!important}
+}
+@media(max-width:1109px){
+  .wc-surface .wc-instruments-toggle{display:none}
+  .wc-surface .wc-workbench{display:grid}
+}
