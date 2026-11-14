@@ -267,6 +267,18 @@ try{
  await page.screenshot({path:resolve(output,'acoustic-desktop.png'),fullPage:true});
  await checkDockNavigation(page,{profile:'desktop',destination:'wayglass:living-watercolor',surfaceSelector:'#wc-fluid'});
  receipt.scenarios.push({id:'acoustic-navigation-spatial-return-and-room-remount',status:'passed'});
+ // The new FAEpunk Worktable passage must open an actual native Wyrdrune editor,
+ // not a decorative button linking to an unregistered surface.
+ await page.locator('.wg-helm-loci [data-locus="worktable"]').click();
+ await page.locator('[data-surface="wayglass-universal-codex"]').waitFor();
+ assert.ok((await page.locator('#codex-source').inputValue()).includes('mobius'),
+   'Universal Codex must have real editable Wyrdrune source');
+ await page.locator('[data-codex-translate]').click();
+ assert.match(await page.locator('[data-codex-english]').textContent(),/Perceive|perceive|source|code/i,
+   'Native Wyrdrune must give an English reading without invoking a model');
+ await page.locator('[data-codex-room="wayglass:living-watercolor"]').click();
+ await page.locator('#wc-fluid').waitFor();
+ receipt.scenarios.push({id:'faepunk-worktable-universal-codex-native-wyrdrune-translation',status:'passed'});
  await context.close();
 
  const mobile=await prepareContext({viewport:{width:390,height:844},deviceScaleFactor:1,hasTouch:true,isMobile:true,reducedMotion:'reduce'});
