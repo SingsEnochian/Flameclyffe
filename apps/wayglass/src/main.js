@@ -3,6 +3,7 @@ import {wayglassSomaticSound} from './somatic-sound.js';
 import {wayglassStoryScoreBinding,installWayglassStoryComposition} from './story-score-binding.js';
 import './styles.css';
 import './authorization.css';
+import './faeberpunk.css';
 import { openWayglassAuthorization } from './authorization.js';
 import { installWayglassField } from './glass-field.js';
 import { installMotionChoreography } from './motion-choreography.js';
@@ -23,9 +24,12 @@ import { mountWayglassVideoAtelier } from './surfaces/video-atelier.js';
 import { mountWayglassLivingObserver } from './surfaces/living-observer.js';
 import { mountWayglassLibrarySurface } from './surfaces/library.js';
 import { mountWayglassToybox } from './surfaces/toybox.js';
+import { mountMythienceCrossing } from './surfaces/mythience-crossing.js';
+import { subscribeMythience, mythienceSnapshot } from './mythience-client.js';
 import { mountWayglassCommonsSurface } from './surfaces/commons.js';
 import { mountWayglassAcousticRoom } from './surfaces/acoustic-room.js';
 import {SHIP_DECK_GROUPS,shipDeckGroup,shipDeckMatches,shipDeckDestinationLabel} from './ship-deck-navigation.js';
+import {faeberpunkLocusLinks,faeberpunkLocusForRoom} from './faeberpunk-loci.js';
 import { mountWayglassQuadGestalt } from './surfaces/quad-eightfold.js';
 import { installQuadFeatherListener, readLatestQuadGestalt, subscribeQuadGestalt } from './quad-eightfold-client.js';
 import { publishWatercolorActivity } from './watercolor-bridge.js';
@@ -131,6 +135,8 @@ registerWayglassSurface({
   mount: mountWayglassLibrarySurface,
 });
 
+registerWayglassSurface({surface_id:'wayglass:mythience-crossing',label:'Wayglass · Mythience Membrane',mount:mountMythienceCrossing});
+
 registerWayglassSurface({
   surface_id: 'wayglass:toybox',
   label: 'Wayglass · Toybox',
@@ -217,9 +223,36 @@ const roomLabel=document.createElement('span');roomLabel.className='wg-helm-room
 const routeLabel=document.createElement('span');routeLabel.className='wg-helm-route';routeLabel.textContent='ROUTE / NO ACTIVITY OBSERVED';
 routeLabel.setAttribute('aria-live','polite');routeLabel.setAttribute('role','status');
 helmReadout.append(roomLabel,routeLabel);
+const locusNav=document.createElement('nav');
+locusNav.className='wg-helm-loci';
+locusNav.setAttribute('aria-label','Wayglass five-locus passages');
+const locusGlyphs={door:'◌',identity:'◇',worktable:'✎',wonder:'✧',return:'↶'};
+for(const locus of faeberpunkLocusLinks(surfaces)){
+  const button=document.createElement('button');
+  button.type='button';button.className='wg-locus';
+  button.dataset.locus=locus.id;button.dataset.locusRoom=locus.room;
+  button.title=locus.description;button.setAttribute('aria-label',locus.label+': '+locus.description);
+  const glyph=document.createElement('span');glyph.className='wg-locus-glyph';
+  glyph.setAttribute('aria-hidden','true');glyph.textContent=locusGlyphs[locus.id];
+  const label=document.createElement('span');label.textContent=locus.label;
+  button.append(glyph,label);locusNav.append(button);
+}
+const featherButton=document.createElement('button');
+featherButton.type='button';featherButton.className='glass-chip wg-helm-feather';
+featherButton.textContent='🪽 Feather';
+featherButton.title='Immediately stop Wayglass sensory activity. Release only from an explicit room control.';
+featherButton.setAttribute('aria-label','Feather stop all Wayglass sensory activity');
+function updateFeatherButton(stopped){
+  featherButton.dataset.held=String(stopped);
+  featherButton.setAttribute('aria-pressed',String(stopped));
+  featherButton.textContent=stopped?'🪽 Held':'🪽 Feather';
+}
+updateFeatherButton(wayglassSomaticSound.snapshot().feather_stopped);
+featherButton.addEventListener('click',()=>wayglassSomaticSound.feather());
+globalThis.addEventListener('wayglass:feather',event=>updateFeatherButton(event.detail?.stopped===true));
 const helmNav=document.createElement('button');helmNav.type='button';helmNav.className='glass-chip wg-helm-nav';
 helmNav.textContent='⌘  Ship map';helmNav.setAttribute('aria-controls',shell.id);helmNav.setAttribute('aria-expanded','false');
-helm.append(helmIdentity,helmReadout,helmNav);
+helm.append(helmIdentity,helmReadout,locusNav,featherButton,helmNav);
 root.before(helm);root.after(shell,switcher);
 const motion=installMotionChoreography({root:document.documentElement,controlsHost:shell,contentRoot:root});
 function setDeckOpen(open,{focus=false}={}){
@@ -237,6 +270,14 @@ document.addEventListener('keydown',event=>{
     event.preventDefault();setDeckOpen(true,{focus:true});
   }
 });
+subscribeMythience(encounter=>{
+  if(!encounter)return;
+  const result=encounter.result;
+  routeLabel.textContent='MYTHIENCE / '+(result.status==='candidate-returned'?'CANDIDATE':'REFUSED');
+  helm.dataset.mythienceState=result.status;
+  if(result.status==='candidate-returned')fullSpectrum.capture({kind:'world',strength:result.candidate.permeability,motion:result.candidate.expression,
+    continuity:.9,intent:.9,source_ref:'wayglass:mythience-candidate-only'});
+});
 subscribeWayglassObserver(record=>{
   if(!record||!['started','completed','failed'].includes(record.status))return;
   routeLabel.textContent='ROUTE / '+record.status.toUpperCase()+(record.route_id?' · '+record.route_id:'');
@@ -252,6 +293,11 @@ function mountSurface(surfaceId){
     motion?.arrive(root);
     document.documentElement.dataset.wayglassSurface=surfaceId;
     roomLabel.textContent=shipDeckDestinationLabel(surfaceId,surfaces);
+    const activeLocus=faeberpunkLocusForRoom(surfaceId);
+    for(const button of locusNav.querySelectorAll('[data-locus-room]')){
+      if(button.dataset.locus===activeLocus)button.setAttribute('aria-current','page');
+      else button.removeAttribute('aria-current');
+    }
     setDeckOpen(false);
     for(const button of shell.querySelectorAll('[data-surface-id]')){
       const active=button.dataset.surfaceId===surfaceId;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));
@@ -260,7 +306,17 @@ function mountSurface(surfaceId){
   });
   mountQueue=request.catch(()=>{});return request;
 }
-shell.addEventListener('click',event=>{const button=event.target.closest('[data-surface-id]');if(button)void mountSurface(button.dataset.surfaceId);});
+function navigateAndFocus(surfaceId){
+  void mountSurface(surfaceId).then(()=>{
+    const heading=root.querySelector('h1');
+    if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}
+  });
+}
+shell.addEventListener('click',event=>{const button=event.target.closest('[data-surface-id]');if(button)navigateAndFocus(button.dataset.surfaceId);});
+locusNav.addEventListener('click',event=>{
+  const button=event.target.closest('[data-locus-room]');
+  if(button)navigateAndFocus(button.dataset.locusRoom);
+});
 
 const wayglass = Object.freeze({
   schema: 'wayglass.os/v0.1',
@@ -296,6 +352,7 @@ const wayglass = Object.freeze({
   recoverDeparture: recoverWayglassDeparture,
   reply: replyToVoyage,
   doubleMobius: Object.freeze({ inspect: inspectWayglassDoubleMobius, traverse: traverseWayglassDoubleMobius }),
+  mythience: Object.freeze({inspect:mythienceSnapshot,subscribe:subscribeMythience,open:()=>mountSurface('wayglass:mythience-crossing')}),
   fullSpectrum,
 });
 

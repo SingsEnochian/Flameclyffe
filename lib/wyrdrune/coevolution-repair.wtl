@@ -1,0 +1,73 @@
+// WAYGLASS · TIMELINE THREE · NATIVE WYRDRUNE
+// Infrastructure and intelligence adapt reciprocally.
+// A measured or simulated trial must improve at least one dimension without
+// regressing another, with independent fallback and exact provenance.
+// These are sandbox *configuration suggestions*; not external deployment.
+// Profile: repair. Native WTL determines all candidate configuration changes.
+mobius scoped {
+  perceive {
+    let base_p95 = bridge("evidence", "baselineP95");
+    let base_error = bridge("evidence", "baselineError");
+    let base_success = bridge("evidence", "baselineSuccess");
+    let base_fallback = bridge("evidence", "baselineFallback");
+    let base_kind = bridge("evidence", "baselineKind");
+    let next_p95 = bridge("evidence", "candidateP95");
+    let next_error = bridge("evidence", "candidateError");
+    let next_success = bridge("evidence", "candidateSuccess");
+    let next_fallback = bridge("evidence", "candidateFallback");
+    let next_kind = bridge("evidence", "candidateKind");
+  }
+  compress {
+    let eligible = base_p95 >= 500 or base_error >= 0.1 or not base_fallback;
+  }
+  release {
+    let suggested_queue = queue_capacity - 4;
+    let suggested_timeout = timeout_ms + 250;
+    let suggested_concurrency = concurrency - 1;
+    let suggested_context = context_tokens - 256;
+  }
+  verify {
+    require eligible else "repair requires observed stress";
+    require suggested_queue >= 8 and suggested_queue <= 64 else "queue budget exceeded";
+    require suggested_timeout >= 500 and suggested_timeout <= 8000 else "timeout budget exceeded";
+    require suggested_concurrency >= 1 and suggested_concurrency <= 8 else "concurrency budget exceeded";
+    require suggested_concurrency <= suggested_queue else "cannot dispatch above queue capacity";
+    require suggested_context >= 512 and suggested_context <= 8192 else "context budget exceeded";
+    require base_kind == next_kind else "cannot compare simulation with an instrument";
+    require next_fallback else "independent fallback is not operational";
+    require next_p95 <= base_p95 else "network latency regression";
+    require next_error <= base_error else "network error-rate regression";
+    require next_success >= base_success else "intelligence success regression";
+    require next_p95 < base_p95 or next_error < base_error or next_success > base_success else "no validated improvement";
+    require bridge("evidence", "candidateMatches", suggested_queue, suggested_timeout, suggested_concurrency, suggested_context) else "trial configuration does not match Wyrdrune proposal";
+    require bridge("evidence", "lineageValid") else "provenance or timeline invalid";
+  }
+  integrate {
+    let withness_relation = {
+      outcome: "repair",
+      infrastructure: { queue_capacity: suggested_queue, timeout_ms: suggested_timeout },
+      intelligence: { concurrency: suggested_concurrency, context_tokens: suggested_context },
+      authority: "reviewed-sandbox-only"
+    };
+  }
+  choose {
+    let activation = bridge("authority", "sandboxWeight");
+  }
+  return {
+    emit {
+      outcome: "repair",
+      infrastructure: { queue_capacity: suggested_queue, timeout_ms: suggested_timeout },
+      intelligence: { concurrency: suggested_concurrency, context_tokens: suggested_context },
+      activation: activation,
+      evidence_kind: base_kind,
+      status: "trial-verified-sandbox-proposal",
+      withness: withness_relation
+    };
+  }
+  transcend {
+    carry queue_capacity = queue_capacity + (suggested_queue - queue_capacity) * activation;
+    carry timeout_ms = timeout_ms + (suggested_timeout - timeout_ms) * activation;
+    carry concurrency = concurrency + (suggested_concurrency - concurrency) * activation;
+    carry context_tokens = context_tokens + (suggested_context - context_tokens) * activation;
+  }
+}

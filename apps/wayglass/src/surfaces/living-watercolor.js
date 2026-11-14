@@ -38,7 +38,7 @@ export async function mountLivingWatercolorSurface(root) {
       '<header class="wg-surface-head glass-panel wc-head">',
         '<div><p class="eyebrow">Wayglass · Living Observer</p>',
         '<h1>The Living Watercolor</h1>',
-        '<nav class="wc-room-links" aria-label="Wayglass rooms"><button type="button" class="glass-chip" data-wc-room="wayglass:acoustic-room">Acoustic Room</button><button type="button" class="glass-chip" data-wc-room="arcsweep:writing-room">Writing Room</button><button type="button" class="glass-chip" data-wc-room="wayglass:journey-before-destination">Journey</button></nav>',
+        '<nav class="wc-room-links" aria-label="Wayglass rooms"><button type="button" class="glass-chip" data-wc-room="wayglass:acoustic-room">Acoustic Room</button><button type="button" class="glass-chip" data-wc-room="arcsweep:writing-room">Writing Room</button><button type="button" class="glass-chip" data-wc-room="wayglass:journey-before-destination">Journey</button><button type="button" class="glass-chip" data-wc-room="wayglass:mythience-crossing">Mythience</button></nav>',
         '<p class="lede">A place to meet, paint, speak, and choose what comes next together.</p></div>',
         '<div class="wc-head-signal"><span class="wc-status-light" aria-hidden="true"></span>',
         '<strong id="wc-link">Awaiting activity</strong>',

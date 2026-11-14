@@ -1,0 +1,43 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {allowedWayglassPath,createTailnetGate,TAILNET_GATE_PORT,HOST_PORT} from '../../../scripts/wayglass-tailnet-gate.mjs';
+
+test('remote gateway admits only Wayglass and House sign-in paths',()=>{
+ for(const path of ['/wayglass/','/wayglass/assets/main.js','/api/v1/wayglass/healthz','/api/v1/house/session']){
+  assert.equal(allowedWayglassPath(path),true,path);
+ }
+ for(const path of ['/api/boxfire/status','/mcp','/api/v1/chat','/api/v1/flames',
+  '//evil.example/wayglass/','/wayglass/%2e%2e/api/boxfire/status','http://evil.example/wayglass/',
+  '/wayglass\\api/boxfire','/wayglass%0d%0aevil',
+  '/wayglass/%2Fapi','/wayglass/%5capi','/wayglass/%2e%2e',
+  '/wayglass/%252e%252e','/wayglass/./asset','/wayglass/../api/v1/house/session']){
+  assert.equal(allowedWayglassPath(path),false,path);
+ }
+});
+test('gateway only binds loopback and uses a dedicated port',()=>{
+ assert.equal(HOST_PORT,3000);
+ assert.equal(TAILNET_GATE_PORT,32861);
+ const gate=createTailnetGate({port:32862});
+ assert.equal(typeof gate.listen,'function');
+ assert.equal(typeof gate.close,'function');
+});
+
+test('encoded traversal and double-encoding cannot cross the route boundary',()=>{
+ for(const path of [
+  '/wayglass/%252fapi','/wayglass/%255capi','/wayglass/%252e%252e',
+  '/wayglass/%2E%2E/private','/wayglass/%00','/wayglass/%0A',
+  '/wayglass/%0D','/wayglass/..%2Fapi','/wayglass/%2e./api',
+  '/wayglass/..%5capi','/wayglass/%252Fapi'
+ ]) assert.equal(allowedWayglassPath(path),false,path);
+});
+
+// A reverse proxy must not rely on an upstream's number of decode passes.
+test('recursive percent encoding and invalid upstream configuration fail closed',()=>{
+ for(const path of ['/wayglass/%2525252e%2525252e/private',
+   '/wayglass/%252520private','/wayglass/%25','/api/v1/house/session/%252fadmin']) {
+  assert.equal(allowedWayglassPath(path),false,path);
+ }
+ for(const hostPort of [0,80,65536,32862,NaN,3000.5]) {
+  assert.throws(()=>createTailnetGate({port:32862,hostPort}),TypeError);
+ }
+});

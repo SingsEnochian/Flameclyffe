@@ -84,6 +84,7 @@ export async function mountWayglassToybox(root) {
         '<button type="button" class="glass-chip" data-wayglass-room="wayglass:systems">Organs</button>',
         '<button type="button" class="glass-chip" data-wayglass-room="wayglass:video-atelier">Video Atelier</button>',
         '<button type="button" class="glass-chip" data-wayglass-room="wayglass:living-observer">Living Observer</button>',
+        '<button type="button" class="glass-chip" data-wayglass-room="wayglass:mythience-crossing">Mythience</button>',
         '<button type="button" class="glass-chip active" aria-current="page">Toybox</button>',
       '</nav>',
       '<header class="glass-panel toybox-head">',
