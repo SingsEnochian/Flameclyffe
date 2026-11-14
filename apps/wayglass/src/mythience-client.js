@@ -19,6 +19,7 @@ export async function proposeMythienceHybrid({request,seeds,signal,fetchImpl=fet
     body:JSON.stringify({request,seeds}),
   });
   const data=await response.json().catch(()=>({}));
+  if(signal?.aborted)throw new DOMException('Mythience request cancelled','AbortError');
   if(!response.ok)throw new Error(String(data.error||'Mythience hybrid route unavailable').slice(0,240));
   if(!['candidate-returned','denied'].includes(data.status))throw new Error('Unrecognised hybrid result');
   last=Object.freeze({schema:MYTHIENCE_SCHEMA,observed_at:new Date().toISOString(),
