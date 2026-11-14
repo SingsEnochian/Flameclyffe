@@ -4,6 +4,7 @@ import {wayglassStoryScoreBinding,installWayglassStoryComposition} from './story
 import './styles.css';
 import './authorization.css';
 import './faeberpunk.css';
+import './faeberpunk-rooms.css';
 import { openWayglassAuthorization } from './authorization.js';
 import { installWayglassField } from './glass-field.js';
 import { installMotionChoreography } from './motion-choreography.js';
@@ -19,6 +20,7 @@ import { mountArcSweepWritingSurface } from './surfaces/arcsweep-writing.js';
 import { mountWayglassSystemsSurface } from './surfaces/systems.js';
 import { mountWayglassSpectrumSurface } from './surfaces/spectral-field.js';
 import { mountWayglassNativeVoice } from './surfaces/native-voice.js';
+import { mountUniversalCodex } from './surfaces/universal-codex.js';
 import { createWayglassSpectralField } from './spectral-field.js';
 import { mountWayglassVideoAtelier } from './surfaces/video-atelier.js';
 import { mountWayglassLivingObserver } from './surfaces/living-observer.js';
@@ -71,6 +73,8 @@ registerWayglassSurface({
   mount: mountArcSweepWritingSurface,
 });
 
+
+registerWayglassSurface({surface_id:'wayglass:universal-codex',label:'Wayglass · Universal Codex',mount:mountUniversalCodex});
 
 registerWayglassSurface({
   surface_id:'wayglass:native-voice',
