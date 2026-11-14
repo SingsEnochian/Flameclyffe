@@ -5,6 +5,7 @@ const path = require('node:path');
 const { pathToFileURL } = require('node:url');
 const express = require('express');
 const { createRequestGate } = require('../security/wayglass-request-gate');
+const {createAlteredTimelineRouter}=require('./altered-timeline-router.cjs');
 const {
   publicWayglassRoutes,
   resolveWayglassRoute,
@@ -532,6 +533,8 @@ async function readQuadSourcesFromSupabase(fetchImpl=globalThis.fetch){
 
 function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThis.fetch, departureStore = createDepartureStore() } = {}) {
   const router = express.Router();
+  // Same authenticated House gateway as Wayglass route custody. No separate user identity.
+  router.use('/timeline/altered',createAlteredTimelineRouter({authorise:griffStewardAuthorized}));
   // Stable, public, metadata-free process readiness. Never use the private
   // /routes catalogue as a health probe (401 is expected without House auth).
   router.get('/healthz', (_req, res) => {
