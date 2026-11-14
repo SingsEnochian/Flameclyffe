@@ -71,3 +71,20 @@ test('active drag ignores foreign pointers and stops after lost capture',()=>{
   scene.destroy();
   assert.equal(listeners.size,0);
 });
+
+test('Feather blocks touch and keyboard until explicit resume',()=>{
+  const listeners=new Map(),shifts=[];
+  const canvas={dataset:{},getContext:()=>null,
+    addEventListener:(name,fn)=>listeners.set(name,fn),
+    removeEventListener:name=>listeners.delete(name),
+    getBoundingClientRect:()=>({left:0,width:200})};
+  const scene=mountMythienceMembraneScene(canvas,{onShift:v=>shifts.push(v),reducedMotion:true});
+  scene.pause();
+  listeners.get('pointerdown')({isPrimary:true,button:0,pointerId:1,clientX:100});
+  listeners.get('keydown')({key:'ArrowRight',preventDefault(){}});
+  assert.deepEqual(shifts,[]);
+  scene.resume();
+  listeners.get('pointerdown')({isPrimary:true,button:0,pointerId:1,clientX:100});
+  assert.deepEqual(shifts,[.5]);
+  scene.destroy();
+});
