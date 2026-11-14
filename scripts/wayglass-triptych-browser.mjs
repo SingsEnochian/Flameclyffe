@@ -51,12 +51,17 @@ async function layout(page,profile){
   return {stage:{left:stage.left,right:stage.right,width:stage.width,bottom:stage.bottom},
    control:{left:control.left,right:control.right,bottom:control.bottom},
    viewport:{width:innerWidth,height:innerHeight},
+   utilityOverlaps:[...document.querySelectorAll('.wg-ship-switch,.wg-voyage-inbox')].filter(node=>{
+     const box=node.getBoundingClientRect();
+     return box.left<control.right && box.right>control.left && box.top<control.bottom && box.bottom>control.top;
+   }).map(node=>node.className),
    noHorizontalScroll:document.documentElement.scrollWidth<=innerWidth+3};
  });
  assert.ok(bounds.stage.width>=bounds.viewport.width*.83,'Spatial chamber must dominate viewport: '+profile);
  assert.ok(bounds.control.right<=bounds.viewport.width+3&&bounds.control.left>=-3,'Controls clipped: '+profile);
  assert.ok(bounds.control.bottom<=bounds.stage.bottom+3,'Controls overflow the ship: '+profile);
  assert.ok(bounds.noHorizontalScroll,'Horizontal overflow: '+profile);
+ assert.deepEqual(bounds.utilityOverlaps,[],'Host utility controls must not cover lift interaction controls: '+profile);
  return bounds;
 }
 try{
