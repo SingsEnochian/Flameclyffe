@@ -129,7 +129,7 @@ jobs:
           npm run wayglass:build
           test -f dist/wayglass/index.html
           test -d dist/wayglass/assets
-          printf '%s\\n' "$(git rev-parse HEAD)" > dist/wayglass/DEVELOPMENT-SOURCE-SHA.txt
+          printf '%s\n' "$(git rev-parse HEAD)" > dist/wayglass/DEVELOPMENT-SOURCE-SHA.txt
 
       - name: Assemble static Pages site
         run: |
@@ -181,7 +181,7 @@ jobs:
           test -f _site/wayglass-preview/index.html
           test -f _site/wayglass-preview/DEVELOPMENT-SOURCE-SHA.txt
           sed -i 's#</head>#<meta name="robots" content="noindex,nofollow"></head>#' _site/wayglass-preview/index.html
-          printf '%s\\n' \\
+          printf '%s\n' \\
             'Wayglass FAEberpunk preview, public UI only; House host is NOT attached.' \\
             "Wayglass source: $(cat _site/wayglass-preview/DEVELOPMENT-SOURCE-SHA.txt)" \\
             "Publisher: $GITHUB_SHA" \\
