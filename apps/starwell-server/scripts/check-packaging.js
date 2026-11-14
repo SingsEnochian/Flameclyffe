@@ -34,6 +34,8 @@ const requiredFiles = [
   'scripts/prepare-assets.js',
   'build/hearthgate.png',
   'public/hearthgate.html',
+  'public/wayglass/index.html',
+  'public/wayglass/wayglass-host.js',
   'public/hearthgate-archive.html',
   'public/setup-wizard.html',
   'public/starwell/index.html',
@@ -161,6 +163,19 @@ for (const [relativePath, expectedId] of [
   if (!exists(relativePath)) continue;
   const schema = readJson(relativePath, relativePath);
   if (schema && schema.$id !== expectedId) errors.push(`${relativePath} has the wrong schema identifier.`);
+}
+
+if (exists('public/wayglass/index.html') && !read('public/wayglass/index.html').includes('wayglass-host.js')) {
+  errors.push('Bundled Wayglass entry does not load its CSP-compatible host context.');
+}
+if (exists('public/wayglass/wayglass-host.js') && !read('public/wayglass/wayglass-host.js').includes('__wayglassHost')) {
+  errors.push('Bundled Wayglass host context is invalid.');
+}
+const wayglassAssets = resolve('public/wayglass/assets');
+if (!fs.existsSync(wayglassAssets) || !fs.statSync(wayglassAssets).isDirectory()) {
+  errors.push('Bundled Wayglass assets directory is missing.');
+} else if (!fs.readdirSync(wayglassAssets).some((name) => /\.js$/i.test(name))) {
+  errors.push('Bundled Wayglass assets directory has no JavaScript.');
 }
 
 const starwellAssets = resolve('public/starwell/assets');
