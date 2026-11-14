@@ -382,6 +382,34 @@ try{
   rich_text:'browser-local',observation:'source-labelled'});
  await context.close();
 
+ // The owner's primary iPad form factor must not inherit a stacked page.
+ const tablet=await prepareContext({
+  viewport:{width:820,height:1180},deviceScaleFactor:1,
+  isMobile:true,hasTouch:true,reducedMotion:'reduce',
+ });
+ const tabletPage=await tablet.newPage();
+ await tabletPage.goto(origin,{waitUntil:'networkidle'});
+ await tabletPage.locator('#wc-fluid').waitFor();
+ const tabletToggle=tabletPage.locator('#wc-instruments-toggle');
+ assert.equal(await tabletToggle.isVisible(),true,'iPad needs a touch-visible instrument drawer');
+ assert.equal(await tabletToggle.getAttribute('aria-expanded'),'false');
+ assert.equal(await tabletPage.locator('.wc-workbench').isVisible(),false,
+  'iPad starts with the living membrane, not a shrunken dashboard');
+ const tabletPlane=await tabletPage.locator('.wc-stage').boundingBox();
+ assert.ok(tabletPlane&&tabletPlane.height>900,'iPad canvas should occupy most of portrait screen');
+ assert.match(await tabletPage.locator('.wc-stage').evaluate(el=>getComputedStyle(el,'::before').backgroundImage),
+  /opal-membrane/,'iPad must render the actual opaline material over the canvas');
+ await tabletPage.screenshot({path:resolve(output,'faeberpunk-ipad-immersive.png'),fullPage:true});
+ await tabletToggle.tap();
+ const tabletDock=await tabletPage.locator('.wc-workbench').boundingBox();
+ const tabletBody=await tabletPage.locator('.wc-stage').boundingBox();
+ assert.ok(tabletDock && tabletBody && tabletDock.y>=tabletBody.bottom-1,
+  'The iPad instrument dock must unfold below, never over the Pencil canvas');
+ await tabletPage.screenshot({path:resolve(output,'faeberpunk-ipad-instruments.png'),fullPage:true});
+ receipt.scenarios.push({id:'ipad-first-living-materials-and-nonoccluding-drawer',status:'passed',
+  viewport:{width:820,height:1180},materials:['opal','copper','labradorite']});
+ await tablet.close();
+
  const mobile=await prepareContext({viewport:{width:390,height:844},deviceScaleFactor:1,hasTouch:true,isMobile:true,reducedMotion:'reduce'});
  const touchPage=await mobile.newPage();await touchPage.goto(origin,{waitUntil:'networkidle'});
  const touchCanvas=touchPage.locator('#wc-fluid');await touchCanvas.waitFor();
