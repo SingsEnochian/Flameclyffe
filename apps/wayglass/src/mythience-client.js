@@ -44,6 +44,10 @@ export async function proposeMythienceCrossing({request,seeds,signal,fetchImpl=f
     body:JSON.stringify({request,seeds}),
   });
   const data=await response.json().catch(()=>({}));
+  if(signal?.aborted){
+    recordLateEncounter({route:ROUTE,event_id:request?.event_id,status:data.status,input_hash:data.input_hash});
+    throw new DOMException('Mythience request cancelled','AbortError');
+  }
   if(!response.ok)throw new Error(String(data.error||'Mythience route unavailable').slice(0,240));
   if(!['candidate-returned','denied'].includes(data.status))
     throw new Error('Unrecognised Mythience crossing result');
