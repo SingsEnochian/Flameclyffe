@@ -56,6 +56,8 @@ jobs:
       - run: npm run wayglass:build && npm run arcsweep:build
       - run: npm install --prefix "$RUNNER_TEMP/wayglass-browser" --no-save --package-lock=false playwright@1.62.1
       - run: node "$RUNNER_TEMP/wayglass-browser/node_modules/playwright/cli.js" install chromium --with-deps
+      - name: Preserve detailed motion failure state without relaxing checks
+        run: node scripts/wayglass-augment-motion-diagnostics.mjs
       - name: First Contact and live motion preferences
         env:
           WAYGLASS_PLAYWRIGHT_MODULE: ${{ runner.temp }}/wayglass-browser/node_modules/playwright/index.mjs
