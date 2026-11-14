@@ -1,0 +1,39 @@
+name: Wayglass Möbius Lift Browser
+on:
+  pull_request:
+    paths:
+      - 'apps/wayglass/**'
+      - 'lib/wyrdrune/triptych-mobius-lift.wtl'
+      - 'scripts/wayglass-triptych-browser.mjs'
+      - '.github/workflows/wayglass-triptych-browser.yml'
+      - 'package*.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  rendered-lift:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run wayglass:build
+      - name: Install pinned Chromium harness
+        run: npm install --prefix "$RUNNER_TEMP/wayglass-browser" --no-save --package-lock=false playwright@1.62.1
+      - name: Install Chromium and system dependencies
+        run: node "$RUNNER_TEMP/wayglass-browser/node_modules/playwright/cli.js" install chromium --with-deps
+      - name: Test navigable inhabited lift and reduced-motion on mobile
+        env:
+          WAYGLASS_PLAYWRIGHT_MODULE: ${{ runner.temp }}/wayglass-browser/node_modules/playwright/index.mjs
+        run: node scripts/wayglass-triptych-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wayglass-triptych-browser-${{ github.sha }}
+          path: artifacts/wayglass/triptych-lift/
+          if-no-files-found: warn
+          retention-days: 30
