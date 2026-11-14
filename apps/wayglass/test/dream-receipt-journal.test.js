@@ -80,3 +80,28 @@ test('Feather during pending replay prevents disclosure',async()=>{
  journal.feather();release();
  await assert.rejects(pending,/Feather/);
 });
+
+test('Feather during post-write authorisation never adopts the result',async()=>{
+ let release,entered;const gate=new Promise(r=>{release=r;});const seen=new Promise(r=>{entered=r;});
+ let checks=0;
+ const journal=createDreamReceiptJournal({
+  dream_id:'voyage-1',owner_id:'rowan',
+  authorise:async()=>{checks++;if(checks===2){entered();await gate;}return true;},
+  store:{appendAtomic:async({receipt})=>receipt,readScoped:async()=>[]}
+ });
+ const pending=journal.append(event);
+ await seen;journal.feather();release();
+ await assert.rejects(pending,/Feather/);
+});
+test('Feather during post-read authorisation never reveals replay',async()=>{
+ let release,entered;const gate=new Promise(r=>{release=r;});const seen=new Promise(r=>{entered=r;});
+ let checks=0;
+ const journal=createDreamReceiptJournal({
+  dream_id:'voyage-1',owner_id:'rowan',
+  authorise:async()=>{checks++;if(checks===2){entered();await gate;}return true;},
+  store:{appendAtomic:async({receipt})=>receipt,readScoped:async()=>[]}
+ });
+ const pending=journal.replay();
+ await seen;journal.feather();release();
+ await assert.rejects(pending,/Feather/);
+});
