@@ -5,8 +5,8 @@
 
 mobius {
   perceive {
-    let change_strength = bridge("scenario", "magnitude");
-    let choice = bridge("scenario", "confirmed");
+    let change_strength = 0.5; // numeric intervention score, supplied by a local WTL source rewrite
+    let choice = true; // only compiled after deliberate owner interaction
   }
   compress {
     let near_face = change_strength * 0.72;
