@@ -31,9 +31,18 @@ def call_kernel(message, history):
         return "Wayglass kernel not connected. Configure private WAYGLASS_RESPOND_URL and WAYGLASS_GATEWAY_TOKEN in Space secrets before enabling conversation."
     if not message or len(message) > 8000:
         return "Please enter a message under 8,000 characters."
+    # Preserve bounded context; never trust client-supplied privileged roles.
+    prior = []
+    if isinstance(history, list):
+        for turn in history[-24:]:
+            if not isinstance(turn, dict):
+                continue
+            role, content = turn.get("role"), turn.get("content")
+            if role in ("user", "assistant") and isinstance(content, str) and len(content) <= 8000:
+                prior.append({"role": role, "content": content})
     # The configured endpoint must be an owner-authenticated Wayglass conversation adapter.
     # Never point this at a public unauthenticated model endpoint.
-    payload = json.dumps({"input": message, "route_id": "wayglass:ship", "character_id": "wayglass", "interaction": {"channel": "OOC"}, "world_id": "wayglass:home", "surface_id": "huggingface-kernel-entrance"}).encode("utf-8")
+    payload = json.dumps({"input": message, "history": prior, "route_id": "wayglass:ship", "character_id": "wayglass", "interaction": {"channel": "OOC"}, "world_id": "wayglass:home", "surface_id": "huggingface-kernel-entrance"}).encode("utf-8")
     req = urllib.request.Request(
         GATEWAY,
         data=payload,
@@ -48,7 +57,7 @@ def call_kernel(message, history):
             data = json.loads(raw)
             if not isinstance(data, dict) or not isinstance(data.get("receipt"), dict):
                 return "Wayglass returned an invalid receipt envelope."
-            if data.get("schema") != "wayglass.route-turn/v0.1" or data.get("route_id") != "wayglass:ship" or data.get("receipt", {}).get("character_id") != "wayglass" or not data.get("receipt", {}).get("observation_id"):
+            if data.get("schema") != "wayglass.route-turn/v0.1" or data.get("route_id") != "wayglass:ship" or data.get("receipt", {}).get("character_id") != "wayglass" or not isinstance(data.get("receipt", {}).get("observation_id"), str) or not data["receipt"]["observation_id"].strip():
                 return "Kernel provenance missing. Refusing to present an unattributed response as Wayglass."
             if not isinstance(data.get("output"), str) or not data["output"].strip():
                 return "Wayglass returned no attributable speech; receipt retained upstream."
