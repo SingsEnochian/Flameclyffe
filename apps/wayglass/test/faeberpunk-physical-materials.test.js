@@ -23,7 +23,7 @@ test('visible composited opal membrane and material workstations replace desktop
  const main=read('../src/main.js');
  assert.match(main,/import '\.\/faeberpunk-immersive\.css';/);
  for(const file of ['opal-membrane','labradorite-sheen','copper-etching','vellum-fibres'])
-  assert.match(material,new RegExp(file+'\\\\.svg'));
+  assert.ok(material.includes(file+'.svg'),file+' material must be wired into CSS');
  assert.match(material,/\.wc-surface \.wc-composition\s*\{\s*display:block;position:relative/);
  assert.match(material,/\.wc-surface \.wc-head\s*\{\s*position:absolute/);
  assert.match(material,/\.wc-surface \.wc-workbench\s*\{\s*position:absolute/);
