@@ -156,7 +156,8 @@ export function mountWayglassAlteredTimeline(root,{
       const note=document.createElement('p');note.className='tiny';
       note.textContent='Local hypothetical change only. No provider request, canon promotion or physical timeline alteration.';held.append(note);
     }
-    root.dataset.alteredState=stopped?'paused':current?'branched':'original';
+    root.querySelector('[data-surface="altered-timeline"]').dataset.alteredState=
+      stopped?'paused':current?'branched':'original';
   }
   form.addEventListener('submit',async event=>{
     event.preventDefault();
