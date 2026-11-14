@@ -8,7 +8,7 @@ export function resolveWayglassEntry({ available = [], room = null } = {}) {
   if (!ids.includes(WAYGLASS_ENTRY_SURFACE)) {
     throw new Error('Living Watercolor entryway is not registered; refuse to silently open another screen');
   }
-  const rooms={deck:'arcsweep:deck',quad:'wayglass:quad-gestalt',watercolor:WAYGLASS_ENTRY_SURFACE,journey:'wayglass:journey-before-destination',writing:'arcsweep:writing-room',observer:'wayglass:living-observer',library:'wayglass:library',toybox:'wayglass:toybox',organs:'wayglass:systems',acoustic:'wayglass:acoustic-room',video:'wayglass:video-atelier',commons:'wayglass:commons',mythience:'wayglass:mythience-crossing'};
+  const rooms={deck:'arcsweep:deck',quad:'wayglass:quad-gestalt',watercolor:WAYGLASS_ENTRY_SURFACE,journey:'wayglass:journey-before-destination',writing:'arcsweep:writing-room',codex:'wayglass:universal-codex',observer:'wayglass:living-observer',library:'wayglass:library',toybox:'wayglass:toybox',organs:'wayglass:systems',acoustic:'wayglass:acoustic-room',video:'wayglass:video-atelier',commons:'wayglass:commons',mythience:'wayglass:mythience-crossing'};
   const requested=typeof room==='string'?rooms[room]:null;
   if(requested&&!ids.includes(requested))throw new Error('Requested Wayglass room is not registered: '+room);
   return Object.freeze({
