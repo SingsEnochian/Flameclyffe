@@ -13,6 +13,9 @@ on:
     paths:
       - 'lib/wayglass-mobius-palimpsest.mjs'
       - 'lib/wayglass-mobius-palimpsest.test.mjs'
+      - 'lib/wayglass-worldwake-wtl.mjs'
+      - 'lib/wayglass-worldwake-wtl.test.mjs'
+      - 'docs/wayglass/WORLDWAKE_CR_001.wyr'
       - '.github/workflows/wayglass-palimpsest.yml'
   workflow_dispatch:
 permissions:
