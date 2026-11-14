@@ -186,12 +186,37 @@ try{
  await page.locator('[data-surface="living-watercolor"]').waitFor();
  await checkMotionPreferences(page,{profile:'desktop'});
  assert.equal(await page.locator('.wg-auth-overlay:visible').count(),0,'Offline watercolor entry must render without provider login');
+ const instruments=page.locator('#wc-instruments-toggle');
+ assert.equal(await instruments.getAttribute('aria-expanded'),'false',
+   'New Wayglass must open into a free paintable environment, not a crowded dashboard');
+ assert.equal(await page.locator('.wc-workbench').isVisible(),false,
+   'Instrument drawers must be closed until explicitly requested on desktop');
+ const fullMembrane=await page.locator('.wc-stage').boundingBox();
+ assert.ok(fullMembrane?.width>=1080,'Closed membrane must dominate the viewport');
+ const materialImage=await page.locator('.wc-stage').evaluate(el=>getComputedStyle(el,'::before').backgroundImage);
+ assert.match(materialImage,/opal-membrane|data:image\/svg(?:\+|%2[Bb])xml/i,
+  'Rendered opal must exist in computed pseudo-element material, including bundled inline SVG: '+materialImage.slice(0,100));
+ const keelGeometry=await page.evaluate(()=>{
+  const helm=document.querySelector('.wg-helm').getBoundingClientRect();
+  const touch=document.querySelector('.wc-faepunk-touch').getBoundingClientRect();
+  return {overlap:helm.left<touch.right && helm.right>touch.left &&
+    helm.top<touch.bottom && helm.bottom>touch.top,
+    keelWidth:helm.width,keelHeight:helm.height};
+ });
+ assert.equal(keelGeometry.overlap,false,
+   'The copper keel must never obscure Touch, Soothe or Bloom');
+ assert.ok(keelGeometry.keelWidth<190 && keelGeometry.keelHeight>200,
+   'The Door must use the new vertical keel, not a recycled horizontal toolbar');
+ await page.screenshot({path:resolve(output,'faeberpunk-immersive-desktop.png'),fullPage:true});
+ await instruments.click();
+ assert.equal(await instruments.getAttribute('aria-expanded'),'true',
+   'The ship must make its instrument dock operable with a real user gesture');
  const paintingRect=await page.locator('.wc-stage').boundingBox();
  const workbenchRect=await page.locator('.wc-workbench').boundingBox();
- assert.ok(paintingRect&&workbenchRect,'Painting and workbench must both be visible on desktop');
+ assert.ok(paintingRect&&workbenchRect,'Painting and dock must be visible after opening Instruments');
  assert.ok(paintingRect.x+paintingRect.width<=workbenchRect.x+1 || workbenchRect.x+workbenchRect.width<=paintingRect.x+1,
-   'Watercolor canvas must never be covered by the conversation workbench');
- assert.ok(paintingRect.width>=480,'Desktop painting should have substantial visible width');
+   'Opening instruments must never cover the paintable membrane');
+ assert.ok(paintingRect.width>=480,'Desktop painting should retain substantial usable width');
  assert.ok(await page.locator('#wc-paint-help').isVisible(),'Painting instructions must be visible');
  await page.locator('[data-wc-pigment="#4c7961"]').click();
  assert.equal(await page.locator('#wc-color').inputValue(),'#4c7961','Swatch must update brush pigment');
@@ -246,7 +271,36 @@ try{
  receipt.scenarios.push({id:'real-browser-touch-native-wyrdrune-return-colour-and-bloom',status:'passed',
   capture:'owner-simulated-host',mode_count:2});
  receipt.scenarios.push({id:'unobstructed-paper-palette-brush-width-and-reversible-focus',status:'passed'});
- const before=await canvasDigest(page),canvas=page.locator('#wc-fluid');
+ const materialCheck=await page.evaluate(()=>{
+   const stage=document.querySelector('.wc-stage'),
+     workbench=document.querySelector('.wc-workbench'),
+     head=document.querySelector('.wc-head'),
+     composition=document.querySelector('.wc-composition');
+   const host=stage.getBoundingClientRect();
+   const bench=workbench.getBoundingClientRect();
+   const title=head.getBoundingClientRect();
+   return {
+     plane:host.width/window.innerWidth,
+     composition:getComputedStyle(composition).display,
+     workbench:getComputedStyle(workbench).position,
+     header:getComputedStyle(head).position,
+     dockOutsidePaint:bench.left>=host.right-1,
+     headWithinPlane:title.left>host.left && title.top<host.bottom,
+     mineral:getComputedStyle(stage,'::before').backgroundImage,
+     decorated:getComputedStyle(document.querySelector('.wc-faepunk-touch')).backgroundImage,
+   };
+ });
+ assert.equal(materialCheck.composition,'grid','Opened instrument drawer must reflow instead of overlay');
+ assert.equal(materialCheck.header,'absolute','Title must inhabit the membrane, not displace it');
+ assert.equal(materialCheck.workbench,'relative','Opened instruments must own separate paint-safe docking space');
+ assert.ok(materialCheck.plane>.55,'Opened membrane must retain more than half the viewport width');
+ assert.equal(materialCheck.dockOutsidePaint,true,'Dock must not hide any paintable pixels');
+ assert.equal(materialCheck.headWithinPlane,true,'Identity title must belong to the environment');
+ assert.match(materialCheck.mineral,/opal-membrane|data:image\/svg(?:\+|%2[Bb])xml/i,'Procedural opal must composite over canvas pixels');
+ assert.match(materialCheck.decorated,/copper-etching|data:image\/svg(?:\+|%2[Bb])xml/i,'Touch orb dock must render the etched-copper texture');
+ receipt.scenarios.push({id:'faeberpunk-physical-materials-and-immersive-composition',status:'passed',
+  mineral:'opal-membrane',chassis:'etched-copper',plane_ratio:materialCheck.plane});
+  const before=await canvasDigest(page),canvas=page.locator('#wc-fluid');
  const box=await canvas.boundingBox();assert.ok(box&&box.width>0&&box.height>0);
  await canvas.click({position:{x:box.width*0.18,y:box.height*0.15}});
  assert.notEqual(await canvasDigest(page),before,'Actual pointer input must change rendered pigment');
@@ -268,6 +322,9 @@ try{
  assert.equal(saved.turns[0].response.receipt.response_id,null);
  await page.screenshot({path:resolve(output,'watercolor-desktop.png'),fullPage:true});
  await page.reload({waitUntil:'networkidle'});
+ // A fresh entry intentionally returns to the full Living Watercolour.
+ // Reopen the drawer before exercising its explicit recovery action.
+ await page.locator('#wc-instruments-toggle').click();
  await page.locator('#wc-recover-return').click();
  await page.waitForFunction(()=>document.querySelector('#wc-feedback')?.textContent.includes('Conversation recovered'));
  assert.match(await page.locator('#wc-voice').textContent(),/Captured transport reply:/);
@@ -339,6 +396,41 @@ try{
  receipt.scenarios.push({id:'faepunk-four-room-codex-writing-observer-watercolour-passage',status:'passed',
   rich_text:'browser-local',observation:'source-labelled'});
  await context.close();
+
+ // The owner's primary iPad form factor must not inherit a stacked page.
+ const tablet=await prepareContext({
+  viewport:{width:820,height:1180},deviceScaleFactor:1,
+  isMobile:true,hasTouch:true,reducedMotion:'reduce',
+ });
+ const tabletPage=await tablet.newPage();
+ await tabletPage.goto(origin,{waitUntil:'networkidle'});
+ await tabletPage.locator('#wc-fluid').waitFor();
+ const tabletToggle=tabletPage.locator('#wc-instruments-toggle');
+ assert.equal(await tabletToggle.isVisible(),true,'iPad needs a touch-visible instrument drawer');
+ assert.equal(await tabletToggle.getAttribute('aria-expanded'),'false');
+ assert.equal(await tabletPage.locator('.wc-workbench').isVisible(),false,
+  'iPad starts with the living membrane, not a shrunken dashboard');
+ const tabletPlane=await tabletPage.locator('.wc-stage').boundingBox();
+ assert.ok(tabletPlane&&tabletPlane.height>900,'iPad canvas should occupy most of portrait screen');
+ assert.match(await tabletPage.locator('.wc-stage').evaluate(el=>getComputedStyle(el,'::before').backgroundImage),
+  /opal-membrane|data:image\/svg(?:\+|%2[Bb])xml/i,'iPad must render the opaline material over the canvas');
+ const tabletTouchClear=await tabletPage.evaluate(()=>{
+  const helm=document.querySelector('.wg-helm').getBoundingClientRect();
+  const touch=document.querySelector('.wc-faepunk-touch').getBoundingClientRect();
+  return !(helm.left<touch.right && helm.right>touch.left &&
+   helm.top<touch.bottom && helm.bottom>touch.top);
+ });
+ assert.equal(tabletTouchClear,true,'iPad Touch control must clear the bottom nav');
+ await tabletPage.screenshot({path:resolve(output,'faeberpunk-ipad-immersive.png'),fullPage:true});
+ await tabletToggle.tap();
+ const tabletDock=await tabletPage.locator('.wc-workbench').boundingBox();
+ const tabletBody=await tabletPage.locator('.wc-stage').boundingBox();
+ assert.ok(tabletDock && tabletBody && tabletDock.y>=tabletBody.y+tabletBody.height-1,
+  'The iPad instrument dock must unfold below, never over the Pencil canvas');
+ await tabletPage.screenshot({path:resolve(output,'faeberpunk-ipad-instruments.png'),fullPage:true});
+ receipt.scenarios.push({id:'ipad-first-living-materials-and-nonoccluding-drawer',status:'passed',
+  viewport:{width:820,height:1180},materials:['opal','copper','labradorite']});
+ await tablet.close();
 
  const mobile=await prepareContext({viewport:{width:390,height:844},deviceScaleFactor:1,hasTouch:true,isMobile:true,reducedMotion:'reduce'});
  const touchPage=await mobile.newPage();await touchPage.goto(origin,{waitUntil:'networkidle'});

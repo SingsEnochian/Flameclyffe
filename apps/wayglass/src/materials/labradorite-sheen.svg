@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Layered labradorite iridescent mineral">
+<defs>
+ <linearGradient id="night" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#030e19"/><stop offset=".38" stop-color="#0b313a"/><stop offset=".69" stop-color="#111c31"/><stop offset="1" stop-color="#081a25"/></linearGradient>
+ <linearGradient id="flash" x1="0" x2="1" y1="0" y2="0"><stop stop-color="#00c5d1" stop-opacity=".13"/><stop offset=".22" stop-color="#82ffe7" stop-opacity=".56"/><stop offset=".46" stop-color="#d5c887" stop-opacity=".16"/><stop offset=".7" stop-color="#8aa4e8" stop-opacity=".35"/><stop offset="1" stop-color="#a477b7" stop-opacity=".04"/></linearGradient>
+ <filter id="stone"><feTurbulence type="fractalNoise" baseFrequency=".018 .045" numOctaves="4" seed="91"/><feColorMatrix type="saturate" values=".31"/><feComponentTransfer><feFuncA type="linear" slope=".13"/></feComponentTransfer></filter>
+ <filter id="edge"><feGaussianBlur stdDeviation="5"/></filter>
+</defs>
+<rect width="960" height="720" fill="url(#night)"/>
+<path d="M-110 125L302-60 620 88 802 10 1090 188 960 346 630 391 416 235 92 400Z" fill="url(#flash)" opacity=".7"/>
+<path d="M-70 545L230 265 453 384 652 304 1030 424 987 784 727 622 510 677 224 560Z" fill="url(#flash)" opacity=".45"/>
+<g stroke="#cdeace" stroke-opacity=".22" stroke-width="1" fill="none">
+<path d="M-20 115L302-60 620 88 802 10 1090 188M-10 170L302 31 620 150 810 72 1000 228"/>
+<path d="M-60 545L230 265 453 384 652 304 1030 424M-20 580L235 313 453 426 650 351 1005 472"/>
+<path d="M302-60L312 200 416 235 453 384 510 677 M620 88L630 391 727 622 M802 10L800 380 727 622"/>
+<path d="M92 400L224 560M416 235L630 391M652 304L800 380"/>
+</g>
+<g stroke="#aeffeb" stroke-width="7" stroke-opacity=".17" fill="none" filter="url(#edge)">
+<path d="M-20 170L302 31 620 150 810 72 1000 228"/>
+<path d="M-20 580L235 313 453 426 650 351 1005 472"/>
+</g>
+<rect width="960" height="720" filter="url(#stone)" opacity=".46"/>
+</svg>

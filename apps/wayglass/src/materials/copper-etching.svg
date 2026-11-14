@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Brushed copper lattice with etched foliate circuits">
+<defs>
+ <linearGradient id="copper" x1="0" x2="1" y1="0" y2=".7"><stop stop-color="#3c241b"/><stop offset=".17" stop-color="#c49465"/><stop offset=".31" stop-color="#674735"/><stop offset=".5" stop-color="#e0c29a"/><stop offset=".66" stop-color="#755544"/><stop offset=".84" stop-color="#cf9c68"/><stop offset="1" stop-color="#392a28"/></linearGradient>
+ <pattern id="brush" width="2" height="16" patternUnits="userSpaceOnUse"><path d="M0 0H2 M0 4H1 M0 9H2 M0 12H1" stroke="#ffdfaa" opacity=".13" stroke-width=".4"/></pattern>
+ <filter id="patina"><feTurbulence type="fractalNoise" baseFrequency=".021" numOctaves="4" seed="32" result="t"/><feColorMatrix in="t" type="matrix" values="0 0 0 0 .03 0 0 0 0 .4 0 0 0 0 .38 0 0 0 .24 0"/></filter>
+</defs>
+<rect width="960" height="720" fill="#0d2023"/>
+<rect width="960" height="720" fill="url(#copper)" opacity=".69"/>
+<rect width="960" height="720" fill="url(#brush)"/>
+<rect width="960" height="720" filter="url(#patina)" opacity=".57"/>
+<g stroke="#f4ddb3" stroke-width="1.6" stroke-opacity=".68" fill="none">
+ <path d="M0 300C185 268 142 60 349 120S510 424 680 308 800 54 960 85"/>
+ <path d="M0 322C185 290 142 82 349 142S510 446 680 330 800 76 960 107" opacity=".35"/>
+ <path d="M0 540C130 490 250 625 361 562S623 330 760 470 889 690 960 640"/>
+ <path d="M0 560C130 510 250 645 361 582S623 350 760 490 889 710 960 660" opacity=".35"/>
+ <circle cx="350" cy="134" r="16"/><circle cx="680" cy="318" r="9"/><circle cx="361" cy="571" r="12"/><circle cx="760" cy="478" r="18"/>
+ <path d="M350 134l-31-31m31 31 34-33m-34 33v50M680 318l-30-18 19-29m11 47 34 17-11 26M361 571l-29-29m29 29 38 19m361-112-28-44m28 44 37-41"/>
+</g>
+<g fill="#98d9c5" opacity=".54"><circle cx="349" cy="120" r="4"/><circle cx="680" cy="308" r="4"/><circle cx="361" cy="562" r="4"/><circle cx="760" cy="470" r="4"/></g>
+</svg>
