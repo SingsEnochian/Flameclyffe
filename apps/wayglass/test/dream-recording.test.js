@@ -23,3 +23,23 @@ test('records content-addressed asset without storing raw private content; repla
  second.feather();
  await assert.rejects(second.append({...event,event_id:'frame-002'}),/closed/);
 });
+
+test('concurrent recording appends do not overwrite sibling events',async()=>{
+ const store=new Map();
+ const read=async id=>{await Promise.resolve();return structuredClone(store.get(id)||[]);};
+ const write=async(id,events)=>{await Promise.resolve();store.set(id,structuredClone(events));};
+ const rec=createDreamRecording({dream_id:'concurrent',universe_id:'wayglass',permission:true,read,write});
+ await Promise.all(Array.from({length:12},(_,i)=>rec.append({event_id:'e'+i,stage:'observed'})));
+ const manifest=await rec.manifest();
+ assert.equal(manifest.events.length,12);
+ assert.equal(new Set(manifest.events.map(e=>e.event_id)).size,12);
+});
+test('Feather refuses an append waiting on storage read',async()=>{
+ let release;
+ const gate=new Promise(resolve=>{release=resolve;});
+ const rec=createDreamRecording({dream_id:'stopped',universe_id:'wayglass',permission:true,
+  read:async()=>{await gate;return [];},write:async()=>{throw new Error('must not write');}});
+ const pending=rec.append({event_id:'e1',stage:'observed'});
+ rec.feather();release();
+ await assert.rejects(pending,/closed/);
+});
