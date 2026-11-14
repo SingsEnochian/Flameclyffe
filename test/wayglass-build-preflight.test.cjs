@@ -1,0 +1,14 @@
+'use strict';
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const {validate,QUESTIONS}=require('../scripts/wayglass-build-preflight.cjs');
+const root=path.resolve(__dirname,'..');
+const valid=JSON.parse(fs.readFileSync(path.join(root,'docs/wayglass/preflight-example.json'),'utf8'));
+test('all eight questions and Withness are present',()=>assert.equal(QUESTIONS.length,9));
+test('documented existing-system reuse passes',()=>assert.deepEqual(validate(valid,root),[]));
+test('missing reuse investigation fails closed',()=>assert.ok(validate({...valid,existing_evidence:[]},root).some(x=>x.includes('existing_evidence'))));
+test('new architecture requires duplicate justification',()=>assert.ok(validate({...valid,decision:'new'},root).some(x=>x.includes('duplication'))));
+test('unsupported live verification is rejected',()=>assert.ok(validate({...valid,live_verified:true},root).some(x=>x.includes('receipt'))));
+test('missing Withness is rejected',()=>assert.ok(validate({...valid,withness_wholeness:''},root).some(x=>x.includes('withness'))));
