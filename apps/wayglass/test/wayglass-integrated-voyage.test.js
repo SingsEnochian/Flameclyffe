@@ -34,6 +34,30 @@ test('Wyrdrune, tensor, mythience, Observer, autopoietic Octo and Return share a
  assert.equal(Mobius.verifyChain(r.evolution.root,[r.evolution.checkpoint]).ok,true);
 });
 
+test('new FAEpunk controls select native repair or expansion and explicit sandbox carry',async()=>{
+ const expanded=options();
+ expanded.scenario=syntheticWayglassVoyage({mode:'expand'}).scenario;
+ const proposal=await Integrated.runIntegratedVoyage(expanded);
+ assert.equal(proposal.status,'sandbox-return-verified');
+ assert.equal(proposal.evolution.proposal.infrastructure.queue_capacity,28);
+ assert.equal(proposal.evolution.proposal.intelligence.concurrency,5);
+ assert.equal(proposal.evolution.changed,false);
+ const accepting=options();
+ accepting.scenario=syntheticWayglassVoyage({mode:'expand',decision:'accept'}).scenario;
+ const accepted=await Integrated.runIntegratedVoyage(accepting);
+ assert.equal(accepted.status,'sandbox-return-verified');
+ assert.equal(accepted.evolution.status,'accepted-sandbox-carry');
+ assert.equal(accepted.evolution.changed,true);
+ assert.equal(accepted.evolution.carry.infrastructure.queue_capacity,28);
+ assert.equal(accepted.evolution.carry.intelligence.context_tokens,2176);
+ assert.equal(accepted.persisted,false);
+ const denied=options();
+ denied.scenario=syntheticWayglassVoyage({mode:'repair',decision:'decline'}).scenario;
+ const declined=await Integrated.runIntegratedVoyage(denied);
+ assert.equal(declined.evolution.status,'declined');
+ assert.equal(declined.evolution.changed,false);
+});
+
 test('uninvited Mythience is absent, rather than silently claimed',async()=>{
  const r=await Integrated.runIntegratedVoyage(options());
  assert.equal(r.status,'sandbox-return-verified');
@@ -95,6 +119,9 @@ test('ship host binds verified Steward rather than accepting a caller-supplied p
  assert.match(route,/principal:\{id:'house:steward',authorized:true\}/);
  assert.match(stage,/coevolution-repair\.wtl/);
  assert.match(stage,/coevolution-expand\.wtl/);
- assert.match(systems,/data-voyage-start/);
+ assert.match(systems,/data-voyage-action/);
+ assert.match(systems,/data-voyage-orbit/);
+ assert.match(systems,/data-voyage-mode/);
+ assert.match(systems,/data-voyage-voice/);
  assert.match(systems,/wayglassSomaticSound\.feather\(\)/);
 });
