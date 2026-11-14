@@ -3,14 +3,25 @@ import os
 import json
 import urllib.request
 import urllib.error
+import urllib.parse
+import secrets
 import gradio as gr
 
 GATEWAY = os.environ.get("WAYGLASS_GATEWAY_URL", "").rstrip("/")
 TOKEN = os.environ.get("WAYGLASS_GATEWAY_TOKEN", "")
 MAX_BYTES = 64_000
+OWNER_USER = os.environ.get("WAYGLASS_OWNER_USER", "")
+OWNER_PASSWORD = os.environ.get("WAYGLASS_OWNER_PASSWORD", "")
+
+def ready():
+    if not (GATEWAY and TOKEN and OWNER_USER and OWNER_PASSWORD):
+        return False
+    parsed = urllib.parse.urlparse(GATEWAY)
+    return parsed.scheme == "https" and bool(parsed.hostname) and not parsed.username and not parsed.password and not parsed.fragment and not parsed.query
+
 
 def call_kernel(message, history):
-    if not GATEWAY or not TOKEN:
+    if not ready():
         return "Wayglass kernel not connected. Configure private WAYGLASS_GATEWAY_URL and WAYGLASS_GATEWAY_TOKEN in Space secrets before enabling conversation."
     if not message or len(message) > 8000:
         return "Please enter a message under 8,000 characters."
@@ -39,4 +50,6 @@ with gr.Blocks(title="Wayglass · Kernel Entrance") as demo:
     gr.Markdown("# Wayglass · Kernel Entrance\nOwner-authenticated, receipt-bearing conversations. No simulated kernel.")
     gr.ChatInterface(fn=call_kernel, type="messages")
 if __name__ == "__main__":
-    demo.launch()
+    if not ready():
+        raise SystemExit("Wayglass Space disabled: owner gate, HTTPS gateway and token must all be configured.")
+    demo.launch(auth=(OWNER_USER, OWNER_PASSWORD), show_api=False)
