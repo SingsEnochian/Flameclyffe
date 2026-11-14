@@ -228,8 +228,8 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
       status.textContent=result.status==='candidate-returned'?'Third correspondence proposed. No canon committed.':'Hybrid invitation refused.';
       carryButton.disabled=result.status!=='candidate-returned';
     }catch(error){if(active&&controller===flight)status.textContent=flight.signal.aborted?'Feather: paused.':error.message;}
-    finally{if(controller===flight){controller=null;if(active){button.disabled=false;
-      hybridButton.disabled=journey.snapshot().abilities.length<2;}}}
+    finally{if(controller===flight){controller=null;if(active){button.disabled=paused;
+      hybridButton.disabled=paused||journey.snapshot().abilities.length<2;}}}
   });
   carryButton.addEventListener('click',()=>{
     if(!active||paused||controller)return;
@@ -248,7 +248,7 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
     if(active)status.textContent=outcome.played?'Wyrdrune-derived tone played on request.':outcome.reason;
   });
   feelButton.addEventListener('click',()=>{
-    if(!active||!lastReading)return;
+    if(!active||paused||!lastReading)return;
     const outcome=sensory.feel(lastReading);
     status.textContent=outcome.felt?'Threshold haptic played on request.':outcome.reason||'Haptics unavailable.';
   });
