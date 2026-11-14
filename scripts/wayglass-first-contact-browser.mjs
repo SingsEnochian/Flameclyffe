@@ -196,6 +196,17 @@ try{
  const materialImage=await page.locator('.wc-stage').evaluate(el=>getComputedStyle(el,'::before').backgroundImage);
  assert.match(materialImage,/opal-membrane|data:image\/svg(?:\+|%2[Bb])xml/i,
   'Rendered opal must exist in computed pseudo-element material, including bundled inline SVG: '+materialImage.slice(0,100));
+ const keelGeometry=await page.evaluate(()=>{
+  const helm=document.querySelector('.wg-helm').getBoundingClientRect();
+  const touch=document.querySelector('.wc-faepunk-touch').getBoundingClientRect();
+  return {overlap:helm.left<touch.right && helm.right>touch.left &&
+    helm.top<touch.bottom && helm.bottom>touch.top,
+    keelWidth:helm.width,keelHeight:helm.height};
+ });
+ assert.equal(keelGeometry.overlap,false,
+   'The copper keel must never obscure Touch, Soothe or Bloom');
+ assert.ok(keelGeometry.keelWidth<190 && keelGeometry.keelHeight>200,
+   'The Door must use the new vertical keel, not a recycled horizontal toolbar');
  await page.screenshot({path:resolve(output,'faeberpunk-immersive-desktop.png'),fullPage:true});
  await instruments.click();
  assert.equal(await instruments.getAttribute('aria-expanded'),'true',
@@ -403,6 +414,13 @@ try{
  assert.ok(tabletPlane&&tabletPlane.height>900,'iPad canvas should occupy most of portrait screen');
  assert.match(await tabletPage.locator('.wc-stage').evaluate(el=>getComputedStyle(el,'::before').backgroundImage),
   /opal-membrane|data:image\/svg(?:\+|%2[Bb])xml/i,'iPad must render the opaline material over the canvas');
+ const tabletTouchClear=await tabletPage.evaluate(()=>{
+  const helm=document.querySelector('.wg-helm').getBoundingClientRect();
+  const touch=document.querySelector('.wc-faepunk-touch').getBoundingClientRect();
+  return !(helm.left<touch.right && helm.right>touch.left &&
+   helm.top<touch.bottom && helm.bottom>touch.top);
+ });
+ assert.equal(tabletTouchClear,true,'iPad Touch control must clear the bottom nav');
  await tabletPage.screenshot({path:resolve(output,'faeberpunk-ipad-immersive.png'),fullPage:true});
  await tabletToggle.tap();
  const tabletDock=await tabletPage.locator('.wc-workbench').boundingBox();
