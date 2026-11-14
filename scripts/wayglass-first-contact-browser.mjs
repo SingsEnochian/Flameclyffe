@@ -311,6 +311,9 @@ try{
  assert.equal(saved.turns[0].response.receipt.response_id,null);
  await page.screenshot({path:resolve(output,'watercolor-desktop.png'),fullPage:true});
  await page.reload({waitUntil:'networkidle'});
+ // A fresh entry intentionally returns to the full Living Watercolour.
+ // Reopen the drawer before exercising its explicit recovery action.
+ await page.locator('#wc-instruments-toggle').click();
  await page.locator('#wc-recover-return').click();
  await page.waitForFunction(()=>document.querySelector('#wc-feedback')?.textContent.includes('Conversation recovered'));
  assert.match(await page.locator('#wc-voice').textContent(),/Captured transport reply:/);
