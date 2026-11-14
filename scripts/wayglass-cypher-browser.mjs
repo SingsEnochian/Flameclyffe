@@ -105,6 +105,17 @@ async function checkCodex(page,profile){
  assert.equal(await reading.locator('[data-cypher-line="runes"]').count(),0);
  assert.equal(await coded.first().getAttribute('lang'),'en-GB');
  assert.equal(await source.inputValue(),original,'Reading must not mutate WTL source');
+ if(profile==='mobile'){
+  const overlap=await page.evaluate(()=>{
+    const a=document.querySelector('.wg-codex-toolbar').getBoundingClientRect();
+    const items=[...document.querySelectorAll('.wg-ship-switch,.wg-voyage-inbox')];
+    return items.filter(node=>{
+      const b=node.getBoundingClientRect();
+      return b.left<a.right&&b.right>a.left&&b.top<a.bottom&&b.bottom>a.top;
+    }).map(node=>node.className);
+  });
+  assert.deepEqual(overlap,[],'Mobile Wayglass utilities may not obscure the Cypher toolbar');
+ }
  await page.screenshot({path:resolve(output,profile+'-cypher-english.png'),fullPage:true});
  await source.fill(original+'\n');
  assert.equal(await reading.getAttribute('data-cypher-state'),'idle');
