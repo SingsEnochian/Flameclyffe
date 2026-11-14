@@ -1,0 +1,208 @@
+/* FAEberpunk · second generation. One ship, differentiated rooms.
+ * Aesthetic, never a telemetry claim. Living Watercolour remains the door;
+ * Writing the ritual desk; Observer the instrument bay; Codex native Wyrdrune.
+ */
+:root{
+  --fae2-void:#050c12;--fae2-glass:rgba(8,28,34,.91);
+  --fae2-opal:#bcefe0;--fae2-copper:#e4c38e;
+  --fae2-labradorite:#80bec4;--fae2-moss:#76b7a4;
+  --fae2-etch:rgba(176,235,218,.28);--fae2-paper:#f3eedf;
+  --fae2-recess:#061824;--fae2-focus:#f6d39a;
+  --fae2-text:#edf6ed;--fae2-muted:#bbd3c9;
+  --fae2-round:25px;--fae2-glow:0 0 42px rgba(99,205,179,.08);
+}
+html[data-wayglass-surface="wayglass:living-watercolor"] .wc-stage{
+  box-shadow:0 27px 70px rgba(0,0,0,.5),inset 0 0 1px 1px rgba(211,244,213,.2),
+    inset 0 0 80px rgba(40,117,111,.18),0 0 48px rgba(99,205,179,.12);
+}
+.wc-head h1,.wg-writing-room h1,.wg-living-observer h1{
+  font-family:Georgia,"Times New Roman",serif;font-weight:400;
+  letter-spacing:-.055em;text-shadow:0 0 40px rgba(139,231,209,.12);
+}
+.wc-room-links,.wg-writing-room .wg-deck-nav,.wg-living-observer .wg-deck-nav{
+  display:flex;flex-wrap:wrap;gap:6px;
+}
+.wc-room-links button,.wg-writing-room .wg-deck-nav button,.wg-living-observer .wg-deck-nav button{
+  min-height:44px;border:1px solid rgba(154,220,207,.24);
+  border-radius:13px;background:linear-gradient(145deg,rgba(35,75,79,.25),rgba(5,22,31,.6));
+  color:#d9e8da;
+}
+.wc-room-links button:hover,.wg-writing-room .wg-deck-nav button:hover,
+.wg-living-observer .wg-deck-nav button:hover{
+  border-color:rgba(216,240,200,.68);box-shadow:0 0 20px rgba(127,216,188,.12);
+}
+.wc-room-links button:focus-visible,.wg-writing-room .wg-deck-nav button:focus-visible,
+.wg-living-observer .wg-deck-nav button:focus-visible{
+  outline:3px solid var(--fae2-focus);outline-offset:3px;
+}
+/* The writing room is a real worktable, not a simulated conversation. */
+.wg-writing-room{
+  --wg-writing-tint:rgba(135,194,162,.14);
+  gap:16px;
+}
+.wg-writing-room .wg-surface-head{
+  border-radius:27px;border-color:var(--fae2-etch);
+  background:radial-gradient(ellipse at 14% 0%,var(--wg-writing-tint),transparent 58%),
+    linear-gradient(145deg,rgba(14,36,42,.95),rgba(5,16,26,.97));
+}
+.wg-writing-room h1{color:#f6eedb;font-size:clamp(3rem,6vw,5.7rem)}
+.wg-writing-room .wg-surface-head .eyebrow{color:#b6e6d3}
+.wg-writing-room .wg-surface-head .lede{color:var(--fae2-muted)}
+.wg-writing-room .wg-route-block{
+  border-left-color:rgba(192,222,196,.19);
+}
+.wg-writing-main,.wg-session-sidebar{
+  border:1px solid var(--fae2-etch);
+  background:linear-gradient(153deg,rgba(11,35,41,.95),rgba(4,13,24,.95));
+  box-shadow:inset 0 1px rgba(235,251,217,.11),0 18px 55px rgba(0,0,0,.24),var(--fae2-glow);
+}
+.wg-writing-room .wg-writing-main{overflow:visible}
+.wg-writing-room .wg-thread{border-color:rgba(157,205,195,.26);
+  background:linear-gradient(150deg,rgba(4,18,28,.9),rgba(8,27,32,.83))}
+.wg-writing-room .wg-composer{border-color:rgba(164,225,211,.34);
+  background:radial-gradient(ellipse at 0 0,rgba(113,191,156,.08),transparent 67%),rgba(4,15,24,.83)}
+.wg-writing-room .send-jewel{
+  background:linear-gradient(125deg,rgba(58,133,128,.76),rgba(27,83,96,.82));
+  border-color:rgba(172,236,203,.59);color:#fff8e9;
+  box-shadow:inset 0 1px rgba(253,255,233,.21),0 0 23px rgba(88,210,180,.12);
+}
+.wg-writing-room .send-jewel:hover:not(:disabled){
+  background:linear-gradient(120deg,rgba(67,148,124,.86),rgba(42,104,109,.9));
+}
+.wg-writing-room .glass-chip.active{
+  border-color:rgba(230,205,149,.7);
+  box-shadow:inset 0 1px rgba(254,247,217,.15),0 0 14px rgba(145,204,163,.11);
+}
+.wg-writing-room .wg-wyrdrune-soundscape{
+  border:1px solid rgba(155,208,191,.3);
+  background:radial-gradient(ellipse at 13% 0,rgba(105,156,130,.16),transparent 66%),
+    linear-gradient(155deg,rgba(5,28,34,.9),rgba(7,19,28,.96));
+}
+.wg-writing-room .wg-wtl-panel{
+  display:grid;gap:8px;margin-top:14px;
+}
+.wg-writing-room .fae-codex-door{
+  justify-self:start;min-height:44px;color:#fff1c9;
+  border:1px solid rgba(216,200,151,.51);background:linear-gradient(125deg,rgba(111,100,70,.22),rgba(49,106,104,.21));
+}
+/* Rich manuscript: semantic text on a tactile local parchment, never a model input without a button. */
+.fae-writing-worktable{margin:0 14px 12px;min-width:0}
+.fae-manuscript{
+  border:1px solid rgba(203,220,177,.35);
+  border-radius:20px;overflow:hidden;
+  background:linear-gradient(155deg,rgba(25,56,56,.42),rgba(6,22,28,.67));
+  box-shadow:inset 0 1px rgba(253,246,214,.08);
+}
+.fae-manuscript>summary{
+  display:flex;align-items:center;gap:12px;padding:14px 18px;
+  cursor:pointer;color:#f2e6c6;font:400 clamp(1.04rem,1.8vw,1.3rem) Georgia,serif;
+  border-bottom:1px solid rgba(205,222,182,.14);
+}
+.fae-manuscript-mark{font-size:1.3em;color:#d5ebcb}
+.fae-manuscript-local{margin-left:auto;color:#c2dac7;font:700 .62rem ui-monospace,monospace;letter-spacing:.13em}
+.fae-manuscript-inner{display:grid;gap:11px;padding:14px}
+.fae-manuscript-ribbon{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.fae-manuscript-ribbon button{
+  min-width:44px;min-height:44px;border-radius:11px;
+  background:rgba(6,28,31,.76);border-color:rgba(180,223,200,.34);
+}
+.fae-manuscript-ribbon [data-manuscript-stage]{margin-left:auto;flex:1 1 180px;color:#f4e8bd}
+.fae-manuscript-page{
+  position:relative;min-height:200px;max-height:500px;overflow-y:auto;
+  padding:clamp(16px,2vw,24px);border:1px solid rgba(250,248,225,.49);
+  border-radius:15px;
+  background:radial-gradient(circle at 20% 0,rgba(255,255,255,.5),transparent 46%),
+    linear-gradient(155deg,#f6f3e8,#e7e6d8);
+  color:#233e3b;font:400 clamp(1rem,1.5vw,1.1rem)/1.64 Georgia,serif;
+  overflow-wrap:anywhere;
+  box-shadow:inset 0 0 27px rgba(123,124,101,.12),0 12px 34px rgba(0,0,0,.16);
+}
+.fae-manuscript-page:empty::before{
+  content:attr(data-placeholder);color:#65776e;pointer-events:none;
+}
+.fae-manuscript-page h2,.fae-manuscript-page h3{color:#183833}
+.fae-manuscript-page:focus-visible{outline:3px solid #a95b2a;outline-offset:3px}
+.fae-manuscript-page :is(p,blockquote,ul,ol){margin-block:.4em 1em}
+.fae-manuscript-page blockquote{border-left:3px solid #6b9c8d;padding-left:14px}
+.fae-manuscript-status{margin:0;font-size:.75rem;color:#c8e0cf;line-height:1.5}
+/* Observer: the star chart is a measurement instrument, and its provenance has a face. */
+.wg-living-observer .observer-head{
+  background:radial-gradient(ellipse at 83% 12%,rgba(111,198,184,.16),transparent 57%),
+    linear-gradient(146deg,rgba(7,27,34,.94),rgba(6,15,27,.95));
+  border:1px solid var(--fae2-etch);
+  box-shadow:inset 0 1px rgba(239,249,225,.1),0 21px 55px rgba(0,0,0,.24);
+}
+.wg-living-observer h1{font-size:clamp(2.8rem,6vw,5.1rem)}
+.wg-living-observer .observer-deck{grid-template-columns:minmax(0,1.3fr) minmax(310px,.8fr)}
+.wg-living-observer .observer-stage{
+  background:radial-gradient(circle at 50% 44%,rgba(100,211,195,.13),transparent 44%),
+    radial-gradient(circle at 34% 30%,rgba(166,147,206,.13),transparent 61%),
+    linear-gradient(145deg,rgba(4,20,33,.95),rgba(13,36,45,.88));
+  border:1px solid rgba(165,222,202,.32);
+  box-shadow:inset 0 0 55px rgba(71,153,154,.08),0 27px 65px rgba(0,0,0,.31);
+}
+.wg-living-observer .observer-console{
+  background:radial-gradient(ellipse at 3% 4%,rgba(103,191,159,.1),transparent 60%),
+    linear-gradient(150deg,rgba(11,38,43,.92),rgba(7,19,30,.96));
+  border:1px solid rgba(179,222,198,.32);
+}
+.wg-living-observer .observer-input{
+  min-height:44px;
+  background:linear-gradient(155deg,rgba(48,96,96,.19),rgba(12,30,39,.74));
+  border:1px solid rgba(141,222,204,.31);
+  color:#d7e8df;
+}
+.wg-living-observer .observer-input[aria-pressed="true"]{
+  border-color:#decba2;color:#fbf3dc;
+  background:linear-gradient(145deg,rgba(76,150,134,.3),rgba(26,73,84,.64));
+}
+.fae-observer-evidence{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;
+  padding:12px 17px;border:1px solid rgba(170,226,202,.32);
+  border-radius:18px;
+  background:linear-gradient(110deg,rgba(6,26,34,.9),rgba(21,48,53,.76),rgba(6,23,32,.94));
+}
+.fae-observer-evidence span{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 8px;
+  font:700 .65rem/1.5 ui-monospace,Consolas,monospace;color:#d7c69a;letter-spacing:.1em}
+.fae-observer-evidence i{font:400 1rem Georgia,serif;color:#a9ded1}
+.fae-observer-evidence strong{grid-column:2;display:block;font:500 .82rem/1.4 system-ui,sans-serif;
+  color:#e0efe6;overflow-wrap:anywhere;letter-spacing:normal}
+.wg-living-observer .observer-source{border-left-color:#b8dcb4}
+.wg-living-observer .observer-translation{
+  background:rgba(2,18,24,.38);border-color:rgba(159,223,204,.25);
+}
+/* Shared semantic feedback: light indicates activity only when backed by a receipt. */
+html[data-wayglass-surface="wayglass:living-observer"] .wg-helm-mark,
+html[data-wayglass-surface="wayglass:universal-codex"] .wg-helm-mark{
+  color:#e6c98e;text-shadow:0 0 20px rgba(137,231,203,.34);
+}
+@media(max-width:1020px){
+  .wg-living-observer .observer-deck{grid-template-columns:1fr}
+  .fae-observer-evidence{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:690px){
+  .fae-observer-evidence{grid-template-columns:1fr}
+  .wg-writing-room .wg-writing-main{overflow:visible}
+  .fae-writing-worktable{margin:0 9px 11px}
+  .fae-manuscript-inner{padding:10px}
+  .fae-manuscript-page{min-height:170px}
+  .fae-manuscript>summary{padding:13px}
+  .fae-manuscript-local{font-size:.56rem}
+  .wg-living-observer .observer-inputs{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .wg-living-observer .observer-input{min-height:44px}
+}
+@media(prefers-reduced-motion:reduce){
+  .fae-manuscript *, .wg-living-observer .observer-stage,
+  .wg-writing-room .send-jewel{animation:none!important;transition:none!important;transform:none!important}
+}
+@media(prefers-reduced-transparency:reduce){
+  .wg-writing-main,.wg-session-sidebar,.wg-living-observer .observer-console,
+  .fae-observer-evidence,.wg-living-observer .observer-stage{backdrop-filter:none;
+    background:#0b2029}
+}
+@media(forced-colors:active){
+  .fae-manuscript,.fae-observer-evidence,.wg-writing-main,.wg-session-sidebar{
+    border-color:CanvasText;box-shadow:none;
+  }
+  .fae-manuscript-page{background:Canvas;color:CanvasText;border-color:CanvasText}
+}

@@ -3,6 +3,7 @@ import {createServer} from 'node:http';
 import {readFile,stat,mkdir,writeFile} from 'node:fs/promises';
 import {resolve,relative,extname,dirname,sep} from 'node:path';
 import {pathToFileURL} from 'node:url';
+import firstTouchDemo from '../lib/wayglass-first-touch-demo.cjs';
 
 // Real Chromium against the built application. Host calls use captured transport;
 // this verifies browser behavior, never live inference or provider credentials.
@@ -66,6 +67,24 @@ async function prepareContext(options){
     participant_id:'captured:visitor',kind:'hello',text:'Captured inbox message for browser draft preservation.',
     voyage_ref:'captured:voyage:1',created_at:'2026-11-05T23:00:00.000Z',
    }]}});return;
+  }
+  if(url.pathname==='/api/v1/wayglass/wyrdrune/first-touch'&&route.request().method()==='POST'){
+   try{
+    const payload=route.request().postDataJSON();
+    const native=await firstTouchDemo.runFirstTouch({
+      principal:{id:'house:steward',authorized:true},
+      mode:payload.mode,touch:payload.touch,
+      now:new Date('2026-11-13T20:00:00.000Z'),
+    });
+    receipt.requests.push({route_id:'wayglass:first-touch-captured-host',
+      evidence_kind:'simulation',wtl_executed:native.status==='connected-sandbox-preview',
+      mode:payload.mode,touch:payload.touch,model_invoked:false});
+    await route.fulfill({status:200,json:native});
+   }catch(error){
+    receipt.transport_errors.push(String(error.stack||error));
+    await route.fulfill({status:400,json:{error:'Native Wyrdrune captured-host simulation failed'}});
+   }
+   return;
   }
   if(url.pathname==='/api/v1/wayglass/respond'&&route.request().method()==='POST'){
    try{
@@ -181,17 +200,51 @@ try{
  });
  assert.match(await page.locator('#wc-brush-size-label').textContent(),/85%/);
  await page.locator('#wc-clear-paint').click();
- const paperPixel=await page.locator('#wc-fluid').evaluate(node=>{
+ const samplePaper=()=>page.locator('#wc-fluid').evaluate(node=>{
    const ctx=node.getContext('2d');
    return [...ctx.getImageData(Math.floor(node.width/2),Math.floor(node.height/2),1,1).data];
  });
+ const opaline=await samplePaper();
+ assert.ok(opaline[0]<80&&opaline[1]<95&&opaline[2]<110,
+   'FAEpank cleared painting must show dark opaline paper by default');
+ assert.equal(await page.locator('#wc-paper').getAttribute('aria-pressed'),'true',
+   'The dark paper mode must be accurately exposed to assistive technology');
+ await page.locator('#wc-paper').click();
+ const paperPixel=await samplePaper();
  assert.ok(paperPixel[0]>200&&paperPixel[1]>190&&paperPixel[2]>180,
-   'Cleared painting must show bright, readable paper');
+   'Owner must be able to select a bright, readable light paper');
+ assert.equal(await page.locator('#wc-paper').getAttribute('aria-pressed'),'false',
+   'The paper mode must remain reversible and accessible');
+ assert.ok(await page.locator('#wc-first-touch').isVisible(),
+   'The real Wyrdrune First Touch orb must be reachable in Watercolour');
+ await page.locator('[data-wc-touch-mode="expand"]').click();
+ assert.equal(await page.locator('[data-wc-touch-mode="expand"]').getAttribute('aria-pressed'),'true',
+   'Touch profile must be selectable without starting a model or making a network call');
+ await page.locator('[data-wc-touch-mode="repair"]').click();
  await page.locator('#wc-focus-paint').click();
  assert.equal(await page.locator('.wc-workbench').isVisible(),false,'Focus mode must reclaim canvas space');
  assert.match(await page.locator('#wc-focus-paint').textContent(),/Show workbench/);
  await page.locator('#wc-focus-paint').click();
  assert.equal(await page.locator('.wc-workbench').isVisible(),true,'Focus mode must be reversible');
+ // Actual browser gesture -> captured host executes the real native Wyrdrune
+ // implementation -> Return receipt -> pigment on the existing canvas.
+ const beforeWyrdruneTouch=await canvasDigest(page);
+ const beforeWyrdruneEvents=Number(await page.locator('#wc-events').textContent());
+ await page.locator('#wc-first-touch').click();
+ await page.waitForFunction(()=>document.querySelector('#wc-touch-status')?.textContent.includes('Returned'));
+ assert.notEqual(await canvasDigest(page),beforeWyrdruneTouch,
+   'Touching the FAEpunk orb must change real canvas pigment from the native Wyrdrune Return');
+ assert.ok(Number(await page.locator('#wc-events').textContent())>beforeWyrdruneEvents,
+   'Native Wyrdrune receipt must enter the Living Watercolour activity bus');
+ assert.equal(receipt.requests.at(-1).wtl_executed,true,'Browser touch must execute the native Wyrdrune backend');
+ assert.equal(receipt.requests.at(-1).evidence_kind,'simulation',
+   'A captured-host trial must never be relabelled as live telemetry');
+ await page.locator('[data-wc-touch-mode="expand"]').click();
+ await page.locator('#wc-first-touch').click();
+ await page.waitForFunction(()=>document.querySelector('#wc-touch-status')?.textContent.includes('Bloom'));
+ assert.equal(receipt.requests.at(-1).mode,'expand','Second gesture must execute the other Wyrdrune expansion path');
+ receipt.scenarios.push({id:'real-browser-touch-native-wyrdrune-return-colour-and-bloom',status:'passed',
+  capture:'owner-simulated-host',mode_count:2});
  receipt.scenarios.push({id:'unobstructed-paper-palette-brush-width-and-reversible-focus',status:'passed'});
  const before=await canvasDigest(page),canvas=page.locator('#wc-fluid');
  const box=await canvas.boundingBox();assert.ok(box&&box.width>0&&box.height>0);
@@ -207,7 +260,8 @@ try{
  assert.equal(await page.locator('.wc-deck').evaluate(el=>el.scrollWidth<=el.clientWidth+1),true,'Desktop contribution controls must fit without horizontal clipping');
  assert.notEqual(await canvasDigest(page),pigmentBeforeReply,'Captured route events must produce visible pigment');
  assert.match(await page.locator('#wc-feedback').textContent(),/ollama.*captured-first-contact-fixture.*captured-observation:/);
- assert.equal(receipt.requests[0].first_hello_present,true,'First hello must reach the selected host route');
+ assert.equal(receipt.requests.find(item=>item.route_id===fixtureRoute.route_id && item.first_hello_present===true)?.first_hello_present,true,
+   'First hello must reach the selected host route even when First Touch requests occur earlier');
  assert.match(await page.locator('.wg-motion-status').textContent(),/Route completed/,'Motion status must reflect observed route completion');
  await page.locator('#wc-save-return').click();
  const saved=await localTranscript(page);assert.equal(saved.turns.length,1);
@@ -252,6 +306,38 @@ try{
  await page.screenshot({path:resolve(output,'acoustic-desktop.png'),fullPage:true});
  await checkDockNavigation(page,{profile:'desktop',destination:'wayglass:living-watercolor',surfaceSelector:'#wc-fluid'});
  receipt.scenarios.push({id:'acoustic-navigation-spatial-return-and-room-remount',status:'passed'});
+ // The new FAEpunk Worktable passage must open an actual native Wyrdrune editor,
+ // not a decorative button linking to an unregistered surface.
+ await page.locator('.wg-helm-loci [data-locus="worktable"]').click();
+ await page.locator('[data-surface="wayglass-universal-codex"]').waitFor();
+ assert.ok((await page.locator('#codex-source').inputValue()).includes('mobius'),
+   'Universal Codex must have real editable Wyrdrune source');
+ await page.locator('[data-codex-translate]').click();
+ assert.match(await page.locator('[data-codex-english]').textContent(),/Perceive|perceive|source|code/i,
+   'Native Wyrdrune must give an English reading without invoking a model');
+ await page.screenshot({path:resolve(output,'faeberpunk-codex-desktop.png'),fullPage:true});
+ // The same source-level design system must connect a real editor and a real
+ // Observer, not just draw a Codex screen. The manuscript is local-only.
+ await page.locator('[data-codex-room="arcsweep:writing-room"]').click();
+ const manuscript=page.locator('[data-manuscript-editor]');
+ await manuscript.waitFor();
+ await manuscript.fill('An opaline moon over the living ship.');
+ await page.locator('[data-manuscript-stage]').click();
+ assert.match(await page.locator('#wg-input').inputValue(),/An opaline moon over the living ship/);
+ assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('wayglass:manuscript-local/v1'))?.schema),
+  'wayglass:manuscript-local/v1','Rich manuscript must retain a local-only draft');
+ await page.screenshot({path:resolve(output,'faeberpunk-writing-desktop.png'),fullPage:true});
+ await page.locator('[data-wayglass-room="wayglass:living-observer"]').first().click();
+ await page.locator('.fae-observer-evidence').waitFor();
+ assert.ok((await page.locator('[data-fae-observer-source]').textContent()).trim().length>0,
+  'Observer must expose its selected instrument source');
+ assert.match(await page.locator('[data-fae-observer-quad]').textContent(),/Not observed|reported channels/);
+ await page.locator('[data-observer-focus]').nth(1).click();
+ await page.screenshot({path:resolve(output,'faeberpunk-observer-desktop.png'),fullPage:true});
+ await page.locator('[data-wayglass-room="wayglass:living-watercolor"]').first().click();
+ await page.locator('#wc-fluid').waitFor();
+ receipt.scenarios.push({id:'faepunk-four-room-codex-writing-observer-watercolour-passage',status:'passed',
+  rich_text:'browser-local',observation:'source-labelled'});
  await context.close();
 
  const mobile=await prepareContext({viewport:{width:390,height:844},deviceScaleFactor:1,hasTouch:true,isMobile:true,reducedMotion:'reduce'});

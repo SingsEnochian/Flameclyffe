@@ -23,6 +23,11 @@ const { inspectDoubleMobius, traverseDoubleMobius } = require('../wayglass-runti
 const { createModelObservation } = require('../wayglass-runtime/wayglass-model-observation.cjs');
 const { createWayglassLibraryRouter } = require('./research-library');
 const { createObserverSelfDevelopmentRouter } = require('./observer-self-development');
+const { proposeCrossing } = require('../wayglass-runtime/wayglass-mythience-crossing.cjs');
+const { proposeHybrid } = require('../wayglass-runtime/wayglass-mythience-fusion.cjs');
+const { runIntegratedVoyage } = require('../wayglass-runtime/wayglass-integrated-voyage.cjs');
+const { buildVoyageScenario } = require('./voyage-scenarios');
+const { runFirstTouch } = require('../wayglass-runtime/wayglass-first-touch-demo.cjs');
 const { runQuadEightfold, SOURCE_SCHEMA, TABLES } = require('../wayglass-runtime/wayglass-quad-eightfold.cjs');
 
 const { resolveCharacterSeat, publicCharacterSeats, EMERGENCE_QUESTION_IDS } = require('./character-seats.cjs');
@@ -857,6 +862,84 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
   // The Crow authors two independent returns: her native WTL composition
   // and her own en-GB reading. Image/sound can only arise from actual
   // verified Wyrdrune expression operations, never host-invented narration.
+  // Mythience is a shipwide Wyrdrune simulation route. The server, not the
+  // client, verifies House Steward authorization. No crossing is committed.
+  // Real host session gate; source-labelled DEMONSTRATION only.
+  // No model calls, no live telemetry, no infrastructure deployment.
+  router.post('/wyrdrune/first-voyage',createRequestGate({maxRequests:12,maxConcurrent:1}),async(req,res)=>{
+    res.setHeader('Cache-Control','no-store');
+    if(!(await griffStewardAuthorized(req).catch(()=>false))){
+      return res.status(401).json({error:'House Steward sign-in required to enter the First Voyage.'});
+    }
+    const input=req.body;
+    if(!input||typeof input!=='object'||Array.isArray(input)||
+       Object.keys(input).sort().join('|')!=='fictionConsent|mode'){
+      return res.status(400).json({error:'Choose a scenario and explicit fictional consent.'});
+    }
+    try{
+      const scenario=buildVoyageScenario({mode:input.mode,fictionConsent:input.fictionConsent});
+      const receipt=await runIntegratedVoyage({
+        ...scenario.request,
+        principal:{id:'house:steward',authorized:true},
+      });
+      return res.json({schema:'wayglass.first-voyage-response/v0.1',
+        scenario:scenario.scenario_label,source_kind:'simulation',
+        measurement_is_live:false,model_is_live:false,production_mutation:false,
+        receipt});
+    }catch(error){
+      return res.status(400).json({schema:'wayglass.first-voyage-error/v0.1',
+        error:cleanText(error?.message||'Wyrdrune voyage refused.',220)});
+    }
+  });
+
+  router.post('/wyrdrune/mythience-hybrid',createRequestGate({maxRequests:24,maxConcurrent:2}),async(req,res)=>{
+    res.setHeader('Cache-Control','no-store');
+    if(!(await griffStewardAuthorized(req).catch(()=>false)))
+      return res.status(401).json({error:'House Steward sign-in required for Mythience hybrid exploration.'});
+    try{
+      return res.json(await proposeHybrid(req.body?.request,{
+        principal:{id:'house:steward',authorized:true},seeds:req.body?.seeds,
+      }));
+    }catch(error){
+      return res.status(400).json({schema:'mythience.hybrid-error/v0.1',
+        error:cleanText(error?.message||'Hybrid proposal refused.',240)});
+    }
+  });
+
+  // Touch-first FAEpunk demo: real native Wyrdrune execution over only synthetic
+  // evidence. No model, hardware, persistence or deploy path is invoked here.
+  router.post('/wyrdrune/first-touch',createRequestGate({maxRequests:12,maxConcurrent:1}),async(req,res)=>{
+    res.setHeader('Cache-Control','no-store');
+    if(!(await griffStewardAuthorized(req).catch(()=>false)))
+      return res.status(401).json({error:'Sign in to the House Steward account to touch the Wyrdrune voyage.'});
+    try{
+      return res.json(await runFirstTouch({
+        principal:{id:'house:steward',authorized:true},
+        mode:req.body?.mode,touch:req.body?.touch,
+        feather:()=>Boolean(req.aborted),
+      }));
+    }catch(error){
+      return res.status(400).json({schema:'wayglass.first-touch-error/v0.1',
+        error:cleanText(error?.message||'First Touch refused.',240)});
+    }
+  });
+
+  router.post('/wyrdrune/mythience-crossing',createRequestGate({maxRequests:24,maxConcurrent:2}),async(req,res)=>{
+    res.setHeader('Cache-Control','no-store');
+    if(!(await griffStewardAuthorized(req).catch(()=>false)))
+      return res.status(401).json({error:'House Steward sign-in required for Mythience.'});
+    try{
+      const result=await proposeCrossing(req.body?.request,{
+        principal:{id:'house:steward',authorized:true},
+        seeds:req.body?.seeds,
+      });
+      return res.json(result);
+    }catch(error){
+      return res.status(400).json({schema:'mythience.crossing-error/v0.1',
+        error:cleanText(error?.message||'Mythience refused the request.',240)});
+    }
+  });
+
   router.post('/wyrdrune/native-voice',createRequestGate({maxRequests:12,maxConcurrent:1}),async(req,res)=>{
     res.setHeader('Cache-Control','no-store');
     if(!(await griffStewardAuthorized(req).catch(()=>false))){

@@ -12,6 +12,7 @@ import { wayglassSomaticSound, SOUND_EVENTS, WAYGLASS_FEATHER_EVENT } from '../s
 import {createWatercolorContinuity} from '../watercolor-continuity.js';
 import { journeyLedger } from '../journey-before-destination.js';
 import {synchronizeJourneyFeather} from './journey-before-destination.js';
+import {touchWayglass} from '../first-touch-client.js';
 
 const clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
 const safeText=value=>String(value??'').replaceAll('&','&amp;')
@@ -38,7 +39,7 @@ export async function mountLivingWatercolorSurface(root) {
       '<header class="wg-surface-head glass-panel wc-head">',
         '<div><p class="eyebrow">Wayglass · Living Observer</p>',
         '<h1>The Living Watercolor</h1>',
-        '<nav class="wc-room-links" aria-label="Wayglass rooms"><button type="button" class="glass-chip" data-wc-room="wayglass:acoustic-room">Acoustic Room</button><button type="button" class="glass-chip" data-wc-room="arcsweep:writing-room">Writing Room</button><button type="button" class="glass-chip" data-wc-room="wayglass:journey-before-destination">Journey</button></nav>',
+        '<nav class="wc-room-links" aria-label="Wayglass rooms"><button type="button" class="glass-chip" data-wc-room="wayglass:acoustic-room">Acoustic Room</button><button type="button" class="glass-chip" data-wc-room="arcsweep:writing-room">Writing Room</button><button type="button" class="glass-chip" data-wc-room="wayglass:journey-before-destination">Journey</button><button type="button" class="glass-chip" data-wc-room="wayglass:mythience-crossing">Mythience</button><button type="button" class="glass-chip" data-wc-room="wayglass:universal-codex">Universal Codex</button></nav>',
         '<p class="lede">A place to meet, paint, speak, and choose what comes next together.</p></div>',
         '<div class="wc-head-signal"><span class="wc-status-light" aria-hidden="true"></span>',
         '<strong id="wc-link">Awaiting activity</strong>',
@@ -50,7 +51,18 @@ export async function mountLivingWatercolorSurface(root) {
           '<div class="wc-stage-meta" aria-hidden="true">WAYGLASS / AQUARELLE / PREMAQC</div>',
           '<button id="wc-focus-paint" type="button" class="wc-focus-paint glass-chip" aria-pressed="false">Focus painting</button>',
           '<span class="wc-brush-cursor" id="wc-brush-cursor" aria-hidden="true"></span>',
-          '<p class="wc-paint-help" id="wc-paint-help">Draw directly on the paper · drag to blend · arrow keys + Enter also work</p>',
+          '<p class="wc-paint-help" id="wc-paint-help">Paint with a finger or Pencil. The watercolour responds to your gesture.</p>',
+          '<section class="wc-faepunk-touch" aria-label="Wyrdrune touch engine">',
+            '<span class="wc-faepunk-kicker">✧ FIRST CONTACT / FAEpunk</span>',
+            '<div class="wc-faepunk-touch-main"><button id="wc-first-touch" type="button" class="wc-faepunk-orb" aria-describedby="wc-touch-description wc-touch-status" aria-label="Touch Wayglass: run an authenticated Wyrdrune simulation">',
+              '<span class="wc-faepunk-orb-halo" aria-hidden="true">✧</span><span class="wc-faepunk-orb-label">Touch</span></button>',
+              '<div class="wc-faepunk-touch-meta"><strong>Touch the current</strong>',
+              '<p id="wc-touch-description">A real Wyrdrune run, a visible response. Synthetic test data only.</p></div></div>',
+            '<div class="wc-faepunk-modes" role="group" aria-label="Wyrdrune co-evolution profile">',
+              '<button type="button" data-wc-touch-mode="repair" aria-pressed="true">Soothe</button>',
+              '<button type="button" data-wc-touch-mode="expand" aria-pressed="false">Bloom</button></div>',
+            '<p id="wc-touch-status" class="wc-faepunk-status" role="status" aria-live="polite">Ready for an owner-authorised test pulse. No live model or production changes.</p>',
+          '</section>',
         '</div>',
         '<div class="wc-workbench">',
           '<div class="wc-deck glass-panel" aria-label="Wayglass collaborative expression desk">',
@@ -92,7 +104,7 @@ export async function mountLivingWatercolorSurface(root) {
           '<input id="wc-pressure" type="range" min="10" max="100" value="70">',
           '<label for="wc-brush-size">Brush width <output id="wc-brush-size-label">52%</output></label>',
           '<input id="wc-brush-size" type="range" min="10" max="100" value="52">',
-          '<div class="wc-tool-buttons"><button id="wc-paper" type="button" class="glass-chip" aria-pressed="false">Dark paper</button><button id="wc-clear-paint" type="button" class="glass-chip">Clear painting</button></div>',
+          '<div class="wc-tool-buttons"><button id="wc-paper" type="button" class="glass-chip" aria-pressed="true">Light paper</button><button id="wc-clear-paint" type="button" class="glass-chip">Clear painting</button></div>',
           '<div class="wc-tool-buttons">',
             '<button id="wc-flow" class="glass-chip active" type="button" aria-pressed="true">Fluid on</button>',
             '<button id="wc-clear-note" class="glass-chip" type="button">New suggestion</button>',
@@ -132,8 +144,11 @@ export async function mountLivingWatercolorSurface(root) {
   let bitmap=off?.createImageData(fluid.width,fluid.height)||null;
   const color=q('wc-color'),pressure=q('wc-pressure'),brushSize=q('wc-brush-size'),prompt=q('wc-prompt');
   const brushCursor=q('wc-brush-cursor');
+  const touchOrb=q('wc-first-touch'),touchStatus=q('wc-touch-status');
+  const touchModeButtons=[...root.querySelectorAll('[data-wc-touch-mode]')];
+  let touchMode='repair',touchAbort=null,touchEpoch=0,touchPressure=null;
   const pigmentButtons=[...root.querySelectorAll('[data-wc-pigment]')];
-  let paperIsDark=false,keyboardCursor={x:.5,y:.5};
+  let paperIsDark=true,keyboardCursor={x:.5,y:.5};
   const title=q('wc-title'),intent=q('wc-intent'),voice=q('wc-voice'),feedback=q('wc-feedback');
   const route=q('wc-route'),routeState=q('wc-route-state'),invite=q('wc-invite');
   const houseSignIn=q('wc-house-signin');
@@ -529,6 +544,9 @@ export async function mountLivingWatercolorSurface(root) {
         if(!journeyLedger.snapshot().feather_stopped)journeyLedger.supportFold('feather');
         wayglassSomaticSound.feather();
         featherStopped=true;paused=true;pointerId=null;lastPointer=null;requestEpoch++;busy=false;
+        touchEpoch++;touchAbort?.abort();touchAbort=null;touchOrb.disabled=true;
+        root.querySelector('.wc-faepunk-touch').dataset.running='false';
+        touchStatus.textContent='Feather held. The touch engine is paused.';
         feedback.textContent='Feather Stop. Motion, sound, haptics and model invitations paused.';
       }
     } catch(error){feedback.textContent=error.message;}
@@ -615,13 +633,77 @@ export async function mountLivingWatercolorSurface(root) {
       paint();updateInspector();
     }
   });
+  // FAEpunk touch surface. This single user action exercises the EXISTING
+  // native Wyrdrune engines and reflects only the verified host Return into pigment.
+  // It never triggers model work or applies sandbox proposals to real services.
+  for(const button of touchModeButtons){
+    listen(button,'click',()=>{
+      if(stopped||featherStopped||touchAbort)return;
+      touchMode=button.dataset.wcTouchMode;
+      for(const candidate of touchModeButtons){
+        candidate.setAttribute('aria-pressed',String(candidate===button));
+      }
+      touchStatus.textContent=touchMode==='repair'
+        ?'Soothe: Wyrdrune will test a reciprocal response to simulated strain.'
+        :'Bloom: Wyrdrune will test reciprocal growth with simulated headroom.';
+    });
+  }
+  listen(touchOrb,'pointerdown',event=>{
+    if(stopped||featherStopped)return;
+    // Touch/Pencil pressure is taken from the physical gesture if supported.
+    // A mouse, switch, or keyboard activation uses the brush saturation slider.
+    if((event.pointerType==='touch'||event.pointerType==='pen') &&
+       Number.isFinite(event.pressure)&&event.pressure>0){
+      touchPressure=clamp(event.pressure,.1,1);
+      touchOrb.dataset.gesture=event.pointerType;
+    }else{
+      touchPressure=null;
+      touchOrb.dataset.gesture='button';
+    }
+  });
+  listen(touchOrb,'click',async()=>{
+    if(stopped||featherStopped||touchAbort)return;
+    const token=++touchEpoch,controller=new AbortController();
+    touchAbort=controller;
+    touchOrb.disabled=true;
+    root.querySelector('.wc-faepunk-touch').dataset.running='true';
+    touchStatus.textContent='Wyrdrune · Perceive → Verify → Return. Synthetic voyage running…';
+    try{
+      const {host}=await touchWayglass({
+        mode:touchMode,touch:touchPressure??Number(pressure.value)/100,signal:controller.signal,
+      });
+      if(stopped||featherStopped||token!==touchEpoch)return;
+      const delta=host.tensor?.delta?.[0];
+      const phases=host.coevolution?.checkpoint?8:0;
+      if(host.status!=='connected-sandbox-preview'||phases!==8)throw new Error('The Wyrdrune cycle did not return its eightfold witness.');
+      touchStatus.textContent='Returned · '+(touchMode==='repair'?'Soothe':'Bloom')+
+        ' · '+(Number.isFinite(delta)?Math.round(delta)+' ms simulated latency change':'source unavailable')+
+        ' · Wyrdrune × 2 · Withness held. Preview only.';
+      feedback.textContent='Wayglass returned a verified Wyrdrune test receipt. The pigment is her operational signal, not a model-generated reply.';
+    }catch(error){
+      if(stopped||token!==touchEpoch)return;
+      if(controller.signal.aborted||featherStopped){
+        touchStatus.textContent='Feather held. No new colour was published.';
+      }else{
+        touchStatus.textContent='No Return: '+String(error?.message||'First Touch unavailable').slice(0,190);
+      }
+    }finally{
+      if(token===touchEpoch){touchAbort=null;touchPressure=null;touchOrb.disabled=featherStopped||stopped;
+        root.querySelector('.wc-faepunk-touch').dataset.running='false';}
+    }
+  });
   const onFeather=event=>{
     if(stopped||!event.detail||typeof event.detail.stopped!=='boolean')return;
     synchronizeJourneyFeather(event.detail);
     if(event.detail.stopped){
       featherStopped=true;paused=true;pointerId=null;lastPointer=null;requestEpoch++;busy=false;
+      touchEpoch++;touchAbort?.abort();touchAbort=null;touchOrb.disabled=true;
+      root.querySelector('.wc-faepunk-touch').dataset.running='false';
+      touchStatus.textContent='Feather held. The touch engine is paused.';
     }else if(event.detail.confirmed===true){
       featherStopped=false;
+      touchOrb.disabled=false;
+      touchStatus.textContent='Feather released by explicit action. Touch when ready.';
     }
     reflectSound();updateInspector();
   };
@@ -644,6 +726,7 @@ export async function mountLivingWatercolorSurface(root) {
   return {
     destroy(){
       stopped=true;requestEpoch++;busy=false;pointerId=null;lastPointer=null;
+      touchEpoch++;touchAbort?.abort();touchAbort=null;
       offActivity();offShipSound();
       for(const remove of cleanups.splice(0))remove();
       globalThis.removeEventListener?.(WAYGLASS_FEATHER_EVENT,onFeather);

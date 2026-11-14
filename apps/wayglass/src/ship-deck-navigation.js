@@ -9,6 +9,7 @@ export const SHIP_DECK_GROUPS=Object.freeze([
 const DESTINATIONS=Object.freeze({
   'wayglass:living-watercolor':'contact',
   'arcsweep:writing-room':'contact',
+  'wayglass:universal-codex':'creation',
   'wayglass:journey-before-destination':'contact',
   'arcsweep:deck':'creation',
   'wayglass:sound-composition':'creation',
@@ -22,6 +23,7 @@ const DESTINATIONS=Object.freeze({
   'wayglass:library':'commons',
   'wayglass:commons':'commons',
   'wayglass:toybox':'commons',
+  'wayglass:mythience-crossing':'creation',
 });
 export function shipDeckGroup(surfaceId){return DESTINATIONS[surfaceId]||'commons';}
 export function shipDeckMatches({label='',surface_id=''},search=''){

@@ -1,0 +1,71 @@
+/* Wayglass FAEberpunk · Universal Codex, native Wyrdrune worktable */
+.wg-codex{--codex-ink:#eaf3e8;--codex-rune:#b1e8dd;--codex-gold:#e3c490;
+  --codex-etched:rgba(170,226,207,.24);display:grid;gap:16px;color:var(--codex-ink)}
+.wg-codex .glass-panel{border:1px solid var(--codex-etched);border-radius:25px;
+  background:radial-gradient(ellipse at 12% 0%,rgba(83,153,146,.16),transparent 52%),
+  linear-gradient(150deg,rgba(10,31,39,.94),rgba(5,15,25,.96));
+  box-shadow:inset 0 1px rgba(241,254,228,.09),0 20px 48px rgba(0,0,0,.24)}
+.wg-codex-head{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:clamp(20px,4vw,47px);
+  min-height:240px;overflow:hidden;position:relative}
+.wg-codex-head::after{content:"";position:absolute;inset:auto -15% -75% 22%;height:120%;
+  background:radial-gradient(ellipse,rgba(100,193,176,.12),transparent 62%);pointer-events:none}
+.wg-codex-head>div:first-child{max-width:71ch;z-index:1}
+.wg-codex h1{font:400 clamp(3rem,7vw,6rem)/.95 Georgia,serif;letter-spacing:-.06em;color:#f8f5e8;margin:.3em 0}
+.wg-codex h1 em{color:#b6eee0;font-weight:400}
+.wg-codex .lede{font-size:clamp(1rem,1.3vw,1.13rem);line-height:1.5;color:#cbded7}
+.wg-codex-truth{color:#a7c5c0;font-size:.81rem}
+.wg-codex-sigil{flex:0 0 clamp(145px,18vw,250px);aspect-ratio:1;position:relative;
+  display:grid;place-items:center;isolation:isolate;color:#e0cba2}
+.wg-codex-sigil::before{content:"";position:absolute;inset:8%;border-radius:50%;
+  border:1px solid rgba(208,230,197,.38);box-shadow:0 0 0 14px rgba(97,200,178,.055),
+  inset 0 0 45px rgba(103,206,175,.19);background:radial-gradient(circle,rgba(44,116,113,.38),rgba(6,25,32,.78) 65%,transparent)}
+.wg-codex-sigil span{font:normal clamp(4rem,7vw,6rem)/1 Georgia,serif;color:#d3eddd;
+  text-shadow:0 0 22px rgba(144,238,215,.42);position:relative}
+.wg-codex-sigil i{position:absolute;right:14%;top:16%;font:400 2rem Georgia,serif}
+.wg-codex-sigil strong{position:absolute;bottom:10%;letter-spacing:.25em;font-size:.6rem}
+.wg-codex-passages{padding:11px;display:flex;gap:8px;flex-wrap:wrap}
+.wg-codex-passages button{min-height:44px;flex:1 1 150px}
+.wg-codex-worktable{display:grid;grid-template-columns:minmax(0,1.06fr) minmax(0,.94fr);align-items:start;gap:16px}
+.wg-codex-editor,.wg-codex-reading{min-width:0;min-height:660px;display:flex;flex-direction:column;gap:12px;padding:clamp(17px,2.3vw,28px)}
+.wg-codex-bay-title{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.wg-codex h2{margin:0;font:400 clamp(1.8rem,3vw,2.5rem)/1.1 Georgia,serif;color:#ecf3e9}
+.wg-codex-source-status{letter-spacing:.15em;color:#d9c59a;font-size:.66rem;font-weight:700}
+.wg-codex-source-label{font-size:.76rem;color:#c0d8cf}
+.wg-codex textarea{min-height:460px;width:100%;flex:1;resize:vertical;padding:23px 21px;tab-size:2;
+  font:500 clamp(.9rem,1.2vw,1rem)/1.74 ui-monospace,SFMono-Regular,Consolas,monospace;color:#d9f1e3;
+  background:linear-gradient(140deg,rgba(2,14,22,.96),rgba(6,28,33,.96));
+  border:1px solid rgba(127,218,199,.27);border-radius:18px;
+  box-shadow:inset 0 0 30px rgba(28,65,74,.2)}
+.wg-codex textarea:focus-visible,.wg-codex button:focus-visible,.wg-codex summary:focus-visible{
+  outline:3px solid #efcd90;outline-offset:3px}
+.wg-codex-toolbar{display:flex;flex-wrap:wrap;gap:8px}
+.wg-codex-toolbar button{min-height:44px;flex:1 1 auto;white-space:normal}
+.wg-codex-status{min-height:44px;line-height:1.5;color:#b6d7d0;font-size:.88rem;margin:0}
+.wg-codex-status[data-held="true"]{color:#f0cfb4}
+.wg-codex-reading-intro{color:#b9d1c9;margin:0;line-height:1.6}
+.wg-codex-translation{padding:20px;max-height:550px;min-height:260px;overflow-y:auto;
+  background:radial-gradient(circle at 50% 0%,rgba(102,183,165,.1),transparent 63%),rgba(2,15,24,.72);
+  border:1px solid rgba(155,219,198,.24);border-radius:17px;font-size:.95rem;line-height:1.66}
+.wg-codex-translation .wg-cypher-phase{padding:11px 13px;border-left:2px solid rgba(226,198,143,.54);
+  background:rgba(51,100,102,.1);margin:13px 0}
+.wg-codex-translation .wg-cypher-line{overflow-wrap:anywhere;white-space:pre-wrap}
+.wg-codex-translation .wg-cypher-unit{font:400 1.2rem Georgia,serif;color:#dfc9a1}
+.wg-codex-translation .wg-cypher-phase-name{color:#c6eadd}
+.wg-codex-ledger{border-top:1px solid rgba(163,216,196,.22);padding:12px 0}
+.wg-codex-ledger summary{cursor:pointer;font-weight:700;color:#e9d5ad}
+.wg-codex-ledger pre{max-height:300px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;
+  background:rgba(0,8,15,.8);padding:14px;border-radius:12px;color:#b6d3cb}
+.wg-codex-folds{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:auto}
+.wg-codex-folds span{font-size:.75rem;padding:11px 9px;display:flex;align-items:center;gap:7px;
+  border-radius:12px;border:1px solid rgba(149,218,203,.23);background:rgba(32,69,73,.12);color:#acc9c0}
+.wg-codex-folds b{font:600 .73rem ui-monospace,monospace;color:#d8c29b}
+.wg-codex-folds [data-verified="true"]{border-color:rgba(190,239,191,.64);background:rgba(68,147,112,.18);color:#e9ffe9}
+.wg-codex-footer{padding:0 9px;color:#adc4bc}
+@media(max-width:1050px){.wg-codex-worktable{grid-template-columns:1fr}.wg-codex-editor,.wg-codex-reading{min-height:0}.wg-codex textarea{min-height:350px}}
+@media(max-width:700px){.wg-codex-head{padding:23px;min-height:0}.wg-codex-sigil{display:none}
+  .wg-codex h1{font-size:clamp(2.8rem,11vw,4.3rem)}.wg-codex-folds{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .wg-codex-toolbar button{flex:1 1 125px}.wg-codex-editor,.wg-codex-reading{padding:16px}
+  .wg-codex-translation{min-height:200px}.wg-codex textarea{font-size:16px}}
+@media(prefers-reduced-motion:reduce){.wg-codex *{animation:none!important;transition:none!important}}
+@media(prefers-reduced-transparency:reduce){.wg-codex .glass-panel{background:#0c2029}}
+@media(forced-colors:active){.wg-codex .glass-panel,.wg-codex-folds span{border-color:CanvasText}}

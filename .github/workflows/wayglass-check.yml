@@ -18,6 +18,7 @@ on:
       - 'apps/starwell-server/flames/**'
       - 'scripts/wayglass-*.mjs'
       - 'lib/wayglass-*'
+      - 'lib/wyrdrune/**'
       - 'api/_shared/wayglass-gateway.mjs'
       - 'api/v1/wayglass/**'
       - 'vercel.json'

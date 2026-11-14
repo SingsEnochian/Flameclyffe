@@ -1,0 +1,49 @@
+// Wyrdrune native tensor-engine demonstration.
+// WTL owns the programme and the authorised bridge; the numerical engine owns only tensor execution.
+// The returned WGSL is a derivation artifact, not a claim that a GPU dispatched it.
+
+mobius scoped {
+  perceive {
+    let programme = {
+      schema: "wyrdrune.tensor-ir/v0.1",
+      inputs: [
+        { id: "x", shape: [4], dtype: "f32" },
+        { id: "y", shape: [4], dtype: "f32" }
+      ],
+      nodes: [
+        { id: "product", op: "mul", args: ["x", "y"] },
+        { id: "wave", op: "sin", args: ["x"] },
+        { id: "score", op: "add", args: ["product", "wave"] },
+        { id: "loss", op: "sum", args: ["score"] }
+      ],
+      outputs: ["score", "loss"]
+    };
+    let feeds = {
+      x: [0.1, 0.2, 0.3, 0.4],
+      y: [2, 2, 2, 2]
+    };
+  }
+  compress {
+    let divination = bridge("tensor", "divine", programme, "score");
+  }
+  release {
+    let result = bridge("tensor", "evaluate", programme, feeds);
+  }
+  verify {
+    require true else "Tensor bridge did not reach Verify";
+  }
+  integrate {
+    let gradient = bridge("tensor", "differentiate", programme, "loss", "x", feeds);
+  }
+  choose {
+    emit result;
+    emit divination;
+    emit gradient;
+  }
+  return {
+    emit "Wyrdrune tensor result returned";
+  }
+  transcend {
+    carry result = result;
+  }
+}
