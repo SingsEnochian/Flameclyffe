@@ -43,7 +43,7 @@ mobius scoped {
     require bridge("evidence", "lineageValid") else "provenance or timeline invalid";
   }
   integrate {
-    withness {
+    let withness_relation = {
       outcome: "expand",
       infrastructure: { queue_capacity: suggested_queue, timeout_ms: suggested_timeout },
       intelligence: { concurrency: suggested_concurrency, context_tokens: suggested_context },
@@ -60,7 +60,8 @@ mobius scoped {
       intelligence: { concurrency: suggested_concurrency, context_tokens: suggested_context },
       activation: activation,
       evidence_kind: base_kind,
-      status: "trial-verified-sandbox-proposal"
+      status: "trial-verified-sandbox-proposal",
+      withness: withness_relation
     };
   }
   transcend {
