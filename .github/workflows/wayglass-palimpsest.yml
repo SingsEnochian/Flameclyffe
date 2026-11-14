@@ -5,6 +5,9 @@ on:
     paths:
       - 'lib/wayglass-mobius-palimpsest.mjs'
       - 'lib/wayglass-mobius-palimpsest.test.mjs'
+      - 'lib/wayglass-worldwake-wtl.mjs'
+      - 'lib/wayglass-worldwake-wtl.test.mjs'
+      - 'docs/wayglass/WORLDWAKE_CR_001.wyr'
       - '.github/workflows/wayglass-palimpsest.yml'
   pull_request:
     paths:
@@ -23,4 +26,4 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test lib/wayglass-mobius-palimpsest.test.mjs
+      - run: node --test lib/wayglass-mobius-palimpsest.test.mjs lib/wayglass-worldwake-wtl.test.mjs
