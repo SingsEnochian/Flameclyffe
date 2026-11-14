@@ -49,3 +49,47 @@ test('source that does not compile is refused before anything animates', () => {
   assert.equal(root.children.length, 0);
   assert.match(readWyrdrune(SRC).text, /Carry depth across the twist as depth\./);
 });
+
+test('living cypher marks its three faces and keeps the mutable text out of live announcements', async()=>{
+  const dom=fakeDom(),clock=fakeClock(),phases=[];
+  const job=animateWyrdruneCypher(dom.root,{
+    source:SRC,doc:dom,scope:clock,steps:6,frameMs:10,
+    onPhase:phase=>phases.push(phase),
+  });
+  assert.equal(dom.root.attrs['aria-live'],'off');
+  assert.equal(dom.root.attrs['aria-busy'],'true');
+  assert.equal(dom.root.attrs['data-cypher-state'],'reading');
+  assert.ok(lines(dom.root).every(row=>row.attrs['data-cypher-line']==='source'));
+  clock.run();
+  await job.done;
+  assert.equal(dom.root.attrs['aria-busy'],'false');
+  assert.equal(dom.root.attrs['data-cypher-state'],'english');
+  assert.ok(lines(dom.root).every(row=>row.attrs['data-cypher-line']==='english'));
+  assert.deepEqual(phases,['perceive','compress','release','verify','integrate','choose','return','transcend']);
+});
+
+test('stop and ship motion-off settle the full English without a stale rune or timer', async()=>{
+  const a=fakeDom(),clock=fakeClock();
+  const job=animateWyrdruneCypher(a.root,{source:SRC,doc:a,scope:clock,steps:22,frameMs:40});
+  clock.run(5);
+  job.stop();
+  await job.done;
+  assert.equal(clock.pending(),0);
+  assert.ok(lines(a.root).every(row=>row.attrs.lang==='en-GB'));
+  const b=fakeDom(),next=fakeClock();
+  const moving=animateWyrdruneCypher(b.root,{source:SRC,doc:b,scope:next});
+  next.run(2);
+  next.fire('wayglass:motion',{enabled:false});
+  await moving.done;
+  assert.equal(next.pending(),0);
+  assert.equal(b.root.attrs['data-cypher-state'],'english');
+});
+
+test('system reduced-motion renders English immediately even if the caller requested animation', async()=>{
+  const doc=fakeDom(), clock=fakeClock();
+  clock.matchMedia=()=>({matches:true,addEventListener(){},removeEventListener(){}});
+  const run=animateWyrdruneCypher(doc.root,{source:SRC,doc,scope:clock,reducedMotion:false});
+  await run.done;
+  assert.equal(clock.pending(),0);
+  assert.ok(lines(doc.root).every(row=>row.attrs.lang==='en-GB'));
+});
