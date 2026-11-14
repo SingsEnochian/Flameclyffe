@@ -38,6 +38,8 @@ async function shipRoom(page,id){
  const target=page.locator('[data-surface-id="'+id+'"]');
  await target.scrollIntoViewIfNeeded();
  await target.click();
+ await page.waitForFunction(id=>document.querySelector('#wg-shell-nav')?.hidden===true
+   && document.documentElement.dataset.wayglassSurface===id,id,{timeout:12000});
 }
 async function checkCodex(page,profile){
  await shipRoom(page,'wayglass:universal-codex');
@@ -54,7 +56,18 @@ async function checkCodex(page,profile){
    window.__cypherButton=button;window.__cypherClicks=0;
    button?.addEventListener('click',()=>{window.__cypherClicks++;});
  });
- await page.locator('[data-codex-translate]').click();
+ const button=page.locator('[data-codex-translate]');
+ await button.scrollIntoViewIfNeeded();
+ const hit=await button.evaluate(el=>{
+   const rect=el.getBoundingClientRect();
+   const x=rect.x+rect.width/2,y=rect.y+rect.height/2;
+   const target=document.elementFromPoint(x,y);
+   return {same:target===el||el.contains(target),
+     hit:target?.outerHTML.slice(0,300), x,y,navHidden:document.querySelector('#wg-shell-nav')?.hidden};
+ });
+ receipt['hit_'+profile]=hit;
+ assert.equal(hit.same,true,'Codex reading control is covered by another ship layer: '+JSON.stringify(hit));
+ await button.click();
  await page.waitForTimeout(120);
  const observed=await page.evaluate(()=>({
    cypher:document.querySelector('[data-codex-english]')?.getAttribute('data-cypher-state'),
