@@ -246,6 +246,36 @@ try{
  receipt.scenarios.push({id:'real-browser-touch-native-wyrdrune-return-colour-and-bloom',status:'passed',
   capture:'owner-simulated-host',mode_count:2});
  receipt.scenarios.push({id:'unobstructed-paper-palette-brush-width-and-reversible-focus',status:'passed'});
+ const materialCheck=await page.evaluate(()=>{
+   const stage=document.querySelector('.wc-stage'),
+     workbench=document.querySelector('.wc-workbench'),
+     head=document.querySelector('.wc-head'),
+     composition=document.querySelector('.wc-composition');
+   const host=stage.getBoundingClientRect();
+   const bench=workbench.getBoundingClientRect();
+   const title=head.getBoundingClientRect();
+   return {
+     plane:host.width/window.innerWidth,
+     composition:getComputedStyle(composition).display,
+     workbench:getComputedStyle(workbench).position,
+     header:getComputedStyle(head).position,
+     benchWithinPlane:bench.left>host.left+host.width*.55 && bench.top<host.bottom,
+     headWithinPlane:title.left>host.left && title.top<host.bottom,
+     mineral:getComputedStyle(stage,'::before').backgroundImage,
+     decorated:getComputedStyle(document.querySelector('.wc-faepunk-touch')).backgroundImage,
+   };
+ });
+ assert.equal(materialCheck.composition,'block','Watercolour must become an inhabitable plane, not a two-column dashboard');
+ assert.equal(materialCheck.header,'absolute','Title must float within the membrane, not own a separate page row');
+ assert.equal(materialCheck.workbench,'absolute','Operational workbench must dock ON the membrane');
+ assert.ok(materialCheck.plane>.83,'Membrane must occupy most of the browser viewport');
+ assert.equal(materialCheck.benchWithinPlane,true,'Workbench must appear inside the active membrane');
+ assert.equal(materialCheck.headWithinPlane,true,'The identity label belongs to the environment');
+ assert.match(materialCheck.mineral,/opal-membrane/,'Procedural opal must be visible OVER the opaque canvas');
+ assert.match(materialCheck.decorated,/copper-etching/,'Touch instrument must have actual etched copper material');
+ receipt.scenarios.push({id:'faeberpunk-physical-materials-and-immersive-composition',status:'passed',
+  mineral:'opal-membrane',chassis:'etched-copper',plane_ratio:materialCheck.plane});
+ await page.screenshot({path:resolve(output,'faeberpunk-immersive-desktop.png'),fullPage:true});
  const before=await canvasDigest(page),canvas=page.locator('#wc-fluid');
  const box=await canvas.boundingBox();assert.ok(box&&box.width>0&&box.height>0);
  await canvas.click({position:{x:box.width*0.18,y:box.height*0.15}});
