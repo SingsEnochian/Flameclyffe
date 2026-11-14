@@ -79,6 +79,25 @@ try{
   const page=await context.newPage();
   page.on('pageerror',error=>receipt.errors.push(String(error.stack||error)));
   const scene=await mountLift(page);
+  if(profile==='desktop'){
+   await page.emulateMedia({reducedMotion:'reduce'});
+   await page.locator('.wg-ship-switch').click();
+   const motionToggle=page.locator('[data-motion-toggle]');
+   assert.equal(await motionToggle.isDisabled(),true,'System motion lock should disable toggle');
+   await page.emulateMedia({reducedMotion:'no-preference'});
+   await page.waitForTimeout(850);
+   const motionState=await page.evaluate(()=>({
+    osReduced:matchMedia('(prefers-reduced-motion: reduce)').matches,
+    disabled:document.querySelector('[data-motion-toggle]')?.disabled,
+    pressed:document.querySelector('[data-motion-toggle]')?.getAttribute('aria-pressed'),
+    wgMotion:document.documentElement.dataset.wgMotion,
+    feather:document.querySelector('.wg-helm-feather')?.dataset.held,
+    visible:document.visibilityState,
+   }));
+   receipt.motion_state=motionState;
+   assert.equal(motionState.disabled,false,'Media preference unlock: '+JSON.stringify(motionState));
+   await page.locator('.wg-ship-switch').click();
+  }
   const bounds=await layout(page,profile);
   await page.screenshot({path:resolve(output,profile+'-monolith.png'),fullPage:true});
   if(profile==='desktop'){
