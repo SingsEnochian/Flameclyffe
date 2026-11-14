@@ -12,20 +12,15 @@ export async function compileAlteredTimelineRipple({
     throw new RangeError('Scenario strength must be between zero and one');
   if(signal?.aborted)throw new Error('Feather Stop: scenario is paused');
   if(!cryptoProvider?.subtle)throw new Error('Secure source hashing is required');
-  const hash=await cryptoProvider.subtle.digest('SHA-256',new TextEncoder().encode(source));
+  // No privileged WTL bridge: deliberately authored, bounded numeric literal only.
+  // A browser preview never asserts a verified House Steward principal.
+  const authored=source.replace('let change_strength = 0.5;', 'let change_strength = '+String(magnitude)+';');
+  if(authored===source&&magnitude!==0.5)throw new Error('WTL magnitude slot missing');
+  const hash=await cryptoProvider.subtle.digest('SHA-256',new TextEncoder().encode(authored));
   const sourceHash=[...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,'0')).join('');
-  const emptyArgs=fn=>({arguments:args})=>{
-    if(args.length)throw new TypeError('Unexpected Wyrdrune scenario arguments');
-    return fn();
-  };
   const runtime=createWyrdruneRuntime({hashSource:()=>sourceHash});
-  const result=await runtime.execute(runtime.compile(source),{
-    bridges:{scenario:{
-      magnitude:emptyArgs(()=>magnitude),
-      confirmed:emptyArgs(()=>confirmed),
-    }},
-    signal:{get aborted(){return Boolean(signal?.aborted);}},
-    maxOperations:5000,
+  const result=await runtime.execute(runtime.compile(authored),{
+    signal:{get aborted(){return Boolean(signal?.aborted);}},maxOperations:5000,
   });
   if(result.withness?.completedCycles!==2||result.receipts.length!==16)
     throw new TypeError('Both native Eightfold cycles must complete');
