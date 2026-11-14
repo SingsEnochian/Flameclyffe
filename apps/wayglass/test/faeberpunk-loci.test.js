@@ -8,5 +8,5 @@ test('five loci map to real Wayglass rooms, not imaginary routes',()=>{
   assert.equal(faeberpunkLocusForRoom('wayglass:unknown'),null);
 });
 test('loci expose only rooms actually registered in the ship',()=>{
-  assert.deepEqual(faeberpunkLocusLinks(['wayglass:living-watercolor','arcsweep:writing-room']).map(x=>x.id),['door','worktable']);
+  assert.deepEqual(faeberpunkLocusLinks(['wayglass:living-watercolor','wayglass:universal-codex']).map(x=>x.id),['door','worktable']);
 });
