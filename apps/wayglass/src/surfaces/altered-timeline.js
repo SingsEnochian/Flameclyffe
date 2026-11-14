@@ -3,6 +3,8 @@
 // Browser-local until deliberately exported or saved. No canonical mutations.
 import {createTimelineOriginal,buildAlteredTimeline} from '../../../arcsweep/src/altered-timeline.js';
 import {compileAlteredTimelineRipple} from '../altered-timeline-score.js';
+import {compareTimelineEvidence} from '../../../arcsweep/src/coherence-spine.js';
+import {listAlteredTimelineHost,saveAlteredTimelineHost,restoreAlteredTimelineHost} from '../altered-timeline-client.js';
 import {wayglassSomaticSound,WAYGLASS_FEATHER_EVENT} from '../somatic-sound.js';
 import './altered-timeline.css';
 
@@ -40,7 +42,9 @@ function fromStorage(storage){
     approved:true,at:data.createdAt,
   });
   return {original:data.original,changes:data.changes,branchId:data.branchId,
-    createdAt:data.createdAt,current};
+    createdAt:data.createdAt,current,evidence:Array.isArray(data.evidence)?data.evidence:[],
+    hostReceipt:data.hostReceipt?.storage_id&&data.hostReceipt.branch_id===data.branchId
+      ?data.hostReceipt:null};
 }
 export function mountWayglassAlteredTimeline(root,{
   scope=globalThis,storage=null,compile=compileAlteredTimelineRipple,
@@ -79,6 +83,15 @@ export function mountWayglassAlteredTimeline(root,{
             '<button class="glass-chip" type="button" data-alt-restore>Restore saved</button>',
             '<button class="glass-chip" type="button" data-alt-export disabled>Export JSON</button>',
           '</div>',
+          '<fieldset class="wg-altered-house"><legend>House Return · authenticated persistence</legend>',
+            '<p class="tiny">Signed-in House session required. Checkpoints stay on the same persistent Wayglass host; no automatic cloud or canon promotion.</p>',
+            '<div class="wg-altered-controls">',
+              '<button class="glass-chip" type="button" data-alt-host-save disabled>Checkpoint to House</button>',
+              '<button class="glass-chip" type="button" data-alt-host-list>Find House branches</button>',
+            '</div>',
+            '<label>Saved House branch<select data-alt-host-branch aria-label="Saved Wayglass House branch"><option value="">Find saved branches first</option></select></label>',
+            '<button class="glass-chip" type="button" data-alt-host-restore disabled>Return from House</button>',
+          '</fieldset>',
           '<div class="wg-altered-controls">',
             '<button class="glass-chip" type="button" data-alt-feather>Feather · stop</button>',
             '<button class="glass-chip" type="button" data-alt-resume hidden>Release Feather deliberately</button>',
@@ -92,6 +105,29 @@ export function mountWayglassAlteredTimeline(root,{
             '<section aria-label="Altered timeline"><h2>Altered</h2><p class="tiny">Experimental descendant · reversible</p><div data-alt-child-track></div></section>',
           '</div>',
           '<div class="wg-altered-ripples" data-alt-ripples><p class="tiny">No branch yet. Ripples are illustrative, not probabilities or predicted events.</p></div>',
+          '<section class="wg-altered-evidence" aria-label="Timeline evidence comparison">',
+            '<h3>Evidence · Competing branches</h3>',
+            '<p class="tiny">Record a source and your classification. This is not independent source verification or a prediction.</p>',
+            '<form data-alt-evidence-form>',
+              '<label>Timeline<select data-alt-evidence-timeline>',
+                '<option value="altered">Altered</option><option value="original">Original</option>',
+                '<option value="assimilation">AI · Assimilation</option>',
+                '<option value="accommodation">AI · Accommodation</option>',
+                '<option value="coevolution">AI · Co-evolution</option>',
+              '</select></label>',
+              '<label>Relationship<select data-alt-evidence-relation>',
+                '<option value="context">Context</option><option value="supports">Supports</option>',
+                '<option value="challenges">Challenges</option>',
+              '</select></label>',
+              '<label>Evidence class<select data-alt-evidence-class>',
+                '<option value="reported">Reported</option><option value="observed">Observed (owner-declared)</option>',
+                '<option value="projected">Projected</option><option value="simulated">Simulated</option>',
+              '</select></label>',
+              '<label>Source reference<input data-alt-evidence-ref maxlength="300" required placeholder="Article URL, archive ID, or receipt"></label>',
+              '<button class="glass-chip" type="submit" data-alt-evidence-add disabled>Add source-backed evidence</button>',
+            '</form>',
+            '<div data-alt-evidence-reading role="status" aria-live="polite"></div>',
+          '</section>',
           '<section class="wg-altered-withness" aria-label="Return marker">',
             '<h3>Withness · Return</h3><div data-alt-withness>Original intact. No change introduced.</div>',
           '</section>',
@@ -103,6 +139,7 @@ export function mountWayglassAlteredTimeline(root,{
   const form=q('altered-form'),status=q('alt-status'),originalTrack=q('alt-original-track'),
     childTrack=q('alt-child-track'),ripples=q('alt-ripples'),held=q('alt-withness');
   let original=null,changes=[],branchId=null,createdAt=null,current=null,working=false,closed=false;
+  let evidence=[],hostReceipt=null,houseBranches=[];
   const feather=()=>wayglassSomaticSound.snapshot().feather_stopped;
   function setStatus(value){if(!closed)status.textContent=value;}
   function render(){
@@ -113,6 +150,10 @@ export function mountWayglassAlteredTimeline(root,{
     q('alt-undo').disabled=stopped||working||!changes.length;
     q('alt-save').disabled=stopped||working||!current;
     q('alt-export').disabled=stopped||working||!current;
+    q('alt-host-save').disabled=stopped||working||!current;
+    q('alt-host-list').disabled=stopped||working;
+    q('alt-host-restore').disabled=stopped||working||!q('alt-host-branch').value;
+    q('alt-evidence-add').disabled=stopped||working||!current;
     q('alt-restore').disabled=stopped||working;
     q('alt-reset').disabled=stopped||working;
     for(const name of ['alt-world','alt-date','alt-original'])q(name).disabled=stopped||working||!!original;
@@ -155,6 +196,23 @@ export function mountWayglassAlteredTimeline(root,{
       line(held,'Unresolved:',current.comparison.open_future.length+' inherited future event(s) require review');
       const note=document.createElement('p');note.className='tiny';
       note.textContent='Local hypothetical change only. No provider request, canon promotion or physical timeline alteration.';held.append(note);
+    }
+    const report=compareTimelineEvidence(evidence,
+      ['original','altered','assimilation','accommodation','coevolution']);
+    const reading=q('alt-evidence-reading');reading.replaceChildren();
+    for(const row of report.timelines){
+      const p=document.createElement('p');p.className='tiny';
+      p.textContent=row.timeline_id+': '+row.assessment+
+        ' · witnessed supports '+row.observed_support_receipts+
+        ', challenges '+row.observed_challenge_receipts+
+        ' · '+row.distinct_source_refs+' distinct source reference(s)';
+      reading.append(p);
+    }
+    const foot=document.createElement('p');foot.className='tiny';
+    foot.textContent='No winning timeline selected. Sources are declared, not independently verified.';
+    reading.append(foot);
+    if(hostReceipt){
+      line(held,'House Return:',hostReceipt.storage_id.slice(0,14)+'… · revision '+hostReceipt.revision);
     }
     root.querySelector('[data-surface="altered-timeline"]').dataset.alteredState=
       stopped?'paused':current?'branched':'original';
@@ -202,6 +260,7 @@ export function mountWayglassAlteredTimeline(root,{
   q('alt-reset').addEventListener('click',()=>{
     if(feather()||working)return;
     original=null;changes=[];branchId=null;createdAt=null;current=null;
+    evidence=[];hostReceipt=null;
     setStatus('Experiment reset. Source fields are editable again. Saved copies remain until explicitly replaced.');
     render();
   });
@@ -209,7 +268,7 @@ export function mountWayglassAlteredTimeline(root,{
     if(!current||feather()||working)return;
     try{
       if(!savedStorage)throw new Error('Local storage is unavailable');
-      const data={schema:'wayglass.altered-timeline-local/v0.1',original,changes,branchId,createdAt};
+      const data={schema:'wayglass.altered-timeline-local/v0.1',original,changes,branchId,createdAt,evidence,hostReceipt};
       const encoded=JSON.stringify(data);
       if(encoded.length>80000)throw new RangeError('Local scenario is too large to save');
       savedStorage.setItem(ALTERED_LOCAL_KEY,encoded);
@@ -221,7 +280,7 @@ export function mountWayglassAlteredTimeline(root,{
     try{
       const loaded=fromStorage(savedStorage);
       if(!loaded)throw new Error('No local timeline saved yet');
-      ({original,changes,branchId,createdAt,current}=loaded);
+      ({original,changes,branchId,createdAt,current,evidence,hostReceipt}=loaded);
       q('alt-world').value=original.world.name;
       q('alt-date').value=original.events[0].at;
       q('alt-original').value=original.events[0].title;
@@ -240,6 +299,89 @@ export function mountWayglassAlteredTimeline(root,{
       URL.revokeObjectURL(url);
       setStatus('Exported local branch. Original, altered events and source receipts are included.');
     }catch(error){setStatus('Export unavailable: '+error.message);}
+  });
+  q('alt-evidence-form').addEventListener('submit',event=>{
+    event.preventDefault();
+    if(!current||feather()||working||evidence.length>=64)return;
+    const sourceRef=q('alt-evidence-ref').value.trim();
+    if(!sourceRef)return;
+    const id='timeline-evidence:'+Date.now()+':'+String(evidence.length+1);
+    evidence=[...evidence,{
+      receipt_id:id,source_refs:[sourceRef],when:{occurred_at:new Date().toISOString()},
+      timeline_evidence:[{timeline_id:q('alt-evidence-timeline').value,
+        relation:q('alt-evidence-relation').value,
+        evidence_class:q('alt-evidence-class').value,source_refs:[sourceRef]}],
+    }];
+    q('alt-evidence-ref').value='';
+    setStatus('Evidence classified in this branch. It has not been externally verified.');
+    render();
+  });
+  q('alt-host-list').addEventListener('click',async()=>{
+    if(feather()||working)return;
+    working=true;render();setStatus('Inspecting authenticated House Return catalogue…');
+    try{
+      const result=await listAlteredTimelineHost();
+      houseBranches=result.checkpoints||[];
+      const select=q('alt-host-branch');select.replaceChildren();
+      const empty=document.createElement('option');empty.value='';empty.textContent=
+        houseBranches.length?'Choose a saved branch':'No House checkpoints found';
+      select.append(empty);
+      for(const item of houseBranches){
+        const option=document.createElement('option');option.value=item.branch_id;
+        option.textContent=item.branch_id+' · revision '+item.revision;
+        select.append(option);
+      }
+      if(branchId&&houseBranches.some(item=>item.branch_id===branchId))
+        select.value=branchId;
+      setStatus(houseBranches.length+' authenticated House branch(es) available. Choose one to return.');
+    }catch(error){setStatus('House catalogue unavailable: '+error.message);}
+    finally{working=false;render();}
+  });
+  q('alt-host-branch').addEventListener('change',render);
+  q('alt-host-save').addEventListener('click',async()=>{
+    if(!current||feather()||working)return;
+    working=true;render();setStatus('Verifying Wyrdrune and checkpointing with the signed House host…');
+    try{
+      const result=await saveAlteredTimelineHost({
+        snapshot:{original,changes,branchId,createdAt,evidence},
+        expectedStorageId:hostReceipt?.storage_id||null,
+        signal:{get aborted(){return closed||feather();}},
+      });
+      if(closed||feather())throw new Error('Feather interrupted the Return acknowledgement');
+      if(result?.receipt?.persisted!==true||result.receipt.verified!==true||
+         result.receipt.branch_id!==branchId)
+        throw new Error('House did not return a verified checkpoint receipt');
+      hostReceipt=result.receipt;
+      setStatus('Host checkpoint verified · revision '+hostReceipt.revision+
+        '. Return available from an authenticated browser on this persistent House host.');
+    }catch(error){setStatus('House checkpoint not confirmed: '+error.message);}
+    finally{working=false;render();}
+  });
+  q('alt-host-restore').addEventListener('click',async()=>{
+    if(feather()||working)return;
+    const selected=q('alt-host-branch').value;
+    if(!selected)return;
+    working=true;render();setStatus('Recovering authenticated House checkpoint…');
+    try{
+      const result=await restoreAlteredTimelineHost({branchId:selected,
+        signal:{get aborted(){return closed||feather();}}});
+      if(closed||feather())throw new Error('Feather interrupted the Return');
+      const snapshot=result.snapshot;
+      const experiment=buildAlteredTimeline({
+        original:snapshot.original,branchId:snapshot.branchId,
+        changes:snapshot.changes,approved:true,at:snapshot.createdAt,
+      });
+      original=snapshot.original;changes=snapshot.changes;
+      branchId=snapshot.branchId;createdAt=snapshot.createdAt;
+      evidence=Array.isArray(snapshot.evidence)?snapshot.evidence:[];
+      current=experiment;hostReceipt=result.receipt;
+      q('alt-world').value=original.world.name;
+      q('alt-date').value=original.events[0].at;
+      q('alt-original').value=original.events[0].title;
+      setStatus('Returned from House revision '+hostReceipt.revision+
+        '. Original provenance, alterations and evidence restored.');
+    }catch(error){setStatus('House Return could not be verified: '+error.message);}
+    finally{working=false;render();}
   });
   q('alt-feather').addEventListener('click',()=>{
     wayglassSomaticSound.feather();
