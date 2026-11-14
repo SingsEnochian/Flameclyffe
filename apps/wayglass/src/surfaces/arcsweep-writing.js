@@ -1,7 +1,7 @@
 import { createInteractionState } from '../interaction-state.js';
 import { emitInteractionCue } from '../interaction-cues.js';
 import { emitMaterialSignal } from '../material-state.js';
-import { invokeWayglassRoute, listWayglassRoutes } from '../route-client.js';
+import { invokeWayglassRoute, listWayglassRoutes, requestWayglassCloudCirculation } from '../route-client.js';
 
 function escapeHtml(value = '') {
   return String(value)
@@ -32,6 +32,9 @@ export async function mountArcSweepWritingSurface(root) {
   let selectedRoute = 'openai:gpt';
   let busy = false;
   let lastReceipt = null;
+  let draftRevision = 0;
+  let needsBusy = false;
+  let cloudBusy = false;
 
   root.innerHTML = [
     '<section class="wg-surface" data-surface="arcsweep-writing">',
@@ -72,6 +75,13 @@ export async function mountArcSweepWritingSurface(root) {
         '</details>',
       '</section>',
 
+      '<section class="wg-control-ribbon glass-panel" aria-label="System communication">',
+        '<div><strong>Wayglass · System Needs</strong><p class="tiny">Ask the connected route to inspect its capabilities and report actionable needs. The response is attributable to that route.</p></div>',
+        '<button type="button" id="wg-needs" class="glass-chip">Ask what she needs</button>',
+        '<span id="wg-needs-state" class="tiny" role="status">Awaiting request</span>',
+        '<button type="button" id="wg-cloud-pulse" class="glass-chip">Wake cloud cognition</button>',
+        '<span id="wg-cloud-state" class="tiny" role="status">Owner sign-in required for cloud</span>',
+      '</section>',
       '<section class="wg-thread glass-panel" aria-live="polite">',
         '<div id="wg-thread" class="wg-thread-log">',
           '<div class="empty-thread">The room is quiet. Start anywhere.</div>',
@@ -102,6 +112,11 @@ export async function mountArcSweepWritingSurface(root) {
   const status = root.querySelector('#wg-status');
   const send = root.querySelector('#wg-send');
   const receipt = root.querySelector('#wg-receipt');
+  const needsButton = root.querySelector('#wg-needs');
+  const needsState = root.querySelector('#wg-needs-state');
+  const cloudButton = root.querySelector('#wg-cloud-pulse');
+  const cloudState = root.querySelector('#wg-cloud-state');
+  input.addEventListener('input', () => { draftRevision += 1; });
 
   const arState = document.documentElement.dataset.wayglassAr || 'unknown';
   embodimentState.textContent = 'Keyboard ready · AR ' + (arState === 'ready' ? 'ready' : arState.replaceAll('-', ' '));
@@ -185,12 +200,12 @@ export async function mountArcSweepWritingSurface(root) {
     if (!text || busy) return;
     busy = true;
     send.disabled = true;
-    input.disabled = true;
+    const submittedRevision = draftRevision;
 
     const current = interaction.snapshot();
     const history = messages.slice(-12).map((message) => ({ role: message.role, content: message.content }));
     messages.push({ role: 'user', content: text, channel: current.channel });
-    input.value = '';
+    if (draftRevision === submittedRevision) input.value = '';
     refreshThread();
 
     const routeLabel = selectedRouteLabel();
@@ -200,7 +215,19 @@ export async function mountArcSweepWritingSurface(root) {
     refreshState();
 
     try {
-      const result = await invokeWayglassRoute({
+      // The Writing Room now executes the live selected route through the
+      // shared Quantum Quad. A missing PREMAQC packet stays explicitly unmeasured.
+      const quad = globalThis.__wayglassOS?.quantumQuad;
+      const quadCycle = quad ? await quad.cycle({
+        input: text,
+        worldId: 'wayglass:writing-room',
+        participantId: 'wayglass:writing-room/local-client',
+        routeId: selectedRoute,
+        history,
+        interaction: current,
+        sessionId: session,
+      }) : null;
+      const result = quadCycle ? quadCycle.result : await invokeWayglassRoute({
         routeId: selectedRoute,
         input: text,
         history,
@@ -218,6 +245,11 @@ export async function mountArcSweepWritingSurface(root) {
       receipt.textContent = lastReceipt
         ? 'Observation · not canon · ' + (result.provider || 'route') + ' / ' + (result.model || 'model') + ' · ' + (lastReceipt.epistemic_register || 'external-observation') + ' · ' + (lastReceipt.completed_at || '')
         : 'Turn completed without a receipt payload.';
+      if (quadCycle) {
+        const math = quadCycle.receipts.find(item => item.organ === 'bifrost');
+        receipt.textContent += ' · Quad: ' + (math?.status || 'unknown') +
+          ' · continuity: ' + quadCycle.persistence;
+      }
     } catch (error) {
       messages.push({
         role: 'assistant',
@@ -230,7 +262,7 @@ export async function mountArcSweepWritingSurface(root) {
       interaction.setTurnOwner('Rowan');
       busy = false;
       send.disabled = false;
-      input.disabled = false;
+      // The composer remains editable during model requests; never erase newer drafts.
       refreshThread();
       refreshState();
       input.focus();
@@ -301,6 +333,80 @@ export async function mountArcSweepWritingSurface(root) {
   }
 
   globalThis.addEventListener?.('wayglass:command', handleWayglassCommand);
+
+  needsButton.addEventListener('click', async () => {
+    if (needsBusy || busy) return;
+    needsBusy = true;
+    needsButton.disabled = true;
+    needsState.textContent = 'Contacting ' + selectedRouteLabel() + '…';
+    const routeId = selectedRoute;
+    const routeLabel = selectedRouteLabel();
+    const prompt = [
+      'System Needs report for Wayglass Writing Room. You are the selected model route, not a native Wayglass model.',
+      'Describe what you can actually observe in this conversation, which tools or runtime capabilities are unavailable,',
+      'and what concrete system information or capability you need next to improve Wayglass.',
+      'Distinguish verified observations from requests. Do not invent runtime checks or claim access to private systems.',
+      'Respond with: Observed, Needed, Proposed next action, Evidence needed.'
+    ].join(' ');
+    try {
+      const result = await invokeWayglassRoute({
+        routeId, input: prompt, history: [], sessionId: session,
+        interaction: { ...interaction.snapshot(), channel: 'OOC', turn_owner: 'Rowan' },
+      });
+      messages.push({ role: 'assistant', content: result.output || '[No report returned]',
+        channel: 'OOC', route_label: routeLabel + ' · System Needs' });
+      lastReceipt = result.receipt || null;
+      needsState.textContent = 'Report received from ' + routeLabel;
+      receipt.textContent = lastReceipt
+        ? 'System Needs · ' + routeId + ' · ' + (lastReceipt.completed_at || 'receipt received')
+        : 'System Needs response received without a route receipt';
+      refreshThread();
+    } catch (error) {
+      needsState.textContent = 'Delivery failed: ' + error.message;
+    } finally {
+      needsBusy = false;
+      needsButton.disabled = false;
+    }
+  });
+
+
+  cloudButton.addEventListener('click', async () => {
+    if (cloudBusy || busy) return;
+    cloudBusy = true;
+    cloudButton.disabled = true;
+    cloudState.textContent = 'Requesting fresh evidence and attributable model response…';
+    try {
+      const result = await requestWayglassCloudCirculation({
+        action: 'pulse',
+        message: 'Inspect current Wayglass engineering evidence. Choose one next verifiable PREMAQC/Math Spine or model-to-Return Engine integration test. Distinguish evidence from proposals.',
+      });
+      messages.push({
+        role: 'assistant',
+        content: result.reply.text,
+        channel: 'OOC',
+        route_label: 'Wayglass cloud consultation · ' + (result.reply.model || 'model route'),
+      });
+      lastReceipt = result;
+      const observed = result.cells.find(cell => cell.cell === 'sensory');
+      const memory = result.cells.find(cell => cell.cell === 'memory');
+      cloudState.textContent = 'Cloud model responded · ' + (result.reply.provider || 'provider')
+        + ' / ' + (result.reply.model || 'model');
+      receipt.textContent = 'Cloud circulation · ' + result.receipt_id
+        + ' · observed evidence: ' + (observed?.count ?? 'unknown')
+        + ' · continuity: ' + (memory?.status || 'unverified')
+        + ' · not canon';
+      refreshThread();
+    } catch (error) {
+      cloudState.textContent = 'Cloud crossing not completed: ' + error.message;
+      if (error.receipt?.receipt_id) {
+        receipt.textContent = 'Cloud failed · receipt ' + error.receipt.receipt_id
+          + ' · ' + (error.receipt.cells?.find(cell => cell.cell === 'cognition')?.error || error.message);
+      }
+    } finally {
+      cloudBusy = false;
+      cloudButton.disabled = false;
+    }
+  });
 
   send.addEventListener('click', passTurn);
   input.addEventListener('keydown', (event) => {

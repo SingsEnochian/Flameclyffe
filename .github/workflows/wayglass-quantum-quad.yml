@@ -1,0 +1,108 @@
+name: Wayglass Quantum Quad · One-Shot Integration
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feature/wayglass-web-needs-room-20261104
+    paths:
+      - 'apps/wayglass/**'
+      - 'apps/starwell/src/arcsweep-temporal-quantum/**'
+      - 'apps/starwell-server/wayglass/**'
+      - 'scripts/wayglass-*'
+      - '.github/workflows/wayglass-quantum-quad.yml'
+  pull_request:
+    paths:
+      - 'apps/wayglass/**'
+      - 'apps/starwell/src/arcsweep-temporal-quantum/**'
+      - 'apps/starwell-server/wayglass/**'
+      - 'scripts/wayglass-*'
+      - '.github/workflows/wayglass-quantum-quad.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wayglass-quad-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  integration:
+    name: Build · Quad · Browser · Return Engine
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Quad organ and boundary tests
+        run: npm run wayglass:test
+      - name: Starwell Bifröst mathematics tests
+        run: npm run starwell:test
+      - name: Compile Writing Room
+        run: npm run wayglass:build
+      - name: Stage real Hearthgate host
+        run: npm run wayglass:stage:server
+      - name: Verify staged entrypoint
+        run: |
+          test -s apps/starwell-server/public/wayglass/index.html
+          test -s apps/starwell-server/public/wayglass/wayglass-host.js
+      - name: Install Hearthgate dependencies
+        run: npm ci --prefix apps/starwell-server --ignore-scripts --no-audit --no-fund
+      - name: Runtime Flight · browser, routes, leave and return
+        shell: bash
+        env:
+          ANTHROPIC_API_KEY: runtime-flight-placeholder
+        run: |
+          set -euo pipefail
+          PORT=3000 node apps/starwell-server/server-secure.js > /tmp/wayglass-quad-server.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for attempt in {1..80}; do
+            if curl -fsS http://127.0.0.1:3000/wayglass/ >/dev/null; then break; fi
+            sleep 0.25
+          done
+          curl -fsS http://127.0.0.1:3000/api/v1/wayglass/routes >/dev/null
+          if ! WAYGLASS_RUNTIME_URL=http://127.0.0.1:3000/wayglass/ node scripts/wayglass-runtime-flight.mjs; then
+            cat /tmp/wayglass-quad-server.log
+            exit 1
+          fi
+      - name: Produce truthful integration capability report
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p /tmp/wayglass-quad-evidence
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const quad = fs.readFileSync('apps/wayglass/src/quantum-quad.js', 'utf8');
+          const report = {
+            schema: 'wayglass.quantum-quad-ci-evidence/v0.1',
+            commit: process.env.GITHUB_SHA,
+            checks: {
+              four_organ_orchestrator: quad.includes('createQuantumQuad'),
+              model_route_adapter: quad.includes('invokeWayglassRoute'),
+              voyage04_adapter: quad.includes('voyage04Departure') && quad.includes('voyage04Return')
+            },
+            not_yet_verified: [
+              'live authenticated Wayglass model response',
+              'native Wayglass trained model',
+              'Bifrost backend wired to Quad cycle',
+              'durable authoritative Quad continuity',
+              'cloud production deployment',
+              'quantum hardware execution'
+            ],
+            note: 'Green CI verifies code/build/local flight, not the unverified capabilities above.'
+          };
+          fs.writeFileSync('/tmp/wayglass-quad-evidence/report.json', JSON.stringify(report, null, 2));
+          console.log(JSON.stringify(report, null, 2));
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wayglass-quantum-quad-evidence
+          path: /tmp/wayglass-quad-evidence/
+          retention-days: 30
