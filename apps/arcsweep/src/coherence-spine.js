@@ -116,3 +116,6 @@ export function coherenceCaseSummary(receipt = {}) {
     source_refs: [...list(receipt.source_refs)],
   });
 }
+
+// One comparison ledger for original, altered and alternate human-AI futures.
+export { TIMELINE_EVIDENCE_SCHEMA, compareTimelineEvidence } from './timeline-evidence-comparison.js';
