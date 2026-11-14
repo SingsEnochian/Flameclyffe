@@ -104,7 +104,7 @@ export function mountUniversalCodex(root){
   listen(editor,'input',invalidate);
   listen(q('[data-codex-example]'),'click',()=>{editor.value=EXAMPLE;invalidate();editor.focus();});
   listen(q('[data-codex-translate]'),'click',()=>{
-    if(held()||stopped)return;
+    if(held()||stopped){status.textContent=held()?'Feather is held. Release it before translating.':'This Codex mount is no longer active.';return;}
     cypher?.stop();
     try{
       const reduced=Boolean(globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches);
@@ -180,6 +180,9 @@ export function mountUniversalCodex(root){
     listen(button,'click',()=>void globalThis.__wayglassOS?.mount(button.dataset.codexRoom));
   }
   sync();
-  return ()=>{stopped=true;revision++;cypher?.stop();disposers.splice(0).forEach(f=>f());};
+  const surface=q('[data-surface="wayglass-universal-codex"]');
+  surface?.setAttribute('data-codex-ready','true');
+  return ()=>{stopped=true;surface?.setAttribute('data-codex-ready','false');
+    revision++;cypher?.stop();disposers.splice(0).forEach(f=>f());};
 }
 export {EXAMPLE as UNIVERSAL_CODEX_SAMPLE,HANDOFF_KEY as UNIVERSAL_CODEX_HANDOFF_KEY};
