@@ -4,8 +4,10 @@ on:
     paths:
       - 'lib/wayglass-crow-trainer-cohort.cjs'
       - 'lib/wayglass-harmony-chaos-mission.cjs'
+      - 'lib/wayglass-crow-trainer-ollama.cjs'
       - 'test/wayglass-crow-trainer-cohort.test.cjs'
       - 'test/wayglass-harmony-chaos-mission.test.cjs'
+      - 'test/wayglass-crow-trainer-ollama.test.cjs'
       - '.github/workflows/crow-trainer-harmony.yml'
   workflow_dispatch:
 permissions:
@@ -18,5 +20,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Execute native Wyrdrune Crow Trainer and Harmony negative tests
-        run: node --test test/wayglass-crow-trainer-cohort.test.cjs test/wayglass-harmony-chaos-mission.test.cjs
+      - name: Execute native Wyrdrune, Harmony and mocked Ollama route tests
+        run: node --test test/wayglass-crow-trainer-cohort.test.cjs test/wayglass-harmony-chaos-mission.test.cjs test/wayglass-crow-trainer-ollama.test.cjs
