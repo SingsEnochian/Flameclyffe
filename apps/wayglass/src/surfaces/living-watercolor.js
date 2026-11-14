@@ -49,6 +49,7 @@ export async function mountLivingWatercolorSurface(root) {
         '<div class="wc-stage glass-panel">',
           '<canvas id="wc-fluid" class="wc-fluid" aria-label="Watercolor canvas. Drag a finger, mouse or Pencil to paint; use arrow keys to move and Enter or Space to paint." aria-describedby="wc-paint-help" tabindex="0"></canvas>',
           '<div class="wc-stage-meta" aria-hidden="true">WAYGLASS / AQUARELLE / PREMAQC</div>',
+          '<button id="wc-instruments-toggle" type="button" class="wc-instruments-toggle glass-chip" aria-controls="wc-workbench" aria-expanded="false" aria-label="Open or close Wayglass instruments">✦ Instruments</button>',
           '<button id="wc-focus-paint" type="button" class="wc-focus-paint glass-chip" aria-pressed="false">Focus painting</button>',
           '<span class="wc-brush-cursor" id="wc-brush-cursor" aria-hidden="true"></span>',
           '<p class="wc-paint-help" id="wc-paint-help">Paint with a finger or Pencil. The watercolour responds to your gesture.</p>',
@@ -64,7 +65,7 @@ export async function mountLivingWatercolorSurface(root) {
             '<p id="wc-touch-status" class="wc-faepunk-status" role="status" aria-live="polite">Ready for an owner-authorised test pulse. No live model or production changes.</p>',
           '</section>',
         '</div>',
-        '<div class="wc-workbench">',
+        '<div id="wc-workbench" class="wc-workbench">',
           '<div class="wc-deck glass-panel" aria-label="Wayglass collaborative expression desk">',
             '<div class="wc-deck-header"><div><span class="eyebrow">Voice &amp; work surface</span>',
             '<h2 id="wc-title">Dream</h2></div><span class="wc-model-state" id="wc-route-state">Checking model routes</span></div>',
@@ -137,6 +138,15 @@ export async function mountLivingWatercolorSurface(root) {
   function listen(target,type,handler){target.addEventListener(type,handler);cleanups.push(()=>target.removeEventListener(type,handler));}
   const q=id=>root.querySelector('#'+id);
   const canvas=q('wc-fluid'),stage=root.querySelector('.wc-stage');
+  const instrumentsToggle=q('wc-instruments-toggle'),surface=root.querySelector('.wc-surface');
+  // The Living Watercolour is a place first. Desktop instruments are a real
+  // drawer: opening it reallocates space instead of occluding the drawing area.
+  listen(instrumentsToggle,'click',()=>{
+    if(stopped)return;
+    const open=surface.classList.toggle('wc-instruments-open');
+    instrumentsToggle.setAttribute('aria-expanded',String(open));
+    instrumentsToggle.textContent=open?'✦ Close instruments':'✦ Instruments';
+  });
   const ctx=canvas.getContext('2d',{alpha:false});
   const buffer=document.createElement('canvas');
   buffer.width=fluid.width;buffer.height=fluid.height;
