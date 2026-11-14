@@ -136,7 +136,7 @@ html[data-wayglass-surface="wayglass:living-watercolor"] #app{
   }
   /* The old horizontal navigation bar is now part of the helm, not a
      screen-width panel midway down the painting. */
-  .wg-helm{
+  html[data-wayglass-surface="wayglass:living-watercolor"] .wg-helm{
     position:fixed;left:25px;right:auto;top:auto;bottom:17px;
     width:min(835px,calc(100vw - 50px));margin:0;
     z-index:90;border:2px solid rgba(220,191,132,.49);
