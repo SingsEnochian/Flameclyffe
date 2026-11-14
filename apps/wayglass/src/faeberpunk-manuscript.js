@@ -31,7 +31,7 @@ export function mountFaepunkManuscript(root,{
   doc=globalThis.document,store=globalThis.localStorage,onStage=()=>{},feather=()=>false,
 }={}){
   if(!root||!doc)throw new TypeError('Manuscript mount requires a document');
-  let stopped=false;
+  let stopped=false,selectionRange=null;
   root.innerHTML=[
     '<details class="fae-manuscript" open>',
       '<summary><span class="fae-manuscript-mark" aria-hidden="true">✎</span> Manuscript · rich-text worktable ',
@@ -71,7 +71,16 @@ export function mountFaepunkManuscript(root,{
       status.textContent='Saved locally, rich text intact. Not sent to any provider.';
     }catch{status.textContent='Local save unavailable; draft stays on this screen.';}
   }
-  listen(editor,'input',save);
+  const rememberSelection=()=>{
+    const selection=doc.getSelection?.();
+    if(selection?.rangeCount){
+      const range=selection.getRangeAt(0);
+      if(editor.contains(range.commonAncestorContainer))selectionRange=range.cloneRange();
+    }
+  };
+  listen(editor,'input',()=>{rememberSelection();save();});
+  listen(editor,'keyup',rememberSelection);
+  listen(editor,'pointerup',rememberSelection);
   // Pasted provider HTML is discarded. Only the user-visible plain text enters.
   listen(editor,'paste',event=>{
     const plain=event.clipboardData?.getData('text/plain');
@@ -92,9 +101,18 @@ export function mountFaepunkManuscript(root,{
     save();
   });
   for(const button of root.querySelectorAll('[data-manuscript-cmd]')){
+    listen(button,'pointerdown',event=>{
+      rememberSelection();
+      // Keep an active text range while choosing a desktop formatting button.
+      if(event.pointerType==='mouse')event.preventDefault();
+    });
     listen(button,'click',()=>{
       if(stopped||feather())return;
       editor.focus();
+      if(selectionRange){
+        const selected=doc.getSelection?.();
+        if(selected){selected.removeAllRanges();selected.addRange(selectionRange);}
+      }
       const cmd=button.dataset.manuscriptCmd;
       // Browser-native editing preserves its undo stack. Saved markup is
       // sanitised to an explicit, attribute-free textual allowlist.
