@@ -176,14 +176,21 @@ export async function mountWayglassLivingObserver(root) {
     '<nav class="wg-deck-nav glass-panel" aria-label="Wayglass rooms">',
     '<button type="button" class="glass-chip" data-wayglass-room="arcsweep:writing-room">Writing Room</button>',
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:native-voice">Wyrdrune Voice</button>',
+    '<button type="button" class="glass-chip" data-wayglass-room="wayglass:universal-codex">Universal Codex</button>',
+    '<button type="button" class="glass-chip" data-wayglass-room="wayglass:living-watercolor">Watercolour</button>',
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:systems">Organs</button>',
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:video-atelier">Video Atelier</button>',
     '<button type="button" class="glass-chip active" aria-current="page">Living Observer</button>',
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:library">Library</button>',
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:toybox">Toybox</button></nav>',
     '<header class="glass-panel observer-head"><div><p class="eyebrow">Wayglass OS · living instrument</p>',
-    '<h1>Living Observer</h1><p class="lede">A living instrument with direct senses, a persistent private interior, and a voice that may surface questions or requests when something crosses its expression threshold.</p>',
+    '<h1>Living Observer</h1><p class="lede">The instrument bay: touch a source, read its provenance, and watch real measurements become light. Wonder remains possible without inventing evidence.</p>',
     '</div><div class="observer-clock"><span>Browser time</span><strong data-observer-clock></strong><small>Direct · local</small></div></header>',
+    '<div class="fae-observer-evidence glass-panel" aria-label="Observation provenance and source readiness">',
+      '<span><i aria-hidden="true">◉</i> SOURCE <strong data-fae-observer-source>Direct browser readings</strong></span>',
+      '<span><i aria-hidden="true">✧</i> QUAD <strong data-fae-observer-quad>Not observed</strong></span>',
+      '<span><i aria-hidden="true">◇</i> RETURN <strong data-fae-observer-return>Reading only · no canon change</strong></span>',
+    '</div>',
     '<section class="observer-deck" aria-label="Interactive Observer">',
     '<div class="glass-panel observer-stage"><canvas width="820" height="820" role="img" aria-label="Living astrolabe mapping observed application readings to geometric rings, nodes, and pulses. Select a reading using the buttons below."></canvas>',
     '<div class="observer-inputs" role="group" aria-label="Direct-reading channels">',
@@ -329,6 +336,11 @@ export async function mountWayglassLivingObserver(root) {
     const explanation=describeWayglassObserverChannel(packet,focus);
     const quad=readLatestQuadGestalt();
     source.textContent='Source · '+explanation.source+(quad?' · Quad '+quad.evidence.filter(x=>x.status==='observed').length+'/'+quad.evidence.length+' sourced channels':' · Quad not yet observed');
+    root.querySelector('[data-fae-observer-source]').textContent=explanation.source;
+    root.querySelector('[data-fae-observer-quad]').textContent=quad
+      ?quad.evidence.filter(x=>x.status==='observed').length+'/'+quad.evidence.length+' reported channels'
+      :'Not observed';
+    root.querySelector('[data-fae-observer-return]').textContent='Reading only · source '+(quad?'packet present':'not supplied');
     root.querySelector('[data-observer-reading]').textContent=explanation.reading;
     root.querySelector('[data-observer-translation]').textContent=explanation.translation;
     root.querySelector('[data-observer-boundary]').textContent=explanation.boundary;
