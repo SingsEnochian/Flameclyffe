@@ -1,0 +1,334 @@
+/* WAYGLASS · FAEpunk 001
+   Material language: dark opal, living enamel, copperlight, woven glyph and
+   responsive glass. Functional events awaken the body; surfaces remain quiet.
+   Original code. No raster or borrowed font dependency. */
+:root{
+ --faep-night:#050d12;--faep-deep:#081b21;--faep-forest:#173a37;
+ --faep-emerald:#72dbc0;--faep-alabaster:#e8f7e9;--faep-gold:#e8b984;
+ --faep-iris:#9eaadf;--faep-salt:#b9d0ca;--faep-lens:rgba(8,30,35,.8);
+ --faep-border:rgba(142,217,191,.27);--faep-border-lit:rgba(233,198,145,.62);
+ --faep-radius:clamp(18px,2.8vw,34px);
+}
+html{color-scheme:dark;scrollbar-color:#4d8d82 #091719}
+body{
+ color:var(--faep-alabaster);
+ background:
+  radial-gradient(ellipse 65vw 44vh at 14% 4%,rgba(40,105,88,.32),transparent 75%),
+  radial-gradient(ellipse 44vw 32vh at 93% 6%,rgba(61,69,109,.22),transparent 72%),
+  radial-gradient(ellipse 70vw 70vh at 50% 100%,rgba(31,100,99,.11),transparent 70%),
+  var(--faep-night);
+}
+body::before{
+ content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;
+ background:
+  linear-gradient(rgba(194,241,221,.014) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(194,241,221,.012) 1px,transparent 1px);
+ background-size:48px 48px;
+ mask-image:linear-gradient(to bottom,rgba(0,0,0,.7),transparent 87%);
+}
+#app{width:min(1500px,calc(100% - 32px));padding-block:clamp(12px,2vw,26px) 88px}
+.wg-surface{gap:clamp(13px,1.7vw,26px)}
+.glass-panel,.wg-surface-head,.wg-thread,.wg-composer{
+ border-radius:var(--faep-radius);
+ border:1px solid var(--faep-border);
+ background:
+  radial-gradient(ellipse at 6% 0%,rgba(157,239,206,.09),transparent 43%),
+  radial-gradient(ellipse at 90% 91%,rgba(118,137,200,.055),transparent 47%),
+  linear-gradient(145deg,rgba(19,49,48,.93),rgba(6,16,24,.94) 45%,rgba(10,26,35,.93));
+ box-shadow:inset 0 1px rgba(243,255,235,.17),
+  inset 0 -22px 58px rgba(0,0,0,.16),0 24px 78px rgba(0,0,0,.35);
+}
+.wg-surface-head{position:relative;overflow:hidden;isolation:isolate}
+.wg-surface-head::after{
+ content:"";position:absolute;inset:auto -15% -72% 40%;
+ width:55%;height:130%;border:1px solid rgba(218,242,199,.09);
+ border-radius:50%;transform:rotate(-22deg);pointer-events:none;
+}
+.wg-surface :is(h1,h2,h3){text-wrap:balance}
+.wg-surface h1{font-family:Georgia,'Iowan Old Style',serif;
+ font-weight:500;letter-spacing:-.045em}
+.wg-surface h2{font-family:Georgia,'Iowan Old Style',serif;letter-spacing:-.024em;font-weight:500}
+.wg-surface .eyebrow{color:#b5ead2;letter-spacing:.2em;font-size:.7rem}
+.wg-surface .lede{color:#c6e0d6}
+.glass-chip,.send-jewel,.fae-primary-action,.wg-helm-nav{
+ border-color:var(--faep-border);min-height:44px;
+}
+.glass-chip:is(:hover,:focus-visible),.send-jewel:is(:hover,:focus-visible){
+ border-color:var(--faep-border-lit);
+ box-shadow:inset 0 1px rgba(245,244,217,.2),0 9px 32px rgba(58,169,139,.17);
+}
+.wg-helm{
+ width:min(1580px,calc(100% - 28px));
+ background:
+  linear-gradient(135deg,rgba(26,65,62,.91),rgba(6,18,27,.96) 52%,rgba(14,36,47,.96));
+ border:1px solid var(--faep-border);
+ border-radius:22px;
+ box-shadow:0 18px 68px rgba(0,0,0,.47),inset 0 1px rgba(244,255,225,.16);
+}
+.wg-helm-mark{
+ border:1px solid rgba(226,202,152,.55);
+ box-shadow:0 0 0 4px rgba(81,171,148,.05),0 0 24px rgba(104,224,195,.15);
+}
+.wg-helm-loci{gap:clamp(3px,.5vw,10px)}
+.wg-locus{
+ border-radius:13px;
+ background:linear-gradient(160deg,rgba(65,114,101,.16),rgba(4,16,25,.7));
+}
+.wg-locus[aria-current="page"]{
+ background:radial-gradient(ellipse at 50% 0%,rgba(144,238,191,.22),transparent 70%),
+  linear-gradient(170deg,rgba(45,83,80,.65),rgba(7,22,31,.96));
+ border-color:rgba(214,192,146,.56);
+ box-shadow:inset 0 1px rgba(244,240,205,.24),0 0 25px rgba(97,218,193,.12);
+}
+.wg-surface :is(button,input,textarea,select,summary):focus-visible,
+.wg-helm :is(button,input,textarea,select):focus-visible{
+ outline:3px solid #f2d79e;outline-offset:3px;
+}
+.wg-surface :is(input,textarea,select){background-color:rgba(2,11,17,.74)}
+.wg-surface input[type=checkbox]{width:18px;height:18px;accent-color:#90d9b7;min-width:18px}
+.wg-surface input[type=range]{accent-color:#a3dcbf}
+.wc-stage{
+ border:1px solid rgba(222,190,138,.65);
+ border-radius:clamp(20px,2vw,30px);
+ box-shadow:0 10px 45px rgba(0,0,0,.37),0 0 0 5px rgba(136,216,178,.035),
+  inset 0 0 54px rgba(37,93,95,.18);
+}
+.wc-stage::before{
+ content:"";position:absolute;inset:6px;border-radius:inherit;pointer-events:none;
+ border:1px solid rgba(229,223,176,.14);
+}
+.wc-deck,.wc-controls,.wg-mythience-console,.wg-mythience-outcome{
+ border-color:rgba(145,214,188,.26);
+ background:linear-gradient(142deg,rgba(17,48,48,.95),rgba(6,19,29,.96));
+}
+.wc-head h1{
+ background:linear-gradient(116deg,#f9f6d9,#bcefd7 63%,#a1c5d9);
+ color:transparent;background-clip:text;-webkit-background-clip:text;
+}
+.wg-mythience-worlds{border:1px solid rgba(224,193,136,.34)}
+.wg-systems>.wg-surface-head{
+ background:
+  radial-gradient(circle at 83% 38%,rgba(127,218,190,.14),transparent 36%),
+  linear-gradient(132deg,#0d2b31,#061820 73%);
+}
+
+/* A new experiential helm, not a list of admin switches. */
+.fae-timeline-portal{
+ overflow:hidden;position:relative;isolation:isolate;
+ border:1px solid rgba(235,203,149,.4);
+ border-radius:clamp(23px,4vw,44px);
+ padding:clamp(16px,2.5vw,32px);
+ background:
+  radial-gradient(ellipse 44% 56% at 23% 43%,rgba(42,142,112,.2),transparent 88%),
+  radial-gradient(ellipse 35% 75% at 82% 14%,rgba(113,121,173,.12),transparent 75%),
+  linear-gradient(118deg,#09262b,#08151e 54%,#0b232b);
+ box-shadow:inset 0 1px rgba(247,252,222,.21),
+  inset 0 -20px 44px rgba(4,17,20,.36),0 28px 80px rgba(0,0,0,.45);
+}
+.fae-timeline-portal::after{
+ content:"";inset:5px;position:absolute;pointer-events:none;
+ border:1px solid rgba(210,250,218,.08);border-radius:inherit;
+}
+.fae-timeline-topline{
+ display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+ color:#beddd0;letter-spacing:.16em;text-transform:uppercase;
+ font-size:clamp(.65rem,.8vw,.75rem);font-weight:750;
+ padding-bottom:clamp(16px,2vw,28px);border-bottom:1px solid rgba(178,219,191,.15);
+}
+.fae-glyph{
+ width:38px;height:38px;display:grid;place-items:center;line-height:1;
+ border:1px solid rgba(237,199,148,.36);border-radius:50%;
+ color:#edd4a0;font-family:Georgia,serif;font-size:1.5rem;
+ background:radial-gradient(circle,rgba(207,193,130,.17),rgba(4,24,28,.8));
+}
+.fae-local-tag{
+ margin-left:auto;padding:7px 11px;border:1px solid rgba(170,219,192,.18);
+ border-radius:999px;font-size:.62rem;color:#d8ebdc;background:rgba(8,31,30,.5);
+}
+.fae-voyage-grid{
+ display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);
+ gap:clamp(12px,3vw,48px);align-items:center;
+}
+.fae-voyage-orbit{
+ --fae-pointer-x:50%;--fae-pointer-y:50%;
+ width:100%;min-height:clamp(290px,34vw,440px);
+ padding:clamp(8px,1.5vw,22px);
+ display:flex;flex-direction:column;align-items:center;justify-content:center;
+ position:relative;overflow:hidden;isolation:isolate;
+ appearance:none;color:var(--faep-alabaster);
+ border:0;border-radius:clamp(14px,2.6vw,32px);cursor:pointer;
+ background:radial-gradient(circle at var(--fae-pointer-x) var(--fae-pointer-y),
+     rgba(192,242,196,.16),transparent 36%),
+  radial-gradient(circle at 50% 50%,rgba(38,140,125,.12),transparent 72%);
+ -webkit-tap-highlight-color:rgba(190,226,187,.14);
+}
+.fae-voyage-orbit::before{
+ content:"";position:absolute;inset:4%;z-index:-1;border-radius:50%;
+ background:conic-gradient(from 30deg,rgba(105,218,177,.09),transparent 25%,
+  rgba(158,151,221,.07) 50%,transparent 74%,rgba(230,174,107,.11));
+ filter:blur(28px);
+}
+.fae-braid{
+ width:100%;max-width:620px;min-height:230px;height:auto;overflow:visible;
+ filter:drop-shadow(0 0 12px rgba(129,216,175,.16));
+}
+.fae-orbit-guide{fill:none;stroke:rgba(198,222,183,.13);stroke-width:1.4;stroke-dasharray:3 7}
+.fae-orbit-inner{fill:none;stroke:rgba(230,192,142,.11);stroke-width:1}
+.fae-braid-path{stroke-linecap:round;filter:drop-shadow(0 0 4px rgba(136,247,181,.35))}
+.fae-braid-glimmer{opacity:.75}
+.fae-orbit-point{fill:#dfbb8a;stroke:#103b38;stroke-width:3}
+.fae-core-halo{fill:rgba(5,25,31,.96);stroke:#d9b886;stroke-width:1.5}
+.fae-center-word{font:600 13px Georgia,serif;fill:#f2e4bd;letter-spacing:1px}
+.fae-orbit-label{font:600 12px Georgia,serif;fill:#b9ddca;letter-spacing:3px}
+.fae-orbit-note{
+ max-width:32ch;text-align:center;color:#b8d9c9;
+ font:italic clamp(.89rem,1.2vw,1.1rem)/1.5 Georgia,serif;
+}
+.fae-voyage-orbit:hover .fae-braid-path,
+.fae-voyage-orbit:focus-visible .fae-braid-path{
+ filter:drop-shadow(0 0 8px rgba(168,248,199,.58));
+}
+.fae-voyage-orbit:active .fae-braid{transform:scale(.986)}
+.fae-voyage-console{display:grid;gap:clamp(12px,1.3vw,20px);padding-block:clamp(16px,2vw,28px)}
+.fae-voyage-console>.eyebrow{margin:0}
+.fae-voyage-console h2{
+ font:500 clamp(2.2rem,4.3vw,4.8rem)/.97 Georgia,'Iowan Old Style',serif;
+ margin:0;letter-spacing:-.046em;
+ background:linear-gradient(110deg,#f3edcf,#d0efdb 73%,#98cfca);
+ color:transparent;background-clip:text;-webkit-background-clip:text;
+}
+.fae-console-intro{font-size:clamp(.88rem,1.1vw,1.02rem);line-height:1.65;color:#c0d9ce;max-width:58ch;margin:0}
+.fae-voyage-mode{
+ display:grid;grid-template-columns:1fr 1fr;gap:9px;
+ padding:6px;background:rgba(2,13,21,.59);border:1px solid rgba(145,219,195,.2);
+ border-radius:21px;
+}
+.fae-voyage-mode button{
+ min-height:66px;display:grid;gap:4px;align-content:center;justify-items:center;
+ border:1px solid transparent;border-radius:16px;padding:10px;
+ background:transparent;color:#c6e1d5;letter-spacing:.025em;font-weight:750;
+}
+.fae-voyage-mode button small{
+ display:block;font-size:.7rem;font-weight:450;color:#a8c4b9;letter-spacing:normal;
+}
+.fae-voyage-mode button[aria-pressed="true"]{
+ color:#f7f2d9;
+ border-color:rgba(231,186,126,.56);
+ background:radial-gradient(ellipse at 45% 0%,rgba(172,228,179,.16),transparent 80%),
+  linear-gradient(150deg,#23514a,#0e2c32);
+ box-shadow:inset 0 1px rgba(255,246,205,.16),0 5px 22px rgba(0,0,0,.22);
+}
+.fae-reciprocity-readouts{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;
+}
+.fae-reciprocity-readouts>div{
+ min-width:0;display:grid;gap:7px;
+ border:1px solid rgba(145,213,185,.18);border-radius:16px;
+ padding:12px;background:rgba(4,18,27,.58);
+}
+.fae-reciprocity-readouts>div:last-child{grid-column:1/-1}
+.fae-reciprocity-readouts span{
+ color:#add2bd;font-size:.67rem;text-transform:uppercase;letter-spacing:.13em;
+}
+.fae-reciprocity-readouts strong{
+ font-size:.83rem;color:#f4eee0;font-weight:600;overflow-wrap:anywhere;
+}
+.fae-permission-chamber{
+ border:1px solid rgba(170,207,190,.19);border-radius:16px;
+ background:rgba(2,12,19,.43);padding:11px 14px;
+}
+.fae-permission-chamber summary{cursor:pointer;font-weight:650;color:#d7e6d7}
+.fae-permission-chamber p{color:#bed3c9;font-size:.85rem}
+.fae-myth-consents{display:flex;flex-wrap:wrap;gap:10px}
+.fae-myth-consents label{display:flex;gap:8px;align-items:center;font-size:.84rem}
+.fae-voyage-actions,.fae-portal-links{display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+.fae-voyage-actions button,.fae-portal-links button{min-height:45px}
+.fae-primary-action{
+ cursor:pointer;padding:12px 20px;border-radius:999px;
+ border:1px solid rgba(238,216,156,.8);font:700 .84rem system-ui,sans-serif;
+ color:#091c21;background:linear-gradient(135deg,#b8f2c6,#f2d7a2 74%,#dfb57c);
+ box-shadow:0 8px 26px rgba(116,218,161,.19),inset 0 1px rgba(255,255,233,.54);
+}
+.fae-primary-action:hover:not(:disabled){
+ box-shadow:0 10px 32px rgba(148,238,174,.28);transform:translateY(-1px);
+}
+.fae-voyage-actions .fae-feather-action{color:#f2cabe;border-color:rgba(214,156,139,.45)}
+.fae-portal-links{padding-top:9px;border-top:1px solid rgba(159,210,178,.17)}
+.fae-portal-links button{font-size:.74rem;letter-spacing:.035em}
+.fae-voyage-status{
+ margin:0;min-height:2.8em;padding:12px 15px;border-radius:14px;
+ border:1px solid rgba(129,217,180,.27);background:rgba(3,19,22,.63);
+ font-size:.83rem;line-height:1.5;color:#d5e9d8;
+}
+.fae-timeline-portal[data-voyage-state="running"] .fae-braid-path{
+ stroke-dasharray:13 7;animation:faep-wave 4s linear infinite;
+}
+.fae-timeline-portal[data-voyage-state="returned"] .fae-core-halo{
+ stroke:#c9f0c3;filter:drop-shadow(0 0 14px rgba(172,245,172,.65));
+}
+.fae-timeline-portal[data-voyage-state="held"] .fae-braid{
+ filter:none;opacity:.55;
+}
+.fae-timeline-portal[data-voyage-state="refused"] .fae-voyage-status{
+ border-color:rgba(228,162,130,.44);
+}
+@keyframes faep-wave{to{stroke-dashoffset:-120}}
+.fae-receipt-drawer{
+ border:1px solid rgba(155,204,183,.16);border-radius:14px;
+ padding:10px 13px;color:#bccdc5;
+}
+.fae-receipt-drawer summary{cursor:pointer;font-size:.79rem}
+.fae-receipt-drawer pre{
+ padding:12px;overflow:auto;max-height:300px;
+ white-space:pre-wrap;overflow-wrap:anywhere;
+ color:#e1e6d1;font-size:.73rem;line-height:1.5;
+ background:rgba(1,10,15,.52);border-radius:10px;
+}
+.organ-bay .organ-vessel{
+ border-radius:22px;border-color:rgba(175,225,186,.22);
+ background:
+  radial-gradient(circle at 70% 18%,rgba(100,202,165,.08),transparent 45%),
+  linear-gradient(147deg,rgba(12,43,43,.92),rgba(6,18,27,.96));
+}
+.organ-bay .organ-vessel:is(:hover,:focus-visible){
+ border-color:rgba(231,198,149,.52);
+ box-shadow:0 13px 52px rgba(0,0,0,.39),0 0 28px rgba(79,196,149,.09);
+}
+@media(min-width:1500px){.wc-composition{gap:clamp(20px,2vw,36px)}}
+@media(max-width:1060px){
+ .fae-voyage-grid{grid-template-columns:1fr}
+ .fae-voyage-orbit{min-height:270px;max-height:360px}
+ .fae-braid{height:270px;min-height:240px}
+ .fae-voyage-console h2{font-size:clamp(2.3rem,6vw,4rem)}
+}
+@media(max-width:670px){
+ #app{width:calc(100% - 16px);padding-top:12px}
+ .fae-timeline-portal{padding:15px}
+ .fae-timeline-topline{gap:8px}
+ .fae-local-tag{margin-left:0}
+ .fae-voyage-orbit{min-height:220px;padding:0}
+ .fae-braid{min-height:200px;height:230px}
+ .fae-voyage-console h2{font-size:clamp(2.35rem,9vw,3.4rem)}
+ .fae-reciprocity-readouts{grid-template-columns:1fr}
+ .fae-reciprocity-readouts>div:last-child{grid-column:1}
+ .fae-voyage-actions button{flex:1 1 auto}
+ .fae-primary-action{flex:1 1 100%!important}
+ .wg-surface-head{padding:clamp(17px,4vw,24px)}
+}
+@media(prefers-reduced-motion:reduce){
+ .fae-timeline-portal *{transition:none!important;animation:none!important}
+ .fae-braid{filter:none}
+}
+@media(prefers-reduced-transparency:reduce){
+ .fae-timeline-portal,.glass-panel,.wg-helm,.wc-deck,.wc-controls{
+  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+  background:#0b232b!important;
+ }
+}
+@media(forced-colors:active){
+ .fae-voyage-mode button[aria-pressed="true"],.fae-primary-action,
+ .fae-timeline-portal[data-voyage-state="returned"] .fae-voyage-status{
+  border:2px solid Highlight;
+ }
+ .fae-voyage-console h2,.wc-head h1{color:CanvasText;background:none}
+}
