@@ -134,6 +134,13 @@ class SpaceContractTests(unittest.TestCase):
             self.assertIn("8,000", self.app.call_kernel("x" * 8001, []))
             open_mock.assert_not_called()
 
+    def test_nontext_and_blank_inputs_fail_closed_without_network(self):
+        with patch.object(self.app.OPENER, "open") as opener:
+            for message in (None, "", "   ", 123, {"text": "hello"}, ["hello"]):
+                with self.subTest(message=message):
+                    self.assertIn("8,000", self.app.call_kernel(message, []))
+            opener.assert_not_called()
+
     def test_redirect_handler_denies_all_redirects(self):
         handler = self.app.NoRedirect()
         for code in (301, 302, 303, 307, 308):
