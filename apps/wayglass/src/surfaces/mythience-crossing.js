@@ -253,7 +253,7 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
     status.textContent=outcome.felt?'Threshold haptic played on request.':outcome.reason||'Haptics unavailable.';
   });
   function featherStop(){
-    controller?.abort();controller=null;journey.discard();sensory.stop();lastReading=null;
+    scene.pause();controller?.abort();controller=null;journey.discard();sensory.stop();lastReading=null;
     hearButton.disabled=true;feelButton.disabled=true;
     button.disabled=false;carryButton.disabled=true;
     hybridButton.disabled=journey.snapshot().abilities.length<2;
@@ -263,7 +263,7 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
   const onShipFeather=event=>{if(event.detail?.stopped===true&&active)featherStop();};
   globalThis.addEventListener('wayglass:feather',onShipFeather);
   root.querySelector('[data-mythience-reset]').addEventListener('click',()=>{
-    controller?.abort();controller=null;journey.reset();serial=0;hybridButton.disabled=true;carryButton.disabled=true;
+    controller?.abort();controller=null;journey.reset();scene.resume();serial=0;hybridButton.disabled=true;carryButton.disabled=true;
     sensory.stop();lastReading=null;hearButton.disabled=true;feelButton.disabled=true;
     clearMythience();renderLineage();membrane.style.setProperty('--membrane-open','0');scene.setFields(fieldValues());
     reading.textContent='A fresh possibility. Nothing has been carried forward.';
