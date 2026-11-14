@@ -11,6 +11,23 @@ export function membraneVisualState({intention=0.5,shifting=0.5,porosity=0.5,res
     observed:permeability!==null,phase:clamp(resonance),intention:clamp(intention),
   });
 }
+// Two independent currents remain visually distinct. Their geometry is a projection,
+// not a claim that a model or another participant is currently active.
+export function membraneCurrents(state,{width=320,height=260,time=0,reducedMotion=false}={}){
+  const w=Math.max(1,width),h=Math.max(1,height),cx=w/2,cy=h/2;
+  const radius=Math.min(w*.26,h*.33,112),turn=reducedMotion?0:time;
+  return Object.freeze(['harmony','chaos'].map((name,index)=>{
+    const direction=index===0?1:-1;
+    const points=Array.from({length:49},(_,i)=>{
+      const u=i/48,angle=u*Math.PI*4+turn*direction;
+      const spread=(.22+.78*state.openness)*radius;
+      return Object.freeze({x:cx+(u-.5)*radius*2.8,
+        y:cy+Math.sin(angle+index*Math.PI)*spread*(.55+.45*state.correspondence),
+        depth:Math.cos(angle+index*Math.PI)});
+    });
+    return Object.freeze({name,points,opacity:.3+.6*(index===0?state.alignment:1-state.alignment)});
+  }));
+}
 export function mountMythienceMembraneScene(canvas,{onShift=()=>{},reducedMotion=null}={}){
   if(!canvas?.getContext)throw new TypeError('A canvas is required');
   const ctx=canvas.getContext('2d');
@@ -58,6 +75,17 @@ export function mountMythienceMembraneScene(canvas,{onShift=()=>{},reducedMotion
       ctx.bezierCurveTo(cx-r*.2, y+bend, cx+r*.2,y-bend,cx+span-r*.65,y);
       ctx.strokeStyle='rgba(176,242,229,'+(0.06+openness*.52*(.45+.55*Math.sin(v*Math.PI)))+')';
       ctx.lineWidth=1+openness*1.4;ctx.stroke();
+    }
+    // Responsive, reciprocal double-Möbius ribbon: separate Harmony and Chaos
+    // paths remain visible even when alignment is low; no forced consensus.
+    for(const current of membraneCurrents(state,{width:w,height:h,time:t,reducedMotion:!motion()})){
+      const rgb=current.name==='harmony'?'156,238,213':'238,174,120';
+      for(let i=1;i<current.points.length;i++){
+        const a=current.points[i-1],b=current.points[i];
+        ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);
+        ctx.strokeStyle='rgba('+rgb+','+(current.opacity*(.3+.45*(b.depth+1)/2))+')';
+        ctx.lineWidth=1.2+Math.abs(b.depth)*2.4;ctx.stroke();
+      }
     }
     const stars=Math.max(5,Math.round(12+state.correspondence*18));
     for(let i=0;i<stars;i++){
