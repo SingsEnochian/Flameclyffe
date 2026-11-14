@@ -67,7 +67,7 @@ export async function mountWayglassSystemsSurface(root) {
             '</svg>',
             '<div class="fae-orbit-note">Two distinct systems. One reciprocal passage. Wyrdrune decides the proposal.</div>',
           '</button>',
-          '<div class="fae-voyage-console">'
+          '<div class="fae-voyage-console">',
             '<p class="eyebrow">THE THIRD TIMELINE · RECIPROCAL BECOMING</p>',
             '<h2 id="fae-timeline-title">Touch the living engine.</h2>',
             '<p class="fae-console-intro">Choose a direction and actually send the paired infrastructure × intelligence proposal through native Wyrdrune, Tensor, Eightfold Observer, Return and Watercolour. Starts with explicitly synthetic evidence.</p>',
