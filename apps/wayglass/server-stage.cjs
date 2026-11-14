@@ -41,6 +41,11 @@ async function copyTree(from, to) {
   // WTL preview has local CommonJS dependencies; package the reviewed runtime exactly.
   const wtlDir = path.join(runtime,'wyrdrune');
   await fsp.mkdir(wtlDir,{recursive:true});
+  // The integrated voyage's native tensor reference has two local dependencies.
+  // Keep these inside the packaged host, not in an external development checkout.
+  for (const file of ['tensor-engine.cjs','tensor-ir.cjs']) {
+    await fsp.copyFile(path.join(repoRoot,'lib','wyrdrune',file),path.join(wtlDir,file));
+  }
   for(const file of ['canonical.cjs','enochian.cjs','wyrdrune.cjs','ritual-ledger.cjs','runtime.mjs','story-soundscape.wtl','full-spectrum.wtl','resonance-atlas.wtl','living-learning.wtl','with-001.wtl','with-002-amber.wtl','with-003-refrain.wtl','with-004-enochian-369.wtl','tensor-ir.cjs','tensor-engine.cjs','tensor-autodiff.cjs','tensor-lowering.cjs','tensor-assurance.cjs','tensor-wtl-bridge.cjs','kernel-divination.cjs','tensor-engine.wtl','coevolution-repair.wtl','coevolution-expand.wtl','mythience-crossing.wtl','mythience-hybrid.wtl']){
     await fsp.copyFile(path.join(repoRoot,'lib','wyrdrune',file),path.join(wtlDir,file));
   }
