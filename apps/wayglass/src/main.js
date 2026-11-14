@@ -34,6 +34,7 @@ import { mountWayglassQuadGestalt } from './surfaces/quad-eightfold.js';
 import { installQuadFeatherListener, readLatestQuadGestalt, subscribeQuadGestalt } from './quad-eightfold-client.js';
 import { publishWatercolorActivity } from './watercolor-bridge.js';
 import { divineWayglassTensorKernel, dispatchWyrdruneTensorKernel } from './tensor-webgpu.js';
+import {observeIntegratedVoyage,latestIntegratedVoyage,subscribeIntegratedVoyage} from './integrated-voyage-visual.js';
 import { mountLivingWatercolorSurface } from './surfaces/living-watercolor.js';
 import { mountJourneyBeforeDestinationSurface } from './surfaces/journey-before-destination.js';
 import { WAYGLASS_ENTRY_SURFACE, resolveWayglassEntry } from './wayglass-entry.js';
@@ -354,6 +355,8 @@ const wayglass = Object.freeze({
   reply: replyToVoyage,
   doubleMobius: Object.freeze({ inspect: inspectWayglassDoubleMobius, traverse: traverseWayglassDoubleMobius }),
   mythience: Object.freeze({inspect:mythienceSnapshot,subscribe:subscribeMythience,open:()=>mountSurface('wayglass:mythience-crossing')}),
+  voyage: Object.freeze({observe:observeIntegratedVoyage,inspect:latestIntegratedVoyage,subscribe:subscribeIntegratedVoyage,
+    authority:'visualisation-only; separately authenticated host result required'}),
   // Wyrdrune tensor backend remains explicit, never dispatched on entry.
   tensor: Object.freeze({ divine: divineWayglassTensorKernel, dispatch: dispatchWyrdruneTensorKernel, backend: 'explicit-webgpu' }),
   fullSpectrum,
