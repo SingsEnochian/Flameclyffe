@@ -412,3 +412,70 @@ html[data-wayglass-surface="wayglass:living-watercolor"] #app{
   .wc-surface .wc-instruments-toggle{display:none}
   .wc-surface .wc-workbench{display:grid}
 }
+
+
+/* iPad is a first-class ship, not a shrunken desktop dashboard.
+   In portrait the living membrane fills the initial viewport, and instruments
+   unfold BELOW it rather than stealing Apple Pencil painting space. */
+@media (min-width:701px) and (max-width:1109px){
+  .wc-surface{position:relative;display:block;min-height:calc(100svh - 80px)}
+  .wc-surface .wc-composition{
+    position:relative;display:block;min-height:calc(100svh - 80px);
+  }
+  .wc-surface .wc-stage{
+    height:max(650px,calc(100svh - 95px));
+    min-height:max(650px,calc(100svh - 95px));
+    border-radius:36px;
+  }
+  .wc-surface .wc-head{
+    position:absolute;z-index:8;top:clamp(32px,5vh,80px);left:clamp(25px,5vw,68px);
+    display:grid;grid-template-columns:1fr;
+    width:min(565px,68%);
+    padding:0;border:0;border-radius:0;box-shadow:none;
+    background:none;backdrop-filter:none;-webkit-backdrop-filter:none;
+    pointer-events:none;
+  }
+  .wc-surface .wc-head h1{
+    font-size:clamp(3.3rem,7.3vw,6.4rem);
+    line-height:.84;color:#fff7e5;letter-spacing:-.07em;
+    text-shadow:0 3px 8px #020f18,0 0 55px rgba(115,229,200,.46);
+  }
+  .wc-surface .wc-head .lede,.wc-surface .wc-head .eyebrow{
+    text-shadow:0 2px 14px #00121c;
+  }
+  .wc-surface .wc-head .wc-room-links{
+    pointer-events:auto;display:flex;gap:7px;max-width:100%;flex-wrap:wrap;
+  }
+  .wc-surface .wc-room-links button{
+    border:1px solid rgba(238,208,155,.72);
+    border-radius:99px;background:rgba(4,19,28,.81);
+  }
+  .wc-surface .wc-head-signal{
+    margin-top:8px;padding:7px 10px;max-width:max-content;
+    border-radius:14px;background:rgba(4,23,31,.8);
+    border:1px solid rgba(220,203,161,.44);
+  }
+  .wc-surface .wc-instruments-toggle{
+    display:inline-flex;align-items:center;justify-content:center;
+    right:18px;top:18px;
+  }
+  .wc-surface .wc-focus-paint{top:80px;right:18px}
+  .wc-surface .wc-workbench{display:none;position:static;width:100%;margin-top:22px}
+  .wc-surface.wc-instruments-open .wc-workbench{
+    display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.78fr);
+    gap:15px;align-items:start;overflow:visible;mask-image:none;
+  }
+  .wc-surface .wc-deck,.wc-surface .wc-controls{
+    background-image:url('./materials/labradorite-sheen.svg'),
+      linear-gradient(145deg,rgba(5,28,34,.96),rgba(3,15,25,.97));
+    background-size:cover,cover;background-blend-mode:soft-light,normal;
+    border:2px solid rgba(215,183,131,.61);
+  }
+  .wc-surface .wc-faepunk-touch{
+    right:22px;left:auto;transform:none;
+    width:min(355px,45%);bottom:27px;
+  }
+  .wc-surface .wc-stage-meta{top:auto;bottom:30px;color:#f5deb0}
+  .wc-surface .wc-paint-help{bottom:17px;left:17px;max-width:240px}
+  .wc-surface .wc-stage::before{opacity:.72}
+}
