@@ -1,0 +1,25 @@
+name: Wayglass Architecture Preflight
+on:
+  pull_request:
+    paths:
+      - 'apps/wayglass/**'
+      - 'apps/starwell-server/wayglass/**'
+      - 'lib/wayglass-**'
+      - 'scripts/wayglass-build-preflight.cjs'
+      - 'docs/wayglass/preflight-example.json'
+      - 'test/wayglass-build-preflight.test.cjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  architecture-preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate architecture preflight contract and examples
+        run: |
+          node --test test/wayglass-build-preflight.test.cjs
+          node scripts/wayglass-build-preflight.cjs docs/wayglass/preflight-example.json
