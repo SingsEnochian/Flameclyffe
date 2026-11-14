@@ -164,6 +164,9 @@ export function installMotionChoreography({
   toggle?.addEventListener('click', onToggle);
   preference?.addEventListener?.('change', onPreference);
   scope.addEventListener?.('pointermove', pointer, { passive: true });
+  // Some browser/device combinations emit mousemove without a corresponding
+  // pointermove. Keep the magnetic affordance functional in both input streams.
+  scope.addEventListener?.('mousemove', pointer, { passive: true });
   scope.addEventListener?.('pointerout', pointerOut, { passive: true });
   scope.addEventListener?.('pointercancel', clear, { passive: true });
   scope.addEventListener?.('wayglass:feather', feather);
@@ -181,6 +184,7 @@ export function installMotionChoreography({
       toggle?.removeEventListener('click', onToggle);
       preference?.removeEventListener?.('change', onPreference);
       scope.removeEventListener?.('pointermove', pointer);
+      scope.removeEventListener?.('mousemove', pointer);
       scope.removeEventListener?.('pointerout', pointerOut);
       scope.removeEventListener?.('pointercancel', clear);
       scope.removeEventListener?.('wayglass:feather', feather);
