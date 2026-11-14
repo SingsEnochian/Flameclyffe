@@ -186,12 +186,25 @@ try{
  await page.locator('[data-surface="living-watercolor"]').waitFor();
  await checkMotionPreferences(page,{profile:'desktop'});
  assert.equal(await page.locator('.wg-auth-overlay:visible').count(),0,'Offline watercolor entry must render without provider login');
+ const instruments=page.locator('#wc-instruments-toggle');
+ assert.equal(await instruments.getAttribute('aria-expanded'),'false',
+   'New Wayglass must open into a free paintable environment, not a crowded dashboard');
+ assert.equal(await page.locator('.wc-workbench').isVisible(),false,
+   'Instrument drawers must be closed until explicitly requested on desktop');
+ const fullMembrane=await page.locator('.wc-stage').boundingBox();
+ assert.ok(fullMembrane?.width>=1080,'Closed membrane must dominate the viewport');
+ assert.match(await page.locator('.wc-stage').evaluate(el=>getComputedStyle(el,'::before').backgroundImage),/opal-membrane/,
+  'Refraction texture must be composited ABOVE the opaque painting canvas');
+ await page.screenshot({path:resolve(output,'faeberpunk-immersive-desktop.png'),fullPage:true});
+ await instruments.click();
+ assert.equal(await instruments.getAttribute('aria-expanded'),'true',
+   'The ship must make its instrument dock operable with a real user gesture');
  const paintingRect=await page.locator('.wc-stage').boundingBox();
  const workbenchRect=await page.locator('.wc-workbench').boundingBox();
- assert.ok(paintingRect&&workbenchRect,'Painting and workbench must both be visible on desktop');
+ assert.ok(paintingRect&&workbenchRect,'Painting and dock must be visible after opening Instruments');
  assert.ok(paintingRect.x+paintingRect.width<=workbenchRect.x+1 || workbenchRect.x+workbenchRect.width<=paintingRect.x+1,
-   'Watercolor canvas must never be covered by the conversation workbench');
- assert.ok(paintingRect.width>=480,'Desktop painting should have substantial visible width');
+   'Opening instruments must never cover the paintable membrane');
+ assert.ok(paintingRect.width>=480,'Desktop painting should retain substantial usable width');
  assert.ok(await page.locator('#wc-paint-help').isVisible(),'Painting instructions must be visible');
  await page.locator('[data-wc-pigment="#4c7961"]').click();
  assert.equal(await page.locator('#wc-color').inputValue(),'#4c7961','Swatch must update brush pigment');
@@ -259,24 +272,23 @@ try{
      composition:getComputedStyle(composition).display,
      workbench:getComputedStyle(workbench).position,
      header:getComputedStyle(head).position,
-     benchWithinPlane:bench.left>host.left+host.width*.55 && bench.top<host.bottom,
+     dockOutsidePaint:bench.left>=host.right-1,
      headWithinPlane:title.left>host.left && title.top<host.bottom,
      mineral:getComputedStyle(stage,'::before').backgroundImage,
      decorated:getComputedStyle(document.querySelector('.wc-faepunk-touch')).backgroundImage,
    };
  });
- assert.equal(materialCheck.composition,'block','Watercolour must become an inhabitable plane, not a two-column dashboard');
- assert.equal(materialCheck.header,'absolute','Title must float within the membrane, not own a separate page row');
- assert.equal(materialCheck.workbench,'absolute','Operational workbench must dock ON the membrane');
- assert.ok(materialCheck.plane>.83,'Membrane must occupy most of the browser viewport');
- assert.equal(materialCheck.benchWithinPlane,true,'Workbench must appear inside the active membrane');
- assert.equal(materialCheck.headWithinPlane,true,'The identity label belongs to the environment');
- assert.match(materialCheck.mineral,/opal-membrane/,'Procedural opal must be visible OVER the opaque canvas');
- assert.match(materialCheck.decorated,/copper-etching/,'Touch instrument must have actual etched copper material');
+ assert.equal(materialCheck.composition,'grid','Opened instrument drawer must reflow instead of overlay');
+ assert.equal(materialCheck.header,'absolute','Title must inhabit the membrane, not displace it');
+ assert.equal(materialCheck.workbench,'relative','Opened instruments must own separate paint-safe docking space');
+ assert.ok(materialCheck.plane>.55,'Opened membrane must retain more than half the viewport width');
+ assert.equal(materialCheck.dockOutsidePaint,true,'Dock must not hide any paintable pixels');
+ assert.equal(materialCheck.headWithinPlane,true,'Identity title must belong to the environment');
+ assert.match(materialCheck.mineral,/opal-membrane/,'Procedural opal must composite over canvas pixels');
+ assert.match(materialCheck.decorated,/copper-etching/,'Touch orb dock must be a copper-etched material');
  receipt.scenarios.push({id:'faeberpunk-physical-materials-and-immersive-composition',status:'passed',
   mineral:'opal-membrane',chassis:'etched-copper',plane_ratio:materialCheck.plane});
- await page.screenshot({path:resolve(output,'faeberpunk-immersive-desktop.png'),fullPage:true});
- const before=await canvasDigest(page),canvas=page.locator('#wc-fluid');
+  const before=await canvasDigest(page),canvas=page.locator('#wc-fluid');
  const box=await canvas.boundingBox();assert.ok(box&&box.width>0&&box.height>0);
  await canvas.click({position:{x:box.width*0.18,y:box.height*0.15}});
  assert.notEqual(await canvasDigest(page),before,'Actual pointer input must change rendered pigment');
