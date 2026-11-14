@@ -29,10 +29,28 @@ const origin='http://127.0.0.1:'+server.address().port;
 const receipt={schema:'wayglass.triptych-browser/v1',source_sha:process.env.GITHUB_SHA||null,
  model_invoked:false,production_deployment:false,scenarios:[],errors:[],status:'running'};
 let browser;
-async function mountLift(page){
+async function mountLift(page,profile){
  await page.goto(origin,{waitUntil:'networkidle'});
  const ship=page.locator('.wg-ship-switch');
  await ship.waitFor({state:'visible'});
+ if(profile==='desktop'){
+  // Reproduce the historical First Contact failure while Watercolour is still mounted.
+  await ship.click();
+  const toggle=page.locator('[data-motion-toggle]');
+  assert.equal(await toggle.isDisabled(),true,'OS reduce starts locked');
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  await page.waitForTimeout(850);
+  const state=await page.evaluate(()=>({
+   media:matchMedia('(prefers-reduced-motion: reduce)').matches,
+   disabled:document.querySelector('[data-motion-toggle]')?.disabled,
+   pressed:document.querySelector('[data-motion-toggle]')?.getAttribute('aria-pressed'),
+   feather:document.querySelector('.wg-helm-feather')?.dataset.held,
+   wgMotion:document.documentElement.dataset.wgMotion,
+  }));
+  receipt.watercolour_motion_state=state;
+  assert.equal(state.disabled,false,'Watercolour OS motion unlock: '+JSON.stringify(state));
+  await ship.click();
+ }
  await ship.click();
  const map=page.locator('#wg-shell-nav');
  await map.locator('[data-surface-id="wayglass:triptych-lift"]').click();
@@ -68,7 +86,7 @@ try{
  browser=await chromium.launch({headless:true});
  for(const profile of ['desktop','mobile']){
   const context=await browser.newContext(profile==='desktop'
-   ?{viewport:{width:1440,height:900},reducedMotion:'no-preference'}
+   ?{viewport:{width:1440,height:900},reducedMotion:'reduce'}
    :{viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'reduce',deviceScaleFactor:1});
   await context.route('**/*',async route=>{
    const url=new URL(route.request().url());
@@ -78,7 +96,7 @@ try{
   });
   const page=await context.newPage();
   page.on('pageerror',error=>receipt.errors.push(String(error.stack||error)));
-  const scene=await mountLift(page);
+  const scene=await mountLift(page,profile);
   if(profile==='desktop'){
    await page.emulateMedia({reducedMotion:'reduce'});
    await page.locator('.wg-ship-switch').click();
