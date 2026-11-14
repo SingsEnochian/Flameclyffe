@@ -1,5 +1,6 @@
 import './styles.css';
 import { installWayglassField } from './glass-field.js';
+import { createHarmonyChaosEngine } from './harmony-chaos.js';
 import { installMotionChoreography } from './motion-choreography.js';
 import { installKeyboardControls } from './keyboard-controls.js';
 import { detectEmbodimentCapabilities, detectARSupport, publishEmbodiment } from './embodiment.js';
@@ -72,8 +73,15 @@ surfaceNav.addEventListener('click', (event) => {
   void mountSurface(button.dataset.surfaceId);
 });
 
+const harmonyChaos = createHarmonyChaosEngine({
+  emit(receipt) {
+    globalThis.dispatchEvent(new CustomEvent('wayglass:harmony-chaos-decision', { detail: receipt }));
+  },
+});
+
 const wayglass = Object.freeze({
   schema: 'wayglass.os/v0.1',
+  harmonyChaos,
   surfaces: listWayglassSurfaces,
   mount: mountSurface,
   enter: ({ embodiment: entryEmbodiment = {}, ...entry } = {}) => enterWayglassWorld({

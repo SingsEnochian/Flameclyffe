@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { findStorySoundCues, resolveWorldSoundfontMap, resolveWorldTone } from '../src/story-soundscape.js';
+import { findStorySoundCues, resolveWorldSoundfontMap, resolveWorldTone, projectHarmonyChaosSoundscape } from '../src/story-soundscape.js';
 import { SYNAPTIC_HEARTFIELD_PROFILE, createHeartfieldReceipt, validateHeartfieldProfile } from '../src/synaptic-heartfield.js';
 
 test('story language resolves to exact sound actions', () => {
@@ -78,4 +78,15 @@ test('Ta’veren Vaen maps Tavian, Kestrelle, the Dream, and Resonant Bonding to
   assert.equal(map.voices.find((voice) => voice.id === 'kestrelle').program, 15);
   assert.equal(map.voices.find((voice) => voice.id === 'resonant-bonding').program, 48);
   assert.equal(resolveWorldSoundfontMap({ id: 'house-world-luna' }), null);
+});
+
+test('Harmony/Chaos sound plan never autoplays or infers feelings', () => {
+  const decision = { schema: 'wayglass.harmony-decision/v0.1', decision: 'allow', proposal: { id: 'event-1' } };
+  assert.equal(projectHarmonyChaosSoundscape({ decision, chaos: 0.8, harmony: 0.4 }).status, 'silent');
+  const plan = projectHarmonyChaosSoundscape({ decision, sensory_consent: true, chaos: 0.8, harmony: 0.4 });
+  assert.equal(plan.status, 'proposed-not-playing');
+  assert.equal(plan.auto_play, false);
+  assert.equal(plan.inferred_emotion, false);
+  assert.equal(plan.chaos_layer, 0.8);
+  assert.equal(plan.harmony_layer, 0.4);
 });
