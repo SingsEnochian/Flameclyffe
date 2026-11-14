@@ -89,6 +89,26 @@ async function verify(page,profile){
  await page.locator('[data-alt-resume]').click();
  assert.equal(await room.getAttribute('data-altered-state'),'branched');
  assert.equal(await room.locator('[data-alt-introduce]').isDisabled(),false);
+ // The browser fixture exercises actual HTTP client controls. Separately,
+ // the House integration test verifies real signed auth, fsync and cold restart.
+ await page.locator('[data-alt-evidence-timeline]').selectOption('coevolution');
+ await page.locator('[data-alt-evidence-relation]').selectOption('supports');
+ await page.locator('[data-alt-evidence-class]').selectOption('observed');
+ await page.locator('[data-alt-evidence-ref]').fill('source:owner-observation-001');
+ await page.locator('[data-alt-evidence-add]').click();
+ assert.match(await page.locator('[data-alt-evidence-reading]').innerText(),/coevolution: observational-support/);
+ await page.locator('[data-alt-host-save]').click();
+ await page.waitForFunction(()=>document.querySelector('[data-alt-status]')?.textContent?.includes('Host checkpoint verified'));
+ assert.match(await page.locator('[data-alt-withness]').innerText(),/House Return:/);
+ await page.locator('[data-alt-host-list]').click();
+ await page.waitForFunction(()=>document.querySelector('[data-alt-status]')?.textContent?.includes('authenticated House branch'));
+ assert.ok(await page.locator('[data-alt-host-branch] option').count()>1);
+ await page.locator('[data-alt-host-branch]').selectOption({index:1});
+ await page.locator('[data-alt-host-restore]').click();
+ await page.waitForFunction(()=>document.querySelector('[data-alt-status]')?.textContent?.includes('Returned from House revision'));
+ assert.match(await original.innerText(),/fictional council debates/);
+ assert.match(await altered.innerText(),/limited pilot with independent audits/);
+ assert.match(await page.locator('[data-alt-evidence-reading]').innerText(),/coevolution: observational-support/);
  await page.emulateMedia({reducedMotion:'reduce'});
  assert.equal(await room.locator('[data-alt-introduce]').isDisabled(),false);
  if(profile==='mobile'){
@@ -106,7 +126,8 @@ async function verify(page,profile){
  }
  await page.screenshot({path:resolve(out,profile+'-restored.png'),fullPage:true});
  receipt.scenarios.push({profile,status:'passed',worldseed_branch:true,original_immutable:true,
-  two_changes:true,undo:true,save_restore:true,feather:true,reduced_motion:true});
+  two_changes:true,undo:true,save_restore:true,feather:true,reduced_motion:true,
+  source_evidence:true,house_http_transport_fixture:true});
 }
 try{
  browser=await chromium.launch({headless:true});
@@ -114,11 +135,48 @@ try{
   const context=await browser.newContext(profile==='desktop'?
     {viewport:{width:1440,height:950},reducedMotion:'no-preference'}:
     {viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'no-preference'});
+  let checkpoint=null;
   await context.route('**/*',async route=>{
     const url=new URL(route.request().url());
     if(url.origin!==origin){await route.abort('blockedbyclient');return;}
+    const api='/api/v1/wayglass/timeline/altered';
+    if(url.pathname.startsWith(api+'/')){
+      const request=route.request(),method=request.method();
+      const branch=checkpoint?.snapshot?.branchId;
+      if(url.pathname===api+'/checkpoints'&&method==='POST'){
+        const data=request.postDataJSON(),snapshot=data.snapshot;
+        if(!snapshot?.branchId){await route.fulfill({status:400,json:{error:'Missing branch'}});return;}
+        const revision=checkpoint?checkpoint.receipt.revision+1:1;
+        if((data.expected_storage_id||null)!==(checkpoint?.receipt?.storage_id||null)){
+          await route.fulfill({status:409,json:{error:'House head changed'}});return;
+        }
+        const savedId=String(revision).padStart(64,'a');
+        checkpoint={snapshot,receipt:{
+          storage_id:savedId,branch_id:snapshot.branchId,revision,
+          persisted:true,verified:true,return_scope:'same persistent House host',
+        }};
+        await route.fulfill({status:201,json:{
+          schema:'wayglass.altered-timeline-host-save/v1',receipt:checkpoint.receipt,
+          status:'verified-persistent-host-checkpoint',
+        }});return;
+      }
+      if(url.pathname===api+'/checkpoints'&&method==='GET'){
+        await route.fulfill({status:200,json:{
+          schema:'wayglass.altered-timeline-catalogue/v1',
+          checkpoints:checkpoint?[{...checkpoint.receipt}]:[],
+        }});return;
+      }
+      if(checkpoint&&url.pathname===api+'/latest/'+encodeURIComponent(branch)){
+        await route.fulfill({status:200,json:{
+          schema:'wayglass.altered-timeline-return/v1',
+          snapshot:checkpoint.snapshot,receipt:checkpoint.receipt,
+          status:'restored-from-verified-host-checkpoint',
+        }});return;
+      }
+      await route.fulfill({status:404,json:{error:'No test House checkpoint'}});return;
+    }
     if(url.pathname.startsWith('/api/')){
-      await route.fulfill({status:503,json:{error:'No model, runtime or remote host allowed in browser test'}});
+      await route.fulfill({status:503,json:{error:'No external provider may be invoked in browser fixture'}});
       return;
     }
     await route.continue();
