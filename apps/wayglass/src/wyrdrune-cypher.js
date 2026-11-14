@@ -99,7 +99,8 @@ export function animateWyrdruneCypher(container,{
   if(reducedMotion||media?.matches||!lines.length){
     finishAll();return {gloss,stop:finishAll,done};
   }
-  let remaining=lines.length,previousPhase=null;
+  let remaining=lines.length;
+  const startedPhases=new Set();
   const later=(callback,ms)=>{
     const timer=scope.setTimeout(()=>{
       timers.delete(timer);
@@ -111,8 +112,8 @@ export function animateWyrdruneCypher(container,{
     let frame=0;
     const tick=()=>{
       if(finished)return;
-      if(previousPhase!==item.phase){
-        previousPhase=item.phase;
+      if(frame===0&&!startedPhases.has(item.phase)){
+        startedPhases.add(item.phase);
         onPhase(item.phase);
       }
       frame++;
