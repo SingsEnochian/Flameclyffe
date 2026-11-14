@@ -7,7 +7,7 @@ import urllib.parse
 import secrets
 import gradio as gr
 
-GATEWAY = os.environ.get("WAYGLASS_GATEWAY_URL", "").rstrip("/")
+GATEWAY = os.environ.get("WAYGLASS_RESPOND_URL", "")
 TOKEN = os.environ.get("WAYGLASS_GATEWAY_TOKEN", "")
 MAX_BYTES = 64_000
 OWNER_USER = os.environ.get("WAYGLASS_OWNER_USER", "")
@@ -22,14 +22,14 @@ def ready():
 
 def call_kernel(message, history):
     if not ready():
-        return "Wayglass kernel not connected. Configure private WAYGLASS_GATEWAY_URL and WAYGLASS_GATEWAY_TOKEN in Space secrets before enabling conversation."
+        return "Wayglass kernel not connected. Configure private WAYGLASS_RESPOND_URL and WAYGLASS_GATEWAY_TOKEN in Space secrets before enabling conversation."
     if not message or len(message) > 8000:
         return "Please enter a message under 8,000 characters."
     # The configured endpoint must be an owner-authenticated Wayglass conversation adapter.
     # Never point this at a public unauthenticated model endpoint.
-    payload = json.dumps({"message": message, "history": (history or [])[-12:]}).encode("utf-8")
+    payload = json.dumps({"input": message, "route_id": "wayglass:ship", "character_id": "wayglass", "interaction": {"channel": "OOC"}, "world_id": "wayglass:home", "surface_id": "huggingface-kernel-entrance"}).encode("utf-8")
     req = urllib.request.Request(
-        GATEWAY + "/api/wayglass/ask",
+        GATEWAY,
         data=payload,
         headers={"Content-Type": "application/json", "Authorization": "Bearer " + TOKEN},
         method="POST",
@@ -40,7 +40,7 @@ def call_kernel(message, history):
             if len(raw) > MAX_BYTES:
                 return "Wayglass returned an oversized response; no content displayed."
             data = json.loads(raw)
-            if data.get("source") != "wayglass-kernel" or not data.get("receipt_id"):
+            if data.get("schema") != "wayglass.route-turn/v0.1" or data.get("route_id") != "wayglass:ship" or data.get("receipt", {}).get("character_id") != "wayglass" or not data.get("receipt", {}).get("observation_id"):
                 return "Kernel provenance missing. Refusing to present an unattributed response as Wayglass."
             return str(data.get("reply", "No reply")) + "\n\nReceipt: " + str(data["receipt_id"])
     except (urllib.error.URLError, TimeoutError, ValueError, KeyError) as exc:
