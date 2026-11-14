@@ -19,6 +19,13 @@ class SpaceContractTests(unittest.TestCase):
         self.assertIn('data.get("output", "No reply")', source)
         self.assertIn('data["receipt"]["observation_id"]', source)
         self.assertNotIn('data["receipt_id"]', source)
+    def test_transport_rejects_redirects_and_invalid_receipts(self):
+        source = APP.read_text(encoding="utf-8")
+        self.assertIn("class NoRedirect", source)
+        self.assertIn("OPENER.open(req, timeout=25)", source)
+        self.assertIn('not isinstance(data.get("receipt"), dict)', source)
+        self.assertIn('not isinstance(data.get("output"), str)', source)
+        self.assertIn("api_name=False", source)
     def test_owner_gate(self):
         source = APP.read_text(encoding="utf-8")
         self.assertIn('demo.launch(auth=(OWNER_USER, OWNER_PASSWORD), show_api=False)', source)
