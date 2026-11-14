@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wayglass.invalid/schemas/codemode-readonly-route-receipt.v0.1.json",
+  "title": "Wayglass Code Mode read-only route receipt",
+  "description": "Proposed contract only. Host creates trusted identity fields; tool callers cannot supply them. Excludes credentials and raw route secrets.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "executionId",
+    "requestId",
+    "principal",
+    "initiatingAgent",
+    "connector",
+    "operation",
+    "capabilities",
+    "target",
+    "inputDigest",
+    "resultDigest",
+    "status",
+    "startedAt",
+    "completedAt"
+  ],
+  "properties": {
+    "schema": {
+      "const": "wayglass.codemode.readonly-route-receipt/v0.1"
+    },
+    "executionId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "requestId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "principal": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "subject",
+            "issuer",
+            "ownerAuthorized"
+          ],
+          "properties": {
+            "subject": {
+              "type": "string",
+              "minLength": 1
+            },
+            "issuer": {
+              "type": "string",
+              "format": "uri"
+            },
+            "ownerAuthorized": {
+              "type": "boolean"
+            }
+          }
+        }
+      ]
+    },
+    "initiatingAgent": {
+      "type": "string",
+      "minLength": 1
+    },
+    "connector": {
+      "const": "wayglass"
+    },
+    "operation": {
+      "const": "list_wayglass_routes"
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "const": "wayglass.routes.read"
+      },
+      "minItems": 1,
+      "maxItems": 1
+    },
+    "target": {
+      "const": "native-route-catalogue"
+    },
+    "inputDigest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "resultDigest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "status": {
+      "enum": [
+        "completed",
+        "denied",
+        "failed",
+        "uncertain",
+        "cancelled"
+      ]
+    },
+    "startedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "idempotencyKey": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "completed"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "principal": {
+            "type": "object",
+            "properties": {
+              "ownerAuthorized": {
+                "const": true
+              }
+            },
+            "required": [
+              "ownerAuthorized"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
