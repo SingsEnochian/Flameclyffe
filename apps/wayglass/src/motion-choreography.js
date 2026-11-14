@@ -142,20 +142,6 @@ export function installMotionChoreography({
     if (!active()) clear();
     label();
   }
-  // Browser emulation and OS accessibility changes may update MediaQueryList.matches
-  // without delivering a change event to a background or suspended document. Reconcile
-  // the lock state without ever automatically re-enabling motion.
-  let lastReduced = preference?.matches === true;
-  const reconcileMotionPreference = () => {
-    if (disposed) return;
-    const reduced = preference?.matches === true;
-    if (reduced === lastReduced) return;
-    lastReduced = reduced;
-    if (reduced) { enabled = false; clear(); }
-    label();
-  };
-  const preferenceWatch = typeof scope.setInterval === 'function'
-    ? scope.setInterval(reconcileMotionPreference, 500) : null;
   function feather(event) {
     if (event.detail?.stopped === true) { stopped = true; enabled = false; clear(); label(); }
     else if (event.detail?.stopped === false && event.detail?.confirmed === true) { stopped = false; label(); }
@@ -164,9 +150,6 @@ export function installMotionChoreography({
   toggle?.addEventListener('click', onToggle);
   preference?.addEventListener?.('change', onPreference);
   scope.addEventListener?.('pointermove', pointer, { passive: true });
-  // Some browser/device combinations emit mousemove without a corresponding
-  // pointermove. Keep the magnetic affordance functional in both input streams.
-  scope.addEventListener?.('mousemove', pointer, { passive: true });
   scope.addEventListener?.('pointerout', pointerOut, { passive: true });
   scope.addEventListener?.('pointercancel', clear, { passive: true });
   scope.addEventListener?.('wayglass:feather', feather);
@@ -184,12 +167,10 @@ export function installMotionChoreography({
       toggle?.removeEventListener('click', onToggle);
       preference?.removeEventListener?.('change', onPreference);
       scope.removeEventListener?.('pointermove', pointer);
-      scope.removeEventListener?.('mousemove', pointer);
       scope.removeEventListener?.('pointerout', pointerOut);
       scope.removeEventListener?.('pointercancel', clear);
       scope.removeEventListener?.('wayglass:feather', feather);
       document.removeEventListener?.('visibilitychange', hidden);
-      if (preferenceWatch !== null) scope.clearInterval?.(preferenceWatch);
       toggle?.remove(); status?.remove();
       delete root.dataset.wgMotion; delete root.dataset.wgRouteStatus;
     },
