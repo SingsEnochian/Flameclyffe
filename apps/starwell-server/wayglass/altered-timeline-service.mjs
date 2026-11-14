@@ -3,11 +3,10 @@
 // replay against an independently compiled, content-addressed source.
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
-import {createWyrdruneRuntime} from '../../../lib/wyrdrune/runtime.mjs';
-import {buildAlteredTimeline} from '../../arcsweep/src/altered-timeline.js';
-import {compareTimelineEvidence} from '../../arcsweep/src/coherence-spine.js';
+import {createWyrdruneRuntime} from '../wayglass-runtime/wyrdrune/runtime.mjs';
+import {compareTimelineEvidence} from '../wayglass-runtime/timeline-evidence-comparison.mjs';
 
-const wtlSource=readFileSync(new URL('../../../lib/wyrdrune/altered-timeline.wtl',import.meta.url),'utf8');
+const wtlSource=readFileSync(new URL('../wayglass-runtime/wyrdrune/altered-timeline.wtl',import.meta.url),'utf8');
 const digest=text=>createHash('sha256').update(text).digest('hex');
 const text=(value,max=500)=>typeof value==='string'&&value.trim()&&value.length<=max?value.trim():null;
 const scenarios=Object.freeze(['original','altered','assimilation','accommodation','coevolution']);
@@ -44,10 +43,37 @@ export async function validateAlteredTimelineCheckpoint(data){
     if(JSON.stringify(score)!==JSON.stringify(change.ripple))
       throw new TypeError('Wyrdrune ripple receipt disagrees with native replay');
   }
-  const experiment=buildAlteredTimeline({
-    original:data.original,branchId:data.branchId,changes:data.changes,
-    approved:true,at:data.createdAt,
-  });
+  // Packaged House host verifies the source ledger and change semantics without
+  // importing browser UI or ArcSweep's many applet dependencies. The browser
+  // reconstructs the actual Worldseed fork on Return, using the same signed bytes.
+  const original=data.original;
+  if(original?.schema!=='wayglass.timeline-original/v0.1'||
+     !original.world||!text(original.world.id,120)||
+     !Array.isArray(original.events)||original.events.length<1||original.events.length>64)
+    throw new TypeError('Valid original event ledger required');
+  if(original.world.id===data.branchId)
+    throw new TypeError('Altered branch must not overwrite parent world');
+  const originals=new Map();
+  for(const event of original.events){
+    if(!text(event?.id,120)||!text(event?.title,1600)||
+       !text(event?.at,10)||!/^\\d{4}-\\d{2}-\\d{2}$/.test(event.at)||
+       Number.isNaN(Date.parse(event.at))||
+       new Date(event.at).toISOString().slice(0,10)!==event.at||
+       !Array.isArray(event.source_refs)||!event.source_refs.length||
+       !event.source_refs.every(ref=>text(ref,300))||originals.has(event.id))
+      throw new TypeError('Original event ledger has an invalid or duplicate event');
+    originals.set(event.id,event);
+  }
+  const omitted=new Set();
+  for(const [index,change] of data.changes.entries()){
+    if(!['replace','insert','omit'].includes(change?.mode)||!originals.has(change.target_id)||
+       omitted.has(change.target_id)||!text(change.reason,700)||
+       !Array.isArray(change.source_refs)||change.source_refs.length<1||
+       !change.source_refs.every(ref=>text(ref,300))||
+       (change.mode!=='omit'&&!text(change.title,1600)))
+      throw new TypeError('Introduced change '+(index+1)+' is not anchored to the source ledger');
+    if(change.mode==='omit')omitted.add(change.target_id);
+  }
   const evidence=Array.isArray(data.evidence)?data.evidence:[];
   if(evidence.length>64)throw new RangeError('Maximum 64 source-labelled timeline evidence receipts');
   const accepted=evidence.map((item,i)=>{
@@ -69,7 +95,7 @@ export async function validateAlteredTimelineCheckpoint(data){
   });
   const comparison=compareTimelineEvidence(accepted,scenarios);
   return {snapshot:{
-    original:experiment.original,changes:data.changes,branchId:data.branchId,
+    original,changes:data.changes,branchId:data.branchId,
     createdAt:data.createdAt,evidence:accepted,
-  },experiment,comparison};
+  },comparison};
 }
