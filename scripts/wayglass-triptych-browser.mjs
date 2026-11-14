@@ -49,6 +49,21 @@ async function mountLift(page,profile){
   }));
   receipt.watercolour_motion_state=state;
   assert.equal(state.disabled,false,'Watercolour OS motion unlock: '+JSON.stringify(state));
+  await toggle.click();
+  assert.equal(await toggle.getAttribute('aria-pressed'),'true');
+  const firstRoom=page.locator('[data-surface-id]').first();
+  const box=await firstRoom.boundingBox();
+  assert.ok(box,'Ship control bounding box must exist');
+  const x=box.x+box.width*.7,y=box.y+box.height*.7;
+  await page.mouse.move(x,y);
+  await page.waitForTimeout(300);
+  const magnet=await page.evaluate(({x,y})=>({
+   enabled:document.documentElement.dataset.wgMotion,
+   offset:document.querySelector('[data-surface-id]')?.style.getPropertyValue('--wg-magnet-x')||null,
+   element:document.elementFromPoint(x,y)?.outerHTML.slice(0,320),
+  }),{x,y});
+  receipt.first_contact_magnet=magnet;
+  assert.ok(magnet.offset,'First Contact magnetic pointer coordinate missing: '+JSON.stringify(magnet));
   await ship.click();
  }
  await ship.click();
