@@ -31,7 +31,7 @@ export function membraneCurrents(state,{width=320,height=260,time=0,reducedMotio
 export function mountMythienceMembraneScene(canvas,{onShift=()=>{},reducedMotion=null}={}){
   if(!canvas?.getContext)throw new TypeError('A canvas is required');
   const ctx=canvas.getContext('2d');
-  let active=true,frame=0,raf=0,dragging=false;
+  let active=true,frame=0,raf=0,dragging=false,activePointerId=null;
   let fields={intention:.5,shifting:.5,porosity:.5,resonance:.5,compatibility:.5};
   let state=membraneVisualState(fields),origin='Origin',destination='Destination';
   const reduced=reducedMotion??Boolean(globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches);
@@ -107,9 +107,20 @@ export function mountMythienceMembraneScene(canvas,{onShift=()=>{},reducedMotion
     const v=clamp((event.clientX-rect.left)/Math.max(1,rect.width));
     onShift(Math.round(v*20)/20);
   };
-  const down=event=>{if(event.isPrimary===false||event.button>0)return;dragging=true;canvas.setPointerCapture?.(event.pointerId);pointer(event);};
-  const move=event=>{if(dragging)pointer(event);};
-  const up=event=>{dragging=false;if(event?.pointerId!==undefined&&canvas.hasPointerCapture?.(event.pointerId))canvas.releasePointerCapture?.(event.pointerId);};
+  const down=event=>{
+    if(!active||dragging||event.isPrimary===false||event.button>0)return;
+    dragging=true;activePointerId=event.pointerId;
+    canvas.setPointerCapture?.(event.pointerId);pointer(event);
+  };
+  const move=event=>{if(dragging&&event.pointerId===activePointerId)pointer(event);};
+  const up=event=>{
+    if(!dragging||event?.pointerId!==activePointerId)return;
+    dragging=false;activePointerId=null;
+    if(canvas.hasPointerCapture?.(event.pointerId))canvas.releasePointerCapture?.(event.pointerId);
+  };
+  const lostCapture=event=>{
+    if(event.pointerId===activePointerId){dragging=false;activePointerId=null;}
+  };
   const key=event=>{
     if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
     event.preventDefault();
@@ -122,6 +133,7 @@ export function mountMythienceMembraneScene(canvas,{onShift=()=>{},reducedMotion
   const visibility=()=>{if(motion()&&!raf)draw();else if(!motion())redraw();};
   canvas.addEventListener('pointerdown',down);canvas.addEventListener('pointermove',move);
   canvas.addEventListener('pointerup',up);canvas.addEventListener('pointercancel',up);
+  canvas.addEventListener('lostpointercapture',lostCapture);
   canvas.addEventListener('keydown',key);
   globalThis.document?.addEventListener?.('visibilitychange',visibility);
   globalThis.addEventListener?.('resize',redraw);
@@ -132,9 +144,10 @@ export function mountMythienceMembraneScene(canvas,{onShift=()=>{},reducedMotion
     setOutcome({permeability=null,expression=null}={}){
       state=membraneVisualState({...fields,permeability,expression});redraw();},
     setWorlds(from,to){origin=String(from);destination=String(to);canvas.dataset.worlds=origin+' → '+destination;},
-    destroy(){active=false;dragging=false;if(raf&&cancel)cancel(raf);
+    destroy(){active=false;dragging=false;activePointerId=null;if(raf&&cancel)cancel(raf);
       canvas.removeEventListener('pointerdown',down);canvas.removeEventListener('pointermove',move);
       canvas.removeEventListener('pointerup',up);canvas.removeEventListener('pointercancel',up);
+      canvas.removeEventListener('lostpointercapture',lostCapture);
       canvas.removeEventListener('keydown',key);globalThis.document?.removeEventListener?.('visibilitychange',visibility);
       globalThis.removeEventListener?.('resize',redraw);
     },
