@@ -4,22 +4,25 @@ export const INTEGRATED_VOYAGE_SCHEMA = 'wayglass.integrated-voyage/v0.1';
 
 // All values below are explicitly synthetic, never FAA measurements.
 // Repeated runs use stable fixtures so the WTL ledger is reproducible.
-export function syntheticWayglassVoyage({includeFictionalMythience=false}={}) {
+export function syntheticWayglassVoyage({includeFictionalMythience=false, mode='repair', decision='defer'}={}) {
+  if(!['repair','expand'].includes(mode))throw new TypeError('Unknown native Wyrdrune mode');
+  if(!['defer','decline','accept'].includes(decision))throw new TypeError('Unknown consent choice');
+  const stressed=mode==='repair';
   const baseline={
     source_ref:'synthetic:wayglass-baseline:001',
     observed_at:'2026-11-13T23:58:00.000Z',
-    kind:'simulation',network:{p95_ms:800,error_rate:0.20},
-    intelligence:{success_rate:0.70},fallback_independent:true,
+    kind:'simulation',network:{p95_ms:stressed?800:280,error_rate:stressed?0.20:0.03},
+    intelligence:{success_rate:stressed?0.70:0.85},fallback_independent:true,
   };
   const candidate={
     source_ref:'synthetic:wayglass-candidate:001',
     observed_at:'2026-11-13T23:59:00.000Z',
-    kind:'simulation',network:{p95_ms:480,error_rate:0.05},
-    intelligence:{success_rate:0.85},fallback_independent:true,
+    kind:'simulation',network:{p95_ms:stressed?480:240,error_rate:stressed?0.05:0.02},
+    intelligence:{success_rate:stressed?0.85:0.90},fallback_independent:true,
   };
   return {
     scenario:{
-      mode:'repair',
+      mode,
       seeds:{
         infrastructure:{queue_capacity:24,timeout_ms:1200},
         intelligence:{concurrency:4,context_tokens:2048},
@@ -28,11 +31,11 @@ export function syntheticWayglassVoyage({includeFictionalMythience=false}={}) {
       trial:{
         baseline,candidate,
         configuration:{
-          infrastructure:{queue_capacity:20,timeout_ms:1450},
-          intelligence:{concurrency:3,context_tokens:1792},
+          infrastructure:{queue_capacity:stressed?20:28,timeout_ms:stressed?1450:1150},
+          intelligence:{concurrency:stressed?3:5,context_tokens:stressed?1792:2176},
         },
       },
-      decision:'defer',approval_ref:null,
+      decision,approval_ref:decision==='accept'?'owner:explicit-sandbox-ui-decision':null,
       mythience_request:includeFictionalMythience ? {
         traveller_id:'fictional:fixture',origin_universe:'fictional:home',
         destination_universe:'fictional:garden',
