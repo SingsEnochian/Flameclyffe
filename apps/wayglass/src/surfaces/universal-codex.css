@@ -69,3 +69,17 @@
 @media(prefers-reduced-motion:reduce){.wg-codex *{animation:none!important;transition:none!important}}
 @media(prefers-reduced-transparency:reduce){.wg-codex .glass-panel{background:#0c2029}}
 @media(forced-colors:active){.wg-codex .glass-panel,.wg-codex-folds span{border-color:CanvasText}}
+
+/* Phone Codex: the ship map launcher and voyage inbox must not sit over the
+   source editor or the cypher controls. Keep both available after the worktable. */
+@media(max-width:700px){
+  html[data-wayglass-surface="wayglass:universal-codex"] .wg-ship-switch{
+    position:relative;inset:auto;display:block;width:fit-content;
+    margin:1rem auto;z-index:101;
+  }
+  html[data-wayglass-surface="wayglass:universal-codex"] .wg-voyage-inbox{
+    position:relative;inset:auto;box-sizing:border-box;
+    margin:1rem auto 1.5rem;width:min(28rem,calc(100vw - 2rem));
+    max-height:min(65dvh,480px);
+  }
+}
