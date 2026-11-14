@@ -4,7 +4,6 @@ import json
 import urllib.request
 import urllib.error
 import urllib.parse
-import secrets
 import gradio as gr
 
 GATEWAY = os.environ.get("WAYGLASS_RESPOND_URL", "")
@@ -17,7 +16,7 @@ def ready():
     if not (GATEWAY and TOKEN and OWNER_USER and OWNER_PASSWORD):
         return False
     parsed = urllib.parse.urlparse(GATEWAY)
-    return parsed.scheme == "https" and bool(parsed.hostname) and not parsed.username and not parsed.password and not parsed.fragment and not parsed.query
+    return parsed.scheme == "https" and bool(parsed.hostname) and not parsed.username and not parsed.password and not parsed.fragment and not parsed.query and parsed.path.endswith("/respond")
 
 
 def call_kernel(message, history):
@@ -42,7 +41,7 @@ def call_kernel(message, history):
             data = json.loads(raw)
             if data.get("schema") != "wayglass.route-turn/v0.1" or data.get("route_id") != "wayglass:ship" or data.get("receipt", {}).get("character_id") != "wayglass" or not data.get("receipt", {}).get("observation_id"):
                 return "Kernel provenance missing. Refusing to present an unattributed response as Wayglass."
-            return str(data.get("reply", "No reply")) + "\n\nReceipt: " + str(data["receipt_id"])
+            return str(data.get("output", "No reply")) + "\n\nObservation: " + str(data["receipt"]["observation_id"])
     except (urllib.error.URLError, TimeoutError, ValueError, KeyError) as exc:
         return "Wayglass kernel unreachable or response invalid. No simulated reply was generated."
 
