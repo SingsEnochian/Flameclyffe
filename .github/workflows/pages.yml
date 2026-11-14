@@ -115,6 +115,22 @@ jobs:
       - name: Build Pocket Concordance Lens
         run: npm run pocket:build
 
+      # Preview is always built from the canonical Wayglass development ref, not
+      # whatever happens to be on the separately maintained main release branch.
+      # No production secrets, APIs, or owner archives are bundled into Pages.
+      - name: Build current Wayglass as an isolated public UI preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin refs/heads/wayglass/current
+          git worktree add --detach "$RUNNER_TEMP/wayglass-preview-src" FETCH_HEAD
+          cd "$RUNNER_TEMP/wayglass-preview-src"
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run wayglass:build
+          test -f dist/wayglass/index.html
+          test -d dist/wayglass/assets
+          printf '%s\\n' "$(git rev-parse HEAD)" > dist/wayglass/DEVELOPMENT-SOURCE-SHA.txt
+
       - name: Assemble static Pages site
         run: |
           set -euo pipefail
@@ -159,6 +175,17 @@ jobs:
           test -f _site/bifrost-live/bifrost/index.html
           test -f _site/bifrost-live/arcsweep-continuity/index.html
           test -f _site/bifrost-live/LIVE-BUILD-RECEIPT.txt
+
+          mkdir -p _site/wayglass-preview
+          cp -a "$RUNNER_TEMP/wayglass-preview-src/dist/wayglass/." _site/wayglass-preview/
+          test -f _site/wayglass-preview/index.html
+          test -f _site/wayglass-preview/DEVELOPMENT-SOURCE-SHA.txt
+          sed -i 's#</head>#<meta name="robots" content="noindex,nofollow"></head>#' _site/wayglass-preview/index.html
+          printf '%s\\n' \\
+            'Wayglass FAEberpunk preview, public UI only; House host is NOT attached.' \\
+            "Wayglass source: $(cat _site/wayglass-preview/DEVELOPMENT-SOURCE-SHA.txt)" \\
+            "Publisher: $GITHUB_SHA" \\
+            > _site/wayglass-preview/PREVIEW-RECEIPT.txt
 
           mkdir -p _site/pocket-concordance-lens
           cp -R dist/pocket-concordance-lens/* _site/pocket-concordance-lens/
