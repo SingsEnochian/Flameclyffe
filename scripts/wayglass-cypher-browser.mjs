@@ -49,6 +49,11 @@ async function checkCodex(page,profile){
  assert.match(original,/mobius/);
  const reading=page.locator('[data-codex-english]');
  assert.equal(await reading.getAttribute('aria-live'),'off');
+ await page.evaluate(()=>{
+   const button=document.querySelector('[data-codex-translate]');
+   window.__cypherButton=button;window.__cypherClicks=0;
+   button?.addEventListener('click',()=>{window.__cypherClicks++;});
+ });
  await page.locator('[data-codex-translate]').click();
  await page.waitForTimeout(120);
  const observed=await page.evaluate(()=>({
@@ -58,6 +63,11 @@ async function checkCodex(page,profile){
    media:matchMedia('(prefers-reduced-motion: reduce)').matches,
    wayglassMotion:document.documentElement.dataset.wgMotion,
    runeCount:document.querySelectorAll('[data-codex-english] [data-cypher-line="runes"]').length,
+   clicks:window.__cypherClicks,
+   sameButton:window.__cypherButton===document.querySelector('[data-codex-translate]'),
+   stillReady:document.querySelector('[data-surface="wayglass-universal-codex"]')?.getAttribute('data-codex-ready'),
+   buttonDisabled:document.querySelector('[data-codex-translate]')?.disabled,
+   activeSurface:document.documentElement.dataset.wayglassSurface,
  }));
  receipt['codex_'+profile]=observed;
  assert.equal(observed.cypher,'reading','Codex must enter visible glyph passage: '+JSON.stringify(observed));
