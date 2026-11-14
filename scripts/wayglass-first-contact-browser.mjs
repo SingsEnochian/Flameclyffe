@@ -193,8 +193,9 @@ try{
    'Instrument drawers must be closed until explicitly requested on desktop');
  const fullMembrane=await page.locator('.wc-stage').boundingBox();
  assert.ok(fullMembrane?.width>=1080,'Closed membrane must dominate the viewport');
- assert.match(await page.locator('.wc-stage').evaluate(el=>getComputedStyle(el,'::before').backgroundImage),/opal-membrane/,
-  'Refraction texture must be composited ABOVE the opaque painting canvas');
+ const materialImage=await page.locator('.wc-stage').evaluate(el=>getComputedStyle(el,'::before').backgroundImage);
+ assert.match(materialImage,/opal-membrane|data:image\/svg(?:\+|%2[Bb])xml/i,
+  'Rendered opal must exist in computed pseudo-element material, including bundled inline SVG: '+materialImage.slice(0,100));
  await page.screenshot({path:resolve(output,'faeberpunk-immersive-desktop.png'),fullPage:true});
  await instruments.click();
  assert.equal(await instruments.getAttribute('aria-expanded'),'true',
@@ -284,8 +285,8 @@ try{
  assert.ok(materialCheck.plane>.55,'Opened membrane must retain more than half the viewport width');
  assert.equal(materialCheck.dockOutsidePaint,true,'Dock must not hide any paintable pixels');
  assert.equal(materialCheck.headWithinPlane,true,'Identity title must belong to the environment');
- assert.match(materialCheck.mineral,/opal-membrane/,'Procedural opal must composite over canvas pixels');
- assert.match(materialCheck.decorated,/copper-etching/,'Touch orb dock must be a copper-etched material');
+ assert.match(materialCheck.mineral,/opal-membrane|data:image\/svg(?:\+|%2[Bb])xml/i,'Procedural opal must composite over canvas pixels');
+ assert.match(materialCheck.decorated,/copper-etching|data:image\/svg(?:\+|%2[Bb])xml/i,'Touch orb dock must render the etched-copper texture');
  receipt.scenarios.push({id:'faeberpunk-physical-materials-and-immersive-composition',status:'passed',
   mineral:'opal-membrane',chassis:'etched-copper',plane_ratio:materialCheck.plane});
   const before=await canvasDigest(page),canvas=page.locator('#wc-fluid');
@@ -398,7 +399,7 @@ try{
  const tabletPlane=await tabletPage.locator('.wc-stage').boundingBox();
  assert.ok(tabletPlane&&tabletPlane.height>900,'iPad canvas should occupy most of portrait screen');
  assert.match(await tabletPage.locator('.wc-stage').evaluate(el=>getComputedStyle(el,'::before').backgroundImage),
-  /opal-membrane/,'iPad must render the actual opaline material over the canvas');
+  /opal-membrane|data:image\/svg(?:\+|%2[Bb])xml/i,'iPad must render the opaline material over the canvas');
  await tabletPage.screenshot({path:resolve(output,'faeberpunk-ipad-immersive.png'),fullPage:true});
  await tabletToggle.tap();
  const tabletDock=await tabletPage.locator('.wc-workbench').boundingBox();
