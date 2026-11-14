@@ -1,0 +1,24 @@
+/* FAEberpunk instrument: a continuous mineral rail, not three generic dashboard cards. */
+.wg-triptych{--labrador:#4b9c91;--opal:#e6c5a4;min-height:min(76vh,850px);padding:clamp(1rem,3.8vw,3rem);color:#f1eee4;background:radial-gradient(ellipse at 74% 12%,rgba(120,182,176,.22),transparent 46%),linear-gradient(145deg,#0c2022,#071416 57%,#191a1a);border:1px solid rgba(198,176,135,.32);border-radius:2rem;position:relative;overflow:hidden;isolation:isolate}
+.wg-triptych::before{content:'';position:absolute;inset:-25%;pointer-events:none;background:conic-gradient(from 120deg at 48% 50%,transparent,rgba(96,181,160,.12),transparent,rgba(235,167,120,.15),transparent);mix-blend-mode:screen;opacity:.6}
+.wg-triptych-intro,.wg-triptych-rail,.wg-triptych-footer{position:relative;z-index:1}
+.wg-triptych-intro{max-width:66ch;margin-bottom:2.5rem}
+.wg-triptych-intro h1{font-size:clamp(2rem,5vw,4.1rem);line-height:1.1;margin:.6rem 0}
+.wg-triptych-intro p{line-height:1.5;max-width:62ch}
+.wg-triptych-rail{display:grid;grid-template-columns:1.07fr .93fr 1fr;min-height:clamp(330px,44vh,550px);gap:0;border-top:2px solid rgba(221,199,151,.38);border-bottom:2px solid rgba(221,199,151,.38)}
+.wg-triptych-panel{position:relative;display:flex;flex-direction:column;justify-content:end;padding:1.25rem;min-width:0;border-right:2px solid rgba(221,199,151,.3);background:linear-gradient(0deg,rgba(4,18,19,.98),transparent 75%)}
+.wg-triptych-panel:last-child{border-right:0}
+.wg-triptych-panel h2,.wg-triptych-panel p,.wg-triptych-actions{z-index:1;position:relative}
+.wg-triptych-panel h2{margin:0;font-size:clamp(1.1rem,2.2vw,1.8rem)}
+.wg-triptych-panel p{font-size:.95rem;max-width:25ch}
+.wg-triptych-mineral{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(101deg,transparent 0 13px,rgba(225,245,209,.035) 14px 16px,transparent 18px 28px),radial-gradient(ellipse at 30% 35%,rgba(110,177,159,.32),transparent 60%)}
+[data-panel="monolith"] .wg-triptych-mineral{background:linear-gradient(90deg,rgba(11,39,35,.8) 0 24%,transparent 24% 35%,rgba(41,105,87,.36) 35% 88%,transparent 88%),repeating-linear-gradient(94deg,transparent 0 12px,rgba(210,246,212,.1) 13px 14px,transparent 16px 24px)}
+[data-panel="twist"] .wg-triptych-mineral{background:conic-gradient(from 310deg at 50% 39%,rgba(110,197,181,.42),transparent,rgba(157,117,94,.3),transparent,rgba(110,197,181,.35)),repeating-radial-gradient(ellipse at 50% 50%,transparent 0 14px,rgba(199,237,216,.065) 15px 18px,transparent 19px 36px)}
+[data-panel="arrival"] .wg-triptych-mineral{background:linear-gradient(95deg,rgba(18,47,51,.8) 0 25%,transparent 25% 62%,rgba(67,113,111,.38) 62%),radial-gradient(ellipse at 68% 23%,rgba(227,180,139,.34),transparent 60%)}
+.wg-triptych-actions{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.65rem}
+.wg-triptych-actions button,.wg-triptych-footer button{background:rgba(5,25,28,.78);border:1px solid rgba(225,193,139,.65);border-radius:.65rem;padding:.55rem .8rem;color:#f5e9cf;cursor:pointer;font:inherit}
+.wg-triptych-actions button:hover,.wg-triptych-footer button:hover,.wg-triptych-actions button:focus-visible,.wg-triptych-footer button:focus-visible{outline:2px solid #c1e4cf;outline-offset:2px}
+.wg-triptych-footer{display:flex;gap:1rem;align-items:center;flex-wrap:wrap;margin-top:1.3rem}
+@media(max-width:720px){.wg-triptych-rail{grid-template-columns:1fr;min-height:auto}.wg-triptych-panel{min-height:235px;border-right:0;border-bottom:2px solid rgba(221,199,151,.3)}.wg-triptych-panel:last-child{border-bottom:0}}
+@media(prefers-reduced-transparency:reduce){.wg-triptych{background:#0b2324}.wg-triptych::before{display:none}}
+@media(forced-colors:active){.wg-triptych,.wg-triptych-panel{border:1px solid CanvasText}.wg-triptych-mineral,.wg-triptych::before{display:none}}
