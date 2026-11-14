@@ -29,7 +29,7 @@ export async function mountArcSweepWritingSurface(root) {
   const session = sessionId();
   const messages = [];
   let routes = [];
-  let selectedRoute = 'openai:gpt';
+  let selectedRoute = 'local:ollama';
   let busy = false;
   let lastReceipt = null;
 
@@ -159,8 +159,8 @@ export async function mountArcSweepWritingSurface(root) {
       routeSelect.value = selectedRoute;
       routeState.textContent = routes.length + ' registered route' + (routes.length === 1 ? '' : 's');
     } catch (error) {
-      routes = [{ route_id: 'openai:gpt', label: 'GPT', model: 'server-selected' }];
-      routeSelect.innerHTML = '<option value="openai:gpt">GPT · server-selected</option>';
+      routes = [{ route_id: 'local:ollama', label: 'Local Model', model: 'server-selected' }];
+      routeSelect.innerHTML = '<option value="local:ollama">Local Model · server-selected</option>';
       routeState.textContent = 'Catalogue unavailable · fallback route shown';
     }
   }
