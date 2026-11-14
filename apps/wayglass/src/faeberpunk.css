@@ -406,3 +406,61 @@ html[data-wayglass-surface="wayglass:living-watercolor"] #app{
     border:2px solid Highlight;
   }
 }
+
+
+/* FAEpunk message-fold: a compact readable chip rather than a floating purple slab.
+   Text remains accessible when expanded. No route or inbox behaviour is altered. */
+.wg-voyage-inbox{
+  right:clamp(13px,2.5vw,40px);
+  bottom:calc(28px + env(safe-area-inset-bottom,0px));
+  width:min(390px,calc(100vw - 26px));padding:9px 13px;
+  color:#dcf0e5;
+  background:radial-gradient(circle at 15% 5%,rgba(92,171,145,.24),transparent 70%),
+    linear-gradient(140deg,rgba(8,36,43,.97),rgba(4,15,24,.97));
+  border:1px solid rgba(188,237,215,.36);border-radius:17px;
+  box-shadow:0 18px 40px rgba(0,0,0,.49),inset 0 1px rgba(240,248,224,.12);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+}
+.wg-voyage-inbox:not([open]){
+  width:auto;min-width:0;max-width:calc(100vw - 26px);
+  padding:0;border-radius:999px;
+}
+.wg-voyage-inbox summary{
+  display:list-item;list-style:inside;min-height:44px;
+  padding:10px 13px;cursor:pointer;color:#e3f4e9;
+  font-size:.79rem;font-weight:700;letter-spacing:.045em;
+}
+.wg-voyage-inbox[open] summary{border-bottom:1px solid rgba(161,220,199,.21)}
+.wg-voyage-inbox article{border-top-color:rgba(168,222,207,.25)}
+.wg-voyage-inbox textarea{
+  color:#f2f6ea;background:#071b25;border-radius:12px;
+  border:1px solid rgba(167,222,199,.29);padding:8px 10px;
+}
+.wg-voyage-inbox :is(summary,button,textarea):focus-visible{
+  outline:3px solid #e9cf9c;outline-offset:3px;
+}
+.wg-voyage-inbox button{
+  min-height:44px;border-radius:12px;
+  background:linear-gradient(140deg,rgba(30,87,87,.76),rgba(8,29,35,.9));
+  border:1px solid rgba(153,224,200,.32);color:#eaf7ec;
+}
+@media(min-width:1161px){
+  html[data-wayglass-surface="wayglass:living-watercolor"] .wc-stage{
+    position:sticky;top:112px;
+    min-height:min(760px,calc(100dvh - 128px));
+  }
+}
+@media(max-width:900px){
+  .wg-voyage-inbox{
+    bottom:calc(91px + env(safe-area-inset-bottom,0px));
+    right:max(10px,env(safe-area-inset-right,0px));
+    max-height:calc(100dvh - 180px);
+  }
+  .wg-voyage-inbox:not([open]){padding:0}
+}
+@media(prefers-reduced-transparency:reduce){
+  .wg-voyage-inbox{backdrop-filter:none;-webkit-backdrop-filter:none;background:#09202a}
+}
+@media(forced-colors:active){
+  .wg-voyage-inbox{border:2px solid CanvasText}
+}
