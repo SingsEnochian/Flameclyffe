@@ -5,6 +5,7 @@ import { animateWyrdruneCypher } from '../wyrdrune-cypher.js';
 import '../wyrdrune-cypher-material.css';
 import { scoreWyrdruneStory } from '../route-client.js';
 import {shipSoundscape} from '../ship-soundscape.js';
+import {mountWorldInduction} from '../world-induction.js';
 import { wayglassSomaticSound, WAYGLASS_FEATHER_EVENT } from '../somatic-sound.js';
 import { authorizationSession } from '../authorization-session.js';
 import { mountWayglassRoutePicker } from '../route-picker.js';
@@ -110,6 +111,7 @@ export async function mountArcSweepWritingSurface(root) {
     "    <select id=\"wg-world-seat\" aria-label=\"Wayglass story world\"></select>\n",
     "    <p class=\"tiny\" id=\"wg-world-status\" role=\"status\">World and provider routes are independent.</p>\n",
     '<button type="button" id="wg-griff-check" class="glass-chip" hidden>Check Griff connection</button>',
+    '<div id="wg-world-induction-host" class="wg-world-induction-host" aria-label="World induction and aspect creation"></div>',
     "  </section>\n",
           '<div id="wg-stepfun-transfer" class="wg-stepfun-transfer" hidden>',
             '<label for="wg-stepfun-consent"><input type="checkbox" id="wg-stepfun-consent" /> <span id="wg-provider-consent-label">I approve this external provider transfer.</span></label>',
@@ -512,6 +514,7 @@ export async function mountArcSweepWritingSurface(root) {
     option.textContent = world.character ? world.name + ' · ' + world.character.name : world.name;
     worldSelect.append(option);
   }
+  let induction=null;
   function selectWorldSeat(worldId, { resetCheckpoint = true } = {}) {
     const world = findWayglassWorldSeat(worldId);
     if (!world) return;
@@ -552,6 +555,11 @@ export async function mountArcSweepWritingSurface(root) {
     void loadRoutes();
   });
   selectWorldSeat(cp('world').value, { resetCheckpoint: false });
+  induction=mountWorldInduction(root.querySelector('#wg-world-induction-host'),{
+    worldSelect,input,manuscriptRoot:root.querySelector('#fae-manuscript-host'),
+    getWorld:findWayglassWorldSeat,
+    writerText:()=>[input.value,root.querySelector('#fae-manuscript-host [data-manuscript-editor]')?.innerText||''].join('\n'),
+  });
   griffCheck.addEventListener('click', async () => {
     griffCheck.disabled = true;
     worldStatus.textContent = 'Checking Griff’s exact SpicyChat conversation with the House Steward session…';
@@ -1114,6 +1122,7 @@ export async function mountArcSweepWritingSurface(root) {
       globalThis.removeEventListener?.(WAYGLASS_FEATHER_EVENT,onSharedFeather);
       routePicker.destroy();
       manuscript();
+      induction?.destroy();
     },
   });
 }
