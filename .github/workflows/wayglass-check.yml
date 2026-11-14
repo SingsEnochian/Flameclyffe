@@ -75,6 +75,15 @@ jobs:
           path: artifacts/wayglass/return-trial-001.json
           if-no-files-found: error
           retention-days: 30
+      - name: Run Return Trial 002 Lanternbridge cold return
+        run: node scripts/wayglass-return-trial-002.mjs
+      - name: Preserve Return Trial 002 cold-return evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayglass-return-trial-002-${{ github.sha }}
+          path: artifacts/wayglass/return-trial-002.json
+          if-no-files-found: error
+          retention-days: 30
       - name: Verify authenticated host, MCP, OAuth and crew workspaces
         run: npm run wayglass:test:host
       - name: Verify StepFun synthetic host smoke (captured transport; no credentials)
