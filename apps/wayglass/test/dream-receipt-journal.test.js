@@ -43,3 +43,40 @@ test('conflicting retry is rejected',async()=>{
  const f=fixture(),journal=f.make();await journal.append(event);
  await assert.rejects(journal.append({...event,at_ms:101}),/conflicting/);
 });
+
+test('Feather during pending atomic append rejects late acknowledgement',async()=>{
+ let release;
+ const gate=new Promise(resolve=>{release=resolve;});
+ const journal=createDreamReceiptJournal({
+  dream_id:'voyage-1',owner_id:'rowan',authorise:async()=>true,
+  store:{appendAtomic:async({receipt})=>{await gate;return receipt;},readScoped:async()=>[]}
+ });
+ const pending=journal.append(event);
+ await Promise.resolve();await Promise.resolve();
+ journal.feather();release();
+ await assert.rejects(pending,/Feather/);
+});
+test('consent revoked while write is pending rejects acknowledgement',async()=>{
+ let release;let allowed=true;
+ const gate=new Promise(resolve=>{release=resolve;});
+ const journal=createDreamReceiptJournal({
+  dream_id:'voyage-1',owner_id:'rowan',authorise:async()=>allowed,
+  store:{appendAtomic:async({receipt})=>{await gate;return receipt;},readScoped:async()=>[]}
+ });
+ const pending=journal.append(event);
+ await Promise.resolve();await Promise.resolve();
+ allowed=false;release();
+ await assert.rejects(pending,/revoked/);
+});
+test('Feather during pending replay prevents disclosure',async()=>{
+ let release;
+ const gate=new Promise(resolve=>{release=resolve;});
+ const journal=createDreamReceiptJournal({
+  dream_id:'voyage-1',owner_id:'rowan',authorise:async()=>true,
+  store:{appendAtomic:async({receipt})=>receipt,readScoped:async()=>{await gate;return [];}}
+ });
+ const pending=journal.replay();
+ await Promise.resolve();await Promise.resolve();
+ journal.feather();release();
+ await assert.rejects(pending,/Feather/);
+});
