@@ -181,12 +181,27 @@ try{
  });
  assert.match(await page.locator('#wc-brush-size-label').textContent(),/85%/);
  await page.locator('#wc-clear-paint').click();
- const paperPixel=await page.locator('#wc-fluid').evaluate(node=>{
+ const samplePaper=()=>page.locator('#wc-fluid').evaluate(node=>{
    const ctx=node.getContext('2d');
    return [...ctx.getImageData(Math.floor(node.width/2),Math.floor(node.height/2),1,1).data];
  });
+ const opaline=await samplePaper();
+ assert.ok(opaline[0]<80&&opaline[1]<95&&opaline[2]<110,
+   'FAEpank cleared painting must show dark opaline paper by default');
+ assert.equal(await page.locator('#wc-paper').getAttribute('aria-pressed'),'true',
+   'The dark paper mode must be accurately exposed to assistive technology');
+ await page.locator('#wc-paper').click();
+ const paperPixel=await samplePaper();
  assert.ok(paperPixel[0]>200&&paperPixel[1]>190&&paperPixel[2]>180,
-   'Cleared painting must show bright, readable paper');
+   'Owner must be able to select a bright, readable light paper');
+ assert.equal(await page.locator('#wc-paper').getAttribute('aria-pressed'),'false',
+   'The paper mode must remain reversible and accessible');
+ assert.ok(await page.locator('#wc-first-touch').isVisible(),
+   'The real Wyrdrune First Touch orb must be reachable in Watercolour');
+ await page.locator('[data-wc-touch-mode="expand"]').click();
+ assert.equal(await page.locator('[data-wc-touch-mode="expand"]').getAttribute('aria-pressed'),'true',
+   'Touch profile must be selectable without starting a model or making a network call');
+ await page.locator('[data-wc-touch-mode="repair"]').click();
  await page.locator('#wc-focus-paint').click();
  assert.equal(await page.locator('.wc-workbench').isVisible(),false,'Focus mode must reclaim canvas space');
  assert.match(await page.locator('#wc-focus-paint').textContent(),/Show workbench/);
