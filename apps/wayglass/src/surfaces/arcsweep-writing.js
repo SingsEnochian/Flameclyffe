@@ -1,4 +1,5 @@
 import { createInteractionState } from '../interaction-state.js';
+import {mountFaepunkManuscript} from '../faeberpunk-manuscript.js';
 import { previewWyrdrune, draftWyrdruneDiscussion } from '../wyrdrune-client.js';
 import { animateWyrdruneCypher } from '../wyrdrune-cypher.js';
 import { scoreWyrdruneStory } from '../route-client.js';
@@ -72,6 +73,7 @@ export async function mountArcSweepWritingSurface(root) {
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:acoustic-room">Acoustic Room</button><button type="button" class="glass-chip" data-wayglass-room="wayglass:spectral-field">Full Spectrum</button>',
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:commons">Commons</button>',
     '<button type="button" class="glass-chip" data-wayglass-room="wayglass:mythience-crossing">Mythience</button>',
+    '<button type="button" class="glass-chip" data-wayglass-room="wayglass:universal-codex">Universal Codex</button>',
     "  </nav>\n",
     "  <header class=\"wg-surface-head glass-panel\">\n",
     "    <div class=\"wg-hero-copy\">\n",
@@ -147,6 +149,7 @@ export async function mountArcSweepWritingSurface(root) {
     "          <div id=\"wg-ownership-list\" class=\"ownership-list\"></div>\n",
     "        </details>\n",
     "      </section>\n",
+    '<section id="fae-manuscript-host" class="fae-writing-worktable" aria-label="Rich text manuscript worktable"></section>',
     "      <section class=\"wg-thread\" aria-label=\"Writing conversation\" aria-live=\"polite\">\n",
     "        <div id=\"wg-thread\" class=\"wg-thread-log\"><div class=\"empty-thread\"><span class=\"wg-empty-feather\" aria-hidden=\"true\">✧</span><strong>The room is quiet. Start anywhere.</strong><small>Your conversation will unfold here.</small></div></div>\n",
     "      </section>\n",
@@ -176,6 +179,7 @@ export async function mountArcSweepWritingSurface(root) {
       '<p class="tiny">A genuine routed reply can join the score after Send; route provenance remains visible in the Writing Room. Sound never starts automatically.</p>',
     '</section>',
     '<section class="wg-wtl-panel" aria-label="Wyrdrune ritual workbench">',
+      '<button type="button" class="glass-chip fae-codex-door" data-wayglass-room="wayglass:universal-codex">◇ Open the Universal Codex</button>',
       '<details id="wg-wtl-details" class="glass-panel">',
         '<summary>Wyrdrune · Eightfold Ritual Workbench</summary>',
         '<p class="tiny">Preview the Eightfold locally. You decide whether to discuss it with your selected model or SpicyChat route; nothing sends automatically.</p>',
@@ -254,6 +258,12 @@ export async function mountArcSweepWritingSurface(root) {
   const ownershipList = root.querySelector('#wg-ownership-list');
   const thread = root.querySelector('#wg-thread');
   const input = root.querySelector('#wg-input');
+  const manuscript=mountFaepunkManuscript(root.querySelector('#fae-manuscript-host'),{
+    feather:()=>wayglassSomaticSound.snapshot().feather_stopped,
+    onStage:text=>{if(!input.value.trim())input.value=text;
+      else input.value+='\n\n'+text;
+      input.dispatchEvent(new Event('input',{bubbles:true}));input.focus();},
+  });
   const wtlSource=root.querySelector('#wg-wtl-source'),wtlStatus=root.querySelector('#wg-wtl-status');
   const wtlOutput=root.querySelector('#wg-wtl-output'),wtlDiscuss=root.querySelector('#wg-wtl-discuss');
   const WTL_EXAMPLE="mobius {\n perceive { let light = votive(\"Lantern\",\"An offered guiding light\"); }\n compress { let shape = star(8); }\n release { let letter = angelicLetter(1); }\n verify { emit light; }\n integrate { emit shape; }\n choose { emit letter; }\n return { emit \"held\"; }\n transcend { emit 1; }\n}";
@@ -305,6 +315,15 @@ export async function mountArcSweepWritingSurface(root) {
 
   const sharedObserverReading = consumeObserverContextForWriting();
   if (sharedObserverReading) input.value = sharedObserverReading + '\n\n[My question about this observation:]\n';
+  // Universal Codex stages only an explicitly reviewed text, never sends it.
+  try{
+    const staged=globalThis.sessionStorage?.getItem('wayglass:universal-codex:writing-handoff/v1');
+    if(staged&&staged.length<=11000){
+      const joined=[input.value.trim(),staged].filter(Boolean).join('\n\n');
+      if(joined.length<=11000){input.value=joined;
+        globalThis.sessionStorage?.removeItem('wayglass:universal-codex:writing-handoff/v1');}
+    }
+  }catch{/* Browser session unavailable; do not overwrite a live draft. */}
 
   // This UI transports text and renders the Wyrdrune score. It does not
   // implement the musical decisions, which live only in the .wtl program.
@@ -1081,6 +1100,7 @@ export async function mountArcSweepWritingSurface(root) {
       offShipSound(); // Ship owns the acoustic engine across room changes.
       globalThis.removeEventListener?.(WAYGLASS_FEATHER_EVENT,onSharedFeather);
       routePicker.destroy();
+      manuscript();
     },
   });
 }
