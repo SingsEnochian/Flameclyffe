@@ -31,11 +31,11 @@ export function membraneCurrents(state,{width=320,height=260,time=0,reducedMotio
 export function mountMythienceMembraneScene(canvas,{onShift=()=>{},reducedMotion=null}={}){
   if(!canvas?.getContext)throw new TypeError('A canvas is required');
   const ctx=canvas.getContext('2d');
-  let active=true,frame=0,raf=0,dragging=false,activePointerId=null;
+  let active=true,paused=false,frame=0,raf=0,dragging=false,activePointerId=null;
   let fields={intention:.5,shifting:.5,porosity:.5,resonance:.5,compatibility:.5};
   let state=membraneVisualState(fields),origin='Origin',destination='Destination';
   const reduced=reducedMotion??Boolean(globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches);
-  const motion=()=>!reduced&&globalThis.document?.visibilityState!=='hidden';
+  const motion=()=>!paused&&!reduced&&globalThis.document?.visibilityState!=='hidden';
   const request=globalThis.requestAnimationFrame?.bind(globalThis);
   const cancel=globalThis.cancelAnimationFrame?.bind(globalThis);
   const geometry=()=>{
@@ -102,13 +102,13 @@ export function mountMythienceMembraneScene(canvas,{onShift=()=>{},reducedMotion
   }
   const redraw=()=>{if(raf&&cancel)cancel(raf);raf=0;draw();};
   const pointer=event=>{
-    if(!active)return;
+    if(!active||paused)return;
     const rect=canvas.getBoundingClientRect();
     const v=clamp((event.clientX-rect.left)/Math.max(1,rect.width));
     onShift(Math.round(v*20)/20);
   };
   const down=event=>{
-    if(!active||dragging||event.isPrimary===false||event.button>0)return;
+    if(!active||paused||dragging||event.isPrimary===false||event.button>0)return;
     dragging=true;activePointerId=event.pointerId;
     canvas.setPointerCapture?.(event.pointerId);pointer(event);
   };
@@ -122,7 +122,7 @@ export function mountMythienceMembraneScene(canvas,{onShift=()=>{},reducedMotion
     if(event.pointerId===activePointerId){dragging=false;activePointerId=null;}
   };
   const key=event=>{
-    if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+    if(paused||!active||!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
     event.preventDefault();
     const current=clamp(fields.shifting);
     const v=event.key==='Home'?0:event.key==='End'?1:
@@ -139,6 +139,8 @@ export function mountMythienceMembraneScene(canvas,{onShift=()=>{},reducedMotion
   globalThis.addEventListener?.('resize',redraw);
   draw();
   return Object.freeze({
+    pause(){paused=true;dragging=false;activePointerId=null;redraw();},
+    resume(){if(!active)return;paused=false;redraw();},
     setFields(next){fields={...fields,...next};state=membraneVisualState(fields);
       canvas.dataset.shiftValue=String(fields.shifting);redraw();},
     setOutcome({permeability=null,expression=null}={}){
