@@ -1,4 +1,5 @@
 import {publishWatercolorActivity} from './watercolor-bridge.js';
+import {recordLateEncounter} from './mythience-late-observations.js';
 
 export const MYTHIENCE_SCHEMA='wayglass.mythience-local-encounter/v1';
 const listeners=new Set();
@@ -14,12 +15,16 @@ export function clearMythience(){
   for(const listener of [...listeners]){try{listener(last);}catch{}}
 }
 export async function proposeMythienceHybrid({request,seeds,signal,fetchImpl=fetch}={}){
+  const ROUTE='mythience-hybrid';
   const response=await fetchImpl('/api/v1/wayglass/wyrdrune/mythience-hybrid',{
     method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',signal,
     body:JSON.stringify({request,seeds}),
   });
   const data=await response.json().catch(()=>({}));
-  if(signal?.aborted)throw new DOMException('Mythience request cancelled','AbortError');
+  if(signal?.aborted){
+    recordLateEncounter({route:ROUTE,event_id:request?.event_id,status:data.status,input_hash:data.input_hash});
+    throw new DOMException('Mythience request cancelled','AbortError');
+  }
   if(!response.ok)throw new Error(String(data.error||'Mythience hybrid route unavailable').slice(0,240));
   if(!['candidate-returned','denied'].includes(data.status))throw new Error('Unrecognised hybrid result');
   last=Object.freeze({schema:MYTHIENCE_SCHEMA,observed_at:new Date().toISOString(),
@@ -33,6 +38,7 @@ export async function proposeMythienceHybrid({request,seeds,signal,fetchImpl=fet
 }
 
 export async function proposeMythienceCrossing({request,seeds,signal,fetchImpl=fetch}={}){
+  const ROUTE='mythience-crossing';
   const response=await fetchImpl('/api/v1/wayglass/wyrdrune/mythience-crossing',{
     method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',signal,
     body:JSON.stringify({request,seeds}),
