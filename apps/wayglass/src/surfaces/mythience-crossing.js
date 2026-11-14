@@ -15,7 +15,7 @@ const controls=[
   ['compatibility','Destination compatibility','Ability translation'],
 ];
 export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={}){
-  let active=true,controller=null,serial=0;
+  let active=true,paused=false,controller=null,serial=0;
   const journey=wayglassMythienceJourney();
   const sensory=createMythienceSensory();
   let lastReading=null;
@@ -168,7 +168,7 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
   renderLineage();
   hybridButton.disabled=arrival.abilities.length<2;
   form.addEventListener('submit',async event=>{
-    event.preventDefault();if(!active||controller)return;
+    event.preventDefault();if(!active||paused||controller)return;
     const data=new FormData(form);
     const id=key=>String(data.get(key)||'').trim();
     const field=Object.fromEntries(controls.map(([key])=>[key,Number(data.get(key))]));
@@ -199,12 +199,12 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
       carryButton.disabled=result.status!=='candidate-returned';
     }catch(error){
       if(active&&controller===flight)status.textContent=flight.signal.aborted?'Feather: paused.':error.message;
-    }finally{if(controller===flight){controller=null;if(active){button.disabled=false;
-      hybridButton.disabled=journey.snapshot().abilities.length<2;}}}
+    }finally{if(controller===flight){controller=null;if(active){button.disabled=paused;
+      hybridButton.disabled=paused||journey.snapshot().abilities.length<2;}}}
   });
   hybridButton.addEventListener('click',async()=>{
     const current=journey.snapshot();
-    if(!active||controller||current.abilities.length<2)return;
+    if(!active||paused||controller||current.abilities.length<2)return;
     if(current.traveller_id!==String(form.elements.traveller.value).trim()){
       status.textContent='The traveller has changed. Start a new journey before weaving.';return;
     }
@@ -232,7 +232,7 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
       hybridButton.disabled=journey.snapshot().abilities.length<2;}}}
   });
   carryButton.addEventListener('click',()=>{
-    if(!active||controller)return;
+    if(!active||paused||controller)return;
     try{
       const state=journey.carry();
       carryButton.disabled=true;
@@ -243,7 +243,7 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
     }catch(error){status.textContent=error.message;}
   });
   hearButton.addEventListener('click',async()=>{
-    if(!active||!lastReading)return;
+    if(!active||paused||!lastReading)return;
     const outcome=await sensory.hear(lastReading);
     if(active)status.textContent=outcome.played?'Wyrdrune-derived tone played on request.':outcome.reason;
   });
@@ -253,17 +253,17 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
     status.textContent=outcome.felt?'Threshold haptic played on request.':outcome.reason||'Haptics unavailable.';
   });
   function featherStop(){
-    scene.pause();controller?.abort();controller=null;journey.discard();sensory.stop();lastReading=null;
+    paused=true;scene.pause();controller?.abort();controller=null;journey.discard();sensory.stop();lastReading=null;
     hearButton.disabled=true;feelButton.disabled=true;
-    button.disabled=false;carryButton.disabled=true;
-    hybridButton.disabled=journey.snapshot().abilities.length<2;
+    button.disabled=true;carryButton.disabled=true;
+    hybridButton.disabled=true;
     status.textContent='Feather: paused. Uncarried proposals set aside; carried previews remain.';
   }
   root.querySelector('[data-mythience-feather]').addEventListener('click',featherStop);
   const onShipFeather=event=>{if(event.detail?.stopped===true&&active)featherStop();};
   globalThis.addEventListener('wayglass:feather',onShipFeather);
   root.querySelector('[data-mythience-reset]').addEventListener('click',()=>{
-    controller?.abort();controller=null;journey.reset();scene.resume();serial=0;hybridButton.disabled=true;carryButton.disabled=true;
+    controller?.abort();controller=null;journey.reset();paused=false;scene.resume();serial=0;hybridButton.disabled=true;carryButton.disabled=true;
     sensory.stop();lastReading=null;hearButton.disabled=true;feelButton.disabled=true;
     clearMythience();renderLineage();membrane.style.setProperty('--membrane-open','0');scene.setFields(fieldValues());
     reading.textContent='A fresh possibility. Nothing has been carried forward.';
