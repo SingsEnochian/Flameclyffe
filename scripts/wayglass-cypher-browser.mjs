@@ -43,6 +43,7 @@ async function checkCodex(page,profile){
  await shipRoom(page,'wayglass:universal-codex');
  const scene=page.locator('[data-surface="wayglass-universal-codex"]');
  await scene.waitFor({state:'visible'});
+ await page.waitForFunction(()=>document.querySelector('[data-surface="wayglass-universal-codex"]')?.getAttribute('data-codex-ready')==='true',{},{timeout:8000});
  const source=page.locator('#codex-source');
  const original=await source.inputValue();
  assert.match(original,/mobius/);
