@@ -37,6 +37,7 @@ export function createDreamReceiptJournal({dream_id,owner_id,authorise,store}={}
   if(feathered)throw new Error('Feather during append: storage outcome uncertain; reconcile by event_id');
   // A late acknowledgement is not permission to adopt a revoked result. 
   if(await authorise({owner_id,dream_id,action:'record'})!==true)throw new Error('Recording revoked after append: storage outcome uncertain; reconcile by event_id'); 
+  if(feathered)throw new Error('Feather during append authorisation: storage outcome uncertain; reconcile by event_id');
   if(!saved||saved.event_id!==receipt.event_id||JSON.stringify(saved)!==JSON.stringify(receipt))throw new Error('Atomic store returned mismatched receipt');
   return saved;
  }
@@ -45,6 +46,7 @@ export function createDreamReceiptJournal({dream_id,owner_id,authorise,store}={}
   const rows=await store.readScoped({owner_id,dream_id,authorise});
   if(feathered)throw new Error('Feather during replay'); 
   if(await authorise({owner_id,dream_id,action:'read'})!==true)throw new Error('Reading revoked during replay'); 
+  if(feathered)throw new Error('Feather during replay authorisation');
   if(!Array.isArray(rows))throw new TypeError('Scoped read must return an array');
   const seen=new Set();
   const receipts=rows.map(row=>{
