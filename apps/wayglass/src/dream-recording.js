@@ -16,7 +16,9 @@ export function createDreamRecording({dream_id,universe_id,permission,write,read
  if(permission!==true)throw new Error('Recording requires explicit permission');
  if(typeof write!=='function'||typeof read!=='function')throw new TypeError('Durable write and read adapters required');
  let closed=false;
- async function append(event){
+ // Serialise concurrent appends in this instance; cross-process writes still require atomic storage.
+ let tail=Promise.resolve();
+ async function appendOne(event){
   if(closed)throw new Error('Recording closed');
   if(!event||typeof event!=='object')throw new TypeError('Event required');
   const event_id=validId(event.event_id,'event_id');
@@ -29,10 +31,17 @@ export function createDreamRecording({dream_id,universe_id,permission,write,read
   const match=prior.find(e=>e.event_id===event_id);
   if(match){if(JSON.stringify(match)!==JSON.stringify(entry))throw new Error('Conflicting event identity');return match;}
   if(prior.length>=MAX_EVENTS)throw new Error('Recording event limit reached');
+  if(closed)throw new Error('Recording closed');
   await write(dream_id,Object.freeze([...prior,entry]));
   return entry;
  }
+ function append(event){
+  const operation=tail.then(()=>appendOne(event));
+  tail=operation.catch(()=>{});
+  return operation;
+ }
  async function manifest(){
+  await tail;
   const events=await read(dream_id);
   if(!Array.isArray(events))throw new TypeError('read must return event array');
   return Object.freeze({schema:'wayglass.dream-recording-manifest/v1',dream_id,universe_id,events:Object.freeze(events.slice()),asset_count:events.filter(e=>e.asset).length});
