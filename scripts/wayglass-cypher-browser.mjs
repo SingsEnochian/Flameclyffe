@@ -62,10 +62,15 @@ async function checkCodex(page,profile){
    const rect=el.getBoundingClientRect();
    const x=rect.x+rect.width/2,y=rect.y+rect.height/2;
    const target=document.elementFromPoint(x,y);
+   const css=getComputedStyle(el),parent=getComputedStyle(el.parentElement);
    return {same:target===el||el.contains(target),
-     hit:target?.outerHTML.slice(0,300), x,y,navHidden:document.querySelector('#wg-shell-nav')?.hidden};
+     hit:target?.outerHTML.slice(0,300), x,y,navHidden:document.querySelector('#wg-shell-nav')?.hidden,
+     pointerEvents:css.pointerEvents,visibility:css.visibility,display:css.display,
+     opacity:css.opacity,transform:css.transform,translate:css.translate,
+     parentPointerEvents:parent.pointerEvents,buttonOuter:el.outerHTML.slice(0,240)};
  });
  receipt['hit_'+profile]=hit;
+ await page.screenshot({path:resolve(output,profile+'-cypher-preclick.png'),fullPage:true});
  assert.equal(hit.same,true,'Codex reading control is covered by another ship layer: '+JSON.stringify(hit));
  await button.click();
  await page.waitForTimeout(120);
