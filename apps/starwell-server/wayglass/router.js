@@ -25,6 +25,7 @@ const { createWayglassLibraryRouter } = require('./research-library');
 const { createObserverSelfDevelopmentRouter } = require('./observer-self-development');
 const { proposeCrossing } = require('../wayglass-runtime/wayglass-mythience-crossing.cjs');
 const { proposeHybrid } = require('../wayglass-runtime/wayglass-mythience-fusion.cjs');
+const { runFirstTouch } = require('../wayglass-runtime/wayglass-first-touch-demo.cjs');
 const { runQuadEightfold, SOURCE_SCHEMA, TABLES } = require('../wayglass-runtime/wayglass-quad-eightfold.cjs');
 
 const { resolveCharacterSeat, publicCharacterSeats, EMERGENCE_QUESTION_IDS } = require('./character-seats.cjs');
@@ -872,6 +873,24 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     }catch(error){
       return res.status(400).json({schema:'mythience.hybrid-error/v0.1',
         error:cleanText(error?.message||'Hybrid proposal refused.',240)});
+    }
+  });
+
+  // Touch-first FAEpunk demo: real native Wyrdrune execution over only synthetic
+  // evidence. No model, hardware, persistence or deploy path is invoked here.
+  router.post('/wyrdrune/first-touch',createRequestGate({maxRequests:12,maxConcurrent:1}),async(req,res)=>{
+    res.setHeader('Cache-Control','no-store');
+    if(!(await griffStewardAuthorized(req).catch(()=>false)))
+      return res.status(401).json({error:'Sign in to the House Steward account to touch the Wyrdrune voyage.'});
+    try{
+      return res.json(await runFirstTouch({
+        principal:{id:'house:steward',authorized:true},
+        mode:req.body?.mode,touch:req.body?.touch,
+        feather:()=>Boolean(req.aborted),
+      }));
+    }catch(error){
+      return res.status(400).json({schema:'wayglass.first-touch-error/v0.1',
+        error:cleanText(error?.message||'First Touch refused.',240)});
     }
   });
 
