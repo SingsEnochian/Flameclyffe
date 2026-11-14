@@ -40,6 +40,7 @@ import { subscribeWayglassObserver } from './living-observer-model.js';
 import { recordRouteAsWonderLight } from './wonder-light.js';
 import { registerWayglassOrgan, listWayglassOrgans } from './organ-registry.js';
 import { FIRST_WAYGLASS_ORGANS } from './organ-donors.js';
+import { divineWayglassTensorKernel, dispatchWyrdruneTensorKernel } from './tensor-webgpu.js';
 
 const root = document.querySelector('#app');
 
@@ -353,6 +354,7 @@ const wayglass = Object.freeze({
   reply: replyToVoyage,
   doubleMobius: Object.freeze({ inspect: inspectWayglassDoubleMobius, traverse: traverseWayglassDoubleMobius }),
   mythience: Object.freeze({inspect:mythienceSnapshot,subscribe:subscribeMythience,open:()=>mountSurface('wayglass:mythience-crossing')}),
+  tensor: Object.freeze({ divine: divineWayglassTensorKernel, dispatch: dispatchWyrdruneTensorKernel, backend: 'explicit-webgpu' }),
   fullSpectrum,
 });
 
