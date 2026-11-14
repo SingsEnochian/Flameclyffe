@@ -1,0 +1,25 @@
+name: Wayglass HF Gateway Contract
+on:
+  pull_request:
+    paths:
+      - 'deploy/huggingface-wayglass/**'
+      - '.github/workflows/wayglass-hf-gateway.yml'
+  push:
+    branches: [wayglass/current]
+    paths:
+      - 'deploy/huggingface-wayglass/**'
+      - '.github/workflows/wayglass-hf-gateway.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mocked-transport:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run isolated gateway contract tests (no credentials or network)
+        run: python -m unittest discover -s deploy/huggingface-wayglass -p 'test_*.py' -v
