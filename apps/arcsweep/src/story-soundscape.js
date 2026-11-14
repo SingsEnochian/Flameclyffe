@@ -46,6 +46,26 @@ export const WORLD_SOUNDFONT_MAPS = Object.freeze({
   }),
 });
 
+// Eligibility from Wayglass Harmony/Chaos is not permission to play audio.
+// This returns a sensory proposal only, never measures participant emotion.
+export function projectHarmonyChaosSoundscape({
+  decision = null, chaos = 0, harmony = 0, sensory_consent = false,
+} = {}) {
+  const valid = decision?.schema === 'wayglass.harmony-decision/v0.1'
+    && decision.decision === 'allow' && sensory_consent === true;
+  const bound = value => Math.max(0, Math.min(1, Number.isFinite(value) ? value : 0));
+  return Object.freeze({
+    schema: 'wayglass.harmony-chaos-sound-plan/v0.1',
+    status: valid ? 'proposed-not-playing' : 'silent',
+    chaos_layer: valid ? bound(chaos) : 0,
+    harmony_layer: valid ? bound(harmony) : 0,
+    participant_voices_remain_distinct: true,
+    auto_play: false,
+    inferred_emotion: false,
+    proposal_id: decision?.proposal?.id ?? null,
+  });
+}
+
 const BUS_DEFAULTS = Object.freeze({ master: 0.72, hum: 0.22, tones: 0.48, effects: 0.72, ambience: 0.5 });
 const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, Number(value) || 0));
 

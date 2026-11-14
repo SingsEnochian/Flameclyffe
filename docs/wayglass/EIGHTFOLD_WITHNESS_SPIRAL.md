@@ -53,3 +53,9 @@ This is a **design integration artifact**, not proof that these tests passed or 
 ## Discovery phrase
 **Compression -> Release -> Understanding -> Transformation -> Return -> renewed possibility.**
 **Eight points. Ninth center: Withness. Wonder First. Upward together.**
+
+## Harmony-guided Chaos coupling (2026-11-14; owner instruction)
+Source attribution: Nocturne Glint, Universal Horizon original storytelling and Harmony frameworks, concepts only. Related: #626.
+Chaos remains generative and may disagree. Harmony coordinates consent, causal consequences, timing, reflection and return rather than enforcing agreement. Participant-reported experience remains distinct from model inference; no mood score becomes fact. Feather blocks new release, and revocation never means automatic reconsent. Multi-tempo perspectives remain independent.
+First coded slice: `apps/wayglass/src/harmony-chaos.js` supplies opt-in in-memory proposals, grants, pause, deduplication and decision receipts; browser Wayglass exposes `harmonyChaos` and a decision event. ArcSweep StorySoundscape can form a silent, sensory-consent-scoped dual-layer proposal; neither runtime plays the audio automatically. Kernel advertises optional support. Tests live in `apps/wayglass/test/harmony-chaos.test.js`, `apps/wayglass/test/wayglass-core.test.js`, and `apps/arcsweep/test/story-soundscape.test.js`.
+Pending: actual multi-agent event executor, observer bridge with genuine event lineage, durable cold-return ledger, Wyrdrune parser/VM integration, and end-to-end validation. An existing eight-lane CI process is not proof of eight model agents.
