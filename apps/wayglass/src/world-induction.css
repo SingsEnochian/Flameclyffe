@@ -1,0 +1,51 @@
+/* World induction: a readable, reversible FAEberpunk instrument, not a modal trap. */
+.wg-world-induction {
+  isolation:isolate;
+  display:grid;
+  gap:1rem;
+  padding:clamp(1rem,2.5vw,1.6rem);
+  border-radius:clamp(1.25rem,3vw,2.4rem);
+  overflow:hidden;
+  background:
+    radial-gradient(ellipse at 88% 0%,rgba(153,201,201,.18),transparent 38%),
+    radial-gradient(ellipse at 10% 90%,rgba(194,155,106,.12),transparent 54%),
+    linear-gradient(132deg,rgba(14,26,33,.9),rgba(17,34,32,.77));
+  box-shadow:inset 0 1px rgba(222,247,250,.19),0 24px 72px rgba(0,0,0,.21);
+}
+.wg-induction-heading { display:flex;justify-content:space-between;gap:1rem;align-items:start; }
+.wg-induction-heading h2 { font:500 clamp(1.55rem,4vw,2.45rem)/1.14 Georgia,serif;margin:.1rem 0 .5rem; }
+.wg-induction-sigil { font-size:clamp(2.3rem,8vw,5rem);line-height:1;color:#c2e9dd;
+  text-shadow:0 0 14px rgba(114,235,210,.45), 0 0 46px rgba(190,144,225,.35);
+  animation:wg-induction-breathe 8s ease-in-out infinite alternate; }
+.wg-induction-world { border-left:2px solid rgba(155,223,204,.5);padding-left:1rem; }
+.wg-induction-world strong {color:#e3f7ef;font-weight:700;}
+.wg-induction-world p {max-width:65ch;}
+.wg-induction-actions {display:flex;flex-wrap:wrap;align-items:center;gap:.65rem;}
+.wg-induction-actions label {display:inline-flex;align-items:center;gap:.4rem;font-size:.9rem;}
+.wg-induction-actions input[type=checkbox] {width:auto;accent-color:#9fd2c3;}
+.wg-induction-wizard { border:1px solid rgba(177,219,213,.33);border-radius:1.3rem;
+  padding:clamp(.85rem,2.5vw,1.3rem);background:rgba(2,8,11,.35); }
+.wg-induction-wizard[hidden],.wg-induction-wizard [hidden] {display:none!important;}
+.wg-induction-steps {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.3rem;margin:.8rem 0 1rem;}
+.wg-induction-steps span {border-bottom:2px solid rgba(218,238,234,.2);padding:.4rem .15rem;font-size:.72rem;}
+.wg-induction-steps span[data-current=true] {border-color:#b2e7d8;color:#e6fff6;font-weight:700;}
+.wg-induction-wizard section {display:grid;gap:.75rem;min-width:0;}
+.wg-induction-wizard section>label {display:grid;gap:.35rem;}
+.wg-induction-wizard input {width:100%;max-width:100%;}
+.wg-induction-rich {border:1px solid rgba(193,232,227,.35);border-radius:1rem;padding:1rem;min-height:9rem;
+  color:#f2f7f4;background:linear-gradient(125deg,rgba(7,24,29,.9),rgba(29,43,45,.7));
+  line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;}
+.wg-induction-rich:empty:before {content:attr(data-placeholder);color:rgba(229,239,239,.55);}
+.wg-induction-rich:focus-visible {outline:2px solid #b0f3e0;outline-offset:3px;}
+.wg-induction-rich ul {padding-left:1.5rem;}
+.wg-induction-toolbar {display:flex;gap:.45rem;margin:.65rem 0;flex-wrap:wrap;}
+.wg-induction-transcript {border:1px solid rgba(167,207,210,.3);padding:.6rem 1rem;border-radius:1rem;}
+.wg-induction-transcript summary {cursor:pointer;}
+.wg-induction-transcript pre {font:inherit;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;max-height:24rem;overflow:auto;}
+.wg-induction-mixer {display:grid;gap:.85rem;border-top:1px solid rgba(220,247,243,.22);padding-top:1rem;}
+.wg-induction-mixer output {display:block;color:#cfecdf;font-variant-numeric:tabular-nums;}
+.wg-world-induction .tiny {line-height:1.55;}
+@keyframes wg-induction-breathe {from{transform:rotate(-8deg) scale(.96);opacity:.7}to{transform:rotate(9deg) scale(1.06);opacity:1}}
+@media(max-width:600px){.wg-induction-steps{grid-template-columns:repeat(2,minmax(0,1fr));}.wg-induction-heading{align-items:center;}}
+@media(prefers-reduced-motion:reduce){.wg-induction-sigil{animation:none;}}
+@media(prefers-contrast:more){.wg-world-induction,.wg-induction-wizard,.wg-induction-rich{border:2px solid currentColor;background:#061014;}}
