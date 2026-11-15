@@ -93,7 +93,17 @@ def call_kernel(message, history):
                 return "Kernel provenance missing. Refusing to present an unattributed response as Wayglass."
             if not isinstance(data.get("output"), str) or not data["output"].strip() or len(data["output"]) > 32000:
                 return "Wayglass returned no attributable speech; receipt retained upstream."
-            # Prevent terminal escape sequences and bidirectional formatting controls\n            # from spoofing the visible Wayglass attribution or observation line.\n            if any((ord(ch) < 32 and ch not in "\\n\\t") or ord(ch) == 127 or\n                   0x80 <= ord(ch) <= 0x9f or\n                   0x202a <= ord(ch) <= 0x202e or\n                   0x2066 <= ord(ch) <= 0x2069 for ch in data["output"]):\n                return "Wayglass returned unsafe display controls; no speech displayed."\n            return data["output"] + "\n\nObservation: " + str(data["receipt"]["observation_id"])
+            # Reject controls that could spoof attribution or observation receipts.
+            if any(
+                (ord(ch) < 32 and ch not in "\n\t")
+                or ord(ch) == 127
+                or 0x80 <= ord(ch) <= 0x9f
+                or 0x202a <= ord(ch) <= 0x202e
+                or 0x2066 <= ord(ch) <= 0x2069
+                for ch in data["output"]
+            ):
+                return "Wayglass returned unsafe display controls; no speech displayed."
+            return data["output"] + "\n\nObservation: " + str(data["receipt"]["observation_id"])
     except (OSError, TimeoutError, ValueError, KeyError):
         return "Wayglass kernel unreachable or response invalid. No simulated reply was generated."
 
