@@ -60,3 +60,41 @@ test('age separates a quiet source from active observed work without new claims'
  assert.equal(quiet.state,'quiet');assert.equal(quiet.evidence,'receipt-referenced');
  assert.match(quiet.detail,/captured-fixture/);
 });
+
+test('authenticated voyage polling distinguishes newly arrived messages from old history',async()=>{
+ const {createWatercolorVoyageWatcher}=await import('../src/watercolor-voyage-watch.js');
+ const emitted=[];let current=[],clock,period;
+ const scope={document:{hidden:false,addEventListener(){},removeEventListener(){}},
+  setInterval(fn,ms){clock=fn;period=ms;return 1;},clearInterval(){clock=null;}};
+ const watcher=createWatercolorVoyageWatcher({
+  read:async()=>({messages:current}),scope,publish:event=>emitted.push(event),feather:()=>false,
+ });
+ await watcher.poll();
+ assert.ok(period>=15000);
+ assert.equal(watcher.status().baseline,true);
+ assert.equal(emitted.length,0);
+ current=[{voyage_ref:'v1',participant_id:'agent:a',created_at:'2026-11-14T00:00:00Z',kind:'message',text:'private content'}];
+ await watcher.poll();
+ assert.equal(emitted.length,1);
+ assert.deepEqual(emitted[0],{kind:'voyage:arrived',actor:'wayglass:authenticated-voyage-message',intensity:.56});
+ assert.equal(JSON.stringify(emitted).includes('private content'),false);
+ await watcher.poll();assert.equal(emitted.length,1);
+ watcher.stop();assert.equal(clock,null);
+ await watcher.poll();assert.equal(emitted.length,1);
+});
+test('voyage watch backs off after host failure and never sends work or claims activity on Feather',async()=>{
+ const {createWatercolorVoyageWatcher}=await import('../src/watercolor-voyage-watch.js');
+ let polls=0,held=false;const emitted=[];
+ const watcher=createWatercolorVoyageWatcher({
+  scope:{document:{hidden:false,addEventListener(){},removeEventListener(){}},
+   setInterval(){return 1;},clearInterval(){}},
+  read:async()=>{polls++;throw Error('House session unavailable');},
+  publish:e=>emitted.push(e),feather:()=>held,
+ });
+ for(let i=0;i<5;i++)await watcher.poll();
+ assert.equal(watcher.status().failures,3);
+ assert.equal(polls,3);
+ assert.deepEqual(emitted,[]);
+ held=true;await watcher.poll();assert.equal(polls,3);
+ watcher.stop();
+});
