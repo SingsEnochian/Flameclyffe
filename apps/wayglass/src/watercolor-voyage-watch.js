@@ -13,10 +13,10 @@ export function createWatercolorVoyageWatcher({
   feather=()=>wayglassSomaticSound.snapshot().feather_stopped,
 }={}){
   if(typeof read!=='function'||typeof publish!=='function')throw new TypeError('Read and event projection functions required');
-  let disposed=false,baseline=false,busy=false,failures=0;
+  let disposed=false,baseline=false,busy=false,failures=0,nextRetryAt=0;
   const known=new Set();
   async function poll(){
-    if(disposed||busy||scope.document?.hidden||feather()||failures>=3)return false;
+    if(disposed||busy||scope.document?.hidden||feather()||Date.now()<nextRetryAt)return false;
     busy=true;
     try{
       const response=await read();
@@ -33,9 +33,12 @@ export function createWatercolorVoyageWatcher({
         }
       }
       known.clear();for(const key of next)known.add(key);
-      baseline=true;failures=0;return true;
+      baseline=true;failures=0;nextRetryAt=0;return true;
     }catch{
       failures++;
+      // Back off unauthorised/unavailable hosts, then retry at most once per
+      // five minutes. A later House login must not require reloading the ship.
+      if(failures>=3)nextRetryAt=Date.now()+300000;
       return false;
     }finally{busy=false;}
   }
@@ -46,7 +49,8 @@ export function createWatercolorVoyageWatcher({
   void poll();
   return Object.freeze({
     poll,
-    status:()=>Object.freeze({baseline,known:known.size,failures,active:!disposed&&failures<3}),
+    status:()=>Object.freeze({baseline,known:known.size,failures,
+      active:!disposed,degraded:Date.now()<nextRetryAt}),
     stop(){
       disposed=true;
       if(timer!=null)scope.clearInterval?.(timer);
