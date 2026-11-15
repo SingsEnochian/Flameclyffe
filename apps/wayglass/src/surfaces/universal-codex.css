@@ -230,3 +230,35 @@
  .wg-codex-rift-rune{color:CanvasText;text-shadow:none}
  .wg-codex-ribbon,.wg-codex-lumen{stroke:CanvasText}
 }
+
+/* The filament is a real glyph-bearing conduit, not a panel divider. */
+.wg-codex-rift svg .wg-codex-stream{
+  fill:#f2e3b3;stroke:rgba(131,235,212,.33);stroke-width:.25;
+  font:500 13px ui-serif,Georgia,serif;letter-spacing:2px;
+  paint-order:stroke fill;filter:drop-shadow(0 0 7px #b6eadb);
+}
+.wg-codex-worktable[data-rift-phase="perceive"],
+.wg-codex-worktable[data-rift-phase="compress"]{--rift-flare:#96e3d5}
+.wg-codex-worktable[data-rift-phase="release"],
+.wg-codex-worktable[data-rift-phase="integrate"]{--rift-flare:#e5b38c}
+.wg-codex-worktable[data-rift-phase="verify"],
+.wg-codex-worktable[data-rift-phase="return"]{--rift-flare:#f6df9b}
+.wg-codex-worktable[data-rift-phase="choose"],
+.wg-codex-worktable[data-rift-phase="transcend"]{--rift-flare:#d8b8e6}
+.wg-codex-worktable[data-rift-phase="withness"]{--rift-flare:#c1f3dc}
+.wg-codex-worktable[data-rift-phase] .wg-codex-rift{
+  filter:drop-shadow(0 0 20px var(--rift-flare,#a1edd9));
+}
+.wg-codex-worktable[data-rift-phase] .wg-codex-rift svg .wg-codex-stream{
+  fill:var(--rift-flare,#e0ecce);
+}
+.wg-codex-worktable:has(.wg-cypher-veil[data-cypher-state="reading"]) .wg-codex-rift svg .wg-codex-stream{
+  animation:wg-codex-script-living 3.8s ease-in-out infinite alternate;
+}
+@keyframes wg-codex-script-living{
+  from{opacity:.3;stroke-width:0;letter-spacing:1px}
+  to{opacity:1;stroke-width:.6px;letter-spacing:3px}
+}
+@media(prefers-reduced-motion:reduce){
+  .wg-codex-rift svg .wg-codex-stream{animation:none!important}
+}
