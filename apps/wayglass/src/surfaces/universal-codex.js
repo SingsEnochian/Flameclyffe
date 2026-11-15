@@ -3,6 +3,7 @@ import {animateWyrdruneCypher} from '../wyrdrune-cypher.js';
 import {WAYGLASS_FEATHER_EVENT,wayglassSomaticSound} from '../somatic-sound.js';
 import './universal-codex.css';
 import '../wyrdrune-cypher-material.css';
+import {CYPHER_PACE_OPTIONS,readCypherPace,writeCypherPace,cypherRunOptions} from '../cypher-pace.js';
 
 const DRAFT_KEY='wayglass:universal-codex:draft/v1';
 const HANDOFF_KEY='wayglass:universal-codex:writing-handoff/v1';
@@ -44,7 +45,15 @@ export function mountUniversalCodex(root){
         '<button type="button" class="glass-chip" data-codex-room="wayglass:living-watercolor">◌ Watercolour</button>',
         '<button type="button" class="glass-chip" data-codex-room="wayglass:journey-before-destination">↶ Return</button>',
       '</nav>',
-      '<div class="wg-codex-worktable">',
+      '<div class="wg-codex-worktable" data-codex-journey>',
+        '<div class="wg-codex-rift" aria-hidden="true">',
+          '<svg viewBox="0 0 120 750" preserveAspectRatio="none" focusable="false">',
+            '<defs><linearGradient id="wg-codex-flow" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d5a66e"/><stop offset=".3" stop-color="#a1e3d4"/><stop offset=".65" stop-color="#d0b0da"/><stop offset="1" stop-color="#85e6bd"/></linearGradient></defs>',
+            '<path class="wg-codex-ribbon outer" d="M22 -40 C118 80 10 170 95 295 S15 510 112 790"/>',
+            '<path class="wg-codex-ribbon inner" d="M95 -40 C5 75 115 190 26 300 S104 525 14 790"/>',
+            '<path class="wg-codex-lumen" d="M62 -60 C119 120 12 188 63 370 S112 650 63 810"/>',
+          '</svg><span class="wg-codex-rift-rune">ᚹ</span><span class="wg-codex-rift-rune">⋈</span><span class="wg-codex-rift-rune">ᛟ</span>',
+        '</div>',
         '<section class="glass-panel wg-codex-editor" aria-labelledby="codex-source-label">',
           '<div class="wg-codex-bay-title"><div><p class="eyebrow">01 / SOURCE</p><h2 id="codex-source-label">Wyrdrune</h2></div>',
             '<span class="wg-codex-source-status">OWNER-AUTHORED · LOCAL DRAFT</span></div>',
@@ -53,6 +62,7 @@ export function mountUniversalCodex(root){
           '<p class="tiny" id="codex-source-help">Your source remains editable. Preview requires House Steward authorisation; English reading compiles locally without invoking a model.</p>',
           '<div class="wg-codex-toolbar">',
             '<button type="button" class="glass-chip" data-codex-example>Load original sample</button>',
+            '<label class="wg-cypher-tempo">Glyph tempo <select aria-label="Wyrdrune glyph tempo" data-codex-pace>'+CYPHER_PACE_OPTIONS+'</select></label>',
             '<button type="button" class="glass-chip" data-codex-translate>Read in English</button>',
             '<button type="button" class="glass-chip wg-cypher-skip" data-codex-skip disabled>Reveal English now</button>',
             '<button type="button" class="send-jewel" data-codex-preview>Verify Eightfold</button>',
@@ -78,9 +88,10 @@ export function mountUniversalCodex(root){
   const q=s=>root.querySelector(s);
   const editor=q('#codex-source'),status=q('[data-codex-status]'),
     english=q('[data-codex-english]'),receipts=q('[data-codex-receipts]'),
-    discuss=q('[data-codex-discuss]'),previewButton=q('[data-codex-preview]'),skip=q('[data-codex-skip]');
+    discuss=q('[data-codex-discuss]'),previewButton=q('[data-codex-preview]'),skip=q('[data-codex-skip]'),pace=q('[data-codex-pace]');
   const listen=(el,type,fn)=>{el.addEventListener(type,fn);disposers.push(()=>el.removeEventListener(type,fn));};
   editor.value=safeSessionGet(DRAFT_KEY)||EXAMPLE;
+  pace.value=readCypherPace();
   const held=()=>Boolean(wayglassSomaticSound.snapshot().feather_stopped);
   const sync=()=>{
     const blocked=held()||previewBusy||stopped;
@@ -109,7 +120,7 @@ export function mountUniversalCodex(root){
     try{
       const reduced=Boolean(globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches);
       cypher=animateWyrdruneCypher(english,{
-        source:editor.value,reducedMotion:reduced,
+        source:editor.value,reducedMotion:reduced,...cypherRunOptions(pace.value),
         onPhase:phase=>{
           for(const chip of root.querySelectorAll('[data-codex-phase]')){
             chip.setAttribute('data-reading',String(chip.dataset.codexPhase===phase));
@@ -130,6 +141,12 @@ export function mountUniversalCodex(root){
     }
   });
   listen(skip,'click',()=>cypher?.stop());
+  listen(pace,'change',()=>{
+    writeCypherPace(pace.value);
+    if(english.getAttribute('data-cypher-state')==='reading'){
+      cypher?.stop();status.textContent='Tempo changed. Read in English to replay with the new rhythm.';
+    }
+  });
   listen(previewButton,'click',async()=>{
     if(held()||stopped||previewBusy||!boundedSource(editor.value))return;
     const source=editor.value,token=++revision;
