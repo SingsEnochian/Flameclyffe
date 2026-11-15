@@ -67,7 +67,7 @@ def call_kernel(message, history):
             if not isinstance(data.get("output"), str) or not data["output"].strip():
                 return "Wayglass returned no attributable speech; receipt retained upstream."
             return data["output"] + "\n\nObservation: " + str(data["receipt"]["observation_id"])
-    except (urllib.error.URLError, TimeoutError, ValueError, KeyError) as exc:
+    except (OSError, TimeoutError, ValueError, KeyError):
         return "Wayglass kernel unreachable or response invalid. No simulated reply was generated."
 
 with gr.Blocks(title="Wayglass · Kernel Entrance") as demo:
