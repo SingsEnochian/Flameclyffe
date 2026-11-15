@@ -11,6 +11,7 @@ const DEFAULT_COLORS=Object.freeze({
   'route:pending':'#9c96ce',
   'route:responded':'#e3af73',
   'route:failed':'#b46675',
+  'voyage:arrived':'#98d6c8',
   'waygate:return':'#8daac6',
   'learning:verified':'#ceb17a',
   'touch:suggestion':'#7bbebd',
