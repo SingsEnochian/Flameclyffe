@@ -1,0 +1,76 @@
+/* The living watercolour has two registers:
+   ambient pigment circulation (visual only) and verified source-event traces.
+   Neither a moving canvas nor a successful connectivity check claims an AI agent is working. */
+.wc-surface .wc-stage{--wc-live-pigment:#a0e1cb}
+.wc-live-field{
+  position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden;
+  mix-blend-mode:screen;opacity:.56;
+  mask-image:radial-gradient(ellipse at 52% 50%,#000 7%,rgba(0,0,0,.7) 40%,transparent 78%);
+}
+.wc-live-field i{
+  position:absolute;display:block;left:50%;top:50%;
+  width:min(75%,630px);aspect-ratio:1;border-radius:41% 59% 69% 31%/50% 45% 55% 50%;
+  border:1px solid color-mix(in srgb,var(--wc-live-pigment) 64%,transparent);
+  background:radial-gradient(ellipse at 26% 28%,color-mix(in srgb,var(--wc-live-pigment) 21%,transparent),transparent 72%);
+  box-shadow:0 0 33px color-mix(in srgb,var(--wc-live-pigment) 24%,transparent),
+    inset 0 0 26px rgba(185,245,212,.16);
+  transform:translate(-50%,-50%) rotate(var(--a,0deg)) scale(var(--s,1));
+  animation:wc-ambient-breath var(--t,16s) ease-in-out infinite alternate;
+}
+.wc-live-field i:nth-child(1){--a:12deg;--s:.9;--t:17s}
+.wc-live-field i:nth-child(2){--a:57deg;--s:.68;--t:12s;animation-direction:alternate-reverse}
+.wc-live-field i:nth-child(3){--a:107deg;--s:.46;--t:19s}
+.wc-live-field i:nth-child(4){--a:149deg;--s:.26;--t:13s;animation-direction:alternate-reverse}
+.wc-live-field i:nth-child(5){--a:-24deg;--s:1.18;--t:24s;border-style:dashed;opacity:.58}
+.wc-stage[data-activity-state="observed"] .wc-live-field{
+  opacity:.86;filter:drop-shadow(0 0 17px var(--wc-live-pigment));
+}
+.wc-live-insight{
+  position:absolute;z-index:4;pointer-events:none;
+  left:clamp(15px,3vw,42px);bottom:clamp(100px,15svh,158px);
+  display:flex;flex-direction:column;gap:5px;
+  width:max-content;max-width:min(47%,390px);
+  padding:12px 18px 12px 24px;
+  border-inline-start:2px solid rgba(217,211,162,.65);
+  border-radius:0 45% 21px 0/0 44% 21px 0;
+  background:radial-gradient(ellipse at 0 50%,rgba(5,32,34,.8),rgba(4,22,30,.42) 77%,transparent);
+  text-shadow:0 2px 10px #00121b;
+  box-shadow:inset 0 1px rgba(239,234,190,.12);
+}
+.wc-live-insight strong{
+  color:#e0f8df;letter-spacing:.035em;
+  font-size:clamp(.73rem,1.3vw,.94rem);font-weight:650;line-height:1.3;
+}
+.wc-live-insight small{
+  color:#d3e0d3;font-size:clamp(.66rem,1.05vw,.79rem);line-height:1.35;
+  overflow-wrap:anywhere;
+}
+.wc-stage[data-activity-state="observed"] .wc-live-insight{
+  border-inline-start-color:var(--wc-live-pigment);
+}
+@keyframes wc-ambient-breath{
+  0%{transform:translate(-50%,-50%) rotate(var(--a)) scale(var(--s));opacity:.35}
+  50%{opacity:.78}
+  100%{transform:translate(-49%,-52%) rotate(calc(var(--a) + 80deg)) scale(calc(var(--s)*1.16));opacity:.62}
+}
+@media(max-width:700px){
+ .wc-live-insight{left:13px;bottom:clamp(170px,29svh,240px);max-width:52%;
+   padding:9px 10px 9px 12px}
+ .wc-live-field i{width:120%;left:51%;top:48%}
+ .wc-live-insight strong{font-size:.72rem}
+ .wc-live-insight small{font-size:.64rem}
+}
+.wc-stage[data-paused="true"] .wc-live-field i{animation-play-state:paused}
+@media(prefers-reduced-motion:reduce){
+ .wc-live-field i{animation:none!important}
+ .wc-live-field{opacity:.26!important;filter:none!important}
+}
+@media(prefers-reduced-transparency:reduce){
+ .wc-live-insight{background:#082c31;border-inline-start-width:3px}
+ .wc-live-field{mix-blend-mode:normal;opacity:.24}
+}
+@media(forced-colors:active){
+ .wc-live-field{display:none}
+ .wc-live-insight{background:Canvas;border:1px solid CanvasText}
+ .wc-live-insight :is(strong,small){color:CanvasText}
+}
