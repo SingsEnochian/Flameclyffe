@@ -86,6 +86,20 @@ class SpaceContractTests(unittest.TestCase):
         self.app.TOKEN = ""
         self.assertFalse(self.app.ready())
 
+    def test_whitespace_credentials_and_control_character_urls_fail_closed(self):
+        for field in ("TOKEN", "OWNER_USER", "OWNER_PASSWORD"):
+            original = getattr(self.app, field)
+            for invalid in (" ", "\t", " " + original, original + "\n"):
+                with self.subTest(field=field, invalid=repr(invalid)):
+                    setattr(self.app, field, invalid)
+                    self.assertFalse(self.app.ready())
+            setattr(self.app, field, original)
+        for url in (" https://private.example.test/respond", "https://private.example.test/respond ",
+                    "https://private.example.test/\nrespond", "https://private.example.test/\trespond"):
+            with self.subTest(url=repr(url)):
+                self.app.GATEWAY = url
+                self.assertFalse(self.app.ready())
+
     def test_valid_attributed_response_and_bearer_request(self):
         captured = {}
         def open_response(req, timeout):
