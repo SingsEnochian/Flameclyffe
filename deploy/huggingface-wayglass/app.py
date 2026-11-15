@@ -41,6 +41,7 @@ def ready():
         and not parsed.username and not parsed.password
         and not parsed.fragment and not parsed.query
         and parsed.path.endswith("/respond")
+        and all(segment not in ("", ".", "..") for segment in parsed.path.split("/")[1:])
         and not parsed.path.startswith("//")
         and "%" not in parsed.path
         and "\\" not in parsed.path
