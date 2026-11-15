@@ -156,6 +156,13 @@ class SpaceContractTests(unittest.TestCase):
                 self.assertNotIn("Verified response", result)
                 self.assertNotIn("Observation:", result)
 
+    def test_bounded_model_output_cannot_flood_owner_ui(self):
+        raw = envelope(output="A" * 32001)
+        with patch.object(self.app.OPENER, "open", return_value=FakeResponse(raw)):
+            result = self.app.call_kernel("Hello", [])
+        self.assertNotIn("A" * 100, result)
+        self.assertIn("no attributable speech", result)
+
     def test_oversize_response_is_rejected(self):
         with patch.object(self.app.OPENER, "open", return_value=FakeResponse(b"x" * (self.app.MAX_BYTES + 1))):
             self.assertIn("oversized", self.app.call_kernel("Hello", []))
