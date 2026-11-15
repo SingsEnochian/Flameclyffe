@@ -22,7 +22,7 @@ OWNER_PASSWORD = os.environ.get("WAYGLASS_OWNER_PASSWORD", "")
 def ready():
     if not all(isinstance(value, str) and value.strip() and value == value.strip() for value in (GATEWAY, TOKEN, OWNER_USER, OWNER_PASSWORD)):
         return False
-    if GATEWAY != GATEWAY.strip() or any(ord(char) < 33 or ord(char) == 127 for char in GATEWAY):
+    # urllib encodes Authorization as Latin-1; reject non-ASCII bearer material before any request.\n    if any(ord(char) < 33 or ord(char) > 126 for char in TOKEN):\n        return False\n    if GATEWAY != GATEWAY.strip() or any(ord(char) < 33 or ord(char) == 127 for char in GATEWAY):
         return False
     parsed = urllib.parse.urlparse(GATEWAY)
     return parsed.scheme == "https" and bool(parsed.hostname) and not parsed.username and not parsed.password and not parsed.fragment and not parsed.query and parsed.path.endswith("/respond") and not parsed.path.startswith("//")
