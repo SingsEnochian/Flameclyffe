@@ -66,7 +66,7 @@ def call_kernel(message, history):
                 return "Wayglass returned an invalid receipt envelope."
             if data.get("schema") != "wayglass.route-turn/v0.1" or data.get("route_id") != "wayglass:ship" or data.get("receipt", {}).get("character_id") != "wayglass" or not isinstance(data.get("receipt", {}).get("observation_id"), str) or not data["receipt"]["observation_id"].strip() or len(data["receipt"]["observation_id"]) > 128 or not all(char.isascii() and (char.isalnum() or char in "-_:.") for char in data["receipt"]["observation_id"]):
                 return "Kernel provenance missing. Refusing to present an unattributed response as Wayglass."
-            if not isinstance(data.get("output"), str) or not data["output"].strip():
+            if not isinstance(data.get("output"), str) or not data["output"].strip() or len(data["output"]) > 32000:
                 return "Wayglass returned no attributable speech; receipt retained upstream."
             return data["output"] + "\n\nObservation: " + str(data["receipt"]["observation_id"])
     except (OSError, TimeoutError, ValueError, KeyError):
