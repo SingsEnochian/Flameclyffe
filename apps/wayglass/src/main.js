@@ -40,6 +40,7 @@ import { mountWayglassQuadGestalt } from './surfaces/quad-eightfold.js';
 import { installQuadFeatherListener, readLatestQuadGestalt, subscribeQuadGestalt } from './quad-eightfold-client.js';
 import { publishWatercolorActivity } from './watercolor-bridge.js';
 import {installWatercolorRouteActivity} from './watercolor-live-observer.js';
+import {createWatercolorVoyageWatcher} from './watercolor-voyage-watch.js';
 import { divineWayglassTensorKernel, dispatchWyrdruneTensorKernel } from './tensor-webgpu.js';
 import {observeIntegratedVoyage,latestIntegratedVoyage,subscribeIntegratedVoyage} from './integrated-voyage-visual.js';
 import { mountLivingWatercolorSurface } from './surfaces/living-watercolor.js';
@@ -295,6 +296,9 @@ subscribeMythience(encounter=>{
 });
 // Always observe route activity across the ship, even when Watercolour is not mounted.
 installWatercolorRouteActivity();
+// Read-only 30-second voyage-message watch. Old messages become baseline,
+// only new arrivals are painted. Failed/unauthorised hosts back off and stop.
+createWatercolorVoyageWatcher();
 subscribeWayglassObserver(record=>{
   if(!record||!['started','completed','failed'].includes(record.status))return;
   routeLabel.textContent='ROUTE / '+record.status.toUpperCase()+(record.route_id?' · '+record.route_id:'');
