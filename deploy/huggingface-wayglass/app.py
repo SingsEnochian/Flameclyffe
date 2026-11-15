@@ -77,7 +77,15 @@ def call_kernel(message, history):
             raw = response.read(MAX_BYTES + 1)
             if len(raw) > MAX_BYTES:
                 return "Wayglass returned an oversized response; no content displayed."
-            data = json.loads(raw)
+            # Duplicate JSON keys make attribution ambiguous across parsers; fail closed.
+            def unique_object(pairs):
+                result = {}
+                for key, value in pairs:
+                    if key in result:
+                        raise ValueError("duplicate response key")
+                    result[key] = value
+                return result
+            data = json.loads(raw, object_pairs_hook=unique_object)
             if not isinstance(data, dict) or not isinstance(data.get("receipt"), dict):
                 return "Wayglass returned an invalid receipt envelope."
             if data.get("schema") != "wayglass.route-turn/v0.1" or data.get("route_id") != "wayglass:ship" or data.get("receipt", {}).get("character_id") != "wayglass" or not isinstance(data.get("receipt", {}).get("observation_id"), str) or not data["receipt"]["observation_id"].strip() or len(data["receipt"]["observation_id"]) > 128 or not all(char.isascii() and (char.isalnum() or char in "-_:.") for char in data["receipt"]["observation_id"]):
