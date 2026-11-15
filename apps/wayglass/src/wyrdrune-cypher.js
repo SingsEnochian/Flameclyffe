@@ -20,7 +20,7 @@ export function readWyrdrune(source){
  */
 export function animateWyrdruneCypher(container,{
   source,reducedMotion=false,scope=globalThis,doc=globalThis.document,
-  frameMs=36,steps=16,overlap=.45,onPhase=()=>{},onComplete=()=>{},
+  frameMs=95,steps=34,overlap=.78,staggerCapMs=9600,onPhase=()=>{},onComplete=()=>{},
 }={}){
   if(!container||!doc)throw new TypeError('A display and document are required.');
   const gloss=readWyrdrune(source);
@@ -66,14 +66,16 @@ export function animateWyrdruneCypher(container,{
   const done=new Promise(resolve=>{resolveDone=resolve;});
   const timers=new Set();
   const media=scope.matchMedia?.('(prefers-reduced-motion: reduce)');
-  const totalSteps=Math.max(2,Math.min(36,Math.trunc(Number(steps)||16)));
-  const interval=Math.max(12,Math.min(100,Number(frameMs)||36));
-  const staggerRatio=Math.max(.1,Math.min(.95,1-(Number(overlap)||.45)));
+  const totalSteps=Math.max(2,Math.min(64,Math.trunc(Number(steps)||34)));
+  const interval=Math.max(12,Math.min(180,Number(frameMs)||95));
+  const staggerRatio=Math.max(.08,Math.min(.95,1-(Number(overlap)||.78)));
+  const maxStagger=Math.max(1200,Math.min(20000,Number(staggerCapMs)||9600));
   const settle=item=>{
     if(item.settled)return;
     item.node.textContent=item.to;
     item.node.setAttribute('lang','en-GB');
     item.node.setAttribute('data-cypher-line','english');
+    item.node.setAttribute('data-cypher-visual-phase','english');
     item.settled=true;
   };
   const finishAll=()=>{
@@ -123,12 +125,14 @@ export function animateWyrdruneCypher(container,{
         return;
       }
       item.node.setAttribute('data-cypher-line','runes');
-      item.node.textContent=morphFrame(item.from,item.to,frame/totalSteps);
+      const progress=frame/totalSteps;
+      item.node.setAttribute('data-cypher-visual-phase',progress>=.39&&progress<.62?'full-runes':'crossing');
+      item.node.textContent=morphFrame(item.from,item.to,progress);
       later(tick,interval);
     };
-    // Entire reading enters the luminous passage within 2.4 seconds, however
-    // many statements the compiler accepts. The source remains inspectable.
-    const delay=Math.min(2400,Math.round(i*totalSteps*interval*staggerRatio));
+    // A deliberately slower unfolding, with a bounded tail for long programmes.
+    // The source remains inspectable, and Reveal English stops the entire sequence.
+    const delay=Math.min(maxStagger,Math.round(i*totalSteps*interval*staggerRatio));
     later(tick,delay);
   });
   return {gloss,stop:finishAll,done};

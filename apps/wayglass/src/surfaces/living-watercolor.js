@@ -1,5 +1,6 @@
 import {shipSoundscape} from '../ship-soundscape.js';
 import { createWatercolorFluid } from '../watercolor-fluid.js';
+import {AMBIENT_INTERVAL_MS,ambientWatercolorStroke,watercolorLiveness} from '../watercolor-liveness.mjs';
 import {
   watercolorSnapshot, watercolorProgram, publishWatercolorActivity,
   subscribeWatercolorActivity, proposeWatercolorTouch, configureWatercolorProgram,
@@ -27,13 +28,15 @@ export async function mountLivingWatercolorSurface(root) {
   const drafts=new Map(), responses=new Map();
   let mode='dream', routeId=null, routes=[], paused=false, busy=false,
     stopped=false, pointerId=null, lastPointer=null, lastFrame=0, elapsed=0,
-    pendingProgram=null, animationId=0, requestEpoch=0;
+    pendingProgram=null, animationId=0, requestEpoch=0,
+    lastAmbient=0,ambientCycle=0;
   const soundState=wayglassSomaticSound.snapshot();
   synchronizeJourneyFeather({stopped:soundState.feather_stopped,confirmed:soundState.feather_release_confirmed});
   let featherStopped = journeyLedger.snapshot().feather_stopped || soundState.feather_stopped;
   paused=featherStopped;
   if(featherStopped&&!wayglassSomaticSound.snapshot().feather_stopped)wayglassSomaticSound.feather();
-  const reduced=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches??false;
+  const motionQuery=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
+  let reduced=motionQuery?.matches??false;
   root.innerHTML=[
     '<section class="wg-surface wc-surface" data-surface="living-watercolor">',
       '<header class="wg-surface-head glass-panel wc-head">',
@@ -46,7 +49,9 @@ export async function mountLivingWatercolorSurface(root) {
         '<span class="tiny" id="wc-evidence">No verified agent event received</span></div>',
       '</header>',
       '<div class="wc-composition">',
-        '<div class="wc-stage glass-panel">',
+        '<div class="wc-stage glass-panel" data-activity-state="ambient">',
+          '<div class="wc-live-field" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>',
+          '<div class="wc-live-insight" role="status" aria-live="polite"><strong id="wc-live-title">Ambient current · listening</strong><small id="wc-live-detail">Local pigment moves independently. No agent activity claimed.</small></div>',
           '<canvas id="wc-fluid" class="wc-fluid" aria-label="Watercolor canvas. Drag a finger, mouse or Pencil to paint; use arrow keys to move and Enter or Space to paint." aria-describedby="wc-paint-help" tabindex="0"></canvas>',
           '<div class="wc-stage-meta" aria-hidden="true">WAYGLASS / AQUARELLE / PREMAQC</div>',
           '<button id="wc-instruments-toggle" type="button" class="wc-instruments-toggle glass-chip" aria-controls="wc-workbench" aria-expanded="false" aria-label="Open or close Wayglass instruments">✦ Instruments</button>',
@@ -182,6 +187,14 @@ export async function mountLivingWatercolorSurface(root) {
   }
   function updateInspector() {
     const s=fluid.snapshot(),data=watercolorSnapshot();
+    const live=watercolorLiveness(data);
+    stage.dataset.activityState=live.state;
+    stage.dataset.paused=String(paused||featherStopped||reduced);
+    const headline=q('wc-live-title'),detail=q('wc-live-detail');
+    const liveTitle=featherStopped?'Feather held · current still':live.label;
+    const liveDetail=featherStopped?'Observations retained. Motion and sound remain paused.':live.detail;
+    if(headline.textContent!==liveTitle)headline.textContent=liveTitle;
+    if(detail.textContent!==liveDetail)detail.textContent=liveDetail;
     q('wc-fluid-status').textContent=paused?'paused':s.motion>0.003?'flowing':'settling';
     q('wc-premaqc').textContent=data.events.some(e=>e.texture?.data_state==='supplied-observation')?
       'observations present':'not connected';
@@ -189,8 +202,8 @@ export async function mountLivingWatercolorSurface(root) {
     q('wc-proposals').textContent=data.proposals.length+' local only';
     q('wc-evidence').textContent=data.events.some(e=>e.evidence)?
       'Receipt references observed; independently verify sources':'No verified agent event received';
-    q('wc-link').textContent=data.events.length?
-      'Activity translated to pigment':'Awaiting activity';
+    q('wc-link').textContent=live.state==='observed'?'Observed work · pigment moving':
+      live.state==='quiet'?'Listening · last event retained':'Ambient current · listening';
   }
   function paint() {
     if(!ctx||!bitmap||!off)return;
@@ -208,6 +221,16 @@ export async function mountLivingWatercolorSurface(root) {
   }
   function frame(ts) {
     if(stopped)return;
+    if(!paused&&!reduced){
+      // Breathing is an original *visual* field, never an invented agent or route event.
+      // Only the sourced bus below increments the work counter.
+      if(ts-lastAmbient>=AMBIENT_INTERVAL_MS){
+        const ambient=ambientWatercolorStroke(ambientCycle++);
+        fluid.inject(ambient);
+        stage.dataset.ambientCycles=String(ambientCycle);
+        lastAmbient=ts;
+      }
+    }
     if(!paused&&!reduced && ts-lastFrame>=40){
       fluid.step(Math.min((ts-lastFrame)/42,1.5));
       paint();
@@ -225,6 +248,8 @@ export async function mountLivingWatercolorSurface(root) {
   }
   const offActivity=subscribeWatercolorActivity(event=>{
     if(stopped||featherStopped)return;
+    stage.dataset.activityState='observed';
+    stage.style?.setProperty?.('--wc-live-pigment',event.pigment);
     const angle=event.sequence*2.399963229728653;
     const x=clamp(.5+.3*Math.cos(angle)),y=clamp(.5+.3*Math.sin(angle));
     addPigment(event,{x,y,dx:Math.cos(angle)*event.texture.rhythm*.55,
@@ -718,12 +743,14 @@ export async function mountLivingWatercolorSurface(root) {
     reflectSound();updateInspector();
   };
   globalThis.addEventListener?.(WAYGLASS_FEATHER_EVENT,onFeather);
-  // A thin ambient wash signals readiness only. It does not invent agent state.
+  // A continuous, low-energy ambient wash signals readiness only, never agent state.
   fluid.inject({x:.22,y:.24,color:'#405e87',amount:.44,radius:.19});
   fluid.inject({x:.74,y:.63,color:'#736b92',amount:.32,radius:.21});
   // Reconstitute recent authored activity when returning from another room.
   // No invented telemetry is used to fill quiet intervals.
-  for(const event of watercolorSnapshot().events.slice(-20)){
+  const previousEvents=watercolorSnapshot().events;
+  if(previousEvents.length)stage.style?.setProperty?.('--wc-live-pigment',previousEvents.at(-1).pigment);
+  for(const event of previousEvents.slice(-20)){
     const angle=event.sequence*2.399963229728653;
     addPigment(event,{x:clamp(.5+.3*Math.cos(angle)),y:clamp(.5+.3*Math.sin(angle))});
   }
@@ -731,8 +758,21 @@ export async function mountLivingWatercolorSurface(root) {
   paint();updateInspector();void loadRoutes();
   if(localSaveWarning)feedback.textContent='Saved conversation was not auto-opened: '+localSaveWarning;
   else if(continuity.snapshot().turns.length)feedback.textContent='Saved conversation restored · '+continuity.snapshot().turns.length+' turns.';
+  const onMotionPreference=()=>{
+    reduced=motionQuery?.matches??false;
+    if(reduced){
+      globalThis.cancelAnimationFrame?.(animationId);animationId=0;lastFrame=0;
+      paint();
+    }else if(!animationId&&!stopped){
+      lastFrame=0;lastAmbient=0;
+      animationId=globalThis.requestAnimationFrame(frame);
+    }
+    updateInspector();
+  };
+  motionQuery?.addEventListener?.('change',onMotionPreference);
+  cleanups.push(()=>motionQuery?.removeEventListener?.('change',onMotionPreference));
   if(!reduced)animationId=globalThis.requestAnimationFrame(frame);
-  else feedback.textContent='Reduced motion enabled. Pigment flows only on interaction.';
+  else feedback.textContent='Reduced motion enabled. Sourced activity appears as static pigment; ambient movement is off.';
   return {
     destroy(){
       stopped=true;requestEpoch++;busy=false;pointerId=null;lastPointer=null;

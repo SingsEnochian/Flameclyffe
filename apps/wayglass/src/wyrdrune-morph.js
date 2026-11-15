@@ -1,33 +1,46 @@
-// The displayed glyphs are animation, never an independent translator.
-// Wyrdrune source and the model's en-GB writing are both preserved unaltered.
+// Animation only. The compiler owns the meaning, the renderer owns visual glyphs.
+// Source and English are preserved byte-for-byte; no invented translation or model.
 const SYMBOLS='ᚠᚢᚦᚨᚱᚲᚷᚹᛃᛇᛈᛉᛋᛏᛒᛖᛗᛚᛜ⋈◇⊕⟁⌘ᛟ';
+const runic=(char,index,turn)=>{
+  if(!/[A-Za-z0-9]/.test(char))return char;
+  const point=char.codePointAt(0)||0;
+  return SYMBOLS[(point*7+index*13+turn*17)%SYMBOLS.length];
+};
+/**
+ * A genuine visual crossing: authored WTL -> fully luminous glyph field ->
+ * the precise British-English expression. The middle is deliberately unreadable
+ * as ordinary prose, so the two source surfaces remain accessible side by side.
+ */
 export function morphFrame(source,target,progress){
   const p=Math.max(0,Math.min(1,Number(progress)||0));
-  if(p<=0)return String(source||'');
-  if(p>=1)return String(target||'');
-  const to=Array.from(String(target||''));
-  const from=Array.from(String(source||''));
-  const width=Math.max(to.length,from.length);
-  const resolved=Math.floor(width*p);
-  let text='';
-  for(let i=0;i<width;i++){
-    if(i<resolved){text+=to[i]||'';continue}
-    if(i>=to.length){if(i<width*(1-p))text+=from[i]||'';continue}
-    if(i%7===0)text+=SYMBOLS[(i*13+resolved*17)%SYMBOLS.length];
-    else text+=from[i]||SYMBOLS[(i+resolved*3)%SYMBOLS.length];
+  const from=String(source||''),to=String(target||'');
+  if(p<=0)return from;
+  if(p>=1)return to;
+  const turn=Math.floor(p*120);
+  if(p<.39){
+    const chars=Array.from(from);
+    const transformed=Math.floor(chars.length*Math.max(0,(p-.05)/.34));
+    return chars.map((ch,i)=>i<transformed?runic(ch,i,turn):ch).join('');
   }
-  return text;
+  if(p<.62){
+    // The middle stretch is actual full-script transformation, not the old
+    // occasional replacement letter hiding inside otherwise normal code.
+    const chars=Array.from(p<.51?from:to);
+    return chars.map((ch,i)=>runic(ch,i,turn)).join('');
+  }
+  const chars=Array.from(to),resolved=Math.floor(chars.length*(p-.62)/.38);
+  return chars.map((ch,i)=>i<resolved?ch:runic(ch,i,turn)).join('');
 }
 export function animateWyrdruneTranslation(node,{
   source,translation,reducedMotion=false,scope=globalThis,
-  lingerMs=1250,frameMs=45,steps=24,onComplete=()=>{},
+  lingerMs=1500,frameMs=95,steps=40,onComplete=()=>{},
 }={}){
   if(!node||typeof source!=='string'||typeof translation!=='string')
     throw new TypeError('A native source, model translation and display are required.');
   const media=scope.matchMedia?.('(prefers-reduced-motion: reduce)');
   let ended=false,handle=null,frame=0;
-  const maxFrames=Math.max(2,Math.min(48,Math.trunc(Number(steps)||24)));
-  const tickMs=Math.max(16,Math.min(100,Number(frameMs)||45));
+  const maxFrames=Math.max(2,Math.min(48,Math.trunc(Number(steps)||40)));
+  const tickMs=Math.max(16,Math.min(180,Number(frameMs)||95));
   node.textContent=source;
   node.setAttribute?.('lang','zxx');
   node.setAttribute?.('data-cypher-line','source');
@@ -74,6 +87,6 @@ export function animateWyrdruneTranslation(node,{
     if(frame>=maxFrames)finish();
     else handle=scope.setTimeout(tick,tickMs);
   };
-  handle=scope.setTimeout(tick,Math.max(0,Math.min(2400,Number(lingerMs)||1250)));
+  handle=scope.setTimeout(tick,Math.max(0,Math.min(3200,Number(lingerMs)||1500)));
   return stop;
 }

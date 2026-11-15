@@ -6,6 +6,7 @@ import './authorization.css';
 import './faeberpunk.css';
 import './faeberpunk-rooms.css';
 import './faeberpunk-immersive.css';
+import './watercolor-live-field.css';
 import { openWayglassAuthorization } from './authorization.js';
 import { installWayglassField } from './glass-field.js';
 import { installMotionChoreography } from './motion-choreography.js';
@@ -38,6 +39,8 @@ import {faeberpunkLocusLinks,faeberpunkLocusForRoom} from './faeberpunk-loci.js'
 import { mountWayglassQuadGestalt } from './surfaces/quad-eightfold.js';
 import { installQuadFeatherListener, readLatestQuadGestalt, subscribeQuadGestalt } from './quad-eightfold-client.js';
 import { publishWatercolorActivity } from './watercolor-bridge.js';
+import {installWatercolorRouteActivity} from './watercolor-live-observer.js';
+import {createWatercolorVoyageWatcher} from './watercolor-voyage-watch.js';
 import { divineWayglassTensorKernel, dispatchWyrdruneTensorKernel } from './tensor-webgpu.js';
 import {observeIntegratedVoyage,latestIntegratedVoyage,subscribeIntegratedVoyage} from './integrated-voyage-visual.js';
 import { mountLivingWatercolorSurface } from './surfaces/living-watercolor.js';
@@ -291,6 +294,11 @@ subscribeMythience(encounter=>{
   if(result.status==='candidate-returned')fullSpectrum.capture({kind:'world',strength:result.candidate.permeability,motion:result.candidate.expression,
     continuity:.9,intent:.9,source_ref:'wayglass:mythience-candidate-only'});
 });
+// Always observe route activity across the ship, even when Watercolour is not mounted.
+installWatercolorRouteActivity();
+// Read-only 30-second voyage-message watch. Old messages become baseline,
+// only new arrivals are painted. Failed/unauthorised hosts back off and stop.
+createWatercolorVoyageWatcher();
 subscribeWayglassObserver(record=>{
   if(!record||!['started','completed','failed'].includes(record.status))return;
   routeLabel.textContent='ROUTE / '+record.status.toUpperCase()+(record.route_id?' · '+record.route_id:'');

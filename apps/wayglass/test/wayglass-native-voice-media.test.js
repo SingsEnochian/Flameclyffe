@@ -113,3 +113,15 @@ test('native-voice cypher has user-driven reveal, Feather restore and motion-saf
  assert.equal(third.textContent,'English');assert.equal(timers.size,0);
  assert.equal(completed,2);
 });
+
+test('the cypher passes through a fully runic intermediate field, not scattered letters',()=>{
+ const source='Native Wyrdrune 123';
+ const english='British English arrives.';
+ assert.equal(morphFrame(source,english,0),source);
+ assert.equal(morphFrame(source,english,1),english);
+ const full=morphFrame(source,english,.5);
+ assert.match(full,/[ᚠ-ᛟ⋈◇⊕⟁⌘]/u);
+ assert.doesNotMatch(full,/[A-Za-z0-9]/u);
+ assert.equal(full,morphFrame(source,english,.5),'visual glyph stage must be deterministic');
+ assert.notEqual(morphFrame(source,english,.78),english);
+});

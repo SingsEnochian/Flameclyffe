@@ -83,3 +83,182 @@
     max-height:min(65dvh,480px);
   }
 }
+
+
+/* FAEberpunk Cypher Reliquary.
+   The source and reading are two interior walls of ONE inhabited instrument.
+   A Möbius rift carries Wyrdrune between them, not a pair of glass cards. */
+.wg-codex-worktable[data-codex-journey]{
+  --rift-copper:#d4ac77;--rift-opal:#a3e9d5;
+  position:relative;isolation:isolate;display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0;
+  overflow:hidden;min-height:690px;
+  border:1px solid rgba(199,227,188,.46);
+  border-radius:clamp(25px,5vw,68px) clamp(40px,7vw,100px) clamp(25px,5vw,68px) clamp(40px,7vw,100px);
+  background:
+    radial-gradient(ellipse 50% 90% at 50% 49%,rgba(66,152,133,.3),transparent 70%),
+    url('../materials/opal-membrane.svg') center/cover,
+    linear-gradient(135deg,#0b2427,#071b23 45%,#10262b 70%,#081823);
+  box-shadow:inset 0 0 0 3px rgba(159,233,199,.08),inset 0 20px 80px rgba(111,165,133,.18),
+    0 16px 70px rgba(0,0,0,.4),0 0 32px rgba(133,200,177,.15);
+}
+.wg-codex-worktable[data-codex-journey]::before{
+  content:"";position:absolute;inset:9px;pointer-events:none;z-index:1;
+  border:1px solid rgba(238,207,156,.22);border-radius:inherit;
+  background:
+    repeating-radial-gradient(ellipse at 50% 40%,transparent 0 14px,rgba(162,228,201,.036) 16px 17px,transparent 20px 44px),
+    url('../materials/labradorite-sheen.svg') center/cover;
+  mix-blend-mode:screen;opacity:.48;
+}
+.wg-codex .wg-codex-worktable > .glass-panel{
+  position:relative;z-index:2;min-height:680px;
+  background:linear-gradient(90deg,rgba(5,16,19,.78),rgba(6,24,27,.34)) !important;
+  border:0;border-radius:0;box-shadow:none;
+  padding:clamp(24px,3.1vw,43px);
+}
+.wg-codex .wg-codex-worktable > .wg-codex-reading{
+  padding-inline-start:clamp(36px,5vw,74px);
+  background:linear-gradient(90deg,rgba(6,25,26,.3),rgba(9,20,27,.75)) !important;
+}
+.wg-codex .wg-codex-worktable > .wg-codex-editor{
+  padding-inline-end:clamp(36px,5vw,74px);
+}
+.wg-codex-rift{
+  position:absolute;z-index:4;pointer-events:none;
+  left:50%;top:-4%;height:108%;width:clamp(88px,11vw,174px);
+  transform:translateX(-50%);
+  opacity:.88;filter:drop-shadow(0 0 10px rgba(145,231,206,.35));
+}
+.wg-codex-rift svg{position:absolute;width:100%;height:100%;overflow:visible}
+.wg-codex-rift svg path{fill:none;stroke-linecap:round}
+.wg-codex-ribbon{stroke:url(#wg-codex-flow);stroke-width:12;opacity:.66;stroke-dasharray:21 13;
+  filter:drop-shadow(0 0 11px rgba(126,241,202,.43))}
+.wg-codex-ribbon.inner{stroke-width:5;opacity:.9;stroke-dasharray:12 11}
+.wg-codex-lumen{stroke:#d1f6d8;stroke-width:2.6;opacity:.85;stroke-dasharray:4 11}
+.wg-codex-rift-rune{
+  position:absolute;left:45%;font-family:ui-serif,Georgia,serif;
+  color:#f5dfb7;font-size:clamp(1.2rem,2.2vw,2rem);
+  text-shadow:0 0 8px #e5fbd2,0 0 21px #84ccba;
+  transform:translateX(-50%) rotate(14deg);
+}
+.wg-codex-rift-rune:nth-of-type(1){top:14%;left:36%}
+.wg-codex-rift-rune:nth-of-type(2){top:45%;left:52%;font-size:2.3rem}
+.wg-codex-rift-rune:nth-of-type(3){top:78%;left:26%}
+.wg-codex-worktable:has(.wg-cypher-veil[data-cypher-state="reading"]) .wg-codex-ribbon{
+  animation:wg-rift-flow 3.2s linear infinite;
+}
+.wg-codex-worktable:has(.wg-cypher-veil[data-cypher-state="reading"]) .wg-codex-ribbon.inner{
+  animation-direction:reverse;animation-duration:4.8s;
+}
+.wg-codex-worktable:has(.wg-cypher-veil[data-cypher-state="reading"]) .wg-codex-rift-rune{
+  animation:wg-rift-rune 5.3s ease-in-out infinite alternate;
+}
+@keyframes wg-rift-flow{to{stroke-dashoffset:-140}}
+@keyframes wg-rift-rune{to{transform:translate(6px,-30px) rotate(170deg);filter:brightness(1.4)}}
+.wg-codex .wg-codex-translation{
+  position:relative;border:0;border-block:1px solid rgba(211,228,172,.24);
+  border-radius:clamp(10px,3vw,28px);padding:clamp(14px,2vw,24px);
+  background:linear-gradient(130deg,rgba(7,28,31,.3),rgba(24,62,59,.21)) !important;
+  box-shadow:inset 0 0 35px rgba(100,185,155,.12),inset 0 1px rgba(240,224,176,.12);
+}
+.wg-codex .wg-codex-editor textarea{
+  border:1px solid rgba(215,197,152,.31);border-radius:clamp(10px,2vw,27px);
+  background:linear-gradient(135deg,rgba(5,21,23,.92),rgba(23,59,55,.68));
+  box-shadow:inset 0 0 32px rgba(119,180,147,.16),0 0 22px rgba(87,166,141,.11);
+}
+.wg-codex .wg-codex-folds{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+.wg-codex .wg-codex-folds span{
+  border:0;border-radius:50% 50% 16% 16%;padding:13px 5px;justify-content:center;min-height:50px;
+  background:radial-gradient(ellipse,rgba(113,190,165,.16),transparent 72%);
+  box-shadow:inset 0 0 0 1px rgba(177,214,175,.26);
+}
+.wg-codex .wg-codex-folds [data-reading="true"]{
+  background:radial-gradient(ellipse at 50% 60%,rgba(154,244,206,.45),rgba(171,123,87,.1));
+  box-shadow:0 0 22px rgba(140,219,190,.49),inset 0 0 0 2px #e9ce96;
+  color:#fff9df;
+}
+.wg-cypher-tempo{
+  display:inline-flex;align-items:center;justify-content:center;gap:.45rem;flex-wrap:wrap;
+  font-size:.77rem;letter-spacing:.04em;font-weight:650;
+  color:#f2dfb4;min-height:44px;
+}
+.wg-cypher-tempo select{
+  min-height:44px;max-width:210px;padding:.52rem .7rem;
+  background:#10282b;color:#f6efda;
+  border:1px solid #9cc5b3;border-radius:999px;
+  font:inherit;cursor:pointer;
+}
+.wg-cypher-tempo select:focus-visible{outline:3px solid #f6db99;outline-offset:3px}
+@media(max-width:1050px){
+ .wg-codex-worktable[data-codex-journey]{
+   grid-template-columns:minmax(0,1fr);border-radius:44px 44px 65px 65px;
+ }
+ .wg-codex .wg-codex-worktable > .glass-panel{
+   min-height:0;padding:clamp(20px,4vw,36px);background:rgba(9,24,27,.5) !important;
+ }
+ .wg-codex .wg-codex-worktable > .wg-codex-editor{grid-row:1;padding-bottom:28px}
+ .wg-codex .wg-codex-worktable > .wg-codex-reading{grid-row:3;padding-top:28px}
+ .wg-codex-rift{
+   position:relative;grid-row:2;left:auto;top:auto;transform:none;height:100px;
+   width:90%;max-width:660px;justify-self:center;filter:drop-shadow(0 0 8px #79c0ac);
+ }
+ .wg-codex-rift svg{transform:rotate(-90deg);width:100px;height:600px;transform-origin:50px 50px;
+    top:50%;left:50%;margin-left:-50px;margin-top:-50px}
+ .wg-codex-rift-rune:nth-of-type(1){left:16%;top:30%}
+ .wg-codex-rift-rune:nth-of-type(2){left:50%;top:34%}
+ .wg-codex-rift-rune:nth-of-type(3){left:83%;top:30%}
+}
+@media(max-width:600px){
+ .wg-codex .wg-codex-folds{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .wg-codex .wg-codex-folds span{flex-direction:column;font-size:.68rem}
+ .wg-codex-rift{height:74px}
+ .wg-codex .wg-codex-worktable > .glass-panel{padding:20px 15px}
+ .wg-cypher-tempo{width:100%;justify-content:start}
+}
+@media(prefers-reduced-motion:reduce){
+ .wg-codex-worktable .wg-codex-rift *,
+ .wg-codex-worktable:has(.wg-cypher-veil[data-cypher-state="reading"]) .wg-codex-ribbon{
+  animation:none!important;transition:none!important;
+ }
+}
+@media(prefers-reduced-transparency:reduce){
+ .wg-codex-worktable[data-codex-journey]{background:#09272c}
+ .wg-codex-worktable[data-codex-journey]::before{display:none}
+}
+@media(forced-colors:active){
+ .wg-codex-worktable[data-codex-journey]{border:2px solid CanvasText}
+ .wg-codex-rift-rune{color:CanvasText;text-shadow:none}
+ .wg-codex-ribbon,.wg-codex-lumen{stroke:CanvasText}
+}
+
+/* The filament is a real glyph-bearing conduit, not a panel divider. */
+.wg-codex-rift svg .wg-codex-stream{
+  fill:#f2e3b3;stroke:rgba(131,235,212,.33);stroke-width:.25;
+  font:500 13px ui-serif,Georgia,serif;letter-spacing:2px;
+  paint-order:stroke fill;filter:drop-shadow(0 0 7px #b6eadb);
+}
+.wg-codex-worktable[data-rift-phase="perceive"],
+.wg-codex-worktable[data-rift-phase="compress"]{--rift-flare:#96e3d5}
+.wg-codex-worktable[data-rift-phase="release"],
+.wg-codex-worktable[data-rift-phase="integrate"]{--rift-flare:#e5b38c}
+.wg-codex-worktable[data-rift-phase="verify"],
+.wg-codex-worktable[data-rift-phase="return"]{--rift-flare:#f6df9b}
+.wg-codex-worktable[data-rift-phase="choose"],
+.wg-codex-worktable[data-rift-phase="transcend"]{--rift-flare:#d8b8e6}
+.wg-codex-worktable[data-rift-phase="withness"]{--rift-flare:#c1f3dc}
+.wg-codex-worktable[data-rift-phase] .wg-codex-rift{
+  filter:drop-shadow(0 0 20px var(--rift-flare,#a1edd9));
+}
+.wg-codex-worktable[data-rift-phase] .wg-codex-rift svg .wg-codex-stream{
+  fill:var(--rift-flare,#e0ecce);
+}
+.wg-codex-worktable:has(.wg-cypher-veil[data-cypher-state="reading"]) .wg-codex-rift svg .wg-codex-stream{
+  animation:wg-codex-script-living 3.8s ease-in-out infinite alternate;
+}
+@keyframes wg-codex-script-living{
+  from{opacity:.3;stroke-width:0;letter-spacing:1px}
+  to{opacity:1;stroke-width:.6px;letter-spacing:3px}
+}
+@media(prefers-reduced-motion:reduce){
+  .wg-codex-rift svg .wg-codex-stream{animation:none!important}
+}
