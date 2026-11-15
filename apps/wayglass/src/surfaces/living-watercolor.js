@@ -248,9 +248,8 @@ export async function mountLivingWatercolorSurface(root) {
   }
   const offActivity=subscribeWatercolorActivity(event=>{
     if(stopped||featherStopped)return;
-    if(paused){updateInspector();return;}
     stage.dataset.activityState='observed';
-    stage.style.setProperty('--wc-live-pigment',event.pigment);
+    stage.style?.setProperty?.('--wc-live-pigment',event.pigment);
     const angle=event.sequence*2.399963229728653;
     const x=clamp(.5+.3*Math.cos(angle)),y=clamp(.5+.3*Math.sin(angle));
     addPigment(event,{x,y,dx:Math.cos(angle)*event.texture.rhythm*.55,
@@ -750,7 +749,7 @@ export async function mountLivingWatercolorSurface(root) {
   // Reconstitute recent authored activity when returning from another room.
   // No invented telemetry is used to fill quiet intervals.
   const previousEvents=watercolorSnapshot().events;
-  if(previousEvents.length)stage.style.setProperty('--wc-live-pigment',previousEvents.at(-1).pigment);
+  if(previousEvents.length)stage.style?.setProperty?.('--wc-live-pigment',previousEvents.at(-1).pigment);
   for(const event of previousEvents.slice(-20)){
     const angle=event.sequence*2.399963229728653;
     addPigment(event,{x:clamp(.5+.3*Math.cos(angle)),y:clamp(.5+.3*Math.sin(angle))});
