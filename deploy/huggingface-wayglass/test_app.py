@@ -164,6 +164,19 @@ class SpaceContractTests(unittest.TestCase):
                 self.assertNotIn("Verified response", result)
                 self.assertNotIn("Observation: obs-123", result)
 
+    def test_duplicate_json_keys_cannot_override_attribution(self):
+        # Different JSON consumers may select first or last duplicate key.
+        for raw in (
+            b'{"schema":"wayglass.route-turn/v0.1","route_id":"other","route_id":"wayglass:ship","output":"Verified response","receipt":{"character_id":"wayglass","observation_id":"obs-123"}}',
+            b'{"schema":"wayglass.route-turn/v0.1","route_id":"wayglass:ship","output":"Verified response","receipt":{"character_id":"other","character_id":"wayglass","observation_id":"obs-123"}}',
+            b'{"schema":"wayglass.route-turn/v0.1","route_id":"wayglass:ship","output":"Verified response","receipt":{"character_id":"wayglass","observation_id":"obs-123","observation_id":"obs-456"}}',
+        ):
+            with self.subTest(raw=raw):
+                with patch.object(self.app.OPENER, "open", return_value=FakeResponse(raw)):
+                    result = self.app.call_kernel("Hello", [])
+                self.assertNotIn("Verified response", result)
+                self.assertNotIn("Observation:", result)
+
     def test_non_success_transport_status_cannot_present_forged_speech(self):
         for status in (201, 202, 204, 206, 302):
             with self.subTest(status=status):
