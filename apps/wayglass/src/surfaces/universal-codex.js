@@ -51,7 +51,8 @@ export function mountUniversalCodex(root){
             '<defs><linearGradient id="wg-codex-flow" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d5a66e"/><stop offset=".3" stop-color="#a1e3d4"/><stop offset=".65" stop-color="#d0b0da"/><stop offset="1" stop-color="#85e6bd"/></linearGradient></defs>',
             '<path class="wg-codex-ribbon outer" d="M22 -40 C118 80 10 170 95 295 S15 510 112 790"/>',
             '<path class="wg-codex-ribbon inner" d="M95 -40 C5 75 115 190 26 300 S104 525 14 790"/>',
-            '<path class="wg-codex-lumen" d="M62 -60 C119 120 12 188 63 370 S112 650 63 810"/>',
+            '<path id="wg-codex-lumen-path" class="wg-codex-lumen" d="M62 -60 C119 120 12 188 63 370 S112 650 63 810"/>',
+            '<text class="wg-codex-stream" text-anchor="middle"><textPath href="#wg-codex-lumen-path" startOffset="50%">ᚹ ᛟ ⋈ ᚠ ᛉ ⟁ ᚢ ᛚ ᚷ ⊕ ᛗ ◇ ᚹ ᛟ</textPath></text>',
           '</svg><span class="wg-codex-rift-rune">ᚹ</span><span class="wg-codex-rift-rune">⋈</span><span class="wg-codex-rift-rune">ᛟ</span>',
         '</div>',
         '<section class="glass-panel wg-codex-editor" aria-labelledby="codex-source-label">',
@@ -106,6 +107,7 @@ export function mountUniversalCodex(root){
     revision++;lastSource=null;lastPreview=null;cypher?.stop();cypher=null;
     english.replaceChildren();english.textContent='Source changed. Read in English again to translate this revision.';
     english.setAttribute('data-cypher-state','idle');skip.disabled=true;
+    q('[data-codex-journey]').removeAttribute('data-rift-phase');
     receipts.textContent='Source changed; previous preview no longer applies.';
     for(const phase of root.querySelectorAll('[data-codex-phase]'))phase.removeAttribute('data-verified');
     safeSessionSet(DRAFT_KEY,editor.value);
@@ -122,11 +124,13 @@ export function mountUniversalCodex(root){
       cypher=animateWyrdruneCypher(english,{
         source:editor.value,reducedMotion:reduced,...cypherRunOptions(pace.value),
         onPhase:phase=>{
+          q('[data-codex-journey]').dataset.riftPhase=phase;
           for(const chip of root.querySelectorAll('[data-codex-phase]')){
             chip.setAttribute('data-reading',String(chip.dataset.codexPhase===phase));
           }
         },
         onComplete:()=>{
+          q('[data-codex-journey]').dataset.riftPhase='withness';
           skip.disabled=true;
           for(const chip of root.querySelectorAll('[data-codex-phase]'))chip.removeAttribute('data-reading');
           status.textContent='The native Wyrdrune reading has opened into British English. Source unchanged; no model contacted.';
