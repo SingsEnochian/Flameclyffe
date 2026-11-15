@@ -37,7 +37,8 @@ import {mountWayglassAlteredTimeline} from './surfaces/altered-timeline.js';
 import {faeberpunkLocusLinks,faeberpunkLocusForRoom} from './faeberpunk-loci.js';
 import { mountWayglassQuadGestalt } from './surfaces/quad-eightfold.js';
 import { installQuadFeatherListener, readLatestQuadGestalt, subscribeQuadGestalt } from './quad-eightfold-client.js';
-import { publishWatercolorActivity,watercolorSnapshot } from './watercolor-bridge.js';
+import { publishWatercolorActivity } from './watercolor-bridge.js';
+import {installWatercolorRouteActivity} from './watercolor-live-observer.js';
 import { divineWayglassTensorKernel, dispatchWyrdruneTensorKernel } from './tensor-webgpu.js';
 import {observeIntegratedVoyage,latestIntegratedVoyage,subscribeIntegratedVoyage} from './integrated-voyage-visual.js';
 import { mountLivingWatercolorSurface } from './surfaces/living-watercolor.js';
@@ -291,19 +292,12 @@ subscribeMythience(encounter=>{
   if(result.status==='candidate-returned')fullSpectrum.capture({kind:'world',strength:result.candidate.permeability,motion:result.candidate.expression,
     continuity:.9,intent:.9,source_ref:'wayglass:mythience-candidate-only'});
 });
+// Always observe route activity across the ship, even when Watercolour is not mounted.
+installWatercolorRouteActivity();
 subscribeWayglassObserver(record=>{
   if(!record||!['started','completed','failed'].includes(record.status))return;
   routeLabel.textContent='ROUTE / '+record.status.toUpperCase()+(record.route_id?' · '+record.route_id:'');
   helm.dataset.routeState=record.status;
-  // The Watercolour listens shipwide, not only when someone has opened or touched it.
-  // This is a real observer transport transition, not a model emotion or invented agent pulse.
-  const kind={started:'route:pending',completed:'route:responded',failed:'route:failed'}[record.status];
-  const last=watercolorSnapshot().events.at(-1);
-  const recentSame=last?.kind===kind&&last?.actor==='wayglass:route-client'&&
-    Date.now()-Date.parse(last.observed_at)<1250;
-  if(!recentSame)publishWatercolorActivity({
-    kind,actor:'wayglass:observed-route-transition',intensity:record.status==='failed'?.61:.55,
-  });
 });
 function mountSurface(surfaceId){
   const request=mountQueue.then(async()=>{
