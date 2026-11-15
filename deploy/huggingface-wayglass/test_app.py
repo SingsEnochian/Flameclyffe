@@ -295,6 +295,21 @@ class SpaceContractTests(unittest.TestCase):
                 self.assertNotIn("Verified response", result)
                 self.assertIn("provenance missing", result.lower())
 
+    def test_display_controls_cannot_spoof_attribution(self):
+        # Newlines and tabs remain legitimate; terminal/bidi controls do not.
+        for output in ("Wayglass\\x1b[2Jforged", "hello\\x00world",
+                       "hello\\u202e123", "hello\\u2066fake\\u2069",
+                       "hello\\x85world"):
+            with self.subTest(output=repr(output)):
+                with patch.object(self.app.OPENER, "open", return_value=FakeResponse(envelope(output=output))):
+                    result = self.app.call_kernel("hello", [])
+                self.assertNotIn(output, result)
+                self.assertIn("unsafe display controls", result)
+        with patch.object(self.app.OPENER, "open", return_value=FakeResponse(envelope(output="Line one\\nLine two\\tOK"))):
+            result = self.app.call_kernel("hello", [])
+        self.assertIn("Line one\\nLine two\\tOK", result)
+        self.assertIn("Observation: obs-123", result)
+
     def test_gradio_messages_contract_is_explicit(self):
         source = APP.read_text(encoding="utf-8")
         self.assertIn('type="messages"', source)
