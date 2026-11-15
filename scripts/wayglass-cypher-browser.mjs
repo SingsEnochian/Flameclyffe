@@ -41,6 +41,26 @@ async function shipRoom(page,id){
  await page.waitForFunction(id=>document.querySelector('#wg-shell-nav')?.hidden===true
    && document.documentElement.dataset.wayglassSurface===id,id,{timeout:12000});
 }
+async function checkWatercolour(page,profile){
+ const stage=page.locator('.wc-stage');
+ await stage.waitFor({state:'visible'});
+ const countBefore=await page.locator('#wc-events').innerText();
+ await page.waitForFunction(()=>{
+  const stage=document.querySelector('.wc-stage');
+  return Number(stage?.dataset.ambientCycles||0)>=1;
+ },null,{timeout:7500});
+ const countAfter=await page.locator('#wc-events').innerText();
+ assert.equal(countAfter,countBefore,'Local ambient breathing must not fabricate agent events');
+ assert.equal(await page.locator('#wc-live-title').isVisible(),true);
+ assert.match(await page.locator('#wc-live-title').innerText(),/Ambient current|Listening/);
+ assert.equal(await page.locator('.wc-live-field').isVisible(),true);
+ const stageState=await stage.getAttribute('data-activity-state');
+ assert.ok(['ambient','quiet','observed'].includes(stageState));
+ await page.screenshot({path:resolve(output,profile+'-watercolour-autonomous.png'),fullPage:true});
+ receipt.scenarios.push({profile,room:'Living Watercolour',status:'passed',
+  unattended_ambient_cycles:Number(await stage.getAttribute('data-ambient-cycles')),
+  no_fake_agent_event:true});
+}
 async function checkCodex(page,profile){
  await shipRoom(page,'wayglass:universal-codex');
  const scene=page.locator('[data-surface="wayglass-universal-codex"]');
@@ -50,6 +70,8 @@ async function checkCodex(page,profile){
  const original=await source.inputValue();
  assert.match(original,/mobius/);
  const reading=page.locator('[data-codex-english]');
+ assert.equal(await page.locator('[data-codex-pace]').inputValue(),'slow','Deliberate slow tempo is the default');
+ assert.equal(await page.locator('.wg-codex-rift').isVisible(),true,'Möbius spatial conduit must be in the actual Codex');
  assert.equal(await reading.getAttribute('aria-live'),'off');
  await page.evaluate(()=>{
    const button=document.querySelector('[data-codex-translate]');
@@ -124,6 +146,7 @@ async function checkCodex(page,profile){
  await page.locator('[data-codex-translate]').click();
  assert.equal(await reading.getAttribute('data-cypher-state'),'english','Reduced motion must reveal complete English immediately');
  assert.equal(await page.locator('[data-codex-skip]').isDisabled(),true);
+ await page.locator('[data-codex-pace]').selectOption('steady');
  receipt.scenarios.push({profile,room:'Universal Codex',status:'passed',runes:true,skip:true,
   reduced_motion:true,original_source_preserved:true});
 }
@@ -133,6 +156,7 @@ async function checkWriting(page,profile){
  await page.locator('#wg-wtl-details summary').click();
  await page.locator('#wg-wtl-example').click();
  const source=page.locator('#wg-wtl-source');
+ assert.equal(await page.locator('#wg-wtl-cypher-pace').inputValue(),'steady','Shared tempo persists across ship rooms');
  const original=await source.inputValue();
  assert.match(original,/mobius/);
  await page.emulateMedia({reducedMotion:'no-preference'});
@@ -164,6 +188,7 @@ try{
   const page=await context.newPage();
   page.on('pageerror',error=>receipt.page_errors.push(String(error.stack||error)));
   await page.goto(origin,{waitUntil:'networkidle'});
+  await checkWatercolour(page,profile);
   await checkCodex(page,profile);
   await checkWriting(page,profile);
   await context.close();
