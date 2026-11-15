@@ -119,6 +119,11 @@ async function checkCodex(page,profile){
  }));
  assert.match(material.background,/labradorite|data:image|url\(/);
  assert.equal(material.busy,'true');
+ await page.waitForFunction(()=>document.querySelector(
+  '[data-codex-english] [data-cypher-visual-phase="full-runes"]'
+ ),null,{timeout:7500});
+ const runeSample=await page.locator('[data-codex-english] [data-cypher-visual-phase="full-runes"]').first().innerText();
+ assert.match(runeSample,/[ᚠ-ᛟ⋈◇⊕⟁⌘]/u,'Ritual passage must visibly become glyphs, not merely ordinary text with a glow');
  await page.screenshot({path:resolve(output,profile+'-cypher-runes.png'),fullPage:true});
  await page.locator('[data-codex-skip]').click();
  assert.equal(await reading.getAttribute('data-cypher-state'),'english');
