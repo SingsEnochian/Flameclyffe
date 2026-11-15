@@ -20,14 +20,14 @@ export function morphFrame(source,target,progress){
 }
 export function animateWyrdruneTranslation(node,{
   source,translation,reducedMotion=false,scope=globalThis,
-  lingerMs=1250,frameMs=45,steps=24,onComplete=()=>{},
+  lingerMs=1500,frameMs=95,steps=40,onComplete=()=>{},
 }={}){
   if(!node||typeof source!=='string'||typeof translation!=='string')
     throw new TypeError('A native source, model translation and display are required.');
   const media=scope.matchMedia?.('(prefers-reduced-motion: reduce)');
   let ended=false,handle=null,frame=0;
-  const maxFrames=Math.max(2,Math.min(48,Math.trunc(Number(steps)||24)));
-  const tickMs=Math.max(16,Math.min(100,Number(frameMs)||45));
+  const maxFrames=Math.max(2,Math.min(48,Math.trunc(Number(steps)||40)));
+  const tickMs=Math.max(16,Math.min(180,Number(frameMs)||95));
   node.textContent=source;
   node.setAttribute?.('lang','zxx');
   node.setAttribute?.('data-cypher-line','source');
@@ -74,6 +74,6 @@ export function animateWyrdruneTranslation(node,{
     if(frame>=maxFrames)finish();
     else handle=scope.setTimeout(tick,tickMs);
   };
-  handle=scope.setTimeout(tick,Math.max(0,Math.min(2400,Number(lingerMs)||1250)));
+  handle=scope.setTimeout(tick,Math.max(0,Math.min(3200,Number(lingerMs)||1500)));
   return stop;
 }
