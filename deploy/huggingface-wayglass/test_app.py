@@ -146,6 +146,16 @@ class SpaceContractTests(unittest.TestCase):
                 self.assertNotIn("Verified response", result)
                 self.assertNotIn("Observation: obs-123", result)
 
+    def test_non_success_transport_status_cannot_present_forged_speech(self):
+        for status in (201, 202, 204, 206, 302):
+            with self.subTest(status=status):
+                response = FakeResponse(envelope())
+                response.status = status
+                with patch.object(self.app.OPENER, "open", return_value=response):
+                    result = self.app.call_kernel("Hello", [])
+                self.assertNotIn("Verified response", result)
+                self.assertNotIn("Observation:", result)
+
     def test_oversize_response_is_rejected(self):
         with patch.object(self.app.OPENER, "open", return_value=FakeResponse(b"x" * (self.app.MAX_BYTES + 1))):
             self.assertIn("oversized", self.app.call_kernel("Hello", []))
