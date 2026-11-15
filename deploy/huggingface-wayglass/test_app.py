@@ -100,6 +100,16 @@ class SpaceContractTests(unittest.TestCase):
                 self.app.GATEWAY = url
                 self.assertFalse(self.app.ready())
 
+    def test_non_ascii_bearer_fails_closed_without_network(self):
+        for token in ("token-💎", "token-é", "token\\x7f"):
+            with self.subTest(token=repr(token)):
+                self.app.TOKEN = token
+                self.assertFalse(self.app.ready())
+                with patch.object(self.app.OPENER, "open") as opener:
+                    self.assertIn("not connected", self.app.call_kernel("Hello", []))
+                    opener.assert_not_called()
+        self.app.TOKEN = "test-token-not-a-secret"
+
     def test_valid_attributed_response_and_bearer_request(self):
         captured = {}
         def open_response(req, timeout):
