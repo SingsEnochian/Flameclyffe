@@ -100,6 +100,24 @@ class SpaceContractTests(unittest.TestCase):
                 self.app.GATEWAY = url
                 self.assertFalse(self.app.ready())
 
+    def test_malformed_gateway_authority_and_encoded_paths_fail_before_network(self):
+        # urllib may defer invalid ports until connection time. Reject them at readiness.
+        for url in (
+            "https://private.example.test:invalid/respond",
+            "https://private.example.test:99999/respond",
+            "https://private.example.test:0/respond",
+            "https://private.example.test/%72espond",
+            "https://private.example.test/respond%2f",
+            "https://private.example.test/other%2frespond",
+        ):
+            with self.subTest(url=url):
+                self.app.GATEWAY = url
+                self.assertFalse(self.app.ready())
+                with patch.object(self.app.OPENER, "open") as opener:
+                    self.assertIn("not connected", self.app.call_kernel("Hello", []))
+                    opener.assert_not_called()
+        self.app.GATEWAY = "https://private.example.test/respond"
+
     def test_non_ascii_bearer_fails_closed_without_network(self):
         for token in ("token-💎", "token-é", "token\\x7f"):
             with self.subTest(token=repr(token)):
