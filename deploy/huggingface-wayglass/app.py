@@ -28,7 +28,23 @@ def ready():
     if GATEWAY != GATEWAY.strip() or any(ord(char) < 33 or ord(char) == 127 for char in GATEWAY):
         return False
     parsed = urllib.parse.urlparse(GATEWAY)
-    return parsed.scheme == "https" and bool(parsed.hostname) and not parsed.username and not parsed.password and not parsed.fragment and not parsed.query and parsed.path.endswith("/respond") and not parsed.path.startswith("//")
+    try:
+        port = parsed.port
+    except ValueError:
+        return False
+    # Validate the URL before the first network call; never let encoded path
+    # separators or a malformed authority alter the authenticated route.
+    return (
+        parsed.scheme == "https"
+        and bool(parsed.hostname)
+        and (port is None or 1 <= port <= 65535)
+        and not parsed.username and not parsed.password
+        and not parsed.fragment and not parsed.query
+        and parsed.path.endswith("/respond")
+        and not parsed.path.startswith("//")
+        and "%" not in parsed.path
+        and "\\\\" not in parsed.path
+    )
 
 
 def call_kernel(message, history):
