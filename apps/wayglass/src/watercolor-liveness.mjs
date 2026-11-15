@@ -10,8 +10,8 @@ export function ambientWatercolorStroke(tick=0){
     kind:'ambient-only',evidence:null,actor:null,
     x:clamp(.5+.28*Math.cos(theta)),
     y:clamp(.5+.23*Math.sin(theta*1.37)),
-    color:cycle%2===0?'#4f827e':'#637998',
-    amount:.055,radius:.12,
+    color:cycle%2===0?'#7ab5a6':'#9b97bd',
+    amount:.17,radius:.16,
     dx:.07*Math.sin(theta+.4),dy:.08*Math.cos(theta*.79),
     claimed_agent_activity:false,
   });
