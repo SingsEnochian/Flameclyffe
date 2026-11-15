@@ -6,6 +6,7 @@ import './authorization.css';
 import './faeberpunk.css';
 import './faeberpunk-rooms.css';
 import './faeberpunk-immersive.css';
+import './watercolor-live-field.css';
 import { openWayglassAuthorization } from './authorization.js';
 import { installWayglassField } from './glass-field.js';
 import { installMotionChoreography } from './motion-choreography.js';
