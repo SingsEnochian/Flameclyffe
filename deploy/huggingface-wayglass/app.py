@@ -43,7 +43,7 @@ def ready():
         and parsed.path.endswith("/respond")
         and not parsed.path.startswith("//")
         and "%" not in parsed.path
-        and "\\\\" not in parsed.path
+        and "\\" not in parsed.path
     )
 
 
