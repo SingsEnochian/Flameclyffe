@@ -192,6 +192,14 @@ class SpaceContractTests(unittest.TestCase):
                 self.assertIn("unreachable", result)
                 self.assertNotIn("Observation:", result)
 
+    def test_transport_reset_does_not_escape_or_forge_speech(self):
+        # A TLS socket may reset with ConnectionResetError, not URLError.
+        with patch.object(self.app.OPENER, "open", side_effect=ConnectionResetError("reset")) as opener:
+            result = self.app.call_kernel("Hello", [])
+        self.assertIn("unreachable", result)
+        self.assertNotIn("Observation:", result)
+        self.assertEqual(opener.call_count, 1)
+
     def test_history_is_bounded_and_role_filtered(self):
         captured = {}
         def open_response(req, timeout):
