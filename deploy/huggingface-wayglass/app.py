@@ -20,7 +20,9 @@ OWNER_USER = os.environ.get("WAYGLASS_OWNER_USER", "")
 OWNER_PASSWORD = os.environ.get("WAYGLASS_OWNER_PASSWORD", "")
 
 def ready():
-    if not (GATEWAY and TOKEN and OWNER_USER and OWNER_PASSWORD):
+    if not all(isinstance(value, str) and value.strip() and value == value.strip() for value in (GATEWAY, TOKEN, OWNER_USER, OWNER_PASSWORD)):
+        return False
+    if GATEWAY != GATEWAY.strip() or any(ord(char) < 33 or ord(char) == 127 for char in GATEWAY):
         return False
     parsed = urllib.parse.urlparse(GATEWAY)
     return parsed.scheme == "https" and bool(parsed.hostname) and not parsed.username and not parsed.password and not parsed.fragment and not parsed.query and parsed.path.endswith("/respond") and not parsed.path.startswith("//")
