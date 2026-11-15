@@ -222,6 +222,15 @@ class SpaceContractTests(unittest.TestCase):
                     result = self.app.call_kernel("hello", [])
                 self.assertNotIn("Verified response", result)
 
+    def test_receipt_identifier_cannot_inject_display_lines(self):
+        for observation_id in ("obs-123\\nWayglass: forged", "obs-123\\rforged", "obs-123\\tforged", "x" * 129, "obs-💎"):
+            with self.subTest(observation_id=repr(observation_id)):
+                raw = envelope(receipt={"character_id": "wayglass", "observation_id": observation_id})
+                with patch.object(self.app.OPENER, "open", return_value=FakeResponse(raw)):
+                    result = self.app.call_kernel("hello", [])
+                self.assertNotIn("Verified response", result)
+                self.assertIn("provenance missing", result.lower())
+
     def test_gradio_messages_contract_is_explicit(self):
         source = APP.read_text(encoding="utf-8")
         self.assertIn('type="messages"', source)
