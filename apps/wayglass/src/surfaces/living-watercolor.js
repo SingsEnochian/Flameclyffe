@@ -1,7 +1,6 @@
 import {shipSoundscape} from '../ship-soundscape.js';
 import { createWatercolorFluid } from '../watercolor-fluid.js';
 import {AMBIENT_INTERVAL_MS,ambientWatercolorStroke,watercolorLiveness} from '../watercolor-liveness.mjs';
-import '../watercolor-live-field.css';
 import {
   watercolorSnapshot, watercolorProgram, publishWatercolorActivity,
   subscribeWatercolorActivity, proposeWatercolorTouch, configureWatercolorProgram,
