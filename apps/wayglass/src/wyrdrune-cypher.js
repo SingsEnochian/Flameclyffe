@@ -75,6 +75,7 @@ export function animateWyrdruneCypher(container,{
     item.node.textContent=item.to;
     item.node.setAttribute('lang','en-GB');
     item.node.setAttribute('data-cypher-line','english');
+    item.node.setAttribute('data-cypher-visual-phase','english');
     item.settled=true;
   };
   const finishAll=()=>{
@@ -124,7 +125,9 @@ export function animateWyrdruneCypher(container,{
         return;
       }
       item.node.setAttribute('data-cypher-line','runes');
-      item.node.textContent=morphFrame(item.from,item.to,frame/totalSteps);
+      const progress=frame/totalSteps;
+      item.node.setAttribute('data-cypher-visual-phase',progress>=.39&&progress<.62?'full-runes':'crossing');
+      item.node.textContent=morphFrame(item.from,item.to,progress);
       later(tick,interval);
     };
     // A deliberately slower unfolding, with a bounded tail for long programmes.
