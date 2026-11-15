@@ -228,6 +228,7 @@ export async function mountLivingWatercolorSurface(root) {
       if(ts-lastAmbient>=AMBIENT_INTERVAL_MS){
         const ambient=ambientWatercolorStroke(ambientCycle++);
         fluid.inject(ambient);
+        stage.dataset.ambientCycles=String(ambientCycle);
         lastAmbient=ts;
       }
     }
