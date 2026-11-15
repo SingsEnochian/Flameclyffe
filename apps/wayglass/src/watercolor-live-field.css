@@ -74,3 +74,45 @@
  .wc-live-insight{background:Canvas;border:1px solid CanvasText}
  .wc-live-insight :is(strong,small){color:CanvasText}
 }
+
+/* The membrane can visibly breathe without user input. Operational traces
+   change the colour; breathing alone never increments the observer ledger. */
+.wc-surface .wc-live-field{opacity:.83}
+.wc-surface .wc-live-field::before{
+  content:"";position:absolute;inset:12%;border-radius:54% 46% 38% 62% / 40% 57% 43% 60%;
+  pointer-events:none;
+  background:radial-gradient(ellipse at 51% 47%,color-mix(in srgb,var(--wc-live-pigment) 32%,transparent),
+    rgba(69,157,146,.2) 26%,transparent 69%);
+  box-shadow:inset 0 0 55px color-mix(in srgb,var(--wc-live-pigment) 27%,transparent),
+    0 0 50px color-mix(in srgb,var(--wc-live-pigment) 22%,transparent);
+  animation:wc-luminous-tide 13s ease-in-out infinite alternate;
+}
+.wc-surface .wc-live-field i{
+  border-color:color-mix(in srgb,var(--wc-live-pigment) 84%,transparent);
+  box-shadow:0 0 58px color-mix(in srgb,var(--wc-live-pigment) 32%,transparent),
+    inset 0 0 42px rgba(187,245,216,.22);
+}
+.wc-surface .wc-live-insight{
+  left:auto;right:clamp(32px,7vw,118px);top:clamp(140px,27svh,285px);bottom:auto;
+  width:min(36vw,330px);max-width:36vw;
+  border-inline-start:3px solid rgba(204,235,189,.7);
+  border-radius:15% 48% 12% 35% / 27% 34% 30% 24%;
+  background:radial-gradient(ellipse at 5% 45%,rgba(13,48,47,.93),rgba(6,28,32,.52) 73%,transparent);
+  box-shadow:inset 0 0 21px rgba(142,232,194,.19),0 0 35px rgba(67,149,130,.18);
+}
+@keyframes wc-luminous-tide{
+  from{transform:rotate(-13deg) scale(.8);opacity:.38}
+  to{transform:rotate(23deg) scale(1.16);opacity:.75}
+}
+@media(max-width:700px){
+ .wc-surface .wc-live-insight{
+   left:11px;right:auto;top:88px;bottom:auto;max-width:195px;width:max-content;
+   padding:8px 11px;line-height:1.2;border-radius:12px 32px 20px 12px;
+ }
+ .wc-surface .wc-live-insight small{display:none}
+ .wc-surface .wc-live-field{opacity:.64}
+}
+.wc-stage[data-paused="true"] .wc-live-field::before{animation-play-state:paused}
+@media(prefers-reduced-motion:reduce){
+ .wc-surface .wc-live-field::before{animation:none!important}
+}
