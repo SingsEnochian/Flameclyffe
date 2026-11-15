@@ -118,6 +118,22 @@ class SpaceContractTests(unittest.TestCase):
                     opener.assert_not_called()
         self.app.GATEWAY = "https://private.example.test/respond"
 
+    def test_ambiguous_gateway_path_fails_closed_without_network(self):
+        for url in (
+            "https://private.example.test/./respond",
+            "https://private.example.test/../respond",
+            "https://private.example.test/a/../respond",
+            "https://private.example.test//respond",
+            "https://private.example.test/a//respond",
+        ):
+            with self.subTest(url=url):
+                self.app.GATEWAY = url
+                self.assertFalse(self.app.ready())
+                with patch.object(self.app.OPENER, "open") as opener:
+                    self.assertIn("not connected", self.app.call_kernel("Hello", []))
+                    opener.assert_not_called()
+        self.app.GATEWAY = "https://private.example.test/respond"
+
     def test_non_ascii_bearer_fails_closed_without_network(self):
         for token in ("token-💎", "token-é", "token\\x7f"):
             with self.subTest(token=repr(token)):
