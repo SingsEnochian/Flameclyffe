@@ -282,3 +282,10 @@ test('HUMAIN route metadata surfaces provider recording policy without exposing 
   assert.doesNotMatch(json, /api_key/i);
   assert.doesNotMatch(json, /HUMAIN_NODE_SANDBOX_KEY/);
 });
+
+test('Wayglass kernel advertises opt-in Harmony/Chaos without claiming event execution', () => {
+  const kernel = bootWayglassKernel({ world_id: 'wayglass:test' });
+  assert.equal(kernel.harmony_chaos.schema, 'wayglass.harmony-chaos/v0.1');
+  assert.equal(kernel.harmony_chaos.auto_release, false);
+  assert.equal(kernel.harmony_chaos.world_id, 'wayglass:test');
+});
