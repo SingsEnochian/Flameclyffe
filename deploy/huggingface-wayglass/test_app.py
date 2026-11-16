@@ -279,12 +279,19 @@ class SpaceContractTests(unittest.TestCase):
         ])
 
     def test_surrogate_gateway_output_cannot_be_attributed_as_speech(self):
-        for output in ("hello\ud800", "\\udfff", "valid\ud800\udc00"):
+        for output in ("hello\ud800", "\udfff", "valid\ud800"):
             with self.subTest(output=repr(output)):
                 with patch.object(self.app.OPENER, "open", return_value=FakeResponse(envelope(output=output))):
                     result = self.app.call_kernel("hello", [])
                 self.assertNotIn("Observation:", result)
                 self.assertIn("unsafe display controls", result)
+
+    def test_valid_unicode_surrogate_pair_decodes_to_scalar(self):
+        # JSON decoding combines a valid pair into a single Unicode scalar.
+        with patch.object(self.app.OPENER, "open", return_value=FakeResponse(envelope(output="valid\ud800\udc00"))):
+            result = self.app.call_kernel("hello", [])
+        self.assertIn("valid", result)
+        self.assertIn("Observation: obs-123", result)
 
     def test_redirect_handler_denies_all_redirects(self):
         handler = self.app.NoRedirect()
