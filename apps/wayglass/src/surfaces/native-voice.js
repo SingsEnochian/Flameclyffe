@@ -72,6 +72,22 @@ export function mountWayglassNativeVoice(root,{request=inviteWayglassVoice,
     soundPlayer.stop();
     if(!disposed)status.textContent='Feather · paused. No sound is playing.';
   }
+  function cross(result,direction){
+    reader.textContent='';cancelMorph();
+    skip.textContent=direction==='wyrdrune'?'Reveal Wyrdrune now':'Reveal English now';
+    replay.textContent=direction==='english'?'Return to Wyrdrune':'Read in British English';
+    cancelMorph=animateWyrdruneTranslation(morph,{
+      source:result.native.source,translation:result.translation.text,direction,
+      reducedMotion:reduced(),...nativeRunOptions(pace.value),onComplete:()=>{
+        if(disposed)return;
+        skip.disabled=true;
+        reader.setAttribute('lang',direction==='english'?'en-GB':'zxx');
+        reader.textContent=direction==='english'?result.translation.text:result.native.source;
+        status.textContent=direction==='english'?'British English reading ready.':'Original Wyrdrune restored.';
+      },
+    });
+    skip.disabled=morph.getAttribute('data-cypher-state')!=='reading';
+  }
   function reveal(result){
     last=result;response.hidden=false;
     // This is the owner's explicit invitation. Keep the actual WTL work and
@@ -83,17 +99,7 @@ export function mountWayglassNativeVoice(root,{request=inviteWayglassVoice,
       status.textContent='Wayglass spoke; private return storage unavailable: '+error.message;
     }
     source.textContent=result.native.source;
-    reader.textContent='';cancelMorph();
-    cancelMorph=animateWyrdruneTranslation(morph,{
-      source:result.native.source,translation:result.translation.text,
-      reducedMotion:reduced(),...nativeRunOptions(pace.value),onComplete:()=>{
-        if(disposed)return;
-        skip.disabled=true;
-        reader.textContent=result.translation.text;
-        status.textContent='Wayglass returned in Wyrdrune and British English.';
-      },
-    });
-    skip.disabled=morph.getAttribute('data-cypher-state')!=='reading';
+    cross(result,'english');
     const proposed=(Array.isArray(result.native.operators)?result.native.operators:[]);
     receipt.textContent='Wayglass / Crow · Wyrdrune '+result.native.sha256.slice(0,12)
       +' · '+result.receipt.model_calls+' model turns'
@@ -146,15 +152,7 @@ export function mountWayglassNativeVoice(root,{request=inviteWayglassVoice,
   });
   replay.addEventListener('click',()=>{
     if(!last||disposed||featherHeld())return;
-    reader.textContent='';cancelMorph();
-    cancelMorph=animateWyrdruneTranslation(morph,{
-      source:last.native.source,translation:last.translation.text,
-      reducedMotion:reduced(),...nativeRunOptions(pace.value),
-      onComplete:()=>{
-        if(!disposed){skip.disabled=true;reader.textContent=last.translation.text;}
-      },
-    });
-    skip.disabled=morph.getAttribute('data-cypher-state')!=='reading';
+    cross(last,replay.textContent==='Return to Wyrdrune'?'wyrdrune':'english');
   });
   pace.addEventListener('change',()=>{
     writeCypherPace(pace.value);

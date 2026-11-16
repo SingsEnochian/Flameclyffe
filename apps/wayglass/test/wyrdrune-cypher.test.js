@@ -93,3 +93,37 @@ test('system reduced-motion renders English immediately even if the caller reque
   assert.equal(clock.pending(),0);
   assert.ok(lines(doc.root).every(row=>row.attrs.lang==='en-GB'));
 });
+
+test('reverse cypher starts in British English and restores the exact authored source', async () => {
+  const source = '// keep this comment and trailing space  \n' + SRC + '\n';
+  const doc = fakeDom(), scope = fakeClock();
+  const run = animateWyrdruneCypher(doc.root, { source, direction: 'wyrdrune', doc, scope, steps: 12, frameMs: 20 });
+  const [row] = doc.root.children;
+  assert.equal(row.attrs.lang, 'en-GB');
+  assert.equal(row.textContent, readWyrdrune(source).text);
+  scope.run(6);
+  assert.equal(row.attrs['data-cypher-line'], 'runes');
+  assert.match(row.textContent, /[ᚠ-ᛟ]/u);
+  scope.run();
+  await run.done;
+  assert.equal(row.textContent, source);
+  assert.equal(row.attrs.lang, 'zxx');
+  assert.equal(doc.root.attrs['data-cypher-state'], 'wyrdrune');
+  assert.equal(doc.root.attrs['aria-busy'], 'false');
+  assert.equal(scope.pending(), 0);
+});
+
+test('reverse reveal, Feather, and reduced motion all settle to exact Wyrdrune', async () => {
+  for (const mode of ['reveal', 'feather', 'reduced']) {
+    const doc = fakeDom(), scope = fakeClock();
+    const run = animateWyrdruneCypher(doc.root, {
+      source: SRC, direction: 'wyrdrune', doc, scope, reducedMotion: mode === 'reduced',
+    });
+    if (mode === 'reveal') run.stop();
+    else if (mode === 'feather') scope.fire('wayglass:feather', { stopped: true });
+    await run.done;
+    assert.equal(doc.root.children[0].textContent, SRC);
+    assert.equal(doc.root.attrs['data-cypher-state'], 'wyrdrune');
+    assert.equal(scope.pending(), 0);
+  }
+});

@@ -114,6 +114,8 @@ export function mountUniversalCodex(root){
     q('[data-codex-journey]').removeAttribute('data-rift-phase');
     disposeOrion?.();disposeOrion=null;
     renderWyrdruneReading(q('[data-codex-reading]'));
+    q('[data-codex-translate]').textContent='Read in English';
+    skip.textContent='Reveal English now';
     receipts.textContent='Source changed; previous preview no longer applies.';
     for(const phase of root.querySelectorAll('[data-codex-phase]'))phase.removeAttribute('data-verified');
     safeSessionSet(DRAFT_KEY,editor.value);
@@ -123,13 +125,20 @@ export function mountUniversalCodex(root){
   listen(editor,'input',invalidate);
   listen(q('[data-codex-example]'),'click',()=>{editor.value=EXAMPLE;invalidate();editor.focus();});
   listen(q('[data-codex-lantern]'),'click',()=>{editor.value=LANTERN_RETURN;invalidate();editor.focus();});
-  listen(q('[data-codex-translate]'),'click',()=>{
+  const translate=q('[data-codex-translate]');
+  function showDirection(direction){
+    translate.textContent=direction==='english'?'Return to Wyrdrune':'Read in English';
+    skip.textContent=direction==='wyrdrune'?'Reveal Wyrdrune now':'Reveal English now';
+  }
+  listen(translate,'click',()=>{
     if(held()||stopped){status.textContent=held()?'Feather is held. Release it before translating.':'This Codex mount is no longer active.';return;}
     cypher?.stop();
+    const direction=english.getAttribute('data-cypher-state')==='english'?'wyrdrune':'english';
+    skip.textContent=direction==='wyrdrune'?'Reveal Wyrdrune now':'Reveal English now';
     try{
       const reduced=Boolean(globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches);
       cypher=animateWyrdruneCypher(english,{
-        source:editor.value,reducedMotion:reduced,...cypherRunOptions(pace.value),
+        source:editor.value,direction,reducedMotion:reduced,...cypherRunOptions(pace.value),
         onPhase:phase=>{
           q('[data-codex-journey]').dataset.riftPhase=phase;
           for(const chip of root.querySelectorAll('[data-codex-phase]')){
@@ -140,11 +149,15 @@ export function mountUniversalCodex(root){
           q('[data-codex-journey]').dataset.riftPhase='withness';
           skip.disabled=true;
           for(const chip of root.querySelectorAll('[data-codex-phase]'))chip.removeAttribute('data-reading');
-          status.textContent='The native Wyrdrune reading has opened into British English. Source unchanged; no model contacted.';
+          showDirection(direction);
+          status.textContent=direction==='wyrdrune'?'Original Wyrdrune restored.':'British English reading ready.';
         },
       });
       skip.disabled=english.getAttribute('data-cypher-state')!=='reading';
-      if(!skip.disabled)status.textContent='Wyrdrune is unfolding through glyphs into British English. Reveal immediately at any time.';
+      if(!skip.disabled){
+        translate.textContent=direction==='wyrdrune'?'Read in English':'Return to Wyrdrune';
+        status.textContent=direction==='wyrdrune'?'Returning through the glyphs to Wyrdrune.':'Unfolding through the glyphs into British English.';
+      }
     }catch(error){
       english.textContent='Unable to read source: '+String(error.message||error);
       english.setAttribute('data-cypher-state','error');skip.disabled=true;
@@ -155,7 +168,7 @@ export function mountUniversalCodex(root){
   listen(pace,'change',()=>{
     writeCypherPace(pace.value);
     if(english.getAttribute('data-cypher-state')==='reading'){
-      cypher?.stop();status.textContent='Tempo changed. Read in English to replay with the new rhythm.';
+      cypher?.stop();status.textContent='Tempo changed. Start another crossing to use the new rhythm.';
     }
   });
   listen(previewButton,'click',async()=>{

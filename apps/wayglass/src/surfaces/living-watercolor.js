@@ -408,19 +408,21 @@ export async function mountLivingWatercolorSurface(root) {
           }
           body.before(controls,note,display,original);
           note.hidden=native.executable;
-          function play({focus=false,still=false}={}){
+          function play({focus=false,still=false,direction='english'}={}){
             voiceCypher?.stop();
             display.hidden=false;
             const reduce=still||reduced||featherStopped||document.documentElement.dataset.wgMotion==='off';
+            reveal.textContent=native.executable?(direction==='wyrdrune'?'Reveal Wyrdrune':'Reveal English'):'Reveal original words';
             reveal.hidden=reduce;
             if(focus&&!reduce)reveal.focus({preventScroll:true});
             const onComplete=()=>{
               if(document.activeElement===reveal)replay.focus({preventScroll:true});
               reveal.hidden=true;
+              if(native.executable)replay.textContent=direction==='english'?'Return to Wyrdrune':'Read in British English';
             };
             if(native.executable){
               voiceCypher=animateWyrdruneCypher(display,{
-                source:native.source,reducedMotion:reduce,...cypherRunOptions(readCypherPace()),onComplete,
+                source:native.source,direction,reducedMotion:reduce,...cypherRunOptions(readCypherPace()),onComplete,
               });
             }else{
               const line=document.createElement('p');
@@ -433,7 +435,9 @@ export async function mountLivingWatercolorSurface(root) {
               voiceCypher={stop:run.reveal};
             }
           }
-          replay.addEventListener('click',()=>play({focus:true}));
+          replay.addEventListener('click',()=>play({
+            focus:true,direction:native.executable&&display.getAttribute('data-cypher-state')==='english'?'wyrdrune':'english',
+          }));
           reveal.addEventListener('click',()=>voiceCypher?.stop());
           play({still:!animateLatest||turn!==turns.at(-1)});
         }

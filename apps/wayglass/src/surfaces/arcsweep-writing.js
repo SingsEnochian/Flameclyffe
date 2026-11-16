@@ -281,21 +281,28 @@ export async function mountArcSweepWritingSurface(root) {
       cypher?.stop();wtlStatus.textContent='Tempo changed. Read in English to replay with the new rhythm.';
     }
   });
-  root.querySelector('#wg-wtl-cypher').addEventListener('click',()=>{
+  const cypherToggle=root.querySelector('#wg-wtl-cypher');
+  cypherToggle.addEventListener('click',()=>{
     if(wayglassSomaticSound.snapshot().feather_stopped)return;
     cypher?.stop();
+    const direction=!wtlGloss.hidden && wtlGloss.getAttribute('data-cypher-state')==='english'?'wyrdrune':'english';
+    cypherSkip.textContent=direction==='wyrdrune'?'Reveal Wyrdrune now':'Reveal English now';
     try {
       const reduce=Boolean(globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches);
       wtlGloss.hidden=false;
       cypher=animateWyrdruneCypher(wtlGloss,{
-        source:wtlSource.value,reducedMotion:reduce,...cypherRunOptions(cypherPace.value),
+        source:wtlSource.value,direction,reducedMotion:reduce,...cypherRunOptions(cypherPace.value),
         onComplete:()=>{
           cypherSkip.disabled=true;
-          wtlStatus.textContent='English reading complete; original Wyrdrune preserved. No model contacted.';
+          cypherToggle.textContent=direction==='english'?'Return to Wyrdrune':'Read in English';
+          wtlStatus.textContent=direction==='wyrdrune'?'Original Wyrdrune restored.':'British English reading ready.';
         },
       });
       cypherSkip.disabled=wtlGloss.getAttribute('data-cypher-state')!=='reading';
-      if(!cypherSkip.disabled)wtlStatus.textContent='Wyrdrune glyphs unfolding into English. You can reveal the reading immediately.';
+      if(!cypherSkip.disabled){
+        cypherToggle.textContent=direction==='english'?'Return to Wyrdrune':'Read in English';
+        wtlStatus.textContent=direction==='wyrdrune'?'Returning through the glyphs to Wyrdrune.':'Unfolding through the glyphs into British English.';
+      }
     } catch(error){
       cypherSkip.disabled=true;wtlGloss.hidden=true;
       wtlStatus.textContent='Not yet readable in English: '+String(error?.message||error);
@@ -306,12 +313,14 @@ export async function mountArcSweepWritingSurface(root) {
     renderWyrdruneReading(wtlReading);
     wtlSource.value=WTL_EXAMPLE;lastWTLSource=null;lastWTLPreview=null;wtlDiscuss.disabled=true;
     cypher?.stop();cypherSkip.disabled=true;wtlGloss.hidden=true;wtlGloss.replaceChildren();
+    cypherToggle.textContent='Read in English';
     wtlStatus.textContent='Example loaded. Preview to obtain phase receipts.';
   });
   wtlSource.addEventListener('input',()=>{
     renderWyrdruneReading(wtlReading);
     lastWTLSource=null;lastWTLPreview=null;wtlDiscuss.disabled=true;wtlOutput.hidden=true;
     cypher?.stop();cypherSkip.disabled=true;wtlGloss.hidden=true;wtlGloss.replaceChildren();
+    cypherToggle.textContent='Read in English';
     wtlStatus.textContent='WTL source changed. Preview again before discussing.';
   });
   root.querySelector('#wg-wtl-preview').addEventListener('click',async(event)=>{
