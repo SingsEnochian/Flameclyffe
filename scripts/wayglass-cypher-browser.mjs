@@ -4,7 +4,7 @@ import {readFile,mkdir,stat,writeFile} from 'node:fs/promises';
 import {resolve,relative,extname,dirname,sep} from 'node:path';
 import {pathToFileURL} from 'node:url';
 
-// Source-faithful real-browser verification of two existing ship rooms.
+// Source-faithful real-browser verification of the ship's cypher surfaces.
 // No model call, authentication bypass, private source export or production claim.
 const dist=resolve('dist/wayglass'), output=resolve('artifacts/wayglass/cypher-browser');
 const modulePath=process.env.WAYGLASS_PLAYWRIGHT_MODULE;
@@ -60,6 +60,35 @@ async function checkWatercolour(page,profile){
  receipt.scenarios.push({profile,room:'Living Watercolour',status:'passed',
   unattended_ambient_cycles:Number(await stage.getAttribute('data-ambient-cycles')),
   no_fake_agent_event:true});
+}
+const chatSource='mobius scoped { perceive {} compress {} release {} verify {} integrate {} choose {} return { emit "Hope is here."; } transcend {} }';
+const chatReply='At the eighth station.\n\n'+['```wyrdrune',chatSource,'```'].join('\n');
+async function checkWatercolourChat(page,profile){
+ await page.locator('#wc-invite').waitFor();
+ await page.locator('#wc-prompt').fill('Greet the eighth station.');
+ await page.locator('#wc-invite').click();
+ const turn=page.locator('.wc-dialogue-response').last();
+ const display=turn.locator('.wg-cypher-veil');
+ await display.waitFor({state:'visible'});
+ assert.equal(await display.getAttribute('data-cypher-state'),'reading');
+ await display.locator('[data-cypher-visual-phase="full-runes"]').first().waitFor({state:'attached'});
+ assert.match(await turn.innerText(),/At the eighth station/);
+ await turn.getByRole('button',{name:'Reveal English'}).click();
+ assert.equal(await display.getAttribute('data-cypher-state'),'english');
+ assert.match(await display.innerText(),/Hope is here/);
+ await turn.getByText('Original Wyrdrune',{exact:true}).click();
+ assert.equal(await turn.locator('details p').textContent(),chatSource);
+ await page.reload({waitUntil:'networkidle'});
+ assert.equal(await display.getAttribute('data-cypher-state'),'english');
+ await turn.getByRole('button',{name:'Replay Wyrdrune'}).click();
+ assert.equal(await display.getAttribute('data-cypher-state'),'reading');
+ await page.emulateMedia({reducedMotion:'reduce'});
+ await page.waitForFunction(()=>document.querySelector('.wc-dialogue-response .wg-cypher-veil')?.dataset.cypherState==='english');
+ await turn.getByRole('button',{name:'Replay Wyrdrune'}).click();
+ assert.equal(await display.getAttribute('data-cypher-state'),'english');
+ await page.emulateMedia({reducedMotion:'no-preference'});
+ receipt.scenarios.push({profile,room:'Living Watercolour chat',status:'passed',runes:true,
+   skip:true,original_source_preserved:true,replay_after_reload:true,reduced_motion:true});
 }
 async function checkCodex(page,profile){
  await shipRoom(page,'wayglass:universal-codex');
@@ -187,6 +216,21 @@ try{
   await context.route('**/*',async route=>{
    const url=new URL(route.request().url());
    if(url.origin!==origin){await route.abort('blockedbyclient');return;}
+   if(url.pathname==='/api/v1/wayglass/routes'){
+    await route.fulfill({json:{routes:[{route_id:'wayglass:ship',label:'Wayglass · Ship Voice',configured:true}]}});
+    return;
+   }
+   if(url.pathname==='/api/v1/wayglass/respond'){
+    const request=route.request().postDataJSON();
+    assert.equal(request.surface_id,'wayglass:living-watercolor');
+    assert.equal(request.route_id,'wayglass:ship');
+    assert.match(request.input,/fenced wyrdrune block/);
+    await route.fulfill({json:{schema:'wayglass.route-turn/v0.1',route_id:'wayglass:ship',
+      participant_id:'wayglass',provider:'fixture',model:'fixture',output:chatReply,
+      receipt:{observation_id:'watercolour-cypher-fixture',character_id:'wayglass',
+        voice_seat_kind:'system-voice-over-external-route'}}});
+    return;
+   }
    if(url.pathname.startsWith('/api/')){await route.fulfill({status:503,json:{error:'Browser fixture; no provider invoked'}});return;}
    await route.continue();
   });
@@ -194,6 +238,7 @@ try{
   page.on('pageerror',error=>receipt.page_errors.push(String(error.stack||error)));
   await page.goto(origin,{waitUntil:'networkidle'});
   await checkWatercolour(page,profile);
+  await checkWatercolourChat(page,profile);
   await checkCodex(page,profile);
   await checkWriting(page,profile);
   await context.close();

@@ -46,6 +46,12 @@ export function composeWatercolorPrompt({mode,authorText='',activity=[],voicePre
   return Object.freeze({schema:MODE_SCHEMA,mode:selected.id,mode_label:selected.label,input:instructions.filter(Boolean).join('\n\n'),author_text:trimmed});
 }
 
+const WATERCOLOR_WYRDRUNE=[
+  'If you wish to speak in native Wyrdrune, include one fenced wyrdrune block containing valid WTL.',
+  'You can include your own prose alongside it. Keep lyrical or illustrative pseudocode outside the wyrdrune fence.',
+  'A minimal valid example is mobius scoped { perceive {} compress {} release {} verify {} integrate {} choose {} return { emit "I am here."; } transcend {} }.',
+].join(' ');
+
 export async function inviteWatercolorMode({
   mode,authorText='',activity=[],routeId='local:ollama',
   sessionId,history=[],checkpoint=null,voicePreferences=null,
@@ -60,7 +66,7 @@ export async function inviteWatercolorMode({
   if(typeof routeId!=='string'||!routeId.trim())throw new TypeError('A registered model route is required');
   try{
     const result=await invoke({
-      routeId,input:prompt.input,
+      routeId,input:shipVoice ? prompt.input+'\n\n'+WATERCOLOR_WYRDRUNE : prompt.input,
       sessionId,history:continuationHistory,checkpoint:continuationCheckpoint,
       // Keep the optional inheritance adapter out of an ordinary First Contact.
       // The host route itself pins and receipts the Wayglass participant.
