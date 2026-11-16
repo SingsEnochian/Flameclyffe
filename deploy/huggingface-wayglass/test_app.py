@@ -335,6 +335,22 @@ class SpaceContractTests(unittest.TestCase):
         self.assertIn("Line one\\nLine two\\tOK", result)
         self.assertIn("Observation: obs-123", result)
 
+    def test_multibyte_history_cannot_expand_gateway_payload_unbounded(self):
+        captured = {}
+        def open_response(req, timeout):
+            captured["body"] = json.loads(req.data)
+            return FakeResponse(envelope())
+        history = [
+            {"role": "user", "content": "💎" * 8000},
+            {"role": "assistant", "content": "valid context"},
+        ]
+        with patch.object(self.app.OPENER, "open", side_effect=open_response):
+            result = self.app.call_kernel("continue", history)
+        self.assertIn("Verified response", result)
+        self.assertEqual(captured["body"]["history"], [
+            {"role": "assistant", "content": "valid context"},
+        ])
+
     def test_gradio_messages_contract_is_explicit(self):
         source = APP.read_text(encoding="utf-8")
         self.assertIn('type="messages"', source)
