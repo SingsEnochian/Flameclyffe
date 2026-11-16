@@ -53,6 +53,10 @@ def call_kernel(message, history):
         return "Wayglass kernel not connected. Configure private WAYGLASS_RESPOND_URL and WAYGLASS_GATEWAY_TOKEN in Space secrets before enabling conversation."
     if not isinstance(message, str) or not message.strip() or len(message) > 8000 or len(message.encode("utf-8")) > 32000:
         return "Please enter a message under 8,000 characters."
+    # Reject lone UTF-16 surrogates before transport; JSON escaping otherwise hides
+    # malformed Unicode from the byte-budget and downstream display contracts.
+    if any(0xD800 <= ord(ch) <= 0xDFFF for ch in message):
+        return "Please enter a message with valid Unicode text."
     # Preserve bounded context; never trust client-supplied privileged roles.
     prior = []
     if isinstance(history, list):
