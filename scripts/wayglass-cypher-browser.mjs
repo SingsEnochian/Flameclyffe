@@ -99,11 +99,11 @@ async function checkWatercolourChat(page,profile){
  await openWatercolourChat(page);
  assert.ok((await pigmentPixel(page))[0]>originalPixel[0]+40,'Settled Ship Voice pigment survives reload');
  assert.equal(await display.getAttribute('data-cypher-state'),'english');
- await turn.getByRole('button',{name:'Replay Wyrdrune'}).click();
+ await turn.getByRole('button',{name:/^(Replay Wyrdrune|Return to Wyrdrune)$/}).click();
  assert.equal(await display.getAttribute('data-cypher-state'),'reading');
  await page.emulateMedia({reducedMotion:'reduce'});
  await page.waitForFunction(()=>document.querySelector('.wc-dialogue-response .wg-cypher-veil')?.dataset.cypherState==='english');
- await turn.getByRole('button',{name:'Replay Wyrdrune'}).click();
+ await turn.getByRole('button',{name:/^(Replay Wyrdrune|Return to Wyrdrune)$/}).click();
  assert.equal(await display.getAttribute('data-cypher-state'),'english');
  await page.emulateMedia({reducedMotion:'no-preference'});
  const instruments=page.locator('#wc-instruments-toggle');
