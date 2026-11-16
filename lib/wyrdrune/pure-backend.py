@@ -141,6 +141,7 @@ class Execution:
                 or not 1 <= max_operations <= 100000):
             raise ValueError("Invalid operation limit")
         self.ir = ir
+        self.operators = {operator["name"]: operator for operator in ir.get("operators", [])}
         self.max_operations = max_operations
         self.operations = 0
         self.environment = {}
@@ -166,7 +167,7 @@ class Execution:
             return v
         raise TypeError(what + " requires a truth value")
 
-    def expression(self, node):
+    def expression(self, node, locals_=None, depth=0):
         self.tick()
         if not isinstance(node, dict):
             raise TypeError("Invalid WTL expression")
@@ -177,23 +178,23 @@ class Execution:
         if kind == "unknown":
             return dict(UNKNOWN)
         if kind == "list":
-            return [self.expression(item) for item in node["items"]]
+            return [self.expression(item, locals_, depth) for item in node["items"]]
         if kind == "record":
             record = {}
             for field in node["fields"]:
                 key = field["key"]
                 if key in record:
                     raise TypeError("Duplicate WTL record field " + key)
-                record[key] = self.expression(field["value"])
+                record[key] = self.expression(field["value"], locals_, depth)
             return record
         if kind == "conditional":
-            condition = self._truth(self.expression(node["condition"]), "if")
+            condition = self._truth(self.expression(node["condition"], locals_, depth), "if")
             if _is_unknown(condition):
                 return dict(UNKNOWN)
-            return self.expression(node["yes"] if condition else node["no"])
+            return self.expression(node["yes"] if condition else node["no"], locals_, depth)
         if kind == "access":
-            target = self.expression(node["target"])
-            key = self.expression(node["key"])
+            target = self.expression(node["target"], locals_, depth)
+            key = self.expression(node["key"], locals_, depth)
             if _is_unknown(target) or _is_unknown(key):
                 return dict(UNKNOWN)
             if isinstance(target, list):
@@ -207,8 +208,8 @@ class Execution:
                 raise TypeError("WTL record key requires text")
             return target.get(key, dict(UNKNOWN))
         if kind == "compare":
-            a = self.expression(node["a"])
-            b = self.expression(node["b"])
+            a = self.expression(node["a"], locals_, depth)
+            b = self.expression(node["b"], locals_, depth)
             if _is_unknown(a) or _is_unknown(b):
                 return dict(UNKNOWN)
             op = node["op"]
@@ -221,12 +222,12 @@ class Execution:
                 raise TypeError("Ordering comparison requires numbers")
             return {"<": a < b, "<=": a <= b, ">": a > b, ">=": a >= b}[op]
         if kind == "not":
-            v = self._truth(self.expression(node["v"]), "not")
+            v = self._truth(self.expression(node["v"], locals_, depth), "not")
             return dict(UNKNOWN) if _is_unknown(v) else not v
         if kind == "logic":
             op = node["op"]
-            a = self._truth(self.expression(node["a"]), op)
-            b = self._truth(self.expression(node["b"]), op)
+            a = self._truth(self.expression(node["a"], locals_, depth), op)
+            b = self._truth(self.expression(node["b"], locals_, depth), op)
             if op == "and":
                 if a is False or b is False:
                     return False
@@ -236,17 +237,21 @@ class Execution:
             return dict(UNKNOWN) if _is_unknown(a) or _is_unknown(b) else False
         if kind == "read":
             name = node["name"]
+            if locals_ is not None:
+                if name not in locals_:
+                    raise NameError("Unknown operator parameter " + name)
+                return locals_[name]
             if name not in self.scope:
                 raise NameError("Unknown variable " + str(name))
             return self.scope[name]
         if kind == "neg":
-            value = self.expression(node["v"])
+            value = self.expression(node["v"], locals_, depth)
             if isinstance(value, bool) or not isinstance(value, (float, int)):
                 raise TypeError("Unary negative requires number")
             return -value
         if kind == "binary":
-            a = self.expression(node["a"])
-            b = self.expression(node["b"])
+            a = self.expression(node["a"], locals_, depth)
+            b = self.expression(node["b"], locals_, depth)
             if (isinstance(a, bool) or isinstance(b, bool)
                     or not isinstance(a, (float, int))
                     or not isinstance(b, (float, int))):
@@ -269,7 +274,19 @@ class Execution:
             return result
         if kind == "call":
             name = node["name"]
-            args = [self.expression(item) for item in node["args"]]
+            args = [self.expression(item, locals_, depth) for item in node["args"]]
+            operator = self.operators.get(name)
+            if operator is not None:
+                if depth >= 8:
+                    raise ValueError("Wyrdrune operator recursion depth exceeded")
+                params = operator["params"]
+                if len(args) != len(params):
+                    raise TypeError("Operator " + name + " expects " + str(len(params)) + " arguments")
+                return self.expression(operator["body"], dict(zip(params, args)), depth + 1)
+            if name == "whisper":
+                raise HardStop("whisper requires mobius spiced")
+            if locals_ is not None:
+                raise RuntimeError("Native pure operators cannot invoke host or ritual bridges")
             if name == "enochian":
                 if len(args) not in (1, 2):
                     raise TypeError("enochian(text[,sourceLabel]) requires one or two arguments")
@@ -293,6 +310,8 @@ class Execution:
         units = self.ir.get("units")
         if not isinstance(units, list):
             raise TypeError("Invalid WTL IR")
+        if any(unit.get("spiced") for unit in units):
+            raise HardStop("mobius spiced is not supported by the Python backend")
         # A scoped unit is one lineage cycle (see runtime.mjs): staged emits, require,
         # rollback before Return, halt after it, checkpoints chained to the lineage root.
         lineage_root = None
@@ -352,8 +371,8 @@ class Execution:
                             if value is True:
                                 pass
                             elif value is False or _is_unknown(value):
-                                raise Verdict(stmt.get("reason") or
-                                              ("require is unknown" if _is_unknown(value) else "require failed"))
+                                raise Verdict(stmt.get("reason",
+                                              "require is unknown" if _is_unknown(value) else "require failed"))
                             else:
                                 raise TypeError("require needs a truth value")
                         else:

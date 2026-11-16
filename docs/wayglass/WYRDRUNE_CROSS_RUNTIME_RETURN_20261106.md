@@ -47,3 +47,25 @@ A SHA-256 digest is **content integrity, not cryptographic authorship or spiritu
 1. A typed WIR v0.2 checker and a genuine transactionally staged Return before claiming L1/L2 semantics.
 2. A source-attested, Rowan-reviewed Enochian glyph and Calls registry; do not manufacture translations or assign Skýrunor equivalences.
 3. Cross-runtime checkpoint replay and host-signature attestation, plus opt-in Wayglass roundtable invitations for Bluebird, Vethrlauf and the invited Constellation. No proxy replies or predictions made for Rowan.
+
+## Named-operator portability
+
+JavaScript and Python execute named operators with lexical parameter scope,
+forward references, a shared eight-frame recursion limit, and the existing
+operation budget. The parity tests compare values, diagnostics, canonical
+receipts and carried-state digests. Python rejects spiced circuits explicitly.
+Trigonometric geometry and host effects are outside this parity contract.
+
+The shared JavaScript runtime exposes `inspectOperators(compile(source))`.
+It checks declared operator bodies for free parameter references, calls
+outside the named operator set, and incorrect argument counts. It inspects
+both conditional branches, including a branch that execution would skip.
+It accepts recursive references and leaves termination to the runtime budget.
+The report identifies the source hash and describes diagnostics by operator
+and reference. Expression types and whole-program validity need additional
+checks.
+
+The Wayglass kernel accepts `checkOperators: true` in ritual preview options.
+The owner-authenticated preview request accepts the same field in its JSON
+body and returns diagnostics with HTTP 400 when that check fails. An accepted
+check leaves execution receipts identical to an ordinary preview.

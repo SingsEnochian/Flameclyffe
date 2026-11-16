@@ -108,3 +108,17 @@ test('browser rejects source substitution, emitted value tampering, phase breaks
   }
   assert.throws(()=>draftWyrdruneDiscussion(SOURCE,original),/owner-reviewed Wyrdrune preview/);
 });
+
+test('browser preview forwards the requested operator check and preserves diagnostics', async () => {
+  const diagnostics = [{ operator: 'capture', code: 'unbound-parameter', name: 'free' }];
+  await assert.rejects(previewWyrdrune(SOURCE, {
+    checkOperators: true,
+    fetchImpl: async (_url, init) => {
+      assert.deepEqual(JSON.parse(init.body), { source: SOURCE, checkOperators: true });
+      return { ok: false, json: async () => ({ error: 'Operator check failed', diagnostics }) };
+    },
+  }), error => {
+    assert.deepEqual(error.diagnostics, diagnostics);
+    return true;
+  });
+});

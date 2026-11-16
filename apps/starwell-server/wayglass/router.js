@@ -1079,13 +1079,20 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     if (typeof source !== 'string' || !source.trim() || source.length > 16000) {
       return res.status(400).json({ error: 'WTL source must be nonempty text of at most 16000 characters.' });
     }
+    const checkOperators = req.body?.checkOperators;
+    if (checkOperators !== undefined && typeof checkOperators !== 'boolean') {
+      return res.status(400).json({ error: 'checkOperators must be true or false.' });
+    }
     try {
-      const preview = await previewWyrdruneRitual(source, { maxOperations: 2000 });
+      const preview = await previewWyrdruneRitual(source, { maxOperations: 2000, checkOperators });
       return res.json({ ...preview, dispatch: 'none', model_turn: false, canon_commit: false });
     } catch (error) {
       const invalid = error instanceof SyntaxError || error instanceof TypeError || error instanceof RangeError ||
         error instanceof ReferenceError || /Bridge capability unavailable|Feather|operation budget|Duplicate binding|Unknown binding/.test(error.message);
-      return res.status(invalid ? 400 : 422).json({ error: 'Wyrdrune preview rejected: ' + cleanText(error.message, 250) });
+      return res.status(invalid ? 400 : 422).json({
+        error: 'Wyrdrune preview rejected: ' + cleanText(error.message, 250),
+        ...(Array.isArray(error.diagnostics) ? { diagnostics: error.diagnostics } : {}),
+      });
     }
   });
 

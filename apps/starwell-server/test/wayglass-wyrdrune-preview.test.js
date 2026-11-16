@@ -55,6 +55,16 @@ test('WTL owner-only HTTP preview preserves Eightfold records and never contacts
     const denial = await json({source:source.replace('emit "held";','emit bridge("python","run",1);')},{authorization:'Bearer '+token});
     assert.equal(denial.status,400);
     assert.match((await denial.json()).error,/Bridge capability unavailable/);
+    const auth = {authorization:'Bearer '+token};
+    const checked = await json({source,checkOperators:true},auth);
+    assert.equal((await checked.json()).receiptHash,preview.receiptHash);
+    const invalid = await json({source:'operator capture() = free;\n'+source,checkOperators:true},auth);
+    assert.equal(invalid.status,400);
+    assert.deepEqual((await invalid.json()).diagnostics,[
+      {operator:'capture',code:'unbound-parameter',name:'free'},
+    ]);
+    const badOption = await json({source,checkOperators:'false'},auth);
+    assert.equal(badOption.status,400);
     const bad = await json({source:'not a Wyrdrune rite'},{authorization:'Bearer '+token});
     assert.equal(bad.status,400);
     const tooLong = await json({source:'x'.repeat(16001)},{authorization:'Bearer '+token});
