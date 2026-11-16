@@ -351,6 +351,20 @@ class SpaceContractTests(unittest.TestCase):
             {"role": "assistant", "content": "valid context"},
         ])
 
+    def test_aggregate_history_budget_keeps_newest_contiguous_turns(self):
+        captured = {}
+        def open_response(req, timeout):
+            captured["body"] = json.loads(req.data)
+            return FakeResponse(envelope())
+        history = [{"role": "user", "content": str(i) + "x" * 9998} for i in range(12)]
+        with patch.object(self.app.OPENER, "open", side_effect=open_response):
+            result = self.app.call_kernel("continue", history)
+        self.assertIn("Verified response", result)
+        retained = captured["body"]["history"]
+        self.assertEqual(len(retained), 6)
+        self.assertEqual([int(t["content"].split("x")[0]) for t in retained], list(range(6, 12)))
+        self.assertLessEqual(sum(len(t["content"].encode("utf-8")) for t in retained), 64000)
+
     def test_gradio_messages_contract_is_explicit(self):
         source = APP.read_text(encoding="utf-8")
         self.assertIn('type="messages"', source)
