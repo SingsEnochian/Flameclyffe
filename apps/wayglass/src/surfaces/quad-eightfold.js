@@ -1,4 +1,5 @@
 import './quad-eightfold.css';
+import { shipwideFeedback } from '../shipwide-feedback.js';
 import {runLiveQuad,subscribeQuadGestalt,quadFeatherState,readLatestQuadGestalt} from '../quad-eightfold-client.js';
 import {temporalHingeFor,designThroughEightfold} from '../quad-temporal-hinge.js';
 import {runWayglassNikolaReview} from '../wayglass-nikola-workflow.js';
@@ -86,6 +87,11 @@ export function mountWayglassQuadGestalt(root){
     collabButton.disabled=busy||collabBusy||feather||!checkpoint||!collabConsent.checked;
     collabExport.disabled=!collabReceipt;
   }
+  void shipwideFeedback.restore().then(plan => {
+    if (!plan || disposed || checkpoint || busy || feather) return;
+    $('[data-quad-learning-state]').textContent = 'Returned Observer focus: ' +
+      plan.agents.replaceAll('-', ' ') + '. Run a current reading before inviting local cognition.';
+  });
   for(const p of PHASES){const e=document.createElement('span');e.textContent=p;$('.quad-phases').append(e);}
   function setBusy(value){busy=value;run.disabled=value||feather;invite.disabled=value||!checkpoint||feather;nikola.disabled=value||!checkpoint||feather;setCollabAvailability();}
   function renderLens(){

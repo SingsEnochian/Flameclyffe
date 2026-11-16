@@ -1,9 +1,10 @@
-import { publishShipwideFeedback, verifyShipwideFeedback } from './shipwide-feedback.js';
+import { shipwideFeedback } from './shipwide-feedback.js';
 import { digestWce1 } from './wyrdrune-proof.js';
 // Wayglass Quad Eightfold: sourced host data -> entire ship, no hidden telemetry.
 export const QUAD_EVENT='wayglass:quad-gestalt';
 let latest=null;
 let feather=false;
+let observationGeneration=0;
 export function quadFeatherState(){return feather;}
 export function readLatestQuadGestalt(){return latest;}
 export function subscribeQuadGestalt(listener,{scope=globalThis}={}){
@@ -35,6 +36,8 @@ export function publishQuadGestalt(checkpoint,{scope=globalThis,shipwide=null}={
 }
 export async function runLiveQuad({cycles=2,previous=null,continuity={},signal,fetchImpl=globalThis.fetch}={}){
   if(feather)throw new Error('Feather Stop is active');
+  const generation = ++observationGeneration;
+  const stopped = () => signal?.aborted || feather || generation !== observationGeneration;
   const response=await fetchImpl('/api/v1/wayglass/quad/run',{
     method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',
     credentials:'same-origin',signal,
@@ -50,10 +53,12 @@ export async function runLiveQuad({cycles=2,previous=null,continuity={},signal,f
     if (!Array.isArray(payload.feedback) || await digestWce1(payload.feedback) !== payload.feedbackDigest) {
       throw new Error('Observer feedback digest mismatch');
     }
-    shipwide = await verifyShipwideFeedback(payload.shipwide, payload.checkpoint.hash, payload.feedbackDigest);
+    shipwide = await shipwideFeedback.admit(payload.shipwide, payload.checkpoint.hash, payload.feedbackDigest,
+      { stopped });
+    if (!shipwide && !signal?.aborted && !feather) throw new Error('A newer shipwide reading superseded this response');
   }
-  if (signal?.aborted || feather) throw new DOMException('Observer feedback stopped', 'AbortError');
-  publishShipwideFeedback(shipwide);
+  if (stopped()) throw new DOMException('Observer feedback stopped', 'AbortError');
+  if (!payload.shipwide) shipwideFeedback.clear();
   publishQuadGestalt(payload.checkpoint, { shipwide });
   return payload.checkpoint;
 }

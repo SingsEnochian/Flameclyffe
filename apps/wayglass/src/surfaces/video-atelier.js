@@ -1,5 +1,5 @@
 import './video-atelier.css';
-import { latestShipwideFeedback } from '../shipwide-feedback.js';
+import { shipwideFeedback } from '../shipwide-feedback.js';
 import { WayglassVideoAtelier, WAYGLASS_SCENES } from '../ltx-desktop-bridge.js';
 
 export async function mountWayglassVideoAtelier(root) {
@@ -45,8 +45,9 @@ export async function mountWayglassVideoAtelier(root) {
   const status = root.querySelector('#wg-video-status');
   prompt.value = preset.prompt;
   let sourceRef, observerDirection;
-  root.querySelector('#wg-video-observer').addEventListener('click', () => {
-    const frame = latestShipwideFeedback();
+  root.querySelector('#wg-video-observer').addEventListener('click', async () => {
+    const frame = await shipwideFeedback.restore();
+    if (!root.contains(prompt) || !root.isConnected) return;
     if (!frame) {
       status.textContent = 'Run the Quad Observer or First Voyage to receive Wyrdrune direction.';
       return;

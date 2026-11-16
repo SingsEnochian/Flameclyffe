@@ -1,9 +1,10 @@
 import { digestWce1 } from './wyrdrune-proof.js';
 
-let latest = null;
+export const SHIPWIDE_RETURN_KEY = 'wayglass.shipwide-feedback.return/v1';
 
-export function latestShipwideFeedback() {
-  return latest;
+function tabStorage() {
+  try { return globalThis.sessionStorage; }
+  catch { return null; }
 }
 
 export async function verifyShipwideFeedback(value, checkpoint, feedbackDigest, cryptoImpl) {
@@ -31,6 +32,52 @@ export async function verifyShipwideFeedback(value, checkpoint, feedbackDigest, 
   });
 }
 
-export function publishShipwideFeedback(plan) {
-  latest = plan;
+export function createShipwideFeedbackStore({ storage = tabStorage, cryptoImpl } = {}) {
+  let latest = null;
+  let generation = 0;
+  let settled = false;
+  let pending = 0;
+
+  async function restore() {
+    if (settled || pending) return latest;
+    const start = generation;
+    let plan = null;
+    try {
+      const raw = storage()?.getItem(SHIPWIDE_RETURN_KEY);
+      if (raw && raw.length <= 16000) {
+        const { value, checkpoint, feedbackDigest } = JSON.parse(raw);
+        plan = await verifyShipwideFeedback(value, checkpoint, feedbackDigest, cryptoImpl);
+      }
+    } catch { /* A missing or unreadable Return leaves the plan empty. */ }
+    if (generation === start) {
+      latest = plan;
+      settled = true;
+    }
+    return latest;
+  }
+
+  async function admit(value, checkpoint, feedbackDigest, { stopped = () => false } = {}) {
+    const start = ++generation;
+    pending++;
+    let plan;
+    try { plan = await verifyShipwideFeedback(value, checkpoint, feedbackDigest, cryptoImpl); }
+    finally { pending--; }
+    if (stopped() || generation !== start) return null;
+    latest = plan;
+    settled = true;
+    try { storage()?.setItem(SHIPWIDE_RETURN_KEY, JSON.stringify({ value, checkpoint, feedbackDigest })); }
+    catch { /* The admitted plan remains usable until this page closes. */ }
+    return plan;
+  }
+
+  function clear() {
+    generation++;
+    latest = null;
+    settled = true;
+    try { storage()?.removeItem(SHIPWIDE_RETURN_KEY); }
+    catch { /* Storage may be disabled. */ }
+  }
+  return Object.freeze({ restore, admit, clear });
 }
+
+export const shipwideFeedback = createShipwideFeedbackStore();

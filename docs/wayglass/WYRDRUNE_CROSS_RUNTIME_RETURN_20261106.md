@@ -234,3 +234,15 @@ First Voyage returns a pending engineering review linked to its trial.
 The Quad's local cognition invitation includes the WTL inquiry for the
 same checkpoint. Rendering, playback, model calls and engineering changes
 remain controlled by their existing entry points.
+
+### Returning to a shipwide reading
+
+The browser retains the latest admitted shipwide proposal and its digest
+binding in same-tab session storage. On reload it rechecks the plan before
+the Acoustic Room or Video Atelier applies it. First Voyage and the
+Learning Port display its engineering and agent focus as returned context.
+Engineering review and an agent invitation still require current trial
+or Observer evidence. Browser Return storage contains no credential or
+model transcript and starts no playback, render, or inference. It provides
+content integrity against the cached digest, with host authenticity
+depending on the original authenticated transport.

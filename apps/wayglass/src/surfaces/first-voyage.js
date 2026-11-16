@@ -1,5 +1,5 @@
 import './first-voyage.css';
-import { publishShipwideFeedback, verifyShipwideFeedback } from '../shipwide-feedback.js';
+import { shipwideFeedback } from '../shipwide-feedback.js';
 import {checkHouseSteward,signInHouseSteward} from '../house-steward-session.js';
 import {observeIntegratedVoyage} from '../integrated-voyage-visual.js';
 import {wayglassSomaticSound} from '../somatic-sound.js';
@@ -168,10 +168,9 @@ export async function mountWayglassFirstVoyage(root){
      q('[data-voyage-return-label]').textContent=success?'Return packet verified':'Refusal remains valid';
      root.querySelectorAll('[data-voyage-fold]').forEach(el=>{if(success)el.dataset.witnessed='true';else delete el.dataset.witnessed;});
      if(success && result.shipwide) {
-       const frame = await verifyShipwideFeedback(result.shipwide, result.observer.checkpoint_hash,
-         result.observer.feedback_digest);
-       if(stopped||held()||controller.signal.aborted)return;
-       publishShipwideFeedback(frame);
+       const frame = await shipwideFeedback.admit(result.shipwide, result.observer.checkpoint_hash,
+         result.observer.feedback_digest, { stopped: () => stopped || held() || controller.signal.aborted });
+       if(!frame)return;
        q('[data-voyage-reading]').textContent += ' Engineering focus: ' + frame.engineering.replaceAll('-', ' ') + '.';
      }
      if(success)observeIntegratedVoyage(result);
@@ -192,6 +191,11 @@ export async function mountWayglassFirstVoyage(root){
    finally{controller=null;busy=false;reflect()}
  });
  render();reflect();
+ void shipwideFeedback.restore().then(frame => {
+   if (!frame || stopped || busy || q('[data-voyage-result-flag]').textContent !== 'AWAITING A VOYAGE') return;
+   q('[data-voyage-reading]').textContent = 'Returned Observer engineering focus: ' +
+     frame.engineering.replaceAll('-', ' ') + '. Run a voyage to review a current trial.';
+ });
  try{
    authenticated=await checkHouseSteward();
    if(!stopped){signIn.hidden=authenticated;announce(authenticated?'House verified. Choose a tide and begin.':'House sign-in required for execution. The room remains open.');reflect()}

@@ -1,6 +1,6 @@
 import './acoustic-room.css';
 import {transition,bearing} from '../acoustic-marker-model.js';
-import { latestShipwideFeedback } from '../shipwide-feedback.js';
+import { shipwideFeedback } from '../shipwide-feedback.js';
 import {shipSoundscape} from '../ship-soundscape.js';
 import {createAcousticComposition,ACOUSTIC_COMPOSITION_STORAGE_KEY} from '../acoustic-composition.js';
 import {WAYGLASS_FEATHER_EVENT,wayglassSomaticSound} from '../somatic-sound.js';
@@ -196,7 +196,7 @@ export function mountWayglassAcousticRoom(root,{loadCompositionControls=()=>impo
   if(intent.type==='reset'){mirror=null;world=createWorld({markerState});render();}else advance(markerState);
   if(['select','orient','request-traverse','decline'].includes(intent.type))audio.signal({eventId:world.snapshot_id+':'+intent.type+':'+(++eventSequence),kind:'status'});
  }
- function onClick(e){
+ async function onClick(e){
   interactions++;
   const roomButton=e.target.closest('[data-wayglass-room]');
   if(roomButton&&root.contains(roomButton)){globalThis.__wayglassOS?.mount(roomButton.dataset.wayglassRoom);return;}
@@ -207,7 +207,8 @@ export function mountWayglassAcousticRoom(root,{loadCompositionControls=()=>impo
   if(e.target.closest('[data-signal]')){audio.signal({eventId:world.snapshot_id+':bell:'+ (++eventSequence),kind:'status'});return;}
   if(e.target.closest('[data-observer-score]')){
     const status=$('[data-observer-score-status]');
-    const frame=latestShipwideFeedback();
+    const frame=await shipwideFeedback.restore();
+    if(disposed)return;
     if(featherStopped||!frame){
       status.textContent=featherStopped?'Feather is holding sound.':'Run Quad Observer or First Voyage to receive a score.';
       return;
