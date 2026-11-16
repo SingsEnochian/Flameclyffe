@@ -176,6 +176,36 @@ class Execution:
             return float(value) if isinstance(value, (int, float)) and not isinstance(value, bool) else value
         if kind == "unknown":
             return dict(UNKNOWN)
+        if kind == "list":
+            return [self.expression(item) for item in node["items"]]
+        if kind == "record":
+            record = {}
+            for field in node["fields"]:
+                key = field["key"]
+                if key in record:
+                    raise TypeError("Duplicate WTL record field " + key)
+                record[key] = self.expression(field["value"])
+            return record
+        if kind == "conditional":
+            condition = self._truth(self.expression(node["condition"]), "if")
+            if _is_unknown(condition):
+                return dict(UNKNOWN)
+            return self.expression(node["yes"] if condition else node["no"])
+        if kind == "access":
+            target = self.expression(node["target"])
+            key = self.expression(node["key"])
+            if _is_unknown(target) or _is_unknown(key):
+                return dict(UNKNOWN)
+            if isinstance(target, list):
+                if (_kind(key) != "number" or not 0 <= key <= 2**53 - 1
+                        or key != int(key)):
+                    raise TypeError("WTL list index requires a nonnegative safe integer")
+                return target[int(key)] if key < len(target) else dict(UNKNOWN)
+            if not isinstance(target, dict):
+                raise TypeError("WTL access requires a record or list")
+            if not isinstance(key, str):
+                raise TypeError("WTL record key requires text")
+            return target.get(key, dict(UNKNOWN))
         if kind == "compare":
             a = self.expression(node["a"])
             b = self.expression(node["b"])
