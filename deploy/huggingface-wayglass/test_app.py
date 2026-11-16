@@ -240,6 +240,13 @@ class SpaceContractTests(unittest.TestCase):
             self.assertIn("8,000", self.app.call_kernel("x" * 8001, []))
             open_mock.assert_not_called()
 
+    def test_multibyte_input_is_bounded_before_bearer_transport(self):
+        # Eight thousand Unicode codepoints can exceed the intended request budget.
+        with patch.object(self.app.OPENER, "open") as opener:
+            self.assertIn("8,000", self.app.call_kernel("💎" * 8000, []))
+            self.assertIn("8,000", self.app.call_kernel("a" * 8001, []))
+            opener.assert_not_called()
+
     def test_nontext_and_blank_inputs_fail_closed_without_network(self):
         with patch.object(self.app.OPENER, "open") as opener:
             for message in (None, "", "   ", 123, {"text": "hello"}, ["hello"]):
