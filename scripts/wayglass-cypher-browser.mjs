@@ -259,7 +259,7 @@ try{
     const request=route.request().postDataJSON();
     assert.equal(request.surface_id,'wayglass:living-watercolor');
     assert.equal(request.route_id,'wayglass:ship');
-    assert.match(request.input,/fenced wyrdrune block/);
+    assert.equal(request.input,'Greet the eighth station.','Owner prompt must remain unmodified; WTL is supplied in the attributed model response, not fabricated in the request');
     const interrupted=request.input.includes('Continue the interrupted Dream.');
     const output=interrupted?'```wtl\n'+interruptedDream:chatReply;
     await route.fulfill({json:{schema:'wayglass.route-turn/v0.1',route_id:'wayglass:ship',
