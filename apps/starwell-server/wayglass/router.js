@@ -11,7 +11,7 @@ const {
   resolveWayglassRoute,
 } = require('../wayglass-runtime/wayglass-route-registry.cjs');
 const { bootWayglassKernel, inspectWayglassCognitionPreflight } = require('../wayglass-runtime/wayglass-kernel.cjs');
-const { previewWyrdruneRitual } = require('../wayglass-runtime/wayglass-wyrdrune-ritual.cjs');
+const { previewWyrdruneRitual, compileTyped } = require('../wayglass-runtime/wayglass-wyrdrune-ritual.cjs');
 const { scoreStoryWithWyrdrune } = require('../wayglass-runtime/wayglass-wyrdrune-soundscape.cjs');
 const { scoreSpectralBatch } = require('../wayglass-runtime/wayglass-wyrdrune-spectrum.cjs');
 const { scoreResonanceAtlas } = require('../wayglass-runtime/wayglass-wyrdrune-atlas.cjs');
@@ -1083,8 +1083,15 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     if (checkOperators !== undefined && typeof checkOperators !== 'boolean') {
       return res.status(400).json({ error: 'checkOperators must be true or false.' });
     }
+    const mode = req.body?.mode;
+    if (mode !== undefined && mode !== 'typed-preview' && mode !== 'typed-inspect') {
+      return res.status(400).json({ error: 'Unknown Wyrdrune preview mode.' });
+    }
     try {
-      const preview = await previewWyrdruneRitual(source, { maxOperations: 2000, checkOperators });
+      if (mode === 'typed-inspect') return res.json(compileTyped(source));
+      const preview = await previewWyrdruneRitual(source, {
+        maxOperations: 2000, checkOperators, typed: mode === 'typed-preview',
+      });
       return res.json({ ...preview, dispatch: 'none', model_turn: false, canon_commit: false });
     } catch (error) {
       const invalid = error instanceof SyntaxError || error instanceof TypeError || error instanceof RangeError ||
@@ -1092,6 +1099,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       return res.status(invalid ? 400 : 422).json({
         error: 'Wyrdrune preview rejected: ' + cleanText(error.message, 250),
         ...(Array.isArray(error.diagnostics) ? { diagnostics: error.diagnostics } : {}),
+        ...(error.effects ? { effects: error.effects } : {}),
       });
     }
   });

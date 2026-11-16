@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { applyWayglassSpelling,createWayglassSpellingController } from '../src/spelling-assistance.js';
-import { previewWyrdrune,draftWyrdruneDiscussion } from '../src/wyrdrune-client.js';
+import { inspectTypedWyrdrune,previewWyrdrune,draftWyrdruneDiscussion } from '../src/wyrdrune-client.js';
 import { webcrypto } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { encodeWce1,digestWce1,verifyWyrdrunePreview } from '../src/wyrdrune-proof.js';
@@ -121,4 +121,24 @@ test('browser preview forwards the requested operator check and preserves diagno
     assert.deepEqual(error.diagnostics, diagnostics);
     return true;
   });
+});
+
+test('browser checks typed manifest content and source binding', async () => {
+  const { compileTyped } = require('../../../lib/wyrdrune/typed-ir.cjs');
+  const source = 'effect "host" "read";\n' +
+    SOURCE.replace('perceive {', 'perceive { emit bridge("host","read");');
+  const artifact = compileTyped(source);
+  const options = data => ({
+    cryptoImpl: webcrypto,
+    fetchImpl: async (_url, init) => {
+      assert.deepEqual(JSON.parse(init.body), { source, mode: 'typed-inspect' });
+      return { ok: true, json: async () => data };
+    },
+  });
+  assert.equal((await inspectTypedWyrdrune(source, options(artifact))).effects.required[0].operation, 'read');
+  await assert.rejects(inspectTypedWyrdrune(source, options({
+    ...artifact, effects: { ...artifact.effects, required: [] },
+  })), /integrity verification failed/);
+  await assert.rejects(inspectTypedWyrdrune(source, options(compileTyped(source + ' '))),
+    /integrity verification failed/);
 });

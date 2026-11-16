@@ -69,3 +69,39 @@ The Wayglass kernel accepts `checkOperators: true` in ritual preview options.
 The owner-authenticated preview request accepts the same field in its JSON
 body and returns diagnostics with HTTP 400 when that check fails. An accepted
 check leaves execution receipts identical to an ordinary preview.
+
+## Typed IR and declared host effects
+
+`compileTyped(source)` lowers typed Wyrdrune to a `wyrdrune.typed-ir/v0.1`
+artifact. It contains the source hash, operator signatures, inferred expression
+types keyed by executable IR path, a declared and required effect manifest, and
+a WCE-1 digest. The immutable `executable` field is the existing v0.1 runtime
+IR, which keeps phase and Return receipts interoperable for supported features.
+
+```text
+effect "research" "read";
+operator double(n: number): number = n * 2;
+mobius {
+  perceive { let sample = double(4); }
+  compress {} release {} verify {} integrate {} choose {}
+  return { emit if sample > 0 then sample else bridge("research", "read"); }
+  transcend {}
+}
+```
+
+Effect declarations precede operators and identify exact bridge pairs. The
+checker scans both arms of each conditional, reports undeclared and dynamic
+targets, and rejects host calls from named operators. A declaration documents
+what the source may request. Runtime authority remains with the host.
+Signatures use `number`, `text`, `truth`, `unknown`, `list`, `record`,
+`null` or `data`. Bindings are inferred in phase order, with distinct shared
+and carried environments. Bridge results and collection lookups have the
+conservative `data` type. Initial external seeds, structural collection types,
+and bridge result contracts are outside this revision. Runtime checks still
+handle value constraints, operation limits, termination and execution faults.
+
+The owner-authenticated preview endpoint accepts `mode: "typed-inspect"` to
+return the artifact without executing source. `mode: "typed-preview"` checks
+the source and executes only when the required host-effect manifest is empty.
+It returns the usual independently verified preview receipt. The mode is
+explicit so existing v0.1 programs and callers can still use ordinary preview.
