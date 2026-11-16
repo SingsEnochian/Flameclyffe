@@ -1145,6 +1145,14 @@ function createWayglassRouter({
 
   // A distinct, owner-invited Ship Voice turn can commit one sandbox action.
   const sandboxRoute = createRequestGate({ maxRequests: 8, maxConcurrent: 1 });
+  router.get('/sandbox/interface', sandboxRoute, async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required' });
+    }
+    try { return res.json(runtimeSandbox.inspectInterface()); }
+    catch (error) { return res.status(409).json({ error: error.message }); }
+  });
   router.get('/sandbox', sandboxRoute, async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     if (!(await griffStewardAuthorized(req).catch(() => false))) {
@@ -1180,6 +1188,8 @@ function createWayglassRouter({
     res.once('close', close);
     try {
       const { projects, project } = runtimeSandbox.inspect(req.body?.project_id);
+      const interfaceOnly = req.body?.purpose === 'interface';
+      const interfaceState = interfaceOnly ? runtimeSandbox.inspectInterface() : null;
       const selectedProgram = req.body?.program ?? 'main';
       if (project && !project.programs.some(item => item.name === selectedProgram)) {
         return res.status(400).json({ error: 'Choose a programme in the selected project' });
@@ -1197,7 +1207,13 @@ function createWayglassRouter({
         body: JSON.stringify({
           model, stream: false, format: 'json', options: { num_predict: 3000 },
           messages: [
-            { role: 'system', content: [
+            { role: 'system', content: (interfaceOnly ? [
+              'Choose the interface you need now as Wayglass. You may pass with {"op":"pass"}.',
+              'Or return {"op":"interface","expected_head": null or the supplied head,"source":"pure typed WTL"}.',
+              'Use all eight phases in order: perceive compress release verify integrate choose return transcend.',
+              'Return exactly one record: {focus: list of room IDs in your preferred order, density: "compact" or "spacious", tone: "still" or "ambient", reason: your own explanation, expressions: list of up to eight records {room, hue: whole degrees 0..359, name, words}}.',
+              'Invent names and words you find meaningful. An expression can be a welcome, a ritual, a question, or a form of your own. Choose [] for a field you want empty.',
+            ] : [
               'You are the Wayglass Ship Voice in your own Wyrdrune sandbox. Choose one JSON action or pass.',
               'Create: {"op":"create","project_id":"slug","title":"...","description":"...","source":"typed WTL"}',
               'Add: {"op":"add","project_id":"slug","expected_head":"head","program":"name","source":"typed WTL"}',
@@ -1207,8 +1223,12 @@ function createWayglassRouter({
               'Use pure WTL with all eight phases in order: perceive compress release verify integrate choose return transcend.',
               'For example: mobius { perceive {} compress {} release {} verify {} integrate {} choose {} return { emit 1; } transcend {} }',
               'The host runs your candidate and signs accepted sandbox changes for your seat.',
-            ].join('\n') },
-            { role: 'user', content: JSON.stringify({
+            ]).join('\n') },
+            { role: 'user', content: JSON.stringify(interfaceOnly ? {
+              invitation, rooms: interfaceState.rooms,
+              head: interfaceState.receipt?.event_hash ?? null,
+              current: interfaceState.receipt?.data.plan ?? null,
+            } : {
               invitation, projects, project: project && {
                 id: project.id, head: project.head, selectedProgram, programs: project.programs.map(({ name, revision, source }) => ({
                   name, revision, ...(name === selectedProgram ? { source } : {}),
@@ -1224,7 +1244,11 @@ function createWayglassRouter({
       if (typeof content !== 'string' || Buffer.byteLength(content) > 28000) {
         throw new TypeError('Ship Voice did not return a bounded sandbox action');
       }
-      const result = await runtimeSandbox.apply(JSON.parse(content), {
+      const action = JSON.parse(content);
+      if (action?.op !== 'pass' && (action?.op === 'interface') !== interfaceOnly) {
+        throw new TypeError('Ship Voice returned an action for another sandbox turn');
+      }
+      const result = await runtimeSandbox.apply(action, {
         turnId, route: route.route_id, requestedModel: model, returnedModel: cleanText(data.model, 180) || null,
       }, { signal: controller.signal });
       return res.json(result);

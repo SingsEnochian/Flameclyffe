@@ -97,3 +97,33 @@ test('named programmes maintain separate signed revision chains across a project
   assert.deepEqual((await open().run('lantern')).preview.values, [2]);
   assert.deepEqual((await open().run('lantern', { program: 'second' })).preview.values, [13]);
 });
+
+test('Wayglass signs and restores a Wyrdrune-authored interface expression', async t => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'wayglass-interface-'));
+  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
+  const open = () => createRuntimeSandbox({ directory });
+  const action = {
+    op: 'interface', expected_head: null,
+    source: source('{focus:["wayglass:living-observer"],density:"spacious",tone:"ambient",' +
+      'reason:"I need a quieter threshold.",expressions:[{room:"wayglass:living-observer",hue:211,' +
+      'name:"The Listening Glass",words:"Come by the window."}]}'),
+  };
+  const provenance = { turnId: 'interface-turn', route: 'wayglass:ship' };
+  const result = await open().apply(action, provenance);
+  assert.equal(result.receipt.participant_id, 'wayglass');
+  assert.equal(result.receipt.data.plan.expressions[0].name, 'The Listening Glass');
+  assert.deepEqual(open().inspectInterface().receipt, result.receipt);
+  assert.deepEqual(open().inspect().projects, []);
+  assert.equal((await open().apply(action, provenance)).status, 'already-applied');
+  await assert.rejects(open().apply(action, { ...provenance, turnId: 'stale' }), /head changed/);
+  const next = { ...action, expected_head: result.receipt.event_hash,
+    source: action.source.replace('wayglass:living-observer', 'external:invalid') };
+  await assert.rejects(open().apply(next, { ...provenance, turnId: 'bad-layout' }), /Invalid interface/);
+  assert.equal(open().inspectInterface().receipt.event_hash, result.receipt.event_hash);
+  const revision = await open().apply({
+    ...action, expected_head: result.receipt.event_hash,
+    source: action.source.replace('Come by the window.', 'Stay as long as you need.'),
+  }, { ...provenance, turnId: 'revised' });
+  assert.equal(revision.receipt.previous_hash, result.receipt.event_hash);
+  assert.equal(open().inspectInterface().receipt.data.plan.expressions[0].words, 'Stay as long as you need.');
+});

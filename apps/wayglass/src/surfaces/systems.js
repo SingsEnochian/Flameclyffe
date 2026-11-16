@@ -1,3 +1,4 @@
+import { applyShipInterface } from './ship-interface.js';
 import { listWayglassOrgans } from '../organ-registry.js';
 import { inspectWayglassDoubleMobius } from '../route-client.js';
 
@@ -36,6 +37,7 @@ export async function mountWayglassSystemsSurface(root) {
         '<button type="button" class="glass-chip" data-wayglass-room="wayglass:native-voice">Wyrdrune Voice</button><button type="button" class="glass-chip active" aria-current="page">Organs</button><button type="button" class="glass-chip" data-wayglass-room="wayglass:spectral-field">Full Spectrum</button>',
         '<button type="button" class="glass-chip" data-wayglass-room="wayglass:runtime-sandbox">Runtime Sandbox</button><button type="button" class="glass-chip" data-wayglass-room="wayglass:video-atelier">Video Atelier</button><button type="button" class="glass-chip" data-wayglass-room="wayglass:living-observer">Living Observer</button><button type="button" class="glass-chip" data-wayglass-room="wayglass:toybox">Toybox</button>',
       '</nav>',
+      '<section class="glass-panel" data-ship-interface hidden></section>',
       '<section class="glass-panel" data-double-mobius-panel aria-label="Gateway double Möbius engine" style="border-radius:1.5rem;padding:1.25rem;margin-block:1rem;">',
         '<p class="eyebrow">Gateway × Wayglass · coupled engine</p>',
         '<h2>Double Möbius</h2>',
@@ -67,6 +69,18 @@ export async function mountWayglassSystemsSurface(root) {
       '<footer class="wg-receipt tiny">Wayglass is the ship. These are mounted organs, not identities, worlds, or canon authorities.</footer>',
     '</section>'
   ].join('');
+
+  const mounted = root.querySelector('[data-surface="wayglass-systems"]');
+  void (async () => {
+    try {
+      const response = await fetch('/api/v1/wayglass/sandbox/interface', {
+        credentials: 'same-origin', cache: 'no-store',
+      });
+      if (!response.ok) return;
+      const result = await response.json();
+      if (root.contains(mounted)) applyShipInterface(mounted, result.receipt);
+    } catch { /* The built-in deck navigation remains usable. */ }
+  })();
 
   const inspectButton = root.querySelector('[data-double-mobius-inspect]');
   const engineStatus = root.querySelector('[data-double-mobius-status]');

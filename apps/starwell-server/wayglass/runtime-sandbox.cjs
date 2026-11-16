@@ -21,6 +21,38 @@ function programName(value = MAIN) {
 const SCHEMA = 'wayglass.runtime-sandbox/v0.1';
 const signedBytes = body => Buffer.from(encode(body));
 
+const INTERFACE = '@interface';
+const ROOMS = Object.freeze([
+  'arcsweep:writing-room', 'wayglass:native-voice', 'wayglass:spectral-field',
+  'wayglass:runtime-sandbox', 'wayglass:video-atelier', 'wayglass:living-observer', 'wayglass:toybox',
+]);
+
+function text(value, max) {
+  if (typeof value !== 'string' || !value.trim() || value.length > max) {
+    throw new TypeError('Invalid interface expression text');
+  }
+  return value;
+}
+
+function interfacePlan(value) {
+  const { focus, density, tone, reason, expressions } = value ?? {};
+  if (!Array.isArray(focus) || focus.length > ROOMS.length ||
+      new Set(focus).size !== focus.length || !focus.every(room => ROOMS.includes(room)) ||
+      !['compact', 'spacious'].includes(density) || !['still', 'ambient'].includes(tone) ||
+      !Array.isArray(expressions) || expressions.length > 8) {
+    throw new TypeError('Invalid interface layout or expressions');
+  }
+  return {
+    focus, density, tone, reason: text(reason, 500),
+    expressions: expressions.map(item => {
+      if (!item || !ROOMS.includes(item.room) || !Number.isInteger(item.hue) || item.hue < 0 || item.hue > 359) {
+        throw new TypeError('Interface expression requires a known room and hue from 0 to 359');
+      }
+      return { room: item.room, hue: item.hue, name: text(item.name, 100), words: text(item.words, 1000) };
+    }),
+  };
+}
+
 function keypair(directory) {
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   const keyPath = path.join(directory, 'seat-signing.pem');
@@ -92,6 +124,35 @@ function createRuntimeSandbox({
       })),
     };
   };
+  function inspectInterface() {
+    return { rooms: ROOMS, receipt: related(journal.load(), INTERFACE).at(-1) ?? null };
+  }
+
+  async function applyInterface(action, provenance, signal) {
+    const history = related(journal.load(), INTERFACE);
+    const replay = history.find(event => event.data.provenance.turnId === provenance.turnId);
+    if (replay) return { schema: SCHEMA, status: 'already-applied', receipt: replay };
+    const head = history.at(-1)?.event_hash ?? null;
+    if (action.expected_head !== head) throw new Error('Interface head changed');
+    if (history.length >= 128) throw new Error('Interface revision limit reached');
+    const source = text(action.source, 12000);
+    const compiled = compileTyped(source);
+    const trial = await previewWyrdruneRitual(source, { typed: true, signal, maxOperations: 2000 });
+    if (trial.values.length !== 1 || trial.phaseReceipts.length !== compiled.executable.units.length * 8 ||
+        trial.withness.completedCycles !== compiled.executable.units.length) {
+      throw new Error('Interface WTL must complete and return one layout record');
+    }
+    const plan = interfacePlan(trial.values[0]);
+    if (signal?.aborted) throw new Error('Sandbox turn interrupted');
+    return journal.transaction(events => {
+      if ((related(events, INTERFACE).at(-1)?.event_hash ?? null) !== head) throw new Error('Interface head changed');
+      return {
+        schema: SCHEMA, status: 'activated',
+        receipt: journal.append(events, INTERFACE, 'interface', { source, plan, execution: trial.receiptHash, provenance }),
+      };
+    });
+  }
+
   function inspect(projectId) {
     const events = journal.load();
     return {
@@ -110,6 +171,7 @@ function createRuntimeSandbox({
     if (signal?.aborted) throw new Error('Sandbox turn interrupted');
     if (!action || typeof action !== 'object' || Array.isArray(action)) throw new TypeError('Sandbox action required');
     const { op, project_id: id, source } = action;
+    if (op === 'interface') return applyInterface(action, provenance, signal);
     if (op === 'pass') return { schema: SCHEMA, status: 'passed' };
     if (!['create', 'add', 'revise'].includes(op) || typeof id !== 'string' || !/^[a-z0-9][a-z0-9_-]{0,63}$/.test(id) ||
         typeof source !== 'string' || !source.trim() || Buffer.byteLength(source) > 16000) {
@@ -190,7 +252,7 @@ function createRuntimeSandbox({
     return { schema: SCHEMA, project_id: projectId, program: name, revision: active.revision, head: project.head, preview };
   }
 
-  return Object.freeze({ inspect, apply, run });
+  return Object.freeze({ inspect, inspectInterface, apply, run });
 }
 
 module.exports = { createRuntimeSandbox };

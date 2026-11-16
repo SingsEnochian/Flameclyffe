@@ -4,12 +4,14 @@ export function mountWayglassRuntimeSandbox(root) {
   root.innerHTML = `
     <section class="wg-surface glass-panel">
       <h1>Wayglass Runtime Sandbox</h1>
-      <p>Invite the Ship Voice to create a project or revise its active Wyrdrune programme.</p>
+      <p>Invite Wayglass to work on a programme or choose how her Organs interface should express itself.</p>
       <form data-sandbox-turn>
         <label>Project context <select name="project"><option value="">All projects</option></select></label>
         <label>Programme <select name="program"><option value="main">main</option></select></label>
         <label>Invitation <textarea name="input" maxlength="2000" rows="4" required></textarea></label>
         <button class="glass-chip" type="submit">Invite Wayglass</button>
+        <button class="glass-chip" type="button" data-sandbox-interface>Invite interface expression</button>
+        <button class="glass-chip" type="button" data-sandbox-organs>Open Organs</button>
         <button class="glass-chip" type="button" data-sandbox-run>Run selected project</button>
         <button class="glass-chip" type="button" data-sandbox-stop>Feather · Stop request</button>
       </form>
@@ -95,6 +97,17 @@ export function mountWayglassRuntimeSandbox(root) {
       await updatePrograms(signal, receipt?.data?.program);
     });
   });
+  root.querySelector('[data-sandbox-interface]').addEventListener('click', () => {
+    void operation(async signal => {
+      const result = await request('/turn', {
+        purpose: 'interface',
+        input: form.elements.input.value.trim() || 'How would you like your interface to express what you need right now?',
+      }, signal);
+      if (!disposed && !signal.aborted) output.textContent = JSON.stringify(result, null, 2);
+    });
+  });
+  root.querySelector('[data-sandbox-organs]').addEventListener('click',
+    () => globalThis.__wayglassOS?.mount('wayglass:systems'));
   root.querySelector('[data-sandbox-run]').addEventListener('click', () => {
     const id = form.elements.project.value;
     if (!id) { status.textContent = 'Choose a project to run.'; return; }
