@@ -1,0 +1,14 @@
+// A host must furnish affirmative evidence before Return.
+mobius scoped {
+  perceive {}
+  compress {}
+  release {}
+  verify {
+    require evidenceCount > 0 else "Engine supplied no verification evidence";
+    require refusalCount == 0 else "Engine evidence was refused or unknown";
+  }
+  integrate {}
+  choose {}
+  return { emit evidenceDigest; }
+  transcend {}
+}

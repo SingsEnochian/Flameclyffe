@@ -39,6 +39,19 @@ export async function digestWce1(value,cryptoImpl=globalThis.crypto) {
 
 function reject() {throw new Error('Wyrdrune receipt integrity verification failed');}
 
+/** Bind the returned manifest to the requested source and check its content digest. */
+export async function verifyTypedWyrdrune(source, data, cryptoImpl=globalThis.crypto) {
+  if (typeof source !== 'string' || !source.trim() || source.length > 16000 ||
+      data?.schema !== 'wyrdrune.typed-ir/v0.1' ||
+      data.executable?.schema !== 'wyrdrune.ir/v0.1' ||
+      !Array.isArray(data.effects?.declared) || !Array.isArray(data.effects?.required)) reject();
+  const sourceHash = await sha256(new TextEncoder().encode(source), cryptoImpl);
+  const { digest, ...artifact } = data;
+  if (data.sourceHash !== sourceHash || data.executable.sourceHash !== sourceHash ||
+      digest !== await digestWce1(artifact, cryptoImpl)) reject();
+  return data;
+}
+
 /** Called before the editor accepts a host preview or offers a discussion draft. */
 export async function verifyWyrdrunePreview(source, data, cryptoImpl=globalThis.crypto) {
   if(typeof source!=='string'||!source.trim()||source.length>16000)reject();

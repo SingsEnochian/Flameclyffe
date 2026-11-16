@@ -1,7 +1,7 @@
 // Native Wyrdrune -> intermediate runes -> deterministic en-GB gloss.
 // The compiled source is never executed or replaced. This is a visual projection;
 // the text is not a generated paraphrase, model reply or materialised world crossing.
-import { morphFrame } from './wyrdrune-morph.js';
+import { animateWyrdruneTranslation, morphFrame } from './wyrdrune-morph.js';
 import { glossProgram } from '../../../lib/wyrdrune/gloss.mjs';
 import { createWyrdruneRuntime } from '../../../lib/wyrdrune/runtime.mjs';
 import { WAYGLASS_FEATHER_EVENT } from './somatic-sound.js';
@@ -19,7 +19,7 @@ export function readWyrdrune(source){
  * - No source execution, model request or automatic sound.
  */
 export function animateWyrdruneCypher(container,{
-  source,reducedMotion=false,scope=globalThis,doc=globalThis.document,
+  source,direction="english",reducedMotion=false,scope=globalThis,doc=globalThis.document,
   frameMs=95,steps=34,overlap=.78,staggerCapMs=9600,onPhase=()=>{},onComplete=()=>{},
 }={}){
   if(!container||!doc)throw new TypeError('A display and document are required.');
@@ -30,6 +30,30 @@ export function animateWyrdruneCypher(container,{
     if(text!=null)node.textContent=text;
     return node;
   };
+  if(direction==='wyrdrune'){
+    const row=el('pre','wg-cypher-line');
+    if(row.style)row.style.whiteSpace='pre-wrap';
+    container.replaceChildren();
+    container.append(row);
+    container.setAttribute('aria-live','off');
+    container.setAttribute('aria-busy','true');
+    container.setAttribute('data-cypher-state','reading');
+    let resolve;
+    const done=new Promise(settle=>{resolve=settle;});
+    const run=animateWyrdruneTranslation(row,{
+      source:String(source),translation:gloss.text,direction,reducedMotion,scope,frameMs,steps,lingerMs:100,
+      onComplete:finish,
+    });
+    function finish(){
+      container.setAttribute('aria-busy','false');
+      container.setAttribute('data-cypher-state','wyrdrune');
+      resolve(gloss);
+      onComplete(gloss);
+    }
+    const stop=()=>run.reveal();
+    return {gloss,stop,done};
+  }
+  if(direction!=='english')throw new TypeError('Unknown cypher direction.');
   const lines=[];
   container.replaceChildren();
   container.setAttribute('aria-live','off');

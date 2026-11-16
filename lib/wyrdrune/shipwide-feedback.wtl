@@ -1,0 +1,34 @@
+// A receipted Observer reading becomes four independent, bounded proposals.
+mobius scoped {
+  perceive {
+    let hasEvidence = observed > 0;
+    let hasTransitions = changed > 0;
+  }
+  compress {
+    let coverage = observed / channels;
+    let motion = changed / channels;
+  }
+  release {
+    let audio = {rootHz:176 + 44 * coverage, counterpartHz:220 + 44 * motion,
+      foregroundGain:0.012 + 0.018 * coverage, atmosphereGain:0.004 + 0.008 * motion};
+    let video = if hasTransitions then "Make each transition visible in a continuous shot, with a slow reveal at the threshold."
+      else "Hold a continuous composition and let light and depth reveal the existing scene.";
+    let engineering = if missing > 0 then "recover-source-evidence" else
+      if hasTransitions then "recheck-transition-baseline" else "review-stable-baseline";
+    let agents = if hasEvidence then "compare-observation-and-uncertainty" else "investigate-evidence-gaps";
+  }
+  verify {
+    require channels == 6 and observed >= 0 and missing >= 0 and missing <= channels - observed
+      and changed >= 0 and changed <= channels else "Shipwide feedback lost Observer bounds";
+  }
+  integrate {
+    let provenance = {checkpoint:checkpoint, feedback:feedback};
+  }
+  choose {
+    let agentAction = if hasTransitions and hasEvidence then "explain-transitions-with-evidence" else agents;
+  }
+  return {
+    emit {provenance:provenance, audio:audio, video:video, engineering:engineering, agents:agentAction};
+  }
+  transcend {}
+}

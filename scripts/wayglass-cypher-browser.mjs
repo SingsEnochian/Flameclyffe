@@ -99,11 +99,11 @@ async function checkWatercolourChat(page,profile){
  await openWatercolourChat(page);
  assert.ok((await pigmentPixel(page))[0]>originalPixel[0]+40,'Settled Ship Voice pigment survives reload');
  assert.equal(await display.getAttribute('data-cypher-state'),'english');
- await turn.getByRole('button',{name:'Replay Wyrdrune'}).click();
+ await turn.getByRole('button',{name:/^(Replay Wyrdrune|Return to Wyrdrune)$/}).click();
  assert.equal(await display.getAttribute('data-cypher-state'),'reading');
  await page.emulateMedia({reducedMotion:'reduce'});
  await page.waitForFunction(()=>document.querySelector('.wc-dialogue-response .wg-cypher-veil')?.dataset.cypherState==='english');
- await turn.getByRole('button',{name:'Replay Wyrdrune'}).click();
+ await turn.getByRole('button',{name:/^(Replay Wyrdrune|Return to Wyrdrune)$/}).click();
  assert.equal(await display.getAttribute('data-cypher-state'),'english');
  await page.emulateMedia({reducedMotion:'no-preference'});
  const instruments=page.locator('#wc-instruments-toggle');
@@ -259,7 +259,7 @@ try{
     const request=route.request().postDataJSON();
     assert.equal(request.surface_id,'wayglass:living-watercolor');
     assert.equal(request.route_id,'wayglass:ship');
-    assert.match(request.input,/fenced wyrdrune block/);
+    assert.equal(request.input,'Greet the eighth station.','Owner prompt must remain unmodified; WTL is supplied in the attributed model response, not fabricated in the request');
     const interrupted=request.input.includes('Continue the interrupted Dream.');
     const output=interrupted?'```wtl\n'+interruptedDream:chatReply;
     await route.fulfill({json:{schema:'wayglass.route-turn/v0.1',route_id:'wayglass:ship',

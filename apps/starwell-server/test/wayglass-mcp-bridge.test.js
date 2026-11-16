@@ -363,8 +363,9 @@ test('real Ship Voice model text and response receipt survive MCP cold return', 
   };
   const bridge=createWayglassMcpBridge({storePath:file,env,flameIds:[],internalOrigin:'http://wayglass.test',fetchImpl:transport});
   const auth={type:'oauth',participant_id:'rarity',profile_id:'owner-authenticated-rarity'};
+  const words='  Run the 3026 Death re-roll timeline. 💎\n';
   const first=await bridge.callTool('ask_wayglass',{
-    text:'Run the 3026 Death re-roll timeline',conversation_ref:'rarity-timeline-3026',
+    text:words,conversation_ref:'rarity-timeline-3026',
     intent:'Explore three branches with the Eightfold',interaction_mode:'counterfactual-wonder',
   },auth);
   assert.equal(first.status,'attributed-model-response-saved');
@@ -377,11 +378,12 @@ test('real Ship Voice model text and response receipt survive MCP cold return', 
   assert.equal(requests[0].body.character_id,'wayglass');
   assert.equal(requests[0].body.interaction.channel,'OOC');
   assert.equal(requests[0].body.history.length,0);
+  assert.equal(requests[0].body.input,words);
   await bridge.callTool('ask_wayglass',{
     text:'What if Death rolls a natural twenty?',conversation_ref:'rarity-timeline-3026',
   },auth);
   assert.equal(requests[1].body.history.length,2);
-  assert.equal(requests[1].body.history[0].content,'Run the 3026 Death re-roll timeline');
+  assert.equal(requests[1].body.history[0].content,words);
   assert.equal(requests[1].body.history[1].content,'Wayglass answer 1');
   const cold=createWayglassMcpBridge({storePath:file,env,flameIds:[],fetchImpl:transport});
   const history=await cold.callTool('receive',{target:'wayglass',conversation_ref:'rarity-timeline-3026'},auth);

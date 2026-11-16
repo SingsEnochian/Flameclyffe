@@ -1,5 +1,6 @@
 import './acoustic-room.css';
 import {transition,bearing} from '../acoustic-marker-model.js';
+import { shipwideFeedback } from '../shipwide-feedback.js';
 import {shipSoundscape} from '../ship-soundscape.js';
 import {createAcousticComposition,ACOUSTIC_COMPOSITION_STORAGE_KEY} from '../acoustic-composition.js';
 import {WAYGLASS_FEATHER_EVENT,wayglassSomaticSound} from '../somatic-sound.js';
@@ -55,6 +56,8 @@ export function mountWayglassAcousticRoom(root,{loadCompositionControls=()=>impo
  <button type="button" class="glass-chip" data-intent="decline">Decline crossing</button></div>
  <div class="acoustic-options">
  <label><input type="checkbox" data-audio> Enable sound</label>
+ <button type="button" class="glass-chip" data-observer-score>Apply Observer score</button>
+ <p role="status" data-observer-score-status></p>
  <label><input type="checkbox" data-mono> Mono-safe</label>
  <label><input type="checkbox" data-ambience> Room ambience</label>
  <label><input type="checkbox" data-motion> Reduce motion</label>
@@ -193,7 +196,7 @@ export function mountWayglassAcousticRoom(root,{loadCompositionControls=()=>impo
   if(intent.type==='reset'){mirror=null;world=createWorld({markerState});render();}else advance(markerState);
   if(['select','orient','request-traverse','decline'].includes(intent.type))audio.signal({eventId:world.snapshot_id+':'+intent.type+':'+(++eventSequence),kind:'status'});
  }
- function onClick(e){
+ async function onClick(e){
   interactions++;
   const roomButton=e.target.closest('[data-wayglass-room]');
   if(roomButton&&root.contains(roomButton)){globalThis.__wayglassOS?.mount(roomButton.dataset.wayglassRoom);return;}
@@ -202,6 +205,19 @@ export function mountWayglassAcousticRoom(root,{loadCompositionControls=()=>impo
   if(e.target.closest('[data-fork]')){mirror=forkWorld(world,{branchId:'mirror-'+(++eventSequence),fieldMass:Number($('[data-mirror-mass]').value)});render();return;}
   if(e.target.closest('[data-clear-mirror]')){mirror=null;render();return;}
   if(e.target.closest('[data-signal]')){audio.signal({eventId:world.snapshot_id+':bell:'+ (++eventSequence),kind:'status'});return;}
+  if(e.target.closest('[data-observer-score]')){
+    const status=$('[data-observer-score-status]');
+    const frame=await shipwideFeedback.restore();
+    if(disposed)return;
+    if(featherStopped||!frame){
+      status.textContent=featherStopped?'Feather is holding sound.':'Run Quad Observer or First Voyage to receive a score.';
+      return;
+    }
+    soundscape.selectOwner();
+    audio.update({score:frame.audio});
+    status.textContent='Observer score applied · '+frame.provenance.checkpoint.slice(0,18);
+    return;
+  }
   if(e.target.closest('[data-acoustic-score-extended]')){
     const button=$('[data-acoustic-score-extended]');button.disabled=true;
     $('[data-acoustic-extended-status]').textContent='Executing extended Wyrdrune score…';
