@@ -31,3 +31,32 @@ test('Wayglass WebAudio schedules Amber silent beat without autoplay and Feather
  await assert.rejects(player.play({...delayed,autoplay:true}),/user-invoked/);
  player.dispose();
 });
+
+test('Orion performance uses the audio clock for cues and schedules no oscillator during silence', async () => {
+  const { createWayglassSoundPlayer } = await import('../../apps/wayglass/src/wyrdrune-response-media.js');
+  const starts = [], stops = [], seen = [];
+  let context, next;
+  class AudioContext {
+    constructor() { context = this; this.currentTime = 10; this.destination = {}; }
+    async resume() {}
+    async close() {}
+    createGain() { return { gain: { setValueAtTime() {}, linearRampToValueAtTime() {} }, connect() {} }; }
+    createOscillator() { return { frequency: {}, connect() {}, start: t => starts.push(t), stop: t => stops.push(t), disconnect() {} }; }
+  }
+  const player = createWayglassSoundPlayer({ scope: {
+    AudioContext, requestAnimationFrame: cb => { next = cb; return 1; },
+    cancelAnimationFrame: () => { next = null; },
+  } });
+  const sound = { fundamental: 220, interval: 1.5, texture: 0.2 };
+  await player.perform([
+    { kind: 'invocation', startMs: 0, durationMs: 1000, sound },
+    { kind: 'silence', startMs: 1000, durationMs: 1200 },
+    { kind: 'response', startMs: 2200, durationMs: 1000, sound },
+  ], cue => seen.push(cue?.kind));
+  assert.deepEqual(starts.map(t => Math.round(t * 1000)), [10030, 10030, 12230, 12230]);
+  assert.deepEqual(stops.map(t => Math.round(t * 1000)), [11030, 11030, 13230, 13230]);
+  for (const t of [10.1, 11.1, 12.3]) { context.currentTime = t; next(); }
+  assert.deepEqual(seen, ['invocation', 'silence', 'response']);
+  player.stop();
+  assert.equal(next, null);
+});

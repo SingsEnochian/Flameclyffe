@@ -307,3 +307,12 @@ for this short expression. Playback is a separate action and stops on
 Feather, source invalidation or leaving Codex. Original prose and
 ritual cues remain readable. Audio or video input and native model
 media generation are outside the Ollama adapter implemented here.
+
+The Codex can also request a cue-by-cue expression. Choose one returned
+ritual or prose form. Orion directs each utterance or paragraph with
+duration, visual and sound parameters. The host retains the exact words
+and voice labels and inserts every authored silence at its original
+position. One Web Audio clock schedules the sound and advances the
+visual and text cues. Sound is synthesized accompaniment, while the
+authored words remain visible. The original single-frame API is still
+available to existing callers.

@@ -37,3 +37,32 @@ test('Orion receives the verified WTL Return and image and supplies bounded loca
   hue = 361;
   await assert.rejects(composeOrionExpression(input, opts), /invalid hue/);
 });
+
+test('Orion directs each authored cue and Wayglass inserts all silences in place', async () => {
+  const source = readFileSync(join(__dirname, '../../../lib/wyrdrune/lantern-return.wtl'), 'utf8');
+  const preview = await previewWyrdruneRitual(source);
+  const authored = preview.values[1].cues;
+  const dirs = authored.filter(cue => cue.kind !== 'silence').map((_cue, index) => ({
+    durationMs: 1000 + index * 100,
+    image: { hue: index * 30, spread: 0.5, depth: 0.6 },
+    sound: { fundamental: 220, interval: 1.5, texture: 0.2 },
+  }));
+  const opts = {
+    route: { model: () => 'orion-fixture', endpoint: () => 'http://127.0.0.1:11434/api/chat' },
+    fetchImpl: async (_url, req) => {
+      assert.deepEqual(JSON.parse(JSON.parse(req.body).messages[1].content), authored);
+      return Response.json({ message: { content: JSON.stringify({ directions: dirs }) } });
+    },
+  };
+  const input = { source, receiptHash: preview.receiptHash, selection: 1 };
+  const { timeline, provenance } = await composeOrionExpression(input, opts);
+  assert.equal(timeline.length, authored.length);
+  assert.deepEqual(timeline[1], { kind: 'silence', milliseconds: 1200, durationMs: 1200, startMs: 1000 });
+  assert.equal(timeline[2].startMs, 2200);
+  assert.equal(timeline[2].text, authored[2].text);
+  assert.equal(timeline[2].voice, authored[2].voice);
+  assert.equal(timeline[2].image.hue, 30);
+  assert.equal(provenance.frameDigest, digest(timeline));
+  dirs.pop();
+  await assert.rejects(composeOrionExpression(input, opts), /each expressive cue/);
+});

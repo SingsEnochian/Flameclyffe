@@ -170,7 +170,7 @@ export function mountUniversalCodex(root){
       const reading=q('[data-codex-reading]');
       disposeOrion?.();disposeOrion=null;
       renderWyrdruneReading(reading,result.values);
-      if(!reading.hidden)disposeOrion=attachOrionExpression(reading,{source,receiptHash:result.receiptHash,held});
+      if(!reading.hidden)disposeOrion=attachOrionExpression(reading,{source,receiptHash:result.receiptHash,held,values:result.values});
       receipts.textContent=JSON.stringify({
         source_hash:result.receiptHash,
         source_integrity:result.verification,

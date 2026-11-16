@@ -31,7 +31,8 @@ export function renderWyrdruneReading(root, values = []) {
   root.hidden = !root.childElementCount;
 }
 
-export function attachOrionExpression(root, { source, receiptHash, held }) {
+export function attachOrionExpression(root, { source, receiptHash, held, values }) {
+  const forms = values.filter(value => ['wyrdrune.prose/v0.1', 'wyrdrune.ritual-score/v0.1'].includes(value?.schema));
   const doc = root.ownerDocument;
   const media = doc.createElement('section');
   const reference = doc.createElement('input');
@@ -40,6 +41,16 @@ export function attachOrionExpression(root, { source, receiptHash, held }) {
   const label = doc.createElement('label');
   label.textContent = 'Optional Orion image reference (PNG or JPEG, up to 48 KB) ';
   label.append(reference);
+  const selection = doc.createElement('select');
+  forms.forEach((form, index) => {
+    const option = doc.createElement('option');
+    option.value = index;
+    option.textContent = (form.cues ? 'Ritual · ' : 'Prose · ') + form.title;
+    selection.append(option);
+  });
+  const selectLabel = doc.createElement('label');
+  selectLabel.textContent = 'Form to perform ';
+  selectLabel.append(selection);
   const controls = doc.createElement('div');
   function button(text) {
     const element = doc.createElement('button');
@@ -51,25 +62,37 @@ export function attachOrionExpression(root, { source, receiptHash, held }) {
   }
   const compose = button('Ask Orion to express this Return');
   const play = button('Play expression');
-  const stop = button('Stop sound');
+  const stop = button('Stop expression');
   play.disabled = stop.disabled = true;
   const status = doc.createElement('p');
   status.setAttribute('role', 'status');
   const visual = doc.createElement('div');
-  media.append(label, controls, status, visual);
+  const transcript = doc.createElement('p');
+  transcript.style.whiteSpace = 'pre-wrap';
+  media.append(selectLabel, label, controls, status, visual, transcript);
   root.append(media);
   const player = createWayglassSoundPlayer();
-  let pending = null, frame = null, disposed = false;
+  let pending = null, timeline = null, disposed = false;
   function hold() {
     pending?.abort();
     player.stop();
   }
+  selection.addEventListener('change', () => {
+    hold();
+    timeline = null;
+    play.disabled = stop.disabled = true;
+    visual.replaceChildren();
+    transcript.textContent = '';
+  });
   const onFeather = event => { if (event.detail?.stopped) hold(); };
   globalThis.addEventListener?.('wayglass:feather', onFeather);
   compose.addEventListener('click', async () => {
     if (pending || disposed || held()) return;
     player.stop();
-    frame = null;
+    timeline = null;
+    visual.replaceChildren();
+    transcript.textContent = '';
+    const chosen = Number(selection.value);
     play.disabled = stop.disabled = compose.disabled = true;
     const controller = new AbortController();
     pending = controller;
@@ -85,17 +108,19 @@ export function attachOrionExpression(root, { source, receiptHash, held }) {
       const response = await fetch('/api/v1/wayglass/wyrdrune/orion-expression', {
         method: 'POST', credentials: 'same-origin', cache: 'no-store',
         headers: { 'Content-Type': 'application/json' }, signal: controller.signal,
-        body: JSON.stringify({ source, receiptHash, image }),
+        body: JSON.stringify({ source, receiptHash, selection: chosen, image }),
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Orion expression unavailable');
-      if (result.schema !== 'wayglass.orion-expression/v0.1' || result.receiptHash !== receiptHash ||
-          result.provenance?.frameDigest !== await digestWce1(result.frames)) {
+      if (result.schema !== 'wayglass.orion-expression/v0.2' || result.receiptHash !== receiptHash ||
+          result.selection !== chosen || !Array.isArray(result.timeline) ||
+          result.provenance?.frameDigest !== await digestWce1(result.timeline)) {
         throw new Error('Orion expression does not match this Return');
       }
       if (disposed || held() || controller.signal.aborted) return;
-      frame = result.frames.sound;
-      visual.replaceChildren(createWayglassImage(result.frames.image, doc));
+      timeline = result.timeline;
+      const first = timeline.find(cue => cue.image);
+      if (first) visual.replaceChildren(createWayglassImage(first.image, doc));
       play.disabled = stop.disabled = false;
       status.textContent = 'Direction by ' + (result.provenance.returnedModel || result.provenance.model)
         + ' · visual and sound rendered locally by Wayglass.';
@@ -107,8 +132,19 @@ export function attachOrionExpression(root, { source, receiptHash, held }) {
     }
   });
   play.addEventListener('click', async () => {
-    if (!frame || disposed || held()) return;
-    try { await player.play(frame); }
+    if (!timeline || disposed || held()) return;
+    try {
+      await player.perform(timeline, cue => {
+        if (!cue) {
+          status.textContent = 'Expression complete.';
+          return;
+        }
+        if (cue.image) visual.replaceChildren(createWayglassImage(cue.image, doc));
+        else visual.replaceChildren();
+        transcript.textContent = cue.kind === 'silence' ? 'Silence · ' + cue.durationMs + ' ms'
+          : [cue.voice, cue.text].filter(Boolean).join('\n');
+      });
+    }
     catch (error) { if (!disposed) status.textContent = error.message; }
   });
   stop.addEventListener('click', () => player.stop());

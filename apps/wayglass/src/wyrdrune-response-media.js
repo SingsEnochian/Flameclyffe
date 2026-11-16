@@ -44,8 +44,9 @@ export function createWayglassImage(score,doc=document){
  return svg;
 }
 export function createWayglassSoundPlayer({scope=globalThis}={}){
- let ctx=null,oscillators=[];
+ let ctx=null,oscillators=[],animation=null;
  function stop(){
+  if(animation!==null){scope.cancelAnimationFrame?.(animation);animation=null;}
   for(const osc of oscillators){try{osc.stop()}catch{}try{osc.disconnect()}catch{}}
   oscillators=[];
   if(ctx){const closing=ctx;ctx=null;try{void closing.close()}catch{}}
@@ -84,5 +85,51 @@ export function createWayglassSoundPlayer({scope=globalThis}={}){
   return {started:true,duration_seconds:2.55+silenceMs/1000,
     silence_seconds:silenceMs/1000,mono:true,max_gain:.017};
  }
- return Object.freeze({play,stop,dispose:stop});
+ async function perform(timeline, onCue = () => {}){
+  stop();
+  const Ctx=scope.AudioContext||scope.webkitAudioContext;
+  if(!Ctx)throw new Error('The device has no supported audio synthesiser.');
+  const context=new Ctx();ctx=context;
+  await context.resume?.();
+  if(ctx!==context)return;
+  const origin=context.currentTime + 0.03;
+  let cursor=0;
+  try {
+   for (const cue of timeline) {
+    if (cue.kind === 'silence') continue;
+    const at = origin + cue.startMs / 1000;
+    const end = at + cue.durationMs / 1000;
+    const gain=context.createGain();
+    gain.gain.setValueAtTime(0,at);
+    gain.gain.linearRampToValueAtTime(.013,at+.12);
+    gain.gain.setValueAtTime(.013,end-.12);
+    gain.gain.linearRampToValueAtTime(0,end);
+    gain.connect(context.destination);
+    for(const [ratio,kind,mix] of [[1,'sine',1],[cue.sound.interval,'triangle',.1+cue.sound.texture*.35]]){
+     const oscillator=context.createOscillator();
+     const layer=context.createGain();
+     layer.gain.value=mix;
+     oscillator.type=kind;
+     oscillator.frequency.value=cue.sound.fundamental*ratio;
+     oscillator.connect(layer);layer.connect(gain);
+     oscillator.start(at);oscillator.stop(end);
+     oscillators.push(oscillator);
+    }
+   }
+   const last=timeline.at(-1);
+   function tick(){
+    animation=null;
+    if(ctx!==context)return;
+    const elapsed=(context.currentTime-origin)*1000;
+    if(elapsed>=last.startMs+last.durationMs){stop();onCue(null);return;}
+    const prior=cursor;
+    while(cursor+1<timeline.length && elapsed>=timeline[cursor+1].startMs)cursor++;
+    if(prior!==cursor || !shown){shown=true;onCue(timeline[cursor]);}
+    if(ctx===context)animation=scope.requestAnimationFrame(tick);
+   }
+   let shown=false;
+   animation=scope.requestAnimationFrame(tick);
+  } catch(error){stop();throw error;}
+ }
+ return Object.freeze({play,perform,stop,dispose:stop});
 }
