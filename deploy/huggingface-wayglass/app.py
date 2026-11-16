@@ -66,8 +66,10 @@ def call_kernel(message, history):
             role, content = turn.get("role"), turn.get("content")
             if role in ("user", "assistant") and isinstance(content, str) and len(content) <= 8000 and not any(0xD800 <= ord(ch) <= 0xDFFF for ch in content) and len(content.encode("utf-8")) <= 32000:
                 prior.append({"role": role, "content": content})
+    # Reserve the new turn before selecting history so the complete request stays bounded.
+    # This is a transport budget, not a limit on what the owner may write locally.
+    budget = max(0, 64_000 - len(message.encode("utf-8")) - 4_000)
     # Bound the aggregate context, not only each turn. Preserve newest turns first.
-    budget = 64_000
     selected = []
     for turn in reversed(prior):
         size = len(turn["content"].encode("utf-8"))
