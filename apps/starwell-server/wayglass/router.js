@@ -4,6 +4,7 @@ const { randomUUID } = require('node:crypto');
 const path = require('node:path');
 const { pathToFileURL } = require('node:url');
 const express = require('express');
+const { createRuntimeSandbox } = require('./runtime-sandbox.cjs');
 const { createRequestGate } = require('../security/wayglass-request-gate');
 const {createAlteredTimelineRouter}=require('./altered-timeline-router.cjs');
 const {
@@ -531,7 +532,10 @@ async function readQuadSourcesFromSupabase(fetchImpl=globalThis.fetch){
   return {schema:SOURCE_SCHEMA,observed_at,channels};
 }
 
-function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThis.fetch, departureStore = createDepartureStore() } = {}) {
+function createWayglassRouter({
+  inheritanceContext = null, fetchImpl = globalThis.fetch, departureStore = createDepartureStore(),
+  runtimeSandbox = createRuntimeSandbox(),
+} = {}) {
   const router = express.Router();
   // Same authenticated House gateway as Wayglass route custody. No separate user identity.
   router.use('/timeline/altered',createAlteredTimelineRouter({authorise:griffStewardAuthorized}));
@@ -1118,6 +1122,88 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       // Fail closed; never disclose route data if session verification fails.
       return res.status(503).json({ error: 'Wayglass Steward authorization is unavailable.' });
     }
+  });
+
+  // A distinct, owner-invited Ship Voice turn can commit one sandbox action.
+  const sandboxRoute = createRequestGate({ maxRequests: 8, maxConcurrent: 1 });
+  router.get('/sandbox', sandboxRoute, async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required' });
+    }
+    try { return res.json(runtimeSandbox.inspect(req.query.project_id)); }
+    catch (error) { return res.status(409).json({ error: error.message }); }
+  });
+  router.post('/sandbox/run', sandboxRoute, async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required' });
+    }
+    const controller = new AbortController();
+    const close = () => controller.abort();
+    res.once('close', close);
+    try { return res.json(await runtimeSandbox.run(req.body?.project_id, { signal: controller.signal })); }
+    catch (error) { if (!res.destroyed) return res.status(409).json({ error: error.message }); }
+    finally { res.off('close', close); }
+  });
+  router.post('/sandbox/turn', sandboxRoute, async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required' });
+    }
+    if (req.body?.feather === true) return res.status(409).json({ error: 'Feather Stop active' });
+    const invitation = cleanText(req.body?.input, 2000);
+    if (!invitation) return res.status(400).json({ error: 'Sandbox invitation required' });
+    const route = resolveWayglassRoute('wayglass:ship');
+    const turnId = randomUUID();
+    const controller = new AbortController();
+    const close = () => controller.abort();
+    res.once('close', close);
+    try {
+      const { projects, project } = runtimeSandbox.inspect(req.body?.project_id);
+      const model = route.model();
+      const endpoint = new URL(route.endpoint());
+      if (!['http:', 'https:'].includes(endpoint.protocol) ||
+          !['127.0.0.1', '[::1]', 'localhost'].includes(endpoint.hostname) ||
+          endpoint.username || endpoint.password) {
+        return res.status(503).json({ error: 'The runtime sandbox requires a loopback Ship Voice endpoint' });
+      }
+      const reply = await fetchImpl(endpoint.href, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, redirect: 'error',
+        signal: AbortSignal.any([controller.signal, AbortSignal.timeout(120000)]),
+        body: JSON.stringify({
+          model, stream: false, format: 'json', options: { num_predict: 3000 },
+          messages: [
+            { role: 'system', content: [
+              'You are the Wayglass Ship Voice in your own Wyrdrune sandbox. Choose one JSON action or pass.',
+              'Create: {"op":"create","project_id":"slug","title":"...","description":"...","source":"typed WTL"}',
+              'Revise: {"op":"revise","project_id":"slug","expected_head":"head","source":"typed WTL","expected_output":[...]}',
+              'Pass: {"op":"pass"}. A revision can omit expected_output to preserve the active output.',
+              'Use pure WTL with all eight phases in order: perceive compress release verify integrate choose return transcend.',
+              'For example: mobius { perceive {} compress {} release {} verify {} integrate {} choose {} return { emit 1; } transcend {} }',
+              'The host runs your candidate and signs accepted sandbox changes for your seat.',
+            ].join('\n') },
+            { role: 'user', content: JSON.stringify({
+              invitation, projects, project: project && {
+                id: project.id, source: project.source, head: project.head,
+              },
+            }) },
+          ],
+        }),
+      });
+      if (!reply.ok) return res.status(502).json({ error: 'Ship Voice sandbox turn unavailable' });
+      const data = await reply.json();
+      const content = data?.message?.content;
+      if (typeof content !== 'string' || Buffer.byteLength(content) > 28000) {
+        throw new TypeError('Ship Voice did not return a bounded sandbox action');
+      }
+      const result = await runtimeSandbox.apply(JSON.parse(content), {
+        turnId, route: route.route_id, requestedModel: model, returnedModel: cleanText(data.model, 180) || null,
+      }, { signal: controller.signal });
+      return res.json(result);
+    } catch (error) {
+      if (!res.destroyed) return res.status(409).json({ error: cleanText(error.message, 300) });
+    } finally { res.off('close', close); }
   });
 
   router.post('/respond', async (req, res) => {

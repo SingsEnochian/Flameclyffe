@@ -25,6 +25,7 @@ import { mountWayglassSpectrumSurface } from './surfaces/spectral-field.js';
 import { mountWayglassNativeVoice } from './surfaces/native-voice.js';
 import { mountUniversalCodex } from './surfaces/universal-codex.js';
 import { createWayglassSpectralField } from './spectral-field.js';
+import { mountWayglassRuntimeSandbox } from './surfaces/runtime-sandbox.js';
 import { mountWayglassVideoAtelier } from './surfaces/video-atelier.js';
 import { mountWayglassLivingObserver } from './surfaces/living-observer.js';
 import { mountWayglassLibrarySurface } from './surfaces/library.js';
@@ -103,6 +104,12 @@ registerWayglassSurface({
   surface_id: 'wayglass:systems',
   label: 'Wayglass · Organs',
   mount: mountWayglassSystemsSurface,
+});
+
+registerWayglassSurface({
+  surface_id: 'wayglass:runtime-sandbox',
+  label: 'Wayglass · Runtime Sandbox',
+  mount: mountWayglassRuntimeSandbox,
 });
 
 registerWayglassSurface({

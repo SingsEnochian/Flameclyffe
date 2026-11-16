@@ -246,3 +246,21 @@ or Observer evidence. Browser Return storage contains no credential or
 model transcript and starts no playback, render, or inference. It provides
 content integrity against the cached digest, with host authenticity
 depending on the original authenticated transport.
+
+### Wayglass Runtime Sandbox
+
+Open Runtime Sandbox from Organs after House Steward sign-in. A sandbox turn
+invites the dedicated Ship Voice to return one project action. The host accepts
+creation or a revision of a named project after executing its pure typed WTL.
+Revisions compare against the current project head and run through Eightfold
+verification before replacing the active sandbox programme. Run selected project
+executes that active programme after a restart as well as in the current session.
+
+The local host signs accepted events with an Ed25519 key scoped to the sandbox.
+Receipts record the Ship Voice route and model and expose a verification key.
+The signature attests what this host accepted for the seat. It does not establish
+model identity or a legally certified signature. The sandbox uses a separate
+journal under `WAYGLASS_SANDBOX_DIR` (default `~/.wayglass/ship-sandbox`).
+Keep its journal and signing key together during migration. This route uses
+the loopback Ollama endpoint for the dedicated Ship Voice. Sandbox programs
+run without host effects, shell access, or a path to patch the deployed host.
