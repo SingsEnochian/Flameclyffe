@@ -273,3 +273,20 @@ sandbox room, select a project and programme to give Wayglass that source
 as context or run its active version. Programmes in one project are
 independently runnable. Module imports and inter-programme calls are
 outside this revision.
+
+### Authored prose and ritual
+
+Triple-quoted WTL strings preserve line breaks and spacing. The compiler
+stores their content as ordinary text in the existing IR, so the cypher can
+round-trip it as escaped source. `prose(title, paragraphs)` returns ordered
+paragraphs and a reading joined with blank lines. `ritual(title, cues)`
+returns an ordered score. Use `utterance(kind, voice, text)` for invocation,
+offering, response, witness or return, and `silence(milliseconds)` for a
+scored interval. A voice label attributes text within the authored score.
+
+The constructors are pure and can be composed inside typed operators or
+selected by WTL conditions. The Universal Codex and Writing Room display
+the authored outputs after verifying the existing Eightfold receipt. Load
+**Ritual and prose** in the Codex for the original programme
+`lib/wyrdrune/lantern-return.wtl`. Silence is represented as a cue. Preview
+does not start a clock, speak, or initiate playback.

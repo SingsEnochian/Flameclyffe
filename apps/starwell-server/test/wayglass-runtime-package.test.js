@@ -21,7 +21,7 @@ test('staged Wayglass runtime is complete and matches canonical lib sources', ()
   for (const [, name] of imported) {
     assert.ok(modules.includes(name), 'router imports an unbundled Wayglass runtime module: ' + name);
   }
-  for(const file of ['canonical.cjs','enochian.cjs','wyrdrune.cjs','typed-ir.cjs','revision-selection.wtl','engine-verify.wtl','engine-turn.wtl','double-mobius-orientation.wtl','observer-compression.wtl','observer-feedback.wtl','shipwide-feedback.wtl','runtime.mjs','quantum.mjs','bell-wonder.wtl','ritual-ledger.cjs']){
+  for(const file of ['canonical.cjs','enochian.cjs','wyrdrune.cjs','typed-ir.cjs','revision-selection.wtl','engine-verify.wtl','engine-turn.wtl','double-mobius-orientation.wtl','observer-compression.wtl','observer-feedback.wtl','shipwide-feedback.wtl','runtime.mjs','quantum.mjs','expression.mjs','bell-wonder.wtl','ritual-ledger.cjs']){
     const source=fs.readFileSync(path.join(repositoryLib,'wyrdrune',file),'utf8');
     const bundled=fs.readFileSync(path.join(runtime,'wyrdrune',file),'utf8');
     assert.equal(bundled,source,'WTL runtime drift: '+file);

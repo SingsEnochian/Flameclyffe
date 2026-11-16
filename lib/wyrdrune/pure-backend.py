@@ -230,10 +230,16 @@ def _quantum_probability(vector, index):
     return _norm(vector[int(index)])
 
 
+def _author_text(value, limit):
+    return (isinstance(value, str)
+            and bool(value.strip("\t\n\v\f\r \u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005"
+                                 "\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000\ufeff"))
+            and len(value.encode("utf-16-le", "surrogatepass")) // 2 <= limit)
+
+
 def _wonder(question, perspectives, evidence):
     def bounded_text(value):
-        return (isinstance(value, str) and bool(value.strip("\t\n\v\f\r \u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000\ufeff"))
-                and len(value.encode("utf-16-le", "surrogatepass")) // 2 <= 2048)
+        return _author_text(value, 2048)
 
     if (not bounded_text(question) or not isinstance(perspectives, list)
             or not 1 <= len(perspectives) <= 16 or not all(map(bounded_text, perspectives))
@@ -243,7 +249,45 @@ def _wonder(question, perspectives, evidence):
             "perspectives": perspectives, "evidence": evidence}
 
 
+def _prose(title, paragraphs):
+    if (not _author_text(title, 180) or not isinstance(paragraphs, list)
+            or not 1 <= len(paragraphs) <= 32
+            or not all(_author_text(text, 4000) for text in paragraphs)):
+        raise TypeError("Prose requires a title and 1 to 32 nonempty paragraphs")
+    return {"schema": "wyrdrune.prose/v0.1", "title": title, "paragraphs": paragraphs,
+            "text": "\n\n".join(paragraphs)}
+
+
+def _utterance(kind, voice, text):
+    if (kind not in ("invocation", "offering", "response", "witness", "return")
+            or not _author_text(voice, 180) or not _author_text(text, 4000)):
+        raise TypeError("Ritual utterance requires a cue, attributed voice and authored text")
+    return {"kind": kind, "voice": voice, "text": text}
+
+
+def _silence(milliseconds):
+    if (not _finite_number(milliseconds) or not 1 <= milliseconds <= 60000
+            or milliseconds != int(milliseconds)):
+        raise ValueError("Ritual silence requires 1 to 60000 whole milliseconds")
+    return {"kind": "silence", "milliseconds": milliseconds}
+
+
+def _ritual(title, cues):
+    if not _author_text(title, 180) or not isinstance(cues, list) or not 1 <= len(cues) <= 32:
+        raise TypeError("Ritual requires a title and 1 to 32 cues")
+    score = []
+    for cue in cues:
+        cue = cue if isinstance(cue, dict) else {}
+        kind = cue.get("kind")
+        score.append(_silence(cue.get("milliseconds")) if kind == "silence"
+                     else _utterance(kind, cue.get("voice"), cue.get("text")))
+    return {"schema": "wyrdrune.ritual-score/v0.1", "title": title, "cues": score, "autoplay": False}
+
+
 PURE_OPERATIONS = {
+    "prose": (2, _prose), "utterance": (3, _utterance),
+    "silence": (1, _silence), "ritual": (2, _ritual),
+
     "quantumApply": (2, _quantum_apply), "quantumTensor": (2, _quantum_tensor),
     "quantumProbabilities": (1, _quantum_probabilities),
     "quantumExpectation": (2, _quantum_expectation),
