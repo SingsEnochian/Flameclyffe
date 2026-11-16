@@ -64,7 +64,7 @@ def call_kernel(message, history):
             if not isinstance(turn, dict):
                 continue
             role, content = turn.get("role"), turn.get("content")
-            if role in ("user", "assistant") and isinstance(content, str) and len(content) <= 8000 and len(content.encode("utf-8", errors="surrogatepass")) <= 32000:
+            if role in ("user", "assistant") and isinstance(content, str) and len(content) <= 8000 and not any(0xD800 <= ord(ch) <= 0xDFFF for ch in content) and len(content.encode("utf-8")) <= 32000:
                 prior.append({"role": role, "content": content})
     # Bound the aggregate context, not only each turn. Preserve newest turns first.
     budget = 64_000
@@ -114,6 +114,7 @@ def call_kernel(message, history):
                 or 0x80 <= ord(ch) <= 0x9f
                 or 0x202a <= ord(ch) <= 0x202e
                 or 0x2066 <= ord(ch) <= 0x2069
+                or 0xD800 <= ord(ch) <= 0xDFFF
                 for ch in data["output"]
             ):
                 return "Wayglass returned unsafe display controls; no speech displayed."
