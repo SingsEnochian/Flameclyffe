@@ -2,7 +2,10 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { inspectEightfoldSpace, runEightfoldSpace, ENGINES, CANONICAL_PHASES } = require('../../lib/wayglass-eightfold-space.cjs');
-const { TABLES } = require('../../lib/wayglass-quad-eightfold.cjs');
+const { digest } = require('../../lib/wyrdrune/canonical.cjs');
+const { traverseDoubleMobius, traverseWyrdruneDoubleMobius } = require('../../lib/wayglass-double-mobius.cjs');
+const { createWaygateManifest } = require('../../lib/wayglass-waygate.cjs');
+const { TABLES, runQuadEightfold, runWyrdruneQuadEightfold } = require('../../lib/wayglass-quad-eightfold.cjs');
 
 const crossing = {
   world_id: 'wayglass:home', participant_id: 'participant:fixture', embodiment: { body_class: 'host-os' },
@@ -57,4 +60,32 @@ test('all four run in one process, each returning its own receipt', async () => 
 test('the double-Möbius still refuses a crossing without explicit consent', async () => {
   await assert.rejects(runEightfoldSpace({ crossing: { ...crossing, explicit_consent: false },
     quadSources: unavailable(crossing.recorded_at), quadContinuity: continuity }), /Explicit consent/);
+});
+
+test('WTL orientation drives both crossing records and preserves the host trace', async () => {
+  const input = { ...crossing, waygate_manifest: createWaygateManifest({
+    waygate_id: 'waygate:eightfold-space', world_id: crossing.world_id,
+    provenance_refs: crossing.provenance_refs, allowed_body_classes: ['host-os'],
+  }) };
+  const wtl = await traverseWyrdruneDoubleMobius(input);
+  const host = traverseDoubleMobius(input);
+  assert.equal(wtl.trace_sha256, host.trace_sha256);
+  assert.deepEqual(wtl.departure, host.departure);
+  assert.equal(wtl.orientationWTL.outputDigest, digest(wtl.orientation));
+  assert.equal(wtl.gateway.orientation_after, wtl.wayglass.orientation_before);
+});
+
+test('WTL compression preserves checkpoint hashes and permits cross-runtime Return', async () => {
+  const sources = unavailable(crossing.recorded_at);
+  Object.assign(sources.channels[0], { status: 'observed', count: 42 });
+  Object.assign(sources.channels[1], { status: 'empty', count: 0 });
+  Object.assign(sources.channels[2], { status: 'error' });
+  const input = { sources, continuity, cycles: 1 };
+  const host = runQuadEightfold(input);
+  const first = await runWyrdruneQuadEightfold(input);
+  assert.deepEqual(first.checkpoint, host);
+  assert.equal(first.compressionWTL.outputDigest, digest({ observed: 1, empty: 1, unavailable: 4 }));
+  const second = await runWyrdruneQuadEightfold({ ...input, previous: host });
+  assert.deepEqual(second.checkpoint, runQuadEightfold({ ...input, previous: first.checkpoint }));
+  assert.equal(second.checkpoint.completed_cycles, 2);
 });

@@ -184,3 +184,19 @@ before returning. Their established geometry, projection and receipt
 formats remain host implementations. The synchronous functions are used
 for calculation and compatibility. The async entry points attach a WTL
 receipt without altering the Observer checkpoint's existing hash.
+
+### Engine calculations written in WTL
+
+The Double Möbius route uses `double-mobius-orientation.wtl` to calculate
+the Gateway and Wayglass orientation transitions. Those values populate
+the crossing records before the host hashes the trace and builds the
+Return packet. The Quad Observer route and Integrated Voyage use
+`observer-compression.wtl` to compute the observed, empty and unavailable
+channel counts that feed every lane's Compress entry. Each language
+execution contributes its source, input, output and execution digests to
+the engine verification evidence.
+
+The existing synchronous host implementations remain available for
+compatibility. Tests compare WTL and host receipts and resume an Observer
+checkpoint produced by either path. The host still owns coordinate
+geometry, source normalisation, soundstage derivation and persistence.
