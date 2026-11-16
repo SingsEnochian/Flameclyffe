@@ -24,6 +24,7 @@ import { mountWayglassSystemsSurface } from './surfaces/systems.js';
 import { mountWayglassSpectrumSurface } from './surfaces/spectral-field.js';
 import { mountWayglassNativeVoice } from './surfaces/native-voice.js';
 import { mountUniversalCodex } from './surfaces/universal-codex.js';
+import { mountWtlInterfaceAtelier } from './surfaces/wtl-interface-atelier.js';
 import { createWayglassSpectralField } from './spectral-field.js';
 import { mountWayglassVideoAtelier } from './surfaces/video-atelier.js';
 import { mountWayglassLivingObserver } from './surfaces/living-observer.js';
@@ -69,6 +70,7 @@ FIRST_WAYGLASS_ORGANS.forEach(registerWayglassOrgan);
 const fullSpectrum = createWayglassSpectralField();
 
 registerWayglassSurface({surface_id:'wayglass:sound-composition',label:'Wayglass · Spatial Soundstage',mount:root=>mountWayglassSoundComposition(root,{composition:wayglassSomaticSound.composition,soundscape:wayglassSomaticSound,storyBinding:wayglassStoryScoreBinding})});
+registerWayglassSurface({surface_id:'wayglass:wtl-interface-atelier',label:'WTL · Living Interface Atelier',mount:mountWtlInterfaceAtelier});
 registerWayglassSurface({surface_id:WAYGLASS_ENTRY_SURFACE,label:'Living Watercolor',mount:mountLivingWatercolorSurface});
 registerWayglassSurface({surface_id:'wayglass:journey-before-destination',label:'Journey Before Destination',mount:mountJourneyBeforeDestinationSurface});
 registerWayglassSurface({surface_id:'wayglass:triptych-lift',label:'The Möbius Lift · Triptych navigation',mount:root=>mountWayglassTriptychLift(root,{navigate:navigateAndFocus})});
