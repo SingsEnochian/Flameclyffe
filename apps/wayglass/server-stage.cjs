@@ -46,7 +46,7 @@ async function copyTree(from, to) {
   for (const file of ['tensor-engine.cjs','tensor-ir.cjs']) {
     await fsp.copyFile(path.join(repoRoot,'lib','wyrdrune',file),path.join(wtlDir,file));
   }
-  for(const file of ['canonical.cjs','enochian.cjs','wyrdrune.cjs','typed-ir.cjs','revision-selection.wtl','ritual-ledger.cjs','runtime.mjs','quantum.mjs','bell-wonder.wtl','story-soundscape.wtl','full-spectrum.wtl','resonance-atlas.wtl','living-learning.wtl','with-001.wtl','with-002-amber.wtl','with-003-refrain.wtl','with-004-enochian-369.wtl','tensor-ir.cjs','tensor-engine.cjs','tensor-autodiff.cjs','tensor-lowering.cjs','tensor-assurance.cjs','tensor-wtl-bridge.cjs','kernel-divination.cjs','tensor-engine.wtl','coevolution-repair.wtl','coevolution-expand.wtl','mythience-crossing.wtl','mythience-hybrid.wtl','altered-timeline.wtl']){
+  for(const file of ['canonical.cjs','enochian.cjs','wyrdrune.cjs','typed-ir.cjs','revision-selection.wtl','engine-verify.wtl','engine-turn.wtl','ritual-ledger.cjs','runtime.mjs','quantum.mjs','bell-wonder.wtl','story-soundscape.wtl','full-spectrum.wtl','resonance-atlas.wtl','living-learning.wtl','with-001.wtl','with-002-amber.wtl','with-003-refrain.wtl','with-004-enochian-369.wtl','tensor-ir.cjs','tensor-engine.cjs','tensor-autodiff.cjs','tensor-lowering.cjs','tensor-assurance.cjs','tensor-wtl-bridge.cjs','kernel-divination.cjs','tensor-engine.wtl','coevolution-repair.wtl','coevolution-expand.wtl','mythience-crossing.wtl','mythience-hybrid.wtl','altered-timeline.wtl']){
     await fsp.copyFile(path.join(repoRoot,'lib','wyrdrune',file),path.join(wtlDir,file));
   }
 

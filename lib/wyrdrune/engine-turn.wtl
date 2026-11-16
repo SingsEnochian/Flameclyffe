@@ -1,0 +1,10 @@
+mobius scoped {
+  perceive { let prior = n; }
+  compress {}
+  release { set n = n + 1; }
+  verify { require n > prior else "Möbius carry did not advance"; }
+  integrate {}
+  choose {}
+  return { emit n; }
+  transcend { carry n = n; }
+}

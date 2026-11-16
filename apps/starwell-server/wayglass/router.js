@@ -20,7 +20,7 @@ const { composeWayglassNativeVoice } = require('../wayglass-runtime/wayglass-wyr
 const { enterWayglassWorld } = require('../wayglass-runtime/wayglass-world-entry.cjs');
 const { createWayglassDeparture } = require('../wayglass-runtime/wayglass-stop-receipt.cjs');
 const { createDepartureStore } = require('../wayglass-runtime/wayglass-departure-store.cjs');
-const { inspectDoubleMobius, traverseDoubleMobius } = require('../wayglass-runtime/wayglass-double-mobius.cjs');
+const { inspectDoubleMobius, traverseWyrdruneDoubleMobius } = require('../wayglass-runtime/wayglass-double-mobius.cjs');
 const { createModelObservation } = require('../wayglass-runtime/wayglass-model-observation.cjs');
 const { createWayglassLibraryRouter } = require('./research-library');
 const { createObserverSelfDevelopmentRouter } = require('./observer-self-development');
@@ -29,7 +29,7 @@ const { proposeHybrid } = require('../wayglass-runtime/wayglass-mythience-fusion
 const { runIntegratedVoyage } = require('../wayglass-runtime/wayglass-integrated-voyage.cjs');
 const { buildVoyageScenario } = require('./voyage-scenarios');
 const { runFirstTouch } = require('../wayglass-runtime/wayglass-first-touch-demo.cjs');
-const { runQuadEightfold, SOURCE_SCHEMA, TABLES } = require('../wayglass-runtime/wayglass-quad-eightfold.cjs');
+const { runWyrdruneQuadEightfold, SOURCE_SCHEMA, TABLES } = require('../wayglass-runtime/wayglass-quad-eightfold.cjs');
 
 const { resolveCharacterSeat, publicCharacterSeats, EMERGENCE_QUESTION_IDS } = require('./character-seats.cjs');
 
@@ -550,12 +550,12 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     if(req.body?.feather===true)return res.status(409).json({error:'Feather Stop active'});
     try{
       const sources=await readQuadSourcesFromSupabase(fetchImpl);
-      const result=runQuadEightfold({
+      const { checkpoint, wtl } = await runWyrdruneQuadEightfold({
         sources,cycles:req.body?.cycles===undefined?2:req.body.cycles,
         continuity:req.body?.continuity||{},previous:req.body?.previous||null,
       });
       return res.json({schema:'wayglass.quad-host-response/v1',status:'host-observed',
-        source:'authorized-supabase-metadata',checkpoint:result,
+        source:'authorized-supabase-metadata',checkpoint, wtl,
         notes:['Source counts and last timestamps are real; no private raw rows returned',
           'Proposed audio is silent until explicitly enabled',
           'Training candidates require distinct agent choices and approved datasets']});
@@ -642,10 +642,10 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     res.setHeader('Cache-Control', 'no-store');
     return res.json(inspectDoubleMobius());
   });
-  router.post('/kernel/double-mobius', createRequestGate({ maxRequests: 8, maxConcurrent: 2 }), (req, res) => {
+  router.post('/kernel/double-mobius', createRequestGate({ maxRequests: 8, maxConcurrent: 2 }), async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     try {
-      const result = traverseDoubleMobius({
+      const result = await traverseWyrdruneDoubleMobius({
         ...(req.body || {}),
         // Server time, never a client-controlled timestamp in runtime receipts.
         recorded_at: new Date().toISOString(),

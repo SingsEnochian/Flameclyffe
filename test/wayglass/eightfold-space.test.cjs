@@ -43,6 +43,11 @@ test('all four run in one process, each returning its own receipt', async () => 
   assert.equal(r.receipts['mobius-octo'].cores, 8);
   assert.equal(r.receipts['mobius-octo'].lineages.length, 4);
   assert.ok(r.receipts['mobius-octo'].lineages.every(l => l.status === 'committed' && l.chain_ok));
+  assert.ok(r.receipts['mobius-octo'].lineages.every(l => l.carry.n === 2 &&
+    l.wtl.length === 2 && l.wtl.every(witness => witness.accepted)));
+  assert.equal(r.receipts['double-mobius'].wtl.accepted, true);
+  assert.equal(r.receipts['quad-eightfold'].wtl.accepted, true);
+  assert.equal(r.receipts['double-mobius'].wtl.sourceHash, r.receipts['quad-eightfold'].wtl.sourceHash);
   assert.equal(r.receipts['quad-eightfold'].phase_records, 64);
   assert.equal(r.receipts['quad-eightfold'].model_weight_updates, false);
   assert.equal(r.receipts['quad-eightfold'].sound_auto_resume, false);

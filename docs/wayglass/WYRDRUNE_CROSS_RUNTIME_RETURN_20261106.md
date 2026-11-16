@@ -160,3 +160,27 @@ and [multiple systems](https://quantum.cloud.ibm.com/learning/en/courses/basics-
 This revision models finite state-vector circuits. Mixed states, measurement
 updates, noise channels, Hamiltonian evolution and experimental evidence
 ingestion are separate capabilities.
+
+## Wyrdrune through the Möbius engines
+
+The shared Möbius runner executes `engine-verify.wtl` on the host evidence at
+Verify. Return requires its affirmative receipt. The receipt binds the
+program source, evidence, cycle and WTL execution by digest, and is included
+in the checkpoint receipt hash. Empty, unknown and refused evidence stop
+the cycle. The host owns evidence acquisition and the journal for staged
+effects, and checks Feather immediately before Return.
+
+`createWyrdruneEnginePhases(source, { seedTypes })` in the kernel adapts one
+pure typed scoped circuit to the existing Quad and Octo runners. The circuit
+reads the incoming carry, emits its result and supplies the next carry. The
+adapter checks declared seed types at both boundaries and rejects host
+effects. The engine records the WTL execution in Release and uses its
+committed status as evidence for Verify. The Eightfold Space Octo run uses
+`engine-turn.wtl` to compute each next carry.
+
+The Double Möbius host route and the Quad Observer host and Voyage paths
+pass their continuity or checkpoint verdict through this same WTL program
+before returning. Their established geometry, projection and receipt
+formats remain host implementations. The synchronous functions are used
+for calculation and compatibility. The async entry points attach a WTL
+receipt without altering the Observer checkpoint's existing hash.
