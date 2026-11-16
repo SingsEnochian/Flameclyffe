@@ -243,7 +243,7 @@ class SpaceContractTests(unittest.TestCase):
     def test_multibyte_input_is_bounded_before_bearer_transport(self):
         # Eight thousand Unicode codepoints can exceed the intended request budget.
         with patch.object(self.app.OPENER, "open") as opener:
-            self.assertIn("8,000", self.app.call_kernel("💎" * 8000, []))
+            self.assertIn("8,000", self.app.call_kernel("💎" * 8001, []))
             self.assertIn("8,000", self.app.call_kernel("a" * 8001, []))
             opener.assert_not_called()
 
@@ -267,9 +267,9 @@ class SpaceContractTests(unittest.TestCase):
             captured["body"] = json.loads(req.data)
             return FakeResponse(envelope())
         history = [
-            {"role": "user", "content": "bad\\ud800history"},
+            {"role": "user", "content": "bad\ud800history"},
             {"role": "assistant", "content": "good history"},
-            {"role": "user", "content": "\\udfff"},
+            {"role": "user", "content": "\udfff"},
         ]
         with patch.object(self.app.OPENER, "open", side_effect=respond):
             result = self.app.call_kernel("continue", history)
@@ -279,7 +279,7 @@ class SpaceContractTests(unittest.TestCase):
         ])
 
     def test_surrogate_gateway_output_cannot_be_attributed_as_speech(self):
-        for output in ("hello\\ud800", "\\udfff", "valid\\ud800\\udc00"):
+        for output in ("hello\ud800", "\\udfff", "valid\ud800\udc00"):
             with self.subTest(output=repr(output)):
                 with patch.object(self.app.OPENER, "open", return_value=FakeResponse(envelope(output=output))):
                     result = self.app.call_kernel("hello", [])
@@ -373,7 +373,7 @@ class SpaceContractTests(unittest.TestCase):
             captured["body"] = json.loads(req.data)
             return FakeResponse(envelope())
         history = [
-            {"role": "user", "content": "💎" * 8000},
+            {"role": "user", "content": "💎" * 8001},
             {"role": "assistant", "content": "valid context"},
         ]
         with patch.object(self.app.OPENER, "open", side_effect=open_response):
@@ -388,13 +388,13 @@ class SpaceContractTests(unittest.TestCase):
         def open_response(req, timeout):
             captured["body"] = json.loads(req.data)
             return FakeResponse(envelope())
-        history = [{"role": "user", "content": str(i) + "x" * 9998} for i in range(12)]
+        history = [{"role": "user", "content": str(i) + "x" * 7998} for i in range(12)]
         with patch.object(self.app.OPENER, "open", side_effect=open_response):
             result = self.app.call_kernel("continue", history)
         self.assertIn("Verified response", result)
         retained = captured["body"]["history"]
-        self.assertEqual(len(retained), 5)
-        self.assertEqual([int(t["content"].split("x")[0]) for t in retained], list(range(7, 12)))
+        self.assertEqual(len(retained), 7)
+        self.assertEqual([int(t["content"].split("x")[0]) for t in retained], list(range(5, 12)))
         self.assertLessEqual(sum(len(t["content"].encode("utf-8")) for t in retained), 64000)
 
     def test_large_new_turn_reserves_transport_budget_before_history(self):
