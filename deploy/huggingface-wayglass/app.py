@@ -62,7 +62,7 @@ def call_kernel(message, history):
             role, content = turn.get("role"), turn.get("content")
             if role in ("user", "assistant") and isinstance(content, str) and len(content) <= 8000 and len(content.encode("utf-8", errors="surrogatepass")) <= 32000:
                 prior.append({"role": role, "content": content})
-    # The configured endpoint must be an owner-authenticated Wayglass conversation adapter.
+    # Bound the aggregate context, not only each turn. Preserve newest turns first.\n    budget = 64_000\n    selected = []\n    for turn in reversed(prior):\n        size = len(turn["content"].encode("utf-8"))\n        if size > budget:\n            break\n        selected.append(turn)\n        budget -= size\n    prior = list(reversed(selected))\n    # The configured endpoint must be an owner-authenticated Wayglass conversation adapter.
     # Never point this at a public unauthenticated model endpoint.
     payload = json.dumps({"input": message, "history": prior, "route_id": "wayglass:ship", "character_id": "wayglass", "interaction": {"channel": "OOC"}, "world_id": "wayglass:home", "surface_id": "huggingface-kernel-entrance"}).encode("utf-8")
     req = urllib.request.Request(
