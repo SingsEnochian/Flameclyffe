@@ -1,0 +1,47 @@
+// Source content and identity stay in the canonical packet. This circuit receives
+// its digest and the two status vectors. Return binds the projection to both.
+operator matchFeedback(status: text, target: text): number = if status == target then 1 else 0;
+operator countFeedback(a: text, b: text, c: text, d: text, e: text, f: text, target: text): number =
+  matchFeedback(a,target) + matchFeedback(b,target) + matchFeedback(c,target)
+  + matchFeedback(d,target) + matchFeedback(e,target) + matchFeedback(f,target);
+operator change(now: text, before: text, returning: truth): number =
+  if returning then (if now == before then 0 else 1) else 0;
+operator attention(now: text, before: text, returning: truth): text =
+  if now == "error" then "inspect-error" else
+  if now == "unavailable" then "restore-source" else
+  if returning and now != before then "inspect-transition" else
+  if now == "observed" then "inspect-supported-events" else "hold-empty";
+
+mobius scoped {
+  perceive {
+    let returning = previousSource != "";
+  }
+  compress {
+    let changed = change(a,pa,returning) + change(b,pb,returning) + change(c,pc,returning)
+      + change(d,pd,returning) + change(e,pe,returning) + change(f,pf,returning);
+    let observedCount = countFeedback(a,b,c,d,e,f,"observed");
+    let emptyCount = countFeedback(a,b,c,d,e,f,"empty");
+    let missingCount = countFeedback(a,b,c,d,e,f,"error") + countFeedback(a,b,c,d,e,f,"unavailable");
+    let loss = ["record contents", "within-channel changes that keep the same status"];
+  }
+  release {
+    let possibilities = [attention(a,pa,returning),attention(b,pb,returning),
+      attention(c,pc,returning),attention(d,pd,returning),attention(e,pe,returning),attention(f,pf,returning)];
+  }
+  verify {
+    require observedCount == expectedObserved and emptyCount == expectedEmpty
+      and missingCount == expectedMissing and observedCount + emptyCount + missingCount == 6 else "Observer compression disagrees with perceived sources";
+    require changed >= 0 and changed <= 6 else "Observer status change count is invalid";
+  }
+  integrate {
+    let evidence = {source:source, previousSource:previousSource};
+  }
+  choose {
+    let disposition = if changed > 0 then "review-transitions" else "review-current-evidence";
+  }
+  return {
+    emit {evidence:evidence, changedChannels:changed, observedChannels:observedCount,
+      omitted:loss, attention:possibilities, disposition:disposition};
+  }
+  transcend {}
+}

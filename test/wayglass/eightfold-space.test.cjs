@@ -89,3 +89,29 @@ test('WTL compression preserves checkpoint hashes and permits cross-runtime Retu
   assert.deepEqual(second.checkpoint, runQuadEightfold({ ...input, previous: first.checkpoint }));
   assert.equal(second.checkpoint.completed_cycles, 2);
 });
+
+test('Observer Release uses status changes from the returned source packet', async () => {
+  const prior = unavailable(crossing.recorded_at);
+  Object.assign(prior.channels[0], { status: 'observed', count: 12 });
+  const previous = runQuadEightfold({ sources: prior, continuity, cycles: 1 });
+  const current = structuredClone(prior);
+  Object.assign(current.channels[0], { status: 'empty', count: 0 });
+  Object.assign(current.channels[1], { status: 'error' });
+  Object.assign(current.channels[2], { status: 'observed', count: 7 });
+  const result = await runWyrdruneQuadEightfold({ sources: current, continuity, cycles: 2, previous });
+  const [first, second] = result.feedback;
+  assert.deepEqual(result.checkpoint, runQuadEightfold({ sources: current, continuity, cycles: 2, previous }));
+  assert.equal(first.perception.previousSource, digest(previous.source_packet));
+  assert.equal(first.perception.source, digest(result.checkpoint.source_packet));
+  assert.equal(first.compression.changedChannels, 3);
+  assert.equal(first.compression.observedChannels, 1);
+  assert.ok(first.compression.omitted.includes('record contents'));
+  assert.equal(first.release.disposition, 'review-transitions');
+  assert.deepEqual(first.release.proposals.slice(0, 4).map(proposal => proposal.action),
+    ['inspect-transition', 'inspect-error', 'inspect-transition', 'restore-source']);
+  assert.ok(first.release.proposals.every(proposal => proposal.decision === 'pending'));
+  assert.equal(second.perception.previousSource, first.perception.source);
+  assert.equal(second.compression.changedChannels, 0);
+  assert.equal(second.release.proposals[0].action, 'hold-empty');
+  assert.equal(result.feedbackDigest, digest(result.feedback));
+});

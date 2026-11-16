@@ -200,3 +200,20 @@ The existing synchronous host implementations remain available for
 compatibility. Tests compare WTL and host receipts and resume an Observer
 checkpoint produced by either path. The host still owns coordinate
 geometry, source normalisation, soundstage derivation and persistence.
+
+### Observer Perceive → Compress → Release feedback
+
+`observer-feedback.wtl` compares the current channel statuses against
+the prior returned source packet. Perceive binds both source digests.
+Compress counts status transitions and states what the summary omits.
+Release distinguishes source errors, unavailable sources, changed
+statuses, observed activity and confirmed emptiness. Verify re-derives
+the channel counts and compares them to the existing WTL compression
+result before returning pending proposals. A first run has no prior
+comparison. A later cycle within the same request uses the same admitted
+source and records zero status transitions.
+
+The host and Integrated Voyage expose the feedback and its digest. The
+WTL verification evidence binds that digest to the existing Observer
+checkpoint. The checkpoint schema and synchronous host fallback retain
+their existing format. The feedback proposes investigations for review.
