@@ -60,7 +60,7 @@ def call_kernel(message, history):
             if not isinstance(turn, dict):
                 continue
             role, content = turn.get("role"), turn.get("content")
-            if role in ("user", "assistant") and isinstance(content, str) and len(content) <= 8000:
+            if role in ("user", "assistant") and isinstance(content, str) and len(content) <= 8000 and len(content.encode("utf-8", errors="surrogatepass")) <= 32000:
                 prior.append({"role": role, "content": content})
     # The configured endpoint must be an owner-authenticated Wayglass conversation adapter.
     # Never point this at a public unauthenticated model endpoint.
