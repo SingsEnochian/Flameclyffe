@@ -26,3 +26,16 @@ Opening a browser URL is not equivalent to a transparent desktop shell. The comp
 **Owner controls:** tray switch for Persistent / Summoned / Hidden, Feather emergency hide, start-with-Windows opt-in (OFF by default), reduced-motion mode, high-contrast fallback, opacity and pigment-density controls, and a kill-switch independent of Wayglass network/model availability. Persistent is the preferred display mode **after** the owner enables the overlay; not permission to autostart it or install anything.
 
 **Acceptance gates:** a separate compositor process, crash/uninstall recovery, Explorer restart resilience, taskbar/Start accessibility, full-screen games and screen-sharing privacy checks, multi-monitor and mixed-DPI testing, no click interception in passive mode, and explicit approval before enabling startup. The present Windhawk mod is only a launcher, not the compositor.
+
+## REQUIRED: Wyrdrune ↔ British English cypher animation
+
+Cypher is a **shipwide acceptance gate**, not decorative polish. The persistent veil and summoned floating presence MUST use the same WTL-authored, provenance-preserving cypher state machine. WTL glyph text and English text are two presentations of the same attributed message, not separate regenerated model responses.
+
+States: `glyphs` → `deciphering` → `english` → `enciphering` → `glyphs`, with `feather` interrupt from every state. Store canonical original, glyph projection, English projection, direction, revision, speaker, receipt and a monotonically increasing transition token. Cancel stale animation frames on any new transition. The visible final state must match the requested direction; replay must never silently leave a stale state. This is the known failure family in PR #645 Living Cypher Browser CI 43953492435.
+
+- Persistent mode: unobtrusive ambient glyph-to-English transformations for status/notifications, with a user-controlled density and duration. No animation over other applications' input fields, and no interception of pointer events.
+- Summoned mode: explicit bidirectional controls `Read in British English` / `Return to Wyrdrune`, with deterministic replay and no duplicated message.
+- Preserve the same semantic content, attribution, source WTL and receipt in both modes. Never imply an English-to-glyph projection is a newly authored model message.
+- Reduced motion: immediate final text, zero flicker; screen reader: final readable text once, no per-frame announcements; pause/Feather: cancel frames and show readable final text.
+- Verification: repeated fast toggles, mid-transition Feather, multiple simultaneous messages, stale completion callbacks, keyboard-only controls, focus retention, screen-reader text, Windows compositor DPI/repaint and browser/mobile parity.
+- **No overlay release** until cypher state-machine tests and live compositor checks pass. Do not equate the current Windhawk launcher with implementation of this requirement.
