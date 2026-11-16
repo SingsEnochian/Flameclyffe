@@ -254,6 +254,22 @@ class SpaceContractTests(unittest.TestCase):
                     self.assertIn("8,000", self.app.call_kernel(message, []))
             opener.assert_not_called()
 
+    def test_unpaired_surrogate_message_and_history_fail_closed(self):
+        with patch.object(self.app.OPENER, "open") as opener:
+            self.assertIn("valid Unicode", self.app.call_kernel("\ud800", []))
+            opener.assert_not_called()
+        captured = {}
+        def open_response(req, timeout):
+            captured["body"] = json.loads(req.data)
+            return FakeResponse(envelope())
+        with patch.object(self.app.OPENER, "open", side_effect=open_response):
+            result = self.app.call_kernel("Hello", [
+                {"role": "user", "content": "\udfff"},
+                {"role": "user", "content": "valid history"},
+            ])
+        self.assertIn("Verified response", result)
+        self.assertEqual(captured["body"]["history"], [{"role": "user", "content": "valid history"}])
+
     def test_redirect_handler_denies_all_redirects(self):
         handler = self.app.NoRedirect()
         for code in (301, 302, 303, 307, 308):
