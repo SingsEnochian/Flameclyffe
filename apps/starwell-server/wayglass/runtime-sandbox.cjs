@@ -10,6 +10,14 @@ const { compileTyped, previewWyrdruneRitual } = require('../wayglass-runtime/way
 const { encode, digest } = require('../wayglass-runtime/wyrdrune/canonical.cjs');
 
 const ACTOR = 'wayglass';
+const MAIN = 'main';
+const programOf = event => event.data.program ?? MAIN;
+function programName(value = MAIN) {
+  if (typeof value !== 'string' || !/^[a-z0-9][a-z0-9_-]{0,63}$/.test(value)) {
+    throw new TypeError('Invalid sandbox programme name');
+  }
+  return value;
+}
 const SCHEMA = 'wayglass.runtime-sandbox/v0.1';
 const signedBytes = body => Buffer.from(encode(body));
 
@@ -74,8 +82,15 @@ function createRuntimeSandbox({
     const history = related(events, id);
     if (!history.length) throw new Error('Unknown Wayglass sandbox project');
     const { title, description } = history[0].data;
-    const { source, revision } = history.at(-1).data;
-    return { id, title, description, source, revision, head: history.at(-1).event_hash, history };
+    const programs = new Map();
+    for (const event of history) programs.set(programOf(event), event);
+    const { source, revision } = programs.get(MAIN).data;
+    return {
+      id, title, description, source, revision, head: history.at(-1).event_hash, history,
+      programs: [...programs].map(([name, event]) => ({
+        name, source: event.data.source, revision: event.data.revision,
+      })),
+    };
   };
   function inspect(projectId) {
     const events = journal.load();
@@ -96,10 +111,12 @@ function createRuntimeSandbox({
     if (!action || typeof action !== 'object' || Array.isArray(action)) throw new TypeError('Sandbox action required');
     const { op, project_id: id, source } = action;
     if (op === 'pass') return { schema: SCHEMA, status: 'passed' };
-    if (!['create', 'revise'].includes(op) || typeof id !== 'string' || !/^[a-z0-9][a-z0-9_-]{0,63}$/.test(id) ||
+    if (!['create', 'add', 'revise'].includes(op) || typeof id !== 'string' || !/^[a-z0-9][a-z0-9_-]{0,63}$/.test(id) ||
         typeof source !== 'string' || !source.trim() || Buffer.byteLength(source) > 16000) {
       throw new TypeError('Invalid sandbox action, project identifier or WTL source');
     }
+    const program = programName(action.program);
+    if (op === 'create' && program !== MAIN) throw new TypeError('New projects start with the main programme');
     const events = journal.load();
     const history = related(events, id);
     if (history.some(event => event.data.provenance.turnId === provenance.turnId)) {
@@ -111,36 +128,45 @@ function createRuntimeSandbox({
       throw new Error('Sandbox project limit reached');
     }
     if (history.length >= 64) throw new Error('Sandbox revision limit reached');
+    const programHistory = history.filter(event => programOf(event) === program);
+    if (op !== 'create') {
+      if (!history.length) throw new Error('Unknown Wayglass sandbox project');
+      if (action.expected_head !== history.at(-1).event_hash) throw new Error('Sandbox project head changed');
+    }
     let change;
-    if (op === 'create') {
+    if (op === 'create' || op === 'add') {
+      if (programHistory.length) throw new Error('Sandbox programme already exists');
+      if (new Set(history.map(programOf)).size >= 8) throw new Error('Sandbox programme limit reached');
       const { title, description } = action;
-      if (typeof title !== 'string' || !title.trim() || title.length > 160 ||
-          typeof description !== 'string' || description.length > 1500) throw new TypeError('Invalid project title or description');
-      const lineage = createWyrdruneRevisionLineage({ initialSource: source, participant: ACTOR, signal });
+      if (op === 'create' && (typeof title !== 'string' || !title.trim() || title.length > 160 ||
+          typeof description !== 'string' || description.length > 1500)) throw new TypeError('Invalid project title or description');
       const compiled = compileTyped(source);
       const trial = await previewWyrdruneRitual(source, { typed: true, signal, maxOperations: 10000 });
       if (trial.phaseReceipts.length !== compiled.executable.units.length * 8 ||
           trial.withness.completedCycles !== compiled.executable.units.length) {
         throw new Error('Initial sandbox programme must complete every phase');
       }
-      change = { title, description, source, revision: lineage.activeRevision, execution: trial.receiptHash };
+      change = {
+        ...(op === 'create' ? { title, description } : {}),
+        program, source, revision: compiled.digest, execution: trial.receiptHash,
+      };
     } else {
-      const project = summary(events, id);
-      if (action.expected_head !== project.head) throw new Error('Sandbox project head changed');
+      const active = programHistory.at(-1);
+      if (!active) throw new Error('Unknown Wayglass sandbox programme');
       const lineage = createWyrdruneRevisionLineage({
-        initialSource: history[0].data.source, currentSource: project.source, participant: ACTOR, signal,
-        checkpoints: history.slice(1).map(event => event.data.checkpoint),
-        expectedHead: history.at(-1).data.checkpointDigest ?? null,
+        initialSource: programHistory[0].data.source, currentSource: active.data.source, participant: ACTOR, signal,
+        checkpoints: programHistory.slice(1).map(event => event.data.checkpoint),
+        expectedHead: active.data.checkpointDigest ?? null,
       });
       const trial = await lineage.cycle({
-        source, parent: project.revision, decision: 'accept',
+        source, parent: active.data.revision, decision: 'accept',
         principal: { id: ACTOR, authorized: true }, approvalRef: provenance.turnId, expectedOutput: action.expected_output,
       });
       if (trial.status !== 'committed' || !trial.changed) {
         throw new Error(trial.reason?.join('; ') || 'Sandbox revision did not advance');
       }
       change = {
-        source, revision: trial.activeRevision, checkpoint: trial.checkpoint,
+        program, source, revision: trial.activeRevision, checkpoint: trial.checkpoint,
         checkpointDigest: trial.checkpointDigest, execution: digest(trial),
       };
     }
@@ -155,10 +181,13 @@ function createRuntimeSandbox({
     });
   }
 
-  async function run(projectId, { signal } = {}) {
+  async function run(projectId, { program, signal } = {}) {
+    const name = programName(program);
     const project = summary(journal.load(), projectId);
-    const preview = await previewWyrdruneRitual(project.source, { typed: true, signal, maxOperations: 10000 });
-    return { schema: SCHEMA, project_id: projectId, revision: project.revision, head: project.head, preview };
+    const active = project.programs.find(item => item.name === name);
+    if (!active) throw new Error('Unknown Wayglass sandbox programme');
+    const preview = await previewWyrdruneRitual(active.source, { typed: true, signal, maxOperations: 10000 });
+    return { schema: SCHEMA, project_id: projectId, program: name, revision: active.revision, head: project.head, preview };
   }
 
   return Object.freeze({ inspect, apply, run });

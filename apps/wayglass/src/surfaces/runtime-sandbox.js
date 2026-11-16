@@ -7,6 +7,7 @@ export function mountWayglassRuntimeSandbox(root) {
       <p>Invite the Ship Voice to create a project or revise its active Wyrdrune programme.</p>
       <form data-sandbox-turn>
         <label>Project context <select name="project"><option value="">All projects</option></select></label>
+        <label>Programme <select name="program"><option value="main">main</option></select></label>
         <label>Invitation <textarea name="input" maxlength="2000" rows="4" required></textarea></label>
         <button class="glass-chip" type="submit">Invite Wayglass</button>
         <button class="glass-chip" type="button" data-sandbox-run>Run selected project</button>
@@ -31,6 +32,18 @@ export function mountWayglassRuntimeSandbox(root) {
     return data;
   }
 
+  async function updatePrograms(signal, preferred) {
+    const id = form.elements.project.value;
+    const list = form.elements.program;
+    const selected = preferred ?? list.value;
+    const programs = id ? (await request('?project_id=' + encodeURIComponent(id), undefined, signal)).project.programs : [];
+    if (disposed || signal.aborted || id !== form.elements.project.value) return;
+    list.length = 0;
+    for (const item of programs) list.add(new Option(item.name, item.name));
+    if (!programs.length) list.add(new Option('main', 'main'));
+    if (programs.some(item => item.name === selected)) list.value = selected;
+  }
+
   async function update(signal) {
     const { projects } = await request('', undefined, signal);
     if (disposed || signal.aborted) return;
@@ -48,6 +61,8 @@ export function mountWayglassRuntimeSandbox(root) {
     }
     const controller = new AbortController();
     pending = controller;
+    form.elements.project.disabled = true;
+    form.elements.program.disabled = true;
     status.textContent = 'Working…';
     try {
       await run(controller.signal);
@@ -56,26 +71,35 @@ export function mountWayglassRuntimeSandbox(root) {
       if (!disposed) status.textContent = controller.signal.aborted ? 'Feather held the request.' : error.message;
     } finally {
       pending = null;
+      if (!disposed) {
+        form.elements.project.disabled = false;
+        form.elements.program.disabled = false;
+      }
     }
   }
 
+  form.elements.project.addEventListener('change', () => void operation(updatePrograms));
   form.addEventListener('submit', event => {
     event.preventDefault();
     void operation(async signal => {
       const result = await request('/turn', {
         input: form.elements.input.value, project_id: form.elements.project.value || undefined,
+        program: form.elements.program.value,
       }, signal);
       if (disposed || signal.aborted) return;
       output.textContent = JSON.stringify(result, null, 2);
       await update(signal);
-      if (!disposed && result.receipt?.project_id) form.elements.project.value = result.receipt.project_id;
+      if (disposed || signal.aborted) return;
+      const receipt = result.receipt;
+      if (receipt?.project_id) form.elements.project.value = receipt.project_id;
+      await updatePrograms(signal, receipt?.data?.program);
     });
   });
   root.querySelector('[data-sandbox-run]').addEventListener('click', () => {
     const id = form.elements.project.value;
     if (!id) { status.textContent = 'Choose a project to run.'; return; }
     void operation(async signal => {
-      const result = await request('/run', { project_id: id }, signal);
+      const result = await request('/run', { project_id: id, program: form.elements.program.value }, signal);
       if (!disposed && !signal.aborted) output.textContent = JSON.stringify(result, null, 2);
     });
   });

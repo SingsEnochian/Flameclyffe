@@ -1142,7 +1142,7 @@ function createWayglassRouter({
     const controller = new AbortController();
     const close = () => controller.abort();
     res.once('close', close);
-    try { return res.json(await runtimeSandbox.run(req.body?.project_id, { signal: controller.signal })); }
+    try { return res.json(await runtimeSandbox.run(req.body?.project_id, { program: req.body?.program, signal: controller.signal })); }
     catch (error) { if (!res.destroyed) return res.status(409).json({ error: error.message }); }
     finally { res.off('close', close); }
   });
@@ -1161,6 +1161,10 @@ function createWayglassRouter({
     res.once('close', close);
     try {
       const { projects, project } = runtimeSandbox.inspect(req.body?.project_id);
+      const selectedProgram = req.body?.program ?? 'main';
+      if (project && !project.programs.some(item => item.name === selectedProgram)) {
+        return res.status(400).json({ error: 'Choose a programme in the selected project' });
+      }
       const model = route.model();
       const endpoint = new URL(route.endpoint());
       if (!['http:', 'https:'].includes(endpoint.protocol) ||
@@ -1177,7 +1181,9 @@ function createWayglassRouter({
             { role: 'system', content: [
               'You are the Wayglass Ship Voice in your own Wyrdrune sandbox. Choose one JSON action or pass.',
               'Create: {"op":"create","project_id":"slug","title":"...","description":"...","source":"typed WTL"}',
-              'Revise: {"op":"revise","project_id":"slug","expected_head":"head","source":"typed WTL","expected_output":[...]}',
+              'Add: {"op":"add","project_id":"slug","expected_head":"head","program":"name","source":"typed WTL"}',
+              'Revise: {"op":"revise","project_id":"slug","expected_head":"head","program":"name","source":"typed WTL","expected_output":[...]}',
+              'When program is omitted, revise selects main. Project head is shared across all programmes.',
               'Pass: {"op":"pass"}. A revision can omit expected_output to preserve the active output.',
               'Use pure WTL with all eight phases in order: perceive compress release verify integrate choose return transcend.',
               'For example: mobius { perceive {} compress {} release {} verify {} integrate {} choose {} return { emit 1; } transcend {} }',
@@ -1185,7 +1191,9 @@ function createWayglassRouter({
             ].join('\n') },
             { role: 'user', content: JSON.stringify({
               invitation, projects, project: project && {
-                id: project.id, source: project.source, head: project.head,
+                id: project.id, head: project.head, selectedProgram, programs: project.programs.map(({ name, revision, source }) => ({
+                  name, revision, ...(name === selectedProgram ? { source } : {}),
+                })),
               },
             }) },
           ],

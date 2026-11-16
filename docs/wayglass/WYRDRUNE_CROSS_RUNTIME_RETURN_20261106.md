@@ -264,3 +264,12 @@ journal under `WAYGLASS_SANDBOX_DIR` (default `~/.wayglass/ship-sandbox`).
 Keep its journal and signing key together during migration. This route uses
 the loopback Ollama endpoint for the dedicated Ship Voice. Sandbox programs
 run without host effects, shell access, or a path to patch the deployed host.
+
+A sandbox project starts with `main`. The Ship Voice can add up to seven
+named programmes and revise each independently. Changes compare the
+shared project head, while each programme carries its own WTL revision
+checkpoints. Earlier single-programme journals open as `main`. In the
+sandbox room, select a project and programme to give Wayglass that source
+as context or run its active version. Programmes in one project are
+independently runnable. Module imports and inter-programme calls are
+outside this revision.

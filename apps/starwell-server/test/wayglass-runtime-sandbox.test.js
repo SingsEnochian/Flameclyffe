@@ -70,3 +70,30 @@ test('House invitation binds Ship Voice to one signed project action and the act
   assert.equal((await turn({ input: 'Attempt an unavailable effect', project_id: 'lantern' })).status, 409);
   assert.equal(restarted().inspect('lantern').project.history.length, 2);
 });
+
+test('named programmes maintain separate signed revision chains across a project restart', async t => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'wayglass-ship-programmes-'));
+  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
+  const open = () => createRuntimeSandbox({ directory });
+  const apply = (action, turnId) => open().apply({ project_id: 'lantern', ...action }, { turnId, route: 'wayglass:ship' });
+  const main = await apply(create, 'create-main');
+  const add = { op: 'add', program: 'second', source: source(11), expected_head: main.receipt.event_hash };
+  const added = await apply(add, 'add-second');
+  assert.equal((await apply(add, 'add-second')).status, 'already-applied');
+  await assert.rejects(apply({ ...add, program: 'third' }, 'stale-add'), /head changed/);
+  const changed = await apply({
+    op: 'revise', program: 'second', source: source(12), expected_output: [12],
+    expected_head: added.receipt.event_hash,
+  }, 'revise-second');
+  const mainChange = await apply({
+    op: 'revise', source: source(2), expected_output: [2], expected_head: changed.receipt.event_hash,
+  }, 'revise-main');
+  const final = await apply({
+    op: 'revise', program: 'second', source: source(13), expected_output: [13],
+    expected_head: mainChange.receipt.event_hash,
+  }, 'revise-second-again');
+  assert.equal(final.receipt.data.checkpoint.carry.generation, 2);
+  assert.deepEqual(open().inspect('lantern').project.programs.map(p => p.name), ['main', 'second']);
+  assert.deepEqual((await open().run('lantern')).preview.values, [2]);
+  assert.deepEqual((await open().run('lantern', { program: 'second' })).preview.values, [13]);
+});
