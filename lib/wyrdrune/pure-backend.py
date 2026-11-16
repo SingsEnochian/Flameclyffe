@@ -174,6 +174,35 @@ class Execution:
         if kind == "literal":
             value = node["v"]
             return float(value) if isinstance(value, (int, float)) and not isinstance(value, bool) else value
+        if kind == "list":
+            return [self.expression(item) for item in node["items"]]
+        if kind == "record":
+            record = {}
+            for field in node["fields"]:
+                key = field["key"]
+                if key in record:
+                    raise TypeError("Duplicate WTL record field " + key)
+                record[key] = self.expression(field["value"])
+            return record
+        if kind == "access":
+            target = self.expression(node["target"])
+            key = self.expression(node["key"])
+            if _is_unknown(target) or _is_unknown(key):
+                return dict(UNKNOWN)
+            if isinstance(target, list):
+                if (_kind(key) != "number" or not 0 <= key <= 2**53 - 1
+                        or key != int(key)):
+                    raise TypeError("WTL list index must be a nonnegative safe integer")
+                if key >= len(target):
+                    raise ValueError("WTL list index is out of range")
+                return target[int(key)]
+            if not isinstance(target, dict):
+                raise TypeError("WTL selection requires a record or list")
+            if not isinstance(key, str):
+                raise TypeError("WTL record key must be text")
+            if key not in target:
+                raise NameError("Unknown WTL record field " + key)
+            return target[key]
         if kind == "unknown":
             return dict(UNKNOWN)
         if kind == "compare":
