@@ -51,7 +51,7 @@ def ready():
 def call_kernel(message, history):
     if not ready():
         return "Wayglass kernel not connected. Configure private WAYGLASS_RESPOND_URL and WAYGLASS_GATEWAY_TOKEN in Space secrets before enabling conversation."
-    if not isinstance(message, str) or not message.strip() or len(message) > 8000:
+    if not isinstance(message, str) or not message.strip() or len(message) > 8000 or len(message.encode("utf-8")) > 32000:
         return "Please enter a message under 8,000 characters."
     # Preserve bounded context; never trust client-supplied privileged roles.
     prior = []
