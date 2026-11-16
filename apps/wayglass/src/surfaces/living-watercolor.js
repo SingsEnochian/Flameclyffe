@@ -544,7 +544,8 @@ export async function mountLivingWatercolorSurface(root) {
     const notes=q('wc-voice-notes').value.trim(),author=q('wc-voice-author').value.trim();
     if(notes&&!author){feedback.textContent='Add who authored the voice notes before sharing them.';q('wc-voice-author').focus();return;}
     busy=true;invite.disabled=true;q('wc-first-contact').disabled=true;
-    const authorText=prompt.value.trim(),requestedMode=mode,requestedRoute=routeId,epoch=++requestEpoch;
+    const requestedMode=mode,requestedRoute=routeId,epoch=++requestEpoch;
+    const authorText=requestedRoute==='wayglass:ship'?prompt.value:prompt.value.trim();
     const request={mode:requestedMode,authorText,routeId:requestedRoute,sessionId:session};
     feedback.textContent='Inviting a '+activeMode().label.toLowerCase()+' contribution…';
     try{

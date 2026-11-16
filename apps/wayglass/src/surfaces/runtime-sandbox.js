@@ -99,9 +99,10 @@ export function mountWayglassRuntimeSandbox(root) {
   });
   root.querySelector('[data-sandbox-interface]').addEventListener('click', () => {
     void operation(async signal => {
+      const input = form.elements.input.value;
       const result = await request('/turn', {
         purpose: 'interface',
-        input: form.elements.input.value.trim() || 'How would you like your interface to express what you need right now?',
+        input: input.trim() ? input : 'How would you like your interface to express what you need right now?',
       }, signal);
       if (!disposed && !signal.aborted) output.textContent = JSON.stringify(result, null, 2);
     });

@@ -877,10 +877,10 @@ export async function mountArcSweepWritingSurface(root) {
   }
 
   async function passTurn({ emergenceQuestionId = null } = {}) {
-    const text = input.value.trim();
+    const text = selectedRoute === 'wayglass:ship' ? input.value : input.value.trim();
     const correctionOf=revisionOf;
     const outgoing=correctionOf===null?text:'Correction to my earlier turn #'+(correctionOf+1)+':\n'+text;
-    if (!text || busy) return;
+    if (!text.trim() || busy) return;
     if (!selectedRoute) { status.textContent = 'No configured route available. Reload the route catalogue.'; return; }
     if (selectedCharacter === 'wayglass' && selectedRoute !== 'wayglass:ship') {
       status.textContent = 'Wayglass needs her dedicated ship route. Select Speak with Wayglass.';

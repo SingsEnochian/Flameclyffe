@@ -35,6 +35,8 @@ test('House invitation binds Ship Voice to one signed project action and the act
       const req = JSON.parse(init.body);
       assert.equal(req.format, 'json');
       assert.match(req.messages[0].content, /Wayglass Ship Voice/);
+      assert.match(req.messages[1].content, /^mobius scoped \{/);
+      assert.equal(JSON.parse(req.messages[2].content).invitation, undefined);
       return Response.json({ model: req.model, message: { content: JSON.stringify(action) } });
     },
   }));
@@ -54,6 +56,7 @@ test('House invitation binds Ship Voice to one signed project action and the act
   const { receipt } = await first.json();
   assert.equal(receipt.participant_id, 'wayglass');
   assert.equal(receipt.data.provenance.route, 'wayglass:ship');
+  assert.match(receipt.data.provenance.inputWyrdruneHash, /^[a-f0-9]{64}$/);
   const restarted = () => createRuntimeSandbox({ directory });
   const { publicKey } = restarted().inspect();
   const { event_hash, data: { signature, ...data }, ...event } = receipt;

@@ -134,7 +134,8 @@ test('First Contact requests an actual ship route contribution and preserves aut
   await f.q('wc-first-contact').dispatch('click');await flush();
   const calls=f.calls.filter(call=>call.url==='/api/v1/wayglass/respond');assert.equal(calls.length,1);
   const body=JSON.parse(calls[0].options.body);
-  assert.match(body.input,/choose|decline/i);assert.match(body.input,/A warm measured cadence/);assert.match(body.input,/Rowan/);
+  assert.match(body.input,/choose|decline/i);
+  assert.match(body.surface_context,/Participant-authored voice preferences \(Rowan\): A warm measured cadence/);
   assert.match(f.q('wc-voice').textContent,/Captured transport fixture/);
  }finally{f.restore();}
 });
