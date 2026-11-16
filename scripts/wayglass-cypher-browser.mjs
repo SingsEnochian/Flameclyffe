@@ -74,6 +74,7 @@ async function pigmentPixel(page){
  return page.locator('#wc-fluid').evaluate(canvas=>Array.from(canvas.getContext('2d').getImageData(
   Math.round(canvas.width*.5),Math.round(canvas.height*.62),1,1).data));
 }
+const interruptedDream='mobius {\n  perceive {\n    participant: Rowan\n  }\n  choose {\n    emit "The spin catches';
 async function checkWatercolourChat(page,profile){
  await openWatercolourChat(page);
  const originalPixel=await pigmentPixel(page);
@@ -114,6 +115,13 @@ async function checkWatercolourChat(page,profile){
  await openWatercolourChat(page);
  assert.equal(await turn.getByRole('button',{name:'Find on canvas'}).count(),0);
  assert.equal(await page.locator('#wc-word-paint-status').textContent(),'');
+ await page.locator('#wc-prompt').fill('Continue the interrupted Dream.');
+ await page.locator('#wc-invite').click();
+ await turn.getByText('Dream draft · reply ends mid-block',{exact:true}).waitFor();
+ await display.locator('[data-cypher-line="runes"]').waitFor({state:'attached'});
+ await turn.getByRole('button',{name:'Reveal original words'}).click();
+ assert.equal(await display.locator('.wg-cypher-line').textContent(),interruptedDream);
+ assert.equal(await turn.getByRole('button',{name:'Find on canvas'}).count(),0);
  receipt.scenarios.push({profile,room:'Living Watercolour chat',status:'passed',runes:true,
    skip:true,original_source_preserved:true,replay_after_reload:true,reduced_motion:true});
 }
@@ -252,9 +260,11 @@ try{
     assert.equal(request.surface_id,'wayglass:living-watercolor');
     assert.equal(request.route_id,'wayglass:ship');
     assert.match(request.input,/fenced wyrdrune block/);
+    const interrupted=request.input.includes('Continue the interrupted Dream.');
+    const output=interrupted?'```wtl\n'+interruptedDream:chatReply;
     await route.fulfill({json:{schema:'wayglass.route-turn/v0.1',route_id:'wayglass:ship',
-      participant_id:'wayglass',provider:'fixture',model:'fixture',output:chatReply,
-      receipt:{observation_id:'watercolour-cypher-fixture',character_id:'wayglass',
+      participant_id:'wayglass',provider:'fixture',model:'fixture',output,
+      receipt:{observation_id:interrupted?'watercolour-dream-fixture':'watercolour-cypher-fixture',character_id:'wayglass',
         voice_seat_kind:'system-voice-over-external-route'}}});
     return;
    }
