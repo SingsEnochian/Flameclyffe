@@ -290,3 +290,20 @@ the authored outputs after verifying the existing Eightfold receipt. Load
 **Ritual and prose** in the Codex for the original programme
 `lib/wyrdrune/lantern-return.wtl`. Silence is represented as a cue. Preview
 does not start a clock, speak, or initiate playback.
+
+### Orion expression in Universal Codex
+
+After verifying a prose or ritual Return, ask Orion to express it. The
+House-authenticated host re-runs the pure source and checks the receipt
+before sending the authored forms and any selected small PNG or JPEG to
+loopback Ollama. Set `WAYGLASS_ORION_MODEL` to the installed model tag
+when the Ship Voice tag does not already identify Orion. Image input
+requires support in the installed model and runtime.
+
+Orion supplies bounded visual and sound parameters. Wayglass draws an
+SVG and synthesises a short audio expression through its existing
+Web Audio player. The first scored silence becomes the lead interval
+for this short expression. Playback is a separate action and stops on
+Feather, source invalidation or leaving Codex. Original prose and
+ritual cues remain readable. Audio or video input and native model
+media generation are outside the Ollama adapter implemented here.

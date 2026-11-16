@@ -5,6 +5,7 @@ const path = require('node:path');
 const { pathToFileURL } = require('node:url');
 const express = require('express');
 const { createRuntimeSandbox } = require('./runtime-sandbox.cjs');
+const { composeOrionExpression } = require('./orion-expression.cjs');
 const { createRequestGate } = require('../security/wayglass-request-gate');
 const {createAlteredTimelineRouter}=require('./altered-timeline-router.cjs');
 const {
@@ -1106,6 +1107,24 @@ function createWayglassRouter({
         ...(error.effects ? { effects: error.effects } : {}),
       });
     }
+  });
+
+  router.post('/wyrdrune/orion-expression', createRequestGate({ maxRequests: 8, maxConcurrent: 1 }), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required' });
+    }
+    const controller = new AbortController();
+    const close = () => controller.abort();
+    res.once('close', close);
+    try {
+      const packet = await composeOrionExpression(req.body || {}, {
+        route: resolveWayglassRoute('wayglass:ship'), fetchImpl, signal: controller.signal,
+      });
+      return res.json(packet);
+    } catch (error) {
+      if (!res.destroyed) return res.status(error.status || 400).json({ error: cleanText(error.message, 300) });
+    } finally { res.off('close', close); }
   });
 
   router.get('/routes', async (req, res) => {

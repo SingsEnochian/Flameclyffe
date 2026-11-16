@@ -60,10 +60,12 @@ export function createWayglassSoundPlayer({scope=globalThis}={}){
   const interval=clamp(score.interval,1,2);
   const texture=clamp(score.texture,0,1);
   const silenceMs=score.lead_silence_ms??0;
-  if(typeof silenceMs!=='number'||!Number.isFinite(silenceMs)||silenceMs<0||silenceMs>4000)
-    throw new RangeError('Wyrdrune scored silence must be 0–4000 milliseconds');
+  const maxSilence=score.timing==='ritual-expression'?60000:4000;
+  if(typeof silenceMs!=='number'||!Number.isFinite(silenceMs)||silenceMs<0||silenceMs>maxSilence)
+    throw new RangeError('Wyrdrune scored silence must be 0–'+maxSilence+' milliseconds');
   const context=new Ctx();ctx=context;
   await context.resume?.();
+  if(ctx!==context)return {started:false};
   // WebAudio scheduling owns time. No timer, no busy wait, and no autoplay.
   const t=context.currentTime+silenceMs/1000;
   const vol=context.createGain();

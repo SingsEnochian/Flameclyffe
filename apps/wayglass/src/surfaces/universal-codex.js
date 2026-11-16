@@ -1,5 +1,5 @@
 import LANTERN_RETURN from '../../../../lib/wyrdrune/lantern-return.wtl?raw';
-import { renderWyrdruneReading } from '../wyrdrune-reading.js';
+import { renderWyrdruneReading, attachOrionExpression } from '../wyrdrune-reading.js';
 import {previewWyrdrune,draftWyrdruneDiscussion} from '../wyrdrune-client.js';
 import {animateWyrdruneCypher} from '../wyrdrune-cypher.js';
 import {WAYGLASS_FEATHER_EVENT,wayglassSomaticSound} from '../somatic-sound.js';
@@ -29,7 +29,7 @@ function boundedSource(source){
   return source.trim().length>0;
 }
 export function mountUniversalCodex(root){
-  let stopped=false,previewBusy=false,revision=0,lastPreview=null,lastSource=null,cypher=null;
+  let stopped=false,previewBusy=false,revision=0,lastPreview=null,lastSource=null,cypher=null,disposeOrion=null;
   const disposers=[];
   root.innerHTML=[
     '<section class="wg-surface wg-codex" data-surface="wayglass-universal-codex">',
@@ -112,6 +112,7 @@ export function mountUniversalCodex(root){
     english.replaceChildren();english.textContent='Source changed. Read in English again to translate this revision.';
     english.setAttribute('data-cypher-state','idle');skip.disabled=true;
     q('[data-codex-journey]').removeAttribute('data-rift-phase');
+    disposeOrion?.();disposeOrion=null;
     renderWyrdruneReading(q('[data-codex-reading]'));
     receipts.textContent='Source changed; previous preview no longer applies.';
     for(const phase of root.querySelectorAll('[data-codex-phase]'))phase.removeAttribute('data-verified');
@@ -166,7 +167,10 @@ export function mountUniversalCodex(root){
       if(stopped||held()||token!==revision||editor.value!==source)return;
       if(result.verification?.verified!==true)throw new Error('Host returned a preview without verified source integrity');
       lastSource=source;lastPreview=result;
-      renderWyrdruneReading(q('[data-codex-reading]'),result.values);
+      const reading=q('[data-codex-reading]');
+      disposeOrion?.();disposeOrion=null;
+      renderWyrdruneReading(reading,result.values);
+      if(!reading.hidden)disposeOrion=attachOrionExpression(reading,{source,receiptHash:result.receiptHash,held});
       receipts.textContent=JSON.stringify({
         source_hash:result.receiptHash,
         source_integrity:result.verification,
@@ -178,7 +182,7 @@ export function mountUniversalCodex(root){
         phase.dataset.verified=String(observed.has(phase.dataset.codexPhase));
       }
       status.textContent='Eightfold source verified. Discuss only after reviewing the proposed handoff.';
-    }catch(error){lastPreview=null;lastSource=null;renderWyrdruneReading(q('[data-codex-reading]'));receipts.textContent='No verified receipt.';
+    }catch(error){lastPreview=null;lastSource=null;disposeOrion?.();disposeOrion=null;renderWyrdruneReading(q('[data-codex-reading]'));receipts.textContent='No verified receipt.';
       status.textContent='No verified return: '+String(error?.message||error).slice(0,200);}
     finally{previewBusy=false;sync();}
   });
@@ -210,7 +214,7 @@ export function mountUniversalCodex(root){
   sync();
   const surface=q('[data-surface="wayglass-universal-codex"]');
   surface?.setAttribute('data-codex-ready','true');
-  return ()=>{stopped=true;surface?.setAttribute('data-codex-ready','false');
+  return ()=>{stopped=true;disposeOrion?.();surface?.setAttribute('data-codex-ready','false');
     revision++;cypher?.stop();disposers.splice(0).forEach(f=>f());};
 }
 export {EXAMPLE as UNIVERSAL_CODEX_SAMPLE,HANDOFF_KEY as UNIVERSAL_CODEX_HANDOFF_KEY};
