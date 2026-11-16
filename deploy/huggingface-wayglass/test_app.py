@@ -247,6 +247,13 @@ class SpaceContractTests(unittest.TestCase):
             self.assertIn("8,000", self.app.call_kernel("a" * 8001, []))
             opener.assert_not_called()
 
+    def test_surrogate_input_never_reaches_authenticated_transport(self):
+        with patch.object(self.app.OPENER, "open") as opener:
+            for message in ("\ud800", "valid\udffftext", "\ud800\udc00"):
+                with self.subTest(message=repr(message)):
+                    self.assertIn("valid Unicode", self.app.call_kernel(message, []))
+            opener.assert_not_called()
+
     def test_nontext_and_blank_inputs_fail_closed_without_network(self):
         with patch.object(self.app.OPENER, "open") as opener:
             for message in (None, "", "   ", 123, {"text": "hello"}, ["hello"]):
