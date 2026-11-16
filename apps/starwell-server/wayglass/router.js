@@ -172,6 +172,7 @@ async function callOllama(route, payload, compiled = null, fetchImpl = globalThi
     output: cleanText(data?.message?.content || data?.response || '', MAX_TEXT),
     thinking: cleanText(data?.message?.thinking || '', MAX_TEXT * 2),
     response_id: null,
+    returned_model: cleanText(data?.model, 180) || null,
     inputWyrdrune,
     usage: {
       prompt_tokens: data?.prompt_eval_count ?? null,

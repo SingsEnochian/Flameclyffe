@@ -43,6 +43,7 @@ test('Watercolour legacy request derives Wayglass ship seat, preserving steward 
     assert.equal(data.receipt.character_id,'wayglass');
     assert.equal(data.receipt.voice_seat_kind,'system-voice-over-external-route');
     assert.equal(data.receipt.session_id,'watercolor-legacy-test');
+    assert.equal(data.receipt.returned_model,seen[0].body.model);
     assert.equal(data.output,'The horizon has many questions.');
     assert.ok(seen[0].body.messages[0].content.includes('Wayglass system voice seat'));
     const wire=seen[0].body.messages;
