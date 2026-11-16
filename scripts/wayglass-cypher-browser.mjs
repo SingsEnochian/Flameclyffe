@@ -63,8 +63,15 @@ async function checkWatercolour(page,profile){
 }
 const chatSource='mobius scoped { perceive {} compress {} release {} verify {} integrate {} choose {} return { emit "Hope is here."; } transcend {} }';
 const chatReply='At the eighth station.\n\n'+['```wyrdrune',chatSource,'```'].join('\n');
+async function openWatercolourChat(page){
+ const toggle=page.locator('#wc-instruments-toggle');
+ if(await toggle.getAttribute('aria-expanded')==='false'&&!(await page.locator('#wc-voice').isVisible())){
+  await toggle.click();
+ }
+ await page.locator('#wc-voice').waitFor({state:'visible'});
+}
 async function checkWatercolourChat(page,profile){
- await page.locator('#wc-invite').waitFor();
+ await openWatercolourChat(page);
  await page.locator('#wc-prompt').fill('Greet the eighth station.');
  await page.locator('#wc-invite').click();
  const turn=page.locator('.wc-dialogue-response').last();
@@ -79,6 +86,7 @@ async function checkWatercolourChat(page,profile){
  await turn.getByText('Original Wyrdrune',{exact:true}).click();
  assert.equal(await turn.locator('details p').textContent(),chatSource);
  await page.reload({waitUntil:'networkidle'});
+ await openWatercolourChat(page);
  assert.equal(await display.getAttribute('data-cypher-state'),'english');
  await turn.getByRole('button',{name:'Replay Wyrdrune'}).click();
  assert.equal(await display.getAttribute('data-cypher-state'),'reading');
