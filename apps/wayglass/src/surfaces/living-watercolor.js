@@ -16,7 +16,6 @@ import {synchronizeJourneyFeather} from './journey-before-destination.js';
 import {touchWayglass} from '../first-touch-client.js';
 import { animateWyrdruneCypher, readWyrdrune } from '../wyrdrune-cypher.js';
 import { cypherRunOptions, readCypherPace } from '../cypher-pace.js';
-import '../wyrdrune-cypher-material.css';
 
 const clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
 const safeText=value=>String(value??'').replaceAll('&','&amp;')
