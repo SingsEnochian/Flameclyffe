@@ -217,3 +217,20 @@ The host and Integrated Voyage expose the feedback and its digest. The
 WTL verification evidence binds that digest to the existing Observer
 checkpoint. The checkpoint schema and synchronous host fallback retain
 their existing format. The feedback proposes investigations for review.
+
+### Shipwide feedback
+
+`shipwide-feedback.wtl` reads the returned Observer totals and the transition
+count from the first cycle of the current source admission. It compresses
+them into coverage and transition fractions, then returns bounded audio
+parameters, editable video direction, an engineering review focus, and an
+agent inquiry. The plan binds the Observer checkpoint and feedback digests.
+The browser checks that binding and the WTL output digest before admission.
+
+The Quad and Acoustic Room use the audio parameters through their existing
+controls. The Video Atelier applies the returned direction to the editable
+prompt on request and binds the exported handoff to the source checkpoint.
+First Voyage returns a pending engineering review linked to its trial.
+The Quad's local cognition invitation includes the WTL inquiry for the
+same checkpoint. Rendering, playback, model calls and engineering changes
+remain controlled by their existing entry points.

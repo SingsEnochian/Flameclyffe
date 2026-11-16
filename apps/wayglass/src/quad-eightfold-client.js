@@ -1,3 +1,5 @@
+import { publishShipwideFeedback, verifyShipwideFeedback } from './shipwide-feedback.js';
+import { digestWce1 } from './wyrdrune-proof.js';
 // Wayglass Quad Eightfold: sourced host data -> entire ship, no hidden telemetry.
 export const QUAD_EVENT='wayglass:quad-gestalt';
 let latest=null;
@@ -9,7 +11,7 @@ export function subscribeQuadGestalt(listener,{scope=globalThis}={}){
   scope.addEventListener?.(QUAD_EVENT,fn);
   return ()=>scope.removeEventListener?.(QUAD_EVENT,fn);
 }
-export function publishQuadGestalt(checkpoint,{scope=globalThis}={}){
+export function publishQuadGestalt(checkpoint,{scope=globalThis,shipwide=null}={}){
   if(checkpoint?.schema!=='wayglass.quad-checkpoint/v2'
     ||checkpoint.gestalt?.schema!=='wayglass.quad-gestalt/v2')
     throw new TypeError('Quad host checkpoint required');
@@ -20,7 +22,7 @@ export function publishQuadGestalt(checkpoint,{scope=globalThis}={}){
     observed_at:checkpoint.source_packet?.observed_at,
     evidence:checkpoint.gestalt.evidence.map(e=>({...e})),
     soundstage:checkpoint.gestalt.soundstage.map(x=>({...x})),
-    gaps:[...checkpoint.gestalt.gaps],
+    gaps:[...checkpoint.gestalt.gaps],shipwide,
     engines:[...checkpoint.gestalt.engines],quads:checkpoint.gestalt.quads,
     phase_records_per_cycle:checkpoint.gestalt.phase_records_per_cycle,
     mode:'host-observed-metadata-projection',sound_autoplay:false,
@@ -43,7 +45,16 @@ export async function runLiveQuad({cycles=2,previous=null,continuity={},signal,f
   if(payload?.schema!=='wayglass.quad-host-response/v1'
     ||payload.checkpoint?.schema!=='wayglass.quad-checkpoint/v2')
     throw new Error('Malformed Quad host response');
-  publishQuadGestalt(payload.checkpoint);
+  let shipwide = null;
+  if (payload.shipwide) {
+    if (!Array.isArray(payload.feedback) || await digestWce1(payload.feedback) !== payload.feedbackDigest) {
+      throw new Error('Observer feedback digest mismatch');
+    }
+    shipwide = await verifyShipwideFeedback(payload.shipwide, payload.checkpoint.hash, payload.feedbackDigest);
+  }
+  if (signal?.aborted || feather) throw new DOMException('Observer feedback stopped', 'AbortError');
+  publishShipwideFeedback(shipwide);
+  publishQuadGestalt(payload.checkpoint, { shipwide });
   return payload.checkpoint;
 }
 export function installQuadFeatherListener(scope=globalThis){

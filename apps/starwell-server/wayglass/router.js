@@ -550,12 +550,12 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     if(req.body?.feather===true)return res.status(409).json({error:'Feather Stop active'});
     try{
       const sources=await readQuadSourcesFromSupabase(fetchImpl);
-      const { checkpoint, wtl, compressionWTL, feedback, feedbackDigest } = await runWyrdruneQuadEightfold({
+      const { checkpoint, wtl, compressionWTL, feedback, feedbackDigest, shipwide } = await runWyrdruneQuadEightfold({
         sources,cycles:req.body?.cycles===undefined?2:req.body.cycles,
         continuity:req.body?.continuity||{},previous:req.body?.previous||null,
       });
       return res.json({schema:'wayglass.quad-host-response/v1',status:'host-observed',
-        source:'authorized-supabase-metadata',checkpoint, wtl, compressionWTL, feedback, feedbackDigest,
+        source:'authorized-supabase-metadata',checkpoint, wtl, compressionWTL, feedback, feedbackDigest, shipwide,
         notes:['Source counts and last timestamps are real; no private raw rows returned',
           'Proposed audio is silent until explicitly enabled',
           'Training candidates require distinct agent choices and approved datasets']});

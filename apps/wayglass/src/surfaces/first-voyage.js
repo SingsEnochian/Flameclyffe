@@ -1,4 +1,5 @@
 import './first-voyage.css';
+import { publishShipwideFeedback, verifyShipwideFeedback } from '../shipwide-feedback.js';
 import {checkHouseSteward,signInHouseSteward} from '../house-steward-session.js';
 import {observeIntegratedVoyage} from '../integrated-voyage-visual.js';
 import {wayglassSomaticSound} from '../somatic-sound.js';
@@ -166,6 +167,13 @@ export async function mountWayglassFirstVoyage(root){
        'Wyrdrune or the fictional membrane declined. The shared voyage did not commit a Return. The choice remains open.';
      q('[data-voyage-return-label]').textContent=success?'Return packet verified':'Refusal remains valid';
      root.querySelectorAll('[data-voyage-fold]').forEach(el=>{if(success)el.dataset.witnessed='true';else delete el.dataset.witnessed;});
+     if(success && result.shipwide) {
+       const frame = await verifyShipwideFeedback(result.shipwide, result.observer.checkpoint_hash,
+         result.observer.feedback_digest);
+       if(stopped||held()||controller.signal.aborted)return;
+       publishShipwideFeedback(frame);
+       q('[data-voyage-reading]').textContent += ' Engineering focus: ' + frame.engineering.replaceAll('-', ' ') + '.';
+     }
      if(success)observeIntegratedVoyage(result);
      q('[data-voyage-receipt]').textContent=JSON.stringify({
        scenario:data.scenario,kind:data.source_kind,status:result?.status,
@@ -173,6 +181,7 @@ export async function mountWayglassFirstVoyage(root){
        mythience_wtl:result?.mythience?.native_wtl||null,
        tensor:result?.tensor?.program_fingerprint||null,
        observer:result?.observer?.checkpoint_hash||null,
+       shipwide:result?.shipwide||null,
        voyage:result?.runtime?.receipt_hash||null,
        return_verdict:result?.return_verification?.verdict||null,
        sources:result?.provenance_refs||[],production_mutation:false,
