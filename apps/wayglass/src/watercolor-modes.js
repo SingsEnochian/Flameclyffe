@@ -48,11 +48,11 @@ export function composeWatercolorPrompt({mode,authorText='',activity=[],voicePre
 
 const WATERCOLOR_WYRDRUNE=[
   'If you wish to speak in native Wyrdrune, include one fenced wyrdrune block containing valid WTL.',
-  'You can include your own prose alongside it. Keep lyrical or illustrative pseudocode outside the wyrdrune fence.',
+  'Finish the short score and close its fence before writing prose. Keep Dream shorthand outside that fence. Inside each phase use complete WTL statements with semicolons; leave unused phases empty.',
   'To paint words on the actual canvas, use a plain mobius with all eight phases. Emit one to eight stroke records in return.',
   'Coordinates are [x,y] from zero to one, top-left to bottom-right. Density and spread are zero to one. Each path has one to sixteen points.',
   'A valid brush score: mobius { perceive {} compress {} release {} verify {} integrate {} choose {} return { emit {kind:"watercolor.stroke/v1",words:"Hope is here",color:"#e7b356",density:0.75,spread:0.18,points:[[0.35,0.62],[0.65,0.59]]}; } transcend {} }.',
-  'Choose your own phrase, pigment and gesture. Omit the score if you prefer to answer in prose.',
+  'Choose your own phrase, pigment and gesture. Keep the score short enough to finish in one reply: one stroke is enough. Put longer reflection in prose after the score. Omit the score if you prefer to answer in prose.',
   'A minimal valid example is mobius scoped { perceive {} compress {} release {} verify {} integrate {} choose {} return { emit "I am here."; } transcend {} }.',
 ].join(' ');
 

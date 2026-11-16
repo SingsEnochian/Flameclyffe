@@ -16,7 +16,8 @@ import { journeyLedger } from '../journey-before-destination.js';
 import {synchronizeJourneyFeather} from './journey-before-destination.js';
 import {touchWayglass} from '../first-touch-client.js';
 import { animateWyrdruneCypher, readWyrdrune } from '../wyrdrune-cypher.js';
-import { cypherRunOptions, readCypherPace } from '../cypher-pace.js';
+import { cypherRunOptions, nativeRunOptions, readCypherPace } from '../cypher-pace.js';
+import { animateWyrdruneTranslation } from '../wyrdrune-morph.js';
 
 const clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
 const safeText=value=>String(value??'').replaceAll('&','&amp;')
@@ -26,19 +27,28 @@ const PIGMENTS=Object.freeze([['Copper','#c26a46'],['Sun','#db9d3e'],['Moss','#4
 const modeButton=mode=>'<button type="button" class="wc-mode" data-wc-mode="'+mode.id+
   '" aria-pressed="false" title="'+safeText(mode.intent)+'">'+mode.label+'</button>';
 
-export function findWatercolorWyrdrune(reply){
-  for(const match of reply.matchAll(/^```([\w-]*)[ \t]*\r?\n([\s\S]*?)^```[ \t]*(?=\r?$)/gm)){
-    if(!['','wyrdrune','wtl'].includes(match[1].toLowerCase()))continue;
+export function findWatercolorWyrdrune(reply,{allowDraft=false}={}){
+  let draft=null;
+  const blocks=/^```([\w-]*)[ \t]*\r?\n([\s\S]*?)(^```[ \t]*(?=\r?$)|(?![\s\S]))/gm;
+  for(const match of reply.matchAll(blocks)){
+    const language=match[1].toLowerCase();
+    if(!['','wyrdrune','wtl'].includes(language))continue;
     const source=match[2].trim();
     if(!source)continue;
-    try{
-      readWyrdrune(source);
-      return {source,prose:(reply.slice(0,match.index)+reply.slice(match.index+match[0].length)).trim()};
-    }catch(error){
-      if(!(error instanceof SyntaxError||error instanceof TypeError||error instanceof RangeError))throw error;
+    const prose=(reply.slice(0,match.index)+reply.slice(match.index+match[0].length)).trim();
+    if(match[3]){
+      try{
+        readWyrdrune(source);
+        return {source,prose,executable:true};
+      }catch(error){
+        if(!(error instanceof SyntaxError||error instanceof TypeError||error instanceof RangeError))throw error;
+      }
+    }
+    if(allowDraft&&!draft&&(language||/^mobius\s*\{/i.test(source))){
+      draft={source,prose,executable:false,incomplete:!match[3]};
     }
   }
-  return null;
+  return draft;
 }
 
 export async function mountLivingWatercolorSurface(root) {
@@ -366,7 +376,7 @@ export async function mountLivingWatercolorSurface(root) {
           });
           body.before(show);
         }
-        const native=findWatercolorWyrdrune(replyText);
+        const native=findWatercolorWyrdrune(replyText,{allowDraft:true});
         if(native){
           const controls=document.createElement('div');
           const replay=document.createElement('button');
@@ -376,7 +386,7 @@ export async function mountLivingWatercolorSurface(root) {
           const reveal=document.createElement('button');
           reveal.type='button';
           reveal.className='glass-chip';
-          reveal.textContent='Reveal English';
+          reveal.textContent=native.executable?'Reveal English':'Reveal original words';
           reveal.hidden=true;
           controls.append(replay,reveal);
           const display=document.createElement('div');
@@ -386,26 +396,42 @@ export async function mountLivingWatercolorSurface(root) {
           display.hidden=true;
           const original=document.createElement('details');
           const summary=document.createElement('summary');
-          summary.textContent='Original Wyrdrune';
+          summary.textContent=native.executable?'Original Wyrdrune':'Original Dream text';
           const code=document.createElement('p');
           code.textContent=native.source;
           original.append(summary,code);
           body.textContent=native.prose;
           body.hidden=!native.prose;
-          body.before(controls,display,original);
+          const note=document.createElement('small');
+          if(!native.executable){
+            note.textContent=native.incomplete?'Dream draft · reply ends mid-block':'Dream draft · visual reading';
+          }
+          body.before(controls,note,display,original);
+          note.hidden=native.executable;
           function play({focus=false,still=false}={}){
             voiceCypher?.stop();
             display.hidden=false;
             const reduce=still||reduced||featherStopped||document.documentElement.dataset.wgMotion==='off';
             reveal.hidden=reduce;
             if(focus&&!reduce)reveal.focus({preventScroll:true});
-            voiceCypher=animateWyrdruneCypher(display,{
-              source:native.source,reducedMotion:reduce,...cypherRunOptions(readCypherPace()),
-              onComplete:()=>{
-                if(document.activeElement===reveal)replay.focus({preventScroll:true});
-                reveal.hidden=true;
-              },
-            });
+            const onComplete=()=>{
+              if(document.activeElement===reveal)replay.focus({preventScroll:true});
+              reveal.hidden=true;
+            };
+            if(native.executable){
+              voiceCypher=animateWyrdruneCypher(display,{
+                source:native.source,reducedMotion:reduce,...cypherRunOptions(readCypherPace()),onComplete,
+              });
+            }else{
+              const line=document.createElement('p');
+              line.className='wg-cypher-line';
+              display.replaceChildren(line);
+              const run=animateWyrdruneTranslation(line,{
+                source:native.source,translation:native.source,reducedMotion:reduce,
+                ...nativeRunOptions(readCypherPace()),onComplete,
+              });
+              voiceCypher={stop:run.reveal};
+            }
           }
           replay.addEventListener('click',()=>play({focus:true}));
           reveal.addEventListener('click',()=>voiceCypher?.stop());
@@ -871,6 +897,7 @@ export async function mountLivingWatercolorSurface(root) {
     if(stopped||!event.detail||typeof event.detail.stopped!=='boolean')return;
     synchronizeJourneyFeather(event.detail);
     if(event.detail.stopped){
+      voiceCypher?.stop();
       featherStopped=true;paused=true;pointerId=null;lastPointer=null;requestEpoch++;busy=false;
       touchEpoch++;touchAbort?.abort();touchAbort=null;touchOrb.disabled=true;
       root.querySelector('.wc-faepunk-touch').dataset.running='false';
