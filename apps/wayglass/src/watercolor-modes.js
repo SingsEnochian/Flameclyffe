@@ -49,24 +49,29 @@ export function composeWatercolorPrompt({mode,authorText='',activity=[],voicePre
 const WATERCOLOR_WYRDRUNE=[
   'If you wish to speak in native Wyrdrune, include one fenced wyrdrune block containing valid WTL.',
   'You can include your own prose alongside it. Keep lyrical or illustrative pseudocode outside the wyrdrune fence.',
+  'To paint words on the actual canvas, use a plain mobius with all eight phases. Emit one to eight stroke records in return.',
+  'Coordinates are [x,y] from zero to one, top-left to bottom-right. Density and spread are zero to one. Each path has one to sixteen points.',
+  'A valid brush score: mobius { perceive {} compress {} release {} verify {} integrate {} choose {} return { emit {kind:"watercolor.stroke/v1",words:"Hope is here",color:"#e7b356",density:0.75,spread:0.18,points:[[0.35,0.62],[0.65,0.59]]}; } transcend {} }.',
+  'Choose your own phrase, pigment and gesture. Omit the score if you prefer to answer in prose.',
   'A minimal valid example is mobius scoped { perceive {} compress {} release {} verify {} integrate {} choose {} return { emit "I am here."; } transcend {} }.',
 ].join(' ');
 
 export async function inviteWatercolorMode({
   mode,authorText='',activity=[],routeId='local:ollama',
   sessionId,history=[],checkpoint=null,voicePreferences=null,
-  worldId=null,participantId=null,externalProviderConsent=false,fetchImpl=fetch,invoke=invokeWayglassRoute,
+  worldId=null,participantId=null,externalProviderConsent=false,recentPaint=[],fetchImpl=fetch,invoke=invokeWayglassRoute,
 }={}){
   const prompt=composeWatercolorPrompt({mode,authorText,activity,voicePreferences});
   const shipVoice = routeId === 'wayglass:ship';
   if(!Array.isArray(history)||history.length>16||Array.from(history).some(turn=>!turn||!['user','assistant'].includes(turn.role)||typeof turn.content!=='string'||turn.content.length>12000))throw new TypeError('Bounded user/assistant history required');
+  const paintContext=recentPaint.length?'\n\nRecent Ship Voice brushstrokes on this canvas: '+JSON.stringify(recentPaint):'';
   const continuationHistory=history.map(({role,content})=>({role,content}));
   if(checkpoint!=null&&(!checkpoint||typeof checkpoint!=='object'||Array.isArray(checkpoint)||['storageId','worldId','participantId'].some(key=>typeof checkpoint[key]!=='string'||!checkpoint[key].trim()||checkpoint[key].length>512)))throw new TypeError('Canonical host checkpoint required');
   const continuationCheckpoint=checkpoint==null?null:{storageId:checkpoint.storageId,worldId:checkpoint.worldId,participantId:checkpoint.participantId};
   if(typeof routeId!=='string'||!routeId.trim())throw new TypeError('A registered model route is required');
   try{
     const result=await invoke({
-      routeId,input:shipVoice ? prompt.input+'\n\n'+WATERCOLOR_WYRDRUNE : prompt.input,
+      routeId,input:shipVoice ? prompt.input+'\n\n'+WATERCOLOR_WYRDRUNE+paintContext : prompt.input,
       sessionId,history:continuationHistory,checkpoint:continuationCheckpoint,
       // Keep the optional inheritance adapter out of an ordinary First Contact.
       // The host route itself pins and receipts the Wayglass participant.
