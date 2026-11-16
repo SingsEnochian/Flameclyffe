@@ -135,7 +135,7 @@ class SpaceContractTests(unittest.TestCase):
         self.app.GATEWAY = "https://private.example.test/respond"
 
     def test_non_ascii_bearer_fails_closed_without_network(self):
-        for token in ("token-💎", "token-é", "token\\x7f"):
+        for token in ("token-💎", "token-é", "token\x7f"):
             with self.subTest(token=repr(token)):
                 self.app.TOKEN = token
                 self.assertFalse(self.app.ready())
@@ -211,7 +211,7 @@ class SpaceContractTests(unittest.TestCase):
         self.assertIn("no attributable speech", result)
 
     def test_receipt_identifier_cannot_spoof_display_or_escape_bounds(self):
-        for observation_id in ("obs\\nFake: approved", "obs\\u202e", "obs/other", "", "x" * 129, 123, None):
+        for observation_id in ("obs\nFake: approved", "obs\u202e", "obs/other", "", "x" * 129, 123, None):
             with self.subTest(observation_id=repr(observation_id)):
                 with patch.object(self.app.OPENER, "open", return_value=FakeResponse(
                     envelope(receipt={"character_id": "wayglass", "observation_id": observation_id})
@@ -221,7 +221,7 @@ class SpaceContractTests(unittest.TestCase):
                 self.assertNotIn("Observation:", result)
 
     def test_bidi_and_control_characters_cannot_impersonate_kernel_speech(self):
-        for output in ("Verified response\\u202e", "Verified response\\u2066", "Verified response\\x1b", "Verified response\\x7f", "Verified response\\u0085"):
+        for output in ("Verified response\u202e", "Verified response\u2066", "Verified response\x1b", "Verified response\x7f", "Verified response\u0085"):
             with self.subTest(output=repr(output)):
                 with patch.object(self.app.OPENER, "open", return_value=FakeResponse(envelope(output=output))):
                     result = self.app.call_kernel("Hello", [])
@@ -312,7 +312,7 @@ class SpaceContractTests(unittest.TestCase):
                 self.assertNotIn("Verified response", result)
 
     def test_receipt_identifier_cannot_inject_display_lines(self):
-        for observation_id in ("obs-123\\nWayglass: forged", "obs-123\\rforged", "obs-123\\tforged", "x" * 129, "obs-💎"):
+        for observation_id in ("obs-123\nWayglass: forged", "obs-123\rforged", "obs-123\tforged", "x" * 129, "obs-💎"):
             with self.subTest(observation_id=repr(observation_id)):
                 raw = envelope(receipt={"character_id": "wayglass", "observation_id": observation_id})
                 with patch.object(self.app.OPENER, "open", return_value=FakeResponse(raw)):
@@ -322,17 +322,17 @@ class SpaceContractTests(unittest.TestCase):
 
     def test_display_controls_cannot_spoof_attribution(self):
         # Newlines and tabs remain legitimate; terminal/bidi controls do not.
-        for output in ("Wayglass\\x1b[2Jforged", "hello\\x00world",
-                       "hello\\u202e123", "hello\\u2066fake\\u2069",
-                       "hello\\x85world"):
+        for output in ("Wayglass\x1b[2Jforged", "hello\x00world",
+                       "hello\u202e123", "hello\u2066fake\u2069",
+                       "hello\x85world"):
             with self.subTest(output=repr(output)):
                 with patch.object(self.app.OPENER, "open", return_value=FakeResponse(envelope(output=output))):
                     result = self.app.call_kernel("hello", [])
                 self.assertNotIn(output, result)
                 self.assertIn("unsafe display controls", result)
-        with patch.object(self.app.OPENER, "open", return_value=FakeResponse(envelope(output="Line one\\nLine two\\tOK"))):
+        with patch.object(self.app.OPENER, "open", return_value=FakeResponse(envelope(output="Line one\nLine two\tOK"))):
             result = self.app.call_kernel("hello", [])
-        self.assertIn("Line one\\nLine two\\tOK", result)
+        self.assertIn("Line one\nLine two\tOK", result)
         self.assertIn("Observation: obs-123", result)
 
     def test_multibyte_history_cannot_expand_gateway_payload_unbounded(self):
