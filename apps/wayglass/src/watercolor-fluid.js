@@ -109,7 +109,7 @@ export function createWatercolorFluid({width=112,height=72,halfLife=560}={}){
     ({dye:dyeNext,red:redNext,green:greenNext,blue:blueNext,wet:wetNext}=old);
     ticks+=dt;
   }
-  function pixels({background='#13242e'}={}){
+  function pixels({background='#13242e',underlay=null}={}){
     assertActive();
     const bg=colorChannels(background),out=pixelBytes;
     for(let y=0;y<height;y++)for(let x=0;x<width;x++){
@@ -120,7 +120,7 @@ export function createWatercolorFluid({width=112,height=72,halfLife=560}={}){
       const alpha=clamp((1-Math.exp(-base*0.85))*paper+rim*.045,0,.98);
       const pigment=base>0.000001
         ?[red[i]/base,green[i]/base,blue[i]/base]:[0,0,0];
-      for(let c=0;c<3;c++)out[i*4+c]=clamp(Math.round((bg[c]*(1-alpha)+pigment[c]*alpha)*255),0,255);
+      for(let c=0;c<3;c++)out[i*4+c]=clamp(Math.round(((underlay?underlay[i*4+c]/255:bg[c])*(1-alpha)+pigment[c]*alpha)*255),0,255);
       out[i*4+3]=255;
     }
     return out;

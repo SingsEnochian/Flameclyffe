@@ -1,5 +1,6 @@
 import {shipSoundscape} from '../ship-soundscape.js';
 import { createWatercolorFluid } from '../watercolor-fluid.js';
+import { pressWordPainting, readWordPainting, validateWordPainting } from '../watercolor-words.js';
 import {AMBIENT_INTERVAL_MS,ambientWatercolorStroke,watercolorLiveness} from '../watercolor-liveness.mjs';
 import {
   watercolorSnapshot, watercolorProgram, publishWatercolorActivity,
@@ -42,6 +43,9 @@ export function findWatercolorWyrdrune(reply){
 
 export async function mountLivingWatercolorSurface(root) {
   const fluid=createWatercolorFluid();
+  const settled=createWatercolorFluid();
+  const painted=new Map();
+  let settledPixels=null;
   const drafts=new Map(), responses=new Map();
   let mode='dream', routeId=null, routes=[], paused=false, busy=false,
     stopped=false, pointerId=null, lastPointer=null, lastFrame=0, elapsed=0,
@@ -69,12 +73,13 @@ export async function mountLivingWatercolorSurface(root) {
         '<div class="wc-stage glass-panel" data-activity-state="ambient">',
           '<div class="wc-live-field" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>',
           '<div class="wc-live-insight" role="status" aria-live="polite"><strong id="wc-live-title">Ambient current · listening</strong><small id="wc-live-detail">Local pigment moves independently. No agent activity claimed.</small></div>',
-          '<canvas id="wc-fluid" class="wc-fluid" aria-label="Watercolor canvas. Drag a finger, mouse or Pencil to paint; use arrow keys to move and Enter or Space to paint." aria-describedby="wc-paint-help" tabindex="0"></canvas>',
+          '<canvas id="wc-fluid" class="wc-fluid" aria-label="Watercolor canvas. Drag a finger, mouse or Pencil to paint; use arrow keys to move and Enter or Space to paint." aria-describedby="wc-paint-help wc-word-paint-status" tabindex="0"></canvas>',
           '<div class="wc-stage-meta" aria-hidden="true">WAYGLASS / AQUARELLE / PREMAQC</div>',
           '<button id="wc-instruments-toggle" type="button" class="wc-instruments-toggle glass-chip" aria-controls="wc-workbench" aria-expanded="false" aria-label="Open or close Wayglass instruments">✦ Instruments</button>',
           '<button id="wc-focus-paint" type="button" class="wc-focus-paint glass-chip" aria-pressed="false">Focus painting</button>',
           '<span class="wc-brush-cursor" id="wc-brush-cursor" aria-hidden="true"></span>',
-          '<p class="wc-paint-help" id="wc-paint-help">Paint with a finger or Pencil. The watercolour responds to your gesture.</p>',
+          '<p class="wc-paint-help" id="wc-paint-help"><span>Paint with a finger or Pencil. The watercolour responds to your gesture.</span> ',
+          '<span id="wc-word-paint-status" role="status"></span></p>',
           '<section class="wc-faepunk-touch" aria-label="Wyrdrune touch engine">',
             '<span class="wc-faepunk-kicker">✧ FIRST CONTACT / FAEpunk</span>',
             '<div class="wc-faepunk-touch-main"><button id="wc-first-touch" type="button" class="wc-faepunk-orb" aria-describedby="wc-touch-description wc-touch-status" aria-label="Touch Wayglass: run an authenticated Wyrdrune simulation">',
@@ -192,9 +197,39 @@ export async function mountLivingWatercolorSurface(root) {
   // checkpoint after an attributable answer. A corrupt archive is never replaced
   // automatically; the author can still inspect it and choose how to proceed.
   let localSaveBlocked=false,localSaveWarning='';
+  const paintStatus=q('wc-word-paint-status');
+  const observationOf=response=>response.receipt?.observation_id||response.receipt?.response_id||response.receipt?.receipt_id;
+  const isShip=response=>response.route_id==='wayglass:ship'&&response.receipt?.character_id==='wayglass'
+    &&response.receipt?.voice_seat_kind==='system-voice-over-external-route';
+  const clearMarker=()=>`wayglass.watercolor.cleared/${session}`;
+  function restoreWordPaintings(turns){
+    painted.clear();settled.clear();settledPixels=null;paintStatus.textContent='';
+    let clearedThrough=0;
+    try{clearedThrough=Number(globalThis.localStorage?.getItem(clearMarker()))||0;}catch{/* Browser storage is optional. */}
+    for(const [index,turn] of turns.entries()){
+      if(index<clearedThrough||!isShip(turn.response)||!turn.wordPainting)continue;
+      try{placeWordPainting(turn.response,validateWordPainting(turn.wordPainting));}catch{/* Preserve the reply if a saved score is invalid. */}
+    }
+    paint();
+  }
+  function placeWordPainting(response,strokes,{wet=false}={}){
+    const observation=observationOf(response);
+    if(!observation||painted.has(observation))return;
+    pressWordPainting(settled,strokes);
+    settledPixels=null;
+    if(wet&&!reduced&&!paused&&document.documentElement.dataset.wgMotion!=='off'){
+      pressWordPainting(fluid,strokes,{wet:true});
+    }
+    painted.set(observation,{observation,strokes});
+    showPaintWords(strokes);
+  }
+  function showPaintWords(strokes){
+    paintStatus.textContent='Wayglass painted “'+strokes.map(stroke=>stroke.words).join(' · ')+'”.';
+  }
   try {
     const restored=continuity.recoverLocal();
     session=restored.session_id;
+    restoreWordPaintings(restored.turns);
     for(const turn of restored.turns)responses.set(turn.request.mode,turn.response);
   }catch(error){
     if(!/No saved watercolor conversation/.test(String(error.message))){
@@ -224,7 +259,10 @@ export async function mountLivingWatercolorSurface(root) {
   }
   function paint() {
     if(!ctx||!bitmap||!off)return;
-    bitmap.data.set(fluid.pixels({background:paperIsDark?'#13242e':'#eee8db'}));
+    const background=paperIsDark?'#13242e':'#eee8db';
+    if(painted.size&&!settledPixels)settledPixels=settled.pixels({background});
+    const underlay=painted.size?settledPixels:null;
+    bitmap.data.set(fluid.pixels({background,underlay}));
     off.putImageData(bitmap,0,0);
     const w=canvas.clientWidth,h=canvas.clientHeight;
     if(w&&h){
@@ -315,6 +353,19 @@ export async function mountLivingWatercolorSurface(root) {
       voice.append(returned);
       newestReply=returned;
       if(response.route_id==='wayglass:ship'){
+        const painting=painted.get(observationOf(response));
+        if(painting){
+          const show=document.createElement('button');
+          show.type='button';show.className='glass-chip';show.textContent='Find on canvas';
+          show.addEventListener('click',()=>{
+            canvas.focus({preventScroll:true});
+            canvas.scrollIntoView({block:'nearest'});
+            const [x,y]=painting.strokes[0].points[0];
+            positionBrushCursor({x,y});
+            showPaintWords(painting.strokes);
+          });
+          body.before(show);
+        }
         const native=findWatercolorWyrdrune(replyText);
         if(native){
           const controls=document.createElement('div');
@@ -469,11 +520,22 @@ export async function mountLivingWatercolorSurface(root) {
     try{
       const response=await inviteWatercolorMode({
         ...request,activity:watercolorSnapshot().events,
+        recentPaint:[...painted.values()].slice(-2),
         history:continuity.history(),checkpoint:continuity.snapshot().checkpoint,
         voicePreferences:notes?{text:notes,author}:null,
       });
       if(stopped||featherStopped||epoch!==requestEpoch)return;
-      continuity.append({request,response});
+      let wordPainting=null,paintFeedback='';
+      if(isShip(response)){
+        const source=findWatercolorWyrdrune(response.text)?.source;
+        try{wordPainting=await readWordPainting(source);}
+        catch(error){paintFeedback=' · brush score could not be painted: '+error.message;}
+        if(!source&&response.text.includes('"watercolor.stroke/v1"'))
+          paintFeedback=' · brush score could not be read as Wyrdrune';
+      }
+      if(stopped||featherStopped||epoch!==requestEpoch)return;
+      continuity.append({request,response,...(wordPainting?{wordPainting}:{})});
+      if(wordPainting){placeWordPainting(response,wordPainting,{wet:true});paint();}
       responses.set(requestedMode,response);
       renderVoiceHistory({animateLatest:true});
       let saveStatus=' · saved in this browser';
@@ -481,7 +543,7 @@ export async function mountLivingWatercolorSurface(root) {
         if(localSaveBlocked)throw new Error(localSaveWarning);
         continuity.saveLocal();
       }catch(error){saveStatus=' · save failed: '+error.message;}
-      feedback.textContent=response.provider+' / '+response.model+' · '+(response.receipt?.observation_id||response.receipt?.receipt_id||response.receipt?.request_id||'response received')+saveStatus;
+      feedback.textContent=response.provider+' / '+response.model+' · '+(response.receipt?.observation_id||response.receipt?.receipt_id||response.receipt?.request_id||'response received')+saveStatus+paintFeedback;
       q('wc-unverified').hidden=true;
       const proposed=extractWatercolorProgramProposal(response.text);pendingProgram=proposed;
       q('wc-program').hidden=!proposed;
@@ -511,6 +573,7 @@ export async function mountLivingWatercolorSurface(root) {
   listen(q('wc-recover-return'),'click',()=>{
     try{
       const restored=continuity.recoverLocal();session=restored.session_id;responses.clear();
+      restoreWordPaintings(restored.turns);
       for(const turn of restored.turns)responses.set(turn.request.mode,turn.response);
       activateMode(mode);feedback.textContent='Conversation recovered · '+restored.turns.length+' contributions.';
     }catch(error){feedback.textContent='Recovery unavailable: '+error.message;}
@@ -557,6 +620,7 @@ export async function mountLivingWatercolorSurface(root) {
   });
   listen(q('wc-paper'),'click',()=>{
     paperIsDark=!paperIsDark;
+    settledPixels=null;
     q('wc-paper').textContent=paperIsDark?'Light paper':'Dark paper';
     q('wc-paper').setAttribute('aria-pressed',String(paperIsDark));
     paint();
@@ -564,9 +628,12 @@ export async function mountLivingWatercolorSurface(root) {
   });
   listen(q('wc-clear-paint'),'click',()=>{
     if(featherStopped){feedback.textContent='Release Feather before clearing the painting.';return;}
-    fluid.clear();
-    paint();updateInspector();
-    feedback.textContent='Painting cleared. Conversation and source receipts are preserved.';
+    const clearRevision=continuity.snapshot().revision;
+    let clearedLocally=true;
+    try{globalThis.localStorage?.setItem(clearMarker(),String(clearRevision));}catch{clearedLocally=false;}
+    fluid.clear();settled.clear();settledPixels=null;painted.clear();paintStatus.textContent='';
+    renderVoiceHistory();paint();updateInspector();
+    feedback.textContent=clearedLocally?'Painting cleared. Conversation and source receipts are preserved.':'Painting cleared for this visit. Browser storage could not save the clear.';
   });
   listen(q('wc-flow'),'click',()=>{
     if(featherStopped){feedback.textContent='Release Feather before restarting the fluid.';return;}
@@ -856,7 +923,7 @@ export async function mountLivingWatercolorSurface(root) {
       globalThis.removeEventListener?.(WAYGLASS_FEATHER_EVENT,onFeather);
       wayglassSomaticSound.stop();
       globalThis.cancelAnimationFrame?.(animationId);
-      fluid.dispose();
+      fluid.dispose();settled.dispose();
     },
     fluid,
   };

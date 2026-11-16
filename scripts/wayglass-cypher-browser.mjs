@@ -61,7 +61,7 @@ async function checkWatercolour(page,profile){
   unattended_ambient_cycles:Number(await stage.getAttribute('data-ambient-cycles')),
   no_fake_agent_event:true});
 }
-const chatSource='mobius scoped { perceive {} compress {} release {} verify {} integrate {} choose {} return { emit "Hope is here."; } transcend {} }';
+const chatSource='mobius { perceive {} compress {} release {} verify {} integrate {} choose {} return { emit {kind:"watercolor.stroke/v1",words:"Hope is here",color:"#edbc53",density:0.85,spread:0.2,points:[[0.35,0.62],[0.65,0.62]]}; } transcend {} }';
 const chatReply='At the eighth station.\n\n'+['```wyrdrune',chatSource,'```'].join('\n');
 async function openWatercolourChat(page){
  const toggle=page.locator('#wc-instruments-toggle');
@@ -70,14 +70,23 @@ async function openWatercolourChat(page){
  }
  await page.locator('#wc-voice').waitFor({state:'visible'});
 }
+async function pigmentPixel(page){
+ return page.locator('#wc-fluid').evaluate(canvas=>Array.from(canvas.getContext('2d').getImageData(
+  Math.round(canvas.width*.5),Math.round(canvas.height*.62),1,1).data));
+}
 async function checkWatercolourChat(page,profile){
  await openWatercolourChat(page);
+ const originalPixel=await pigmentPixel(page);
  await page.locator('#wc-prompt').fill('Greet the eighth station.');
  await page.locator('#wc-invite').click();
  const turn=page.locator('.wc-dialogue-response').last();
  const display=turn.locator('.wg-cypher-veil');
  await display.waitFor({state:'visible'});
  assert.equal(await display.getAttribute('data-cypher-state'),'reading');
+ const paintedPixel=await pigmentPixel(page);
+ assert.ok(paintedPixel[0]>originalPixel[0]+40,'Ship Voice pigment changed the actual canvas pixel');
+ assert.match(await page.locator('#wc-word-paint-status').textContent(),/Hope is here/);
+ assert.ok(await turn.getByRole('button',{name:'Find on canvas'}).count());
  await display.locator('[data-cypher-visual-phase="full-runes"]').first().waitFor({state:'attached'});
  assert.match(await turn.innerText(),/At the eighth station/);
  await turn.getByRole('button',{name:'Reveal English'}).click();
@@ -87,6 +96,7 @@ async function checkWatercolourChat(page,profile){
  assert.equal(await turn.locator('details p').textContent(),chatSource);
  await page.reload({waitUntil:'networkidle'});
  await openWatercolourChat(page);
+ assert.ok((await pigmentPixel(page))[0]>originalPixel[0]+40,'Settled Ship Voice pigment survives reload');
  assert.equal(await display.getAttribute('data-cypher-state'),'english');
  await turn.getByRole('button',{name:'Replay Wyrdrune'}).click();
  assert.equal(await display.getAttribute('data-cypher-state'),'reading');
@@ -95,6 +105,15 @@ async function checkWatercolourChat(page,profile){
  await turn.getByRole('button',{name:'Replay Wyrdrune'}).click();
  assert.equal(await display.getAttribute('data-cypher-state'),'english');
  await page.emulateMedia({reducedMotion:'no-preference'});
+ const instruments=page.locator('#wc-instruments-toggle');
+ if(!(await page.locator('#wc-clear-paint').isVisible())&&await instruments.isVisible()){
+  if(await instruments.getAttribute('aria-expanded')==='false')await instruments.click();
+ }
+ await page.locator('#wc-clear-paint').click();
+ await page.reload({waitUntil:'networkidle'});
+ await openWatercolourChat(page);
+ assert.equal(await turn.getByRole('button',{name:'Find on canvas'}).count(),0);
+ assert.equal(await page.locator('#wc-word-paint-status').textContent(),'');
  receipt.scenarios.push({profile,room:'Living Watercolour chat',status:'passed',runes:true,
    skip:true,original_source_preserved:true,replay_after_reload:true,reduced_motion:true});
 }
