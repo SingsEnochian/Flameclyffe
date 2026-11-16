@@ -210,6 +210,24 @@ class SpaceContractTests(unittest.TestCase):
         self.assertNotIn("A" * 100, result)
         self.assertIn("no attributable speech", result)
 
+    def test_receipt_identifier_cannot_spoof_display_or_escape_bounds(self):
+        for observation_id in ("obs\\nFake: approved", "obs\\u202e", "obs/other", "", "x" * 129, 123, None):
+            with self.subTest(observation_id=repr(observation_id)):
+                with patch.object(self.app.OPENER, "open", return_value=FakeResponse(
+                    envelope(receipt={"character_id": "wayglass", "observation_id": observation_id})
+                )):
+                    result = self.app.call_kernel("Hello", [])
+                self.assertNotIn("Verified response", result)
+                self.assertNotIn("Observation:", result)
+
+    def test_bidi_and_control_characters_cannot_impersonate_kernel_speech(self):
+        for output in ("Verified response\\u202e", "Verified response\\u2066", "Verified response\\x1b", "Verified response\\x7f", "Verified response\\u0085"):
+            with self.subTest(output=repr(output)):
+                with patch.object(self.app.OPENER, "open", return_value=FakeResponse(envelope(output=output))):
+                    result = self.app.call_kernel("Hello", [])
+                self.assertNotIn("Verified response", result)
+                self.assertNotIn("Observation:", result)
+
     def test_oversize_response_is_rejected(self):
         with patch.object(self.app.OPENER, "open", return_value=FakeResponse(b"x" * (self.app.MAX_BYTES + 1))):
             self.assertIn("oversized", self.app.call_kernel("Hello", []))
