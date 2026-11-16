@@ -261,6 +261,31 @@ class SpaceContractTests(unittest.TestCase):
                     self.assertIn("8,000", self.app.call_kernel(message, []))
             opener.assert_not_called()
 
+    def test_surrogate_history_is_discarded_before_transport(self):
+        captured = {}
+        def respond(req, timeout):
+            captured["body"] = json.loads(req.data)
+            return FakeResponse(envelope())
+        history = [
+            {"role": "user", "content": "bad\\ud800history"},
+            {"role": "assistant", "content": "good history"},
+            {"role": "user", "content": "\\udfff"},
+        ]
+        with patch.object(self.app.OPENER, "open", side_effect=respond):
+            result = self.app.call_kernel("continue", history)
+        self.assertIn("Verified response", result)
+        self.assertEqual(captured["body"]["history"], [
+            {"role": "assistant", "content": "good history"},
+        ])
+
+    def test_surrogate_gateway_output_cannot_be_attributed_as_speech(self):
+        for output in ("hello\\ud800", "\\udfff", "valid\\ud800\\udc00"):
+            with self.subTest(output=repr(output)):
+                with patch.object(self.app.OPENER, "open", return_value=FakeResponse(envelope(output=output))):
+                    result = self.app.call_kernel("hello", [])
+                self.assertNotIn("Observation:", result)
+                self.assertIn("unsafe display controls", result)
+
     def test_redirect_handler_denies_all_redirects(self):
         handler = self.app.NoRedirect()
         for code in (301, 302, 303, 307, 308):
