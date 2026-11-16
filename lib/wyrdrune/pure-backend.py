@@ -133,6 +133,124 @@ def _shape(record):
     return sorted(record)
 
 
+QUANTUM_TOLERANCE = 1e-12
+
+
+def _finite_number(value):
+    return _kind(value) == "number" and math.isfinite(value)
+
+
+def _amplitude(value):
+    if not isinstance(value, list) or len(value) != 2 or not all(map(_finite_number, value)):
+        raise TypeError("Quantum amplitude requires two finite numbers")
+
+
+def _norm(value):
+    real, imaginary = value
+    return real * real + imaginary * imaginary
+
+
+def _state(value):
+    if not isinstance(value, list):
+        raise TypeError("Quantum state requires an amplitude list")
+    if len(value) not in (2, 4, 8, 16):
+        raise ValueError("Quantum dimension must be 2, 4, 8 or 16")
+    for item in value:
+        _amplitude(item)
+    total = 0
+    for item in value:
+        total += _norm(item)
+    if abs(total - 1) > QUANTUM_TOLERANCE:
+        raise ValueError("Quantum state must have unit norm")
+    return value
+
+
+def _inner(left, right, conjugate):
+    real = imaginary = 0
+    for (a, b), (c, d) in zip(left, right):
+        signed = -b if conjugate else b
+        real += a * c - signed * d
+        imaginary += a * d + signed * c
+    return [real, imaginary]
+
+
+def _check_matrix(matrix, size, diagnostic):
+    if not isinstance(matrix, list) or len(matrix) != size:
+        raise TypeError(diagnostic)
+    for row in matrix:
+        if not isinstance(row, list) or len(row) != size:
+            raise TypeError(diagnostic)
+        for item in row:
+            _amplitude(item)
+
+
+def _quantum_apply(vector, matrix):
+    vector = _state(vector)
+    _check_matrix(matrix, len(vector), "Quantum gate dimensions must match the state")
+    for i, row in enumerate(matrix):
+        for j in range(i, len(matrix)):
+            real, imaginary = _inner(row, matrix[j], True)
+            if not (abs(real - int(i == j)) <= QUANTUM_TOLERANCE
+                    and abs(imaginary) <= QUANTUM_TOLERANCE):
+                raise ValueError("Quantum gate must be unitary")
+    return _state([_inner(row, vector, False) for row in matrix])
+
+
+def _quantum_tensor(left, right):
+    left, right = _state(left), _state(right)
+    if len(left) * len(right) > 16:
+        raise ValueError("Quantum tensor exceeds 16 amplitudes")
+    return _state([[a * c - b * d, a * d + b * c]
+                   for a, b in left for c, d in right])
+
+
+def _quantum_probabilities(vector):
+    return [_norm(item) for item in _state(vector)]
+
+
+def _quantum_expectation(vector, observable):
+    vector = _state(vector)
+    _check_matrix(observable, len(vector), "Quantum observable dimensions must match the state")
+    for i, row in enumerate(observable):
+        for j in range(i, len(vector)):
+            real, imaginary = row[j]
+            other_real, other_imaginary = observable[j][i]
+            if real != other_real or imaginary != -other_imaginary:
+                raise ValueError("Quantum observable must be Hermitian")
+    expectation, _ = _inner(vector, [_inner(row, vector, False) for row in observable], True)
+    if not math.isfinite(expectation):
+        raise ValueError("Quantum expectation must be finite")
+    return expectation
+
+
+def _quantum_probability(vector, index):
+    vector = _state(vector)
+    if not _finite_number(index) or not 0 <= index < len(vector) or index != int(index):
+        raise ValueError("Quantum outcome index is outside the basis")
+    return _norm(vector[int(index)])
+
+
+def _wonder(question, perspectives, evidence):
+    def bounded_text(value):
+        return (isinstance(value, str) and bool(value.strip("\t\n\v\f\r \u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000\ufeff"))
+                and len(value.encode("utf-16-le", "surrogatepass")) // 2 <= 2048)
+
+    if (not bounded_text(question) or not isinstance(perspectives, list)
+            or not 1 <= len(perspectives) <= 16 or not all(map(bounded_text, perspectives))
+            or not isinstance(evidence, list) or len(evidence) > 16):
+        raise TypeError("Wonder requires a question, perspectives and a list of evidence")
+    return {"schema": "wyrdrune.wonder/v0.1", "status": "open", "question": question,
+            "perspectives": perspectives, "evidence": evidence}
+
+
+PURE_OPERATIONS = {
+    "quantumApply": (2, _quantum_apply), "quantumTensor": (2, _quantum_tensor),
+    "quantumProbabilities": (1, _quantum_probabilities),
+    "quantumExpectation": (2, _quantum_expectation),
+    "quantumProbability": (2, _quantum_probability), "wonder": (3, _wonder),
+}
+
+
 class Execution:
     def __init__(self, ir, max_operations, seeds=None):
         if not isinstance(ir, dict) or ir.get("schema") != "wyrdrune.ir/v0.1":
@@ -283,6 +401,11 @@ class Execution:
                 if len(args) != len(params):
                     raise TypeError("Operator " + name + " expects " + str(len(params)) + " arguments")
                 return self.expression(operator["body"], dict(zip(params, args)), depth + 1)
+            if name in PURE_OPERATIONS:
+                arity, operation = PURE_OPERATIONS[name]
+                if len(args) != arity:
+                    raise TypeError(name + " expects " + str(arity) + " arguments")
+                return operation(*args)
             if name == "whisper":
                 raise HardStop("whisper requires mobius spiced")
             if locals_ is not None:

@@ -136,3 +136,27 @@ current source, ordered checkpoints and the latest checkpoint digest in a
 trusted location. Restore verifies the full chain and the current source
 against that anchor. The reported generation is a lineage counter, and
 output equivalence covers the observed emissions of these bounded runs.
+
+## Quantum amplitudes and open philosophical inquiry
+
+The pure WTL operations `quantumTensor`, `quantumApply`,
+`quantumProbabilities`, `quantumProbability` and `quantumExpectation` support finite pure states
+of one to four qubits. Complex amplitudes use `[real, imaginary]` with
+binary64 arithmetic. Tensor products use the left system as the most
+significant basis bits. Gate application checks unitarity and state
+normalization with an absolute tolerance of 1e-12. The probability operations
+compute Born-rule distributions in the computational basis without sampling.
+`quantumExpectation` computes the mean of a Hermitian observable for a state.
+
+`wonder(question, perspectives, evidence)` returns a record whose status
+is open, with author-supplied interpretations and evidence. A probability
+belongs to its state, basis and measurement model. The language assigns no
+probability to the philosophical interpretations in that record.
+`lib/wyrdrune/bell-wonder.wtl` computes a Bell pair, returns both the
+distribution and the inquiry, and carries the distribution through Transcend.
+
+Mathematical references: [IBM Quantum Learning, single systems](https://learning.quantum.ibm.com/course/basics-of-quantum-information/single-systems)
+and [multiple systems](https://quantum.cloud.ibm.com/learning/en/courses/basics-of-quantum-information/multiple-systems/quantum-information).
+This revision models finite state-vector circuits. Mixed states, measurement
+updates, noise channels, Hamiltonian evolution and experimental evidence
+ingestion are separate capabilities.
