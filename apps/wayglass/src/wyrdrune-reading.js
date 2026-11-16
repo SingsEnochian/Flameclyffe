@@ -67,6 +67,12 @@ export function attachOrionExpression(root, { source, receiptHash, held, values 
   const status = doc.createElement('p');
   status.setAttribute('role', 'status');
   const visual = doc.createElement('div');
+  let lastFrame = null;
+  function displayImage(image) {
+    lastFrame = image ? { hue: Math.round(image.hue), depth: Math.round(image.depth * 40) } : null;
+    if (image) visual.replaceChildren(createWayglassImage(image, doc));
+    else visual.replaceChildren();
+  }
   const transcript = doc.createElement('p');
   transcript.style.whiteSpace = 'pre-wrap';
   media.append(selectLabel, label, controls, status, visual, transcript);
@@ -139,10 +145,16 @@ export function attachOrionExpression(root, { source, receiptHash, held, values 
           status.textContent = 'Expression complete.';
           return;
         }
-        if (cue.image) visual.replaceChildren(createWayglassImage(cue.image, doc));
-        else visual.replaceChildren();
+        displayImage(cue.image);
         transcript.textContent = cue.kind === 'silence' ? 'Silence · ' + cue.durationMs + ' ms'
           : [cue.voice, cue.text].filter(Boolean).join('\n');
+      }, {
+        onFrame: image => {
+          if (globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches) return;
+          if (lastFrame?.hue !== Math.round(image.hue) || lastFrame?.depth !== Math.round(image.depth * 40)) {
+            displayImage(image);
+          }
+        },
       });
     }
     catch (error) { if (!disposed) status.textContent = error.message; }

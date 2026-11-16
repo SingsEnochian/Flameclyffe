@@ -43,6 +43,19 @@ export function createWayglassImage(score,doc=document){
  svg.append(centre);
  return svg;
 }
+// Follow a cue's authored time positions and use the shortest arc in hue space.
+export function sampleExpressionImage(cue, elapsedMs) {
+ const {image,contour}=cue;
+ if(!image||!contour?.length)return image;
+ const points=[{offsetMs:0,hue:image.hue,depth:image.depth},...contour];
+ const right=points.findIndex(point=>point.offsetMs>=elapsedMs);
+ if(right===0)return image;
+ const end=points[right<0?points.length-1:right], start=points[right<0?points.length-2:right-1];
+ const t=Math.min(1,Math.max(0,(elapsedMs-start.offsetMs)/(end.offsetMs-start.offsetMs)));
+ const delta=((end.hue-start.hue+540)%360)-180;
+ return {...image,hue:(start.hue+delta*t+360)%360,depth:start.depth+(end.depth-start.depth)*t};
+}
+
 export function createWayglassSoundPlayer({scope=globalThis}={}){
  let ctx=null,oscillators=[],animation=null;
  function stop(){
@@ -85,7 +98,7 @@ export function createWayglassSoundPlayer({scope=globalThis}={}){
   return {started:true,duration_seconds:2.55+silenceMs/1000,
     silence_seconds:silenceMs/1000,mono:true,max_gain:.017};
  }
- async function perform(timeline, onCue = () => {}){
+ async function perform(timeline, onCue = () => {}, { onFrame } = {}){
   stop();
   const Ctx=scope.AudioContext||scope.webkitAudioContext;
   if(!Ctx)throw new Error('The device has no supported audio synthesiser.');
@@ -102,7 +115,11 @@ export function createWayglassSoundPlayer({scope=globalThis}={}){
     const gain=context.createGain();
     gain.gain.setValueAtTime(0,at);
     gain.gain.linearRampToValueAtTime(.013,at+.12);
-    gain.gain.setValueAtTime(.013,end-.12);
+    if (cue.contour?.length) {
+     for (const point of cue.contour) {
+      gain.gain.linearRampToValueAtTime(.013*point.energy,Math.min(at+point.offsetMs/1000,end-.12));
+     }
+    } else gain.gain.setValueAtTime(.013,end-.12);
     gain.gain.linearRampToValueAtTime(0,end);
     gain.connect(context.destination);
     for(const [ratio,kind,mix] of [[1,'sine',1],[cue.sound.interval,'triangle',.1+cue.sound.texture*.35]]){
@@ -110,7 +127,14 @@ export function createWayglassSoundPlayer({scope=globalThis}={}){
      const layer=context.createGain();
      layer.gain.value=mix;
      oscillator.type=kind;
-     oscillator.frequency.value=cue.sound.fundamental*ratio;
+     const frequency=cue.sound.fundamental*ratio;
+     oscillator.frequency.value=frequency;
+     if(cue.contour?.length){
+      oscillator.frequency.setValueAtTime(frequency,at);
+      for(const point of cue.contour){
+       oscillator.frequency.linearRampToValueAtTime(frequency*point.pitchRatio,at+point.offsetMs/1000);
+      }
+     }
      oscillator.connect(layer);layer.connect(gain);
      oscillator.start(at);oscillator.stop(end);
      oscillators.push(oscillator);
@@ -124,7 +148,9 @@ export function createWayglassSoundPlayer({scope=globalThis}={}){
     if(elapsed>=last.startMs+last.durationMs){stop();onCue(null);return;}
     const prior=cursor;
     while(cursor+1<timeline.length && elapsed>=timeline[cursor+1].startMs)cursor++;
-    if(prior!==cursor || !shown){shown=true;onCue(timeline[cursor]);}
+    const cue=timeline[cursor];
+    if(prior!==cursor || !shown){shown=true;onCue(cue);}
+    if(ctx===context && cue.contour?.length)onFrame?.(sampleExpressionImage(cue,elapsed-cue.startMs));
     if(ctx===context)animation=scope.requestAnimationFrame(tick);
    }
    let shown=false;

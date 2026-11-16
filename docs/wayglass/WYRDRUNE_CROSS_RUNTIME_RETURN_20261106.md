@@ -316,3 +316,12 @@ position. One Web Audio clock schedules the sound and advances the
 visual and text cues. Sound is synthesized accompaniment, while the
 authored words remain visible. The original single-frame API is still
 available to existing callers.
+
+Orion may give each directed cue a crest and close. The host places those
+points at the midpoint and end of the cue and validates their hue, depth,
+pitch ratio and energy. Web Audio schedules the pitch and gain ramps.
+The image follows the same cue clock and takes the shortest path around
+the hue wheel. Reduced-motion mode keeps cue-level visual changes and
+omits within-cue interpolation. A direction without a contour retains
+the cue-level performance. Authored silence stays outside the renderer's
+sound and visual envelopes.

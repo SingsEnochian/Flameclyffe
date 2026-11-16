@@ -44,6 +44,8 @@ test('Orion directs each authored cue and Wayglass inserts all silences in place
   const authored = preview.values[1].cues;
   const dirs = authored.filter(cue => cue.kind !== 'silence').map((_cue, index) => ({
     durationMs: 1000 + index * 100,
+    contour: [{ hue: 5, depth: 0.8, pitchRatio: 1.1, energy: 0.9 },
+      { hue: 10, depth: 0.3, pitchRatio: 0.9, energy: 0.2 }],
     image: { hue: index * 30, spread: 0.5, depth: 0.6 },
     sound: { fundamental: 220, interval: 1.5, texture: 0.2 },
   }));
@@ -62,7 +64,11 @@ test('Orion directs each authored cue and Wayglass inserts all silences in place
   assert.equal(timeline[2].text, authored[2].text);
   assert.equal(timeline[2].voice, authored[2].voice);
   assert.equal(timeline[2].image.hue, 30);
+  assert.deepEqual(timeline[2].contour.map(point => point.offsetMs), [550, 1100]);
   assert.equal(provenance.frameDigest, digest(timeline));
+  dirs[0].contour[0].pitchRatio = 2;
+  await assert.rejects(composeOrionExpression(input, opts), /contour pitch/);
+  dirs[0].contour[0].pitchRatio = 1.1;
   dirs.pop();
   await assert.rejects(composeOrionExpression(input, opts), /each expressive cue/);
 });
