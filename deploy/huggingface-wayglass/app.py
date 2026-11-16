@@ -51,9 +51,17 @@ def ready():
 def call_kernel(message, history):
     if not ready():
         return "Wayglass kernel not connected. Configure private WAYGLASS_RESPOND_URL and WAYGLASS_GATEWAY_TOKEN in Space secrets before enabling conversation."
-    if not isinstance(message, str) or not message.strip() or len(message) > 8000 or len(message.encode("utf-8")) > 32000:
+    if not isinstance(message, str) or not message.strip() or len(message) > 8000:
         return "Please enter a message under 8,000 characters."
-    # Reject unpaired UTF-16 surrogates before JSON transport. A malformed client\n    # string must never crash the Gradio callback or trigger a network request.\n    try:\n        message.encode("utf-8", errors="strict")\n    except UnicodeEncodeError:\n        return "Please enter valid Unicode text."\n    # Preserve bounded context; never trust client-supplied privileged roles.
+    # Reject unpaired UTF-16 surrogates before JSON transport. A malformed client
+    # string must never crash the Gradio callback or trigger a network request.
+    try:
+        message_bytes = message.encode("utf-8", errors="strict")
+    except UnicodeEncodeError:
+        return "Please enter valid Unicode text."
+    if len(message_bytes) > 32000:
+        return "Please enter a message under 8,000 characters."
+    # Preserve bounded context; never trust client-supplied privileged roles.
     prior = []
     if isinstance(history, list):
         for turn in history[-24:]:
