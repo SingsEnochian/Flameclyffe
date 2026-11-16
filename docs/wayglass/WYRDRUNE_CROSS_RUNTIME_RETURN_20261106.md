@@ -105,3 +105,34 @@ return the artifact without executing source. `mode: "typed-preview"` checks
 the source and executes only when the required host-effect manifest is empty.
 It returns the usual independently verified preview receipt. The mode is
 explicit so existing v0.1 programs and callers can still use ordinary preview.
+
+## Wayglass revision lineage
+
+`createWyrdruneRevisionLineage` in the Wayglass kernel runs candidate code
+revisions through the existing Eightfold Möbius engine. The lineage binds
+its participant, initial typed source and WTL selection program. Perceive
+runs the active source. Compress records the expected emitted values by
+digest. Release compiles and runs the candidate twice. Verify runs
+`revision-selection.wtl` against the observed output and replay evidence.
+Integrate binds the evidence, Choose records the caller's decision, Return
+crosses with Withness, and Transcend carries the selected revision digest
+and generation to the opposite face.
+
+A trial defaults to preserving the parent's emitted values. The caller
+can supply an explicit expected output list for a deliberate behaviour
+change. Both candidate runs must produce the same full execution digest.
+Changing the active revision also requires an accepted decision from an
+authenticated kernel caller and an approval reference. The approval
+reference records caller provenance. Authentication and any approval
+record lookup belong to the host that invokes the kernel.
+
+Revisions are pure typed programs. Their trial runs use fresh scopes, an
+operation budget, and Feather cancellation. They do not import arbitrary
+host effects. A stale parent or overlapping trial is refused. A rejected
+trial leaves the prior revision available for a corrected proposal.
+
+The host owns persistence. For cold return it must save the initial source,
+current source, ordered checkpoints and the latest checkpoint digest in a
+trusted location. Restore verifies the full chain and the current source
+against that anchor. The reported generation is a lineage counter, and
+output equivalence covers the observed emissions of these bounded runs.
