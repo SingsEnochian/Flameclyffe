@@ -393,9 +393,22 @@ class SpaceContractTests(unittest.TestCase):
             result = self.app.call_kernel("continue", history)
         self.assertIn("Verified response", result)
         retained = captured["body"]["history"]
-        self.assertEqual(len(retained), 6)
-        self.assertEqual([int(t["content"].split("x")[0]) for t in retained], list(range(6, 12)))
+        self.assertEqual(len(retained), 5)
+        self.assertEqual([int(t["content"].split("x")[0]) for t in retained], list(range(7, 12)))
         self.assertLessEqual(sum(len(t["content"].encode("utf-8")) for t in retained), 64000)
+
+    def test_large_new_turn_reserves_transport_budget_before_history(self):
+        captured = {}
+        def respond(req, timeout):
+            captured["body"] = json.loads(req.data)
+            captured["size"] = len(req.data)
+            return FakeResponse(envelope())
+        history = [{"role": "user", "content": "x" * 8000} for _ in range(12)]
+        with patch.object(self.app.OPENER, "open", side_effect=respond):
+            result = self.app.call_kernel("z" * 8000, history)
+        self.assertIn("Verified response", result)
+        self.assertLessEqual(captured["size"], 64000)
+        self.assertEqual(len(captured["body"]["history"]), 6)
 
     def test_gradio_messages_contract_is_explicit(self):
         source = APP.read_text(encoding="utf-8")
