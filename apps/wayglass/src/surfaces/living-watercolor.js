@@ -14,6 +14,8 @@ import {createWatercolorContinuity} from '../watercolor-continuity.js';
 import { journeyLedger } from '../journey-before-destination.js';
 import {synchronizeJourneyFeather} from './journey-before-destination.js';
 import {touchWayglass} from '../first-touch-client.js';
+import { animateWyrdruneCypher, readWyrdrune } from '../wyrdrune-cypher.js';
+import { cypherRunOptions, readCypherPace } from '../cypher-pace.js';
 
 const clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
 const safeText=value=>String(value??'').replaceAll('&','&amp;')
@@ -22,6 +24,21 @@ const safeText=value=>String(value??'').replaceAll('&','&amp;')
 const PIGMENTS=Object.freeze([['Copper','#c26a46'],['Sun','#db9d3e'],['Moss','#4c7961'],['Tide','#347e9c'],['Amethyst','#8c669c']]);
 const modeButton=mode=>'<button type="button" class="wc-mode" data-wc-mode="'+mode.id+
   '" aria-pressed="false" title="'+safeText(mode.intent)+'">'+mode.label+'</button>';
+
+export function findWatercolorWyrdrune(reply){
+  for(const match of reply.matchAll(/^```([\w-]*)[ \t]*\r?\n([\s\S]*?)^```[ \t]*(?=\r?$)/gm)){
+    if(!['','wyrdrune','wtl'].includes(match[1].toLowerCase()))continue;
+    const source=match[2].trim();
+    if(!source)continue;
+    try{
+      readWyrdrune(source);
+      return {source,prose:(reply.slice(0,match.index)+reply.slice(match.index+match[0].length)).trim()};
+    }catch(error){
+      if(!(error instanceof SyntaxError||error instanceof TypeError||error instanceof RangeError))throw error;
+    }
+  }
+  return null;
+}
 
 export async function mountLivingWatercolorSurface(root) {
   const fluid=createWatercolorFluid();
@@ -258,7 +275,11 @@ export async function mountLivingWatercolorSurface(root) {
       wayglassSomaticSound.play(event.kind,{x,energy:event.intensity});
     }
   });
-  function renderVoiceHistory() {
+  let voiceCypher=null;
+  function renderVoiceHistory({animateLatest=false}={}) {
+    voiceCypher?.stop();
+    voiceCypher=null;
+    let newestReply;
     const turns=continuity.snapshot().turns;
     voice.replaceChildren();
     if(!turns.length){
@@ -286,13 +307,65 @@ export async function mountLivingWatercolorSurface(root) {
       const heading=document.createElement('strong');
       heading.textContent=response.route_id==='wayglass:ship'?'Wayglass · Ship Voice':response.provider+' / '+response.model;
       const body=document.createElement('p');
-      body.textContent=response.text||response.output||'';
+      const replyText=response.text||response.output||'';
+      body.textContent=replyText;
       const evidence=document.createElement('small');
       evidence.textContent='Route: '+response.route_id+' · model: '+response.model+' · observation: '+(response.receipt?.observation_id||response.receipt?.response_id||'unavailable');
       returned.append(heading,body,evidence);
       voice.append(returned);
+      newestReply=returned;
+      if(response.route_id==='wayglass:ship'){
+        const native=findWatercolorWyrdrune(replyText);
+        if(native){
+          const controls=document.createElement('div');
+          const replay=document.createElement('button');
+          replay.type='button';
+          replay.className='glass-chip';
+          replay.textContent='Replay Wyrdrune';
+          const reveal=document.createElement('button');
+          reveal.type='button';
+          reveal.className='glass-chip';
+          reveal.textContent='Reveal English';
+          reveal.hidden=true;
+          controls.append(replay,reveal);
+          const display=document.createElement('div');
+          display.className='wg-cypher-veil';
+          display.setAttribute('aria-label','Wayglass Wyrdrune reading');
+          display.setAttribute('aria-live','off');
+          display.hidden=true;
+          const original=document.createElement('details');
+          const summary=document.createElement('summary');
+          summary.textContent='Original Wyrdrune';
+          const code=document.createElement('p');
+          code.textContent=native.source;
+          original.append(summary,code);
+          body.textContent=native.prose;
+          body.hidden=!native.prose;
+          body.before(controls,display,original);
+          function play({focus=false,still=false}={}){
+            voiceCypher?.stop();
+            display.hidden=false;
+            const reduce=still||reduced||featherStopped||document.documentElement.dataset.wgMotion==='off';
+            reveal.hidden=reduce;
+            if(focus&&!reduce)reveal.focus({preventScroll:true});
+            voiceCypher=animateWyrdruneCypher(display,{
+              source:native.source,reducedMotion:reduce,...cypherRunOptions(readCypherPace()),
+              onComplete:()=>{
+                if(document.activeElement===reveal)replay.focus({preventScroll:true});
+                reveal.hidden=true;
+              },
+            });
+          }
+          replay.addEventListener('click',()=>play({focus:true}));
+          reveal.addEventListener('click',()=>voiceCypher?.stop());
+          play({still:!animateLatest||turn!==turns.at(-1)});
+        }
+      }
     }
-    voice.scrollTop=voice.scrollHeight;
+    if(animateLatest&&newestReply){
+      const offset=newestReply.getBoundingClientRect().top-voice.getBoundingClientRect().top;
+      voice.scrollTop+=offset;
+    }else voice.scrollTop=voice.scrollHeight;
   }
   function activateMode(next) {
     const selected=resolveWatercolorMode(next);
@@ -402,7 +475,7 @@ export async function mountLivingWatercolorSurface(root) {
       if(stopped||featherStopped||epoch!==requestEpoch)return;
       continuity.append({request,response});
       responses.set(requestedMode,response);
-      renderVoiceHistory();
+      renderVoiceHistory({animateLatest:true});
       let saveStatus=' · saved in this browser';
       try {
         if(localSaveBlocked)throw new Error(localSaveWarning);
@@ -776,6 +849,7 @@ export async function mountLivingWatercolorSurface(root) {
   return {
     destroy(){
       stopped=true;requestEpoch++;busy=false;pointerId=null;lastPointer=null;
+      voiceCypher?.stop();
       touchEpoch++;touchAbort?.abort();touchAbort=null;
       offActivity();offShipSound();
       for(const remove of cleanups.splice(0))remove();
