@@ -1,0 +1,19 @@
+/* WTL Atelier: a material-responsive instrument, not an untrusted HTML canvas. */
+[data-surface="wtl-interface-atelier"]{display:grid;gap:1rem;max-width:70rem;margin-inline:auto}
+[data-surface="wtl-interface-atelier"] textarea{width:100%;min-height:12rem;max-height:45vh;resize:vertical;font:0.9rem/1.5 ui-monospace,monospace;background:#101722;color:#e8f4f5;border:1px solid #8babb2;border-radius:0.8rem;padding:1rem}
+[data-surface="wtl-interface-atelier"] button{min-height:2.75rem;cursor:pointer}
+.wg-wtl-atelier-stage{isolation:isolate;overflow:hidden;border-radius:clamp(1rem,3vw,2.5rem);min-height:17rem;border:1px solid rgba(190,224,232,.48);background:#111b28}
+.wg-wtl-atelier-preview{--glow:#85d5d5;--core:#30485b;--accent:#d2dff1;position:relative;display:grid;gap:1rem;align-content:center;padding:clamp(1.2rem,4vw,3rem);min-height:17rem;color:#f6f9ff;background:radial-gradient(ellipse at 22% 28%,color-mix(in srgb,var(--glow),transparent 70%),transparent 57%),radial-gradient(ellipse at 85% 82%,color-mix(in srgb,var(--accent),transparent 78%),transparent 48%),linear-gradient(125deg,#101722,var(--core),#121923)}
+.wg-wtl-atelier-preview::before{content:"";position:absolute;inset:-40%;pointer-events:none;opacity:.35;background:conic-gradient(from 35deg at 50% 50%,transparent 0 20%,var(--glow) 27%,transparent 34% 60%,var(--accent) 70%,transparent 80%);filter:blur(2.8rem);animation:wg-atelier-drift 22s ease-in-out infinite alternate;z-index:-1}
+.wg-wtl-atelier-preview[data-material="labradorite"]{--glow:#62d3bb;--core:#26344f;--accent:#aa91e9}
+.wg-wtl-atelier-preview[data-material="amber"]{--glow:#f3b763;--core:#473024;--accent:#f5d7a1}
+.wg-wtl-atelier-preview[data-material="moss"]{--glow:#9ec99b;--core:#243e35;--accent:#d5dfb0}
+.wg-wtl-atelier-preview[data-material="clear"]{--glow:#b4e9ee;--core:#314653;--accent:#ffffff}
+.wg-wtl-atelier-preview h2{font-size:clamp(1.4rem,3vw,2.4rem);line-height:1.2;margin:0}
+.wg-wtl-atelier-preview p,.wg-wtl-atelier-preview section{max-width:65ch;margin:0}
+.wg-wtl-atelier-panel{padding:1rem 1.4rem;border-radius:1.5rem 0.5rem 1.7rem 0.8rem;background:rgba(9,17,29,.5);border:1px solid color-mix(in srgb,var(--glow),transparent 40%);backdrop-filter:blur(12px)}
+.wg-wtl-atelier-action{justify-self:start;border:1px solid var(--glow);border-radius:100vw;padding:.65rem 1.5rem;background:rgba(9,17,29,.8);color:#fff}
+.wg-wtl-atelier-action:focus-visible,[data-surface="wtl-interface-atelier"] :focus-visible{outline:3px solid #fff;outline-offset:4px}
+@keyframes wg-atelier-drift{from{transform:rotate(-12deg) scale(.95)}to{transform:rotate(15deg) scale(1.08)}}
+@media(prefers-reduced-motion:reduce){.wg-wtl-atelier-preview::before{animation:none}.wg-wtl-atelier-panel{backdrop-filter:none}}
+@media(max-width:600px){.wg-wtl-atelier-preview{padding:1.2rem}.wg-wtl-atelier-stage{border-radius:1.2rem}}
