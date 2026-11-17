@@ -20,6 +20,7 @@ import { installVoyageInbox } from './voyage-inbox.js';
 import { createWayglassSpellingController } from './spelling-assistance.js';
 import { mountWayglassSurface, registerWayglassSurface, listWayglassSurfaces } from './surface-registry.js';
 import { mountArcSweepDeckSurface } from './surfaces/arcsweep-deck.js';
+import { mountWayglassWorldDeck } from './surfaces/world-deck.js';
 import { mountArcSweepWritingSurface } from './surfaces/arcsweep-writing.js';
 import { mountWayglassSystemsSurface } from './surfaces/systems.js';
 import { mountWayglassSpectrumSurface } from './surfaces/spectral-field.js';
@@ -77,7 +78,8 @@ registerWayglassSurface({surface_id:'wayglass:journey-before-destination',label:
 registerWayglassSurface({surface_id:'wayglass:triptych-lift',label:'The Möbius Lift · Triptych navigation',mount:root=>mountWayglassTriptychLift(root,{navigate:navigateAndFocus})});
 registerWayglassSurface({surface_id:'wayglass:altered-timeline',label:'Altered Timeline · Change and Return',mount:mountWayglassAlteredTimeline});
 
-registerWayglassSurface({surface_id:'arcsweep:deck',label:'Wayglass · World and Continuity Deck',mount:mountArcSweepDeckSurface});
+registerWayglassSurface({surface_id:'wayglass:world-deck',label:'Wayglass · World and Continuity Deck',mount:mountWayglassWorldDeck});
+registerWayglassSurface({surface_id:'arcsweep:deck',label:'Legacy ArcSweep deck',mount:mountArcSweepDeckSurface});
 
 registerWayglassSurface({
   surface_id: 'wayglass:writing-room',
