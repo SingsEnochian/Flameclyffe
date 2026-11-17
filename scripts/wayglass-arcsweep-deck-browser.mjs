@@ -108,7 +108,7 @@ try{
   assert.equal(await page.locator('iframe').count(),0);
   const returned=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('wayglass.arcsweep-deck.return/v1')));
   assert.equal(returned.child_state_saved,true);
-  await page.goto(origin+'/wayglass/?room=deck');await page.getByRole('button',{name:'Open world deck',exact:true}).click();
+  await page.goto(origin+'/wayglass/?room=legacyDeck');await page.getByRole('button',{name:'Open world deck',exact:true}).click();
   await page.getByText('Wayglass deck ready · its saved workspace is open.',{exact:true}).waitFor({timeout:45000});
   await page.locator('iframe').scrollIntoViewIfNeeded();
   const cold=page.frameLocator('iframe');
@@ -139,7 +139,7 @@ try{
  }
  hideArcSweep=true;
  const context=await browser.newContext();const page=await context.newPage();
- await page.goto(origin+'/wayglass/?room=deck');await page.getByRole('button',{name:'Open world deck',exact:true}).click();
+ await page.goto(origin+'/wayglass/?room=legacyDeck');await page.getByRole('button',{name:'Open world deck',exact:true}).click();
  await page.getByText(/The world deck is unavailable or did not finish opening/).waitFor({timeout:35000});
  await page.getByRole('button',{name:'Return to Watercolor',exact:true}).click();await page.locator('#wc-fluid').waitFor();
  receipt.scenarios.push({profile:'missing-staged-child',unavailable_visible:true,return_available:true});await context.close();
