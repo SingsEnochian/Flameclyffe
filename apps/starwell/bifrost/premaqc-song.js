@@ -1,6 +1,7 @@
 import * as legacy from './premaq-song.js';
 import {
   PREMAQC_DYNAMIC_AXES,
+  PREMAQC_AXIS_NAMES,
   PREMAQC_FULL_SONG_PLAN_SCHEMA,
   PREMAQC_FULL_SONG_RECEIPT_SCHEMA,
   PREMAQC_NAMING_LAW,
@@ -13,12 +14,21 @@ export const PREMAQC_SONG_NOTE_COUNT = PREMAQC_SONG_AXIS_CYCLES * 2;
 
 export function buildPremaqcSongPlan(options = {}) {
   const plan = legacy.buildPremaqSongPlan(options);
+  const cycles = plan.cycles.map((cycle) => Object.freeze({
+    ...cycle,
+    voices: Object.freeze(cycle.voices.map((voice) => Object.freeze({
+      ...voice,
+      axis_name: PREMAQC_AXIS_NAMES[voice.axis] || voice.axis_name,
+    }))),
+  }));
   return canonicalisePremaqcEnvelope({
     ...plan,
     schema: PREMAQC_FULL_SONG_PLAN_SCHEMA,
     axes: [...PREMAQC_DYNAMIC_AXES],
+    axis_names: Object.freeze({ ...PREMAQC_AXIS_NAMES }),
     context_only_axes: ['Q'],
     qualia_sonified: false,
+    cycles: Object.freeze(cycles),
     legacy_schema: plan.schema,
   }, { schema: PREMAQC_FULL_SONG_PLAN_SCHEMA });
 }
@@ -34,9 +44,11 @@ function canonicaliseVisibleSongVocabulary() {
     if (!root) continue;
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
     while (walker.nextNode()) {
-      if (walker.currentNode.nodeValue?.includes(legacyTerm)) {
-        walker.currentNode.nodeValue = walker.currentNode.nodeValue.replaceAll(legacyTerm, canonicalTerm);
-      }
+      const value = walker.currentNode.nodeValue || '';
+      const next = value
+        .replaceAll(legacyTerm, canonicalTerm)
+        .replace(/\bEntropy\b/g, PREMAQC_AXIS_NAMES.E);
+      if (next !== value) walker.currentNode.nodeValue = next;
     }
   }
 }
