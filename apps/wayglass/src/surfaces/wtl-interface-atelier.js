@@ -1,4 +1,6 @@
 import {wayglassSomaticSound} from '../somatic-sound.js';
+import {compileWyrdruneInterface} from '../wtl-interface-executable.js';
+import {renderWtlInterfaceProposal} from '../wtl-interface-atelier.js';
 import {listWayglassSurfaces} from '../surface-registry.js';
 import {readWayglassRouteObservation,subscribeWayglassObserver} from '../living-observer-model.js';
 
@@ -24,7 +26,10 @@ export function mountWtlInterfaceAtelier(root,{
  let disposed=false;
  const section=doc.createElement('section');section.className='wg-surface wg-wtl-runtime';section.dataset.surface='wtl-interface-atelier';
  const title=doc.createElement('h1');title.textContent='Wayglass · Living Interface';
- const explanation=doc.createElement('p');explanation.textContent='Live local ship instruments. Rooms are read from the registered Wayglass runtime; route status comes from actual observed transport. Wyrdrune-authored self-design awaits an authenticated, attributable proposal.';
+ const explanation=doc.createElement('p');explanation.textContent='Live local ship instruments. Rooms are read from the registered Wayglass runtime; route status comes from actual observed transport. The bounded Wyrdrune interface dialect can compile and run locally below. Model-authored self-design still requires an authenticated, attributable proposal.';
+ const editor=doc.createElement('textarea');editor.setAttribute('aria-label','Executable Wyrdrune interface source');editor.spellcheck=false;editor.placeholder='interface {\n  title "My helm"\n  material opaline\n  heading "Welcome"\n  action feather "Feather"\n}';
+ const execute=doc.createElement('button');execute.type='button';execute.textContent='Compile and run Wyrdrune';
+ const authored=doc.createElement('div');authored.className='wg-wtl-atelier-stage';authored.setAttribute('aria-label','Compiled Wyrdrune interface');
  const status=doc.createElement('p');status.setAttribute('role','status');status.setAttribute('aria-live','polite');
  const stage=doc.createElement('div');stage.className='wg-wtl-atelier-stage';
  const helm=doc.createElement('div');helm.className='wg-wtl-atelier-preview';helm.dataset.material='labradorite';
@@ -48,12 +53,14 @@ export function mountWtlInterfaceAtelier(root,{
   }
   status.textContent=`${snap.rooms.length} registered rooms · live local source · no simulated agent presence`;
  };
- const onFeather=()=>{sound.feather();refresh();};
+ const onFeather=()=>{sound.feather();authored.replaceChildren();refresh();};
+ const onExecute=()=>{try{const result=compileWyrdruneInterface(editor.value);renderWtlInterfaceProposal(authored,result.proposal,{onAction:action=>{if(action==='feather')onFeather();else if(action==='open-codex'||action==='open-writing')navigate(action==='open-codex'?'wayglass:universal-codex':'arcsweep:writing-room');}});status.textContent='Executed '+result.instructions.length+' Wyrdrune IR instructions · '+result.epistemic_register+' · not a model response';}catch(e){authored.replaceChildren();status.textContent='WTL execution refused: '+String(e?.message||e);}};
+ execute.addEventListener('click',onExecute);
  const onSound=async()=>{try{if(sound.snapshot().audio_enabled)sound.stop();else await sound.enable({audio:true});refresh();}catch(e){status.textContent='Sound unavailable: '+String(e?.message||e);}};
  feather.addEventListener('click',onFeather);soundButton.addEventListener('click',onSound);
  const heading=doc.createElement('h2');heading.textContent='The ship, as it is';
  helm.append(heading,route,audio,soundButton,feather,rooms);stage.append(helm);
- section.append(title,explanation,status,stage);root.replaceChildren(section);
+ section.append(title,explanation,editor,execute,status,authored,stage);root.replaceChildren(section);
  const unsubscribe=subscribe(refresh);refresh();
- return ()=>{disposed=true;unsubscribe?.();feather.removeEventListener('click',onFeather);soundButton.removeEventListener('click',onSound);};
+ return ()=>{disposed=true;unsubscribe?.();feather.removeEventListener('click',onFeather);execute.removeEventListener('click',onExecute);soundButton.removeEventListener('click',onSound);};
 }
