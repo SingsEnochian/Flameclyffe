@@ -1,6 +1,5 @@
-// Ship-authored resonance proposals. Validation is NOT route authentication:
-// the host must attest that the proposal came from the dedicated ship route.
-export const RESONANCE_SCHEMA='wayglass.resonance-forge/v1';
+// Internal Wayglass nervous-system resonance vocabulary, not a room or tool.\n// The historical filename is retained for compatibility with the current PR.\n// Validation is NOT route authentication: the host must attest that the\n// proposal came from the dedicated ship route.
+export const RESONANCE_SCHEMA='wayglass.nervous-system.resonance/v1';
 const finite=(v,min,max)=>typeof v==='number'&&Number.isFinite(v)&&v>=min&&v<=max;
 const str=(v,max)=>typeof v==='string'&&v.trim().length>0&&v.length<=max&&!/[<>\x00-\x1f]/.test(v);
 export function validateResonance(proposal,{verifiedShipRoute=false}={}){
