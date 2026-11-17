@@ -254,7 +254,7 @@ test('Wayglass model observations are external observations and cannot silently 
     },
     payload: {
       session_id: 'session-test',
-      surface_id: 'arcsweep:writing-room',
+      surface_id: 'wayglass:writing-room',
       interaction: { channel: 'OOC' },
     },
     completedAt: '2026-10-03T04:00:00.000Z',
