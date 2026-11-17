@@ -31,6 +31,7 @@ export function mountWtlInterfaceAtelier(root,{
  const execute=doc.createElement('button');execute.type='button';execute.textContent='Compile and run Wyrdrune';
  const authored=doc.createElement('div');authored.className='wg-wtl-atelier-stage';authored.setAttribute('aria-label','Compiled Wyrdrune interface');
  const status=doc.createElement('p');status.setAttribute('role','status');status.setAttribute('aria-live','polite');
+ const execution=doc.createElement('p');execution.setAttribute('role','status');execution.setAttribute('aria-live','polite');
  const stage=doc.createElement('div');stage.className='wg-wtl-atelier-stage';
  const helm=doc.createElement('div');helm.className='wg-wtl-atelier-preview';helm.dataset.material='labradorite';
  const route=doc.createElement('p');route.setAttribute('role','status');
@@ -53,14 +54,14 @@ export function mountWtlInterfaceAtelier(root,{
   }
   status.textContent=`${snap.rooms.length} registered rooms · live local source · no simulated agent presence`;
  };
- const onFeather=()=>{sound.feather();authored.replaceChildren();refresh();};
- const onExecute=()=>{try{const result=compileWyrdruneInterface(editor.value);renderWtlInterfaceProposal(authored,result.proposal,{onAction:action=>{if(action==='feather')onFeather();else if(action==='open-codex'||action==='open-writing')navigate(action==='open-codex'?'wayglass:universal-codex':'arcsweep:writing-room');}});status.textContent='Executed '+result.instructions.length+' Wyrdrune IR instructions · '+result.epistemic_register+' · not a model response';}catch(e){authored.replaceChildren();status.textContent='WTL execution refused: '+String(e?.message||e);}};
+ const onFeather=()=>{sound.feather();authored.replaceChildren();execution.textContent='Feather stopped sensory output and cleared the compiled interface. Re-execute only by explicit choice.';refresh();};
+ const onExecute=()=>{try{const result=compileWyrdruneInterface(editor.value);renderWtlInterfaceProposal(authored,result.proposal,{onAction:action=>{if(action==='feather')onFeather();else if(action==='open-codex'||action==='open-writing')navigate(action==='open-codex'?'wayglass:universal-codex':'arcsweep:writing-room');}});execution.textContent='Executed '+result.instructions.length+' Wyrdrune IR instructions · '+result.epistemic_register+' · not a model response';}catch(e){authored.replaceChildren();execution.textContent='WTL execution refused: '+String(e?.message||e);}};
  execute.addEventListener('click',onExecute);
  const onSound=async()=>{try{if(sound.snapshot().audio_enabled)sound.stop();else await sound.enable({audio:true});refresh();}catch(e){status.textContent='Sound unavailable: '+String(e?.message||e);}};
  feather.addEventListener('click',onFeather);soundButton.addEventListener('click',onSound);
  const heading=doc.createElement('h2');heading.textContent='The ship, as it is';
  helm.append(heading,route,audio,soundButton,feather,rooms);stage.append(helm);
- section.append(title,explanation,editor,execute,status,authored,stage);root.replaceChildren(section);
+ section.append(title,explanation,editor,execute,execution,status,authored,stage);root.replaceChildren(section);
  const unsubscribe=subscribe(refresh);refresh();
  return ()=>{disposed=true;unsubscribe?.();feather.removeEventListener('click',onFeather);execute.removeEventListener('click',onExecute);soundButton.removeEventListener('click',onSound);};
 }
