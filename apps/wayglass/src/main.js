@@ -80,8 +80,14 @@ registerWayglassSurface({surface_id:'wayglass:altered-timeline',label:'Altered T
 registerWayglassSurface({surface_id:'arcsweep:deck',label:'Wayglass · World and Continuity Deck',mount:mountArcSweepDeckSurface});
 
 registerWayglassSurface({
+  surface_id: 'wayglass:writing-room',
+  label: 'Wayglass · Writing Room',
+  mount: mountArcSweepWritingSurface,
+});
+// Legacy deep links remain valid without making ArcSweep a required doorway.
+registerWayglassSurface({
   surface_id: 'arcsweep:writing-room',
-  label: 'ArcSweep · Writing Room',
+  label: 'Legacy Writing Room link',
   mount: mountArcSweepWritingSurface,
 });
 
@@ -219,7 +225,7 @@ function filterDeck(search=deckSearch.value){
 }
 deckSearch.addEventListener('input',()=>filterDeck());
 const connection=document.createElement('button');connection.type='button';connection.className='glass-chip';
-connection.textContent='Connect Bluebird';connection.addEventListener('click',()=>{void openWayglassAuthorization();});shell.append(connection);
+connection.textContent='Connect Bluebird';connection.setAttribute('aria-label','Connect Bluebird through Wayglass authorisation');connection.addEventListener('click',()=>{void openWayglassAuthorization();});
 const spellingButton=document.createElement('button');spellingButton.type='button';spellingButton.className='glass-chip';
 spellingButton.textContent='Spellcheck on';spellingButton.setAttribute('aria-pressed','true');
 spellingButton.setAttribute('aria-label','Toggle native spellcheck for writing and messages');
@@ -272,7 +278,7 @@ featherButton.addEventListener('click',()=>wayglassSomaticSound.feather());
 globalThis.addEventListener('wayglass:feather',event=>updateFeatherButton(event.detail?.stopped===true));
 const helmNav=document.createElement('button');helmNav.type='button';helmNav.className='glass-chip wg-helm-nav';
 helmNav.textContent='⌘  Ship map';helmNav.setAttribute('aria-controls',shell.id);helmNav.setAttribute('aria-expanded','false');
-helm.append(helmIdentity,helmReadout,locusNav,featherButton,helmNav);
+helm.append(helmIdentity,helmReadout,locusNav,connection,featherButton,helmNav);
 root.before(helm);root.after(shell,switcher);
 const motion=installMotionChoreography({root:document.documentElement,controlsHost:shell,contentRoot:root});
 function setDeckOpen(open,{focus=false}={}){
