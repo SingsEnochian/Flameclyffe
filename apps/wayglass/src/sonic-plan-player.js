@@ -1,6 +1,6 @@
 // Explicitly authorised SF2 transport adapter. No audio engine or clock is assumed.
 // Host must supply a synth with send(intent), and schedule(callback, milliseconds).
-import {sf2FeatherIntents} from './sf2-control.js';
+import {sf2FeatherIntents,validateSf2MidiIntent} from './sf2-control.js';
 export function createSonicPlanPlayer({synth,schedule,clearSchedule}={}){
  if(!synth||typeof synth.send!=='function'||typeof schedule!=='function'||typeof clearSchedule!=='function')throw new TypeError('Sonic player requires a synth and cancellable scheduler');
  let active=null,stopped=false;
@@ -10,8 +10,12 @@ export function createSonicPlanPlayer({synth,schedule,clearSchedule}={}){
    if(!plan||plan.type!=='sf2-plan'||plan.requires_live_synth!==true||authorised!==true||stopped)return Object.freeze({played:false,reason:'not-authorised'});
    if(!Number.isInteger(durationMs)||durationMs<40||durationMs>2000)throw new TypeError('Invalid duration');
    if(!Array.isArray(plan.intents)||plan.intents.length!==2||plan.intents[0].type!=='note-on'||plan.intents[1].type!=='note-off'||plan.intents[0].channel!==plan.intents[1].channel||plan.intents[0].note!==plan.intents[1].note)throw new TypeError('Invalid paired note plan');
+   // A forged plan must never reach a live synthesiser merely because it has the right shape.
+   const note=validateSf2MidiIntent(plan.intents[0]);
+   const off=validateSf2MidiIntent(plan.intents[1]);
+   if(note.velocity===0||off.velocity!==0)throw new TypeError('Invalid note-on/off velocity');
+   if(typeof plan.event_id!=='string'||!plan.event_id||typeof plan.source_receipt!=='string'||!plan.source_receipt||typeof plan.choice_receipt!=='string'||!plan.choice_receipt||typeof plan.participant_id!=='string'||!plan.participant_id)throw new TypeError('Missing attributable sonic provenance');
    silence();
-   const note=plan.intents[0],off=plan.intents[1];
    synth.send(note);
    const session={timer:null};
    active=session;
