@@ -86,6 +86,16 @@ class SpaceContractTests(unittest.TestCase):
         self.app.TOKEN = ""
         self.assertFalse(self.app.ready())
 
+    def test_empty_userinfo_delimiter_is_rejected_before_network(self):
+        for url in ("https://@private.example.test/respond", "https://:@private.example.test/respond"):
+            with self.subTest(url=url):
+                self.app.GATEWAY = url
+                self.assertFalse(self.app.ready())
+                with patch.object(self.app.OPENER, "open") as opener:
+                    self.assertIn("not connected", self.app.call_kernel("Hello", []))
+                    opener.assert_not_called()
+        self.app.GATEWAY = "https://private.example.test/respond"
+
     def test_whitespace_credentials_and_control_character_urls_fail_closed(self):
         for field in ("TOKEN", "OWNER_USER", "OWNER_PASSWORD"):
             original = getattr(self.app, field)
