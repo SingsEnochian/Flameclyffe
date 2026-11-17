@@ -7,7 +7,7 @@ import {readWayglassRouteObservation,subscribeWayglassObserver} from '../living-
 // A real instrument: only registered rooms, actual route receipts and actual audio state.
 // No model-generated UI, WTL compilation or identity decision is claimed.
 export function atelierRuntimeSnapshot({surfaces=listWayglassSurfaces(),route=readWayglassRouteObservation(),sound=wayglassSomaticSound.snapshot()}={}){
- const rooms=surfaces.filter(s=>typeof s?.surface_id==='string'&&typeof s?.mount==='function')
+ const rooms=surfaces.filter(s=>typeof s?.surface_id==='string'&&s.surface_id.trim().length>0&&typeof s?.mount==='function')
    .map(s=>({id:s.surface_id,label:String(s.label||s.surface_id).slice(0,120)}));
  return Object.freeze({schema:'wayglass.atelier-runtime/v1',source:'local-registered-runtime',
   rooms:Object.freeze(rooms.map(x=>Object.freeze(x))),route:route?Object.freeze({
