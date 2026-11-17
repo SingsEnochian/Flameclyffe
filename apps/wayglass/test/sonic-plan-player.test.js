@@ -11,3 +11,17 @@ test('rejects forged MIDI and missing participant provenance before sending note
 
 test('rejects duplicate event replay even after note-off',()=>{const f=fixture();assert.equal(f.player.play(plan,{authorised:true}).played,true);[...f.tasks.values()][0].f();const before=f.sent.length;assert.deepEqual(f.player.play(plan,{authorised:true}),{played:false,reason:'replayed-event'});assert.equal(f.sent.length,before);});
 test('synth send failure fails closed and does not replay',()=>{const sent=[];const player=createSonicPlanPlayer({synth:{send:i=>{sent.push(i);if(i.type==='note-on')throw Error('transport offline');}},schedule:()=>1,clearSchedule:()=>{}});assert.throws(()=>player.play(plan,{authorised:true}),/transport offline/);assert.equal(player.snapshot().active,false);assert.equal(player.play(plan,{authorised:true}).reason,'replayed-event');});
+
+test('shared Feather stops SF2 and confirmed release never starts sound by itself',()=>{
+ const scope=new EventTarget(),sent=[],tasks=new Map();let n=0;
+ const player=createSonicPlanPlayer({eventScope:scope,synth:{send:i=>sent.push(i)},schedule:fn=>{tasks.set(++n,fn);return n;},clearSchedule:id=>tasks.delete(id)});
+ const emit=(stopped,confirmed=false)=>{const e=new Event('wayglass:feather');Object.defineProperty(e,'detail',{value:{stopped,confirmed}});scope.dispatchEvent(e);};
+ player.play(plan,{authorised:true});emit(true);assert.equal(player.snapshot().feather_latched,true);assert.equal(tasks.size,0);
+ assert.equal(player.play({...plan,event_id:'blocked'},{authorised:true}).played,false);
+ emit(false,true);assert.equal(player.snapshot().feather_latched,false);
+ assert.equal(player.snapshot().active,false);
+ assert.equal(player.play({...plan,event_id:'allowed'},{authorised:true}).played,true);
+ player.dispose();assert.equal(player.snapshot().disposed,true);assert.equal(tasks.size,0);
+ assert.equal(player.play({...plan,event_id:'after-dispose'},{authorised:true}).played,false);
+ emit(false,true);assert.equal(player.snapshot().disposed,true);
+});
