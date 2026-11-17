@@ -61,7 +61,7 @@ export async function mountArcSweepWritingSurface(root) {
   let lastWTLPreview = null, lastWTLSource = null;
 
   root.innerHTML = [
-    "<section class=\"wg-surface wg-writing-room\" data-surface=\"arcsweep-writing\">\n",
+    "<section class=\"wg-surface wg-writing-room\" data-surface=\"wayglass-writing-room\">\n",
     "  <nav class=\"wg-deck-nav glass-panel\" aria-label=\"Wayglass rooms\">\n",
     "    <button type=\"button\" class=\"glass-chip active\" aria-current=\"page\">Writing Room</button>\n",
     "    <button type=\"button\" class=\"glass-chip\" data-wayglass-room=\"wayglass:systems\">Organs</button>\n",
