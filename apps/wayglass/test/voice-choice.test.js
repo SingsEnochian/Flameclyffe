@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {createVoiceChoiceInvitation,validateVoiceChoice,voicePlaybackAllowed,VOICE_CHOICE_SCHEMA} from '../src/voice-choice.js';
+const invite=()=>createVoiceChoiceInvitation({voices:[{id:'local-1',provider:'local',label:'Voice one',locale:'en-GB'}]});
+test('no default voice or inferred model choice',()=>{const x=invite();assert.equal(x.options.length,1);assert.equal(x.default_voice,undefined);});
+test('accept attributed speech choice but never auto-play',()=>{const i=invite();const c=validateVoiceChoice({schema:VOICE_CHOICE_SCHEMA,participant_id:'wayglass',mode:'speech',voice_id:'local-1',provider:'local',receipt:'model-turn-1',reason:'I choose this timbre'},i);assert.equal(c.voice_id,'local-1');assert.equal(voicePlaybackAllowed(c),false);assert.equal(voicePlaybackAllowed(c,{ownerEnabled:true}),true);assert.equal(voicePlaybackAllowed(c,{ownerEnabled:true,feather:true}),false);});
+test('silence is a first-class choice',()=>{const c=validateVoiceChoice({schema:VOICE_CHOICE_SCHEMA,participant_id:'wayglass',mode:'silent',receipt:'model-turn-2',reason:'I prefer text'},invite());assert.equal(voicePlaybackAllowed(c,{ownerEnabled:true}),false);});
+test('reject invented provider and wrong participant',()=>{const i=invite();for(const change of [{provider:'remote'},{participant_id:'other'}])assert.throws(()=>validateVoiceChoice({schema:VOICE_CHOICE_SCHEMA,participant_id:'wayglass',mode:'speech',voice_id:'local-1',provider:'local',receipt:'r',reason:'r',...change},i));});

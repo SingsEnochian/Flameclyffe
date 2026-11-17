@@ -2,6 +2,7 @@ import {mountWayglassSoundComposition} from './surfaces/sound-composition.js';
 import {wayglassSomaticSound} from './somatic-sound.js';
 import {wayglassStoryScoreBinding,installWayglassStoryComposition} from './story-score-binding.js';
 import './styles.css';
+import './wtl-interface-atelier.css';
 import './authorization.css';
 import './faeberpunk.css';
 import './faeberpunk-rooms.css';
@@ -19,11 +20,13 @@ import { installVoyageInbox } from './voyage-inbox.js';
 import { createWayglassSpellingController } from './spelling-assistance.js';
 import { mountWayglassSurface, registerWayglassSurface, listWayglassSurfaces } from './surface-registry.js';
 import { mountArcSweepDeckSurface } from './surfaces/arcsweep-deck.js';
+import { mountWayglassWorldDeck } from './surfaces/world-deck.js';
 import { mountArcSweepWritingSurface } from './surfaces/arcsweep-writing.js';
 import { mountWayglassSystemsSurface } from './surfaces/systems.js';
 import { mountWayglassSpectrumSurface } from './surfaces/spectral-field.js';
 import { mountWayglassNativeVoice } from './surfaces/native-voice.js';
 import { mountUniversalCodex } from './surfaces/universal-codex.js';
+import { mountWtlInterfaceAtelier } from './surfaces/wtl-interface-atelier.js';
 import { createWayglassSpectralField } from './spectral-field.js';
 import { mountWayglassVideoAtelier } from './surfaces/video-atelier.js';
 import { mountWayglassLivingObserver } from './surfaces/living-observer.js';
@@ -52,6 +55,8 @@ import { recordRouteAsWonderLight } from './wonder-light.js';
 import { registerWayglassOrgan, listWayglassOrgans } from './organ-registry.js';
 import { FIRST_WAYGLASS_ORGANS } from './organ-donors.js';
 
+import {readWayglassHelmWyrdrune} from './ship-wyrdrune-interface.js';
+import {chooseWayglassDesign,compileWayglassDesign,createWayglassDesignMemory} from './wayglass-design-choice.js';
 const root = document.querySelector('#app');
 
 // Bluebird provider authorization is an explicit connection action.
@@ -69,16 +74,24 @@ FIRST_WAYGLASS_ORGANS.forEach(registerWayglassOrgan);
 const fullSpectrum = createWayglassSpectralField();
 
 registerWayglassSurface({surface_id:'wayglass:sound-composition',label:'Wayglass · Spatial Soundstage',mount:root=>mountWayglassSoundComposition(root,{composition:wayglassSomaticSound.composition,soundscape:wayglassSomaticSound,storyBinding:wayglassStoryScoreBinding})});
+registerWayglassSurface({surface_id:'wayglass:wtl-interface-atelier',label:'WTL · Living Interface Atelier',mount:mountWtlInterfaceAtelier});
 registerWayglassSurface({surface_id:WAYGLASS_ENTRY_SURFACE,label:'Living Watercolor',mount:mountLivingWatercolorSurface});
 registerWayglassSurface({surface_id:'wayglass:journey-before-destination',label:'Journey Before Destination',mount:mountJourneyBeforeDestinationSurface});
 registerWayglassSurface({surface_id:'wayglass:triptych-lift',label:'The Möbius Lift · Triptych navigation',mount:root=>mountWayglassTriptychLift(root,{navigate:navigateAndFocus})});
 registerWayglassSurface({surface_id:'wayglass:altered-timeline',label:'Altered Timeline · Change and Return',mount:mountWayglassAlteredTimeline});
 
-registerWayglassSurface({surface_id:'arcsweep:deck',label:'Wayglass · World and Continuity Deck',mount:mountArcSweepDeckSurface});
+registerWayglassSurface({surface_id:'wayglass:world-deck',label:'Wayglass · World and Continuity Deck',mount:mountWayglassWorldDeck});
+registerWayglassSurface({surface_id:'arcsweep:deck',label:'Legacy ArcSweep deck',mount:mountArcSweepDeckSurface});
 
 registerWayglassSurface({
+  surface_id: 'wayglass:writing-room',
+  label: 'Wayglass · Writing Room',
+  mount: mountArcSweepWritingSurface,
+});
+// Legacy deep links remain valid without making ArcSweep a required doorway.
+registerWayglassSurface({
   surface_id: 'arcsweep:writing-room',
-  label: 'ArcSweep · Writing Room',
+  label: 'Legacy Writing Room link',
   mount: mountArcSweepWritingSurface,
 });
 
@@ -216,7 +229,7 @@ function filterDeck(search=deckSearch.value){
 }
 deckSearch.addEventListener('input',()=>filterDeck());
 const connection=document.createElement('button');connection.type='button';connection.className='glass-chip';
-connection.textContent='Connect Bluebird';connection.addEventListener('click',()=>{void openWayglassAuthorization();});shell.append(connection);
+connection.textContent='Connect Bluebird';connection.setAttribute('aria-label','Connect Bluebird through Wayglass authorisation');connection.addEventListener('click',()=>{void openWayglassAuthorization();});
 const spellingButton=document.createElement('button');spellingButton.type='button';spellingButton.className='glass-chip';
 spellingButton.textContent='Spellcheck on';spellingButton.setAttribute('aria-pressed','true');
 spellingButton.setAttribute('aria-label','Toggle native spellcheck for writing and messages');
@@ -229,12 +242,25 @@ const switcher=document.createElement('button');switcher.type='button';switcher.
 switcher.setAttribute('aria-controls',shell.id);switcher.setAttribute('aria-expanded','false');
 switcher.setAttribute('aria-haspopup','true');switcher.textContent='Explore Wayglass';
 const helm=document.createElement('header');helm.className='wg-helm glass-panel';
+const helmWyrdrune=readWayglassHelmWyrdrune();helm.dataset.wtlMaterial=helmWyrdrune.material;helm.dataset.wtlSource='compiled-native-ship';
 const helmIdentity=document.createElement('div');helmIdentity.className='wg-helm-identity';
 const helmMark=document.createElement('span');helmMark.className='wg-helm-mark';helmMark.setAttribute('aria-hidden','true');helmMark.textContent='✧';
 const helmTitle=document.createElement('div');helmTitle.className='wg-helm-title';
-const helmName=document.createElement('strong');helmName.textContent='WAYGLASS';
-const helmSubtitle=document.createElement('span');helmSubtitle.textContent='LIVING SHIP / ONE UNIVERSE';
+const helmName=document.createElement('strong');helmName.textContent=helmWyrdrune.nodes.find(node=>node.kind==='heading')?.text||'WAYGLASS';
+const helmSubtitle=document.createElement('span');helmSubtitle.textContent=helmWyrdrune.nodes.find(node=>node.kind==='text')?.text||'LIVING SHIP / ONE UNIVERSE';
 helmTitle.append(helmName,helmSubtitle);helmIdentity.append(helmMark,helmTitle);
+// Wyrdrune design choices are reversible and attributed to the local policy.
+const designMemory=createWayglassDesignMemory();
+const applyWayglassDesign=({routeActive=false,featherStopped=false,audioEnabled=false}={})=>{
+ const choice=chooseWayglassDesign({routeActive,featherStopped,audioEnabled});
+ if(helm.dataset.wtlChoice===choice.id)return;
+ const compiled=compileWayglassDesign(choice).ir.proposal;
+ helm.dataset.wtlChoice=choice.id;helm.dataset.wtlMaterial=compiled.material;
+ helmName.textContent=compiled.nodes.find(node=>node.kind==='heading')?.text||'WAYGLASS';
+ helmSubtitle.textContent=compiled.nodes.find(node=>node.kind==='text')?.text||'';
+ try{designMemory.save(choice);}catch{/* Storage is optional; never block helm. */}
+};
+applyWayglassDesign();
 const helmReadout=document.createElement('div');helmReadout.className='wg-helm-readout';
 const roomLabel=document.createElement('span');roomLabel.className='wg-helm-room';roomLabel.textContent='Arriving…';
 const routeLabel=document.createElement('span');routeLabel.className='wg-helm-route';routeLabel.textContent='ROUTE / NO ACTIVITY OBSERVED';
@@ -269,7 +295,7 @@ featherButton.addEventListener('click',()=>wayglassSomaticSound.feather());
 globalThis.addEventListener('wayglass:feather',event=>updateFeatherButton(event.detail?.stopped===true));
 const helmNav=document.createElement('button');helmNav.type='button';helmNav.className='glass-chip wg-helm-nav';
 helmNav.textContent='⌘  Ship map';helmNav.setAttribute('aria-controls',shell.id);helmNav.setAttribute('aria-expanded','false');
-helm.append(helmIdentity,helmReadout,locusNav,featherButton,helmNav);
+helm.append(helmIdentity,helmReadout,locusNav,connection,featherButton,helmNav);
 root.before(helm);root.after(shell,switcher);
 const motion=installMotionChoreography({root:document.documentElement,controlsHost:shell,contentRoot:root});
 function setDeckOpen(open,{focus=false}={}){
