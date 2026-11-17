@@ -18,6 +18,10 @@ export function createAcousticAudioEngine({AudioContext = null,scope=globalThis}
   const voices = new Set(), presented = new Set();
   const hasAudio=()=>typeof resolveAudioContext()==='function';
   const compositionProjection=createCompositionProjection({getContext:()=>context,getDestination:()=>graph?.ambience,canPlay:()=>isRunning()&&!settings.muted&&!disposed});
+  const storyProjection=createCompositionProjection({
+    getContext:()=>context,getDestination:()=>graph?.master,
+    canPlay:()=>isRunning()&&!settings.muted&&!disposed,maxVoices:4,
+  });
   const composition=createSoundComposition({region:'wayglass-acoustic',source_ref:'apps/wayglass/src/acoustic-audio-engine.js',scene:{id:'acoustic-field',root_hz:110,source_ref:'apps/wayglass/src/acoustic-world-model.js'},
     onScore:frame=>{settings.mono=frame.mono;project();return compositionProjection.render(frame);},
     enableAudio:async()=>{await start();settings.ambience=true;project();return isRunning();},stopAudio:()=>compositionProjection.stop()});
@@ -30,6 +34,7 @@ export function createAcousticAudioEngine({AudioContext = null,scope=globalThis}
     disconnect(voice.osc); disconnect(voice.envelope);
   }
   function teardown() {
+    storyProjection.stop();
     for (const voice of [...voices]) releaseVoice(voice);
     if (!graph) return;
     for (const osc of [graph.navigationTone, graph.ambienceTone]) {
@@ -74,6 +79,17 @@ export function createAcousticAudioEngine({AudioContext = null,scope=globalThis}
     master.connect(compressor); compressor.connect(context.destination);
     navigationTone.start(); ambienceTone.start(); project();
   }
+  function projectStoryLayers() {
+    const layers = settings.score?.layers;
+    if (!settings.ambience || !layers?.length) {
+      storyProjection.stop();
+      return;
+    }
+    if (!isRunning()) return;
+    if (!storyProjection.render({layers,mono:settings.mono},{continuous:true})) {
+      throw new Error('Wyrdrune sound layers could not reach the audio output.');
+    }
+  }
   function isRunning() { return running && (!context?.state || context.state === 'running'); }
   function getState() {
     const active = isRunning();
@@ -97,6 +113,7 @@ export function createAcousticAudioEngine({AudioContext = null,scope=globalThis}
         if (disposed || token !== epoch || settings.muted) return getState();
         if (!graph) createGraph(); else project();
         running = true; status = 'running';
+        projectStoryLayers();
       } catch (error) {
         if (token === epoch && !disposed) {
           teardown(); running = false; settings.muted = true; status = 'error'; lastError = String(error?.message || error);
@@ -128,16 +145,36 @@ export function createAcousticAudioEngine({AudioContext = null,scope=globalThis}
           number(frame[key], key);
           if (frame[key] < lo || frame[key] > hi) throw new RangeError(key + ' exceeds the bounded audio range.');
         }
+        const layers = frame.layers ?? [];
+        if (!Array.isArray(layers) || (layers.length !== 0 && layers.length !== 4) ||
+            new Set(layers.map(layer => layer?.id)).size !== layers.length ||
+            layers.some(layer => !layer || !['water','wind','glow','pulse'].includes(layer.id) ||
+              !['tone','texture'].includes(layer.kind) || ![
+                [layer.frequency_hz,55,4800], [layer.amplitude,0,0.04], [layer.modulation_hz,0.05,4],
+              ].every(([n,min,max]) => Number.isFinite(n) && n >= min && n <= max))) {
+          throw new TypeError('Wyrdrune requires four bounded sound layers.');
+        }
         next.score = Object.freeze({
           rootHz: frame.rootHz, counterpartHz: frame.counterpartHz,
           foregroundGain: frame.foregroundGain, atmosphereGain: frame.atmosphereGain,
+          layers: Object.freeze(layers.map(({id,kind,frequency_hz,amplitude,modulation_hz}, index) => Object.freeze({
+            id,kind,frequency_hz,amplitude,modulation_hz,active:true,gain:1,duration_s:1,
+            position:Object.freeze({x:[-0.6,0.6,0.25,0][index],y:0}),seed:369+index,
+          }))),
         });
       }
     }
     settings = next;
     if('mono'in value&&composition.snapshot().mono!==next.mono)composition.setMix({mono:next.mono});
     if(value.ambience===false)composition.disableAudio();
-    if (settings.muted) stop({pauseComposition:false}); else project();
+    if (settings.muted) stop({pauseComposition:false});
+    else {
+      project();
+      if ('score' in value || 'ambience' in value || 'mono' in value) {
+        try { projectStoryLayers(); }
+        catch (error) { stop({pauseComposition:false}); throw error; }
+      }
+    }
     return getState();
   }
   function signal({eventId, kind = 'status'} = {}) {
@@ -173,7 +210,7 @@ export function createAcousticAudioEngine({AudioContext = null,scope=globalThis}
   }
   function dispose() {
     if (disposed) return;
-    disposed = true; stop();composition.dispose();compositionProjection.dispose();scope.removeEventListener?.('wayglass:feather',onFeather);
+    disposed = true; stop();composition.dispose();compositionProjection.dispose();storyProjection.dispose();scope.removeEventListener?.('wayglass:feather',onFeather);
     try { Promise.resolve(context?.close()).catch(() => {}); } catch {}
   }
   function onFeather(event){if(event.detail?.stopped===true){composition.feather();stop();}else if(event.detail?.stopped===false&&event.detail?.confirmed===true)composition.releaseFeather({confirmed:true});}

@@ -17,13 +17,14 @@ function assertExtended(frame){
 }
 export function createShipSoundscape({audio=createAcousticAudioEngine(),scoreStory=scoreWyrdruneStory,
   feather=wayglassSomaticSound,scope=globalThis}={}){
-  let source='owner',extended=null,revision=0,playingExtended=false;
+  let source='owner',extended=null,revision=0,playbackRevision=0,playingExtended=false,startingExtended=false;
   const subscribers=new Set();
   function snapshot(){
     return Object.freeze({
       schema:'wayglass.ship-soundscape/v1',
       source,source_ref:SHIP_SCORE_SOURCES[source],playing:source==='extended'&&playingExtended&&audio.getState().running,
       score_ready:!!extended,score_digest:source==='extended'?extended?.program_sha256??null:null,
+      score_layer_count:extended?2+(extended.score?.layers?.length??0):0,
       story_digest:source==='extended'?extended?.story_sha256??null:null,
       original_program:source==='owner'?audio.composition.snapshot().program??null:null,
       output_status:audio.getState().status,
@@ -31,21 +32,26 @@ export function createShipSoundscape({audio=createAcousticAudioEngine(),scoreSto
   }
   function notify(){const state=snapshot();for(const callback of [...subscribers])try{callback(state);}catch{}return state;}
   function selectOwner(){
-    revision++;playingExtended=false;source='owner';
+    revision++;playbackRevision++;playingExtended=false;source='owner';
+    if(startingExtended){startingExtended=false;audio.stop({pauseComposition:false});}
     audio.update({score:null});
     return notify();
   }
   function selectExtended(){
-    revision++;source='extended';playingExtended=false;
+    revision++;playbackRevision++;source='extended';playingExtended=false;
+    if(startingExtended){startingExtended=false;audio.stop({pauseComposition:false});}
     audio.composition.pauseGeneration();
     audio.composition.disableAudio();
     audio.update({score:null});
     return notify();
   }
   function setExtended(frame){
-    assertExtended(frame);extended=frame;
-    if(source==='extended'&&playingExtended)
-      audio.update({muted:false,ambience:true,score:frame.score});
+    assertExtended(frame);
+    if(source==='extended'&&playingExtended){
+      try{audio.update({muted:false,ambience:true,score:frame.score});}
+      catch(error){if(!audio.getState().running)playingExtended=false;notify();throw error;}
+    }
+    extended=frame;
     return notify();
   }
   async function composeExtended({text='',turns=0,affinity=0.5,participants=[
@@ -63,13 +69,21 @@ export function createShipSoundscape({audio=createAcousticAudioEngine(),scoreSto
     if(feather.snapshot().feather_stopped)throw new Error('Feather Stop active');
     if(!extended)throw new Error('Compose a verified Wyrdrune host score first.');
     if(source!=='extended')selectExtended();
-    const state=await audio.start(); // Called directly from a user gesture.
-    if(!state.running)throw new Error('Audio unavailable: '+(state.lastError||state.status));
-    audio.update({muted:false,ambience:true,mono,score:extended.score});
-    playingExtended=true;return notify();
+    const token=++playbackRevision;
+    startingExtended=true;
+    try{
+      const state=await audio.start(); // Called directly from a user gesture.
+      if(token!==playbackRevision)return snapshot();
+      if(!state.running)throw new Error('Audio unavailable: '+(state.lastError||state.status));
+      audio.update({muted:false,ambience:true,mono,score:extended.score});
+      playingExtended=true;return notify();
+    }catch(error){
+      if(token===playbackRevision)stop();
+      throw error;
+    }finally{if(token===playbackRevision)startingExtended=false;}
   }
   function stop(){
-    revision++;playingExtended=false;
+    revision++;playbackRevision++;playingExtended=false;startingExtended=false;
     audio.stop({pauseComposition:false});
     return notify();
   }

@@ -63,7 +63,11 @@ mobius {
     emit bridge("sound","validate",root,counterpart,foreground,atmosphere,below,above);
   }
   integrate {
-    let returned_score = bridge("sound","frame",root,counterpart,foreground,atmosphere,returned_affinity,pulse,below,above);
+    let rain = bridge("sound","layer","water", "texture", 420 + water * 1500, 0.012 + water * 0.024, 0.15 + water * 0.8);
+    let air = bridge("sound","layer","wind", "texture", 170 + wind * 440, 0.009 + wind * 0.024, 0.09 + wind * 0.45);
+    let glow = bridge("sound","layer","glow", "tone", counterpart * (2 + flame - shadow * 0.35), 0.006 + flame * 0.015 + shadow * 0.006, 0.12 + flame * 0.7);
+    let movement = bridge("sound","layer","pulse", "tone", root * 0.55, 0.005 + pulse * 0.019, 0.38 + pulse * 2.2);
+    let returned_score = bridge("sound","frame",root,counterpart,foreground,atmosphere,returned_affinity,pulse,below,above,rain,air,glow,movement);
   }
   choose {
     emit returned_score;

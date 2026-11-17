@@ -678,16 +678,19 @@ export async function mountLivingWatercolorSurface(root) {
     playScore.disabled=!state.score_ready||featherStopped;
     playScore.setAttribute('aria-pressed',String(state.playing));
     playScore.textContent=state.playing?'Stop Wyrdrune':'Play Wyrdrune';
-    if(state.playing)scoreStatus.textContent='Extended Wyrdrune score playing · '+state.score_digest.slice(0,12);
+    if(state.playing)scoreStatus.textContent='Wyrdrune playing · '+state.score_layer_count+' sound layers';
   });
   listen(composeScore,'click',async()=>{
     if(stopped||featherStopped)return;
     const turns=continuity.snapshot().turns,last=turns.at(-1);
-    const text=[last?.request?.authorText||prompt.value,last?.response?.text].filter(Boolean).join('\n').slice(0,4900);
+    const text=(prompt.value.trim()||[last?.request?.authorText,last?.response?.text].filter(Boolean).join('\n')).slice(0,4900);
     composeScore.disabled=true;scoreStatus.textContent='Executing Wyrdrune sound score through the House host…';
     try{
       const result=await shipSoundscape.composeExtended({text,turns:turns.length});
-      if(!stopped&&result)scoreStatus.textContent='Wyrdrune ready · press Play to hear the score.';
+      if(!stopped&&result&&!result.playing){
+        const layers=result.score_layer_count===2?'two-tone score from this host':result.score_layer_count+' sound layers';
+        scoreStatus.textContent='Wyrdrune ready · '+layers+' · press Play to listen.';
+      }
     }catch(error){if(!stopped)scoreStatus.textContent='Score unavailable: '+error.message;}
     finally{if(!stopped)composeScore.disabled=false;}
   });
@@ -704,6 +707,7 @@ export async function mountLivingWatercolorSurface(root) {
     hapticButton.setAttribute('aria-pressed',String(state.haptics_enabled));
     hapticButton.textContent=state.haptics_enabled?'Haptics on':'Haptics off';
     featherButton.textContent=featherStopped?'Release Feather':'Feather Stop';
+    playScore.disabled=featherStopped||!shipSoundscape.snapshot().score_ready;
     invite.disabled=busy||!routeId||featherStopped;q('wc-first-contact').disabled=busy||!routeId||featherStopped;
     q('wc-flow').textContent=paused?'Fluid paused':'Fluid on';q('wc-flow').setAttribute('aria-pressed',String(!paused));q('wc-flow').classList.toggle('active',!paused);
   }
@@ -902,6 +906,7 @@ export async function mountLivingWatercolorSurface(root) {
       touchEpoch++;touchAbort?.abort();touchAbort=null;touchOrb.disabled=true;
       root.querySelector('.wc-faepunk-touch').dataset.running='false';
       touchStatus.textContent='Feather held. The touch engine is paused.';
+      scoreStatus.textContent='Wyrdrune stopped by Feather.';
     }else if(event.detail.confirmed===true){
       featherStopped=false;
       touchOrb.disabled=false;
