@@ -31,6 +31,9 @@ export function createDreamReceiptJournal({dream_id,owner_id,authorise,store}={}
  }
  async function append(event){
   await permitted('record');
+  // Feather can arrive while the asynchronous authorisation callback is pending.
+  // Refuse to call the storage adapter after that stop, even if it would reject.
+  if(feathered)throw new Error('Feather before append: no storage attempted');
   const receipt=normalise(event,dream_id);
   // Adapter must recheck authority INSIDE its transaction, not trust this preflight.
   const saved=await store.appendAtomic({owner_id,dream_id,receipt,authorise});
