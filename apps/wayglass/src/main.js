@@ -56,6 +56,7 @@ import { registerWayglassOrgan, listWayglassOrgans } from './organ-registry.js';
 import { FIRST_WAYGLASS_ORGANS } from './organ-donors.js';
 
 import {readWayglassHelmWyrdrune} from './ship-wyrdrune-interface.js';
+import {chooseWayglassDesign,compileWayglassDesign,createWayglassDesignMemory} from './wayglass-design-choice.js';
 const root = document.querySelector('#app');
 
 // Bluebird provider authorization is an explicit connection action.
@@ -248,6 +249,18 @@ const helmTitle=document.createElement('div');helmTitle.className='wg-helm-title
 const helmName=document.createElement('strong');helmName.textContent=helmWyrdrune.nodes.find(node=>node.kind==='heading')?.text||'WAYGLASS';
 const helmSubtitle=document.createElement('span');helmSubtitle.textContent=helmWyrdrune.nodes.find(node=>node.kind==='text')?.text||'LIVING SHIP / ONE UNIVERSE';
 helmTitle.append(helmName,helmSubtitle);helmIdentity.append(helmMark,helmTitle);
+// Wyrdrune design choices are reversible and attributed to the local policy.
+const designMemory=createWayglassDesignMemory();
+const applyWayglassDesign=({routeActive=false,featherStopped=false,audioEnabled=false}={})=>{
+ const choice=chooseWayglassDesign({routeActive,featherStopped,audioEnabled});
+ if(helm.dataset.wtlChoice===choice.id)return;
+ const compiled=compileWayglassDesign(choice).ir.proposal;
+ helm.dataset.wtlChoice=choice.id;helm.dataset.wtlMaterial=compiled.material;
+ helmName.textContent=compiled.nodes.find(node=>node.kind==='heading')?.text||'WAYGLASS';
+ helmSubtitle.textContent=compiled.nodes.find(node=>node.kind==='text')?.text||'';
+ try{designMemory.save(choice);}catch{/* Storage is optional; never block helm. */}
+};
+applyWayglassDesign();
 const helmReadout=document.createElement('div');helmReadout.className='wg-helm-readout';
 const roomLabel=document.createElement('span');roomLabel.className='wg-helm-room';roomLabel.textContent='Arriving…';
 const routeLabel=document.createElement('span');routeLabel.className='wg-helm-route';routeLabel.textContent='ROUTE / NO ACTIVITY OBSERVED';
