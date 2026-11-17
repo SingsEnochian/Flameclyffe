@@ -5,7 +5,8 @@ import {SHIP_DECK_GROUPS,shipDeckGroup,shipDeckMatches,shipDeckDestinationLabel}
 test('ship map keeps each room in exactly one declared destination area',()=>{
   assert.deepEqual(SHIP_DECK_GROUPS.map(g=>g.id),['contact','creation','observation','commons']);
   assert.equal(shipDeckGroup('wayglass:living-watercolor'),'contact');
-  assert.equal(shipDeckGroup('arcsweep:writing-room'),'contact');
+  assert.equal(shipDeckGroup('wayglass:writing-room'),'contact');
+  assert.equal(shipDeckGroup('wayglass:world-continuity'),'creation');
   assert.equal(shipDeckGroup('wayglass:acoustic-room'),'creation');
   assert.equal(shipDeckGroup('wayglass:quad-gestalt'),'observation');
   assert.equal(shipDeckGroup('wayglass:library'),'commons');
