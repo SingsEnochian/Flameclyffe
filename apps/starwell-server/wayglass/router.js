@@ -1110,6 +1110,9 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
         return res.status(409).json({ error: 'Amber room must retain Wayglass participant identity and Amber room voice seat.' });
       }
     }
+    if (['wayglass', 'amber'].includes(payload.character_id) && !(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward authorization is required for local named participant seats.' });
+    }
     if (['wayglass:ship', 'flame:amber:ollama'].includes(route.route_id) && !route.configured()) {
       return res.status(503).json({ error: 'Configure one matching WAYGLASS_SPINE_MODEL (or legacy Ship/Amber model setting) on the private Wayglass host. Conflicting model tags and silent fallbacks are refused.' });
     }
@@ -1147,9 +1150,6 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     if (payload.character_id && !resolveCharacterSeat(payload.character_id)) return res.status(400).json({ error: 'Unknown character seat.' });
     if (payload.character_id === 'wayglass' && payload.interaction?.channel !== 'OOC') {
       return res.status(422).json({ error: 'Wayglass ship voice requires OOC dialogue, not fictional IC roleplay.' });
-    }
-    if (['wayglass', 'amber'].includes(payload.character_id) && !(await griffStewardAuthorized(req).catch(() => false))) {
-      return res.status(401).json({ error: 'House Steward authorization is required for local named participant seats.' });
     }
     if (!cleanText(payload.input)) return res.status(400).json({ error: 'input required.' });
     // The external StepFun routes are deliberately opt-in for every request.
