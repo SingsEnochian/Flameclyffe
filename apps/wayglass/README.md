@@ -2,9 +2,9 @@
 
 # Wayglass v0.1 · embryonic kernel + embodiment shell
 
-Wayglass is intended to become both a native learned cognitive substrate and the operating environment that carries worlds, continuity, routes, tools, and embodiments. ArcSweep attaches as one spatial/cognitive surface.
+Wayglass is intended to become both a native learned cognitive substrate and the operating environment that carries worlds, continuity, routes, tools, and embodiments. ArcSweep is now inherited as native Wayglass world/continuity and writing organs; its older namespace and source tree remain as compatibility/provenance lineage rather than a separate runtime destination.
 
-**Current truth:** this repository does not yet contain a Wayglass-native trained LLM. The executable slice now contains the first kernel boot contract, a local-first Ollama seed route, an external GPT route, embodiment capability detection, and an attached ArcSweep surface. External/seed models are explicitly marked non-native so scaffolding cannot be mistaken for the finished Wayglass mind.
+**Current truth:** this repository does not yet contain a Wayglass-native trained LLM. The executable slice contains the kernel boot contract, local and external model routes, embodiment capability detection, and native Wayglass surfaces backed by inherited ArcSweep state modules. External/seed models are explicitly marked non-native so scaffolding cannot be mistaken for the finished Wayglass mind.
 
 This first vertical slice proves:
 
@@ -12,7 +12,7 @@ This first vertical slice proves:
 - a local-first Ollama route for seed/local cognition;
 - a GPT route through the OpenAI Responses API;
 - no provider key in the browser;
-- an attached ArcSweep writing surface;
+- a Wayglass-native Writing Room inherited from ArcSweep lineage;
 - round-robin turns;
 - IC/OOC semantic state;
 - explicit character ownership and temporary-handoff vocabulary;
@@ -34,9 +34,9 @@ The GPT route requires `OPENAI_API_KEY` (or the existing compatible server-side 
 
 ## Boundary
 
-Wayglass is not ArcSweep renamed.
+Wayglass is not ArcSweep renamed. ArcSweep is now a donor lineage and compatibility namespace inside the larger Wayglass vessel.
 
-Wayglass owns its kernel, route ecology, world/continuity orchestration, embodiment contracts, and eventually its own learned model lineage. ArcSweep remains an attached cognitive/spatial workspace. Return Engine remains the continuity organ across model/body changes. External models and trained agents can remain registered routes without being mistaken for Wayglass itself.
+Wayglass owns its kernel, route ecology, world/continuity orchestration, embodiment contracts, and eventually its own learned model lineage. ArcSweep world state, continuity evidence, writing instruments, presence, memory and somatic machinery are inherited through native Wayglass organs and surfaces. Legacy `arcsweep:*` identifiers may resolve as compatibility aliases, but canonical navigation and attribution use `wayglass:*`. Return Engine remains the continuity organ across model/body changes. External models and trained agents can remain registered routes without being mistaken for Wayglass itself.
 
 Training completion does not imply promotion to a live route.
 
