@@ -5,7 +5,7 @@ const MATERIALS=new Set(['opaline','labradorite','amber','moss','clear']);
 const COMPONENTS=new Set(['heading','text','panel','status','action']);
 const ACTIONS=new Set(['none','feather','open-codex','open-writing']);
 const MAX_NODES=32;
-const cleanSource=(value,max)=>typeof value==='string'&&value.length<=max&&!/[\\u0000-\\u0008\\u000b\\u000c\\u000e-\\u001f\\u007f]/u.test(value);
+const cleanSource=(value,max)=>typeof value==='string'&&value.length<=max&&!/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/u.test(value);
 const clean=(value,max)=>typeof value==='string'&&value.length<=max&&!/[\u0000-\u001f\u007f]/u.test(value);
 export function validateWtlInterfaceProposal(proposal){
   if(!proposal||typeof proposal!=='object'||Array.isArray(proposal)||proposal.schema!==ATELIER_SCHEMA)throw new TypeError('Unknown WTL interface proposal');
