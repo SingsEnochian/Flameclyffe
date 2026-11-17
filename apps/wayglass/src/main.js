@@ -14,7 +14,7 @@ import { installVoyageInbox } from './voyage-inbox.js';
 import { createWayglassSpellingController } from './spelling-assistance.js';
 import { mountWayglassSurface, registerWayglassSurface, registerWayglassSurfaceAlias, listWayglassSurfaces } from './surface-registry.js';
 import { mountWayglassWorldContinuitySurface } from './surfaces/world-continuity.js';
-import { mountArcSweepWritingSurface } from './surfaces/arcsweep-writing.js';
+import { mountWayglassWritingRoom } from './surfaces/writing-room.js';
 import { mountWayglassSystemsSurface } from './surfaces/systems.js';
 import { mountWayglassSpectrumSurface } from './surfaces/spectral-field.js';
 import { mountWayglassNativeVoice } from './surfaces/native-voice.js';
@@ -63,7 +63,7 @@ registerWayglassSurface({surface_id:'wayglass:world-continuity',label:'Wayglass 
 registerWayglassSurface({
   surface_id: 'wayglass:writing-room',
   label: 'Wayglass · Writing Room',
-  mount: mountArcSweepWritingSurface,
+  mount: mountWayglassWritingRoom,
 });
 
 registerWayglassSurfaceAlias('arcsweep:deck', 'wayglass:world-continuity');
