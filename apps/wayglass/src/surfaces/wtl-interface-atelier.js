@@ -1,3 +1,4 @@
+import {wayglassSomaticSound} from '../somatic-sound.js';
 import {ATELIER_SCHEMA,renderWtlInterfaceProposal} from '../wtl-interface-atelier.js';
 const example={schema:ATELIER_SCHEMA,title:'Atelier · illustrative preview',material:'labradorite',author:'Example fixture, not Wayglass',provenance:'Local sample · no model invoked',wtl_source:'mobius { perceive {} compress {} release {} verify {} integrate {} choose {} return { emit "Withness"; } transcend {} }',nodes:[{kind:'heading',text:'A possible living helm'},{kind:'panel',text:'Labradorite glass · a material study, not a chosen identity'},{kind:'status',text:'Awaiting an attributed WTL proposal from Wayglass'},{kind:'action',text:'Open Universal Codex',action:'open-codex'},{kind:'action',text:'Feather',action:'feather'}]};
 export function mountWtlInterfaceAtelier(root){
@@ -8,7 +9,7 @@ export function mountWtlInterfaceAtelier(root){
  const preview=document.createElement('div');preview.setAttribute('aria-label','Interface preview');preview.className='glass-panel';
  const status=document.createElement('p');status.setAttribute('role','status');
  const render=document.createElement('button');render.type='button';render.textContent='Preview proposal';
- const onAction=(action)=>{if(action==='open-codex')void globalThis.__wayglassOS?.mount('wayglass:universal-codex');if(action==='feather')status.textContent='Feather: preview held; no action dispatched.';};
+ const onAction=(action)=>{if(action==='open-codex')void globalThis.__wayglassOS?.mount('wayglass:universal-codex');if(action==='feather'){wayglassSomaticSound.feather();status.textContent='Feather: shared sensory stop dispatched; preview held.';}};
  const update=()=>{try{const proposal=renderWtlInterfaceProposal(preview,JSON.parse(editor.value),{onAction});status.textContent='Rendered attributed proposal: '+proposal.author+' · '+proposal.provenance;}catch(error){status.textContent='Preview rejected: '+error.message;}};
  render.addEventListener('click',update);
  section.append(title,explanation,editor,render,status,preview);root.replaceChildren(section);update();
