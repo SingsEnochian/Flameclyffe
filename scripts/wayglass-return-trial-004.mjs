@@ -6,18 +6,27 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const { runReturnTaskSelectionTransport } = require('../lib/wayglass-return-task-selection-live.cjs');
+const { runReturnTaskSelectionViaHost } = require('../lib/wayglass-return-task-selection-host.cjs');
 
 const inputPath = process.argv[2];
 const receiptFlag = process.argv.indexOf('--receipt');
 const receiptPath = receiptFlag >= 0 ? process.argv[receiptFlag + 1] : null;
+const transportFlag = process.argv.indexOf('--transport');
+const transport = transportFlag >= 0 ? process.argv[transportFlag + 1] : (process.env.WAYGLASS_RETURN_TRANSPORT || 'host');
 
 if (!inputPath || inputPath.startsWith('--')) {
-  console.error('Usage: node scripts/wayglass-return-trial-004.mjs INPUT.json [--receipt RECEIPT.json]');
+  console.error('Usage: node scripts/wayglass-return-trial-004.mjs INPUT.json [--receipt RECEIPT.json] [--transport host|ollama]');
+  process.exit(64);
+}
+
+if (!['host', 'ollama'].includes(transport)) {
+  console.error('Return Trial 004 transport must be host or ollama.');
   process.exit(64);
 }
 
 const input = JSON.parse(await fs.readFile(inputPath, 'utf8'));
-const result = await runReturnTaskSelectionTransport({
+const runTransport = transport === 'host' ? runReturnTaskSelectionViaHost : runReturnTaskSelectionTransport;
+const result = await runTransport({
   attempt_id: input.attempt_id || 'return-trial-004',
   stop_receipt: input.stop_receipt,
   continuation_packet: input.continuation_packet,
