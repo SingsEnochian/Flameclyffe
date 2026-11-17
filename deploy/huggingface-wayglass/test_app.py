@@ -425,7 +425,7 @@ class SpaceContractTests(unittest.TestCase):
             return FakeResponse(envelope())
         # Control characters expand when JSON encoded; raw UTF-8 length is not
         # a sufficient authenticated transport budget.
-        history = [{"role": "user", "content": "\\u0001" * 8000} for _ in range(12)]
+        history = [{"role": "user", "content": chr(1) * 8000} for _ in range(12)]
         with patch.object(self.app.OPENER, "open", side_effect=respond):
             result = self.app.call_kernel("Continue", history)
         self.assertIn("Verified response", result)
