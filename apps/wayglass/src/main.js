@@ -55,6 +55,7 @@ import { recordRouteAsWonderLight } from './wonder-light.js';
 import { registerWayglassOrgan, listWayglassOrgans } from './organ-registry.js';
 import { FIRST_WAYGLASS_ORGANS } from './organ-donors.js';
 
+import {readWayglassHelmWyrdrune} from './ship-wyrdrune-interface.js';
 const root = document.querySelector('#app');
 
 // Bluebird provider authorization is an explicit connection action.
@@ -240,11 +241,12 @@ const switcher=document.createElement('button');switcher.type='button';switcher.
 switcher.setAttribute('aria-controls',shell.id);switcher.setAttribute('aria-expanded','false');
 switcher.setAttribute('aria-haspopup','true');switcher.textContent='Explore Wayglass';
 const helm=document.createElement('header');helm.className='wg-helm glass-panel';
+const helmWyrdrune=readWayglassHelmWyrdrune();helm.dataset.wtlMaterial=helmWyrdrune.material;helm.dataset.wtlSource='compiled-native-ship';
 const helmIdentity=document.createElement('div');helmIdentity.className='wg-helm-identity';
 const helmMark=document.createElement('span');helmMark.className='wg-helm-mark';helmMark.setAttribute('aria-hidden','true');helmMark.textContent='✧';
 const helmTitle=document.createElement('div');helmTitle.className='wg-helm-title';
-const helmName=document.createElement('strong');helmName.textContent='WAYGLASS';
-const helmSubtitle=document.createElement('span');helmSubtitle.textContent='LIVING SHIP / ONE UNIVERSE';
+const helmName=document.createElement('strong');helmName.textContent=helmWyrdrune.nodes.find(node=>node.kind==='heading')?.text||'WAYGLASS';
+const helmSubtitle=document.createElement('span');helmSubtitle.textContent=helmWyrdrune.nodes.find(node=>node.kind==='text')?.text||'LIVING SHIP / ONE UNIVERSE';
 helmTitle.append(helmName,helmSubtitle);helmIdentity.append(helmMark,helmTitle);
 const helmReadout=document.createElement('div');helmReadout.className='wg-helm-readout';
 const roomLabel=document.createElement('span');roomLabel.className='wg-helm-room';roomLabel.textContent='Arriving…';
