@@ -92,8 +92,8 @@ export function mountWayglassAcousticRoom(root,{loadCompositionControls=()=>impo
   $('[data-acoustic-play-extended]').disabled=!state.score_ready||featherStopped;
   $('[data-acoustic-play-extended]').textContent=state.playing?'Extended playing':'Play extended score';
   if(state.source==='extended')
-    $('[data-acoustic-extended-status]').textContent=state.playing?'Playing extended Wyrdrune · '+state.score_layer_count+' sound layers':
-      state.score_ready?'Extended Wyrdrune score ready · '+state.score_layer_count+' sound layers':'Compose extended Wyrdrune to create a score.';
+    $('[data-acoustic-extended-status]').textContent=state.playing?'Playing '+(state.score_title??'extended Wyrdrune · '+state.score_layer_count+' sound layers'):
+      state.score_ready?(state.score_title??'Extended Wyrdrune · '+state.score_layer_count+' sound layers')+' · ready':'Compose extended Wyrdrune to create a score.';
  };
  const offShipSound=soundscape.subscribe(updateScoreSource);
  let reduced=Boolean(globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches);

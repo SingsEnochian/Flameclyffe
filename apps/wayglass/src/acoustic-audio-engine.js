@@ -13,7 +13,7 @@ export function createAcousticAudioEngine({AudioContext = null,scope=globalThis}
   // unavailable context (notably under delayed Safari/browser initialization).
   const resolveAudioContext=()=>AudioContext||scope.AudioContext||scope.webkitAudioContext;
   let context = null, graph = null, disposed = false, running = false, epoch = 0, pending = null;
-  let status = 'stopped', lastError = null;
+  let status = 'stopped', lastError = null, sequenceSource = null, sequenceRevision = 0;
   let settings = {muted: true, mono: false, ambience: false, bearing: {pan: 0, gain: 1, distance: 1}, score: null};
   const voices = new Set(), presented = new Set();
   const hasAudio=()=>typeof resolveAudioContext()==='function';
@@ -34,6 +34,12 @@ export function createAcousticAudioEngine({AudioContext = null,scope=globalThis}
     disconnect(voice.osc); disconnect(voice.envelope);
   }
   function teardown() {
+    if (sequenceSource) {
+      sequenceSource.onended = null;
+      try { sequenceSource.stop(); } catch {}
+      disconnect(sequenceSource);
+      sequenceSource = null;
+    }
     storyProjection.stop();
     for (const voice of [...voices]) releaseVoice(voice);
     if (!graph) return;
@@ -52,7 +58,7 @@ export function createAcousticAudioEngine({AudioContext = null,scope=globalThis}
     if (!graph) return;
     const b = settings.bearing;
     smooth(graph.master.gain, settings.muted ? 0 : 0.35);
-    smooth(graph.navigation.gain, (settings.score?.foregroundGain ?? 0.035) * b.gain);
+    smooth(graph.navigation.gain, settings.sequence ? 0 : (settings.score?.foregroundGain ?? 0.035) * b.gain);
     smooth(graph.ambience.gain, settings.ambience ? (settings.score?.atmosphereGain ?? 0.008) : 0);
     smooth(graph.status.gain, 0.025);
     if (graph.panner) smooth(graph.panner.pan, settings.mono ? 0 : b.pan);
@@ -96,7 +102,7 @@ export function createAcousticAudioEngine({AudioContext = null,scope=globalThis}
     const effectiveStatus = running && !disposed && context?.state && context.state !== 'running' ? context.state : status;
     return {supported:hasAudio(), running: active, disposed, status: !hasAudio()?'unsupported':effectiveStatus, muted: settings.muted, mono: settings.mono,
       ambience: settings.ambience, pending: Boolean(pending), lastError,
-      buses: {navigation: active && !settings.muted, ambience: active && !settings.muted && settings.ambience,
+      buses: {navigation: active && !settings.muted && !settings.sequence, ambience: active && !settings.muted && settings.ambience,
         status: active && !settings.muted}, activeSignals: voices.size, presentedEvents: presented.size};
   }
   function start() {
@@ -202,9 +208,40 @@ export function createAcousticAudioEngine({AudioContext = null,scope=globalThis}
       return {accepted: false, reason: 'adapter-error'};
     }
   }
+  async function playTimedScore({samples,sampleRate},onEnd) {
+    if (!(samples instanceof Float32Array) || sampleRate!==24000 || !samples.length || samples.length>45*sampleRate) {
+      throw new TypeError('A rendered Wyrdrune timed score is required.');
+    }
+    stop({pauseComposition:false});
+    const token=++sequenceRevision;
+    settings.sequence=true;
+    update({ambience:false,score:null,mono:true,muted:false});
+    const state=await start();
+    if(token!==sequenceRevision)return false;
+    if(!state.running)throw new Error('Audio unavailable: '+(state.lastError||state.status));
+    try {
+      const buffer=context.createBuffer(1,samples.length,sampleRate);
+      buffer.copyToChannel(samples,0);
+      const source=sequenceSource=context.createBufferSource();
+      source.buffer=buffer;
+      source.onended=()=>{
+        if(sequenceSource!==source)return;
+        source.onended=null;
+        disconnect(source);
+        sequenceSource=null;
+        onEnd();
+      };
+      source.connect(graph.master);
+      source.start();
+      return true;
+    } catch(error) {
+      stop({pauseComposition:false});
+      throw error;
+    }
+  }
   function stop({pauseComposition=true}={}) {
     if(pauseComposition)composition.pauseGeneration();composition.disableAudio();
-    ++epoch; pending = null; settings.muted = true; running = false;
+    ++epoch; ++sequenceRevision; pending = null; settings.muted = true; settings.sequence=false; running = false;
     teardown(); status = disposed ? 'disposed' : hasAudio() ? 'stopped' : 'unsupported';
     return getState();
   }
@@ -215,5 +252,5 @@ export function createAcousticAudioEngine({AudioContext = null,scope=globalThis}
   }
   function onFeather(event){if(event.detail?.stopped===true){composition.feather();stop();}else if(event.detail?.stopped===false&&event.detail?.confirmed===true)composition.releaseFeather({confirmed:true});}
   scope.addEventListener?.('wayglass:feather',onFeather);
-  return {composition,start, update, signal, stop, dispose, getState};
+  return {composition,start, update, signal, playTimedScore, stop, dispose, getState};
 }

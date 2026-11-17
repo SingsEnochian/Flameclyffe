@@ -149,6 +149,8 @@ export async function mountLivingWatercolorSurface(root) {
           '</div>',
           '<div class="wc-tool-buttons" aria-label="Opt-in sound and touch cues">',
             '<button id="wc-sound" class="glass-chip" type="button" aria-pressed="false">Cues off</button>',
+            '<label for="wc-score-choice">Wyrdrune score</label>',
+            '<select id="wc-score-choice"><option value="auto">From the conversation</option><option value="myth">The Heart of Myth</option><option value="story">Story soundscape</option></select>',
             '<button id="wc-score-compose" class="glass-chip" type="button">Compose Wyrdrune</button>',
             '<button id="wc-score-play" class="glass-chip" type="button" aria-pressed="false" disabled>Play Wyrdrune</button>',
             '<button id="wc-haptics" class="glass-chip" type="button" aria-pressed="false">Haptics off</button>',
@@ -672,27 +674,40 @@ export async function mountLivingWatercolorSurface(root) {
     updateInspector();
   });
   const soundButton=q('wc-sound'),hapticButton=q('wc-haptics'),featherButton=q('wc-feather');
-  const composeScore=q('wc-score-compose'),playScore=q('wc-score-play'),scoreStatus=q('wc-score-status');
+  const composeScore=q('wc-score-compose'),playScore=q('wc-score-play'),scoreStatus=q('wc-score-status'),scoreChoice=q('wc-score-choice');
+  let composingMyth=false;
   const offShipSound=shipSoundscape.subscribe(state=>{
     if(stopped)return;
     playScore.disabled=!state.score_ready||featherStopped;
     playScore.setAttribute('aria-pressed',String(state.playing));
     playScore.textContent=state.playing?'Stop Wyrdrune':'Play Wyrdrune';
-    if(state.playing)scoreStatus.textContent='Wyrdrune playing · '+state.score_layer_count+' sound layers';
+    if(state.playing)scoreStatus.textContent=state.score_title
+      ?'Playing '+state.score_title:'Wyrdrune playing · '+state.score_layer_count+' sound layers';
+    else if(state.score_finished)scoreStatus.textContent=state.score_title+' · Feather';
   });
   listen(composeScore,'click',async()=>{
     if(stopped||featherStopped)return;
     const turns=continuity.snapshot().turns,last=turns.at(-1);
-    const text=(prompt.value.trim()||[last?.request?.authorText,last?.response?.text].filter(Boolean).join('\n')).slice(0,4900);
-    composeScore.disabled=true;scoreStatus.textContent='Executing Wyrdrune sound score through the House host…';
+    const draft=prompt.value.trim();
+    const text=(draft||[last?.request?.authorText,last?.response?.text].filter(Boolean).join('\n')).slice(0,4900);
+    const myth=/\bheart of myth\b/i;
+    const playMyth=scoreChoice.value==='myth'||(scoreChoice.value==='auto'&&
+      (draft?myth.test(draft):turns.some(turn=>myth.test(turn.request?.authorText??''))));
+    composingMyth=playMyth;
+    composeScore.disabled=true;
+    scoreStatus.textContent=playMyth?'Composing The Heart of Myth…':'Executing Wyrdrune sound score through the House host…';
     try{
-      const result=await shipSoundscape.composeExtended({text,turns:turns.length});
+      const result=playMyth?await shipSoundscape.composeTimed(async()=>{
+        const {renderWyrdruneTimedScore}=await import('../../../../lib/wayglass-timed-score.mjs');
+        const {default:source}=await import('../../../../scores/wyrdrune/heart-of-myth.wtl?raw');
+        return renderWyrdruneTimedScore(source);
+      },'scores/wyrdrune/heart-of-myth.wtl'):await shipSoundscape.composeExtended({text,turns:turns.length});
       if(!stopped&&result&&!result.playing){
         const layers=result.score_layer_count===2?'two-tone score from this host':result.score_layer_count+' sound layers';
-        scoreStatus.textContent='Wyrdrune ready · '+layers+' · press Play to listen.';
+        scoreStatus.textContent=(result.score_title??'Wyrdrune ready · '+layers)+' · press Play to listen.';
       }
     }catch(error){if(!stopped)scoreStatus.textContent='Score unavailable: '+error.message;}
-    finally{if(!stopped)composeScore.disabled=false;}
+    finally{composingMyth=false;if(!stopped)composeScore.disabled=false;}
   });
   listen(playScore,'click',async()=>{
     if(stopped||featherStopped)return;
@@ -951,6 +966,7 @@ export async function mountLivingWatercolorSurface(root) {
       voiceCypher?.stop();
       touchEpoch++;touchAbort?.abort();touchAbort=null;
       offActivity();offShipSound();
+      if(composingMyth||shipSoundscape.snapshot().score_title)shipSoundscape.stop();
       for(const remove of cleanups.splice(0))remove();
       globalThis.removeEventListener?.(WAYGLASS_FEATHER_EVENT,onFeather);
       wayglassSomaticSound.stop();
