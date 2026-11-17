@@ -487,7 +487,7 @@ export async function mountArcSweepWritingSurface(root) {
     cp('world').value = world.world_id;
     // Local atlas lineage changes with the actual selected narrative world.
     globalThis.__wayglassOS?.fullSpectrum?.setScope({
-      room:'arcsweep:writing-room',world:world.world_id,
+      room:'wayglass:writing-room',world:world.world_id,
     });
     root.querySelector('#wg-place-name').textContent = world.name;
     root.querySelector('#wg-place-hint').textContent = world.character
@@ -1066,7 +1066,7 @@ export async function mountArcSweepWritingSurface(root) {
   refreshEmergenceInterview();
 
   return Object.freeze({
-    surface_id: 'arcsweep:writing-room',
+    surface_id: 'wayglass:writing-room',
     interaction,
     get session_id(){return session;},
     messages,
