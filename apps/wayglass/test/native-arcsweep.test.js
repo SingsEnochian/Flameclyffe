@@ -49,6 +49,7 @@ test('ArcSweep world and continuity lineage is a registered Wayglass organ', () 
 test('canonical Wayglass registration no longer mounts the old ArcSweep iframe deck', async () => {
   const main = await readFile(new URL('../src/main.js', import.meta.url), 'utf8');
   const nativeSurface = await readFile(new URL('../src/surfaces/world-continuity.js', import.meta.url), 'utf8');
+  const writingRoom = await readFile(new URL('../src/surfaces/arcsweep-writing.js', import.meta.url), 'utf8');
 
   assert.doesNotMatch(main, /mountArcSweepDeckSurface/);
   assert.doesNotMatch(main, /surface_id:\s*['"]arcsweep:deck['"]/);
@@ -60,4 +61,7 @@ test('canonical Wayglass registration no longer mounts the old ArcSweep iframe d
   assert.match(nativeSurface, /loadState/);
   assert.match(nativeSurface, /saveState/);
   assert.match(nativeSurface, /buildRuntimeWorldContext/);
+
+  assert.match(writingRoom, /data-surface=\\\"wayglass-writing-room\\\"/);
+  assert.doesNotMatch(writingRoom, /data-surface=\\\"arcsweep-writing\\\"/);
 });
