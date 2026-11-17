@@ -2,6 +2,11 @@
 // Preserve the original objects and source keys; do not silently rewrite canon.
 import {HOUSE_DR_BUNDLE} from '../../arcsweep/src/house-dr-bundle.js';
 export const WAYGLASS_IMPORTED_WORLDS_SCHEMA='wayglass.imported-worlds/v1';
+export function filterImportedWorlds(worlds,query=''){
+ const term=String(query).trim().toLocaleLowerCase('en-GB');
+ if(!term)return [...worlds];
+ return worlds.filter(world=>[world.name,world.kind,world.description,world.source_key].some(value=>String(value||'').toLocaleLowerCase('en-GB').includes(term)));
+}
 export function importHouseWorlds(bundle=HOUSE_DR_BUNDLE){
  if(!bundle||!Array.isArray(bundle.worlds))throw new TypeError('World archive required');
  const seen=new Set();
