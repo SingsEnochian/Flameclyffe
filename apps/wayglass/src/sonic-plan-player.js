@@ -1,14 +1,17 @@
 // Explicitly authorised SF2 transport adapter. No audio engine or clock is assumed.
 // Host must supply a synth with send(intent), and schedule(callback, milliseconds).
 import {sf2FeatherIntents,validateSf2MidiIntent} from './sf2-control.js';
-export function createSonicPlanPlayer({synth,schedule,clearSchedule}={}){
+import {WAYGLASS_FEATHER_EVENT} from './somatic-sound.js';
+export function createSonicPlanPlayer({synth,schedule,clearSchedule,eventScope=null}={}){
  if(!synth||typeof synth.send!=='function'||typeof schedule!=='function'||typeof clearSchedule!=='function')throw new TypeError('Sonic player requires a synth and cancellable scheduler');
- let active=null,stopped=false;
+ let active=null,stopped=false,disposed=false;
  const playedEvents=new Set(); // session-local anti-replay; host persists receipts across Return
  const silence=()=>{if(active){clearSchedule(active.timer);active=null;}for(const intent of sf2FeatherIntents())synth.send(intent);};
+ const onFeather=event=>{if(event.detail?.stopped===true){stopped=true;silence();}else if(event.detail?.stopped===false&&event.detail?.confirmed===true){silence();stopped=false;}};
+ eventScope?.addEventListener?.(WAYGLASS_FEATHER_EVENT,onFeather);
  return Object.freeze({
   play(plan,{authorised=false,durationMs=240}={}){
-   if(!plan||plan.type!=='sf2-plan'||plan.requires_live_synth!==true||authorised!==true||stopped)return Object.freeze({played:false,reason:'not-authorised'});
+   if(!plan||plan.type!=='sf2-plan'||plan.requires_live_synth!==true||authorised!==true||stopped||disposed)return Object.freeze({played:false,reason:'not-authorised'});
    if(!Number.isInteger(durationMs)||durationMs<40||durationMs>2000)throw new TypeError('Invalid duration');
    if(!Array.isArray(plan.intents)||plan.intents.length!==2||plan.intents[0].type!=='note-on'||plan.intents[1].type!=='note-off'||plan.intents[0].channel!==plan.intents[1].channel||plan.intents[0].note!==plan.intents[1].note)throw new TypeError('Invalid paired note plan');
    // A forged plan must never reach a live synthesiser merely because it has the right shape.
@@ -28,7 +31,8 @@ export function createSonicPlanPlayer({synth,schedule,clearSchedule}={}){
    return Object.freeze({played:true,event_id:plan.event_id,source_receipt:plan.source_receipt,choice_receipt:plan.choice_receipt,duration_ms:durationMs});
   },
   feather(){stopped=true;silence();return Object.freeze({stopped:true});},
-  reset({ownerAuthorised=false}={}){if(ownerAuthorised!==true)throw new TypeError('Explicit owner authorisation required');silence();stopped=false;},
-  snapshot(){return Object.freeze({active:active!==null,feather_latched:stopped,played_event_count:playedEvents.size});}
+  reset({ownerAuthorised=false}={}){if(disposed)throw new TypeError('Player disposed');if(ownerAuthorised!==true)throw new TypeError('Explicit owner authorisation required');silence();stopped=false;},
+  dispose(){if(disposed)return;disposed=true;stopped=true;eventScope?.removeEventListener?.(WAYGLASS_FEATHER_EVENT,onFeather);silence();},
+  snapshot(){return Object.freeze({active:active!==null,feather_latched:stopped,disposed,played_event_count:playedEvents.size});}
  });
 }
