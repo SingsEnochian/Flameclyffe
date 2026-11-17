@@ -12,6 +12,7 @@ const DESTINATIONS=Object.freeze({
   'arcsweep:writing-room':'creation',
   'wayglass:universal-codex':'creation',
   'wayglass:journey-before-destination':'contact',
+  'wayglass:world-deck':'creation',
   'arcsweep:deck':'creation',
   'wayglass:sound-composition':'creation',
   'wayglass:triptych-lift':'creation',
