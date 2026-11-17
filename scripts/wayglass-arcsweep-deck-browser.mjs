@@ -46,7 +46,7 @@ try{
    addEventListener('message',event=>{if(event.data?.schema==='wayglass.arcsweep-deck/v1')globalThis.__deckProtocolTrace.push({kind:event.data.kind,origin:event.origin,from_parent:event.source===parent});});
   });
   const page=await context.newPage();activePage=page;page.on('pageerror',error=>receipt.page_errors.push(error.message));page.on('console',message=>{if(message.type()==='error')receipt.console_errors.push(message.text().slice(0,2000));});
-  await page.goto(origin+'/wayglass/?room=deck');
+  await page.goto(origin+'/wayglass/?room=legacyDeck');
   await page.locator('[data-surface="arcsweep-deck"]').waitFor();assert.equal(await page.locator('iframe').count(),0,'loading remains explicit');
   const parentSound=page.locator('[data-deck-composer]');
   await page.getByText('Shape this region’s soundscape',{exact:true}).click();
