@@ -2,6 +2,7 @@
   display: grid;
   gap: 1rem;
   color: #e8eeeb;
+  padding-bottom: 6rem;
 }
 
 .wg-atelier-head {
@@ -41,7 +42,7 @@
 
 .wg-atelier-view-controls {
   position: absolute;
-  inset: auto 0.9rem 0.9rem;
+  inset: 0.9rem auto auto 0.9rem;
 }
 
 .wg-atelier-caption {

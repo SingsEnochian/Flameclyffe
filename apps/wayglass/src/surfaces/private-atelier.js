@@ -20,6 +20,15 @@ export function mountPrivateAtelier(root) {
         <p class="eyebrow">Living Watercolour · Liquid</p>
         <h1>Wayglass’s private atelier</h1>
         <p>Wayglass shapes this room. Move around it as a visitor.</p>
+        <div class="wg-atelier-actions">
+          <button type="button" class="glass-chip" data-atelier-refresh>Refresh view</button>
+          <button type="button" class="glass-chip" data-atelier-invite disabled>Invite Wayglass to shape</button>
+        </div>
+        <form class="wg-atelier-actions" data-atelier-signin hidden>
+          <label>House Steward credential <input type="password" autocomplete="current-password" required maxlength="4096"></label>
+          <button type="submit" class="glass-chip">Sign in</button>
+        </form>
+        <p data-atelier-status role="status">Opening the atelier…</p>
       </header>
       <div class="wg-atelier-window">
         <div class="wg-atelier-viewport"></div>
@@ -34,17 +43,8 @@ export function mountPrivateAtelier(root) {
           <h2 data-atelier-title></h2>
           <p data-atelier-note></p>
           <p data-atelier-receipt class="tiny"></p>
-          <p data-atelier-status role="status">Opening the atelier…</p>
           <p data-atelier-fallback hidden>3D rendering is unavailable here. Wayglass’s scene description remains visible.</p>
         </div>
-        <div class="wg-atelier-actions">
-          <button type="button" class="glass-chip" data-atelier-refresh>Refresh view</button>
-          <button type="button" class="glass-chip" data-atelier-invite disabled>Invite Wayglass to shape</button>
-        </div>
-        <form class="wg-atelier-actions" data-atelier-signin hidden>
-          <label>House Steward credential <input type="password" autocomplete="current-password" required maxlength="4096"></label>
-          <button type="submit" class="glass-chip">Sign in</button>
-        </form>
       </div>
     </section>`;
 
