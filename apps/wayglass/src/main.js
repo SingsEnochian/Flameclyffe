@@ -2,6 +2,7 @@ import {mountWayglassSoundComposition} from './surfaces/sound-composition.js';
 import {wayglassSomaticSound} from './somatic-sound.js';
 import {wayglassStoryScoreBinding,installWayglassStoryComposition} from './story-score-binding.js';
 import './styles.css';
+import './wtl-interface-atelier.css';
 import './authorization.css';
 import './faeberpunk.css';
 import './faeberpunk-rooms.css';
