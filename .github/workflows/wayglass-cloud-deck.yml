@@ -1,4 +1,4 @@
-name: Wayglass Cloud and ArcSweep Deck
+name: Wayglass Cloud and Native ArcSweep
 on:
   pull_request:
     paths:
@@ -61,10 +61,10 @@ jobs:
           WAYGLASS_PLAYWRIGHT_MODULE: ${{ runner.temp }}/wayglass-browser/node_modules/playwright/index.mjs
         run: node scripts/wayglass-first-contact-browser.mjs
       - run: npm run wayglass:stage:server && npm run arcsweep:stage:server
-      - name: ArcSweep deck desktop, mobile, Feather and return
+      - name: Native ArcSweep world/continuity desktop and mobile
         env:
           WAYGLASS_PLAYWRIGHT_MODULE: ${{ runner.temp }}/wayglass-browser/node_modules/playwright/index.mjs
-        run: node scripts/wayglass-arcsweep-deck-browser.mjs
+        run: node scripts/wayglass-native-arcsweep-browser.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
