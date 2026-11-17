@@ -5,12 +5,13 @@ const MATERIALS=new Set(['opaline','labradorite','amber','moss','clear']);
 const COMPONENTS=new Set(['heading','text','panel','status','action']);
 const ACTIONS=new Set(['none','feather','open-codex','open-writing']);
 const MAX_NODES=32;
+const cleanSource=(value,max)=>typeof value==='string'&&value.length<=max&&!/[\\u0000-\\u0008\\u000b\\u000c\\u000e-\\u001f\\u007f]/u.test(value);
 const clean=(value,max)=>typeof value==='string'&&value.length<=max&&!/[\u0000-\u001f\u007f]/u.test(value);
 export function validateWtlInterfaceProposal(proposal){
   if(!proposal||typeof proposal!=='object'||Array.isArray(proposal)||proposal.schema!==ATELIER_SCHEMA)throw new TypeError('Unknown WTL interface proposal');
   if(!clean(proposal.title,100)||!MATERIALS.has(proposal.material))throw new TypeError('Invalid interface title or material');
   if(!Array.isArray(proposal.nodes)||proposal.nodes.length<1||proposal.nodes.length>MAX_NODES)throw new TypeError('Interface node budget exceeded');
-  if(!clean(proposal.wtl_source,16000)||!proposal.wtl_source.trim())throw new TypeError('Original WTL source required');
+  if(!cleanSource(proposal.wtl_source,16000)||!proposal.wtl_source.trim())throw new TypeError('Original WTL source required');
   if(!clean(proposal.author,120)||!clean(proposal.provenance,240))throw new TypeError('Attributable authorship and provenance required');
   const nodes=proposal.nodes.map((node,index)=>{
     if(!node||typeof node!=='object'||!COMPONENTS.has(node.kind)||!clean(node.text,500))throw new TypeError('Invalid interface node '+index);
