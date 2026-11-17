@@ -70,11 +70,11 @@ def call_kernel(message, history):
                 prior.append({"role": role, "content": content})
     # Reserve the new turn before selecting history so the complete request stays bounded.
     # This is a transport budget, not a limit on what the owner may write locally.
-    budget = max(0, 64_000 - len(message.encode("utf-8")) - 4_000)
+    budget = max(0, MAX_BYTES - len(json.dumps(message).encode("utf-8")) - 4_000)
     # Bound the aggregate context, not only each turn. Preserve newest turns first.
     selected = []
     for turn in reversed(prior):
-        size = len(turn["content"].encode("utf-8"))
+        size = len(json.dumps(turn).encode("utf-8"))
         if size > budget:
             break
         selected.append(turn)
@@ -83,6 +83,8 @@ def call_kernel(message, history):
     # The configured endpoint must be an owner-authenticated Wayglass conversation adapter.
     # Never point this at a public unauthenticated model endpoint.
     payload = json.dumps({"input": message, "history": prior, "route_id": "wayglass:ship", "character_id": "wayglass", "interaction": {"channel": "OOC"}, "world_id": "wayglass:home", "surface_id": "huggingface-kernel-entrance"}).encode("utf-8")
+    if len(payload) > MAX_BYTES:
+        return "Wayglass request exceeds the private transport limit; no request sent."
     req = urllib.request.Request(
         GATEWAY,
         data=payload,
