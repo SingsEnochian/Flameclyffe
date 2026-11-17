@@ -417,6 +417,36 @@ class SpaceContractTests(unittest.TestCase):
         self.assertLessEqual(captured["size"], 64000)
         self.assertEqual(len(captured["body"]["history"]), 6)
 
+    def test_redirects_never_forward_owner_bearer_to_another_origin(self):
+        import urllib.error
+        import urllib.request
+        request = urllib.request.Request(
+            self.app.GATEWAY,
+            data=b'{}',
+            headers={"Authorization": "Bearer test-token-not-a-secret"},
+            method="POST",
+        )
+        handler = self.app.NoRedirect()
+        for status in (301, 302, 303, 307, 308):
+            with self.subTest(status=status):
+                redirected = handler.redirect_request(
+                    request, None, status, "redirect", {},
+                    "https://untrusted.example.test/collect",
+                )
+                self.assertIsNone(redirected)
+        with patch.object(self.app.OPENER, "open", side_effect=urllib.error.HTTPError(
+            self.app.GATEWAY, 302, "redirect", {"Location": "https://untrusted.example.test/collect"}, None
+        )):
+            result = self.app.call_kernel("Hello", [])
+        self.assertIn("unreachable", result)
+        self.assertNotIn("Observation:", result)
+
+    def test_owner_gate_remains_disabled_when_gateway_is_not_configured(self):
+        self.app.GATEWAY = ""
+        with patch.object(self.app.OPENER, "open") as opener:
+            self.assertIn("not connected", self.app.call_kernel("Hello", []))
+            opener.assert_not_called()
+
     def test_gradio_messages_contract_is_explicit(self):
         source = APP.read_text(encoding="utf-8")
         self.assertIn('type="messages"', source)
