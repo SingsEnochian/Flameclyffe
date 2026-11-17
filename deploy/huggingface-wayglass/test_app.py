@@ -417,6 +417,21 @@ class SpaceContractTests(unittest.TestCase):
         self.assertLessEqual(captured["size"], 64000)
         self.assertEqual(len(captured["body"]["history"]), 6)
 
+    def test_escaped_history_is_bounded_by_actual_json_wire_bytes(self):
+        captured = {}
+        def respond(req, timeout):
+            captured["wire_bytes"] = len(req.data)
+            captured["body"] = json.loads(req.data)
+            return FakeResponse(envelope())
+        # Control characters expand when JSON encoded; raw UTF-8 length is not
+        # a sufficient authenticated transport budget.
+        history = [{"role": "user", "content": "\\u0001" * 8000} for _ in range(12)]
+        with patch.object(self.app.OPENER, "open", side_effect=respond):
+            result = self.app.call_kernel("Continue", history)
+        self.assertIn("Verified response", result)
+        self.assertLessEqual(captured["wire_bytes"], self.app.MAX_BYTES)
+        self.assertLess(len(captured["body"]["history"]), 12)
+
     def test_redirects_never_forward_owner_bearer_to_another_origin(self):
         import urllib.error
         import urllib.request
