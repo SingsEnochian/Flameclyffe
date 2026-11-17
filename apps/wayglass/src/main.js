@@ -12,8 +12,8 @@ import { enterWayglassWorld, leaveWayglassWorld, recoverWayglassDeparture, readV
 import { inspectWayglassDoubleMobius, traverseWayglassDoubleMobius } from './route-client.js';
 import { installVoyageInbox } from './voyage-inbox.js';
 import { createWayglassSpellingController } from './spelling-assistance.js';
-import { mountWayglassSurface, registerWayglassSurface, listWayglassSurfaces } from './surface-registry.js';
-import { mountArcSweepDeckSurface } from './surfaces/arcsweep-deck.js';
+import { mountWayglassSurface, registerWayglassSurface, registerWayglassSurfaceAlias, listWayglassSurfaces } from './surface-registry.js';
+import { mountWayglassWorldContinuitySurface } from './surfaces/world-continuity.js';
 import { mountArcSweepWritingSurface } from './surfaces/arcsweep-writing.js';
 import { mountWayglassSystemsSurface } from './surfaces/systems.js';
 import { mountWayglassSpectrumSurface } from './surfaces/spectral-field.js';
@@ -58,13 +58,16 @@ registerWayglassSurface({surface_id:'wayglass:sound-composition',label:'Wayglass
 registerWayglassSurface({surface_id:WAYGLASS_ENTRY_SURFACE,label:'Living Watercolor',mount:mountLivingWatercolorSurface});
 registerWayglassSurface({surface_id:'wayglass:journey-before-destination',label:'Journey Before Destination',mount:mountJourneyBeforeDestinationSurface});
 
-registerWayglassSurface({surface_id:'arcsweep:deck',label:'Wayglass · World and Continuity Deck',mount:mountArcSweepDeckSurface});
+registerWayglassSurface({surface_id:'wayglass:world-continuity',label:'Wayglass · World & Continuity',mount:mountWayglassWorldContinuitySurface});
 
 registerWayglassSurface({
-  surface_id: 'arcsweep:writing-room',
-  label: 'ArcSweep · Writing Room',
+  surface_id: 'wayglass:writing-room',
+  label: 'Wayglass · Writing Room',
   mount: mountArcSweepWritingSurface,
 });
+
+registerWayglassSurfaceAlias('arcsweep:deck', 'wayglass:world-continuity');
+registerWayglassSurfaceAlias('arcsweep:writing-room', 'wayglass:writing-room');
 
 
 registerWayglassSurface({
