@@ -27,3 +27,10 @@ test('visitors navigate and suggest but cannot author materials',()=>{
  assert.equal(visitorEnvironmentAction('feather'),true);
  assert.equal(visitorEnvironmentAction('set-lighting'),false);
 });
+
+test('prototype-like room names cannot poison the environment',()=>{
+ const rooms=JSON.parse('{"__proto__":{"lighting":"intruder"},"*":{"lighting":"gold"}}');
+ assert.throws(()=>validateShipEnvironment({...change,rooms}));
+ const clean=validateShipEnvironment(change,{surfaceIds:['wayglass:living-watercolor']});
+ assert.equal(resolveShipEnvironment(clean,'constructor').lighting,'#aabbcc');
+});
