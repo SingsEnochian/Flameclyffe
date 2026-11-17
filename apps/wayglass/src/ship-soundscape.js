@@ -26,6 +26,7 @@ export function createShipSoundscape({audio=createAcousticAudioEngine(),scoreSto
       playing:source==='extended'&&playingExtended&&audio.getState().running,
       score_ready:!!(timed||extended),score_digest:source==='extended'?timed?.hash??extended?.program_sha256??null:null,
       score_title:timed?.title??null,score_finished:timedFinished,
+      score_input_count:timed?.inputCount??null,
       score_layer_count:timed?0:extended?2+(extended.score?.layers?.length??0):0,
       story_digest:source==='extended'&&!timed?extended?.story_sha256??null:null,
       original_program:source==='owner'?audio.composition.snapshot().program??null:null,
