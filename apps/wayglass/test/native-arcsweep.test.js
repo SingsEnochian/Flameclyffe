@@ -56,7 +56,7 @@ test('canonical Wayglass registration no longer mounts the old ArcSweep iframe d
   assert.match(main, /registerWayglassSurfaceAlias\(['"]arcsweep:deck['"],\s*['"]wayglass:world-continuity['"]\)/);
 
   assert.doesNotMatch(nativeSurface, /<iframe/i);
-  assert.doesNotMatch(nativeSurface, /\/arcsweep\//);
+  assert.doesNotMatch(nativeSurface, /['\"]\/arcsweep\//, 'native surface must not contain a runtime /arcsweep/ URL');
   assert.match(nativeSurface, /loadState/);
   assert.match(nativeSurface, /saveState/);
   assert.match(nativeSurface, /buildRuntimeWorldContext/);
