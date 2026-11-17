@@ -2,7 +2,7 @@ import {listWayglassSurfaces} from '../surface-registry.js';
 import {readWayglassRouteObservation,subscribeWayglassObserver} from '../living-observer-model.js';
 import {wayglassSomaticSound} from '../somatic-sound.js';
 import {createWayglassWorldDraftStore} from '../world-draft-store.js';
-import {importHouseWorlds} from '../imported-worlds.js';
+import {importHouseWorlds,filterImportedWorlds} from '../imported-worlds.js';
 // Native Wayglass world deck. Never loads /arcsweep/ or assumes legacy storage.
 export function mountWayglassWorldDeck(root,{listRooms=listWayglassSurfaces,readRoute=readWayglassRouteObservation,subscribe=subscribeWayglassObserver,navigate=id=>globalThis.__wayglassOS?.mount(id),sound=wayglassSomaticSound,worldStore=()=>createWayglassWorldDraftStore(),readImportedWorlds=importHouseWorlds}={}){
  if(!root?.ownerDocument)throw new TypeError('Wayglass world deck requires DOM root');
@@ -22,11 +22,27 @@ export function mountWayglassWorldDeck(root,{listRooms=listWayglassSurfaces,read
  const archive=doc.createElement('section');archive.className='glass-panel';archive.setAttribute('aria-label','Imported worlds');
  const archiveTitle=doc.createElement('h2');archiveTitle.textContent='Imported worlds · source-preserving archive';
  const archiveStatus=doc.createElement('p');archiveStatus.setAttribute('role','status');
+ const search=doc.createElement('input');search.type='search';search.setAttribute('aria-label','Search imported worlds');search.placeholder='Search worlds, origins and descriptions';
  const archiveList=doc.createElement('div');archiveList.className='wg-imported-worlds';
- try{const imported=readImportedWorlds();archiveStatus.textContent=imported.worlds.length+' authored worlds available · '+imported.bundle_id+' · '+imported.version+' · read-only source copies';
- for(const world of imported.worlds){const details=doc.createElement('details');const summary=doc.createElement('summary');summary.textContent=world.name;const body=doc.createElement('p');body.textContent=world.description||world.kind||'World record';const provenance=doc.createElement('p');provenance.textContent='Source: '+world.source_key+' · '+world.source_bundle+' · '+world.source_version;details.append(summary,body,provenance);archiveList.append(details);}
- }catch(e){archiveStatus.textContent='World archive unavailable: '+String(e?.message||e);}
- archive.append(archiveTitle,archiveStatus,archiveList);
+ let importedWorlds=[];
+ const renderArchive=()=>{
+  archiveList.replaceChildren();const matches=filterImportedWorlds(importedWorlds,search.value);
+  archiveStatus.textContent=matches.length+' of '+importedWorlds.length+' worlds · source-preserving read-only archive';
+  for(const world of matches){
+   const details=doc.createElement('details');const summary=doc.createElement('summary');summary.textContent=world.name;
+   const description=doc.createElement('p');description.textContent=world.description||world.kind||'World record';
+   const history=doc.createElement('p');history.textContent=world.history?'History: '+world.history:'No history in source bundle';
+   const rules=doc.createElement('p');rules.textContent=world.rules?'World rules: '+world.rules:'No rules in source bundle';
+   const provenance=doc.createElement('p');provenance.textContent='Source: '+world.source_key+' · '+world.source_bundle+' · '+world.source_version;
+   details.append(summary,description,history,rules,provenance);
+   if(world.source_urls.length){const sources=doc.createElement('p');sources.textContent=world.source_urls.length+' original source references retained';details.append(sources);}
+   archiveList.append(details);
+  }
+ };
+ try{const imported=readImportedWorlds();importedWorlds=imported.worlds;renderArchive();}
+ catch(e){archiveStatus.textContent='World archive unavailable: '+String(e?.message||e);}
+ const onSearch=()=>renderArchive();search.addEventListener('input',onSearch);
+ archive.append(archiveTitle,search,archiveStatus,archiveList);
  const feather=doc.createElement('button');feather.type='button';feather.textContent='🪽 Feather · stop sensory output';
  let disposed=false;
  const refresh=()=>{if(disposed)return;const route=readRoute();status.textContent=route?.status?'Observed route: '+route.status+' · '+(route.route_id||'unlabelled'):'No model transport observed in this session.';};
@@ -36,5 +52,5 @@ export function mountWayglassWorldDeck(root,{listRooms=listWayglassSurfaces,read
  const onFeather=()=>{sound.feather();refresh();};feather.addEventListener('click',onFeather);
  section.append(title,explanation,status,archive,editor,feather,rooms);root.replaceChildren(section);
  const unsubscribe=subscribe(refresh);refresh();
- return ()=>{disposed=true;unsubscribe?.();feather.removeEventListener('click',onFeather);save.removeEventListener('click',onSave);};
+ return ()=>{disposed=true;unsubscribe?.();feather.removeEventListener('click',onFeather);save.removeEventListener('click',onSave);search.removeEventListener('input',onSearch);};
 }
