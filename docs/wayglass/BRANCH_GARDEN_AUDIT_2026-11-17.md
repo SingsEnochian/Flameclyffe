@@ -43,3 +43,21 @@ Baseline: wayglass/current (NOT main)
 
 ## Acceptance
 A smaller understandable active PR queue; zero lost unique commits; every retired PR linked to its successor; all experimental history recoverable; Wayglass/current stable; Constellation Room live verification not claimed until actual provider receipts exist.
+
+
+## Owner decision: ONE ACTIVE PR PER SYSTEM (2026-11-17)
+This supersedes the earlier assumption that each integration track may keep multiple competing active PRs indefinitely. A track is an engineering work queue; **each named system has exactly one canonical active integration PR** targeting `wayglass/current`. Related contributors submit commits or reviewed cherry-picks into that one PR; no parallel PRs with overlapping ownership remain active once their unique work is integrated and verified.
+
+- **Wyrdrune:** one canonical WTL language/runtime PR. Candidate sources include #645 #643 #632 #624 #619 #617 #616 #615; also review #618 and historical WTL candidates. The canonical PR must cover typed IR, Möbius, ritual, sound/visual bridges and test gates. **No single source PR is presumed complete.**
+- **Constellation:** #650 is the provisional canonical integration PR; reconcile #636 and other group-chat/seat/route contributions, keeping separate owner authentication as a clearly defined dependency.
+- **FAEberpunk / Living Watercolour:** one canonical sensory-UI PR, combining #614 #613 #604 and relevant visual contributions; keep acoustic subsystem ownership separate only where its contracts truly differ.
+- **Sound / Composition:** one canonical sound engine PR, reconciling #649 #635 #590 and the existing acoustic stack.
+- **Return Engine:** one canonical continuity PR, reconciling #648 #629 #607 and predecessors in ancestry order.
+- **Authentication / host:** one canonical owner-sign-in and provider-custody PR, reconciling #647 #600 and related transport changes under Astra's ownership.
+- **Shipwide integration:** one final integration PR to reconcile completed subsystem PRs, not a competing implementation of each subsystem.
+
+**Closure protocol:** For each noncanonical PR: inventory exact head SHA and unique commits, map every changed file/contract/test to canonical commit(s), confirm CI at the canonical head, check dependent PR bases, then post a link and disposition. Only then close the redundant PR. Retain archived refs for research and experiments. Do not delete source branches solely because the PR was closed.
+
+**Release gate:** one active PR is a queue policy, not evidence of feature completeness. Never mark a PR superseded without its contributions either integrated, explicitly rejected with rationale, or preserved as an unresolved archived experiment. If any item remains unaccounted for, keep the source PR open temporarily with an explicit consolidation-blocked status.
+
+**This document is the policy and inventory starting point, not proof that these consolidations have already been executed.**
