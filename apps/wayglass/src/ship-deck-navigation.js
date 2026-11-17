@@ -8,6 +8,7 @@ export const SHIP_DECK_GROUPS=Object.freeze([
 ]);
 const DESTINATIONS=Object.freeze({
   'wayglass:living-watercolor':'contact',
+  'wayglass:private-atelier':'creation',
   'arcsweep:writing-room':'contact',
   'wayglass:universal-codex':'creation',
   'wayglass:journey-before-destination':'contact',

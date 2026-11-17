@@ -6,6 +6,7 @@ const { pathToFileURL } = require('node:url');
 const express = require('express');
 const { createRequestGate } = require('../security/wayglass-request-gate');
 const {createAlteredTimelineRouter}=require('./altered-timeline-router.cjs');
+const { createPrivateAtelierRouter } = require('./private-atelier.cjs');
 const {
   publicWayglassRoutes,
   resolveWayglassRoute,
@@ -117,7 +118,7 @@ function outputText(data) {
     .trim();
 }
 
-async function callOllama(route, payload, compiled = null, fetchImpl = globalThis.fetch) {
+async function callOllama(route, payload, compiled = null, fetchImpl = globalThis.fetch, options = {}) {
   const input = cleanText(payload.input);
   const messages = [
     { role: 'system', content: buildInstructions(payload.interaction, compiled, resolveCharacterSeat(payload.character_id)) },
@@ -135,11 +136,13 @@ async function callOllama(route, payload, compiled = null, fetchImpl = globalThi
       messages,
       think: payload.think === true,
       stream: false,
+      ...(options.json ? { format: 'json' } : {}),
       options: {
         num_predict: Math.max(64, Math.min(4000, Number(payload.max_output_tokens) || 1400)),
       },
     }),
-    signal: AbortSignal.timeout(120000),
+    ...(options.localOnly ? { redirect: 'error' } : {}),
+    signal: options.signal ? AbortSignal.any([options.signal, AbortSignal.timeout(120000)]) : AbortSignal.timeout(120000),
   });
 
   const data = await response.json().catch(() => ({}));
@@ -531,10 +534,28 @@ async function readQuadSourcesFromSupabase(fetchImpl=globalThis.fetch){
   return {schema:SOURCE_SCHEMA,observed_at,channels};
 }
 
-function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThis.fetch, departureStore = createDepartureStore() } = {}) {
+function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThis.fetch, departureStore = createDepartureStore(), atelierDirectory } = {}) {
   const router = express.Router();
   // Same authenticated House gateway as Wayglass route custody. No separate user identity.
   router.use('/timeline/altered',createAlteredTimelineRouter({authorise:griffStewardAuthorized}));
+  router.use('/private-atelier', createPrivateAtelierRouter({
+    authorise: griffStewardAuthorized,
+    directory: atelierDirectory,
+    async compose(input, signal) {
+      const route = resolveWayglassRoute('wayglass:ship');
+      const endpoint = new URL(route.endpoint());
+      if (!['http:', 'https:'].includes(endpoint.protocol) ||
+          !['localhost', '127.0.0.1', '[::1]'].includes(endpoint.hostname)) {
+        throw new Error('The private atelier requires a loopback ship route.');
+      }
+      const model = route.model();
+      const result = await callOllama({ model: () => model, endpoint: () => endpoint.href },
+        { input, character_id: 'wayglass', interaction: { channel: 'OOC' }, max_output_tokens: 1600 },
+        null, fetchImpl, { signal, json: true, localOnly: true });
+      return { output: result.output, model };
+    },
+  }));
+
   // Stable, public, metadata-free process readiness. Never use the private
   // /routes catalogue as a health probe (401 is expected without House auth).
   router.get('/healthz', (_req, res) => {
