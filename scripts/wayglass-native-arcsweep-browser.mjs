@@ -7,7 +7,7 @@ import { pathToFileURL } from 'node:url';
 const root = resolve(process.env.WAYGLASS_NATIVE_ARCSWEEP_STAGED_ROOT || 'apps/starwell-server/public');
 const output = resolve(process.env.WAYGLASS_NATIVE_ARCSWEEP_BROWSER_ARTIFACTS || 'artifacts/wayglass/native-arcsweep');
 const moduleFile = resolve(process.env.WAYGLASS_PLAYWRIGHT_MODULE || '/opt/codex/runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright/index.mjs');
-const packageInfo = JSON.parse(await readFile(resolve(dirname(moduleFile), 'package.json'), 'utf8');
+const packageInfo = JSON.parse(await readFile(resolve(dirname(moduleFile), 'package.json'), 'utf8'));
 assert.equal(packageInfo.version, '1.62.1', 'Pinned Playwright is required');
 const { chromium } = await import(pathToFileURL(moduleFile).href);
 
