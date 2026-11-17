@@ -5,7 +5,7 @@ class Element{constructor(tag,doc){this.tagName=tag;this.ownerDocument=doc;this.
 const doc={createElement(tag){return new Element(tag,doc);}};
 test('native Wayglass world deck opens rooms without ArcSweep and disposes observer',async()=>{
  const root=new Element('main',doc),calls=[];let unsubscribed=false;
- const cleanup=mountWayglassWorldDeck(root,{listRooms:()=>[{surface_id:'wayglass:writing-room',label:'Writing',mount:()=>{}},{surface_id:'arcsweep:deck',label:'Legacy',mount:()=>{}}],readRoute:()=>null,subscribe:()=>()=>{unsubscribed=true;},navigate:id=>calls.push(id),sound:{feather:()=>calls.push('feather')}});
+ const cleanup=mountWayglassWorldDeck(root,{listRooms:()=>[{surface_id:'wayglass:writing-room',label:'Writing',mount:()=>{}},{surface_id:'arcsweep:deck',label:'Legacy',mount:()=>{}}],readRoute:()=>null,subscribe:()=>()=>{unsubscribed=true;},navigate:id=>calls.push(id),sound:{feather:()=>calls.push('feather')},worldStore:()=>({read:()=>null,save:()=>({saved_at:'test'})})});
  const section=root.children[0],nav=section.children.find(x=>x.tagName==='nav');
  assert.equal(nav.children.length,1);assert.equal(nav.children[0].dataset.room,'wayglass:writing-room');
  nav.children[0].click();await Promise.resolve();assert.deepEqual(calls,['wayglass:writing-room']);
