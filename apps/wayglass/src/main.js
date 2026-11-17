@@ -9,6 +9,7 @@ import './faeberpunk-immersive.css';
 import './watercolor-live-field.css';
 import './wyrdrune-cypher-material.css';
 import { openWayglassAuthorization } from './authorization.js';
+import { resumeHouseSession } from './house-steward-session.js';
 import { installWayglassField } from './glass-field.js';
 import { installMotionChoreography } from './motion-choreography.js';
 import { installKeyboardControls } from './keyboard-controls.js';
@@ -386,6 +387,7 @@ globalThis.__wayglassOS = wayglass;
 
 const roomQuery=new URLSearchParams(globalThis.location?.search||'').get('room');
 const entry=resolveWayglassEntry({available:listWayglassSurfaces(),room:roomQuery});
+if (globalThis.location?.protocol === 'https:') await resumeHouseSession();
 await wayglass.mount(entry.surface_id);
 installVoyageInbox();
 installWayglassStoryComposition({observe:subscribeWayglassObserver});
