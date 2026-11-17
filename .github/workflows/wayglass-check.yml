@@ -85,6 +85,8 @@ jobs:
           STEPFUN_API_KEY: ${{ secrets.STEPFUN_API_KEY }}
           STEPFUN_ROUTE: ${{ inputs.stepfun_route }}
         run: node scripts/wayglass-stepfun-smoke.mjs --live --route="$STEPFUN_ROUTE"
+      - name: Verify canonical PREMAQC semantics
+        run: node --test apps/starwell/test/premaqcNamingLaw.test.js apps/starwell/test/premaqcFullSong.test.js
       - name: Verify integrated contracts and ArcSweep instruments
         run: npm run contracts:verify && npm run arcsweep:test && npm run arcsweep:build
       - run: npm run wayglass:build

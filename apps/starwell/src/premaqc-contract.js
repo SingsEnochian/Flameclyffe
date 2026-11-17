@@ -4,6 +4,15 @@ export const PREMAQC_TERM = 'PREMAQC';
 export const PREMAQC_AXES = Object.freeze(['P', 'C', 'R', 'E', 'M', 'A', 'Q']);
 export const PREMAQC_DYNAMIC_AXES = Object.freeze(['P', 'C', 'R', 'E', 'M', 'A']);
 export const PREMAQC_CONTEXT_ONLY_AXES = Object.freeze(['Q']);
+export const PREMAQC_AXIS_NAMES = Object.freeze({
+  P: 'Presence',
+  C: 'Coherence',
+  R: 'Resonance',
+  E: 'Entanglement',
+  M: 'Memory',
+  A: 'Agency',
+  Q: 'Qualia',
+});
 
 export const PREMAQC_SHOKZ_PLAN_SCHEMA = 'bifrost.premaqc-shokz-soundfont-plan/v1';
 export const PREMAQC_FULL_SONG_PLAN_SCHEMA = 'bifrost.premaqc-full-song-plan/v1';
