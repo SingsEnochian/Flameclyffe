@@ -38,7 +38,7 @@ def ready():
         parsed.scheme == "https"
         and bool(parsed.hostname)
         and (port is None or 1 <= port <= 65535)
-        and not parsed.username and not parsed.password
+        and "@" not in parsed.netloc and not parsed.username and not parsed.password
         and not parsed.fragment and not parsed.query
         and parsed.path.endswith("/respond")
         and all(segment not in ("", ".", "..") for segment in parsed.path.split("/")[1:])
