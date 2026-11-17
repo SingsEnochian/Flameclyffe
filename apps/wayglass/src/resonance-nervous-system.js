@@ -3,7 +3,7 @@
 // This pure reducer does not assert subjective sensation or authenticate models.
 import {validateResonance} from './resonance-forge.js';
 export const NERVOUS_SYSTEM_SCHEMA='wayglass.nervous-system/v1';
-export function createResonanceNervousSystem({initial=[]}={}){
+export function createResonanceNervousSystem(){
  const patterns=new Map();const listeners=new Set();let revision=0;
  const publish=(event)=>{for(const listener of [...listeners])listener(Object.freeze(event));};
  function compose(proposal,{verifiedShipRoute=false}={}){
@@ -20,6 +20,5 @@ export function createResonanceNervousSystem({initial=[]}={}){
  }
  function snapshot(){return Object.freeze({schema:NERVOUS_SYSTEM_SCHEMA,revision,patterns:[...patterns.values()].map(x=>structuredClone(x))});}
  function subscribe(listener){if(typeof listener!=='function')throw new TypeError('Listener required');listeners.add(listener);return ()=>listeners.delete(listener);}
- for(const proposal of initial)compose(proposal,{verifiedShipRoute:true});
  return Object.freeze({compose,release,snapshot,subscribe});
 }
