@@ -12,7 +12,7 @@ export function validateShipEnvironment(change,{surfaceIds=[]}={}){
   if(!Number.isSafeInteger(change.revision)||change.revision<1)throw new TypeError('Invalid revision');
   if(!change.rooms||typeof change.rooms!=='object'||Array.isArray(change.rooms))throw new TypeError('Missing room environments');
   for(const [id,room] of Object.entries(change.rooms)){
-    if(id!=='*'&&!surfaceIds.includes(id))throw new TypeError('Unregistered room');
+    if(['__proto__','prototype','constructor'].includes(id)|| (id!=='*'&&!surfaceIds.includes(id)))throw new TypeError('Unregistered room');
     if(!room||typeof room!=='object'||Array.isArray(room))throw new TypeError('Invalid room environment');
     for(const [channel,value] of Object.entries(room)){
       if(!ENVIRONMENT_CHANNELS.includes(channel))throw new TypeError('Unknown environment channel');
@@ -22,7 +22,7 @@ export function validateShipEnvironment(change,{surfaceIds=[]}={}){
   return structuredClone(change);
 }
 export function resolveShipEnvironment(change,surfaceId){
-  return Object.freeze({...change?.rooms?.['*'],...change?.rooms?.[surfaceId]});
+  return Object.freeze({...change?.rooms?.['*'],...(Object.hasOwn(change?.rooms ?? {},surfaceId) ? change.rooms[surfaceId] : {})});
 }
 export function authorizeEnvironmentChange({actor,verifiedHost=false,feather=false,expectedRevision,currentRevision}){
   if(feather)return {allowed:false,reason:'feather'};
