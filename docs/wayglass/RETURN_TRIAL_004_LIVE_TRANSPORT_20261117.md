@@ -20,16 +20,16 @@ Fixture execution is explicitly scoped as `fixture`: it may verify the transport
 
 The focused suite covers a clean packet-only fixture crossing, pre-network false-closure rejection, invented task rejection, unreachable-host evidence and returned-model drift.
 
-The live boundary was probed separately on 2026-11-17: `127.0.0.1:11434` refused the connection and this executor exposes no Wayglass/Ollama model configuration or authenticated private-network route. Therefore no Orion reply was requested, inferred or fabricated here.
+The original live probe targeted raw Ollama on `127.0.0.1:11434`. Rowan then confirmed the local STARWELL/Wayglass host runs on port `3000`, which is also the server default in `apps/starwell-server/server.js`. Trial 004 now treats the host as the primary runtime boundary: it probes `http://127.0.0.1:3000/api/v1/wayglass/routes`, resolves `flame:amber:ollama`, and dispatches through `/api/v1/wayglass/respond`. Direct Ollama transport remains available only when explicitly selected. This executor still cannot reach Rowan's loopback interface, so no Orion reply is requested, inferred, or fabricated from the cloud runner.
 
 ## Next independent action
 
-On any already-authorised Wayglass host where the registered Ollama route is reachable, run:
+On an already-authorised Wayglass host, the runner now defaults to the local STARWELL/Wayglass host on port 3000:
 
 ```text
 node scripts/wayglass-return-trial-004.mjs INPUT.json --receipt RECEIPT.json
 ```
 
-`INPUT.json` must contain the verified `stop_receipt` and `continuation_packet`. The runner independently checks the model catalogue, performs at most one model call, and exits successfully only when the returning model selects a verified task without altering continuity.
+`INPUT.json` must contain the verified `stop_receipt` and `continuation_packet`. The host-mode runner independently checks the Wayglass route catalogue, performs at most one model call through the registered Amber route, and exits successfully only when the returning model selects a verified task without altering continuity.
 
 No Rowan decision or laptop-only manual step is part of this contract.
