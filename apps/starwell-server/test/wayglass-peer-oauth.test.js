@@ -410,3 +410,14 @@ test('revoked and expired refresh grants fail closed without issuing replacement
   after = JSON.parse(fs.readFileSync(fx.paths.tokenFile, 'utf8'));
   assert.equal(after.access_tokens.length, 1);
 });
+
+
+test('OAuth durable token and profile stores are owner-readable only on POSIX', async (t) => {
+  if (process.platform === 'win32') return t.skip('POSIX permission bits do not apply on Windows');
+  const fx = await startFixture(t);
+  for (const filename of [fx.paths.configFile, fx.paths.tokenFile]) {
+    // A private OAuth store must never be group- or world-readable after an atomic write.
+    if (!fs.existsSync(filename)) continue;
+    assert.equal(fs.statSync(filename).mode & 0o077, 0, filename);
+  }
+});
