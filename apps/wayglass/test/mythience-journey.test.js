@@ -255,3 +255,17 @@ test('malformed hybrid parent entries fail closed without replacing a valid prop
   }
   assert.equal(journey.carry().history.length,1);
 });
+
+
+test('a delayed approval cannot carry a different invitation after Feather',()=>{
+  const journey=createMythienceJourney();
+  const first=journey.offer(crossing(),{traveller_id:'traveller:a'});
+  const firstId=first.pending.experience_id;
+  journey.discard();
+  const replacement=journey.offer(crossing({input_hash:other}),{traveller_id:'traveller:a'});
+  assert.notEqual(replacement.pending.experience_id,firstId);
+  assert.throws(()=>journey.carry({expected_experience_id:firstId}),/Stale carry/);
+  assert.equal(journey.snapshot().pending.experience_id,replacement.pending.experience_id);
+  assert.equal(journey.snapshot().history.length,0);
+  assert.equal(journey.carry({expected_experience_id:replacement.pending.experience_id}).history.length,1);
+});
