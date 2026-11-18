@@ -1,0 +1,45 @@
+name: Wayglass NOAA Mobius Chaos Observed-Data Lab
+
+on:
+  pull_request:
+    paths:
+      - 'apps/arcsweep/src/noaa-mobius-chaos-benchmark.js'
+      - 'apps/arcsweep/test/noaa-mobius-chaos-benchmark.test.js'
+      - 'scripts/wayglass-noaa-mobius-chaos.mjs'
+      - '.github/workflows/wayglass-noaa-mobius-chaos.yml'
+  workflow_dispatch:
+  schedule:
+    - cron: '17 3 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wayglass-noaa-mobius-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate-and-observe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24.x'
+      - name: Verify deterministic science, gaps and controls
+        run: node --test apps/arcsweep/test/noaa-mobius-chaos-benchmark.test.js
+      - name: Pull actual NOAA archives and run held-out comparison
+        if: github.event_name != 'pull_request'
+        run: node scripts/wayglass-noaa-mobius-chaos.mjs --live --output=artifacts/noaa-mobius-chaos.json
+      - name: Preserve attributed live-observation benchmark receipt
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v7
+        with:
+          name: wayglass-noaa-mobius-${{ github.sha }}
+          path: artifacts/noaa-mobius-chaos.json
+          if-no-files-found: error
+          retention-days: 21
+
+# GitHub schedule runs only from the repository default branch after promotion.
+# This workflow does not grant public Supabase access or write an observed value to canon.
