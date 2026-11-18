@@ -35,7 +35,7 @@ export function mountWayglassWorldDeck(root,{listRooms=listWayglassSurfaces,read
    const rules=doc.createElement('p');rules.textContent=world.rules?'World rules: '+world.rules:'No rules in source bundle';
    const provenance=doc.createElement('p');provenance.textContent='Source: '+world.source_key+' · '+world.source_bundle+' · '+world.source_version;
    details.append(summary,description,history,rules,provenance);
-   if(world.source_urls.length){const sources=doc.createElement('p');sources.textContent=world.source_urls.length+' original source references retained';details.append(sources);}
+   if(world.source_urls?.length){const sources=doc.createElement('p');sources.textContent=world.source_urls.length+' original source references retained';details.append(sources);}
    archiveList.append(details);
   }
  };
