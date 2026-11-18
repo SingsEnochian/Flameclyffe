@@ -49,6 +49,20 @@ export function createCellTissue({maxCells=8,energyCap=100}={}) {
     const twist=(parent.twist+variation+1)%1;
     return spawn({id:child_id,role:parent.role,parent_id,energy:10,twist});
   }
+  // Roles are open-ended labels; changing a role never changes the cell's identity.
+  // Transformation has an explicit cost and a durable receipt.
+  function transform(id,nextRole,{mode='transdifferentiate',cost=3}={}) {
+    if(paused) throw Error('Feather: tissue paused');
+    const cell=cells.get(id);
+    if(!cell) throw Error('Unknown cell');
+    if(!idOK(nextRole)) throw Error('Invalid role');
+    if(!['differentiate','transdifferentiate','dedifferentiate'].includes(mode)) throw Error('Invalid transformation mode');
+    if(!Number.isSafeInteger(cost)||cost<0||cost>energyCap||cell.energy<cost) throw Error('Insufficient transformation energy');
+    const previousRole=cell.role;
+    cell.energy-=cost;
+    cell.role=nextRole;
+    return receipt('transform',{id,parent_id:cell.parent_id,from:previousRole,to:nextRole,mode,cost,energy:cell.energy});
+  }
   function retire(id,reason='renewal') {
     if(paused) throw Error('Feather: tissue paused');
     if(!cells.has(id)) throw Error('Unknown cell');
@@ -79,5 +93,5 @@ export function createCellTissue({maxCells=8,energyCap=100}={}) {
     return clone({births,snapshot:snapshot()});
   }
   function snapshot(){return clone({schema:'wayglass.wtl-cell-tissue/v0.1',clock,paused,cells:[...cells.values()],events});}
-  return Object.freeze({spawn,signal,tick,divide,retire,populate,feather,resume,snapshot});
+  return Object.freeze({spawn,signal,tick,divide,transform,retire,populate,feather,resume,snapshot});
 }
