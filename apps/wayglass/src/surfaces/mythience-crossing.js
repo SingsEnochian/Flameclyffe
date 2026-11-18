@@ -105,7 +105,7 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
     if(!active)return;
     if(controller){controller.abort();controller=null;button.disabled=false;
       hybridButton.disabled=journey.snapshot().abilities.length<2;}
-    journey.discard();sensory.stop();lastReading=null;
+    journey.discard();delete carryButton.dataset.experienceId;sensory.stop();lastReading=null;
     carryButton.disabled=true;hearButton.disabled=true;feelButton.disabled=true;
     receipt.textContent='';
     status.textContent='Fields changed. Invite Wyrdrune again to receive a new proposal.';
@@ -194,6 +194,7 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
       const result=await request({request:requestBody,seeds:current.seeds,signal:flight.signal});
       if(!active||controller!==flight||flight.signal.aborted)return;
       journey.offer(result,{traveller_id:id('traveller')});
+       carryButton.dataset.experienceId=journey.snapshot().pending?.experience_id||'';
       render(result);
       status.textContent=result.status==='candidate-returned'?'Candidate returned. No crossing committed.':'Threshold refused.';
       carryButton.disabled=result.status!=='candidate-returned';
@@ -224,6 +225,7 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
       },seeds:current.seeds,signal:flight.signal});
       if(!active||controller!==flight||flight.signal.aborted)return;
       journey.offer(result,{traveller_id:current.traveller_id});
+       carryButton.dataset.experienceId=journey.snapshot().pending?.experience_id||'';
       render(result);
       status.textContent=result.status==='candidate-returned'?'Third correspondence proposed. No canon committed.':'Hybrid invitation refused.';
       carryButton.disabled=result.status!=='candidate-returned';
@@ -234,7 +236,8 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
   carryButton.addEventListener('click',()=>{
     if(!active||paused||controller)return;
     try{
-      const state=journey.carry();
+      const state=journey.carry({expected_experience_id:carryButton.dataset.experienceId});
+       delete carryButton.dataset.experienceId;
       carryButton.disabled=true;
       hybridButton.disabled=state.abilities.length<2;
       status.textContent='Carried in this preview only: '+state.abilities.at(-1).id+
@@ -253,7 +256,7 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
     status.textContent=outcome.felt?'Threshold haptic played on request.':outcome.reason||'Haptics unavailable.';
   });
   function featherStop(){
-    paused=true;scene.pause();controller?.abort();controller=null;journey.discard();sensory.stop();lastReading=null;
+    paused=true;scene.pause();controller?.abort();controller=null;journey.discard();delete carryButton.dataset.experienceId;sensory.stop();lastReading=null;
     hearButton.disabled=true;feelButton.disabled=true;
     button.disabled=true;carryButton.disabled=true;
     hybridButton.disabled=true;
@@ -263,7 +266,7 @@ export function mountMythienceCrossing(root,{request=proposeMythienceCrossing}={
   const onShipFeather=event=>{if(event.detail?.stopped===true&&active)featherStop();};
   globalThis.addEventListener('wayglass:feather',onShipFeather);
   root.querySelector('[data-mythience-reset]').addEventListener('click',()=>{
-    controller?.abort();controller=null;journey.reset();paused=false;scene.resume();serial=0;hybridButton.disabled=true;carryButton.disabled=true;
+    controller?.abort();controller=null;journey.reset();delete carryButton.dataset.experienceId;paused=false;scene.resume();serial=0;hybridButton.disabled=true;carryButton.disabled=true;
     sensory.stop();lastReading=null;hearButton.disabled=true;feelButton.disabled=true;
     clearMythience();renderLineage();membrane.style.setProperty('--membrane-open','0');scene.setFields(fieldValues());
     reading.textContent='A fresh possibility. Nothing has been carried forward.';
