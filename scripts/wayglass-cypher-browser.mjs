@@ -102,8 +102,8 @@ async function checkWatercolourChat(page,profile){
  await turn.getByRole('button',{name:/^(Replay Wyrdrune|Return to Wyrdrune)$/}).click();
  assert.equal(await display.getAttribute('data-cypher-state'),'reading');
  await page.emulateMedia({reducedMotion:'reduce'});
- await page.waitForFunction(()=>document.querySelector('.wc-dialogue-response .wg-cypher-veil')?.dataset.cypherState==='english');
- await turn.getByRole('button',{name:/^(Replay Wyrdrune|Return to Wyrdrune)$/}).click();
+ await page.waitForFunction(()=>document.querySelector('.wc-dialogue-response .wg-cypher-veil')?.dataset.cypherState==='wyrdrune');
+ await turn.getByRole('button',{name:'Read in British English'}).click();
  assert.equal(await display.getAttribute('data-cypher-state'),'english');
  await page.emulateMedia({reducedMotion:'no-preference'});
  const instruments=page.locator('#wc-instruments-toggle');
