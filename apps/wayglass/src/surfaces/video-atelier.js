@@ -1,4 +1,5 @@
 import './video-atelier.css';
+import { shipwideFeedback } from '../shipwide-feedback.js';
 import { WayglassVideoAtelier, WAYGLASS_SCENES } from '../ltx-desktop-bridge.js';
 
 export async function mountWayglassVideoAtelier(root) {
@@ -26,6 +27,7 @@ export async function mountWayglassVideoAtelier(root) {
     '<p class="tiny">5 seconds · 720p · 16:9 · Fast · no audio. LTX starts in text-to-video mode; optional image start/end frames are supported by the local runner.</p>',
     '<div class="atelier-actions">',
     '<button id="wg-video-export" type="button" class="send-jewel">Export LTX scene job</button>',
+    '<button id="wg-video-observer" type="button" class="glass-chip">Use Observer direction</button>',
     '<button id="wg-video-copy" type="button" class="glass-chip">Copy prompt</button>',
     '</div><p id="wg-video-status" role="status" aria-live="polite" class="tiny">Prepared for export. No video has been rendered or uploaded.</p>',
     '</section>',
@@ -42,6 +44,24 @@ export async function mountWayglassVideoAtelier(root) {
   const prompt = root.querySelector('#wg-video-prompt');
   const status = root.querySelector('#wg-video-status');
   prompt.value = preset.prompt;
+  let sourceRef, observerDirection;
+  root.querySelector('#wg-video-observer').addEventListener('click', async () => {
+    const frame = await shipwideFeedback.restore();
+    if (!root.contains(prompt) || !root.isConnected) return;
+    if (!frame) {
+      status.textContent = 'Run the Quad Observer or First Voyage to receive Wyrdrune direction.';
+      return;
+    }
+    if (sourceRef !== frame.provenance.checkpoint) {
+      if (observerDirection && prompt.value.endsWith(observerDirection)) {
+        prompt.value = prompt.value.slice(0, -observerDirection.length);
+      }
+      observerDirection = '\n\n' + frame.video;
+      prompt.value += observerDirection;
+      sourceRef = frame.provenance.checkpoint;
+    }
+    status.textContent = 'Observer direction added to the editable scene.';
+  });
 
   root.querySelector('#wg-video-copy').addEventListener('click', async () => {
     try {
@@ -53,7 +73,7 @@ export async function mountWayglassVideoAtelier(root) {
   });
   root.querySelector('#wg-video-export').addEventListener('click', () => {
     try {
-      const handoff = atelier.prepare({ prompt: prompt.value });
+      const handoff = atelier.prepare({ prompt: prompt.value, sourceRef: sourceRef ? 'observer:' + sourceRef : undefined });
       const blob = new Blob([JSON.stringify(handoff, null, 2) + '\n'], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');

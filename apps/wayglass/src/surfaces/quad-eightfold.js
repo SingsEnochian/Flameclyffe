@@ -1,4 +1,5 @@
 import './quad-eightfold.css';
+import { shipwideFeedback } from '../shipwide-feedback.js';
 import {runLiveQuad,subscribeQuadGestalt,quadFeatherState,readLatestQuadGestalt} from '../quad-eightfold-client.js';
 import {temporalHingeFor,designThroughEightfold} from '../quad-temporal-hinge.js';
 import {runWayglassNikolaReview} from '../wayglass-nikola-workflow.js';
@@ -86,6 +87,11 @@ export function mountWayglassQuadGestalt(root){
     collabButton.disabled=busy||collabBusy||feather||!checkpoint||!collabConsent.checked;
     collabExport.disabled=!collabReceipt;
   }
+  void shipwideFeedback.restore().then(plan => {
+    if (!plan || disposed || checkpoint || busy || feather) return;
+    $('[data-quad-learning-state]').textContent = 'Returned Observer focus: ' +
+      plan.agents.replaceAll('-', ' ') + '. Run a current reading before inviting local cognition.';
+  });
   for(const p of PHASES){const e=document.createElement('span');e.textContent=p;$('.quad-phases').append(e);}
   function setBusy(value){busy=value;run.disabled=value||feather;invite.disabled=value||!checkpoint||feather;nikola.disabled=value||!checkpoint||feather;setCollabAvailability();}
   function renderLens(){
@@ -156,7 +162,7 @@ export function mountWayglassQuadGestalt(root){
       ' · no canon, identity, or model-weight changes claimed.';
     invite.disabled=false;
     setCollabAvailability();
-    audio.update({quadSoundstage:g.soundstage});
+    audio.update({quadSoundstage:g.soundstage, score:readLatestQuadGestalt()?.shipwide?.audio ?? null});
     renderLens();
   }
   async function execute(){
@@ -190,6 +196,7 @@ export function mountWayglassQuadGestalt(root){
     await audio.start();
     if(disposed||feather||!sound.checked){audio.stop();return;}
     audio.update({muted:false,mono:mono.checked,ambience:true,
+      score:readLatestQuadGestalt()?.shipwide?.audio ?? null,
       quadSoundstage:checkpoint?.gestalt?.soundstage||[]});
   }
   async function askWayglass(){
@@ -200,12 +207,15 @@ export function mountWayglassQuadGestalt(root){
     const brief={schema:'wayglass.quad-learning-brief/v1',design:designThroughEightfold(readLatestQuadGestalt(),{lens}),checkpoint_hash:checkpoint.hash,
       source_observed_at:checkpoint.source_packet.observed_at,
       evidence:checkpoint.gestalt.evidence,soundstage:checkpoint.gestalt.soundstage,
-      gaps:checkpoint.gestalt.gaps,questions:checkpoint.continuity.unresolved_wonder_questions};
+      gaps:checkpoint.gestalt.gaps,
+      wtl_focus:readLatestQuadGestalt()?.shipwide?.provenance.checkpoint===checkpoint.hash?
+        readLatestQuadGestalt().shipwide.agents:null,
+      questions:checkpoint.continuity.unresolved_wonder_questions};
     try{
       recordWayglassRouteObservation({status:'started',routeId:'local:ollama'});
       const result=await invokeWayglassRoute({routeId:'local:ollama',history:[],maxOutputTokens:800,
         surfaceId:'wayglass:quad-gestalt',
-        input:'Please examine the following Wayglass Quad Eightfold host evidence. State one observation, an uncertainty, and a candidate learning experiment. Distinguish model-route replies from Wayglass-native trained weights. Do not invent absent source data.\n'+JSON.stringify(brief)});
+        input:'Please examine the following Wayglass Quad Eightfold host evidence. Use wtl_focus when supplied. State one observation, an uncertainty, and a candidate learning experiment. Distinguish model-route replies from Wayglass-native trained weights. Do not invent absent source data.\n'+JSON.stringify(brief)});
       if(disposed)return;
       recordWayglassRouteObservation({status:'completed',routeId:'local:ollama',
         provider:result.provider,model:result.model,receipt:result.receipt});

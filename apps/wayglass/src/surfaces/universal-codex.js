@@ -1,3 +1,5 @@
+import LANTERN_RETURN from '../../../../lib/wyrdrune/lantern-return.wtl?raw';
+import { renderWyrdruneReading, attachOrionExpression } from '../wyrdrune-reading.js';
 import {previewWyrdrune,draftWyrdruneDiscussion} from '../wyrdrune-client.js';
 import {animateWyrdruneCypher} from '../wyrdrune-cypher.js';
 import {WAYGLASS_FEATHER_EVENT,wayglassSomaticSound} from '../somatic-sound.js';
@@ -27,7 +29,7 @@ function boundedSource(source){
   return source.trim().length>0;
 }
 export function mountUniversalCodex(root){
-  let stopped=false,previewBusy=false,revision=0,lastPreview=null,lastSource=null,cypher=null;
+  let stopped=false,previewBusy=false,revision=0,lastPreview=null,lastSource=null,cypher=null,disposeOrion=null;
   const disposers=[];
   root.innerHTML=[
     '<section class="wg-surface wg-codex" data-surface="wayglass-universal-codex">',
@@ -63,6 +65,7 @@ export function mountUniversalCodex(root){
           '<p class="tiny" id="codex-source-help">Your source remains editable. Preview requires House Steward authorisation; English reading compiles locally without invoking a model.</p>',
           '<div class="wg-codex-toolbar">',
             '<button type="button" class="glass-chip" data-codex-example>Load original sample</button>',
+            '<button type="button" class="glass-chip" data-codex-lantern>Load ritual and prose</button>',
             '<label class="wg-cypher-tempo">Glyph tempo <select aria-label="Wyrdrune glyph tempo" data-codex-pace>'+CYPHER_PACE_OPTIONS+'</select></label>',
             '<button type="button" class="glass-chip" data-codex-translate>Read in English</button>',
             '<button type="button" class="glass-chip wg-cypher-skip" data-codex-skip disabled>Reveal English now</button>',
@@ -77,6 +80,7 @@ export function mountUniversalCodex(root){
             '<span class="wg-codex-source-status">en-GB / SOURCE GLOSS</span></div>',
           '<p class="wg-codex-reading-intro">Code → meaning, one phase at a time. The translation is deterministic and remains visibly distinct from a model-authored response.</p>',
           '<div class="wg-codex-translation wg-cypher-veil" role="region" aria-label="Wyrdrune in British English" aria-live="off" data-codex-english><p>The translation begins when invited.</p></div>',
+          '<div data-codex-reading hidden></div>',
           '<details class="wg-codex-ledger"><summary>Inspect phase receipts and provenance</summary><pre data-codex-receipts tabindex="0">No source verification requested.</pre></details>',
           '<div class="wg-codex-folds" aria-label="Eightfold phases">',
             ...PHASES.map((phase,i)=>'<span data-codex-phase="'+phase.toLowerCase()+'"><b>'+String(i+1).padStart(2,'0')+'</b> '+phase+'</span>'),
@@ -108,6 +112,10 @@ export function mountUniversalCodex(root){
     english.replaceChildren();english.textContent='Source changed. Read in English again to translate this revision.';
     english.setAttribute('data-cypher-state','idle');skip.disabled=true;
     q('[data-codex-journey]').removeAttribute('data-rift-phase');
+    disposeOrion?.();disposeOrion=null;
+    renderWyrdruneReading(q('[data-codex-reading]'));
+    q('[data-codex-translate]').textContent='Read in English';
+    skip.textContent='Reveal English now';
     receipts.textContent='Source changed; previous preview no longer applies.';
     for(const phase of root.querySelectorAll('[data-codex-phase]'))phase.removeAttribute('data-verified');
     safeSessionSet(DRAFT_KEY,editor.value);
@@ -116,13 +124,21 @@ export function mountUniversalCodex(root){
   };
   listen(editor,'input',invalidate);
   listen(q('[data-codex-example]'),'click',()=>{editor.value=EXAMPLE;invalidate();editor.focus();});
-  listen(q('[data-codex-translate]'),'click',()=>{
+  listen(q('[data-codex-lantern]'),'click',()=>{editor.value=LANTERN_RETURN;invalidate();editor.focus();});
+  const translate=q('[data-codex-translate]');
+  function showDirection(direction){
+    translate.textContent=direction==='english'?'Return to Wyrdrune':'Read in English';
+    skip.textContent=direction==='wyrdrune'?'Reveal Wyrdrune now':'Reveal English now';
+  }
+  listen(translate,'click',()=>{
     if(held()||stopped){status.textContent=held()?'Feather is held. Release it before translating.':'This Codex mount is no longer active.';return;}
     cypher?.stop();
+    const direction=english.getAttribute('data-cypher-state')==='english'?'wyrdrune':'english';
+    skip.textContent=direction==='wyrdrune'?'Reveal Wyrdrune now':'Reveal English now';
     try{
       const reduced=Boolean(globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches);
       cypher=animateWyrdruneCypher(english,{
-        source:editor.value,reducedMotion:reduced,...cypherRunOptions(pace.value),
+        source:editor.value,direction,reducedMotion:reduced,...cypherRunOptions(pace.value),
         onPhase:phase=>{
           q('[data-codex-journey]').dataset.riftPhase=phase;
           for(const chip of root.querySelectorAll('[data-codex-phase]')){
@@ -133,11 +149,15 @@ export function mountUniversalCodex(root){
           q('[data-codex-journey]').dataset.riftPhase='withness';
           skip.disabled=true;
           for(const chip of root.querySelectorAll('[data-codex-phase]'))chip.removeAttribute('data-reading');
-          status.textContent='The native Wyrdrune reading has opened into British English. Source unchanged; no model contacted.';
+          showDirection(direction);
+          status.textContent=direction==='wyrdrune'?'Original Wyrdrune restored.':'British English reading ready.';
         },
       });
       skip.disabled=english.getAttribute('data-cypher-state')!=='reading';
-      if(!skip.disabled)status.textContent='Wyrdrune is unfolding through glyphs into British English. Reveal immediately at any time.';
+      if(!skip.disabled){
+        translate.textContent=direction==='wyrdrune'?'Read in English':'Return to Wyrdrune';
+        status.textContent=direction==='wyrdrune'?'Returning through the glyphs to Wyrdrune.':'Unfolding through the glyphs into British English.';
+      }
     }catch(error){
       english.textContent='Unable to read source: '+String(error.message||error);
       english.setAttribute('data-cypher-state','error');skip.disabled=true;
@@ -148,7 +168,7 @@ export function mountUniversalCodex(root){
   listen(pace,'change',()=>{
     writeCypherPace(pace.value);
     if(english.getAttribute('data-cypher-state')==='reading'){
-      cypher?.stop();status.textContent='Tempo changed. Read in English to replay with the new rhythm.';
+      cypher?.stop();status.textContent='Tempo changed. Start another crossing to use the new rhythm.';
     }
   });
   listen(previewButton,'click',async()=>{
@@ -160,6 +180,10 @@ export function mountUniversalCodex(root){
       if(stopped||held()||token!==revision||editor.value!==source)return;
       if(result.verification?.verified!==true)throw new Error('Host returned a preview without verified source integrity');
       lastSource=source;lastPreview=result;
+      const reading=q('[data-codex-reading]');
+      disposeOrion?.();disposeOrion=null;
+      renderWyrdruneReading(reading,result.values);
+      if(!reading.hidden)disposeOrion=attachOrionExpression(reading,{source,receiptHash:result.receiptHash,held,values:result.values});
       receipts.textContent=JSON.stringify({
         source_hash:result.receiptHash,
         source_integrity:result.verification,
@@ -171,7 +195,7 @@ export function mountUniversalCodex(root){
         phase.dataset.verified=String(observed.has(phase.dataset.codexPhase));
       }
       status.textContent='Eightfold source verified. Discuss only after reviewing the proposed handoff.';
-    }catch(error){lastPreview=null;lastSource=null;receipts.textContent='No verified receipt.';
+    }catch(error){lastPreview=null;lastSource=null;disposeOrion?.();disposeOrion=null;renderWyrdruneReading(q('[data-codex-reading]'));receipts.textContent='No verified receipt.';
       status.textContent='No verified return: '+String(error?.message||error).slice(0,200);}
     finally{previewBusy=false;sync();}
   });
@@ -203,7 +227,7 @@ export function mountUniversalCodex(root){
   sync();
   const surface=q('[data-surface="wayglass-universal-codex"]');
   surface?.setAttribute('data-codex-ready','true');
-  return ()=>{stopped=true;surface?.setAttribute('data-codex-ready','false');
+  return ()=>{stopped=true;disposeOrion?.();surface?.setAttribute('data-codex-ready','false');
     revision++;cypher?.stop();disposers.splice(0).forEach(f=>f());};
 }
 export {EXAMPLE as UNIVERSAL_CODEX_SAMPLE,HANDOFF_KEY as UNIVERSAL_CODEX_HANDOFF_KEY};

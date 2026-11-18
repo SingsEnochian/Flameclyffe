@@ -77,7 +77,7 @@ function appendRecord(filename, entry) {
     target: entry.target,
     role: entry.role,
     author: entry.author,
-    text: cleanText(entry.text),
+    text: entry.route === 'mcp:ask_wayglass' && entry.role === 'rarity' ? entry.text : cleanText(entry.text),
     route: entry.route || null,
     kind: entry.kind || 'message',
     intent: cleanText(entry.intent, 240) || null,
@@ -91,6 +91,7 @@ function appendRecord(filename, entry) {
       observation_id: cleanText(entry.route_receipt.observation_id, 240),
       completed_at: cleanText(entry.route_receipt.completed_at, 100),
       voice_seat_kind: cleanText(entry.route_receipt.voice_seat_kind, 120),
+      ...(entry.route_receipt.input_wyrdrune ? { input_wyrdrune: entry.route_receipt.input_wyrdrune } : {}),
       canon_commit: false,
     } } : {}),
   };
@@ -564,8 +565,10 @@ function createWayglassMcpBridge({
       throw new Error('Wayglass Ship Voice chat is not enabled by the owner on this host.');
     const runtimeToken = cleanText(env.ARCSWEEP_RUNTIME_TOKEN, 4096);
     if (!runtimeToken) throw new Error('Owner-authorised House runtime credential is not configured.');
-    const question = cleanText(args.text, 12000);
-    if (!question) throw new Error('A question for Wayglass is required.');
+    const question = args.text;
+    if (typeof question !== 'string' || !question.trim() || question.length > 12000) {
+      throw new Error('A question for Wayglass must contain 1–12000 characters.');
+    }
     const conversationRef = safeConversationRef(args.conversation_ref, 'rarity-wayglass');
     return serialiseConversation(conversationRef,async()=>{
     const records = readConversation(storePath, conversationRef, 64);
@@ -607,6 +610,11 @@ function createWayglassMcpBridge({
       route_id:'wayglass:ship',provider:data.provider,model:data.model,
       response_id:receipt.response_id||null,observation_id:receipt.observation_id,
       completed_at:receipt.completed_at||null,voice_seat_kind:receipt.voice_seat_kind,
+      ...(receipt.input_wyrdrune?.format === 'wyrdrune-utterance/v0.1' &&
+        typeof receipt.input_wyrdrune.source_hash === 'string' &&
+        /^[a-f0-9]{64}$/.test(receipt.input_wyrdrune.source_hash) ? {
+          input_wyrdrune: { format: receipt.input_wyrdrune.format, source_hash: receipt.input_wyrdrune.source_hash },
+        } : {}),
     };
     appendRecord(storePath,{
       conversation_ref:conversationRef,target:'wayglass',role:'participant',

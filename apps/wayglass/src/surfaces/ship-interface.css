@@ -1,0 +1,12 @@
+.wg-deck-nav[data-ship-density="compact"] { gap: 0.35rem; }
+.wg-deck-nav[data-ship-density="spacious"] { gap: 1rem; }
+[data-ship-interface] { padding: 1.15rem; margin-block: 1rem; }
+[data-ship-interface] article {
+  border-inline-start: 0.25rem solid hsl(var(--expression-hue) 65% 65%);
+  padding-inline-start: 1rem;
+  margin-block-start: 1rem;
+}
+[data-ship-interface] article p { white-space: pre-wrap; }
+[data-ship-interface] [data-tone="ambient"] {
+  background: linear-gradient(100deg, hsl(var(--expression-hue) 65% 60% / 0.14), transparent);
+}

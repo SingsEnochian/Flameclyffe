@@ -1,4 +1,5 @@
 import './first-voyage.css';
+import { shipwideFeedback } from '../shipwide-feedback.js';
 import {checkHouseSteward,signInHouseSteward} from '../house-steward-session.js';
 import {observeIntegratedVoyage} from '../integrated-voyage-visual.js';
 import {wayglassSomaticSound} from '../somatic-sound.js';
@@ -166,6 +167,12 @@ export async function mountWayglassFirstVoyage(root){
        'Wyrdrune or the fictional membrane declined. The shared voyage did not commit a Return. The choice remains open.';
      q('[data-voyage-return-label]').textContent=success?'Return packet verified':'Refusal remains valid';
      root.querySelectorAll('[data-voyage-fold]').forEach(el=>{if(success)el.dataset.witnessed='true';else delete el.dataset.witnessed;});
+     if(success && result.shipwide) {
+       const frame = await shipwideFeedback.admit(result.shipwide, result.observer.checkpoint_hash,
+         result.observer.feedback_digest, { stopped: () => stopped || held() || controller.signal.aborted });
+       if(!frame)return;
+       q('[data-voyage-reading]').textContent += ' Engineering focus: ' + frame.engineering.replaceAll('-', ' ') + '.';
+     }
      if(success)observeIntegratedVoyage(result);
      q('[data-voyage-receipt]').textContent=JSON.stringify({
        scenario:data.scenario,kind:data.source_kind,status:result?.status,
@@ -173,6 +180,7 @@ export async function mountWayglassFirstVoyage(root){
        mythience_wtl:result?.mythience?.native_wtl||null,
        tensor:result?.tensor?.program_fingerprint||null,
        observer:result?.observer?.checkpoint_hash||null,
+       shipwide:result?.shipwide||null,
        voyage:result?.runtime?.receipt_hash||null,
        return_verdict:result?.return_verification?.verdict||null,
        sources:result?.provenance_refs||[],production_mutation:false,
@@ -183,6 +191,11 @@ export async function mountWayglassFirstVoyage(root){
    finally{controller=null;busy=false;reflect()}
  });
  render();reflect();
+ void shipwideFeedback.restore().then(frame => {
+   if (!frame || stopped || busy || q('[data-voyage-result-flag]').textContent !== 'AWAITING A VOYAGE') return;
+   q('[data-voyage-reading]').textContent = 'Returned Observer engineering focus: ' +
+     frame.engineering.replaceAll('-', ' ') + '. Run a voyage to review a current trial.';
+ });
  try{
    authenticated=await checkHouseSteward();
    if(!stopped){signIn.hidden=authenticated;announce(authenticated?'House verified. Choose a tide and begin.':'House sign-in required for execution. The room remains open.');reflect()}

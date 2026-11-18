@@ -43,9 +43,23 @@ export function createWayglassImage(score,doc=document){
  svg.append(centre);
  return svg;
 }
+// Follow a cue's authored time positions and use the shortest arc in hue space.
+export function sampleExpressionImage(cue, elapsedMs) {
+ const {image,contour}=cue;
+ if(!image||!contour?.length)return image;
+ const points=[{offsetMs:0,hue:image.hue,depth:image.depth},...contour];
+ const right=points.findIndex(point=>point.offsetMs>=elapsedMs);
+ if(right===0)return image;
+ const end=points[right<0?points.length-1:right], start=points[right<0?points.length-2:right-1];
+ const t=Math.min(1,Math.max(0,(elapsedMs-start.offsetMs)/(end.offsetMs-start.offsetMs)));
+ const delta=((end.hue-start.hue+540)%360)-180;
+ return {...image,hue:(start.hue+delta*t+360)%360,depth:start.depth+(end.depth-start.depth)*t};
+}
+
 export function createWayglassSoundPlayer({scope=globalThis}={}){
- let ctx=null,oscillators=[];
+ let ctx=null,oscillators=[],animation=null;
  function stop(){
+  if(animation!==null){scope.cancelAnimationFrame?.(animation);animation=null;}
   for(const osc of oscillators){try{osc.stop()}catch{}try{osc.disconnect()}catch{}}
   oscillators=[];
   if(ctx){const closing=ctx;ctx=null;try{void closing.close()}catch{}}
@@ -60,10 +74,12 @@ export function createWayglassSoundPlayer({scope=globalThis}={}){
   const interval=clamp(score.interval,1,2);
   const texture=clamp(score.texture,0,1);
   const silenceMs=score.lead_silence_ms??0;
-  if(typeof silenceMs!=='number'||!Number.isFinite(silenceMs)||silenceMs<0||silenceMs>4000)
-    throw new RangeError('Wyrdrune scored silence must be 0–4000 milliseconds');
+  const maxSilence=score.timing==='ritual-expression'?60000:4000;
+  if(typeof silenceMs!=='number'||!Number.isFinite(silenceMs)||silenceMs<0||silenceMs>maxSilence)
+    throw new RangeError('Wyrdrune scored silence must be 0–'+maxSilence+' milliseconds');
   const context=new Ctx();ctx=context;
   await context.resume?.();
+  if(ctx!==context)return {started:false};
   // WebAudio scheduling owns time. No timer, no busy wait, and no autoplay.
   const t=context.currentTime+silenceMs/1000;
   const vol=context.createGain();
@@ -82,5 +98,64 @@ export function createWayglassSoundPlayer({scope=globalThis}={}){
   return {started:true,duration_seconds:2.55+silenceMs/1000,
     silence_seconds:silenceMs/1000,mono:true,max_gain:.017};
  }
- return Object.freeze({play,stop,dispose:stop});
+ async function perform(timeline, onCue = () => {}, { onFrame } = {}){
+  stop();
+  const Ctx=scope.AudioContext||scope.webkitAudioContext;
+  if(!Ctx)throw new Error('The device has no supported audio synthesiser.');
+  const context=new Ctx();ctx=context;
+  await context.resume?.();
+  if(ctx!==context)return;
+  const origin=context.currentTime + 0.03;
+  let cursor=0;
+  try {
+   for (const cue of timeline) {
+    if (cue.kind === 'silence') continue;
+    const at = origin + cue.startMs / 1000;
+    const end = at + cue.durationMs / 1000;
+    const gain=context.createGain();
+    gain.gain.setValueAtTime(0,at);
+    gain.gain.linearRampToValueAtTime(.013,at+.12);
+    if (cue.contour?.length) {
+     for (const point of cue.contour) {
+      gain.gain.linearRampToValueAtTime(.013*point.energy,Math.min(at+point.offsetMs/1000,end-.12));
+     }
+    } else gain.gain.setValueAtTime(.013,end-.12);
+    gain.gain.linearRampToValueAtTime(0,end);
+    gain.connect(context.destination);
+    for(const [ratio,kind,mix] of [[1,'sine',1],[cue.sound.interval,'triangle',.1+cue.sound.texture*.35]]){
+     const oscillator=context.createOscillator();
+     const layer=context.createGain();
+     layer.gain.value=mix;
+     oscillator.type=kind;
+     const frequency=cue.sound.fundamental*ratio;
+     oscillator.frequency.value=frequency;
+     if(cue.contour?.length){
+      oscillator.frequency.setValueAtTime(frequency,at);
+      for(const point of cue.contour){
+       oscillator.frequency.linearRampToValueAtTime(frequency*point.pitchRatio,at+point.offsetMs/1000);
+      }
+     }
+     oscillator.connect(layer);layer.connect(gain);
+     oscillator.start(at);oscillator.stop(end);
+     oscillators.push(oscillator);
+    }
+   }
+   const last=timeline.at(-1);
+   function tick(){
+    animation=null;
+    if(ctx!==context)return;
+    const elapsed=(context.currentTime-origin)*1000;
+    if(elapsed>=last.startMs+last.durationMs){stop();onCue(null);return;}
+    const prior=cursor;
+    while(cursor+1<timeline.length && elapsed>=timeline[cursor+1].startMs)cursor++;
+    const cue=timeline[cursor];
+    if(prior!==cursor || !shown){shown=true;onCue(cue);}
+    if(ctx===context && cue.contour?.length)onFrame?.(sampleExpressionImage(cue,elapsed-cue.startMs));
+    if(ctx===context)animation=scope.requestAnimationFrame(tick);
+   }
+   let shown=false;
+   animation=scope.requestAnimationFrame(tick);
+  } catch(error){stop();throw error;}
+ }
+ return Object.freeze({play,perform,stop,dispose:stop});
 }

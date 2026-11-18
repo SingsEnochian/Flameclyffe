@@ -78,12 +78,15 @@ test('Wayglass ship voice can answer in Watercolour with exact seat and model re
     receipt:{response_id:'ship:fixture',character_id:'wayglass',voice_seat_kind:'system-voice-over-external-route'},
   };
   const response=await inviteWatercolorMode({
-    mode:'dream',authorText:'What do you notice?',routeId:'wayglass:ship',sessionId:'wc-fixture',
+    mode:'dream',authorText:'  What do you notice?\n',routeId:'wayglass:ship',sessionId:'wc-fixture',
     invoke:async args=>{dispatched=args;return returned;},
   });
   assert.equal(dispatched.characterId,'wayglass');
   assert.equal(dispatched.participantId,null,'the host pins this system identity; no unsolicited inheritance resolver');
   assert.equal(dispatched.routeId,'wayglass:ship');
+  assert.equal(dispatched.input,'  What do you notice?\n');
+  assert.match(dispatched.surfaceContext,/requested mode: Dream/);
+  assert.doesNotMatch(dispatched.surfaceContext,/What do you notice/);
   assert.equal(response.route_id,'wayglass:ship');
   assert.equal(response.text,returned.output);
   await assert.rejects(inviteWatercolorMode({

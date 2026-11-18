@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {SF2_SCHEMA,createSf2Catalogue,validateSf2Choice,validateSf2MidiIntent,sf2OutputAllowed,sf2FeatherIntents} from '../src/sf2-control.js';
+const catalogue=()=>createSf2Catalogue([{id:'owner-bank',label:'Local SF2',licence:'Owner supplied',presets:[{bank:0,program:11,label:'Vibraphone'}]}]);
+test('authorised SF2 preset with attributed choice',()=>{const c=validateSf2Choice({schema:SF2_SCHEMA,participant_id:'wayglass',mode:'instrument',soundfont_id:'owner-bank',bank:0,program:11,receipt:'r1',reason:'I choose bells'},catalogue());assert.equal(c.program,11);});
+test('reject unknown soundfont and invalid MIDI',()=>{assert.throws(()=>validateSf2Choice({schema:SF2_SCHEMA,participant_id:'wayglass',mode:'instrument',soundfont_id:'missing',bank:0,program:11,receipt:'r',reason:'r'},catalogue()));assert.throws(()=>validateSf2MidiIntent({type:'note-on',channel:0,note:128,velocity:100}));assert.throws(()=>validateSf2MidiIntent({type:'note-on',channel:0,note:60,velocity:100},{activeNotes:32}));});
+test('Feather is all-channel note shutdown and audio remains opt-in',()=>{assert.equal(sf2FeatherIntents().length,16);assert.equal(sf2OutputAllowed({ownerEnabled:true,bankAuthorised:true,feather:true}),false);assert.equal(sf2OutputAllowed({ownerEnabled:true,bankAuthorised:true}),true);});

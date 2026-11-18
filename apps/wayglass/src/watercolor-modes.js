@@ -43,7 +43,9 @@ export function composeWatercolorPrompt({mode,authorText='',activity=[],voicePre
     'Recent locally observed activity references (not independently verified): '+JSON.stringify(observed),
     'Rowan contribution: '+(trimmed||'No additional text. Offer a relevant beginning, open question or next step.'),
   ];
-  return Object.freeze({schema:MODE_SCHEMA,mode:selected.id,mode_label:selected.label,input:instructions.filter(Boolean).join('\n\n'),author_text:trimmed});
+  const context=instructions.slice(0,-1).filter(Boolean).join('\n\n');
+  return Object.freeze({schema:MODE_SCHEMA,mode:selected.id,mode_label:selected.label,
+    context,input:context+'\n\n'+instructions.at(-1),author_text:trimmed});
 }
 
 const WATERCOLOR_WYRDRUNE=[
@@ -71,7 +73,8 @@ export async function inviteWatercolorMode({
   if(typeof routeId!=='string'||!routeId.trim())throw new TypeError('A registered model route is required');
   try{
     const result=await invoke({
-      routeId,input:shipVoice ? prompt.input+'\n\n'+WATERCOLOR_WYRDRUNE+paintContext : prompt.input,
+      routeId,input:shipVoice ? authorText : prompt.input,
+      ...(shipVoice ? {surfaceContext:prompt.context+'\n\n'+WATERCOLOR_WYRDRUNE+paintContext} : {}),
       sessionId,history:continuationHistory,checkpoint:continuationCheckpoint,
       // Keep the optional inheritance adapter out of an ordinary First Contact.
       // The host route itself pins and receipts the Wayglass participant.
