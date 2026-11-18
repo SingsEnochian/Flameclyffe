@@ -82,8 +82,9 @@ jobs:
                 ;;
               integration)
                 npm ci --prefix apps/starwell-server --omit=dev --ignore-scripts
-                npm run wayglass:test:host
                 npm run wayglass:build
+                npm run wayglass:stage:server
+                npm run wayglass:test:host
                 npm run arcsweep:build
                 ;;
             esac

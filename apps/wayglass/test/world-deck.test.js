@@ -9,7 +9,7 @@ test('native Wayglass world deck opens rooms without ArcSweep and disposes obser
  const section=root.children[0],nav=section.children.find(x=>x.tagName==='nav');
  const archive=section.children.find(x=>x.attributes['aria-label']==='Imported worlds');
  assert.equal(archive.children[3].children.length,1);
- assert.equal(archive.children[2].children[0].children[0].textContent,'Terra Aeterna');
+ assert.equal(archive.children[3].children[0].children[0].textContent,'Terra Aeterna');
  assert.equal(nav.children.length,1);assert.equal(nav.children[0].dataset.room,'wayglass:writing-room');
  nav.children[0].click();await Promise.resolve();assert.deepEqual(calls,['wayglass:writing-room']);
  section.children.find(x=>x.tagName==='button').click();assert.deepEqual(calls,['wayglass:writing-room','feather']);
