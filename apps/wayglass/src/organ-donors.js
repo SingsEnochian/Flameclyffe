@@ -23,6 +23,40 @@ import {
   SOMATIC_CUE_SCHEMA,
   SOMATIC_RECEIPT_SCHEMA,
 } from '../../arcsweep/src/somatic-runtime.js';
+import { loadState, saveState } from '../../arcsweep/src/storage.js';
+import { buildRuntimeWorldContext } from '../../arcsweep/src/runtime-world-context.js';
+import { normaliseContinuityEvidenceLedger } from '../../arcsweep/src/continuity-evidence-state.js';
+
+export const worldContinuityOrgan = createWayglassOrgan({
+  organ_id: 'wayglass.organ.world-continuity-core',
+  lineage: ['arcsweep:world-registry', 'arcsweep:runtime-world-context', 'arcsweep:continuity-evidence'],
+  maturity: 'FUNCTIONAL',
+  capabilities: [
+    'world.registry.read',
+    'world.registry.select-active',
+    'world.runtime-context.mint',
+    'continuity.evidence.inspect',
+    'state.persist-compatible',
+  ],
+  authority_ceiling: [
+    'observe-world-state',
+    'select-active-world',
+    'persist-compatible-world-state',
+    'inspect-continuity-evidence',
+  ],
+  receipt_schemas: [
+    'arcsweep.world-birth-receipt/v1',
+    'arcsweep.runtime-world-context/v1',
+    'arcsweep.continuity-evidence-ledger/v1',
+  ],
+  continuity_hooks: ['active-world-id', 'world-birth-receipt', 'runtime-context-fingerprint', 'continuity-evidence-reference'],
+  evidence: [
+    'apps/wayglass/src/surfaces/world-continuity.js',
+    'apps/arcsweep/src/runtime-world-context.js',
+    'apps/arcsweep/src/continuity-evidence-state.js',
+  ],
+  adapter: { loadState, saveState, buildRuntimeWorldContext, normaliseContinuityEvidenceLedger },
+});
 
 export const presenceOrgan = createWayglassOrgan({
   organ_id: 'wayglass.organ.presence-nervous-system',
@@ -136,4 +170,4 @@ export const mythienceOrgan = createWayglassOrgan({
   evidence:['lib/wyrdrune/mythience-crossing.test.cjs','lib/wyrdrune/mythience-hybrid.test.cjs','test/wayglass/mythience-shipwide.test.cjs'],
 });
 
-export const FIRST_WAYGLASS_ORGANS = Object.freeze([presenceOrgan, memoryOrgan, sensoriumOrgan, livingObserverOrgan, voiceConsentOrgan, doubleMobiusOrgan, quadEightfoldOrgan, mythienceOrgan]);
+export const FIRST_WAYGLASS_ORGANS = Object.freeze([worldContinuityOrgan, presenceOrgan, memoryOrgan, sensoriumOrgan, livingObserverOrgan, voiceConsentOrgan, doubleMobiusOrgan, quadEightfoldOrgan, mythienceOrgan]);
