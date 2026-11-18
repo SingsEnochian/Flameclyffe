@@ -3,7 +3,7 @@
 export function createCellTissue({maxCells=8,energyCap=100}={}) {
   if(!Number.isSafeInteger(maxCells)||maxCells<1||maxCells>256) throw Error('Invalid cell limit');
   if(!Number.isSafeInteger(energyCap)||energyCap<10||energyCap>10000) throw Error('Invalid energy cap');
-  const cells=new Map(),events=[]; let clock=0,paused=false;
+  const cells=new Map(),events=[]; let clock=0,paused=false,offspring=0;
   const clone=v=>JSON.parse(JSON.stringify(v));
   const idOK=id=>typeof id==='string'&&/^[a-zA-Z0-9][a-zA-Z0-9:_-]{0,63}$/.test(id);
   const receipt=(type,detail)=>{const entry={tick:clock,type,...clone(detail)};events.push(entry);return clone(entry);};
@@ -47,6 +47,24 @@ export function createCellTissue({maxCells=8,energyCap=100}={}) {
   }
   function feather(){paused=true;for(const c of cells.values())c.signals=[];return receipt('feather',{});}
   function resume(){paused=false;return receipt('resume',{});}
+  function populate({steps=1,threshold=60}={}) {
+    if(!Number.isSafeInteger(steps)||steps<1||steps>1000) throw Error('Invalid step count');
+    if(!Number.isSafeInteger(threshold)||threshold<20||threshold>energyCap) throw Error('Invalid threshold');
+    const births=[];
+    for(let i=0;i<steps;i++){
+      if(paused) break;
+      tick();
+      const parents=[...cells.values()];
+      for(const parent of parents){
+        if(cells.size>=maxCells) break;
+        if(parent.energy<threshold) continue;
+        const child_id=`${parent.id}:m${++offspring}`;
+        if(child_id.length>64) {receipt('division-skipped',{id:parent.id,reason:'id-length'});continue;}
+        births.push(divide(parent.id,child_id));
+      }
+    }
+    return clone({births,snapshot:snapshot()});
+  }
   function snapshot(){return clone({schema:'wayglass.wtl-cell-tissue/v0.1',clock,paused,cells:[...cells.values()],events});}
-  return Object.freeze({spawn,signal,tick,divide,feather,resume,snapshot});
+  return Object.freeze({spawn,signal,tick,divide,populate,feather,resume,snapshot});
 }
