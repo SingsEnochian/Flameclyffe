@@ -1,4 +1,3 @@
-import './cell-garden.css';
 import {WAYGLASS_FEATHER_EVENT, wayglassSomaticSound} from '../somatic-sound.js';
 
 const BASE='/api/v1/wayglass/cell-garden';
