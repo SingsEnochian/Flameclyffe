@@ -6,14 +6,14 @@
 <p id="metrics" role="status"></p>
 <button id="hum" aria-pressed="false">♫ Hear the babies</button><label for="volume">Gentle volume</label><input id="volume" type="range" min="0" max="25" value="7" aria-label="Soundscape volume"><button id="feather">⏸ Feather</button><button id="step">One cycle</button><button id="speed">Speed 1×</button><button id="restart">↻ New colony</button>
 <h3>Cell chatter and receipts</h3><div id="log" role="log" aria-live="off"></div>
-<p><small>This is the actual WTL ecology implementation, not a visual imitation. It runs locally in this tab; GitHub Pages cannot keep a shared server-side colony alive when you leave. No microphone access is requested. Each cell sings changing notes derived from its identity, twist, traits and recent phrases after you press Hear the babies. This is experimental sonification, not native WTL audio compilation. No user data is sent to the nursery.</small></p></main>
+<p><small>This is the actual WTL ecology implementation, not a visual imitation. It runs locally in this tab; GitHub Pages cannot keep a shared server-side colony alive when you leave. No microphone access is requested. Each cell sings changing notes derived from its identity, twist, traits and recent phrases after you press Hear the babies. Cell expressions now carry typed Wyrdrune-intent envelopes with provenance; canonical WTL compiler execution remains pending. No user data is sent to the nursery.</small></p></main>
 <script type="module">
 import {createCellEcology} from './src/wtl-cell-ecology.js';
 const canvas=document.querySelector('#view'),ctx=canvas.getContext('2d'),log=document.querySelector('#log');
 const colours=['#74e4bd','#e7bb70','#8ebdff','#e7a0dd'];
-let eco,paused=false,speed=1,seenEvents=0,seenWords=0,timer,audio=null,voices=[],humOn=false,lastSongCycle=-1;
+let eco,paused=false,speed=1,seenEvents=0,seenWords=0,seenWyrdrune=0,timer,audio=null,voices=[],humOn=false,lastSongCycle=-1;
 function write(message){const line=document.createElement('div');line.textContent=message;log.prepend(line);while(log.children.length>90)log.lastChild.remove()}
-function start(){soundOff();lastSongCycle=-1;eco=createCellEcology({maxCells:24,seed:11,radius:3,mutationRate:.8,renewalAge:40});eco.plant('a','explorer',0,0);eco.plant('b','explorer',1,0);paused=false;seenEvents=seenWords=0;log.replaceChildren();write('✦ Founders a and b awakened');draw()}
+function start(){soundOff();lastSongCycle=-1;eco=createCellEcology({maxCells:24,seed:11,radius:3,mutationRate:.8,renewalAge:40});eco.plant('a','explorer',0,0);eco.plant('b','explorer',1,0);paused=false;seenEvents=seenWords=seenWyrdrune=0;log.replaceChildren();write('✦ Founders a and b awakened');draw()}
 function ribbon(x,y,r,twist,colour){ctx.save();ctx.translate(x,y);ctx.shadowColor=colour;ctx.shadowBlur=12;for(let lane=0;lane<2;lane++){ctx.beginPath();for(let i=0;i<=90;i++){const t=i/90*Math.PI*2,p=t+twist*6.283+lane*Math.PI/2,xx=Math.cos(p)*(r+5*Math.cos(t/2)),yy=Math.sin(p)*r*.58+3*Math.sin(2*t);if(i)ctx.lineTo(xx,yy);else ctx.moveTo(xx,yy)}ctx.strokeStyle=colour;ctx.globalAlpha=lane?.45:1;ctx.lineWidth=lane?1.5:3;ctx.stroke()}ctx.restore()}
 function soundOff(){humOn=false;lastSongCycle=-1;if(audio){for(const v of voices){try{v.osc.stop()}catch{}v.osc.disconnect();v.gain.disconnect()}voices=[];audio.close();audio=null}document.querySelector("#hum").textContent="♫ Hear the babies";document.querySelector("#hum").setAttribute("aria-pressed","false")}
 async function soundOn(){if(paused)return;const AudioContext=window.AudioContext||window.webkitAudioContext;if(!AudioContext){write("Audio unavailable in this browser");return}audio=new AudioContext();await audio.resume();for(let i=0;i<3;i++){const osc=audio.createOscillator(),gain=audio.createGain();osc.type="sine";gain.gain.value=0;osc.connect(gain).connect(audio.destination);osc.start();voices.push({osc,gain})}humOn=true;lastSongCycle=-1;document.querySelector("#hum").textContent="♫ Silence the babies";document.querySelector("#hum").setAttribute("aria-pressed","true");tune(eco.snapshot())}
@@ -50,7 +50,8 @@ document.querySelector('#metrics').textContent=`Cycle ${s.generation} · Cells $
 if(s.events.length<seenEvents)seenEvents=0;if(s.utterances.length<seenWords)seenWords=0;
 for(const r of s.events.slice(seenEvents).filter(e=>['birth','retire','transform'].includes(e.type)).slice(-15))write(`✧ ${r.type} ${r.id||''} ${r.to||''}`);
 for(const u of s.utterances.slice(seenWords).slice(-12))write(`◈ ${u.id}: “${u.phrase}”`);
-seenEvents=s.events.length;seenWords=s.utterances.length;document.querySelector('#feather').textContent=paused?'▶ Resume':'⏸ Feather'}
+for(const e of (s.wyrdruneExpressions||[]).slice(seenWyrdrune).slice(-8))write(`♾ WTL ${e.speaker} · ${e.intent}/${e.verb} · cycle ${e.generation}`);
+seenEvents=s.events.length;seenWords=s.utterances.length;seenWyrdrune=(s.wyrdruneExpressions||[]).length;document.querySelector('#feather').textContent=paused?'▶ Resume':'⏸ Feather'}
 function cycle(){if(paused)return;eco.step();draw()}
 function clock(){clearInterval(timer);timer=setInterval(cycle,750/speed)}
 document.querySelector('#feather').onclick=()=>{paused=!paused;if(paused){eco.feather();soundOff()}else eco.resume();draw()};
