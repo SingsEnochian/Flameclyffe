@@ -353,3 +353,60 @@ test('MCP OAuth issuer cannot be replaced by forwarded-host or a public Host hea
   assert.throws(() => originFromRequest(local, { WAYGLASS_PUBLIC_ORIGIN: 'http://wayglass.example' }), /HTTPS/);
   assert.throws(() => originFromRequest(local, { WAYGLASS_PUBLIC_ORIGIN: 'https://wayglass.example/path' }), /bare HTTPS/);
 });
+
+
+test('revoked and expired refresh grants fail closed without issuing replacement tokens', async (t) => {
+  const fx = await startFixture(t);
+  const verifier = 'expiry-' + 'a'.repeat(64);
+  const params = authParams({
+    origin: fx.origin,
+    clientId: fx.clientId,
+    redirectUri: fx.redirectUri,
+    challenge: pkceS256(verifier),
+  });
+  const approval = await fetch(fx.origin + '/oauth/authorize', {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ ...Object.fromEntries(params), pairing_code: fx.pairingCode }),
+    redirect: 'manual',
+  });
+  assert.equal(approval.status, 302);
+  const code = new URL(approval.headers.get('location')).searchParams.get('code');
+  const issued = await fetch(fx.origin + '/oauth/token', {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'authorization_code', client_id: fx.clientId,
+      redirect_uri: fx.redirectUri, code, code_verifier: verifier,
+      resource: fx.origin + '/mcp',
+    }),
+  });
+  assert.equal(issued.status, 200);
+  const token = await issued.json();
+  const stored = JSON.parse(fs.readFileSync(fx.paths.tokenFile, 'utf8'));
+  assert.equal(stored.refresh_tokens.length, 1);
+  const refresh = () => fetch(fx.origin + '/oauth/token', {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'refresh_token', client_id: fx.clientId,
+      refresh_token: token.refresh_token, resource: fx.origin + '/mcp',
+    }),
+  });
+  stored.refresh_tokens[0].revoked_at = new Date().toISOString();
+  fs.writeFileSync(fx.paths.tokenFile, JSON.stringify(stored));
+  let response = await refresh();
+  assert.equal(response.status, 400);
+  assert.equal((await response.json()).error, 'invalid_grant');
+  let after = JSON.parse(fs.readFileSync(fx.paths.tokenFile, 'utf8'));
+  assert.equal(after.access_tokens.length, 1);
+
+  stored.refresh_tokens[0].revoked_at = null;
+  stored.refresh_tokens[0].expires_at = new Date(Date.now() - 60_000).toISOString();
+  fs.writeFileSync(fx.paths.tokenFile, JSON.stringify(stored));
+  response = await refresh();
+  assert.equal(response.status, 400);
+  assert.equal((await response.json()).error, 'invalid_grant');
+  after = JSON.parse(fs.readFileSync(fx.paths.tokenFile, 'utf8'));
+  assert.equal(after.access_tokens.length, 1);
+});
