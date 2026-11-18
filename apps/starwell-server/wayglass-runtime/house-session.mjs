@@ -37,18 +37,21 @@ function bearer(request) {
   return header.startsWith('Bearer ') ? header.slice(7) : '';
 }
 
-export function issueHouseSession(env, now = Date.now()) {
+export function issueHouseSession(env, now = Date.now(), { expiresAt } = {}) {
   const secret = signingSecret(env);
   if (!secret) throw new Error('House Runtime session signing is not configured.');
-  const ttl = Math.max(
+  const defaultTtl = Math.max(
     300,
     Math.min(Number(env.get('HOUSE_SESSION_TTL_SECONDS')) || DEFAULT_TTL_SECONDS, MAX_TTL_SECONDS),
   );
+  const issuedAt = Math.floor(now / 1000);
+  const ttl = expiresAt === undefined ? defaultTtl : Math.min(defaultTtl, expiresAt - issuedAt);
+  if (!Number.isSafeInteger(ttl) || ttl <= 0) throw new Error('Invalid House session lifetime.');
   const claims = {
     v: VERSION,
     role: 'steward',
-    iat: Math.floor(now / 1000),
-    exp: Math.floor(now / 1000) + ttl,
+    iat: issuedAt,
+    exp: issuedAt + ttl,
     nonce: randomBytes(18).toString('base64url'),
   };
   const payload = encode(JSON.stringify(claims));
