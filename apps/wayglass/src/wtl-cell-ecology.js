@@ -1,7 +1,7 @@
 // Spatial ecology for WTL cells. Positions are local to this experimental tissue.
 // No global clocks, network, model calls, or visual side effects.
 import {createCellTissue} from './wtl-cell-tissue.js';
-import {authorCellProgram,compileCellProgram,executeCellProgram} from './wtl-cell-program.js';
+import {authorCellProgram,compileCellProgram,executeCellProgram,reviseCellProgram} from './wtl-cell-program.js';
 
 export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.2,renewalAge=100}={}) {
   if(!Number.isSafeInteger(seed)||seed<0||seed>2147483647) throw Error('Invalid seed');
@@ -124,11 +124,15 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       proposals.sort((a,b)=>b.score-a.score||a.author.localeCompare(b.author));
       if(proposals.length){
         const winner=proposals[0],result=executeCellProgram(winner.compiled);
+        const targetTone=24+(traits.get(winner.author).curiosity*8+generation)%48;
+        const revision=reviseCellProgram(winner.source,{targetTone});
         const decision={schema:'wayglass.wtl.project-genesis.v1',id:'project-'+generation,
           generation,selection:'neighbour-scored-deterministic',winner:winner.author,
           candidates:proposals.map(p=>({author:p.author,source:p.source,language:p.language,score:p.score,reviews:p.reviews.map(r=>({...r}))})),
           selected:{source:winner.source,language:winner.language,
             result:{status:result.status,steps:result.steps,output:result.output.map(x=>({...x}))}},
+          revision:{targetTone,baselineScore:revision.baselineScore,source:revision.source,score:revision.score,
+            improved:revision.improved,attempts:revision.attempts.map(a=>({...a})),result:revision.result},
           provenance:{origin:'bounded-cell-ecology',canonical_wtl_compiler:false,host_effects:false,autonomous_agent:false}};
         projectDecisions.push(decision);
         wyrdruneExpressions.push({schema:'wayglass.wtl.cell-expression.v1',generation,speaker:winner.author,
@@ -200,7 +204,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       retirements:retirements.map(r=>({...r,traits:{...r.traits},lastPhrases:[...r.lastPhrases]})),utterances:utterances.map(u=>({...u})),lexicons:Object.fromEntries([...lexicons].map(([id,phrases])=>[id,[...phrases]])),
       neighbourhoods:Object.fromEntries([...positions.keys()].map(id=>[id,neighbours(id)])),
       wyrdruneExpressions:wyrdruneExpressions.map(e=>({...e,semantic:{...e.semantic,traits:e.semantic.traits?{...e.semantic.traits}:undefined},provenance:{...e.provenance}})),
-      projectDecisions:projectDecisions.map(d=>({...d,candidates:d.candidates.map(p=>({...p,reviews:p.reviews.map(r=>({...r}))})),selected:{...d.selected,result:{...d.selected.result,output:d.selected.result.output.map(x=>({...x}))}},provenance:{...d.provenance}})),
+      projectDecisions:projectDecisions.map(d=>({...d,candidates:d.candidates.map(p=>({...p,reviews:p.reviews.map(r=>({...r}))})),selected:{...d.selected,result:{...d.selected.result,output:d.selected.result.output.map(x=>({...x}))}},revision:{...d.revision,attempts:d.revision.attempts.map(a=>({...a})),result:{...d.revision.result,output:d.revision.result.output.map(x=>({...x}))}},provenance:{...d.provenance}})),
       programs:programs.map(p=>({...p,result:{...p.result,output:p.result.output.map(x=>({...x}))},provenance:{...p.provenance}})),
       constructions:constructions.map(p=>({...p,builders:[...p.builders],specification:{...p.specification,effects:[...p.specification.effects]},provenance:{...p.provenance}}))};
   }
