@@ -7,14 +7,15 @@ export function createCellTissue({maxCells=8,energyCap=100}={}) {
   const clone=v=>JSON.parse(JSON.stringify(v));
   const idOK=id=>typeof id==='string'&&/^[a-zA-Z0-9][a-zA-Z0-9:_-]{0,63}$/.test(id);
   const receipt=(type,detail)=>{const entry={tick:clock,type,...clone(detail)};events.push(entry);return clone(entry);};
-  function spawn({id,role,parent_id=null,energy=energyCap}={}) {
+  function spawn({id,role,parent_id=null,energy=energyCap,twist=0}={}) {
     if(paused) throw Error('Feather: tissue paused');
     if(!idOK(id)||!idOK(role)||cells.has(id)) throw Error('Invalid or duplicate cell identity');
     if(cells.size>=maxCells) throw Error('Tissue capacity reached');
     if(!Number.isSafeInteger(energy)||energy<0||energy>energyCap) throw Error('Invalid energy');
     if(parent_id!==null&&!cells.has(parent_id)) throw Error('Unknown parent');
-    cells.set(id,{id,role,parent_id,energy,signals:[],state:'resting'});
-    return receipt('birth',{id,role,parent_id,energy});
+    if(!Number.isFinite(twist)||twist<0||twist>=1) throw Error('Invalid twist');
+    cells.set(id,{id,role,parent_id,energy,twist,signals:[],state:'resting'});
+    return receipt('birth',{id,role,parent_id,energy,twist});
   }
   function signal(from,to,type,payload=null) {
     if(paused) throw Error('Feather: tissue paused');
@@ -43,7 +44,10 @@ export function createCellTissue({maxCells=8,energyCap=100}={}) {
     if(!parent||parent.energy<20) throw Error('Insufficient parent energy');
     if(!idOK(child_id)||cells.has(child_id)||cells.size>=maxCells) throw Error('Invalid daughter or capacity');
     parent.energy-=10;
-    return spawn({id:child_id,role:parent.role,parent_id,energy:10});
+    // Small deterministic variation: reproducible without global randomness.
+    const variation=((offspring*37+clock*17+child_id.length*13)%101-50)/1000;
+    const twist=(parent.twist+variation+1)%1;
+    return spawn({id:child_id,role:parent.role,parent_id,energy:10,twist});
   }
   function feather(){paused=true;for(const c of cells.values())c.signals=[];return receipt('feather',{});}
   function resume(){paused=false;return receipt('resume',{});}
