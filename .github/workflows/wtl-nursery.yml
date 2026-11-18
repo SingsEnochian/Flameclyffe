@@ -27,6 +27,7 @@ jobs:
           node --check apps/wayglass/wtl-nursery-server.mjs
           node --check apps/wayglass/src/wtl-cell-ecology.js
           node --check apps/wayglass/src/wtl-cell-tissue.js
+          node --check apps/wayglass/src/wtl-cell-program.js
           test -s apps/wayglass/nursery/index.html
           grep -Fq 'createCellEcology' apps/wayglass/nursery/index.html
           if grep -Fq 'wayglass-nursery' .github/workflows/pages.yml; then
@@ -60,6 +61,7 @@ jobs:
           cp apps/wayglass/nursery/index.html /tmp/wayglass-nursery-preview/index.html
           cp apps/wayglass/src/wtl-cell-ecology.js /tmp/wayglass-nursery-preview/src/
           cp apps/wayglass/src/wtl-cell-tissue.js /tmp/wayglass-nursery-preview/src/
+          cp apps/wayglass/src/wtl-cell-program.js /tmp/wayglass-nursery-preview/src/
           cat > /tmp/wayglass-nursery-preview/README.txt <<'EOF'
           Wayglass WTL Möbius Nursery · GitHub Pages preview package
           Contains the actual WTL ecology and tissue modules.
