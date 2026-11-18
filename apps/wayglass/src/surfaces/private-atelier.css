@@ -1,0 +1,65 @@
+.wg-atelier {
+  display: grid;
+  gap: 1rem;
+  color: #e8eeeb;
+  padding-bottom: 6rem;
+}
+
+.wg-atelier-head {
+  padding-inline: clamp(0.1rem, 2vw, 1.6rem);
+}
+
+.wg-atelier-head h1,
+.wg-atelier-caption h2 {
+  margin-block: 0.3rem;
+}
+
+.wg-atelier-window {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #739a97;
+  border-radius: 1rem;
+  box-shadow: 0 1rem 3rem #02080e80;
+  background: #080e15;
+}
+
+.wg-atelier-viewport {
+  height: clamp(19rem, 61vh, 44rem);
+}
+
+.wg-atelier-viewport canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.wg-atelier-view-controls,
+.wg-atelier-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.wg-atelier-view-controls {
+  position: absolute;
+  inset: 0.9rem auto auto 0.9rem;
+}
+
+.wg-atelier-caption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.wg-atelier-caption p {
+  margin-block: 0.3rem;
+  overflow-wrap: anywhere;
+}
+
+.wg-atelier [hidden],
+.wg-atelier [data-atelier-status]:empty {
+  display: none;
+}

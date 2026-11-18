@@ -25,3 +25,19 @@ export async function checkHouseSteward(fetchImpl = fetch) {
   const result = await response.json().catch(() => ({}));
   return response.ok && result.connected === true && result.role === 'steward';
 }
+
+let accessSignIn;
+export function resumeHouseSession(fetchImpl = fetch) {
+  accessSignIn ||= (async () => {
+    const signal = AbortSignal.timeout(4000);
+    try {
+      if (await checkHouseSteward((url, options) => fetchImpl(url, { ...options, signal }))) return true;
+      const response = await fetchImpl('/api/v1/house/session/access', {
+        method: 'POST', credentials: 'same-origin', cache: 'no-store', signal,
+      });
+      const result = await response.json().catch(() => ({}));
+      return response.ok && result.connected === true && result.role === 'steward';
+    } catch { return false; }
+  })().finally(() => { accessSignIn = null; });
+  return accessSignIn;
+}
