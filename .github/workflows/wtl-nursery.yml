@@ -29,7 +29,10 @@ jobs:
           node --check apps/wayglass/src/wtl-cell-tissue.js
           test -s apps/wayglass/nursery/index.html
           grep -Fq 'createCellEcology' apps/wayglass/nursery/index.html
-          grep -Fq 'wayglass-nursery' .github/workflows/pages.yml
+          if grep -Fq 'wayglass-nursery' .github/workflows/pages.yml; then
+            echo 'Owner-only nursery must not be published on public GitHub Pages' >&2
+            exit 1
+          fi
       - name: Smoke-test persistent colony stream
         shell: bash
         run: |
