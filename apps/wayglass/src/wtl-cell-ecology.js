@@ -2,7 +2,7 @@
 // No global clocks, network, model calls, or visual side effects.
 import {createCellTissue} from './wtl-cell-tissue.js';
 
-export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.2,renewalAge=30}={}) {
+export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.2,renewalAge=100}={}) {
   if(!Number.isSafeInteger(seed)||seed<0||seed>2147483647) throw Error('Invalid seed');
   if(!Number.isFinite(radius)||radius<=0||radius>100) throw Error('Invalid radius');
   if(!Number.isFinite(mutationRate)||mutationRate<0||mutationRate>1) throw Error('Invalid mutation rate');
