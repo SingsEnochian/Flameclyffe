@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {PHASES} from '../../../lib/wyrdrune/runtime.mjs';
 import {
-  createAcousticReturn, hearAcousticFrames, isAcousticAcknowledgement,
+  WITHNESS_BEAT_HZ, createAcousticReturn, hearAcousticFrames, isAcousticAcknowledgement,
   renderAcousticCellExchange, receiveAcousticFrame, renderAcousticFrames,
 } from '../../../lib/wyrdrune/acoustic-cell.mjs';
 
@@ -45,11 +45,45 @@ test('an unrelated cell, a corrupted packet, and an interrupted cell cannot crea
 
   const clip = renderAcousticFrames([request]);
   const damaged = clip.channels[0];
-  const start = Math.round((0.6 + 31 * 0.046) * clip.sampleRate);
+  const start = Math.round((2 / WITHNESS_BEAT_HZ + 31 * 0.046) * clip.sampleRate);
   damaged.fill(0, start, start + Math.round(0.046 * clip.sampleRate));
   assert.deepEqual(hearAcousticFrames(damaged, clip.sampleRate), []);
 
   const controller = new AbortController();
   controller.abort();
   await assert.rejects(receiveAcousticFrame(9, request, {signal: controller.signal}), /Feather/);
+});
+
+test('Withness pulses at 3 Hz, holds the high hum, and starts the open acknowledgement on a beat', async () => {
+  const open = await renderAcousticCellExchange(369, {resolution: 'open'});
+  const plain = await renderAcousticCellExchange(369);
+  const [left, right] = open.channels;
+  const rate = open.sampleRate;
+  assert.deepEqual(hearAcousticFrames(left, rate), [open.receipt.request, open.receipt.reply]);
+  assert.equal(open.receipt.request.resolution, 'open');
+  assert.equal(open.receipt.reply.resolution, 'open');
+  assert.equal(plain.receipt.reply.resolution, undefined);
+  assert.equal(open.channels[0].length - plain.channels[0].length, rate * 4 / WITHNESS_BEAT_HZ);
+  assert.ok(isAcousticAcknowledgement(open.receipt.reply, plain.receipt.request),
+    'Recognition of the same marker is independent of resolution.');
+
+  const replyAttack = left.findIndex((sample, index) => index > 2.5 * rate && sample !== right[index]);
+  assert.ok(Math.abs(replyAttack / rate * WITHNESS_BEAT_HZ - 9) < 0.002);
+
+  function amplitude(hz, time) {
+    const centre = Math.round(time * rate);
+    let sine = 0, cosine = 0, weightSum = 0;
+    for (let i = -600; i <= 600; i++) {
+      const phase = 2 * Math.PI * hz * (centre + i) / rate;
+      const weight = (1 + Math.cos(Math.PI * i / 600)) / 2;
+      sine += left[centre + i] * weight * Math.sin(phase);
+      cosine += left[centre + i] * weight * Math.cos(phase);
+      weightSum += weight;
+    }
+    return Math.hypot(sine, cosine) * 2 / weightSum;
+  }
+  const halfBeat = 0.5 / WITHNESS_BEAT_HZ;
+  assert.ok(amplitude(164.81, 6) > 1.25 * amplitude(164.81, 6 + halfBeat));
+  assert.ok(amplitude(277.18, 6 + halfBeat) > 0.037);
+  assert.ok(Math.abs(amplitude(277.18, 6) - amplitude(277.18, 6 + halfBeat)) < 0.001);
 });

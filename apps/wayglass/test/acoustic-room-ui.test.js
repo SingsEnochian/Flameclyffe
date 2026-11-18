@@ -226,6 +226,7 @@ test('mounted Acoustic Room plays the two-cell exchange on demand and Feather st
   const stop=f.$('[data-cell-stop]');
   const feather=f.$('[data-intent="feather"]');
   const status=f.$('[data-cell-status]');
+  f.$('[data-cell-open]').checked=true;
   assert.equal(f.counts.contexts,0);
   await startCellPlayback();
   assert.equal(f.counts.cellStarts,1);
@@ -233,7 +234,7 @@ test('mounted Acoustic Room plays the two-cell exchange on demand and Feather st
   assert.equal(play.disabled,true);
   f.counts.finishCellSound();
   await new Promise(resolve=>setImmediate(resolve));
-  assert.match(status.textContent,/Cell 1 decoded its acknowledgement/);
+  assert.match(status.textContent,/Cell 1 decoded its acknowledgement.*Question held open/);
   assert.equal(play.disabled,false);
 
   await startCellPlayback();

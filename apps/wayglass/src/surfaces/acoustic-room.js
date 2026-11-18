@@ -70,6 +70,7 @@ export function mountWayglassAcousticRoom(root,{loadCompositionControls=()=>impo
  <button type="button" class="glass-chip" data-cell-sound="audition">Play cell exchange</button>
  <button type="button" class="glass-chip" data-cell-stop disabled>Stop cell sound</button>
  </div>
+ <label><input type="checkbox" data-cell-open checked> Carry the question open</label>
  <details><summary>Exchange sound between two devices</summary>
  <p class="acoustic-note">Choose Listen on the second device, then Send on the first. Both devices use their microphone briefly.</p>
  <div class="acoustic-actions">
@@ -101,6 +102,7 @@ export function mountWayglassAcousticRoom(root,{loadCompositionControls=()=>impo
  function renderCellControls(){
   for(const mode of ['audition','send','listen'])$('[data-cell-sound="'+mode+'"]').disabled=featherStopped||cellBusy;
   $('[data-cell-stop]').disabled=!cellBusy;
+  $('[data-cell-open]').disabled=featherStopped||cellBusy;
  }
  const cellChannel=createAcousticCellChannel({onStatus:({busy,text})=>{
   if(disposed)return;
@@ -224,7 +226,10 @@ export function mountWayglassAcousticRoom(root,{loadCompositionControls=()=>impo
   const cellButton=e.target.closest('[data-cell-sound]');
   if(cellButton&&root.contains(cellButton)){
    const mode=cellButton.dataset.cellSound;
-   if(!featherStopped&&['audition','send','listen'].includes(mode))void cellChannel[mode](world.markerState.mono);
+   if(!featherStopped&&['audition','send','listen'].includes(mode)){
+    const resolution=$('[data-cell-open]').checked?'open':undefined;
+    void cellChannel[mode](world.markerState.mono,resolution);
+   }
    return;
   }
   if(e.target.closest('[data-cell-stop]')){cellChannel.stop();return;}
