@@ -8,7 +8,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
   if(!Number.isFinite(mutationRate)||mutationRate<0||mutationRate>1) throw Error('Invalid mutation rate');
   if(!Number.isSafeInteger(renewalAge)||renewalAge<3||renewalAge>10000) throw Error('Invalid renewal age');
   const tissue=createCellTissue({maxCells});
-  const positions=new Map(),adaptation=new Map(),traits=new Map(),mutations=[],utterances=[],lexicons=new Map(),birthTicks=new Map(),retirements=[],wyrdruneExpressions=[];
+  const positions=new Map(),adaptation=new Map(),traits=new Map(),mutations=[],utterances=[],lexicons=new Map(),birthTicks=new Map(),retirements=[],wyrdruneExpressions=[],constructions=[];
   // An open combinatorial grammar, not a library of finished phrases.
   const vocabulary={
     subject:['my spiral','your echo','this membrane','our orbit','that wobble','the neighbouring twist'],
@@ -90,6 +90,26 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       }
     }
     tissue.tick();
+    // Sandbox construction: cell-authored, bounded symbolic structures only.
+    // No host filesystem, network, code execution or runtime modification.
+    if(generation%6===0&&constructions.length<128){
+      const builders=tissue.snapshot().cells.filter(cell=>neighbours(cell.id).length>0);
+      if(builders.length){
+        const builder=builders[generation%builders.length],nearby=neighbours(builder.id);
+        const partner=nearby[Math.floor(builder.twist*nearby.length)%nearby.length];
+        const genes=traits.get(builder.id);
+        const forms=['bridge','nest','resonator','archive','garden'];
+        const form=forms[(Math.floor(builder.twist*100)+genes.curiosity+generation)%forms.length];
+        const construction={schema:'wayglass.wtl.cell-construction.v1',id:`construct-${generation}-${builder.id}`,
+          generation,builders:[builder.id,partner],form,
+          specification:{twist:builder.twist,curiosity:genes.curiosity,material:'symbolic-tissue',effects:[]},
+          status:'sandbox-proposal',provenance:{origin:'cell-ecology',executed:false,owner_approved:false}};
+        constructions.push(construction);
+        wyrdruneExpressions.push({schema:'wayglass.wtl.cell-expression.v1',generation,speaker:builder.id,
+          intent:'build',verb:'propose',mode:'collaborative',semantic:{construction_id:construction.id,form},
+          provenance:{origin:'ecology-construction',verified_compiler:false}});
+      }
+    }
     // Renewal: age-triggered retirement makes room for descendants without erasing history.
     // Keep at least one active cell so the tissue never extinguishes itself in one pass.
     const retirees=tissue.snapshot().cells
@@ -132,7 +152,8 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       adaptation:Object.fromEntries(adaptation),traits:Object.fromEntries(traits),mutations:mutations.map(m=>({...m})),
       retirements:retirements.map(r=>({...r,traits:{...r.traits},lastPhrases:[...r.lastPhrases]})),utterances:utterances.map(u=>({...u})),lexicons:Object.fromEntries([...lexicons].map(([id,phrases])=>[id,[...phrases]])),
       neighbourhoods:Object.fromEntries([...positions.keys()].map(id=>[id,neighbours(id)])),
-      wyrdruneExpressions:wyrdruneExpressions.map(e=>({...e,semantic:{...e.semantic,traits:{...e.semantic.traits}},provenance:{...e.provenance}}))};
+      wyrdruneExpressions:wyrdruneExpressions.map(e=>({...e,semantic:{...e.semantic,traits:e.semantic.traits?{...e.semantic.traits}:undefined},provenance:{...e.provenance}})),
+      constructions:constructions.map(p=>({...p,builders:[...p.builders],specification:{...p.specification,effects:[...p.specification.effects]},provenance:{...p.provenance}}))};
   }
   return Object.freeze({plant,step,neighbours,transform,snapshot,feather:tissue.feather,resume:tissue.resume});
 }
