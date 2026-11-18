@@ -2,7 +2,6 @@
 // Deliberately not exposed through public Wayglass routes or external network interfaces.
 import http from 'node:http';
 import {readFile} from 'node:fs/promises';
-import {fileURLToPath} from 'node:url';
 import {createCellEcology} from './src/wtl-cell-ecology.js';
 const host='127.0.0.1',port=Number(process.env.WTL_NURSERY_PORT||3844);
 if(!Number.isSafeInteger(port)||port<1024||port>65535)throw Error('Invalid nursery port');
@@ -17,7 +16,10 @@ function send(res,snapshot){res.write('event: snapshot\\ndata: '+JSON.stringify(
 function broadcast(){const snapshot=ecology.snapshot();for(const res of clients){try{send(res,snapshot)}catch{clients.delete(res)}}}
 reset();interval=setInterval(()=>{if(!ecology.snapshot().paused){ecology.step();broadcast()}},750);interval.unref?.();
 const server=http.createServer(async(req,res)=>{
+  const allowedHost='127.0.0.1:'+port;
+  if(req.headers.host!==allowedHost){res.writeHead(403);res.end('Host denied');return}
   const pathname=new URL(req.url,'http://localhost').pathname;
+  if(req.method==='POST'&&req.headers.origin!=='http://'+allowedHost){res.writeHead(403);res.end('Origin denied');return}
   res.setHeader('Cache-Control','no-store');
   res.setHeader('X-Content-Type-Options','nosniff');
   res.setHeader('Content-Security-Policy',"default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'");
