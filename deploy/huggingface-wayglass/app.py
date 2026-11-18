@@ -93,7 +93,7 @@ def call_kernel(message, history):
     )
     try:
         with OPENER.open(req, timeout=25) as response:
-            if getattr(response, "status", 200) != 200:
+            if getattr(response, "status", None) != 200:
                 return "Wayglass kernel unreachable or response invalid. No simulated reply was generated."
             raw = response.read(MAX_BYTES + 1)
             if len(raw) > MAX_BYTES:
