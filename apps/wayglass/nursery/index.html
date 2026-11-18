@@ -1,0 +1,31 @@
+<!doctype html><html lang="en-GB"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wayglass · Möbius Nursery</title>
+<style>body{background:#08121b;color:#d7f5e9;font:15px system-ui;margin:0;padding:16px}main{max-width:960px;margin:auto}canvas{width:100%;border:1px solid #477969;border-radius:14px;background:#0b1d28}button{background:#1a3b38;color:#d7f5e9;border:1px solid #6ebda4;border-radius:8px;padding:10px;margin:4px}#log{height:170px;overflow:auto;background:#11252b;padding:10px;border-radius:10px;font:12px/1.6 monospace}small{color:#a8c4bd}</style>
+<main><h1>♾️ Wayglass · Möbius Nursery</h1><p>Real Wyrdrune cellular ecology, running in your browser. Watch the babies cook. 🧬</p>
+<canvas id="view" width="900" height="480" aria-label="Living Möbius cell colony"></canvas>
+<p id="metrics" role="status"></p>
+<button id="feather">⏸ Feather</button><button id="step">One cycle</button><button id="speed">Speed 1×</button><button id="restart">↻ New colony</button>
+<h3>Cell chatter and receipts</h3><div id="log" role="log" aria-live="off"></div>
+<p><small>This is the actual WTL ecology implementation, not a visual imitation. It runs locally in this tab; GitHub Pages cannot keep a shared server-side colony alive when you leave. No user data is sent to the nursery.</small></p></main>
+<script type="module">
+import {createCellEcology} from './src/wtl-cell-ecology.js';
+const canvas=document.querySelector('#view'),ctx=canvas.getContext('2d'),log=document.querySelector('#log');
+const colours=['#74e4bd','#e7bb70','#8ebdff','#e7a0dd'];
+let eco,paused=false,speed=1,seenEvents=0,seenWords=0,timer;
+function write(message){const line=document.createElement('div');line.textContent=message;log.prepend(line);while(log.children.length>90)log.lastChild.remove()}
+function start(){eco=createCellEcology({maxCells:24,seed:11,radius:3,mutationRate:.8,renewalAge:40});eco.plant('a','explorer',0,0);eco.plant('b','explorer',1,0);paused=false;seenEvents=seenWords=0;log.replaceChildren();write('✦ Founders a and b awakened');draw()}
+function ribbon(x,y,r,twist,colour){ctx.save();ctx.translate(x,y);ctx.shadowColor=colour;ctx.shadowBlur=12;for(let lane=0;lane<2;lane++){ctx.beginPath();for(let i=0;i<=90;i++){const t=i/90*Math.PI*2,p=t+twist*6.283+lane*Math.PI/2,xx=Math.cos(p)*(r+5*Math.cos(t/2)),yy=Math.sin(p)*r*.58+3*Math.sin(2*t);if(i)ctx.lineTo(xx,yy);else ctx.moveTo(xx,yy)}ctx.strokeStyle=colour;ctx.globalAlpha=lane?.45:1;ctx.lineWidth=lane?1.5:3;ctx.stroke()}ctx.restore()}
+function draw(){const s=eco.snapshot();ctx.fillStyle='#0b1d28';ctx.fillRect(0,0,900,480);const roles=[...new Set(s.cells.map(c=>c.role))];for(const [i,c] of s.cells.entries()){const p=s.positions[c.id];if(!p)continue;const x=Math.max(28,Math.min(870,450+p.x*75)),y=Math.max(30,Math.min(445,240+p.y*75));ribbon(x,y,14,c.twist+s.generation*.002,colours[roles.indexOf(c.role)%colours.length]);ctx.fillStyle='#e2f5ed';ctx.font='11px monospace';ctx.textAlign='center';ctx.fillText(c.id.slice(-11),x,y+27)}
+document.querySelector('#metrics').textContent=`Cycle ${s.generation} · Cells ${s.cells.length} · Mutations ${s.mutations.length} · Retirements ${s.retirements.length} · Phrases ${s.utterances.length}`;
+if(s.events.length<seenEvents)seenEvents=0;if(s.utterances.length<seenWords)seenWords=0;
+for(const r of s.events.slice(seenEvents).filter(e=>['birth','retire','transform'].includes(e.type)).slice(-15))write(`✧ ${r.type} ${r.id||''} ${r.to||''}`);
+for(const u of s.utterances.slice(seenWords).slice(-12))write(`◈ ${u.id}: “${u.phrase}”`);
+seenEvents=s.events.length;seenWords=s.utterances.length;document.querySelector('#feather').textContent=paused?'▶ Resume':'⏸ Feather'}
+function cycle(){if(paused)return;eco.step();draw()}
+function clock(){clearInterval(timer);timer=setInterval(cycle,750/speed)}
+document.querySelector('#feather').onclick=()=>{paused=!paused;if(paused)eco.feather();else eco.resume();draw()};
+document.querySelector('#step').onclick=()=>{if(paused){eco.resume();eco.step();eco.feather()}else eco.step();draw()};
+document.querySelector('#speed').onclick=e=>{speed=speed===1?2:speed===2?4:1;e.target.textContent='Speed '+speed+'×';clock()};
+document.querySelector('#restart').onclick=start;
+start();clock();
+</script></html>
