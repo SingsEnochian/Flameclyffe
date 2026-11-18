@@ -13,6 +13,7 @@ const {
   OAUTH_SCOPE,
   createWayglassPeerOAuth,
   pkceS256,
+  originFromRequest,
 } = require('../wayglass/oauth-peer');
 
 function fixturePaths() {
@@ -311,4 +312,13 @@ test('authorization code is single-use, access token opens MCP, profile is stabl
   });
   assert.equal(reusedRefresh.status, 400);
   assert.equal((await reusedRefresh.json()).error, 'invalid_grant');
+});
+
+test('MCP OAuth issuer cannot be replaced by forwarded-host or a public Host header', () => {
+  const local = { headers: { host: '127.0.0.1:3000', 'x-forwarded-host': 'attacker.example', 'x-forwarded-proto': 'https' } };
+  assert.equal(originFromRequest(local, {}), 'http://127.0.0.1:3000');
+  assert.throws(() => originFromRequest({ headers: { host: 'attacker.example' } }, {}), /Non-local/);
+  assert.equal(originFromRequest(local, { WAYGLASS_PUBLIC_ORIGIN: 'https://wayglass.example' }), 'https://wayglass.example');
+  assert.throws(() => originFromRequest(local, { WAYGLASS_PUBLIC_ORIGIN: 'http://wayglass.example' }), /HTTPS/);
+  assert.throws(() => originFromRequest(local, { WAYGLASS_PUBLIC_ORIGIN: 'https://wayglass.example/path' }), /bare HTTPS/);
 });
