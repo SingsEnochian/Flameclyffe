@@ -162,15 +162,6 @@ jobs:
             cp _site/starwell-react-lab/unit-resonance-lab.html "_site/starwell-react-lab/${route}/index.html"
           done
 
-          # GitHub-hosted WTL nursery: copy the real engine, not a mock implementation.
-          mkdir -p _site/wayglass-nursery/src
-          cp apps/wayglass/nursery/index.html _site/wayglass-nursery/index.html
-          cp apps/wayglass/src/wtl-cell-ecology.js _site/wayglass-nursery/src/
-          cp apps/wayglass/src/wtl-cell-tissue.js _site/wayglass-nursery/src/
-          test -s _site/wayglass-nursery/index.html
-          test -s _site/wayglass-nursery/src/wtl-cell-ecology.js
-          test -s _site/wayglass-nursery/src/wtl-cell-tissue.js
-
           node scripts/verify-arcsweep-organ-routes.mjs --site _site
 
           mkdir -p _site/bifrost-live
@@ -196,7 +187,6 @@ jobs:
           Arcsweep: /Flameclyffe/apps/arcsweep/
           Bifröst Live: /Flameclyffe/bifrost-live/
           STARWELL Lab: /Flameclyffe/starwell-react-lab/
-          WTL Möbius Nursery: /Flameclyffe/wayglass-nursery/
           Glyph Lab: /Flameclyffe/starwell-react-lab/glyph-studio/
           Living Glyph: /Flameclyffe/starwell-react-lab/living-glyph/
           Font Foundry: /Flameclyffe/starwell-react-lab/font-foundry/
