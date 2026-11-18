@@ -226,7 +226,7 @@ export async function invokeWayglassRoute({
   history = [],
   interaction,
   sessionId,
-  surfaceId = 'arcsweep:writing-room',
+  surfaceId = 'wayglass:writing-room',
   checkpoint = null,
   waygateManifest = null,
   continuationPacket = null,
