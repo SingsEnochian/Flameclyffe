@@ -14,6 +14,9 @@ test('Project Genesis selects a reviewed executable program with attributable re
  assert.equal(d.revision.result.status,'completed');
  assert.ok(d.revision.score<=d.revision.baselineScore);
  assert.ok(d.revision.attempts.length>0);
+ assert.ok(d.peerTests.length>0);
+ assert.ok(d.peerTests.every(p=>p.original.passed===true));
+ assert.ok(d.peerTests.every(p=>typeof p.revised.passed==='boolean'));
  assert.ok(d.revision.attempts.every(a=>a.score>=0));
  assert.ok(d.selected.result.output.length>0);
  assert.ok(s.wyrdruneExpressions.some(e=>e.semantic.project_id===d.id));
@@ -33,4 +36,13 @@ test('revisions are reproducible, bounded and reject invalid targets',async()=>{
  assert.equal(a.improved,true);
  assert.ok(a.attempts.length<=12);
  assert.throws(()=>reviseCellProgram(source,{targetTone:100}));
+});
+
+test('peer-authored tests execute assertions and reject invalid input',async()=>{
+ const {authorPeerTest,runPeerTest}=await import('../src/wtl-cell-peer-tests.js');
+ const source=['tone 48','rest 2'].join(String.fromCharCode(10));
+ const t=authorPeerTest({id:'reviewer'},{curiosity:0},source);
+ assert.equal(runPeerTest(t,source).passed,true);
+ assert.equal(runPeerTest(t,'tone 49').passed,false);
+ assert.throws(()=>runPeerTest({...t,upper:999},source));
 });
