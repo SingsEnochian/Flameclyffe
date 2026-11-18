@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en-GB"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wayglass · WTL Live Cell Observer</title>
+<style>
+body{margin:0;background:#090f18;color:#e1f5e9;font:15px system-ui;padding:18px}main{max-width:900px;margin:auto}canvas{width:100%;background:#101e28;border:1px solid #3a6558;border-radius:14px}button{padding:10px 14px;margin:5px;background:#1b3433;color:#e1f5e9;border:1px solid #5c9883;border-radius:8px}#log{height:190px;overflow:auto;background:#142326;padding:12px;border-radius:10px;font:12px monospace}small{color:#a8c2ba}
+</style>
+<main><h1>♾ Wayglass · Living Möbius Nursery</h1>
+<p>This observer imports the actual WTL ecology module from this checkout. No mock colony or remote telemetry.</p>
+<p id="status">Loading WTL engine…</p><canvas id="view" width="900" height="490"></canvas>
+<p><button id="pause">⏸ Feather</button><button id="step">Single cycle</button><button id="speed">Speed 1×</button><button id="restart">New colony</button></p>
+<p id="metrics"></p><h3>Cell receipts & invented phrases</h3><div id="log" aria-live="off"></div>
+<small>Runs in this browser tab while open. This does not connect to a separate persistent Wayglass process. Open from a static server serving this repository; file:// module imports may be blocked.</small></main>
+<script type="module">
+import {createCellEcology} from './src/wtl-cell-ecology.js';
+const canvas=document.querySelector('#view'),ctx=canvas.getContext('2d'),log=document.querySelector('#log');
+let ecology,paused=false,speed=1,timer,seen=0;
+const palette=['#74e4bd','#e7bb70','#8ebdff','#e7a0dd'];
+function initialise(){ecology=createCellEcology({maxCells:24,seed:11,radius:3,mutationRate:0.8,renewalAge:40});ecology.plant('a','explorer',0,0);ecology.plant('b','explorer',1,0);seen=0;log.replaceChildren();paused=false;document.querySelector('#pause').textContent='⏸ Feather';render()}
+function drawRibbon(x,y,r,twist,colour){ctx.save();ctx.translate(x,y);ctx.shadowColor=colour;ctx.shadowBlur=14;for(let lane=0;lane<2;lane++){ctx.beginPath();for(let i=0;i<=80;i++){const t=i/80*Math.PI*2,phase=t+twist*6.283+lane*Math.PI/2;const xx=Math.cos(phase)*(r+Math.cos(t/2)*5),yy=Math.sin(phase)*r*.55+Math.sin(t*2)*3;if(i)ctx.lineTo(xx,yy);else ctx.moveTo(xx,yy)}ctx.strokeStyle=colour;ctx.globalAlpha=lane?.5:1;ctx.lineWidth=lane?1.5:3;ctx.stroke()}ctx.restore()}
+function render(){const s=ecology.snapshot();ctx.clearRect(0,0,900,490);ctx.fillStyle='#101e28';ctx.fillRect(0,0,900,490);const roles=[...new Set(s.cells.map(c=>c.role))];s.cells.forEach((c,i)=>{const p=s.positions[c.id],x=450+p.x*75,y=240+p.y*75;drawRibbon(x,y,13,c.twist+Math.sin(s.generation*.04+i)*.1,palette[roles.indexOf(c.role)%palette.length]);ctx.fillStyle='#e1f5e9';ctx.font='11px monospace';ctx.textAlign='center';ctx.fillText(c.id.slice(-12),x,y+28)});document.querySelector('#metrics').textContent=`Cycle ${s.generation} · Living ${s.cells.length} · Mutations ${s.mutations.length} · Retirements ${s.retirements.length} · Utterances ${s.utterances.length}`;const recent=s.events.slice(seen);seen=s.events.length;for(const r of recent.filter(r=>['birth','retire','transform'].includes(r.type)).slice(-15)){const el=document.createElement('div');el.textContent=`${r.tick}: ${r.type} ${r.id||''} ${r.to||''}`;log.prepend(el)}for(const u of s.utterances.filter(u=>u.generation===s.generation).slice(-8)){const el=document.createElement('div');el.textContent=`${u.id}: “${u.phrase}”`;log.prepend(el)}while(log.children.length>100)log.lastChild.remove()}
+function cycle(){if(paused)return;ecology.step();render()}
+function schedule(){clearInterval(timer);timer=setInterval(cycle,750/speed)}
+document.querySelector('#pause').onclick=()=>{paused=!paused;if(paused)ecology.feather();else ecology.resume();document.querySelector('#pause').textContent=paused?'▶ Resume':'⏸ Feather';render()};
+document.querySelector('#step').onclick=()=>{if(paused){ecology.resume();ecology.step();ecology.feather()}else ecology.step();render()};
+document.querySelector('#speed').onclick=e=>{speed=speed===1?2:speed===2?4:1;e.target.textContent=`Speed ${speed}×`;schedule()};
+document.querySelector('#restart').onclick=initialise;
+initialise();document.querySelector('#status').textContent='WTL ecology imported · browser-local live execution';schedule();
+</script></html>
