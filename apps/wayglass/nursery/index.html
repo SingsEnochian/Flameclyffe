@@ -38,8 +38,9 @@ function tune(s){
   const v=voices[i],cell=cells.length?cells[(s.generation+i)%cells.length]:null;
   const note=cell?melodyFor(cell,s,i):null;
   const dialogue=(s.harmonicDialogues||[]).at(-1);
-  const sungPitch=dialogue&&i<2?dialogue.events[(s.generation+i)%dialogue.events.length].pitch:null;
-  const freq=sungPitch!==null?440*Math.pow(2,(sungPitch-69)/12):(note?174.61*Math.pow(2,note.semitones/12):174.61);
+  const sonic=dialogue&&i<2?(i===0?dialogue.sonic.callProjection:dialogue.sonic.replyProjection):null;
+  const freq=sonic?sonic.audibleHz:(note?174.61*Math.pow(2,note.semitones/12):174.61);
+  v.osc.type=sonic?sonic.timbre:'sine';
   const peak=note&&!note.rest?level*(.20+i*.035):0;
   v.osc.frequency.cancelScheduledValues(now);v.osc.frequency.setTargetAtTime(freq,now,.035);
   v.gain.gain.cancelScheduledValues(now);v.gain.gain.setTargetAtTime(peak,now,.045);
@@ -55,7 +56,7 @@ for(const u of s.utterances.slice(seenWords).slice(-12))write(`◈ ${u.id}: “$
 for(const e of (s.wyrdruneExpressions||[]).slice(seenWyrdrune).slice(-8))write(`♾ WTL ${e.speaker} · ${e.intent}/${e.verb} · cycle ${e.generation}`);
 for(const p of (s.constructions||[]).slice(seenBuilds).slice(-8))write(`⌂ ${p.builders.join(' + ')} designed ${p.form} · ${p.status}`);
 for(const p of (s.programs||[]).slice(seenPrograms).slice(-8))write(`⌘ ${p.author} wrote and ran ${p.id}: ${p.result.output.map(o=>o.kind+' '+o.value).join(', ')}`);
-for(const d of (s.harmonicDialogues||[]).slice(seenHarmony).slice(-5))write(`♫ ${d.singer} sings ${d.reply.call}; ${d.listener} replies ${d.reply.response} · harmonic score ${d.reply.score}`);
+for(const d of (s.harmonicDialogues||[]).slice(seenHarmony).slice(-5))write(`♫ ${d.singer} ${d.sonic.call.hz.toFixed(2)} Hz → ${d.listener} ${d.sonic.reply.hz.toFixed(2)} Hz · ratio-based duet`);
 for(const p of (s.programLineages||[]).slice(seenLineages).slice(-8))write(`🧬 ${p.parent_id} → ${p.child_id} inherited executable ${p.ancestor_program_id}`);
 for(const d of (s.projectDecisions||[]).slice(seenProjects).slice(-5)){write(`★ Project Genesis ${d.id}: ${d.winner} selected from ${d.candidates.length} proposals · ${d.selected.result.status}`);write('⌘ '+d.selected.source.replaceAll('\n',' | '));write(`↻ revision ${d.revision.baselineScore} → ${d.revision.score} · ${d.revision.attempts.length} attempts · ${d.revision.improved?'improved':'unchanged'}`);write(`⚖ peer tests ${d.peerTests.filter(p=>p.revised.passed).length}/${d.peerTests.length} pass on revision`);write('⌘ '+d.revision.source.replaceAll('\n',' | '));}
 seenEvents=s.events.length;seenWords=s.utterances.length;seenWyrdrune=(s.wyrdruneExpressions||[]).length;seenBuilds=(s.constructions||[]).length;seenPrograms=(s.programs||[]).length;seenProjects=(s.projectDecisions||[]).length;seenLineages=(s.programLineages||[]).length;seenHarmony=(s.harmonicDialogues||[]).length;document.querySelector('#feather').textContent=paused?'▶ Resume':'⏸ Feather'}
