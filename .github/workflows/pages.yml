@@ -168,6 +168,7 @@ jobs:
           cp apps/wayglass/src/wtl-cell-ecology.js _site/wayglass-nursery/src/
           cp apps/wayglass/src/wtl-cell-tissue.js _site/wayglass-nursery/src/
           cp apps/wayglass/src/wtl-cell-program.js _site/wayglass-nursery/src/
+          cp apps/wayglass/src/wtl-cell-peer-tests.js _site/wayglass-nursery/src/
           test -s _site/wayglass-nursery/src/wtl-cell-program.js
 
           node scripts/verify-arcsweep-organ-routes.mjs --site _site
