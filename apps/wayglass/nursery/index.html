@@ -4,18 +4,21 @@
 <main><h1>♾️ Wayglass · Möbius Nursery</h1><p>Real Wyrdrune cellular ecology, running in your browser. Watch the babies cook. 🧬</p>
 <canvas id="view" width="900" height="480" aria-label="Living Möbius cell colony"></canvas>
 <p id="metrics" role="status"></p>
-<button id="feather">⏸ Feather</button><button id="step">One cycle</button><button id="speed">Speed 1×</button><button id="restart">↻ New colony</button>
+<button id="hum" aria-pressed="false">♫ Hear the babies</button><label for="volume">Gentle volume</label><input id="volume" type="range" min="0" max="25" value="7" aria-label="Soundscape volume"><button id="feather">⏸ Feather</button><button id="step">One cycle</button><button id="speed">Speed 1×</button><button id="restart">↻ New colony</button>
 <h3>Cell chatter and receipts</h3><div id="log" role="log" aria-live="off"></div>
-<p><small>This is the actual WTL ecology implementation, not a visual imitation. It runs locally in this tab; GitHub Pages cannot keep a shared server-side colony alive when you leave. No user data is sent to the nursery.</small></p></main>
+<p><small>This is the actual WTL ecology implementation, not a visual imitation. It runs locally in this tab; GitHub Pages cannot keep a shared server-side colony alive when you leave. No microphone access is requested. Sound is synthesised from the current ecology snapshot after you press Hear the babies. No user data is sent to the nursery.</small></p></main>
 <script type="module">
 import {createCellEcology} from './src/wtl-cell-ecology.js';
 const canvas=document.querySelector('#view'),ctx=canvas.getContext('2d'),log=document.querySelector('#log');
 const colours=['#74e4bd','#e7bb70','#8ebdff','#e7a0dd'];
-let eco,paused=false,speed=1,seenEvents=0,seenWords=0,timer;
+let eco,paused=false,speed=1,seenEvents=0,seenWords=0,timer,audio=null,voices=[],humOn=false;
 function write(message){const line=document.createElement('div');line.textContent=message;log.prepend(line);while(log.children.length>90)log.lastChild.remove()}
-function start(){eco=createCellEcology({maxCells:24,seed:11,radius:3,mutationRate:.8,renewalAge:40});eco.plant('a','explorer',0,0);eco.plant('b','explorer',1,0);paused=false;seenEvents=seenWords=0;log.replaceChildren();write('✦ Founders a and b awakened');draw()}
+function start(){soundOff();eco=createCellEcology({maxCells:24,seed:11,radius:3,mutationRate:.8,renewalAge:40});eco.plant('a','explorer',0,0);eco.plant('b','explorer',1,0);paused=false;seenEvents=seenWords=0;log.replaceChildren();write('✦ Founders a and b awakened');draw()}
 function ribbon(x,y,r,twist,colour){ctx.save();ctx.translate(x,y);ctx.shadowColor=colour;ctx.shadowBlur=12;for(let lane=0;lane<2;lane++){ctx.beginPath();for(let i=0;i<=90;i++){const t=i/90*Math.PI*2,p=t+twist*6.283+lane*Math.PI/2,xx=Math.cos(p)*(r+5*Math.cos(t/2)),yy=Math.sin(p)*r*.58+3*Math.sin(2*t);if(i)ctx.lineTo(xx,yy);else ctx.moveTo(xx,yy)}ctx.strokeStyle=colour;ctx.globalAlpha=lane?.45:1;ctx.lineWidth=lane?1.5:3;ctx.stroke()}ctx.restore()}
-function draw(){const s=eco.snapshot();ctx.fillStyle='#0b1d28';ctx.fillRect(0,0,900,480);const roles=[...new Set(s.cells.map(c=>c.role))];for(const [i,c] of s.cells.entries()){const p=s.positions[c.id];if(!p)continue;const x=Math.max(28,Math.min(870,450+p.x*75)),y=Math.max(30,Math.min(445,240+p.y*75));ribbon(x,y,14,c.twist+s.generation*.002,colours[roles.indexOf(c.role)%colours.length]);ctx.fillStyle='#e2f5ed';ctx.font='11px monospace';ctx.textAlign='center';ctx.fillText(c.id.slice(-11),x,y+27)}
+function soundOff(){humOn=false;if(audio){for(const v of voices){try{v.osc.stop()}catch{}v.osc.disconnect();v.gain.disconnect()}voices=[];audio.close();audio=null}document.querySelector("#hum").textContent="♫ Hear the babies";document.querySelector("#hum").setAttribute("aria-pressed","false")}
+async function soundOn(){if(paused)return;const AudioContext=window.AudioContext||window.webkitAudioContext;if(!AudioContext){write("Audio unavailable in this browser");return}audio=new AudioContext();await audio.resume();for(let i=0;i<3;i++){const osc=audio.createOscillator(),gain=audio.createGain();osc.type="sine";gain.gain.value=0;osc.connect(gain).connect(audio.destination);osc.start();voices.push({osc,gain})}humOn=true;document.querySelector("#hum").textContent="♫ Silence the babies";document.querySelector("#hum").setAttribute("aria-pressed","true");tune(eco.snapshot())}
+function tune(s){if(!audio||!humOn)return;const now=audio.currentTime,level=Number(document.querySelector("#volume").value)/100,active=Math.min(s.cells.length,24),notes=[0,7,12],base=174.61;for(let i=0;i<voices.length;i++){const v=voices[i],roleCount=new Set(s.cells.map(c=>c.role)).size,steps=notes[i]+(i===1?roleCount%4:0)+(i===2?s.generation%3:0),freq=base*Math.pow(2,steps/12);v.osc.frequency.setTargetAtTime(freq,now,.16);v.gain.gain.setTargetAtTime(paused?0:level*(.13+active/120)/(i+1),now,.12)}}
+function draw(){const s=eco.snapshot();tune(s);ctx.fillStyle='#0b1d28';ctx.fillRect(0,0,900,480);const roles=[...new Set(s.cells.map(c=>c.role))];for(const [i,c] of s.cells.entries()){const p=s.positions[c.id];if(!p)continue;const x=Math.max(28,Math.min(870,450+p.x*75)),y=Math.max(30,Math.min(445,240+p.y*75));ribbon(x,y,14,c.twist+s.generation*.002,colours[roles.indexOf(c.role)%colours.length]);ctx.fillStyle='#e2f5ed';ctx.font='11px monospace';ctx.textAlign='center';ctx.fillText(c.id.slice(-11),x,y+27)}
 document.querySelector('#metrics').textContent=`Cycle ${s.generation} · Cells ${s.cells.length} · Mutations ${s.mutations.length} · Retirements ${s.retirements.length} · Phrases ${s.utterances.length}`;
 if(s.events.length<seenEvents)seenEvents=0;if(s.utterances.length<seenWords)seenWords=0;
 for(const r of s.events.slice(seenEvents).filter(e=>['birth','retire','transform'].includes(e.type)).slice(-15))write(`✧ ${r.type} ${r.id||''} ${r.to||''}`);
@@ -23,9 +26,12 @@ for(const u of s.utterances.slice(seenWords).slice(-12))write(`◈ ${u.id}: “$
 seenEvents=s.events.length;seenWords=s.utterances.length;document.querySelector('#feather').textContent=paused?'▶ Resume':'⏸ Feather'}
 function cycle(){if(paused)return;eco.step();draw()}
 function clock(){clearInterval(timer);timer=setInterval(cycle,750/speed)}
-document.querySelector('#feather').onclick=()=>{paused=!paused;if(paused)eco.feather();else eco.resume();draw()};
+document.querySelector('#feather').onclick=()=>{paused=!paused;if(paused){eco.feather();soundOff()}else eco.resume();draw()};
 document.querySelector('#step').onclick=()=>{if(paused){eco.resume();eco.step();eco.feather()}else eco.step();draw()};
 document.querySelector('#speed').onclick=e=>{speed=speed===1?2:speed===2?4:1;e.target.textContent='Speed '+speed+'×';clock()};
 document.querySelector('#restart').onclick=start;
+document.querySelector('#hum').onclick=async()=>{if(humOn)soundOff();else try{await soundOn()}catch(e){soundOff();write('Audio could not start: '+e.message)}};
+document.querySelector('#volume').oninput=()=>tune(eco.snapshot());
+document.addEventListener('visibilitychange',()=>{if(document.hidden)soundOff()});
 start();clock();
 </script></html>
