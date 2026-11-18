@@ -1,0 +1,10 @@
+'use strict';
+const express=require('express');
+const path=require('node:path');
+if(!process.env.WAYGLASS_DATA_DIR||!process.env.ARCSWEEP_RUNTIME_TOKEN)throw new Error('Disposable test custody required');
+const {createWayglassRouter}=require('../wayglass/router.js');
+const app=express();app.use(express.json());
+app.use('/api/v1/wayglass',createWayglassRouter({fetchImpl:async()=>{throw new Error('No provider invocation permitted');}}));
+app.use('/wayglass',express.static(path.join(__dirname,'../public/wayglass')));
+const server=app.listen(0,'127.0.0.1',()=>process.send?.({port:server.address().port}));
+process.on('message',message=>{if(message==='stop'){server.closeAllConnections();server.close(()=>process.exit(0));}});

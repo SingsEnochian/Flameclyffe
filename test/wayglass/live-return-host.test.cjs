@@ -77,7 +77,7 @@ test('actual localhost authenticated MCP prepare/leave, process restart, and pri
   t.after(async () => { if (liveHost) await liveHost.stop(); });
 
   const env = {
-    ...process.env, HOME: userHome,
+    ...process.env, HOME: userHome, USERPROFILE: userHome,
     WAYGLASS_LIVE_RETURN_APPROVED: 'YES',
     WAYGLASS_MCP_URL: hostOne.origin + '/mcp',
     WAYGLASS_LIVE_ACCESS_TOKEN: 'rarity-fixture-credential',

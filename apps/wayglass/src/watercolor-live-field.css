@@ -1,6 +1,11 @@
 /* The living watercolour has two registers:
    ambient pigment circulation (visual only) and verified source-event traces.
    Neither a moving canvas nor a successful connectivity check claims an AI agent is working. */
+.wg-authority-lineage{margin:24px 190px 100px;padding:22px;border-radius:24px;line-height:1.6}
+.wg-authority-lineage summary{cursor:pointer;font-weight:700;font-size:1.1rem}
+.wg-authority-lineage pre{overflow-wrap:anywhere;font-size:.85rem}
+.wg-authority-controls{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+@media(max-width:760px){.wg-authority-lineage{margin:20px 14px 180px;padding:18px}}
 .wc-surface .wc-stage{--wc-live-pigment:#a0e1cb}
 .wc-live-field{
   position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden;

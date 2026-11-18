@@ -1,4 +1,5 @@
 import './living-observer.css';
+import {mountAuthorityLineageView} from '../authority-lineage-view.js';
 import { listWayglassSurfaces } from '../surface-registry.js';
 import { listWayglassOrgans } from '../organ-registry.js';
 import {
@@ -499,5 +500,6 @@ export async function mountWayglassLivingObserver(root) {
   timer=setInterval(()=>{if(!paused)refresh();},1000);
   renderWonder();renderDreamHistory();refresh();
   if(!reduced)animation=requestAnimationFrame(animate);
-  return cleanup;
+  const authorityView=mountAuthorityLineageView(root,{readOnly:true});
+  return ()=>{authorityView.destroy();cleanup();};
 }

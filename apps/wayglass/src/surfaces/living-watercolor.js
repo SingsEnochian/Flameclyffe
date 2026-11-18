@@ -18,6 +18,7 @@ import {touchWayglass} from '../first-touch-client.js';
 import { animateWyrdruneCypher, readWyrdrune } from '../wyrdrune-cypher.js';
 import { cypherRunOptions, nativeRunOptions, readCypherPace } from '../cypher-pace.js';
 import { animateWyrdruneTranslation } from '../wyrdrune-morph.js';
+import {mountAuthorityLineageView} from '../authority-lineage-view.js';
 
 const clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
 const safeText=value=>String(value??'').replaceAll('&','&amp;')
@@ -940,8 +941,10 @@ export async function mountLivingWatercolorSurface(root) {
   cleanups.push(()=>motionQuery?.removeEventListener?.('change',onMotionPreference));
   if(!reduced)animationId=globalThis.requestAnimationFrame(frame);
   else feedback.textContent='Reduced motion enabled. Sourced activity appears as static pigment; ambient movement is off.';
+  const authorityView=mountAuthorityLineageView(root);
   return {
     destroy(){
+      authorityView.destroy();
       stopped=true;requestEpoch++;busy=false;pointerId=null;lastPointer=null;
       voiceCypher?.stop();
       touchEpoch++;touchAbort?.abort();touchAbort=null;

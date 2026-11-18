@@ -1,0 +1,12 @@
+// Authority evidence is resolved by the host; this native policy decides scope.
+// Unknown evidence must be passed as unavailable, never as presumed consent.
+mobius scoped {
+  perceive { let requested = requested_count; let permitted = permitted_count; }
+  compress { let complete = permitted == requested and requested > 0; }
+  release { let partial = permitted > 0 and permitted < requested; }
+  verify { require permitted >= 0 and permitted <= requested else "Invalid authority evidence"; }
+  integrate { let held = objection_count; }
+  choose { emit {continue:complete, narrow:partial, suspend:permitted == 0}; }
+  return { emit {objections:held, revision:revision}; }
+  transcend { }
+}

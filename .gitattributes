@@ -1,0 +1,2 @@
+# This evaluation corpus is byte-pinned; Windows checkout conversion breaks its digest.
+training/wayglass/MOBIUS_EVAL_FROZEN.jsonl -text

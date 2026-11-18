@@ -1,0 +1,56 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import {fork} from 'node:child_process';
+import {once} from 'node:events';
+import {pathToFileURL} from 'node:url';
+import {issueHouseSession} from '../netlify/functions/_shared/house-session.mjs';
+const {chromium}=await import(pathToFileURL(process.env.WAYGLASS_PLAYWRIGHT_MODULE).href);
+const output=path.resolve('artifacts/wayglass/loki-browser');fs.mkdirSync(output,{recursive:true});
+const directory=fs.mkdtempSync(path.join(os.tmpdir(),'loki-browser-'));
+const token='local-browser-fixture-'+crypto.randomUUID();
+const child=fork(path.resolve('apps/starwell-server/test/wayglass-authority-host-fixture.cjs'),[],{env:{...process.env,WAYGLASS_DATA_DIR:directory,ARCSWEEP_RUNTIME_TOKEN:token},stdio:['ignore','pipe','pipe','ipc']});
+let browser,page,errors=[];
+try{
+  const [{port}]=await Promise.race([once(child,'message'),once(child,'exit').then(()=>{throw new Error('Fixture host exited');})]);
+  browser=await chromium.launch({channel:'chrome',headless:true});
+  const context=await browser.newContext({viewport:{width:1400,height:1000},reducedMotion:'reduce'});
+  const session=issueHouseSession({get:name=>name==='ARCSWEEP_RUNTIME_TOKEN'?token:null});
+  await context.addCookies([{name:'hearthgate_session',value:session.token,domain:'127.0.0.1',path:'/',httpOnly:true,sameSite:'Strict'}]);
+  page=await context.newPage();page.on('pageerror',error=>errors.push(error.message));
+  await page.goto('http://127.0.0.1:'+port+'/wayglass/');
+  const panel=page.locator('details').filter({has:page.locator('summary',{hasText:'Authority lineage · Loki Biscuit Test'})});
+  await panel.locator('summary').click();
+  const status=panel.locator('[role=status]');
+  await status.filter({hasText:'No experiment prepared.'}).waitFor();
+  await panel.getByRole('button',{name:'Prepare experiment',exact:true}).click();
+  await status.filter({hasText:'transformation-b: Continue'}).waitFor();
+  await panel.getByRole('button',{name:'Record Loki’s objection',exact:true}).click();
+  await status.filter({hasText:'transformation-b: Suspend'}).waitFor();
+  await panel.getByRole('button',{name:'Run queued work',exact:true}).click();
+  await status.filter({hasText:'Recorded local effects: 2'}).waitFor();
+  assert.match(await status.innerText(),/mixed: Narrow/);
+  assert.match(await status.innerText(),/Unresolved objection · loki: I agreed to biscuits, not architectural engineering\./);
+  await panel.getByRole('button',{name:'Keep Return receipt',exact:true}).click();
+  await status.filter({hasText:'Return receipt:'}).waitFor();
+  await panel.scrollIntoViewIfNeeded();await page.screenshot({path:path.join(output,'watercolour-authority.png'),fullPage:true});
+  const receiptText=await status.innerText();
+  await page.reload();await panel.locator('summary').waitFor();
+  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('wayglass:feather',{detail:{stopped:true}})));
+  await panel.locator('summary').click();
+  await status.filter({hasText:'independent-biscuits: Suspend'}).waitFor();
+  await panel.getByRole('button',{name:'Release stop',exact:true}).click();
+  await status.filter({hasText:'independent-biscuits: Continue'}).waitFor();
+  assert.match(await status.innerText(),/transformation-b: Suspend/);
+  assert.deepEqual(errors,[]);
+  fs.writeFileSync(path.join(output,'receipt.json'),JSON.stringify({status:'passed',receiptText,pageErrors:errors,verified:['browser-controls','objection-display','local-effect-count','return-receipt','reload','feather','release-preserves-objection']},null,2));
+  console.log('Loki browser verification passed: '+output);
+}catch(error){
+  if(page)await page.screenshot({path:path.join(output,'failure.png'),fullPage:true}).catch(()=>{});
+  fs.writeFileSync(path.join(output,'failure.json'),JSON.stringify({error:error.message,pageErrors:errors},null,2));throw error;
+}finally{
+  await browser?.close();child.kill();await once(child,'exit').catch(()=>{});
+  fs.cpSync(directory,path.join(output,'runtime-evidence'),{recursive:true});
+  fs.rmSync(directory,{recursive:true,force:true});
+}

@@ -23,6 +23,7 @@ class Element{
  removeEventListener(type,handler){this.listeners.get(type)?.delete(handler);if(this.listeners.get(type)?.size===0)this.listeners.delete(type);}
  append(...children){for(const child of children){child.parentNode=this;this.children.push(child);}if(this.tagName==='SELECT'&&!this.value)this.value=children[0]?.value??'';}
  replaceChildren(...children){this.children=[];this._text='';this.append(...children);}
+ remove(){if(this.parentNode)this.parentNode.children=this.parentNode.children.filter(child=>child!==this);this.parentNode=null;}
  matches(selector){return selector.split(',').some(part=>{const s=part.trim();if(s.startsWith('#'))return this.attributes.id===s.slice(1);if(s.startsWith('.'))return (this.attributes.class??'').split(/\s+/).includes(s.slice(1));if(s.startsWith('[')){const m=s.match(/^\[([^=\]]+)(?:="([^"]*)")?\]$/);return !!m&&Object.hasOwn(this.attributes,m[1])&&(m[2]===undefined||this.attributes[m[1]]===m[2]);}return this.tagName===s.toUpperCase();});}
  closest(selector){return this.matches(selector)?this:this.parentNode?.closest?.(selector)??null;}
  querySelector(selector){return this.querySelectorAll(selector)[0]??null;}
