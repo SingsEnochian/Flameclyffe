@@ -132,7 +132,7 @@ export function mountWayglassCellGarden(root,{
      ' · twist '+(cell.twist.orientation===1?'clockwise':'counterclockwise')+
      ' · parent '+(cell.parent_ids?.join(' + ')||cell.parent_id||'founder')+
      ' · '+(cell.specialisation||'unassigned')+' · acoustic '+cell.acoustic_address+
-     ' · observations '+cell.memory_refs.length;
+     ' · observations '+(cell.memory_refs?.length??0);
    item.append(name,detail);entries.append(item);
   }
   const count=cells.filter(cell=>cell.status==='active').length;
