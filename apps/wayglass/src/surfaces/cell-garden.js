@@ -127,6 +127,7 @@ export function mountWayglassCellGarden(root,{
   for(const cell of cells){
    const item=doc.createElement('li');item.className='wg-cell-lineage';
    item.dataset.cellStatus=cell.status;
+   item.dataset.cellRole=cell.specialisation||'unassigned';
    const name=doc.createElement('strong');name.textContent=cell.cell_id;
    const detail=doc.createElement('span');
    detail.textContent=' Generation '+cell.generation+' · '+cell.status+

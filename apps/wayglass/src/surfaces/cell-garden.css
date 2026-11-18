@@ -20,3 +20,9 @@
 .wg-cell-row input[type=text]{min-width:min(100%,18rem)}
 .wg-cell-consent{max-width:100%;text-wrap:pretty}
 .wg-cell-row button:disabled{opacity:.48;cursor:not-allowed}
+
+/* Differentiation is visible without sound or inferred model activity. */
+.wg-cell-lineage[data-cell-role="resonance"]{background:radial-gradient(ellipse at 72% 28%,rgba(92,178,229,.24),transparent 58%),linear-gradient(130deg,rgba(26,65,97,.25),rgba(18,36,56,.13));border-color:rgba(127,204,248,.64)}
+.wg-cell-lineage[data-cell-role="observation"]{background:radial-gradient(ellipse at 15% 20%,rgba(227,191,106,.22),transparent 58%),linear-gradient(135deg,rgba(94,79,41,.24),rgba(24,52,55,.12));border-color:rgba(224,198,124,.66)}
+.wg-cell-lineage[data-cell-role="hybrid"]{background:radial-gradient(ellipse at 18% 22%,rgba(118,214,201,.25),transparent 50%),radial-gradient(ellipse at 82% 75%,rgba(238,183,115,.23),transparent 52%);border:2px double rgba(153,216,188,.78)}
+.wg-cell-lineage[data-cell-role="hybrid"] strong{letter-spacing:.015em}
