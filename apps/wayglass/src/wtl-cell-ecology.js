@@ -10,7 +10,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
   if(!Number.isFinite(mutationRate)||mutationRate<0||mutationRate>1) throw Error('Invalid mutation rate');
   if(!Number.isSafeInteger(renewalAge)||renewalAge<3||renewalAge>10000) throw Error('Invalid renewal age');
   const tissue=createCellTissue({maxCells});
-  const positions=new Map(),adaptation=new Map(),traits=new Map(),mutations=[],utterances=[],lexicons=new Map(),birthTicks=new Map(),retirements=[],wyrdruneExpressions=[],constructions=[],programs=[],projectDecisions=[];
+  const positions=new Map(),adaptation=new Map(),traits=new Map(),mutations=[],utterances=[],lexicons=new Map(),birthTicks=new Map(),retirements=[],wyrdruneExpressions=[],constructions=[],programs=[],projectDecisions=[],programLineages=[],programLibrary=new Map();
   // An open combinatorial grammar, not a library of finished phrases.
   const vocabulary={
     subject:['my spiral','your echo','this membrane','our orbit','that wobble','the neighbouring twist'],
@@ -59,6 +59,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
     traits.set(id,makeTraits().traits);
     lexicons.set(id,[]);
     birthTicks.set(id,generation);
+    programLibrary.set(id,[]);
   }
   function neighbours(id) {
     const p=positions.get(id);
@@ -103,6 +104,8 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
           language:compiled.language,result:{status:result.status,steps:result.steps,output:result.output.map(x=>({...x}))},
           provenance:{origin:'deterministic-cell-author',canonical_wtl_compiler:false,host_effects:false}};
         programs.push(program);
+        programLibrary.get(author.id).push({id:program.id,source:program.source,generation});
+        if(programLibrary.get(author.id).length>8)programLibrary.get(author.id).shift();
         wyrdruneExpressions.push({schema:'wayglass.wtl.cell-expression.v1',generation,speaker:author.id,
           intent:'program',verb:'compile-and-run',mode:'sandbox',semantic:{program_id:program.id,language:program.language},
           provenance:{origin:'cell-program-subset',verified_compiler:false}});
@@ -143,6 +146,9 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
             improved:revision.improved,attempts:revision.attempts.map(a=>({...a})),result:revision.result},
           provenance:{origin:'bounded-cell-ecology',canonical_wtl_compiler:false,host_effects:false,autonomous_agent:false}};
         projectDecisions.push(decision);
+        const winnerLibrary=programLibrary.get(winner.author);
+        winnerLibrary.push({id:decision.id+'-revision',source:revision.source,generation});
+        if(winnerLibrary.length>8)winnerLibrary.shift();
         wyrdruneExpressions.push({schema:'wayglass.wtl.cell-expression.v1',generation,speaker:winner.author,
           intent:'project',verb:'select-and-execute',mode:'neighbour-reviewed',
           semantic:{project_id:decision.id,score:winner.score},
@@ -181,7 +187,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       const record=tissue.retire(cell.id,'age-renewal');
       retirements.push({...record,generation,traits:{...traits.get(cell.id)},lastPhrases:[...lexicons.get(cell.id)]});
       positions.delete(cell.id);adaptation.delete(cell.id);traits.delete(cell.id);
-      lexicons.delete(cell.id);birthTicks.delete(cell.id);
+      lexicons.delete(cell.id);birthTicks.delete(cell.id);programLibrary.delete(cell.id);
       retired.push(cell.id);
     }
     // Regenerative response: lower the reproduction threshold in sparse tissue.
@@ -196,6 +202,18 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       traits.set(birth.id,inherited.traits);
       lexicons.set(birth.id,[...lexicons.get(birth.parent_id).slice(-2)]);
       birthTicks.set(birth.id,generation);
+      // Descendants receive a copy of an executable ancestor program, not a pointer.
+      const parentPrograms=programLibrary.get(birth.parent_id)||[];
+      const inheritedProgram=parentPrograms.at(-1);
+      const childPrograms=inheritedProgram?[{...inheritedProgram}]:[];
+      programLibrary.set(birth.id,childPrograms);
+      if(inheritedProgram){
+        const compiled=compileCellProgram(inheritedProgram.source);
+        const result=executeCellProgram(compiled);
+        programLineages.push({generation,parent_id:birth.parent_id,child_id:birth.id,
+          ancestor_program_id:inheritedProgram.id,source:inheritedProgram.source,
+          verification:{status:result.status,steps:result.steps},kind:'inherited-executable-copy'});
+      }
       if(inherited.change)mutations.push({generation,parent_id:birth.parent_id,child_id:birth.id,...inherited.change});
     }
     return {generation,signals,births:births.map(b=>b.id),retired,population:positions.size};
@@ -213,6 +231,8 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       neighbourhoods:Object.fromEntries([...positions.keys()].map(id=>[id,neighbours(id)])),
       wyrdruneExpressions:wyrdruneExpressions.map(e=>({...e,semantic:{...e.semantic,traits:e.semantic.traits?{...e.semantic.traits}:undefined},provenance:{...e.provenance}})),
       projectDecisions:projectDecisions.map(d=>({...d,candidates:d.candidates.map(p=>({...p,reviews:p.reviews.map(r=>({...r}))})),selected:{...d.selected,result:{...d.selected.result,output:d.selected.result.output.map(x=>({...x}))}},peerTests:d.peerTests.map(p=>({test:{...p.test},original:{...p.original,observed:[...p.original.observed]},revised:{...p.revised,observed:[...p.revised.observed]}})),revision:{...d.revision,attempts:d.revision.attempts.map(a=>({...a})),result:{...d.revision.result,output:d.revision.result.output.map(x=>({...x}))}},provenance:{...d.provenance}})),
+      programLineages:programLineages.map(p=>({...p,verification:{...p.verification}})),
+      programLibrary:Object.fromEntries([...programLibrary].map(([id,items])=>[id,items.map(p=>({...p}))])),
       programs:programs.map(p=>({...p,result:{...p.result,output:p.result.output.map(x=>({...x}))},provenance:{...p.provenance}})),
       constructions:constructions.map(p=>({...p,builders:[...p.builders],specification:{...p.specification,effects:[...p.specification.effects]},provenance:{...p.provenance}}))};
   }
