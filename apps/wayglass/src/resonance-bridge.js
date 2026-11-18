@@ -2,11 +2,12 @@
 // Wyrdrune, Observer and Return lanes. Does not trigger audio or inference.
 export const BRIDGE_SCHEMA='wayglass.nervous-system.bridge/v1';
 const validId=value=>typeof value==='string'&&/^[a-z][a-z0-9-]{0,63}$/.test(value);
+const validRoute=value=>typeof value==='string'&&/^[a-z][a-z0-9-]{0,63}:[a-z][a-z0-9-]{0,63}$/.test(value);
 const clone=value=>JSON.parse(JSON.stringify(value));
 export function projectResonance({resonance,revision,source,feather=false,audioOptIn=false,hapticsOptIn=false}={}){
  if(feather)return Object.freeze({schema:BRIDGE_SCHEMA,status:'feather-stopped',projections:[]});
  if(!resonance||!validId(resonance.id)||!Number.isSafeInteger(revision)||revision<1||
- !source||!validId(source.participant_id)||!validId(source.route_id)||
+ !source||!validId(source.participant_id)||!validRoute(source.route_id)||
  typeof source.receipt_id!=='string'||!source.receipt_id.trim())throw new TypeError('Verified source metadata required');
  const tones=resonance.tones;
  if(!Array.isArray(tones)||tones.length>8||!tones.every(t=>
