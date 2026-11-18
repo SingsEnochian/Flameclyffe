@@ -88,14 +88,17 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       .sort((a,b)=>birthTicks.get(a.id)-birthTicks.get(b.id)||a.id.localeCompare(b.id));
     const retired=[];
     for(const cell of retirees){
-      if(positions.size<=1)break;
+      // Stagger renewal: never retire more than one cell in a cycle.
+      if(retired.length>=1||positions.size<=2)break;
       const record=tissue.retire(cell.id,'age-renewal');
       retirements.push({...record,generation,traits:{...traits.get(cell.id)},lastPhrases:[...lexicons.get(cell.id)]});
       positions.delete(cell.id);adaptation.delete(cell.id);traits.delete(cell.id);
       lexicons.delete(cell.id);birthTicks.delete(cell.id);
       retired.push(cell.id);
     }
-    const births=tissue.populate({steps:1,threshold:60}).births;
+    // Regenerative response: lower the reproduction threshold in sparse tissue.
+    const threshold=positions.size<=3?20:60;
+    const births=tissue.populate({steps:1,threshold}).births;
     for(const birth of births) {
       const parent=positions.get(birth.parent_id);
       const theta=2*Math.PI*random(),distance=0.25+random()*0.5;
