@@ -49,6 +49,15 @@ export function createCellTissue({maxCells=8,energyCap=100}={}) {
     const twist=(parent.twist+variation+1)%1;
     return spawn({id:child_id,role:parent.role,parent_id,energy:10,twist});
   }
+  function retire(id,reason='renewal') {
+    if(paused) throw Error('Feather: tissue paused');
+    if(!cells.has(id)) throw Error('Unknown cell');
+    if(typeof reason!=='string'||reason.length>64) throw Error('Invalid reason');
+    const cell=cells.get(id);
+    cells.delete(id);
+    for(const survivor of cells.values())survivor.signals=survivor.signals.filter(s=>s.from!==id);
+    return receipt('retire',{id,parent_id:cell.parent_id,role:cell.role,twist:cell.twist,reason});
+  }
   function feather(){paused=true;for(const c of cells.values())c.signals=[];return receipt('feather',{});}
   function resume(){paused=false;return receipt('resume',{});}
   function populate({steps=1,threshold=60}={}) {
@@ -70,5 +79,5 @@ export function createCellTissue({maxCells=8,energyCap=100}={}) {
     return clone({births,snapshot:snapshot()});
   }
   function snapshot(){return clone({schema:'wayglass.wtl-cell-tissue/v0.1',clock,paused,cells:[...cells.values()],events});}
-  return Object.freeze({spawn,signal,tick,divide,populate,feather,resume,snapshot});
+  return Object.freeze({spawn,signal,tick,divide,retire,populate,feather,resume,snapshot});
 }
