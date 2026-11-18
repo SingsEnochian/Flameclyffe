@@ -25,8 +25,9 @@ class FakeBlocks:
 
 
 class FakeResponse:
-    def __init__(self, payload):
+    def __init__(self, payload, status=200):
         self.payload = payload
+        self.status = status
     def __enter__(self):
         return self
     def __exit__(self, *args):
@@ -202,6 +203,14 @@ class SpaceContractTests(unittest.TestCase):
                     result = self.app.call_kernel("Hello", [])
                 self.assertNotIn("Verified response", result)
                 self.assertNotIn("Observation:", result)
+
+    def test_missing_http_status_cannot_present_forged_speech(self):
+        response = FakeResponse(envelope())
+        del response.status
+        with patch.object(self.app.OPENER, "open", return_value=response):
+            result = self.app.call_kernel("Hello", [])
+        self.assertNotIn("Verified response", result)
+        self.assertNotIn("Observation:", result)
 
     def test_non_success_transport_status_cannot_present_forged_speech(self):
         for status in (201, 202, 204, 206, 302):
