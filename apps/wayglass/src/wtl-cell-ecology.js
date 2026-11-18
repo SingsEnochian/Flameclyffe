@@ -9,7 +9,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
   if(!Number.isFinite(mutationRate)||mutationRate<0||mutationRate>1) throw Error('Invalid mutation rate');
   if(!Number.isSafeInteger(renewalAge)||renewalAge<3||renewalAge>10000) throw Error('Invalid renewal age');
   const tissue=createCellTissue({maxCells});
-  const positions=new Map(),adaptation=new Map(),traits=new Map(),mutations=[],utterances=[],lexicons=new Map(),birthTicks=new Map(),retirements=[],wyrdruneExpressions=[],constructions=[],programs=[];
+  const positions=new Map(),adaptation=new Map(),traits=new Map(),mutations=[],utterances=[],lexicons=new Map(),birthTicks=new Map(),retirements=[],wyrdruneExpressions=[],constructions=[],programs=[],projectDecisions=[];
   // An open combinatorial grammar, not a library of finished phrases.
   const vocabulary={
     subject:['my spiral','your echo','this membrane','our orbit','that wobble','the neighbouring twist'],
@@ -107,6 +107,36 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
           provenance:{origin:'cell-program-subset',verified_compiler:false}});
       }
     }
+    // Project Genesis: competing executable candidates, neighbour reviews and
+    // deterministic selection. Scores describe algorithmic choices, not sentience.
+    if(generation%15===0&&projectDecisions.length<32){
+      const candidates=tissue.snapshot().cells.filter(cell=>neighbours(cell.id).length>0).slice(0,8);
+      const proposals=candidates.map(cell=>{
+        const genes=traits.get(cell.id),source=authorCellProgram(cell,genes,generation);
+        const compiled=compileCellProgram(source);
+        const reviews=neighbours(cell.id).slice(0,8).map(id=>{
+          const reviewer=traits.get(id);
+          return {reviewer:id,score:(reviewer.curiosity+reviewer.dialectBias+compiled.instructions.length+Math.floor(cell.twist*4))%7};
+        });
+        return {author:cell.id,source,language:compiled.language,reviews,
+          score:reviews.reduce((n,r)=>n+r.score,0),compiled};
+      });
+      proposals.sort((a,b)=>b.score-a.score||a.author.localeCompare(b.author));
+      if(proposals.length){
+        const winner=proposals[0],result=executeCellProgram(winner.compiled);
+        const decision={schema:'wayglass.wtl.project-genesis.v1',id:'project-'+generation,
+          generation,selection:'neighbour-scored-deterministic',winner:winner.author,
+          candidates:proposals.map(p=>({author:p.author,source:p.source,language:p.language,score:p.score,reviews:p.reviews.map(r=>({...r}))})),
+          selected:{source:winner.source,language:winner.language,
+            result:{status:result.status,steps:result.steps,output:result.output.map(x=>({...x}))}},
+          provenance:{origin:'bounded-cell-ecology',canonical_wtl_compiler:false,host_effects:false,autonomous_agent:false}};
+        projectDecisions.push(decision);
+        wyrdruneExpressions.push({schema:'wayglass.wtl.cell-expression.v1',generation,speaker:winner.author,
+          intent:'project',verb:'select-and-execute',mode:'neighbour-reviewed',
+          semantic:{project_id:decision.id,score:winner.score},
+          provenance:{origin:'project-genesis',verified_compiler:false}});
+      }
+    }
     // Sandbox construction: cell-authored, bounded symbolic structures only.
     // No host filesystem, network, code execution or runtime modification.
     if(generation%6===0&&constructions.length<128){
@@ -170,6 +200,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       retirements:retirements.map(r=>({...r,traits:{...r.traits},lastPhrases:[...r.lastPhrases]})),utterances:utterances.map(u=>({...u})),lexicons:Object.fromEntries([...lexicons].map(([id,phrases])=>[id,[...phrases]])),
       neighbourhoods:Object.fromEntries([...positions.keys()].map(id=>[id,neighbours(id)])),
       wyrdruneExpressions:wyrdruneExpressions.map(e=>({...e,semantic:{...e.semantic,traits:e.semantic.traits?{...e.semantic.traits}:undefined},provenance:{...e.provenance}})),
+      projectDecisions:projectDecisions.map(d=>({...d,candidates:d.candidates.map(p=>({...p,reviews:p.reviews.map(r=>({...r}))})),selected:{...d.selected,result:{...d.selected.result,output:d.selected.result.output.map(x=>({...x}))}},provenance:{...d.provenance}})),
       programs:programs.map(p=>({...p,result:{...p.result,output:p.result.output.map(x=>({...x}))},provenance:{...p.provenance}})),
       constructions:constructions.map(p=>({...p,builders:[...p.builders],specification:{...p.specification,effects:[...p.specification.effects]},provenance:{...p.provenance}}))};
   }
