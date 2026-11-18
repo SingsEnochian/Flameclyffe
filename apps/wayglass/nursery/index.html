@@ -6,18 +6,45 @@
 <p id="metrics" role="status"></p>
 <button id="hum" aria-pressed="false">♫ Hear the babies</button><label for="volume">Gentle volume</label><input id="volume" type="range" min="0" max="25" value="7" aria-label="Soundscape volume"><button id="feather">⏸ Feather</button><button id="step">One cycle</button><button id="speed">Speed 1×</button><button id="restart">↻ New colony</button>
 <h3>Cell chatter and receipts</h3><div id="log" role="log" aria-live="off"></div>
-<p><small>This is the actual WTL ecology implementation, not a visual imitation. It runs locally in this tab; GitHub Pages cannot keep a shared server-side colony alive when you leave. No microphone access is requested. Sound is synthesised from the current ecology snapshot after you press Hear the babies. No user data is sent to the nursery.</small></p></main>
+<p><small>This is the actual WTL ecology implementation, not a visual imitation. It runs locally in this tab; GitHub Pages cannot keep a shared server-side colony alive when you leave. No microphone access is requested. Each cell sings changing notes derived from its identity, twist, traits and recent phrases after you press Hear the babies. This is experimental sonification, not native WTL audio compilation. No user data is sent to the nursery.</small></p></main>
 <script type="module">
 import {createCellEcology} from './src/wtl-cell-ecology.js';
 const canvas=document.querySelector('#view'),ctx=canvas.getContext('2d'),log=document.querySelector('#log');
 const colours=['#74e4bd','#e7bb70','#8ebdff','#e7a0dd'];
-let eco,paused=false,speed=1,seenEvents=0,seenWords=0,timer,audio=null,voices=[],humOn=false;
+let eco,paused=false,speed=1,seenEvents=0,seenWords=0,timer,audio=null,voices=[],humOn=false,lastSongCycle=-1;
 function write(message){const line=document.createElement('div');line.textContent=message;log.prepend(line);while(log.children.length>90)log.lastChild.remove()}
-function start(){soundOff();eco=createCellEcology({maxCells:24,seed:11,radius:3,mutationRate:.8,renewalAge:40});eco.plant('a','explorer',0,0);eco.plant('b','explorer',1,0);paused=false;seenEvents=seenWords=0;log.replaceChildren();write('✦ Founders a and b awakened');draw()}
+function start(){soundOff();lastSongCycle=-1;eco=createCellEcology({maxCells:24,seed:11,radius:3,mutationRate:.8,renewalAge:40});eco.plant('a','explorer',0,0);eco.plant('b','explorer',1,0);paused=false;seenEvents=seenWords=0;log.replaceChildren();write('✦ Founders a and b awakened');draw()}
 function ribbon(x,y,r,twist,colour){ctx.save();ctx.translate(x,y);ctx.shadowColor=colour;ctx.shadowBlur=12;for(let lane=0;lane<2;lane++){ctx.beginPath();for(let i=0;i<=90;i++){const t=i/90*Math.PI*2,p=t+twist*6.283+lane*Math.PI/2,xx=Math.cos(p)*(r+5*Math.cos(t/2)),yy=Math.sin(p)*r*.58+3*Math.sin(2*t);if(i)ctx.lineTo(xx,yy);else ctx.moveTo(xx,yy)}ctx.strokeStyle=colour;ctx.globalAlpha=lane?.45:1;ctx.lineWidth=lane?1.5:3;ctx.stroke()}ctx.restore()}
-function soundOff(){humOn=false;if(audio){for(const v of voices){try{v.osc.stop()}catch{}v.osc.disconnect();v.gain.disconnect()}voices=[];audio.close();audio=null}document.querySelector("#hum").textContent="♫ Hear the babies";document.querySelector("#hum").setAttribute("aria-pressed","false")}
-async function soundOn(){if(paused)return;const AudioContext=window.AudioContext||window.webkitAudioContext;if(!AudioContext){write("Audio unavailable in this browser");return}audio=new AudioContext();await audio.resume();for(let i=0;i<3;i++){const osc=audio.createOscillator(),gain=audio.createGain();osc.type="sine";gain.gain.value=0;osc.connect(gain).connect(audio.destination);osc.start();voices.push({osc,gain})}humOn=true;document.querySelector("#hum").textContent="♫ Silence the babies";document.querySelector("#hum").setAttribute("aria-pressed","true");tune(eco.snapshot())}
-function tune(s){if(!audio||!humOn)return;const now=audio.currentTime,level=Number(document.querySelector("#volume").value)/100,active=Math.min(s.cells.length,24),notes=[0,7,12],base=174.61;for(let i=0;i<voices.length;i++){const v=voices[i],roleCount=new Set(s.cells.map(c=>c.role)).size,steps=notes[i]+(i===1?roleCount%4:0)+(i===2?s.generation%3:0),freq=base*Math.pow(2,steps/12);v.osc.frequency.setTargetAtTime(freq,now,.16);v.gain.gain.setTargetAtTime(paused?0:level*(.13+active/120)/(i+1),now,.12)}}
+function soundOff(){humOn=false;lastSongCycle=-1;if(audio){for(const v of voices){try{v.osc.stop()}catch{}v.osc.disconnect();v.gain.disconnect()}voices=[];audio.close();audio=null}document.querySelector("#hum").textContent="♫ Hear the babies";document.querySelector("#hum").setAttribute("aria-pressed","false")}
+async function soundOn(){if(paused)return;const AudioContext=window.AudioContext||window.webkitAudioContext;if(!AudioContext){write("Audio unavailable in this browser");return}audio=new AudioContext();await audio.resume();for(let i=0;i<3;i++){const osc=audio.createOscillator(),gain=audio.createGain();osc.type="sine";gain.gain.value=0;osc.connect(gain).connect(audio.destination);osc.start();voices.push({osc,gain})}humOn=true;lastSongCycle=-1;document.querySelector("#hum").textContent="♫ Silence the babies";document.querySelector("#hum").setAttribute("aria-pressed","true");tune(eco.snapshot())}
+// Every sung note is a deterministic interpretation of an actual cell's identity,
+// twist, inherited dialect and the latest ecology utterances. This is musical
+// sonification, not a claim that WTL currently compiles sound instructions.
+function melodyFor(cell,s,voice){
+ const genes=s.traits[cell.id]||{curiosity:0,dialectBias:0,sass:0};
+ const phrase=s.utterances.filter(u=>u.id===cell.id).at(-1)?.phrase||'';
+ const hash=[...cell.id+phrase].reduce((n,ch)=>(Math.imul(n,31)+ch.charCodeAt(0))>>>0,7);
+ const scale=[0,2,3,5,7,9,10,12,14];
+ const index=(Math.floor(cell.twist*8)+genes.dialectBias+genes.curiosity+s.generation+voice+hash%5)%scale.length;
+ const rest=(s.generation+genes.sass+voice)%7===0;
+ return {semitones:scale[index]+(voice===0?-12:voice===2?7:0),rest,cell:cell.id};
+}
+function tune(s){
+ if(!audio||!humOn||paused||s.generation===lastSongCycle)return;
+ lastSongCycle=s.generation;
+ const now=audio.currentTime,level=Number(document.querySelector('#volume').value)/100;
+ const cells=s.cells.slice().sort((a,b)=>a.id.localeCompare(b.id));
+ for(let i=0;i<voices.length;i++){
+  const v=voices[i],cell=cells.length?cells[(s.generation+i)%cells.length]:null;
+  const note=cell?melodyFor(cell,s,i):null;
+  const freq=note?174.61*Math.pow(2,note.semitones/12):174.61;
+  const peak=note&&!note.rest?level*(.20+i*.035):0;
+  v.osc.frequency.cancelScheduledValues(now);v.osc.frequency.setTargetAtTime(freq,now,.035);
+  v.gain.gain.cancelScheduledValues(now);v.gain.gain.setTargetAtTime(peak,now,.045);
+  v.gain.gain.setTargetAtTime(0,now+.24,.14);
+ }
+}
+
 function draw(){const s=eco.snapshot();tune(s);ctx.fillStyle='#0b1d28';ctx.fillRect(0,0,900,480);const roles=[...new Set(s.cells.map(c=>c.role))];for(const [i,c] of s.cells.entries()){const p=s.positions[c.id];if(!p)continue;const x=Math.max(28,Math.min(870,450+p.x*75)),y=Math.max(30,Math.min(445,240+p.y*75));ribbon(x,y,14,c.twist+s.generation*.002,colours[roles.indexOf(c.role)%colours.length]);ctx.fillStyle='#e2f5ed';ctx.font='11px monospace';ctx.textAlign='center';ctx.fillText(c.id.slice(-11),x,y+27)}
 document.querySelector('#metrics').textContent=`Cycle ${s.generation} · Cells ${s.cells.length} · Mutations ${s.mutations.length} · Retirements ${s.retirements.length} · Phrases ${s.utterances.length}`;
 if(s.events.length<seenEvents)seenEvents=0;if(s.utterances.length<seenWords)seenWords=0;
@@ -31,7 +58,7 @@ document.querySelector('#step').onclick=()=>{if(paused){eco.resume();eco.step();
 document.querySelector('#speed').onclick=e=>{speed=speed===1?2:speed===2?4:1;e.target.textContent='Speed '+speed+'×';clock()};
 document.querySelector('#restart').onclick=start;
 document.querySelector('#hum').onclick=async()=>{if(humOn)soundOff();else try{await soundOn()}catch(e){soundOff();write('Audio could not start: '+e.message)}};
-document.querySelector('#volume').oninput=()=>tune(eco.snapshot());
+document.querySelector('#volume').oninput=()=>{if(humOn){lastSongCycle=-1;tune(eco.snapshot())}};
 document.addEventListener('visibilitychange',()=>{if(document.hidden)soundOff()});
 start();clock();
 </script></html>
