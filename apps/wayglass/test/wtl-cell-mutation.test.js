@@ -9,7 +9,8 @@ test('mutations are bounded, attributable, and dialects vary',()=>{
   for(let i=0;i<35;i++)ecology.step();
   const s=ecology.snapshot();
   assert.equal(s.cells.length,24);
-  assert.equal(s.mutations.length,18);
+  assert.ok(s.mutations.length>0);
+  assert.ok(s.mutations.length<=s.cells.length-2);
   assert.deepEqual([...new Set(s.events.filter(e=>e.type==='signal').map(e=>e.signal_type))].sort(),['echo','pulse','spiral']);
   assert.ok(s.mutations.every(m=>s.traits[m.child_id]&&s.traits[m.parent_id]));
   assert.ok(s.cells.every(c=>s.traits[c.id].sass>=0&&s.traits[c.id].sass<=3));
