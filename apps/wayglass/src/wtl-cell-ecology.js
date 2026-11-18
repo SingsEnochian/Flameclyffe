@@ -4,6 +4,7 @@ import {createCellTissue} from './wtl-cell-tissue.js';
 import {authorCellProgram,compileCellProgram,executeCellProgram,reviseCellProgram} from './wtl-cell-program.js';
 import {authorPeerTest,runPeerTest} from './wtl-cell-peer-tests.js';
 import {listenAndReply,composeDialogue} from './wtl-cell-harmony.js';
+import {sonicPitch,replyByRatio,projectAudible} from './wtl-cell-sonic-space.js';
 
 export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.2,renewalAge=100}={}) {
   if(!Number.isSafeInteger(seed)||seed<0||seed>2147483647) throw Error('Invalid seed');
@@ -121,7 +122,11 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
         const call=48+(singerGenes.curiosity+generation+Math.floor(singer.twist*12))%24;
         const reply=listenAndReply(call,{listenerBias:listenerGenes.dialectBias,previous:call+2});
         const score=composeDialogue(call,reply,{beat:generation%16});
+        const callHz=110*Math.pow(2,(call-45)/12);
+        const originalPitch=sonicPitch(callHz,{timbre:['sine','triangle','sawtooth','square'][singerGenes.dialectBias%4]});
+        const ratioPitch=replyByRatio(originalPitch,{numerator:[5,6,7,9][listenerGenes.curiosity],denominator:4});
         harmonicDialogues.push({generation,singer:singer.id,listener:listenerId,...score,
+          sonic:{call:originalPitch,reply:ratioPitch,callProjection:projectAudible(originalPitch),replyProjection:projectAudible(ratioPitch)},
           reply:{...reply,provenance:{...reply.provenance}}});
       }
     }
@@ -245,7 +250,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       neighbourhoods:Object.fromEntries([...positions.keys()].map(id=>[id,neighbours(id)])),
       wyrdruneExpressions:wyrdruneExpressions.map(e=>({...e,semantic:{...e.semantic,traits:e.semantic.traits?{...e.semantic.traits}:undefined},provenance:{...e.provenance}})),
       projectDecisions:projectDecisions.map(d=>({...d,candidates:d.candidates.map(p=>({...p,reviews:p.reviews.map(r=>({...r}))})),selected:{...d.selected,result:{...d.selected.result,output:d.selected.result.output.map(x=>({...x}))}},peerTests:d.peerTests.map(p=>({test:{...p.test},original:{...p.original,observed:[...p.original.observed]},revised:{...p.revised,observed:[...p.revised.observed]}})),revision:{...d.revision,attempts:d.revision.attempts.map(a=>({...a})),result:{...d.revision.result,output:d.revision.result.output.map(x=>({...x}))}},provenance:{...d.provenance}})),
-      harmonicDialogues:harmonicDialogues.map(d=>({...d,events:d.events.map(e=>({...e})),reply:{...d.reply,provenance:{...d.reply.provenance}},provenance:{...d.provenance}})),
+      harmonicDialogues:harmonicDialogues.map(d=>({...d,events:d.events.map(e=>({...e})),reply:{...d.reply,provenance:{...d.reply.provenance}},sonic:{call:{...d.sonic.call},reply:{...d.sonic.reply},callProjection:{...d.sonic.callProjection},replyProjection:{...d.sonic.replyProjection}},provenance:{...d.provenance}})),
       programLineages:programLineages.map(p=>({...p,verification:{...p.verification}})),
       programLibrary:Object.fromEntries([...programLibrary].map(([id,items])=>[id,items.map(p=>({...p}))])),
       programs:programs.map(p=>({...p,result:{...p.result,output:p.result.output.map(x=>({...x}))},provenance:{...p.provenance}})),
