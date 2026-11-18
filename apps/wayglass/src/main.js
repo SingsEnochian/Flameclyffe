@@ -17,9 +17,9 @@ import { enterWayglassWorld, leaveWayglassWorld, recoverWayglassDeparture, readV
 import { inspectWayglassDoubleMobius, traverseWayglassDoubleMobius } from './route-client.js';
 import { installVoyageInbox } from './voyage-inbox.js';
 import { createWayglassSpellingController } from './spelling-assistance.js';
-import { mountWayglassSurface, registerWayglassSurface, listWayglassSurfaces } from './surface-registry.js';
-import { mountArcSweepDeckSurface } from './surfaces/arcsweep-deck.js';
-import { mountArcSweepWritingSurface } from './surfaces/arcsweep-writing.js';
+import { mountWayglassSurface, registerWayglassSurface, registerWayglassSurfaceAlias, listWayglassSurfaces } from './surface-registry.js';
+import { mountWayglassWorldContinuitySurface } from './surfaces/world-continuity.js';
+import { mountWayglassWritingRoom } from './surfaces/writing-room.js';
 import { mountWayglassSystemsSurface } from './surfaces/systems.js';
 import { mountWayglassSpectrumSurface } from './surfaces/spectral-field.js';
 import { mountWayglassNativeVoice } from './surfaces/native-voice.js';
@@ -74,13 +74,16 @@ registerWayglassSurface({surface_id:'wayglass:journey-before-destination',label:
 registerWayglassSurface({surface_id:'wayglass:triptych-lift',label:'The Möbius Lift · Triptych navigation',mount:root=>mountWayglassTriptychLift(root,{navigate:navigateAndFocus})});
 registerWayglassSurface({surface_id:'wayglass:altered-timeline',label:'Altered Timeline · Change and Return',mount:mountWayglassAlteredTimeline});
 
-registerWayglassSurface({surface_id:'arcsweep:deck',label:'Wayglass · World and Continuity Deck',mount:mountArcSweepDeckSurface});
+registerWayglassSurface({surface_id:'wayglass:world-continuity',label:'Wayglass · World & Continuity',mount:mountWayglassWorldContinuitySurface});
 
 registerWayglassSurface({
-  surface_id: 'arcsweep:writing-room',
-  label: 'ArcSweep · Writing Room',
-  mount: mountArcSweepWritingSurface,
+  surface_id: 'wayglass:writing-room',
+  label: 'Wayglass · Writing Room',
+  mount: mountWayglassWritingRoom,
 });
+
+registerWayglassSurfaceAlias('arcsweep:deck', 'wayglass:world-continuity');
+registerWayglassSurfaceAlias('arcsweep:writing-room', 'wayglass:writing-room');
 
 registerWayglassSurface({surface_id:'wayglass:universal-codex',label:'Wayglass · Universal Codex',mount:mountUniversalCodex});
 
