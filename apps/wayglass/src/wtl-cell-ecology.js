@@ -65,6 +65,8 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
     for(const cell of before) {
       const nearby=neighbours(cell.id);
       if(!nearby.length)continue;
+      // Sparse tissue rests between transmissions to rebuild energy reserves.
+      if(positions.size<=3&&generation%4!==0)continue;
       const stats=adaptation.get(cell.id);
       // Deterministic behavioural variation from inherited twist, generation and neighbourhood.
       const target=nearby[Math.floor(cell.twist*nearby.length)%nearby.length];
