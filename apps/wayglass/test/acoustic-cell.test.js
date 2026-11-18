@@ -87,3 +87,25 @@ test('Withness pulses at 3 Hz, holds the high hum, and starts the open acknowled
   assert.ok(amplitude(277.18, 6 + halfBeat) > 0.037);
   assert.ok(Math.abs(amplitude(277.18, 6) - amplitude(277.18, 6 + halfBeat)) < 0.001);
 });
+
+
+test('arbitrary addressed daughter cells have opposite spatial acoustic voices',async()=>{
+ const request=createAcousticReturn({sender:2,recipient:3,marker:123,resolution:'open'});
+ const response=await receiveAcousticFrame(3,request);
+ assert.ok(response.reply);
+ const clip=renderAcousticFrames([request,response.reply]);
+ for(const channel of clip.channels)
+  assert.deepEqual(hearAcousticFrames(channel,clip.sampleRate),[request,response.reply]);
+ const span=Math.round(clip.sampleRate*0.046);
+ const requestStart=Math.round((2/3)*clip.sampleRate);
+ const replyStart=Math.round(3*clip.sampleRate);
+ function energy(channel,start){
+  let total=0;
+  for(let i=start;i<start+span;i++)total+=channel[i]**2;
+  return total;
+ }
+ // The request is left biased and the reply right biased without tying spatial
+ // placement to hard-coded cell addresses 1 and 2.
+ assert.ok(energy(clip.channels[0],requestStart)>energy(clip.channels[1],requestStart));
+ assert.ok(energy(clip.channels[1],replyStart)>energy(clip.channels[0],replyStart));
+});
