@@ -40,7 +40,7 @@ function ensureDir(filename) {
 function atomicWriteJson(filename, value) {
   ensureDir(filename);
   const temp = `${filename}.${process.pid}.tmp`;
-  fs.writeFileSync(temp, JSON.stringify(value, null, 2), 'utf8');
+  fs.writeFileSync(temp, JSON.stringify(value, null, 2), { encoding: 'utf8', mode: 0o600 });
   fs.renameSync(temp, filename);
 }
 
@@ -130,12 +130,21 @@ function saveTokenStore(filename, store) {
 
 function originFromRequest(req, env = process.env) {
   const configured = cleanText(env.WAYGLASS_PUBLIC_ORIGIN, 1000).replace(/\/$/, '');
-  if (configured) return configured;
-  const forwardedProto = cleanText(req.headers['x-forwarded-proto'], 40).split(',')[0].trim();
-  const forwardedHost = cleanText(req.headers['x-forwarded-host'], 500).split(',')[0].trim();
-  const proto = forwardedProto || req.protocol || 'http';
-  const host = forwardedHost || cleanText(req.headers.host, 500);
-  return `${proto}://${host}`.replace(/\/$/, '');
+  if (configured) {
+    const parsed = new URL(configured);
+    const loopback = parsed.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(parsed.hostname);
+    if ((!loopback && parsed.protocol !== 'https:') || parsed.username || parsed.password || parsed.pathname !== '/' || parsed.search || parsed.hash)
+      throw new TypeError('WAYGLASS_PUBLIC_ORIGIN must be a bare HTTPS origin or HTTP loopback origin');
+    return parsed.origin;
+  }
+  // Unconfigured instances are local-only. Never derive an OAuth issuer from
+  // client-controlled Host or X-Forwarded-* headers: an injected issuer poisons
+  // discovery, resource binding and callback verification.
+  const host = cleanText(req.headers.host, 500);
+  const parsed = new URL(`http://${host}`);
+  if (!['localhost', '127.0.0.1', '[::1]'].includes(parsed.hostname) || parsed.username || parsed.password || parsed.pathname !== '/')
+    throw new TypeError('Non-local Wayglass MCP requires WAYGLASS_PUBLIC_ORIGIN');
+  return parsed.origin;
 }
 
 function resourceForOrigin(origin) {
@@ -157,7 +166,9 @@ function requestedScopes(value) {
 }
 
 function includesRequiredScope(scopes) {
-  return Array.isArray(scopes) && scopes.includes(OAUTH_SCOPE);
+  // This private bridge advertises exactly one scope. Never mint tokens for
+  // unrecognised scopes supplied by a client, even alongside the required one.
+  return Array.isArray(scopes) && scopes.length === 1 && scopes[0] === OAUTH_SCOPE;
 }
 
 function appendQuery(urlValue, params) {
@@ -393,8 +404,11 @@ function createWayglassPeerOAuth({
         code_challenge_method: cleanText(body.code_challenge_method, 40),
         resource: cleanText(body.resource, 1200),
       };
+      // Never redirect an error to an unverified client-supplied URI.
+      // A failed pairing code must not become an open redirect.
+      let verifiedRedirect = false;
       const fail = (name, description) => {
-        if (!params.redirect_uri) return res.status(400).json({ error: name, error_description: description });
+        if (!verifiedRedirect) return res.status(400).json({ error: name, error_description: description });
         return res.redirect(302, appendQuery(params.redirect_uri, {
           error: name,
           error_description: description,
@@ -410,6 +424,7 @@ function createWayglassPeerOAuth({
         const scopes = requestedScopes(params.scope);
         if (!includesRequiredScope(scopes)) return fail('invalid_scope', `Scope ${OAUTH_SCOPE} is required.`);
         await validateChatGptCimd(params.client_id, params.redirect_uri, fetchImpl);
+        verifiedRedirect = true;
 
         const code = randomToken('wgc');
         const now = clock().getTime();
@@ -483,6 +498,8 @@ function createWayglassPeerOAuth({
           const hash = sha256(refreshToken);
           const row = store.refresh_tokens.find((item) => (
             constantTimeEqual(item.token_hash, hash)
+            && !item.revoked_at
+            && new Date(item.expires_at).getTime() > clock().getTime()
             && item.client_id === clientId
             && item.resource === resource
           ));

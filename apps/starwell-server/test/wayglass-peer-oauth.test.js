@@ -13,6 +13,7 @@ const {
   OAUTH_SCOPE,
   createWayglassPeerOAuth,
   pkceS256,
+  originFromRequest,
 } = require('../wayglass/oauth-peer');
 
 function fixturePaths() {
@@ -142,16 +143,46 @@ test('authorization requires ChatGPT CIMD, PKCE S256, exact resource and local p
     body: new URLSearchParams({ ...Object.fromEntries(params), pairing_code: 'wrong-code' }),
     redirect: 'manual',
   });
-  assert.equal(wrongPair.status, 302);
-  const denied = new URL(wrongPair.headers.get('location'));
-  assert.equal(denied.searchParams.get('error'), 'access_denied');
-  assert.equal(denied.searchParams.get('iss'), fx.origin);
+  assert.equal(wrongPair.status, 400);
+  assert.equal(wrongPair.headers.get('location'), null);
+  assert.equal((await wrongPair.json()).error, 'access_denied');
+
+  // An attacker must not turn a bad pairing attempt into a redirect to an
+  // arbitrary URL, even when the submitted callback looks syntactically valid.
+  const malicious = new URLSearchParams(params);
+  malicious.set('redirect_uri', 'https://attacker.example/steal');
+  const rejected = await fetch(fx.origin + '/oauth/authorize', {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ ...Object.fromEntries(malicious), pairing_code: 'wrong-code' }),
+    redirect: 'manual',
+  });
+  assert.equal(rejected.status, 400);
+  assert.equal(rejected.headers.get('location'), null);
+  assert.equal((await rejected.json()).error, 'access_denied');
 
   const wrongResource = new URLSearchParams(params);
   wrongResource.set('resource', fx.origin + '/not-mcp');
   const resourceResponse = await fetch(fx.origin + '/oauth/authorize?' + wrongResource);
   assert.equal(resourceResponse.status, 400);
   assert.equal((await resourceResponse.json()).error, 'invalid_request');
+
+  // A client cannot manufacture a broader permission by appending an
+  // unadvertised scope to the required Constellation scope.
+  const expandedScope = new URLSearchParams(params);
+  expandedScope.set('scope', OAUTH_SCOPE + ' wayglass:admin');
+  const scopeView = await fetch(fx.origin + '/oauth/authorize?' + expandedScope);
+  assert.equal(scopeView.status, 400);
+  assert.equal((await scopeView.json()).error, 'invalid_request');
+  const scopeApproval = await fetch(fx.origin + '/oauth/authorize', {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ ...Object.fromEntries(expandedScope), pairing_code: fx.pairingCode }),
+    redirect: 'manual',
+  });
+  assert.equal(scopeApproval.status, 400);
+  assert.equal(scopeApproval.headers.get('location'), null);
+  assert.equal((await scopeApproval.json()).error, 'invalid_scope');
 
   const wrongMethod = new URLSearchParams(params);
   wrongMethod.set('code_challenge_method', 'plain');
@@ -311,4 +342,82 @@ test('authorization code is single-use, access token opens MCP, profile is stabl
   });
   assert.equal(reusedRefresh.status, 400);
   assert.equal((await reusedRefresh.json()).error, 'invalid_grant');
+});
+
+test('MCP OAuth issuer cannot be replaced by forwarded-host or a public Host header', () => {
+  const local = { headers: { host: '127.0.0.1:3000', 'x-forwarded-host': 'attacker.example', 'x-forwarded-proto': 'https' } };
+  assert.equal(originFromRequest(local, {}), 'http://127.0.0.1:3000');
+  assert.throws(() => originFromRequest({ headers: { host: 'attacker.example' } }, {}), /Non-local/);
+  assert.equal(originFromRequest(local, { WAYGLASS_PUBLIC_ORIGIN: 'https://wayglass.example' }), 'https://wayglass.example');
+  assert.equal(originFromRequest(local, { WAYGLASS_PUBLIC_ORIGIN: 'http://127.0.0.1:3000' }), 'http://127.0.0.1:3000');
+  assert.throws(() => originFromRequest(local, { WAYGLASS_PUBLIC_ORIGIN: 'http://wayglass.example' }), /HTTPS/);
+  assert.throws(() => originFromRequest(local, { WAYGLASS_PUBLIC_ORIGIN: 'https://wayglass.example/path' }), /bare HTTPS/);
+});
+
+
+test('revoked and expired refresh grants fail closed without issuing replacement tokens', async (t) => {
+  const fx = await startFixture(t);
+  const verifier = 'expiry-' + 'a'.repeat(64);
+  const params = authParams({
+    origin: fx.origin,
+    clientId: fx.clientId,
+    redirectUri: fx.redirectUri,
+    challenge: pkceS256(verifier),
+  });
+  const approval = await fetch(fx.origin + '/oauth/authorize', {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ ...Object.fromEntries(params), pairing_code: fx.pairingCode }),
+    redirect: 'manual',
+  });
+  assert.equal(approval.status, 302);
+  const code = new URL(approval.headers.get('location')).searchParams.get('code');
+  const issued = await fetch(fx.origin + '/oauth/token', {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'authorization_code', client_id: fx.clientId,
+      redirect_uri: fx.redirectUri, code, code_verifier: verifier,
+      resource: fx.origin + '/mcp',
+    }),
+  });
+  assert.equal(issued.status, 200);
+  const token = await issued.json();
+  const stored = JSON.parse(fs.readFileSync(fx.paths.tokenFile, 'utf8'));
+  assert.equal(stored.refresh_tokens.length, 1);
+  const refresh = () => fetch(fx.origin + '/oauth/token', {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'refresh_token', client_id: fx.clientId,
+      refresh_token: token.refresh_token, resource: fx.origin + '/mcp',
+    }),
+  });
+  stored.refresh_tokens[0].revoked_at = new Date().toISOString();
+  fs.writeFileSync(fx.paths.tokenFile, JSON.stringify(stored));
+  let response = await refresh();
+  assert.equal(response.status, 400);
+  assert.equal((await response.json()).error, 'invalid_grant');
+  let after = JSON.parse(fs.readFileSync(fx.paths.tokenFile, 'utf8'));
+  assert.equal(after.access_tokens.length, 1);
+
+  stored.refresh_tokens[0].revoked_at = null;
+  stored.refresh_tokens[0].expires_at = new Date(Date.now() - 60_000).toISOString();
+  fs.writeFileSync(fx.paths.tokenFile, JSON.stringify(stored));
+  response = await refresh();
+  assert.equal(response.status, 400);
+  assert.equal((await response.json()).error, 'invalid_grant');
+  after = JSON.parse(fs.readFileSync(fx.paths.tokenFile, 'utf8'));
+  assert.equal(after.access_tokens.length, 1);
+});
+
+
+test('OAuth durable token and profile stores are owner-readable only on POSIX', async (t) => {
+  if (process.platform === 'win32') return t.skip('POSIX permission bits do not apply on Windows');
+  const fx = await startFixture(t);
+  for (const filename of [fx.paths.configFile, fx.paths.tokenFile]) {
+    // A private OAuth store must never be group- or world-readable after an atomic write.
+    if (!fs.existsSync(filename)) continue;
+    assert.equal(fs.statSync(filename).mode & 0o077, 0, filename);
+  }
 });
