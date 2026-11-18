@@ -28,6 +28,10 @@ function fixture({defer = false, panner = true, resumeError = false, failAllocat
     createStereoPanner() { const n = allocate('panner'); n.pan = new Param(); return n; }
     createDynamicsCompressor() { const n = allocate('compressor'); for (const k of ['threshold','knee','ratio','attack','release']) n[k] = new Param(); return n; }
     createOscillator() { const n = allocate('oscillator'); n.frequency = new Param(); n.starts = 0; n.stops = []; n.start = () => { n.starts++; }; n.stop = t => { n.stops.push(t); }; return n; }
+    createBuffer(channels, length) { const data = new Float32Array(length); return {getChannelData: () => data}; }
+    createBufferSource() { const n = allocate('buffer source'); n.starts = 0; n.stops = []; n.start = () => { n.starts++; }; n.stop = t => { n.stops.push(t); }; return n; }
+    createBiquadFilter() { const n = allocate('filter'); n.frequency = new Param(); n.Q = new Param(); return n; }
+    get sampleRate() { return 48000; }
     resume() { if (resumeError) return Promise.reject(new Error('output unavailable')); return defer ? new Promise(resolve => resumes.push(() => {this.state='running';resolve();})) : Promise.resolve().then(() => {this.state='running';}); }
     close() { this.closed = true; this.state='closed'; return Promise.resolve(); }
   }
@@ -149,5 +153,29 @@ test('Wyrdrune score drives two existing voices with smooth frequency changes, w
   e.stop();
   assert.equal(e.getState().running,false);
   assert.ok(oscs.every(n=>n.stops.length>0));
+  e.dispose();
+});
+
+test('the executable Wyrdrune return drives two anchors and four moving layers until Stop', async () => {
+  const {scoreStoryWithWyrdrune} = await import('../../../lib/wayglass-wyrdrune-soundscape.cjs');
+  const {score} = await scoreStoryWithWyrdrune({
+    text:'Rain and wind swept over the fire.',turns:2,affinity:0.5,
+    participants:[{id:'rowan'},{id:'wayglass',kind:'model-route'}],
+  }, {principal:{authorized:true}});
+  const f = fixture(), e = createAcousticAudioEngine({AudioContext:f.Context});
+  assert.equal(f.contexts.length,0);
+  await e.start();
+  e.update({ambience:true,mono:true,score});
+  const sources = f.nodes.filter(node=>node.starts);
+  assert.equal(sources.length,10); // Six audible sources and four gain modulators.
+  assert.equal(sources.filter(node=>node.typeName==='buffer source' && node.loop).length,2);
+  assert.ok(sources.every(node=>node.starts===1 && node.stops.length===0));
+  assert.deepEqual(f.nodes.filter(node=>node.typeName==='filter').map(node=>node.frequency.value),
+    score.layers.filter(layer=>layer.kind==='texture').map(layer=>layer.frequency_hz));
+  assert.ok(score.layers.every(layer=>sources.some(source=>source.frequency?.value===layer.modulation_hz)));
+  e.update({score});
+  assert.equal(f.nodes.filter(node=>node.starts).length,10);
+  e.stop();
+  assert.ok(sources.every(source=>source.stops.length===1 && source.disconnected));
   e.dispose();
 });
