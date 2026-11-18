@@ -130,12 +130,20 @@ function saveTokenStore(filename, store) {
 
 function originFromRequest(req, env = process.env) {
   const configured = cleanText(env.WAYGLASS_PUBLIC_ORIGIN, 1000).replace(/\/$/, '');
-  if (configured) return configured;
-  const forwardedProto = cleanText(req.headers['x-forwarded-proto'], 40).split(',')[0].trim();
-  const forwardedHost = cleanText(req.headers['x-forwarded-host'], 500).split(',')[0].trim();
-  const proto = forwardedProto || req.protocol || 'http';
-  const host = forwardedHost || cleanText(req.headers.host, 500);
-  return `${proto}://${host}`.replace(/\/$/, '');
+  if (configured) {
+    const parsed = new URL(configured);
+    if (parsed.protocol !== 'https:' || parsed.username || parsed.password || parsed.pathname !== '/' || parsed.search || parsed.hash)
+      throw new TypeError('WAYGLASS_PUBLIC_ORIGIN must be a bare HTTPS origin');
+    return parsed.origin;
+  }
+  // Unconfigured instances are local-only. Never derive an OAuth issuer from
+  // client-controlled Host or X-Forwarded-* headers: an injected issuer poisons
+  // discovery, resource binding and callback verification.
+  const host = cleanText(req.headers.host, 500);
+  const parsed = new URL(`http://${host}`);
+  if (!['localhost', '127.0.0.1', '[::1]'].includes(parsed.hostname) || parsed.username || parsed.password || parsed.pathname !== '/')
+    throw new TypeError('Non-local Wayglass MCP requires WAYGLASS_PUBLIC_ORIGIN');
+  return parsed.origin;
 }
 
 function resourceForOrigin(origin) {
