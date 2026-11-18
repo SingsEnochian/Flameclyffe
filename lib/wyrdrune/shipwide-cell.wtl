@@ -14,7 +14,7 @@ mobius scoped {
     require expanded == 3 else "cell transformation must be reversible";
   }
   integrate {
-    withness {value: expanded};
+    withness {participants: [{id: "observer", role: "witness", presence: true, agency: "free"}, {id: "cell", role: "transformer", presence: true, agency: "free"}], field: expanded, agreement: "observation only", commitment: "no external effects"};
   }
   choose {
     let chosen = expanded;
