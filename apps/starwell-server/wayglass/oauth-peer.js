@@ -132,8 +132,9 @@ function originFromRequest(req, env = process.env) {
   const configured = cleanText(env.WAYGLASS_PUBLIC_ORIGIN, 1000).replace(/\/$/, '');
   if (configured) {
     const parsed = new URL(configured);
-    if (parsed.protocol !== 'https:' || parsed.username || parsed.password || parsed.pathname !== '/' || parsed.search || parsed.hash)
-      throw new TypeError('WAYGLASS_PUBLIC_ORIGIN must be a bare HTTPS origin');
+    const loopback = parsed.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(parsed.hostname);
+    if ((!loopback && parsed.protocol !== 'https:') || parsed.username || parsed.password || parsed.pathname !== '/' || parsed.search || parsed.hash)
+      throw new TypeError('WAYGLASS_PUBLIC_ORIGIN must be a bare HTTPS origin or HTTP loopback origin');
     return parsed.origin;
   }
   // Unconfigured instances are local-only. Never derive an OAuth issuer from
