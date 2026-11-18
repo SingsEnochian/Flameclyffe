@@ -53,6 +53,14 @@ surfaceNav.innerHTML = listWayglassSurfaces().map((surface) =>
   surface.label +
   '</button>'
 ).join('');
+if (globalThis.__wayglassHost?.host === 'hearthgate') {
+  const returnDoor = document.createElement('a');
+  returnDoor.href = '/starwell/';
+  returnDoor.className = 'glass-chip';
+  returnDoor.textContent = 'STARWELL';
+  returnDoor.setAttribute('aria-label', 'Return to STARWELL');
+  surfaceNav.append(returnDoor);
+}
 root.before(surfaceNav);
 
 async function mountSurface(surfaceId) {
