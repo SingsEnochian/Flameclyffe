@@ -114,6 +114,11 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
     }
     return {generation,signals,births:births.map(b=>b.id),retired,population:positions.size};
   }
+  function transform(id,nextRole,options={}) {
+    const result=tissue.transform(id,nextRole,options);
+    // Position, mutation history, phrase memory and lineage remain unchanged.
+    return result;
+  }
   function snapshot(){
     const core=tissue.snapshot();
     return {...core,generation,positions:Object.fromEntries(positions),
@@ -121,5 +126,5 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       retirements:retirements.map(r=>({...r,traits:{...r.traits},lastPhrases:[...r.lastPhrases]})),utterances:utterances.map(u=>({...u})),lexicons:Object.fromEntries([...lexicons].map(([id,phrases])=>[id,[...phrases]])),
       neighbourhoods:Object.fromEntries([...positions.keys()].map(id=>[id,neighbours(id)]))};
   }
-  return Object.freeze({plant,step,neighbours,snapshot,feather:tissue.feather,resume:tissue.resume});
+  return Object.freeze({plant,step,neighbours,transform,snapshot,feather:tissue.feather,resume:tissue.resume});
 }
