@@ -15,7 +15,7 @@ export function clearMythience(){
   for(const listener of [...listeners]){try{listener(last);}catch{}}
 }
 export async function proposeMythienceHybrid({request,seeds,signal,fetchImpl=fetch}={}){
-  const ROUTE='mythience-hybrid';
+  const ROUTE='hybrid';
   const response=await fetchImpl('/api/v1/wayglass/wyrdrune/mythience-hybrid',{
     method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',signal,
     body:JSON.stringify({request,seeds}),
@@ -38,7 +38,7 @@ export async function proposeMythienceHybrid({request,seeds,signal,fetchImpl=fet
 }
 
 export async function proposeMythienceCrossing({request,seeds,signal,fetchImpl=fetch}={}){
-  const ROUTE='mythience-crossing';
+  const ROUTE='crossing';
   const response=await fetchImpl('/api/v1/wayglass/wyrdrune/mythience-crossing',{
     method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',signal,
     body:JSON.stringify({request,seeds}),

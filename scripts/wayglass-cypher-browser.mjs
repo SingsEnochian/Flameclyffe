@@ -259,8 +259,9 @@ try{
     const request=route.request().postDataJSON();
     assert.equal(request.surface_id,'wayglass:living-watercolor');
     assert.equal(request.route_id,'wayglass:ship');
-    assert.equal(request.input,'Greet the eighth station.','The owner prompt remains unchanged; WTL belongs in the attributed model response.');
-    const interrupted=request.input.includes('Continue the interrupted Dream.');
+    const interrupted=request.input==='Continue the interrupted Dream.';
+    assert.equal(request.input,interrupted?'Continue the interrupted Dream.':'Greet the eighth station.',
+      'Both user prompts must survive the route intact');
     const output=interrupted?'```wtl\n'+interruptedDream:chatReply;
     await route.fulfill({json:{schema:'wayglass.route-turn/v0.1',route_id:'wayglass:ship',
       participant_id:'wayglass',provider:'fixture',model:'fixture',output,
