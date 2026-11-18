@@ -19,7 +19,7 @@ for(const [name,propose] of [['crossing',proposeMythienceCrossing],['hybrid',pro
     const recorded=lateEncounterObservations();
     assert.equal(recorded.length,before+1);
     assert.equal(recorded.at(-1).disposition,'observed-not-adopted');
-    assert.equal(recorded.at(-1).route,name);
+    assert.equal(recorded.at(-1).route,'mythience-'+name);
     assert.equal(recorded.at(-1).upstream_execution,'unknown');
     unsubscribe();
   });
