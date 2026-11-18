@@ -1,0 +1,106 @@
+name: Wayglass Six-Lane Induction Conductor
+# A single event-driven, six-way evidence gate. Matrix jobs are CI workers, NOT model agents.
+on:
+  pull_request:
+    branches: ['wayglass/current']
+    paths:
+      - 'apps/wayglass/**'
+      - 'apps/arcsweep/**'
+      - 'apps/starwell-server/wayglass/**'
+      - 'apps/starwell-server/test/**'
+      - 'lib/wyrdrune/**'
+      - 'lib/wayglass-*'
+      - 'test/wayglass/**'
+      - 'scripts/wayglass-*.mjs'
+      - 'scripts/verify-*.mjs'
+      - 'docs/wayglass/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/wayglass-six-lane-conductor.yml'
+  push:
+    branches: ['wayglass/current']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wayglass-six-lane-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  six-lane-conductor:
+    name: ${{ matrix.lane }} · source-bound evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        lane: [wtl, assurance, faeberpunk, universe, canon, integration]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-python@v5
+        if: matrix.lane == 'wtl'
+        with:
+          python-version: '3.13'
+      - name: Exact checked-out head and evidence envelope
+        run: |
+          mkdir -p artifacts/wayglass/six-lane
+          echo "lane=${{ matrix.lane }}" > artifacts/wayglass/six-lane/${{ matrix.lane }}.receipt
+          echo "source_sha=$(git rev-parse HEAD)" >> artifacts/wayglass/six-lane/${{ matrix.lane }}.receipt
+          echo "event=${{ github.event_name }}" >> artifacts/wayglass/six-lane/${{ matrix.lane }}.receipt
+          echo "status=running" >> artifacts/wayglass/six-lane/${{ matrix.lane }}.receipt
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts
+      - name: Run one of six parallel lanes, preserving failure output
+        shell: bash
+        run: |
+          set -euo pipefail
+          run_lane() {
+            case "${{ matrix.lane }}" in
+              wtl)
+                node --test lib/wyrdrune/wyrdrune.test.cjs lib/wyrdrune/conformance.test.cjs lib/wyrdrune/tensor-assurance.test.cjs lib/wyrdrune/cross-backend.parity.cjs
+                ;;
+              assurance)
+                node --test apps/wayglass/test/eightfold-adversarial.test.js test/wayglass/eightfold-cold-return.test.cjs
+                ;;
+              faeberpunk)
+                node --test apps/wayglass/test/world-induction.test.js apps/wayglass/test/faeberpunk-loci.test.js apps/wayglass/test/faeberpunk-physical-materials.test.js apps/wayglass/test/faeberpunk-ship-ui.test.js apps/wayglass/test/motion-choreography.test.js
+                ;;
+              universe)
+                node --test apps/wayglass/test/wayglass-living-observer-self.test.js apps/wayglass/test/altered-timeline-wyrdrune.test.js test/wayglass/return-trial-001.test.cjs
+                ;;
+              canon)
+                npm run contracts:verify
+                ;;
+              integration)
+                npm ci --prefix apps/starwell-server --omit=dev --ignore-scripts
+                npm run wayglass:test:host
+                npm run wayglass:build
+                npm run arcsweep:build
+                ;;
+            esac
+          }
+          run_lane 2>&1 | tee artifacts/wayglass/six-lane/${{ matrix.lane }}.tap
+      - name: Write result status without erasing failed evidence
+        if: always()
+        run: |
+          echo "job_status=${{ job.status }}" >> artifacts/wayglass/six-lane/${{ matrix.lane }}.receipt
+          echo "checked_sha=$(git rev-parse HEAD)" >> artifacts/wayglass/six-lane/${{ matrix.lane }}.receipt
+          echo "deployed_sha=unknown" >> artifacts/wayglass/six-lane/${{ matrix.lane }}.receipt
+          echo "production_promotion=not_performed" >> artifacts/wayglass/six-lane/${{ matrix.lane }}.receipt
+      - name: Preserve six independent lane receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayglass-six-lane-${{ matrix.lane }}-${{ github.event.pull_request.head.sha || github.sha }}
+          path: artifacts/wayglass/six-lane/
+          retention-days: 30
+          if-no-files-found: error
