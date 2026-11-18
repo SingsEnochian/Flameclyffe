@@ -64,7 +64,7 @@ export async function mountArcSweepWritingSurface(root) {
   let lastWTLPreview = null, lastWTLSource = null;
 
   root.innerHTML = [
-    "<section class=\"wg-surface wg-writing-room\" data-surface=\"arcsweep-writing\">\n",
+    "<section class=\"wg-surface wg-writing-room\" data-surface=\"wayglass-writing-room\">\n",
     "  <nav class=\"wg-deck-nav glass-panel\" aria-label=\"Wayglass rooms\">\n",
     "    <button type=\"button\" class=\"glass-chip active\" aria-current=\"page\">Writing Room</button>\n",
     "    <button type=\"button\" class=\"glass-chip\" data-wayglass-room=\"wayglass:systems\">Organs</button>\n",
@@ -528,7 +528,7 @@ export async function mountArcSweepWritingSurface(root) {
     cp('world').value = world.world_id;
     // Local atlas lineage changes with the actual selected narrative world.
     globalThis.__wayglassOS?.fullSpectrum?.setScope({
-      room:'arcsweep:writing-room',world:world.world_id,
+      room:'wayglass:writing-room',world:world.world_id,
     });
     root.querySelector('#wg-place-name').textContent = world.name;
     root.querySelector('#wg-place-hint').textContent = world.character
@@ -1107,7 +1107,7 @@ export async function mountArcSweepWritingSurface(root) {
   refreshEmergenceInterview();
 
   return Object.freeze({
-    surface_id: 'arcsweep:writing-room',
+    surface_id: 'wayglass:writing-room',
     interaction,
     get session_id(){return session;},
     messages,
