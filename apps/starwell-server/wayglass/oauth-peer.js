@@ -40,7 +40,7 @@ function ensureDir(filename) {
 function atomicWriteJson(filename, value) {
   ensureDir(filename);
   const temp = `${filename}.${process.pid}.tmp`;
-  fs.writeFileSync(temp, JSON.stringify(value, null, 2), 'utf8');
+  fs.writeFileSync(temp, JSON.stringify(value, null, 2), { encoding: 'utf8', mode: 0o600 });
   fs.renameSync(temp, filename);
 }
 
