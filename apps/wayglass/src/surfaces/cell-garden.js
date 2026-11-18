@@ -111,7 +111,8 @@ export function mountWayglassCellGarden(root,{
    option.textContent=cell.cell_id+' · generation '+cell.generation;
    parentChoice.append(option);
   }
-  if(cells.some(cell=>cell.cell_id===chosen&&cell.status==='active'))parentChoice.value=chosen;
+  parentChoice.value=cells.some(cell=>cell.cell_id===chosen&&cell.status==='active')
+    ? chosen : (cells.find(cell=>cell.status==='active')?.cell_id||'');
   const living=cells.filter(cell=>cell.status==='active');
   for(const [select,old,index] of [[senderChoice,oldSender,0],[receiverChoice,oldReceiver,1]]){
    select.replaceChildren();
