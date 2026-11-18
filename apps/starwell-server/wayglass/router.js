@@ -9,6 +9,7 @@ const { composeOrionExpression } = require('./orion-expression.cjs');
 const { createRequestGate } = require('../security/wayglass-request-gate');
 const {createAlteredTimelineRouter}=require('./altered-timeline-router.cjs');
 const {createPrivateAtelierRouter}=require('./private-atelier.cjs');
+const {createCellGarden}=require('../wayglass-runtime/wayglass-cell-mitosis.cjs');
 const {
   publicWayglassRoutes,
   resolveWayglassRoute,
@@ -553,6 +554,7 @@ async function readQuadSourcesFromSupabase(fetchImpl=globalThis.fetch){
 function createWayglassRouter({
   inheritanceContext = null, fetchImpl = globalThis.fetch, departureStore = createDepartureStore(),
   runtimeSandbox = createRuntimeSandbox(), atelierDirectory,
+  cellGarden = createCellGarden(),
 } = {}) {
   const router = express.Router();
   // Same authenticated House gateway as Wayglass route custody. No separate user identity.
@@ -573,6 +575,42 @@ function createWayglassRouter({
       return {output:result.output,model};
     },
   }));
+  // Owner-scoped Wyrdrune cellular ecology. Preview executes pure WTL; only a
+  // second explicit House-authorised choice commits an in-memory division.
+  router.use('/cell-garden', createRequestGate({ maxRequests: 24, maxConcurrent: 4 }),
+    async (req, res, next) => {
+      res.setHeader('Cache-Control', 'no-store');
+      if (!(await griffStewardAuthorized(req).catch(() => false)))
+        return res.status(401).json({ error: 'House Steward sign-in required for cellular lineage' });
+      next();
+    });
+  const gardenFailure = (res, error) => res.status(
+    [400, 403, 409].includes(error?.status) ? error.status : 409
+  ).json({ error: String(error?.message || 'Cell garden proposal failed').slice(0, 160) });
+  router.get('/cell-garden', (_req, res) => res.json(cellGarden.snapshot()));
+  router.post('/cell-garden/preview', async (req, res) => {
+    const controller = new AbortController();
+    const stop = () => controller.abort();
+    res.once('close', stop);
+    try {
+      const proposal = await cellGarden.propose(req.body || {}, { signal: controller.signal });
+      if (!controller.signal.aborted) res.json(proposal);
+    } catch (error) {
+      if (!controller.signal.aborted) gardenFailure(res, error);
+    } finally {
+      res.off('close', stop);
+    }
+  });
+  router.post('/cell-garden/commit', (req, res) => {
+    try { res.json(cellGarden.commit(req.body || {})); }
+    catch (error) { gardenFailure(res, error); }
+  });
+  router.post('/cell-garden/feather', (_req, res) => res.json(cellGarden.feather()));
+  router.post('/cell-garden/resume', (req, res) => {
+    try { res.json(cellGarden.resume(req.body || {})); }
+    catch (error) { gardenFailure(res, error); }
+  });
+
   // Stable, public, metadata-free process readiness. Never use the private
   // /routes catalogue as a health probe (401 is expected without House auth).
   router.get('/healthz', (_req, res) => {
