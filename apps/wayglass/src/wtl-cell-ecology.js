@@ -2,12 +2,13 @@
 // No global clocks, network, model calls, or visual side effects.
 import {createCellTissue} from './wtl-cell-tissue.js';
 
-export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.2}={}) {
+export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.2,renewalAge=30}={}) {
   if(!Number.isSafeInteger(seed)||seed<0||seed>2147483647) throw Error('Invalid seed');
   if(!Number.isFinite(radius)||radius<=0||radius>100) throw Error('Invalid radius');
   if(!Number.isFinite(mutationRate)||mutationRate<0||mutationRate>1) throw Error('Invalid mutation rate');
+  if(!Number.isSafeInteger(renewalAge)||renewalAge<3||renewalAge>10000) throw Error('Invalid renewal age');
   const tissue=createCellTissue({maxCells});
-  const positions=new Map(),adaptation=new Map(),traits=new Map(),mutations=[],utterances=[],lexicons=new Map();
+  const positions=new Map(),adaptation=new Map(),traits=new Map(),mutations=[],utterances=[],lexicons=new Map(),birthTicks=new Map(),retirements=[];
   // An open combinatorial grammar, not a library of finished phrases.
   const vocabulary={
     subject:['my spiral','your echo','this membrane','our orbit','that wobble','the neighbouring twist'],
@@ -48,6 +49,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
     adaptation.set(id,{sent:0,heard:0});
     traits.set(id,makeTraits().traits);
     lexicons.set(id,[]);
+    birthTicks.set(id,generation);
   }
   function neighbours(id) {
     const p=positions.get(id);
@@ -79,6 +81,20 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       }
     }
     tissue.tick();
+    // Renewal: age-triggered retirement makes room for descendants without erasing history.
+    // Keep at least one active cell so the tissue never extinguishes itself in one pass.
+    const retirees=tissue.snapshot().cells
+      .filter(cell=>generation-birthTicks.get(cell.id)>=renewalAge)
+      .sort((a,b)=>birthTicks.get(a.id)-birthTicks.get(b.id)||a.id.localeCompare(b.id));
+    const retired=[];
+    for(const cell of retirees){
+      if(positions.size<=1)break;
+      const record=tissue.retire(cell.id,'age-renewal');
+      retirements.push({...record,generation,traits:{...traits.get(cell.id)},lastPhrases:[...lexicons.get(cell.id)]});
+      positions.delete(cell.id);adaptation.delete(cell.id);traits.delete(cell.id);
+      lexicons.delete(cell.id);birthTicks.delete(cell.id);
+      retired.push(cell.id);
+    }
     const births=tissue.populate({steps:1,threshold:60}).births;
     for(const birth of births) {
       const parent=positions.get(birth.parent_id);
@@ -88,15 +104,16 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       const inherited=makeTraits(traits.get(birth.parent_id));
       traits.set(birth.id,inherited.traits);
       lexicons.set(birth.id,[...lexicons.get(birth.parent_id).slice(-2)]);
+      birthTicks.set(birth.id,generation);
       if(inherited.change)mutations.push({generation,parent_id:birth.parent_id,child_id:birth.id,...inherited.change});
     }
-    return {generation,signals,births:births.map(b=>b.id),population:positions.size};
+    return {generation,signals,births:births.map(b=>b.id),retired,population:positions.size};
   }
   function snapshot(){
     const core=tissue.snapshot();
     return {...core,generation,positions:Object.fromEntries(positions),
       adaptation:Object.fromEntries(adaptation),traits:Object.fromEntries(traits),mutations:mutations.map(m=>({...m})),
-      utterances:utterances.map(u=>({...u})),lexicons:Object.fromEntries([...lexicons].map(([id,phrases])=>[id,[...phrases]])),
+      retirements:retirements.map(r=>({...r,traits:{...r.traits},lastPhrases:[...r.lastPhrases]})),utterances:utterances.map(u=>({...u})),lexicons:Object.fromEntries([...lexicons].map(([id,phrases])=>[id,[...phrases]])),
       neighbourhoods:Object.fromEntries([...positions.keys()].map(id=>[id,neighbours(id)]))};
   }
   return Object.freeze({plant,step,neighbours,snapshot,feather:tissue.feather,resume:tissue.resume});
