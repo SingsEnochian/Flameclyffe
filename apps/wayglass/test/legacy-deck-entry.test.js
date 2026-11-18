@@ -8,3 +8,10 @@ test('native world deck and legacy ArcSweep deck remain independently deep-linka
  assert.equal(resolveWayglassEntry({available}).surface_id,'wayglass:living-watercolor');
  assert.throws(()=>resolveWayglassEntry({available:available.slice(0,2),room:'legacyDeck'}),/not registered/);
 });
+
+test('Wyrdrune Cell Garden is a native room and cannot alias the old deck',()=>{
+ const rooms=[...available,{surface_id:'wayglass:cell-garden'}];
+ assert.equal(resolveWayglassEntry({available:rooms,room:'cellGarden'}).surface_id,'wayglass:cell-garden');
+ assert.throws(()=>resolveWayglassEntry({available,room:'cellGarden'}),/not registered/);
+ assert.equal(resolveWayglassEntry({available:rooms,room:'nativeDeck'}).surface_id,'wayglass:world-deck');
+});
