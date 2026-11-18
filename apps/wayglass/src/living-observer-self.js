@@ -109,6 +109,8 @@ function parseStored(storage) {
         cycles: Math.max(0, Math.trunc(Number(parsed.atlas_learning?.cycles)||0)),
         traces: Array.isArray(parsed.atlas_learning?.traces) ? parsed.atlas_learning.traces.slice(-MAX_ATLAS_LEARNING) : [],
         last_assessment: parsed.atlas_learning?.last_assessment || null,
+        // This device's Return Engine high-water mark survives reload.
+        return_seq: Math.max(0, Math.trunc(Number(parsed.atlas_learning?.return_seq)||0)),
       },
       compression_field: parsed.compression_field
         ? complexField(parsed.compression_field.magnitude, parsed.compression_field.phase_radians, parsed.compression_field.spiral_turn)
@@ -421,6 +423,10 @@ export function createObserverInterior({
     });
     learning.traces=[...learning.traces,trace].slice(-MAX_ATLAS_LEARNING);
     learning.cycles++;
+    // The Return Engine's sequence for this return: this device's high-water mark.
+    const remembered=result.return_record;
+    if(remembered?.persisted===true&&Number.isInteger(remembered.seq)&&remembered.seq>0)
+      learning.return_seq=Math.max(Number(learning.return_seq)||0,remembered.seq);
     // Do not map possibility or uncertainty into prewritten thoughts.
     learning.last_assessment='unresolved-open';
     persist();
@@ -430,6 +436,45 @@ export function createObserverInterior({
       input_hash:source.atlas_input_hash,reflection:'held-open',
       model_invoked:false,model_weights_updated:false,
     });
+  }
+
+  /** The last Return Engine sequence this device has integrated (0 if none). */
+  function nativeLearningMemorySeq(){
+    return Math.max(0,Math.trunc(Number(state.atlas_learning?.return_seq)||0));
+  }
+
+  /**
+   * Cold return: restore the learning state from her verified memory. Only a
+   * verified record newer than this device's own is accepted; an older host record
+   * is reported, never allowed to roll this device back. `verifiedDigest` is the
+   * carry digest recomputed in the browser, so the host is not simply trusted.
+   */
+  function restoreNativeLearning(memory,verifiedDigest){
+    const head=memory?.head,carry=head?.carry;
+    if(memory?.status!=='verified'||!Number.isInteger(head?.seq)||head.seq<1
+       ||typeof head.storage_id!=='string'||!/^[a-f0-9]{64}$/.test(head.storage_id)
+       ||typeof head.carry_digest!=='string'||head.carry_digest!==verifiedDigest)
+      throw new TypeError('A verified Return Engine memory is required.');
+    for(const key of ['energy','curiosity','uncertainty','coherence','opening','attention']){
+      if(typeof carry?.[key]!=='number'||!Number.isFinite(carry[key])||carry[key]<0||carry[key]>1)
+        throw new TypeError('The remembered learning state contains invalid '+key+'.');
+    }
+    const learning=state.atlas_learning||={cycles:0,traces:[],last_assessment:null};
+    const local=nativeLearningMemorySeq();
+    if(head.seq<local)return Object.freeze({status:'host-behind-this-device',host_seq:head.seq,local_seq:local});
+    if(head.seq===local)return Object.freeze({status:'already-current',seq:local});
+    state.energy=carry.energy;state.curiosity=carry.curiosity;
+    state.uncertainty=carry.uncertainty;state.coherence=carry.coherence;
+    state.attention={channel:'native-wyrdrune',strength:carry.attention};
+    learning.return_seq=head.seq;
+    learning.traces=[...learning.traces,Object.freeze({
+      identity:'return:'+head.storage_id,storage_id:head.storage_id,carry_digest:head.carry_digest,
+      coherence:carry.coherence,opening:carry.opening,attention:carry.attention,
+      epistemic_register:'restored-from-verified-return',at:now(),
+    })].slice(-MAX_ATLAS_LEARNING);
+    persist();
+    return Object.freeze({status:'restored',seq:head.seq,carry_digest:head.carry_digest,
+      model_invoked:false,model_weights_updated:false});
   }
 
   // Model-origin reflection is an independent, attributable possibility,
@@ -577,6 +622,8 @@ export function createObserverInterior({
     sense,
     nativeLearningInputs,
     integrateNativeLearning,
+    nativeLearningMemorySeq,
+    restoreNativeLearning,
     holdPossibleModelReflection,
     possibleModelReflections,
     holdNativeWyrdruneCreation,

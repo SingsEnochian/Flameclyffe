@@ -1,4 +1,5 @@
-import { scoreWyrdruneSpectrum, scoreWyrdruneAtlas, executeWyrdruneLearning } from './route-client.js';
+import { scoreWyrdruneSpectrum, scoreWyrdruneAtlas, executeWyrdruneLearning, readWyrdruneLearningMemory } from './route-client.js';
+import { digestWce1 } from './wyrdrune-proof.js';
 import { getSharedWayglassObserverInterior } from './living-observer-self.js';
 import { createResonanceScopeStore } from './resonance-scope-store.js';
 import { createAcousticAudioEngine } from './acoustic-audio-engine.js';
@@ -22,6 +23,8 @@ export function createWayglassSpectralField({
   score=scoreWyrdruneSpectrum,
   atlasScore=scoreWyrdruneAtlas,
   learningScore=executeWyrdruneLearning,
+  learningMemory=readWyrdruneLearningMemory,
+  carryDigest=value=>digestWce1(value),
   observerInterior=getSharedWayglassObserverInterior(),
   audioFactory=createAcousticAudioEngine,
   observerSubscribe=subscribeWayglassObserver,
@@ -35,6 +38,7 @@ export function createWayglassSpectralField({
     .toLowerCase().replace(/[^a-z0-9-]/g,'').slice(0,35);
   const eventScopes=new Map();
   let atlasFrame=null,atlasError=null,learningReceipt=null,learningError=null;
+  let memoryChecked=false,memoryReceipt=null;
   let active=false,disposed=false,heard=false,haptics=false,error=null,sequence=0,affinity=.5;
   let queue=[],pending=null,abort=null,timer=null,unsubscribeObserver=null,unsubscribeWatercolor=null,lastFrame=null;
   const audio=audioFactory();
@@ -44,7 +48,7 @@ export function createWayglassSpectralField({
     last:history.at(-1)||null,history:Object.freeze([...history]),
     virtual_bands:['infrasonic','ultrasonic'],
     atlas:atlasFrame,atlas_error:atlasError,
-    learning:learningReceipt,learning_error:learningError,atlas_scope:atlasStore.scope(),
+    learning:learningReceipt,learning_error:learningError,learning_memory:memoryReceipt,atlas_scope:atlasStore.scope(),
     atlas_window:atlasStore.inspect(),
     physical_inaudible_output:false,
   });
@@ -136,6 +140,20 @@ export function createWayglassSpectralField({
           atlasError=null;
           // A single existing Observer instance receives native Wyrdrune,
           // never a JS-invented phase or interpretation of possible thoughts.
+          // Cold return: once per session, before her first learning step, restore
+          // from her verified Return Engine memory if it is newer than this device.
+          if(!memoryChecked&&typeof observerInterior.restoreNativeLearning==='function'){
+            memoryChecked=true;
+            try{
+              const memory=await learningMemory(undefined,controller?.signal);
+              memoryReceipt=memory?.status==='verified'
+                ?observerInterior.restoreNativeLearning(memory,await carryDigest(memory.head.carry))
+                :Object.freeze({status:memory?.status||'none',reason:memory?.reason||null});
+            }catch(memoryFailure){
+              if(memoryFailure?.name!=='AbortError')
+                memoryReceipt=Object.freeze({status:'unavailable',reason:String(memoryFailure?.message||'No verified memory')});
+            }
+          }
           try{
             const native=await learningScore({
               atlas:field.returned.structure,

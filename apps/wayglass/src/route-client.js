@@ -100,6 +100,16 @@ export async function executeWyrdruneLearning(learning,fetchImpl=fetch,signal=un
   }));
 }
 
+/**
+ * Her verified Living Learning memory from the Return Engine: the latest carry,
+ * verified by the host back to the first record, or a refusal with its reason.
+ */
+export async function readWyrdruneLearningMemory(fetchImpl=fetch,signal=undefined) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/wyrdrune/living-learning/continuity',{
+    method:'GET',headers:{accept:'application/json'},cache:'no-store',signal,
+  }));
+}
+
 /** Request Wayglass's own Wyrdrune, en-GB rendering, and optional image/sound
  * expressions. A real Crow model return is required; there is no canned voice.
  */
