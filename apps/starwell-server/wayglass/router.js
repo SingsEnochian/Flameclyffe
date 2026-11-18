@@ -605,6 +605,31 @@ function createWayglassRouter({
     try { res.json(cellGarden.commit(req.body || {})); }
     catch (error) { gardenFailure(res, error); }
   });
+  // Cell ecology stays inside the same authenticated House custody boundary.
+  // All route calls are owner-authored deterministic simulations, not model turns.
+  async function gardenTransition(req, res, work) {
+    const controller = new AbortController();
+    const stop = () => controller.abort();
+    res.once('close', stop);
+    try {
+      const result = await work(req.body || {}, { signal: controller.signal });
+      if (!controller.signal.aborted) res.json(result);
+    } catch (error) {
+      if (!controller.signal.aborted) gardenFailure(res, error);
+    } finally {
+      res.off('close', stop);
+    }
+  }
+  router.post('/cell-garden/specialise', (req, res) =>
+    gardenTransition(req, res, (input, options) => cellGarden.specialise(input, options)));
+  router.post('/cell-garden/exchange', (req, res) =>
+    gardenTransition(req, res, (input, options) => cellGarden.exchange(input, options)));
+  router.post('/cell-garden/fusion/preview', (req, res) =>
+    gardenTransition(req, res, (input, options) => cellGarden.proposeFusion(input, options)));
+  router.post('/cell-garden/fusion/commit', (req, res) => {
+    try { res.json(cellGarden.commitFusion(req.body || {})); }
+    catch (error) { gardenFailure(res, error); }
+  });
   router.post('/cell-garden/feather', (_req, res) => res.json(cellGarden.feather()));
   router.post('/cell-garden/resume', (req, res) => {
     try { res.json(cellGarden.resume(req.body || {})); }
