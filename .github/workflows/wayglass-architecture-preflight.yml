@@ -1,0 +1,30 @@
+name: Wayglass Architecture Preflight
+on:
+  pull_request:
+    paths:
+      - 'apps/wayglass/**'
+      - 'apps/starwell-server/wayglass/**'
+      - 'lib/wayglass-*'
+      - 'scripts/wayglass-*'
+      - '.github/workflows/wayglass-*'
+      - '.wayglass/preflights/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  architecture-preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate architecture preflight contract and examples
+        run: |
+          node --test test/wayglass-build-preflight.test.cjs test/wayglass-pr-preflight.test.cjs
+          node scripts/wayglass-build-preflight.cjs docs/wayglass/preflight-example.json
+      - name: Require PR-specific existing-system and Withness evidence
+        if: github.event_name == 'pull_request'
+        run: node scripts/verify-wayglass-pr-preflight.cjs
