@@ -402,8 +402,11 @@ function createWayglassPeerOAuth({
         code_challenge_method: cleanText(body.code_challenge_method, 40),
         resource: cleanText(body.resource, 1200),
       };
+      // Never redirect an error to an unverified client-supplied URI.
+      // A failed pairing code must not become an open redirect.
+      let verifiedRedirect = false;
       const fail = (name, description) => {
-        if (!params.redirect_uri) return res.status(400).json({ error: name, error_description: description });
+        if (!verifiedRedirect) return res.status(400).json({ error: name, error_description: description });
         return res.redirect(302, appendQuery(params.redirect_uri, {
           error: name,
           error_description: description,
@@ -419,6 +422,7 @@ function createWayglassPeerOAuth({
         const scopes = requestedScopes(params.scope);
         if (!includesRequiredScope(scopes)) return fail('invalid_scope', `Scope ${OAUTH_SCOPE} is required.`);
         await validateChatGptCimd(params.client_id, params.redirect_uri, fetchImpl);
+        verifiedRedirect = true;
 
         const code = randomToken('wgc');
         const now = clock().getTime();
