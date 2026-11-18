@@ -8,7 +8,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
   if(!Number.isFinite(mutationRate)||mutationRate<0||mutationRate>1) throw Error('Invalid mutation rate');
   if(!Number.isSafeInteger(renewalAge)||renewalAge<3||renewalAge>10000) throw Error('Invalid renewal age');
   const tissue=createCellTissue({maxCells});
-  const positions=new Map(),adaptation=new Map(),traits=new Map(),mutations=[],utterances=[],lexicons=new Map(),birthTicks=new Map(),retirements=[];
+  const positions=new Map(),adaptation=new Map(),traits=new Map(),mutations=[],utterances=[],lexicons=new Map(),birthTicks=new Map(),retirements=[],wyrdruneExpressions=[];
   // An open combinatorial grammar, not a library of finished phrases.
   const vocabulary={
     subject:['my spiral','your echo','this membrane','our orbit','that wobble','the neighbouring twist'],
@@ -27,6 +27,13 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
     memory.push(phrase);
     if(memory.length>8)memory.shift();
     utterances.push({generation,id,phrase,origin:'composed',inherited_vocabulary:false});
+    // Language-bearing, typed event envelope. The canonical WTL compiler is NOT
+    // invoked here: the adapter preserves semantic intent for later WTL lowering.
+    const cell=tissue.snapshot().cells.find(c=>c.id===id);
+    wyrdruneExpressions.push({schema:'wayglass.wtl.cell-expression.v1',generation,speaker:id,
+      intent:'sing',verb:'express',mode:'call',
+      semantic:{phrase,twist:cell?.twist??0,traits:{...genes}},
+      provenance:{origin:'ecology-composition',verified_compiler:false}});
     return phrase;
   }
   const makeTraits=(parent=null)=>{
@@ -124,7 +131,8 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
     return {...core,generation,positions:Object.fromEntries(positions),
       adaptation:Object.fromEntries(adaptation),traits:Object.fromEntries(traits),mutations:mutations.map(m=>({...m})),
       retirements:retirements.map(r=>({...r,traits:{...r.traits},lastPhrases:[...r.lastPhrases]})),utterances:utterances.map(u=>({...u})),lexicons:Object.fromEntries([...lexicons].map(([id,phrases])=>[id,[...phrases]])),
-      neighbourhoods:Object.fromEntries([...positions.keys()].map(id=>[id,neighbours(id)]))};
+      neighbourhoods:Object.fromEntries([...positions.keys()].map(id=>[id,neighbours(id)])),
+      wyrdruneExpressions:wyrdruneExpressions.map(e=>({...e,semantic:{...e.semantic,traits:{...e.semantic.traits}},provenance:{...e.provenance}}))};
   }
   return Object.freeze({plant,step,neighbours,transform,snapshot,feather:tissue.feather,resume:tissue.resume});
 }
