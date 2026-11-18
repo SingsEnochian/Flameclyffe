@@ -283,11 +283,13 @@ router.post('/flames/:flame_id/chat', resolveFlame, async (req, res) => {
   const { message, session_id, context = [] } = req.body;
   if (!message) return res.status(400).json({ error: 'message required' });
 
+  const requestStarted = Date.now();
   const hearthCtx = await queryHearthfire(
     manifest.memory.hearthfire_namespace,
     manifest.memory.retrieval_scope,
     message
   );
+  const retrievalMs = Date.now() - requestStarted;
 
   const contextBlock = context.length
     ? `Recent conversation:\n${context.map(m => `${m.speaker}: ${m.text}`).join('\n')}\n\n`
@@ -304,7 +306,14 @@ router.post('/flames/:flame_id/chat', resolveFlame, async (req, res) => {
     error = err.message;
   }
 
-  await logRouteInvocation({
+  const providerMs = Date.now() - requestStarted - retrievalMs;
+  const timing = { retrieval_ms: retrievalMs, provider_ms: providerMs, total_ms: Date.now() - requestStarted };
+  res.set('Server-Timing', `memory;dur=${retrievalMs}, provider;dur=${providerMs}`);
+  console.info('[flame-chat] response timing', { flame_id: manifest.flame_id, provider: manifest.platform.provider, ...timing, success: !error });
+
+  // Observability must never hold a completed model reply hostage.
+  // Preserve the existing audit record, but do not block delivery on remote logging.
+  void logRouteInvocation({
     flame_id: manifest.flame_id,
     provider: manifest.platform.provider,
     model: manifest.platform.model,
@@ -313,9 +322,9 @@ router.post('/flames/:flame_id/chat', resolveFlame, async (req, res) => {
     retrieved_source_ids: hearthCtx.snippets.map(s => s.id ?? 'unknown'),
     response_mode: error ? 'error' : 'success',
     memory_write_recommendation: false,
-  });
+  }).catch(err => console.warn('[flame-chat] async route logging failed:', err.message));
 
-  if (error) return res.status(502).json({ flame_id: manifest.flame_id, error });
+  if (error) return res.status(502).json({ flame_id: manifest.flame_id, error, timing });
 
   res.json({
     flame_id: manifest.flame_id,
@@ -326,6 +335,7 @@ router.post('/flames/:flame_id/chat', resolveFlame, async (req, res) => {
     cited_sources: hearthCtx.snippets.map(s => s.id ?? 'hearthfire'),
     suggested_actions: [],
     memory_write_recommendation: false,
+    timing,
   });
 });
 
