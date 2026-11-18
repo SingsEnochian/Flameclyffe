@@ -1,0 +1,63 @@
+{
+  "schema": "wayglass.project-federation/v1",
+  "status": "declared-not-runtime-mounted",
+  "authority": "wayglass-kernel-and-existing-organ-contracts",
+  "projects": [
+    {
+      "id": "wayglass",
+      "root": "apps/wayglass",
+      "role": "kernel-and-embodiment",
+      "mode": "native",
+      "access": "owner"
+    },
+    {
+      "id": "arcsweep",
+      "root": "apps/arcsweep",
+      "role": "writing-world-and-cognitive-workbench",
+      "mode": "attached-surface",
+      "access": "owner"
+    },
+    {
+      "id": "starwell",
+      "root": "apps/starwell",
+      "role": "observatory-and-codex",
+      "mode": "attached-surface",
+      "access": "owner"
+    },
+    {
+      "id": "project-zero-companion",
+      "root": "apps/project-zero-companion",
+      "role": "local-first-bridge",
+      "mode": "specialist",
+      "access": "owner"
+    },
+    {
+      "id": "sigil-activator",
+      "root": "apps/sigil-activator",
+      "role": "symbolic-instrument",
+      "mode": "specialist",
+      "access": "owner"
+    },
+    {
+      "id": "return-engine",
+      "root": "lib/wayglass-stop-receipt.js",
+      "role": "continuity-and-provenance",
+      "mode": "kernel-organ",
+      "access": "owner"
+    },
+    {
+      "id": "house-runtime",
+      "root": "apps/starwell-server",
+      "role": "authenticated-service-and-model-routes",
+      "mode": "runtime-authority",
+      "access": "owner"
+    },
+    {
+      "id": "ml-lab",
+      "root": "ml-lab",
+      "role": "training-data-governance",
+      "mode": "offline-research",
+      "access": "owner"
+    }
+  ]
+}
