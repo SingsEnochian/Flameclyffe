@@ -21,8 +21,15 @@ export function createResonanceCircuit({emit,feather=()=>false,audioAllowed=()=>
   const result=projectResonance({resonance:value,revision:system.snapshot().revision,
    source:provenance.get(value.id),audioOptIn:audioAllowed()===true,hapticsOptIn:hapticsAllowed()===true});
   // Projection sinks must independently enforce output permission and durable storage.
-  for(const item of result.projections)emit(structuredClone(item));
-  return result;
+  let delivered=0;
+  for(const item of result.projections){
+   // A sink may trigger Feather synchronously. Never dispatch subsequent cues,
+   // especially audio/haptics, after that stop becomes visible.
+   if(stopped||feather())return {status:'feather-stopped',delivered,projections:[]};
+   try{emit(structuredClone(item));delivered++;}
+   catch(error){return {status:'projection-failed',delivered,projections:[],error:String(error?.message||error)};}
+  }
+  return {...result,delivered};
  }
  function release(id,{verifiedShipRoute=false}={}){
   if(stopped||feather())return false;
