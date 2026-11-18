@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { animateWyrdruneCypher, readWyrdrune } from '../src/wyrdrune-cypher.js';
+import { createWyrdruneRuntime } from '../../../lib/wyrdrune/runtime.mjs';
 
 function fakeDom() {
   const make = tag => ({ tag, className: '', textContent: '', attrs: {}, children: [],
@@ -92,4 +93,21 @@ test('system reduced-motion renders English immediately even if the caller reque
   await run.done;
   assert.equal(clock.pending(),0);
   assert.ok(lines(doc.root).every(row=>row.attrs.lang==='en-GB'));
+});
+
+test('the cypher reads record and list selection and preserves expression grouping', async () => {
+  const dom = fakeDom();
+  const source = SRC.replace('let seen = depth;',
+    'let seen = -[{tone_hz: 220}][0].tone_hz; emit (-depth)["tone Hz"];');
+  const run = animateWyrdruneCypher(dom.root, { source, doc: dom, scope: fakeClock(), reducedMotion: true });
+  const gloss = await run.done;
+  const [first, second] = gloss.units[0].phases[0].lines;
+  assert.match(first.english, /minus the field “tone_hz” in the entry at 0 in the list/);
+  assert.equal(second.wtl, 'emit (-depth)["tone Hz"];');
+  assert.ok(lines(dom.root).every(row => row.attrs.lang === 'en-GB'));
+
+  const runtime = createWyrdruneRuntime({ hashSource: () => 'test' });
+  const rebuilt = 'mobius scoped { ' + gloss.units[0].phases.map(phase =>
+    phase.phase + ' { ' + phase.lines.filter(line => !line.still).map(line => line.wtl).join(' ') + ' }').join(' ') + ' }';
+  assert.deepEqual(runtime.compile(rebuilt).units, runtime.compile(source).units);
 });

@@ -6,13 +6,13 @@ const express = require('express');
 const createWayglassRouter = require('../wayglass/router');
 
 const source = `mobius {
- perceive { let light = votive("Lantern","Light kept for the journey"); }
+ perceive { let light = votive("Lantern","Light kept for the journey"); let voices = [{hz: 220}, {hz: 223}]; }
  compress { let mark = angelicLetter(1); }
  release { let inscription = enochian("Pa","working letter name"); }
  verify { emit light; }
  integrate { emit mark; }
  choose { emit inscription; }
- return { emit "held"; }
+ return { emit voices[1].hz - voices[0].hz; }
  transcend { emit star(1); }
 }`;
 
@@ -50,9 +50,10 @@ test('WTL owner-only HTTP preview preserves Eightfold records and never contacts
     assert.match(preview.ritualLedger.terminalHash,/^wce1:[0-9a-f]{64}$/);
     assert.deepEqual(preview.values.slice(0,3).map(x=>x.kind),['votive-intention','letter-reference','inscription']);
     assert.equal(preview.values[2].translation,null);
+    assert.equal(preview.values[3],3);
     const repeat = await json({source},{authorization:'Bearer '+token});
     assert.equal((await repeat.json()).receiptHash,preview.receiptHash);
-    const denial = await json({source:source.replace('emit "held";','emit bridge("python","run",1);')},{authorization:'Bearer '+token});
+    const denial = await json({source:source.replace('emit voices[1].hz - voices[0].hz;','emit bridge("python","run",1);')},{authorization:'Bearer '+token});
     assert.equal(denial.status,400);
     assert.match((await denial.json()).error,/Bridge capability unavailable/);
     const bad = await json({source:'not a Wyrdrune rite'},{authorization:'Bearer '+token});

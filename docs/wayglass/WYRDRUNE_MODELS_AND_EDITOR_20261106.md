@@ -13,6 +13,15 @@ The executable **WTL v0.1 candidate** and its Enochian register were selectively
 - Enochian letter names are references, not automatically translated Calls or source-certified glyphs. Preserve Drux/Drun and Gisg/Gisa variants.
 - Existing standalone WTL tests and Wayglass hosted preview security acceptance are required on exact head. `apps/wayglass/server-stage.cjs` stages only runtime modules for packaged Windows builds.
 
+Records and lists can be read inside a WTL expression. For example, after
+`let voices = [{tone_hz: 220}, {tone_hz: 223}];`, the expression
+`voices[1].tone_hz - voices[0].tone_hz` gives a beat of 3 Hz. List indices
+start at 0. Use brackets with a text key for record fields such as
+`voice["tone Hz"]`, and with an expression for a calculated key or index.
+Selection reads a data value. Missing fields and invalid indices report a
+runtime fault, while selecting through an explicit `unknown` keeps it unknown.
+A carried record or list can be selected from in the next scoped cycle.
+
 ## Spellcheck and attribution-preserving revision
 
 Browser-native spellcheck defaults on for prose editors and can be toggled using the ship menu; this does **not** send text to a spelling provider from Wayglass. WTL source opts out of English spellcheck. Browser/OS support determines suggested corrections.

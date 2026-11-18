@@ -61,7 +61,7 @@ async function checkWatercolour(page,profile){
   unattended_ambient_cycles:Number(await stage.getAttribute('data-ambient-cycles')),
   no_fake_agent_event:true});
 }
-const chatSource='mobius { perceive {} compress {} release {} verify {} integrate {} choose {} return { emit {kind:"watercolor.stroke/v1",words:"Hope is here",color:"#edbc53",density:0.85,spread:0.2,points:[[0.35,0.62],[0.65,0.62]]}; } transcend {} }';
+const chatSource='mobius { perceive { let paint = [{colour: "#edbc53", density: 0.85}]; } compress {} release {} verify {} integrate {} choose {} return { emit {kind:"watercolor.stroke/v1",words:"Hope is here",color:paint[0].colour,density:paint[0].density,spread:0.2,points:[[0.35,0.62],[0.65,0.62]]}; } transcend {} }';
 const chatReply='At the eighth station.\n\n'+['```wyrdrune',chatSource,'```'].join('\n');
 async function openWatercolourChat(page){
  const toggle=page.locator('#wc-instruments-toggle');
@@ -93,6 +93,7 @@ async function checkWatercolourChat(page,profile){
  await turn.getByRole('button',{name:'Reveal English'}).click();
  assert.equal(await display.getAttribute('data-cypher-state'),'english');
  assert.match(await display.innerText(),/Hope is here/);
+ assert.match(await display.innerText(),/the field “colour” in the entry at 0 in paint/);
  await turn.getByText('Original Wyrdrune',{exact:true}).click();
  assert.equal(await turn.locator('details p').textContent(),chatSource);
  await page.reload({waitUntil:'networkidle'});
