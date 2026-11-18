@@ -242,6 +242,27 @@ async function checkWriting(page,profile){
  assert.equal(await source.inputValue(),original+'\n');
  receipt.scenarios.push({profile,room:'Writing Room',status:'passed',skip:true,source_invalidation:true});
 }
+async function checkCellGarden(page,profile){
+ // A mounted native room is evidence, not a model call or public production host.
+ // This fixture intentionally denies House ownership on all /api requests.
+ await page.goto(origin+'/?room=cellGarden',{waitUntil:'networkidle'});
+ const garden=page.locator('[data-surface="wayglass-cell-garden"]');
+ await garden.waitFor({state:'visible'});
+ assert.equal(await page.locator('h1').filter({hasText:'The Living Cell Garden'}).isVisible(),true);
+ assert.equal(await page.getByRole('button',{name:'Propose mitosis'}).isDisabled(),true,
+  'Unsigned browser never initiates a daughter proposal');
+ assert.equal(await page.getByRole('button',{name:'Commit hybrid · keep both parents'}).isDisabled(),true);
+ assert.equal(await page.getByRole('button',{name:/Hear the Return marker/}).isDisabled(),true,
+  'Acoustic playback requires a local consented exchange');
+ assert.match(await garden.locator('[role="status"]').innerText(),/Browser fixture|sign-in|unavailable/i);
+ await page.emulateMedia({reducedMotion:'reduce'});
+ const motion=await garden.evaluate(el=>getComputedStyle(el.querySelector('.wg-cell-ecology')).animationName);
+ assert.equal(motion,'none','Reduced motion stays available in the cell ecology');
+ await page.screenshot({path:resolve(output,profile+'-cell-garden-unauthorised.png'),fullPage:true});
+ receipt.scenarios.push({profile,room:'Cell Garden',status:'passed',authorisation:'denied',
+  autonomous_replication:false,acoustic_playback_started:false,reduced_motion:true});
+}
+
 try{
  browser=await chromium.launch({headless:true});
  for(const profile of ['desktop','mobile']){
@@ -279,6 +300,7 @@ try{
   await checkWatercolourChat(page,profile);
   await checkCodex(page,profile);
   await checkWriting(page,profile);
+  await checkCellGarden(page,profile);
   await context.close();
  }
  assert.deepEqual(receipt.page_errors,[],'No unhandled browser errors');
