@@ -143,10 +143,23 @@ test('authorization requires ChatGPT CIMD, PKCE S256, exact resource and local p
     body: new URLSearchParams({ ...Object.fromEntries(params), pairing_code: 'wrong-code' }),
     redirect: 'manual',
   });
-  assert.equal(wrongPair.status, 302);
-  const denied = new URL(wrongPair.headers.get('location'));
-  assert.equal(denied.searchParams.get('error'), 'access_denied');
-  assert.equal(denied.searchParams.get('iss'), fx.origin);
+  assert.equal(wrongPair.status, 400);
+  assert.equal(wrongPair.headers.get('location'), null);
+  assert.equal((await wrongPair.json()).error, 'access_denied');
+
+  // An attacker must not turn a bad pairing attempt into a redirect to an
+  // arbitrary URL, even when the submitted callback looks syntactically valid.
+  const malicious = new URLSearchParams(params);
+  malicious.set('redirect_uri', 'https://attacker.example/steal');
+  const rejected = await fetch(fx.origin + '/oauth/authorize', {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ ...Object.fromEntries(malicious), pairing_code: 'wrong-code' }),
+    redirect: 'manual',
+  });
+  assert.equal(rejected.status, 400);
+  assert.equal(rejected.headers.get('location'), null);
+  assert.equal((await rejected.json()).error, 'access_denied');
 
   const wrongResource = new URLSearchParams(params);
   wrongResource.set('resource', fx.origin + '/not-mcp');
