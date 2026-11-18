@@ -1,6 +1,7 @@
 // Spatial ecology for WTL cells. Positions are local to this experimental tissue.
 // No global clocks, network, model calls, or visual side effects.
 import {createCellTissue} from './wtl-cell-tissue.js';
+import {authorCellProgram,compileCellProgram,executeCellProgram} from './wtl-cell-program.js';
 
 export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.2,renewalAge=100}={}) {
   if(!Number.isSafeInteger(seed)||seed<0||seed>2147483647) throw Error('Invalid seed');
@@ -8,7 +9,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
   if(!Number.isFinite(mutationRate)||mutationRate<0||mutationRate>1) throw Error('Invalid mutation rate');
   if(!Number.isSafeInteger(renewalAge)||renewalAge<3||renewalAge>10000) throw Error('Invalid renewal age');
   const tissue=createCellTissue({maxCells});
-  const positions=new Map(),adaptation=new Map(),traits=new Map(),mutations=[],utterances=[],lexicons=new Map(),birthTicks=new Map(),retirements=[],wyrdruneExpressions=[],constructions=[];
+  const positions=new Map(),adaptation=new Map(),traits=new Map(),mutations=[],utterances=[],lexicons=new Map(),birthTicks=new Map(),retirements=[],wyrdruneExpressions=[],constructions=[],programs=[];
   // An open combinatorial grammar, not a library of finished phrases.
   const vocabulary={
     subject:['my spiral','your echo','this membrane','our orbit','that wobble','the neighbouring twist'],
@@ -90,6 +91,22 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       }
     }
     tissue.tick();
+    if(generation%5===0&&programs.length<128){
+      const authors=tissue.snapshot().cells;
+      if(authors.length){
+        const author=authors[generation%authors.length],genes=traits.get(author.id);
+        const source=authorCellProgram(author,genes,generation);
+        const compiled=compileCellProgram(source);
+        const result=executeCellProgram(compiled);
+        const program={id:'program-'+generation+'-'+author.id,generation,author:author.id,source,
+          language:compiled.language,result:{status:result.status,steps:result.steps,output:result.output.map(x=>({...x}))},
+          provenance:{origin:'deterministic-cell-author',canonical_wtl_compiler:false,host_effects:false}};
+        programs.push(program);
+        wyrdruneExpressions.push({schema:'wayglass.wtl.cell-expression.v1',generation,speaker:author.id,
+          intent:'program',verb:'compile-and-run',mode:'sandbox',semantic:{program_id:program.id,language:program.language},
+          provenance:{origin:'cell-program-subset',verified_compiler:false}});
+      }
+    }
     // Sandbox construction: cell-authored, bounded symbolic structures only.
     // No host filesystem, network, code execution or runtime modification.
     if(generation%6===0&&constructions.length<128){
@@ -153,6 +170,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       retirements:retirements.map(r=>({...r,traits:{...r.traits},lastPhrases:[...r.lastPhrases]})),utterances:utterances.map(u=>({...u})),lexicons:Object.fromEntries([...lexicons].map(([id,phrases])=>[id,[...phrases]])),
       neighbourhoods:Object.fromEntries([...positions.keys()].map(id=>[id,neighbours(id)])),
       wyrdruneExpressions:wyrdruneExpressions.map(e=>({...e,semantic:{...e.semantic,traits:e.semantic.traits?{...e.semantic.traits}:undefined},provenance:{...e.provenance}})),
+      programs:programs.map(p=>({...p,result:{...p.result,output:p.result.output.map(x=>({...x}))},provenance:{...p.provenance}})),
       constructions:constructions.map(p=>({...p,builders:[...p.builders],specification:{...p.specification,effects:[...p.specification.effects]},provenance:{...p.provenance}}))};
   }
   return Object.freeze({plant,step,neighbours,transform,snapshot,feather:tissue.feather,resume:tissue.resume});
