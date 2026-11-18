@@ -60,4 +60,49 @@ test('House-authenticated cell garden only divides after a separate explicit app
   })).status, 409);
   assert.equal((await fetchGarden('/resume', {})).status, 403);
   assert.equal((await fetchGarden('/resume', { owner_confirmed: true })).status, 200);
+  const [a,b]=receipt.daughter_ids;
+  assert.equal((await fetchGarden('/specialise', {
+    cell_id:a,role:'resonance',expected_revision:1,owner_confirmed:true
+  },false)).status,401);
+  const ra=await fetchGarden('/specialise',{
+    cell_id:a,role:'resonance',expected_revision:1,owner_confirmed:true
+  });
+  assert.equal(ra.status,200);
+  const rb=await fetchGarden('/specialise',{
+    cell_id:b,role:'observation',expected_revision:2,owner_confirmed:true
+  });
+  assert.equal(rb.status,200);
+  const denied=await fetchGarden('/exchange',{
+    from_id:a,to_id:b,message:'local typed observation',expected_revision:3,
+    owner_confirmed:true,receiver_route_approved:false
+  });
+  assert.equal(denied.status,403);
+  const sent=await fetchGarden('/exchange',{
+    from_id:a,to_id:b,message:'local typed observation',expected_revision:3,
+    owner_confirmed:true,receiver_route_approved:true
+  });
+  assert.equal(sent.status,200);
+  const exchange=await sent.json();
+  assert.equal(exchange.receipt.acoustic.request.kind,1);
+  assert.equal(exchange.receipt.acoustic.reply.kind,2);
+  assert.equal(exchange.receipt.acoustic.playback_started,false);
+  const fusionResponse=await fetchGarden('/fusion/preview',{
+    left_id:a,right_id:b,expected_revision:4
+  });
+  assert.equal(fusionResponse.status,200);
+  const fusion=await fusionResponse.json();
+  assert.equal(fusion.status,'proposed-not-committed');
+  assert.equal((await fetchGarden('/fusion/commit',{
+    proposal_id:fusion.proposal_id,expected_revision:4
+  })).status,403);
+  const combined=await fetchGarden('/fusion/commit',{
+    proposal_id:fusion.proposal_id,expected_revision:4,owner_confirmed:true
+  });
+  assert.equal(combined.status,200);
+  const merged=await combined.json();
+  assert.equal(merged.receipt.independent_parents_retained,true);
+  assert.equal(merged.culture.cells.filter(c=>c.status==='active').length,3);
+  assert.equal((await fetchGarden('/fusion/commit',{
+    proposal_id:fusion.proposal_id,expected_revision:5,owner_confirmed:true
+  })).status,409);
 });
