@@ -76,9 +76,11 @@ export function createMythienceJourney(){
       input_hash:result.input_hash,carry,candidate:copy(c)};
     return snapshot();
   }
-  function carry({expected_revision}={}){
+  function carry({expected_revision,expected_experience_id}={}){
     if(expected_revision!==undefined&&expected_revision!==revision)fail('Stale carry: journey changed');
     if(!pending)fail('No proposed encounter to carry');
+    if(expected_experience_id!==undefined&&expected_experience_id!==pending.experience_id)
+      fail('Stale carry: proposed encounter identity changed');
     const p=pending,c=p.candidate;
     if(travellerId&&travellerId!==p.traveller_id)fail('Traveller identity mismatch');
     const destination=p.kind==='hybrid'?c.destination_universe:c.to;
