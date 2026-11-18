@@ -1219,6 +1219,9 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
           checkpoint_storage_id: payload.checkpoint_storage_id || null,
           ...(compiled ? { inheritance_context: compiled.reference } : {}),
           thinking_exposed: Boolean(result.thinking),
+          // Preserve the provider stop reason in the attributable receipt, not
+          // just the transient adapter result. Never persist raw prompt text.
+          finish_reason: result.finish_reason || null,
           usage: result.usage,
         },
       });
