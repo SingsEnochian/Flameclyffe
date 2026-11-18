@@ -492,6 +492,8 @@ function createWayglassPeerOAuth({
           const hash = sha256(refreshToken);
           const row = store.refresh_tokens.find((item) => (
             constantTimeEqual(item.token_hash, hash)
+            && !item.revoked_at
+            && new Date(item.expires_at).getTime() > clock().getTime()
             && item.client_id === clientId
             && item.resource === resource
           ));
