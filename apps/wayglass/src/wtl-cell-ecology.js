@@ -7,8 +7,27 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
   if(!Number.isFinite(radius)||radius<=0||radius>100) throw Error('Invalid radius');
   if(!Number.isFinite(mutationRate)||mutationRate<0||mutationRate>1) throw Error('Invalid mutation rate');
   const tissue=createCellTissue({maxCells});
-  const positions=new Map(),adaptation=new Map(),traits=new Map(),mutations=[];
-  const sassLines=['Nice signal. Shame about the timing.','My mitochondria demand better neighbours.','I twist, therefore I sass.','Evolution called. It wants more sparkle.'];
+  const positions=new Map(),adaptation=new Map(),traits=new Map(),mutations=[],utterances=[],lexicons=new Map();
+  // An open combinatorial grammar, not a library of finished phrases.
+  const vocabulary={
+    subject:['my spiral','your echo','this membrane','our orbit','that wobble','the neighbouring twist'],
+    action:['tickles','challenges','outdances','confuses','rearranges','befriends'],
+    object:['the silence','my geometry','your rhythm','the current','the next turn','the whole tissue'],
+    ending:['again','with style','for now','quite spectacularly','without permission from gravity','before breakfast']
+  };
+  function invent(id,genes,twist) {
+    const memory=lexicons.get(id);
+    const parts=['subject','action','object','ending'].map((slot,index)=>{
+      const choices=vocabulary[slot];
+      const n=Math.floor(random()*choices.length+genes.sass+genes.curiosity*index+twist*choices.length)%choices.length;
+      return choices[n];
+    });
+    const phrase=parts.join(' ')+'.';
+    memory.push(phrase);
+    if(memory.length>8)memory.shift();
+    utterances.push({generation,id,phrase,origin:'composed',inherited_vocabulary:false});
+    return phrase;
+  }
   const makeTraits=(parent=null)=>{
     const result=parent?{...parent}:{sass:Math.floor(random()*4),curiosity:Math.floor(random()*4),dialectBias:Math.floor(random()*3)};
     if(parent&&random()<mutationRate){
@@ -28,6 +47,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
     positions.set(id,{x,y});
     adaptation.set(id,{sent:0,heard:0});
     traits.set(id,makeTraits().traits);
+    lexicons.set(id,[]);
   }
   function neighbours(id) {
     const p=positions.get(id);
@@ -48,7 +68,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       const target=nearby[Math.floor(cell.twist*nearby.length)%nearby.length];
       const genes=traits.get(cell.id);
       const dialect=['pulse','spiral','echo'][(Math.floor(cell.twist*3)+genes.dialectBias)%3];
-      const sass=genes.sass>0&&generation%(5-genes.sass)===0?sassLines[(genes.sass+generation)%sassLines.length]:null;
+      const sass=genes.sass>0&&generation%(5-genes.sass)===0?invent(cell.id,genes,cell.twist):null;
       try {
         tissue.signal(cell.id,target,dialect,{generation,twist:cell.twist,sass});
         stats.sent++;
@@ -67,6 +87,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       adaptation.set(birth.id,{sent:0,heard:0});
       const inherited=makeTraits(traits.get(birth.parent_id));
       traits.set(birth.id,inherited.traits);
+      lexicons.set(birth.id,[...lexicons.get(birth.parent_id).slice(-2)]);
       if(inherited.change)mutations.push({generation,parent_id:birth.parent_id,child_id:birth.id,...inherited.change});
     }
     return {generation,signals,births:births.map(b=>b.id),population:positions.size};
@@ -75,6 +96,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
     const core=tissue.snapshot();
     return {...core,generation,positions:Object.fromEntries(positions),
       adaptation:Object.fromEntries(adaptation),traits:Object.fromEntries(traits),mutations:mutations.map(m=>({...m})),
+      utterances:utterances.map(u=>({...u})),lexicons:Object.fromEntries([...lexicons].map(([id,phrases])=>[id,[...phrases]])),
       neighbourhoods:Object.fromEntries([...positions.keys()].map(id=>[id,neighbours(id)]))};
   }
   return Object.freeze({plant,step,neighbours,snapshot,feather:tissue.feather,resume:tissue.resume});
