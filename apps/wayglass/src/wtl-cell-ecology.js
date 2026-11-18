@@ -3,6 +3,7 @@
 import {createCellTissue} from './wtl-cell-tissue.js';
 import {authorCellProgram,compileCellProgram,executeCellProgram,reviseCellProgram} from './wtl-cell-program.js';
 import {authorPeerTest,runPeerTest} from './wtl-cell-peer-tests.js';
+import {listenAndReply,composeDialogue} from './wtl-cell-harmony.js';
 
 export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.2,renewalAge=100}={}) {
   if(!Number.isSafeInteger(seed)||seed<0||seed>2147483647) throw Error('Invalid seed');
@@ -10,7 +11,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
   if(!Number.isFinite(mutationRate)||mutationRate<0||mutationRate>1) throw Error('Invalid mutation rate');
   if(!Number.isSafeInteger(renewalAge)||renewalAge<3||renewalAge>10000) throw Error('Invalid renewal age');
   const tissue=createCellTissue({maxCells});
-  const positions=new Map(),adaptation=new Map(),traits=new Map(),mutations=[],utterances=[],lexicons=new Map(),birthTicks=new Map(),retirements=[],wyrdruneExpressions=[],constructions=[],programs=[],projectDecisions=[],programLineages=[],programLibrary=new Map();
+  const positions=new Map(),adaptation=new Map(),traits=new Map(),mutations=[],utterances=[],lexicons=new Map(),birthTicks=new Map(),retirements=[],wyrdruneExpressions=[],constructions=[],programs=[],projectDecisions=[],programLineages=[],programLibrary=new Map(),harmonicDialogues=[];
   // An open combinatorial grammar, not a library of finished phrases.
   const vocabulary={
     subject:['my spiral','your echo','this membrane','our orbit','that wobble','the neighbouring twist'],
@@ -109,6 +110,19 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
         wyrdruneExpressions.push({schema:'wayglass.wtl.cell-expression.v1',generation,speaker:author.id,
           intent:'program',verb:'compile-and-run',mode:'sandbox',semantic:{program_id:program.id,language:program.language},
           provenance:{origin:'cell-program-subset',verified_compiler:false}});
+      }
+    }
+    // Neighbour listening: a bounded call and harmonic reply, with a reproducible score.
+    if(generation%4===0&&harmonicDialogues.length<128){
+      const singers=tissue.snapshot().cells.filter(cell=>neighbours(cell.id).length>0);
+      if(singers.length){
+        const singer=singers[generation%singers.length],listenerId=neighbours(singer.id)[0];
+        const singerGenes=traits.get(singer.id),listenerGenes=traits.get(listenerId);
+        const call=48+(singerGenes.curiosity+generation+Math.floor(singer.twist*12))%24;
+        const reply=listenAndReply(call,{listenerBias:listenerGenes.dialectBias,previous:call+2});
+        const score=composeDialogue(call,reply,{beat:generation%16});
+        harmonicDialogues.push({generation,singer:singer.id,listener:listenerId,...score,
+          reply:{...reply,provenance:{...reply.provenance}}});
       }
     }
     // Project Genesis: competing executable candidates, neighbour reviews and
@@ -231,6 +245,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       neighbourhoods:Object.fromEntries([...positions.keys()].map(id=>[id,neighbours(id)])),
       wyrdruneExpressions:wyrdruneExpressions.map(e=>({...e,semantic:{...e.semantic,traits:e.semantic.traits?{...e.semantic.traits}:undefined},provenance:{...e.provenance}})),
       projectDecisions:projectDecisions.map(d=>({...d,candidates:d.candidates.map(p=>({...p,reviews:p.reviews.map(r=>({...r}))})),selected:{...d.selected,result:{...d.selected.result,output:d.selected.result.output.map(x=>({...x}))}},peerTests:d.peerTests.map(p=>({test:{...p.test},original:{...p.original,observed:[...p.original.observed]},revised:{...p.revised,observed:[...p.revised.observed]}})),revision:{...d.revision,attempts:d.revision.attempts.map(a=>({...a})),result:{...d.revision.result,output:d.revision.result.output.map(x=>({...x}))}},provenance:{...d.provenance}})),
+      harmonicDialogues:harmonicDialogues.map(d=>({...d,events:d.events.map(e=>({...e})),reply:{...d.reply,provenance:{...d.reply.provenance}},provenance:{...d.provenance}})),
       programLineages:programLineages.map(p=>({...p,verification:{...p.verification}})),
       programLibrary:Object.fromEntries([...programLibrary].map(([id,items])=>[id,items.map(p=>({...p}))])),
       programs:programs.map(p=>({...p,result:{...p.result,output:p.result.output.map(x=>({...x}))},provenance:{...p.provenance}})),
