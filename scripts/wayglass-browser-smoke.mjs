@@ -158,6 +158,29 @@ async function main() {
         label: 'Wayglass OS boot',
       });
 
+      // Traveller integration: real mounted surface, explicit movement, Feather and teardown.
+      const travellerEvidence = await evaluate('(async () => {' +
+        'const os = globalThis.__wayglassOS;' +
+        'const t = await os.mount("traveller:sanctuary");' +
+        'document.querySelector("[data-travel=start]").click();' +
+        'const started = t.session.snapshot();' +
+        'document.querySelector("[data-travel=step]").click();' +
+        'const moved = t.session.snapshot();' +
+        'document.querySelector("[data-travel=feather]").click();' +
+        'const stopped = t.session.snapshot();' +
+        'document.querySelector("[data-travel=step]").click();' +
+        'const held = t.session.snapshot();' +
+        'const visible = !!document.querySelector(".traveller-canvas") || document.querySelector("#traveller-status").textContent.includes("3D unavailable");' +
+        'const shaderSuspended = document.querySelector(".wayglass-field").style.display === "none";' +
+        'await os.mount("arcsweep:writing-room");' +
+        'const shaderResumed = document.querySelector(".wayglass-field").style.display !== "none";' +
+        'return {started:started.entered,moved:moved.z<started.z,feather:stopped.paused,held:held.z===stopped.z,visible,shaderSuspended,shaderResumed};' +
+      '})()');
+      for (const [key, value] of Object.entries(travellerEvidence)) {
+        assert(value === true, 'Traveller browser smoke failed: ' + key);
+      }
+      console.log('[Wayglass Traveller] browser mount, navigation, Feather, 3D/fallback and teardown verified.');
+
       const evidence = await evaluate(`(async () => {
         const smoke = globalThis.__wayglassBrowserSmoke = {
           created: [],
