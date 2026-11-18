@@ -167,6 +167,23 @@ test('authorization requires ChatGPT CIMD, PKCE S256, exact resource and local p
   assert.equal(resourceResponse.status, 400);
   assert.equal((await resourceResponse.json()).error, 'invalid_request');
 
+  // A client cannot manufacture a broader permission by appending an
+  // unadvertised scope to the required Constellation scope.
+  const expandedScope = new URLSearchParams(params);
+  expandedScope.set('scope', OAUTH_SCOPE + ' wayglass:admin');
+  const scopeView = await fetch(fx.origin + '/oauth/authorize?' + expandedScope);
+  assert.equal(scopeView.status, 400);
+  assert.equal((await scopeView.json()).error, 'invalid_request');
+  const scopeApproval = await fetch(fx.origin + '/oauth/authorize', {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ ...Object.fromEntries(expandedScope), pairing_code: fx.pairingCode }),
+    redirect: 'manual',
+  });
+  assert.equal(scopeApproval.status, 400);
+  assert.equal(scopeApproval.headers.get('location'), null);
+  assert.equal((await scopeApproval.json()).error, 'invalid_scope');
+
   const wrongMethod = new URLSearchParams(params);
   wrongMethod.set('code_challenge_method', 'plain');
   const pkceResponse = await fetch(fx.origin + '/oauth/authorize?' + wrongMethod);
