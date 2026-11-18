@@ -22,7 +22,7 @@ jobs:
           node-version: '24'
       - name: Run WTL cellular tests
         run: node --test apps/wayglass/test/wtl-cell-*.test.js
-      - name: Verify GitHub Pages nursery source and live server syntax
+      - name: Verify owner-only nursery source and live server syntax
         run: |
           node --check apps/wayglass/wtl-nursery-server.mjs
           node --check apps/wayglass/src/wtl-cell-ecology.js
@@ -69,11 +69,11 @@ jobs:
           cp apps/wayglass/src/wtl-cell-harmony.js /tmp/wayglass-nursery-preview/src/
           cp apps/wayglass/src/wtl-cell-sonic-space.js /tmp/wayglass-nursery-preview/src/
           cat > /tmp/wayglass-nursery-preview/README.txt <<'EOF'
-          Wayglass WTL Möbius Nursery · GitHub Pages preview package
+          Wayglass WTL Möbius Nursery · private CI inspection artifact
           Contains the actual WTL ecology and tissue modules.
           This preview runs a tab-local colony, not a shared server.
           To preview locally, serve this directory over HTTP (e.g. python -m http.server 8080).
-          Production GitHub Pages publishing remains gated on main.
+          This artifact is not a deployment, an authenticated host, or an approved public release.\nDo not publish this preview on GitHub Pages or another public host.\nUse only the owner-authenticated Wayglass integration release path.
           EOF
           test -s /tmp/wayglass-nursery-preview/src/wtl-cell-ecology.js
       - name: Upload nursery preview
