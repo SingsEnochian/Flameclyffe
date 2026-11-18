@@ -12,7 +12,7 @@ const files=new Map([
 ]);
 let ecology,interval;const clients=new Set();
 function reset(){ecology=createCellEcology({maxCells:24,seed:11,radius:3,mutationRate:0.8,renewalAge:40});ecology.plant('a','explorer',0,0);ecology.plant('b','explorer',1,0)}
-function send(res,snapshot){res.write('event: snapshot\\ndata: '+JSON.stringify(snapshot)+'\\n\\n')}
+function send(res,snapshot){res.write('event: snapshot\ndata: '+JSON.stringify(snapshot)+'\n\n')}
 function broadcast(){const snapshot=ecology.snapshot();for(const res of clients){try{send(res,snapshot)}catch{clients.delete(res)}}}
 reset();interval=setInterval(()=>{if(!ecology.snapshot().paused){ecology.step();broadcast()}},750);interval.unref?.();
 const server=http.createServer(async(req,res)=>{
