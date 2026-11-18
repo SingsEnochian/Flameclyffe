@@ -1,0 +1,36 @@
+// Hearthweave Laboratory · co-creation timeline / Introduced Change
+// Native Wyrdrune is authoritative for the compositional transformation.
+// The 5.5 Hz "ghost" is an interaural beat DIFFERENCE, not a physical 5.5 Hz carrier.
+// Playback requires listener consent and headphones; no autoplay.
+mobius {
+  perceive {
+    let turns = bridge("timeline","turns");
+    let trust = bridge("timeline","trust");
+    let intensity = bridge("somatic","intensity");
+    let consent = bridge("somatic","consent");
+  }
+  compress {
+    let continuity = turns / (turns + 8);
+    let texture = trust * 0.5 + continuity * 0.3 + intensity * 0.2;
+  }
+  release {
+    let left = 220;
+    let right = left + 5.5;
+    let gain = 0.008 + texture * 0.008;
+  }
+  verify {
+    emit bridge("audio","validate",left,right,gain,consent);
+  }
+  integrate {
+    let introduced = bridge("change","record",texture,continuity);
+  }
+  choose {
+    emit bridge("audio","frame",left,right,gain,introduced);
+  }
+  return {
+    emit bridge("continuity","hold",turns);
+  }
+  transcend {
+    emit bridge("continuity","next","hearthweave-laboratory");
+  }
+}
