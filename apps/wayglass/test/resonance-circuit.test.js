@@ -26,3 +26,20 @@ test('source forgery cannot emit anything',()=>{
  assert.throws(()=>circuit.compose(proposal,{verifiedShipRoute:true,source:{...source,route_id:'other:ship'}}));
  assert.equal(events.length,0);
 });
+
+test('Feather raised by a sink prevents later sound, Observer and Return projection',()=>{
+ const events=[];let feather=false;
+ const circuit=createResonanceCircuit({emit:event=>{events.push(event);feather=true;},feather:()=>feather,audioAllowed:()=>true,hapticsAllowed:()=>true});
+ const result=circuit.compose(proposal,{verifiedShipRoute:true,source});
+ assert.equal(result.status,'feather-stopped');
+ assert.equal(result.delivered,1);
+ assert.deepEqual(events.map(e=>e.lane),['wyrdrune']);
+});
+test('a failing sink reports partial delivery and does not claim a checkpoint',()=>{
+ const events=[];
+ const circuit=createResonanceCircuit({emit:event=>{if(event.lane==='observer')throw Error('observer offline');events.push(event);}});
+ const result=circuit.compose(proposal,{verifiedShipRoute:true,source});
+ assert.equal(result.status,'projection-failed');
+ assert.equal(result.delivered,2);
+ assert.equal(events.some(e=>e.lane==='return'),false);
+});
