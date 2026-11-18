@@ -10,6 +10,7 @@ const DESTINATIONS=Object.freeze({
   'wayglass:living-watercolor':'contact',
   'wayglass:writing-room':'contact',
   'wayglass:world-deck':'creation',
+  'wayglass:cell-garden':'creation',
   'wayglass:wtl-interface-atelier':'creation',
   'wayglass:runtime-sandbox':'creation',
   'wayglass:universal-codex':'creation',

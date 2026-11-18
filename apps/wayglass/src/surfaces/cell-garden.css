@@ -1,0 +1,14 @@
+.wg-cell-garden{display:grid;gap:1rem;max-width:76rem;margin:auto;padding:1rem}
+.wg-cell-heading{padding:clamp(1rem,3vw,2rem);background:radial-gradient(ellipse at 82% 17%,rgba(126,220,182,.16),transparent 55%),radial-gradient(ellipse at 5% 90%,rgba(225,180,110,.13),transparent 55%)}
+.wg-cell-heading h1{font-size:clamp(1.6rem,4vw,2.8rem)}
+.wg-cell-controls{display:flex;flex-wrap:wrap;align-items:center;gap:.65rem;padding:1rem}
+.wg-cell-controls label{display:flex;align-items:center;flex-wrap:wrap;gap:.6rem}
+.wg-cell-controls select{max-width:100%;font:inherit;color:inherit;background:rgba(12,27,33,.94);border:1px solid rgba(150,230,208,.5);border-radius:.6rem;padding:.5rem}
+.wg-cell-controls button:disabled{opacity:.48;cursor:not-allowed}
+.wg-cell-family,.wg-cell-proposal{padding:1rem}
+.wg-cell-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:.8rem}
+.wg-cell-lineage{display:grid;gap:.3rem;min-width:0;padding:1rem;border:1px solid rgba(150,230,208,.38);border-radius:1.15rem;background:radial-gradient(circle at 85% 10%,rgba(218,180,110,.18),transparent 55%),linear-gradient(135deg,rgba(84,171,157,.12),rgba(27,50,72,.17));overflow-wrap:anywhere;box-shadow:inset 0 0 1.6rem rgba(112,232,186,.05)}
+.wg-cell-lineage[data-cell-status="divided"]{opacity:.65;border-style:dashed}
+.wg-cell-lineage span,.wg-cell-note{font-size:.88rem;line-height:1.5}
+.wg-cell-status{min-height:2rem}
+@media(prefers-reduced-motion:reduce){.wg-cell-garden *{animation:none!important;transition:none!important}}
