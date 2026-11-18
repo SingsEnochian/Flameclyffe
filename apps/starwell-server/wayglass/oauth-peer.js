@@ -166,7 +166,9 @@ function requestedScopes(value) {
 }
 
 function includesRequiredScope(scopes) {
-  return Array.isArray(scopes) && scopes.includes(OAUTH_SCOPE);
+  // This private bridge advertises exactly one scope. Never mint tokens for
+  // unrecognised scopes supplied by a client, even alongside the required one.
+  return Array.isArray(scopes) && scopes.length === 1 && scopes[0] === OAUTH_SCOPE;
 }
 
 function appendQuery(urlValue, params) {
