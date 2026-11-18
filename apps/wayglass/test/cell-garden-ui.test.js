@@ -66,3 +66,88 @@ test('native Cell Garden previews before explicit commit and never invokes a pro
  dispose();
  assert.equal(section.listeners.click,undefined);
 });
+
+
+test('Garden UI keeps acoustic exchange opt-in and proposes a hybrid without replacing parents',async()=>{
+ let starts=0,invoked=0;
+ const first={...offspring[0],acoustic_address:2,specialisation:null,memory_refs:[]};
+ const second={...offspring[1],acoustic_address:3,specialisation:null,memory_refs:[]};
+ let culture={schema:'wayglass.cell-mitosis/v0.1',status:'ready',revision:1,
+   cells:[{...founder,status:'divided',acoustic_address:1,memory_refs:[]},first,second],history:[]};
+ const scope={addEventListener(){},removeEventListener(){},
+   AudioContext:class {constructor(){starts++}},navigator:{mediaDevices:{getUserMedia(){invoked++}}}};
+ const sound={snapshot:()=>({feather_stopped:false}),feather(){},releaseFeather(){}};
+ const calls=[];
+ const fetchImpl=async(url,options)=>{
+  const body=options.body?JSON.parse(options.body):null;calls.push({url,body});
+  let response=culture;
+  if(url.endsWith('/specialise')){
+   const current=culture.cells.find(c=>c.cell_id===body.cell_id);
+   assert.equal(body.owner_confirmed,true);
+   culture={...culture,revision:culture.revision+1,
+     cells:culture.cells.map(c=>c===current?{...c,specialisation:body.role}:c)};
+   response={culture,receipt:{status:'committed-in-memory'}};
+  } else if(url.endsWith('/exchange')){
+   assert.equal(body.receiver_route_approved,true);
+   const receipt={schema:'wayglass.cell-exchange/v0.1',status:'delivered-in-memory',
+     from_id:body.from_id,to_id:body.to_id,message:body.message,
+     wtl:{source_hash:'a'.repeat(64)},acoustic:{playback_started:false}};
+   culture={...culture,revision:culture.revision+1,history:[...culture.history,receipt]};
+   response={culture,receipt};
+  }else if(url.endsWith('/fusion/preview')){
+   response={status:'proposed-not-committed',proposal_id:'fusion-fixture',
+     expected_revision:culture.revision,parent_ids:[first.cell_id,second.cell_id],
+     candidate:{cell_id:'cell:hybrid'}};
+  }else if(url.endsWith('/fusion/commit')){
+   assert.equal(body.owner_confirmed,true);
+   culture={...culture,revision:culture.revision+1,
+     cells:[...culture.cells,{cell_id:'cell:hybrid',parent_ids:[first.cell_id,second.cell_id],
+       generation:2,status:'active',specialisation:'hybrid',
+       twist:{orientation:1,phase:3},acoustic_address:4,memory_refs:[]}]};
+   response={culture,receipt:{status:'committed-in-memory'}};
+  }
+  return {ok:true,json:async()=>response};
+ };
+ const root=new Element('main',doc);
+ const off=mountWayglassCellGarden(root,{fetchImpl,scope,sound});
+ await next();
+ const section=root.children[0],select=section.children[1].children[0].children[0];
+ const ecology=section.children[5];
+ const role=ecology.children[2].children[0].children[0];
+ assert.equal(select.value,first.cell_id);
+ click(section,'specialise');await next();
+ assert.equal(culture.cells[1].specialisation,'resonance');
+ select.value=second.cell_id;role.value='observation';
+ click(section,'specialise');await next();
+ assert.equal(culture.cells[2].specialisation,'observation');
+ const from=ecology.children[3].children[0].children[0];
+ const to=ecology.children[3].children[1].children[0];
+ const observation=ecology.children[4].children[0].children[0];
+ const permission=ecology.children[4].children[1].children[0];
+ const send=ecology.children[4].children[2];
+ assert.equal(from.value,first.cell_id);
+ assert.equal(to.value,second.cell_id);
+ observation.value='different things, shared provenance';
+ section.listeners.input();
+ assert.equal(send.disabled,true,'no silent receiver opt-in');
+ permission.checked=true;section.listeners.change();
+ assert.equal(send.disabled,false);
+ click(section,'exchange');await next();
+ assert.equal(calls.at(-1).url.endsWith('/exchange'),true);
+ assert.equal(permission.checked,false,'new exchange requires new consent');
+ assert.equal(culture.history.length,1);
+ assert.equal(starts,0,'sound never autoplays');
+ assert.equal(invoked,0,'microphone never starts');
+ const propose=ecology.children[8].children[0];
+ assert.equal(propose.disabled,false);
+ click(section,'fusion-preview');await next();
+ assert.equal(culture.cells.length,3,'fusion preview does not add a new cell');
+ const commit=ecology.children[8].children[1];
+ assert.equal(commit.disabled,false);
+ click(section,'fusion-commit');await next();
+ assert.equal(culture.cells.length,4);
+ assert.equal(culture.cells[1].status,'active');
+ assert.equal(culture.cells[2].status,'active');
+ assert.equal(starts,0);
+ off();
+});
