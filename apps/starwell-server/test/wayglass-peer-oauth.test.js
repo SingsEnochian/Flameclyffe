@@ -319,6 +319,7 @@ test('MCP OAuth issuer cannot be replaced by forwarded-host or a public Host hea
   assert.equal(originFromRequest(local, {}), 'http://127.0.0.1:3000');
   assert.throws(() => originFromRequest({ headers: { host: 'attacker.example' } }, {}), /Non-local/);
   assert.equal(originFromRequest(local, { WAYGLASS_PUBLIC_ORIGIN: 'https://wayglass.example' }), 'https://wayglass.example');
+  assert.equal(originFromRequest(local, { WAYGLASS_PUBLIC_ORIGIN: 'http://127.0.0.1:3000' }), 'http://127.0.0.1:3000');
   assert.throws(() => originFromRequest(local, { WAYGLASS_PUBLIC_ORIGIN: 'http://wayglass.example' }), /HTTPS/);
   assert.throws(() => originFromRequest(local, { WAYGLASS_PUBLIC_ORIGIN: 'https://wayglass.example/path' }), /bare HTTPS/);
 });
