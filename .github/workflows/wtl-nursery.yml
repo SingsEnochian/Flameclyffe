@@ -49,3 +49,26 @@ jobs:
           curl -fsS http://127.0.0.1:3844/snapshot -o /tmp/wtl-paused.json
           node -e "const s=require('/tmp/wtl-paused.json');if(!s.paused)process.exit(1)"
           curl -fsS -X POST -H 'Origin: http://127.0.0.1:3844' http://127.0.0.1:3844/resume
+      - name: Assemble standalone nursery preview artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/wayglass-nursery-preview/src
+          cp apps/wayglass/nursery/index.html /tmp/wayglass-nursery-preview/index.html
+          cp apps/wayglass/src/wtl-cell-ecology.js /tmp/wayglass-nursery-preview/src/
+          cp apps/wayglass/src/wtl-cell-tissue.js /tmp/wayglass-nursery-preview/src/
+          cat > /tmp/wayglass-nursery-preview/README.txt <<'EOF'
+          Wayglass WTL Möbius Nursery · GitHub Pages preview package
+          Contains the actual WTL ecology and tissue modules.
+          This preview runs a tab-local colony, not a shared server.
+          To preview locally, serve this directory over HTTP (e.g. python -m http.server 8080).
+          Production GitHub Pages publishing remains gated on main.
+          EOF
+          test -s /tmp/wayglass-nursery-preview/src/wtl-cell-ecology.js
+      - name: Upload nursery preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayglass-mobius-nursery-preview
+          path: /tmp/wayglass-nursery-preview/
+          if-no-files-found: error
+          retention-days: 14
