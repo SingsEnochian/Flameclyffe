@@ -1,0 +1,85 @@
+name: WTL Nursery Gate
+on:
+  pull_request:
+    paths:
+      - 'apps/wayglass/nursery/**'
+      - 'apps/wayglass/wtl-nursery-server.mjs'
+      - 'apps/wayglass/src/wtl-cell-*.js'
+      - 'apps/wayglass/test/wtl-cell-*.test.js'
+      - '.github/workflows/wtl-nursery.yml'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  nursery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Run WTL cellular tests
+        run: node --test apps/wayglass/test/wtl-cell-*.test.js
+      - name: Verify owner-only nursery source and live server syntax
+        run: |
+          node --check apps/wayglass/wtl-nursery-server.mjs
+          node --check apps/wayglass/src/wtl-cell-ecology.js
+          node --check apps/wayglass/src/wtl-cell-tissue.js
+          node --check apps/wayglass/src/wtl-cell-program.js
+          node --check apps/wayglass/src/wtl-cell-peer-tests.js
+          node --check apps/wayglass/src/wtl-cell-harmony.js
+          node --check apps/wayglass/src/wtl-cell-sonic-space.js
+          test -s apps/wayglass/nursery/index.html
+          grep -Fq 'createCellEcology' apps/wayglass/nursery/index.html
+          if grep -Fq 'wayglass-nursery' .github/workflows/pages.yml; then
+            echo 'Owner-only nursery must not be published on public GitHub Pages' >&2
+            exit 1
+          fi
+      - name: Smoke-test persistent colony stream
+        shell: bash
+        run: |
+          set -euo pipefail
+          node apps/wayglass/wtl-nursery-server.mjs &
+          PID=$!
+          trap 'kill "$PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:3844/snapshot -o /tmp/wtl-nursery.json; then break; fi
+            sleep 0.25
+          done
+          node -e "const s=require('/tmp/wtl-nursery.json');if(s.cells.length<2)process.exit(1)"
+          curl -fsSN --max-time 3 http://127.0.0.1:3844/events > /tmp/wtl-events || test "$?" -eq 28
+          grep -Fq 'event: snapshot' /tmp/wtl-events
+          grep -Fq 'data: {' /tmp/wtl-events
+          curl -fsS -X POST -H 'Origin: http://127.0.0.1:3844' http://127.0.0.1:3844/feather
+          curl -fsS http://127.0.0.1:3844/snapshot -o /tmp/wtl-paused.json
+          node -e "const s=require('/tmp/wtl-paused.json');if(!s.paused)process.exit(1)"
+          curl -fsS -X POST -H 'Origin: http://127.0.0.1:3844' http://127.0.0.1:3844/resume
+      - name: Assemble standalone nursery preview artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/wayglass-nursery-preview/src
+          cp apps/wayglass/nursery/index.html /tmp/wayglass-nursery-preview/index.html
+          cp apps/wayglass/src/wtl-cell-ecology.js /tmp/wayglass-nursery-preview/src/
+          cp apps/wayglass/src/wtl-cell-tissue.js /tmp/wayglass-nursery-preview/src/
+          cp apps/wayglass/src/wtl-cell-program.js /tmp/wayglass-nursery-preview/src/
+          cp apps/wayglass/src/wtl-cell-peer-tests.js /tmp/wayglass-nursery-preview/src/
+          cp apps/wayglass/src/wtl-cell-harmony.js /tmp/wayglass-nursery-preview/src/
+          cp apps/wayglass/src/wtl-cell-sonic-space.js /tmp/wayglass-nursery-preview/src/
+          cat > /tmp/wayglass-nursery-preview/README.txt <<'EOF'
+          Wayglass WTL Möbius Nursery · private CI inspection artifact
+          Contains the actual WTL ecology and tissue modules.
+          This preview runs a tab-local colony, not a shared server.
+          To preview locally, serve this directory over HTTP (e.g. python -m http.server 8080).
+          This artifact is not a deployment, an authenticated host, or an approved public release.\nDo not publish this preview on GitHub Pages or another public host.\nUse only the owner-authenticated Wayglass integration release path.
+          EOF
+          test -s /tmp/wayglass-nursery-preview/src/wtl-cell-ecology.js
+      - name: Upload nursery preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayglass-mobius-nursery-preview
+          path: /tmp/wayglass-nursery-preview/
+          if-no-files-found: error
+          retention-days: 14
