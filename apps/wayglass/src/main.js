@@ -25,6 +25,7 @@ import { mountWtlInterfaceAtelier } from './surfaces/wtl-interface-atelier.js';
 import { mountWayglassRuntimeSandbox } from './surfaces/runtime-sandbox.js';
 import './wtl-interface-atelier.css';
 import './surfaces/cell-garden.css';
+import './faeberpunk-ship.css';
 import { mountWayglassWritingRoom } from './surfaces/writing-room.js';
 import { mountWayglassSystemsSurface } from './surfaces/systems.js';
 import { mountWayglassSpectrumSurface } from './surfaces/spectral-field.js';
