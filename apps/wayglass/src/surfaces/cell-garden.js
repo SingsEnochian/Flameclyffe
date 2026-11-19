@@ -365,7 +365,7 @@ export function mountWayglassCellGarden(root,{
     pending=null;
     status.textContent='Feather released by owner choice. Previous proposals remain invalid.';
    }
-   if(type==='refresh')status.textContent=culture.persistence?'Colony lineage recovered.':'Cell family refreshed.';
+   if(type==='refresh')status.textContent=culture.persistence?'Colony lineage ready.':'Cell family refreshed.';
   }catch(error){
    if(!disposed && error?.name!=='AbortError')status.textContent='Cell Garden: '+String(error?.message||error);
   }finally{
