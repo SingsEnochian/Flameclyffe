@@ -35,6 +35,7 @@ jobs:
           node --check apps/wayglass/src/wtl-cell-mobius.js
           node --check apps/wayglass/src/wtl-cell-digest.js
           node --check apps/wayglass/src/wtl-cell-runtime.js
+          node --check apps/wayglass/src/wtl-cell-worlds.js
           test -s apps/wayglass/nursery/index.html
           grep -Fq 'createCellEcology' apps/wayglass/nursery/index.html
           if grep -Fq 'wayglass-nursery' .github/workflows/pages.yml; then
@@ -74,6 +75,7 @@ jobs:
           cp apps/wayglass/src/wtl-cell-sonic-space.js /tmp/wayglass-nursery-preview/src/
           cp apps/wayglass/src/wtl-cell-mobius.js /tmp/wayglass-nursery-preview/src/
           cp apps/wayglass/src/wtl-cell-digest.js /tmp/wayglass-nursery-preview/src/
+          cp apps/wayglass/src/wtl-cell-worlds.js /tmp/wayglass-nursery-preview/src/
           # The preview has no repository lib/; give the runtime door a sibling copy.
           cp lib/wyrdrune/runtime.mjs /tmp/wayglass-nursery-preview/src/wyrdrune-runtime.mjs
           echo "export {createWyrdruneRuntime} from './wyrdrune-runtime.mjs';" > /tmp/wayglass-nursery-preview/src/wtl-cell-runtime.js

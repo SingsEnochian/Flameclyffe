@@ -69,20 +69,30 @@ test('every cell names itself, names are unique, and the choice is receipted',as
   assert.equal(new Set(living).size,living.length);
   for(const record of s.namings){
     assert.ok(record.carry_digest.startsWith('wce1:'));
-    assert.equal(record.chosen_in,'own choose phase voice + own syllables');
+    assert.equal(record.chosen_in,'own Wyrdrune choose phase: pick from own syllables by own voice');
+    assert.ok(record.candidates.includes(record.name)||/-\d+$/.test(record.name));
     assert.ok(record.syllables.every(x=>typeof x==='string'));
   }
   const daughter=s.cells.find(c=>c.parent_id);
   assert.ok(daughter&&s.mobius[daughter.id].parent===daughter.parent_id);
 });
 
-test('a name is decided only by the cell\'s own voice and syllables',()=>{
+test('a cell proposes its names inside its own Wyrdrune choose phase',async()=>{
   const syllables=['lu','vy','sol','ne','or','fen'];
-  const one=chooseName({voice:0.1487,syllables,sass:2});
-  assert.deepEqual(chooseName({voice:0.1487,syllables,sass:2}),one);
-  const again=chooseName({voice:0.1487,syllables,sass:2,taken:new Set([one.name])});
-  assert.notEqual(again.name,one.name);
-  assert.ok(again.attempts>1);
+  const source=cellSource('c9',{sass:2,curiosity:1,dialectBias:0},syllables);
+  assert.match(source,/let own = \["lu","vy","sol","ne","or","fen"\];/);
+  assert.match(source,/pick\(own, k\)/);
+  const {receipt}=await turnCell({address:'c9',genome:{sass:2,curiosity:1,dialectBias:0},carry:firstCarry(),syllables});
+  assert.equal(receipt.name_candidates.length,4);
+  for(const name of receipt.name_candidates){
+    // Three parts for a sassy cell, each one of its own syllables.
+    assert.match(name,/^(lu|vy|sol|ne|or|fen){3}$/);
+  }
+  const one=chooseName({candidates:receipt.name_candidates});
+  assert.equal(one.name,receipt.name_candidates[0].charAt(0).toUpperCase()+receipt.name_candidates[0].slice(1));
+  const second=chooseName({candidates:receipt.name_candidates,taken:new Set([one.name])});
+  assert.notEqual(second.name,one.name);
+  assert.throws(()=>chooseName({candidates:[]}),/at least one name/);
 });
 
 test('sound from the room reaches each cell through the band its twist faces',()=>{

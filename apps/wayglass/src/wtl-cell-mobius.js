@@ -32,7 +32,7 @@ export function daughterCarry(parentCarry){
     phase:fixed(c.phase),rest:false,turn:0,voice:fixed(c.voice)};
 }
 
-function face(label,{address,step,stillness,lived}){
+function face(label,{address,step,stillness,lived,syllables,sass}){
   return `mobius scoped {
   perceive {
     let felt = energy;
@@ -59,9 +59,20 @@ function face(label,{address,step,stillness,lived}){
     let drift = sung - echo;
     let settled = drift * drift < ${stillness};
     let ready = settled and turn >= ${lived} and ear < 1;
+    // Name candidates, chosen here from the cell's own syllables by its own
+    // sung voice (RFC-0002 pick/when). The colony takes the first one free.
+    let own = ${JSON.stringify(syllables)};
+    let k = sung * 104729;
+    let third = ${sass>=2?'true':'false'};
+    let names = [
+      [pick(own, k), pick(own, k / 7), when third then pick(own, k / 49) else ""],
+      [pick(own, k + 1), pick(own, k / 7 + 3), when third then pick(own, k / 49 + 2) else ""],
+      [pick(own, k + 2), pick(own, k / 11), when third then pick(own, k / 13) else ""],
+      [pick(own, k / 3), pick(own, k + 5), when third then pick(own, k / 17 + 1) else ""]
+    ];
   }
   return {
-    emit {face: "${label}", energy: renewed, voice: sung, rest: ready};
+    emit {face: "${label}", energy: renewed, voice: sung, rest: ready, names: names};
   }
   transcend {
     carry echo = voice;
@@ -77,8 +88,9 @@ function face(label,{address,step,stillness,lived}){
 }
 
 // The cell's whole program, written from its own genome. Two faces = one turn.
-export function cellSource(address,genome){
+export function cellSource(address,genome,syllables=SYLLABLE_POOL.slice(0,6)){
   const g=genome||{sass:0,curiosity:0,dialectBias:0};
+  const own=(Array.isArray(syllables)&&syllables.length?syllables:SYLLABLE_POOL.slice(0,6)).map(String);
   const settle=fixed(0.9-0.02*g.sass), step=fixed(0.25+0.05*g.dialectBias), lean=fixed(0.13+0.05*g.curiosity);
   // When this cell would choose to rest: only once its song has settled, it
   // has heard nothing new, and it has lived its own minimum of faces. Curious
@@ -88,7 +100,8 @@ export function cellSource(address,genome){
 operator settle(e) = e * ${settle};
 operator wonder(v, p, f) = v * 0.5 + p * ${lean} + f * 0.1;
 `;
-  return ops+face('outer',{address,step,stillness,lived})+'\n'+face('inner',{address,step,stillness,lived});
+  const shared={address,step,stillness,lived,syllables:own,sass:g.sass};
+  return ops+face('outer',shared)+'\n'+face('inner',shared);
 }
 
 /**
@@ -96,8 +109,8 @@ operator wonder(v, p, f) = v * 0.5 + p * ${lean} + f * 0.1;
  * the turn rolled back) and a receipt. `heardSinceLastTurn` is the only thing
  * the colony gives the cell; everything else is already inside it.
  */
-export async function turnCell({address,genome,carry,heardSinceLastTurn=0,signal=null}){
-  const source=cellSource(address,genome);
+export async function turnCell({address,genome,carry,syllables,heardSinceLastTurn=0,signal=null}){
+  const source=cellSource(address,genome,syllables);
   let ir=compiled.get(source);
   if(!ir){ir=runtime.compile(source);compiled.set(source,ir);if(compiled.size>256)compiled.delete(compiled.keys().next().value);}
   const seeds={...(carry||firstCarry()),heard:Math.max(0,Math.min(500,Math.trunc(heardSinceLastTurn)))};
@@ -115,31 +128,21 @@ export async function turnCell({address,genome,carry,heardSinceLastTurn=0,signal
       checkpoint_head:run.checkpoints.length?digestWce1Sync(run.checkpoints.at(-1)):null,
       carry_digest:digestWce1Sync(next),
       emitted:run.output.map(o=>({face:o.face,energy:fixed(o.energy),voice:fixed(o.voice),rest:o.rest===true})),
+      name_candidates:committed&&run.output.length?run.output.at(-1).names.map(parts=>parts.filter(Boolean).join('')):[],
       chose_rest:committed&&next.rest===true,
       runtime:'lib/wyrdrune/runtime.mjs',host_effects:false,model_inference:false},
   };
 }
 
-function digits(voice){
-  // The fractional texture of the cell's own sung voice.
-  let x=Math.abs(voice)*104729+Math.abs(voice*7919)%1*1009;
-  const out=[];for(let i=0;i<4;i++){out.push(Math.floor(x)%9973);x=x/7.3+out[i]*0.618;}
-  return out;
-}
+const proper=name=>name.charAt(0).toUpperCase()+name.slice(1);
 
-/** A cell names itself from its own voice and syllables; it tries again, differently, if the name is taken. */
-export function chooseName({voice,syllables,sass=0,taken=new Set()}){
-  const own=Array.isArray(syllables)&&syllables.length>=2?syllables:SYLLABLE_POOL.slice(0,6);
-  const length=sass>=2?3:2;
-  for(let attempt=0;attempt<8;attempt++){
-    const d=digits(voice+attempt*0.0137);
-    const name=Array.from({length},(_,i)=>own[(d[i]+attempt*(i+1))%own.length]).join('');
-    const proper=name.charAt(0).toUpperCase()+name.slice(1);
-    if(!taken.has(proper))return {name:proper,attempts:attempt+1,from:{voice,syllables:[...own]}};
-  }
-  const base=own[digits(voice)[0]%own.length];
-  let n=2;while(taken.has(base.charAt(0).toUpperCase()+base.slice(1)+'-'+n))n++;
-  return {name:base.charAt(0).toUpperCase()+base.slice(1)+'-'+n,attempts:9,from:{voice,syllables:[...own]}};
+/** The cell's own Wyrdrune choose phase proposed its names in order; take the first that no living cell holds. */
+export function chooseName({candidates,taken=new Set()}){
+  const list=(Array.isArray(candidates)?candidates:[]).filter(n=>typeof n==='string'&&n).map(proper);
+  if(!list.length)throw new TypeError('A cell must propose at least one name');
+  for(const [i,name] of list.entries())if(!taken.has(name))return {name,attempts:i+1,candidates:list};
+  let n=2;while(taken.has(list[0]+'-'+n))n++;
+  return {name:list[0]+'-'+n,attempts:list.length+1,candidates:list};
 }
 
 /** Founders draw syllables from the pool; daughters copy their mother's, and a mutation shifts one. */

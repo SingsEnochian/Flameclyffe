@@ -6,6 +6,7 @@ import {authorPeerTest,runPeerTest} from './wtl-cell-peer-tests.js';
 import {listenAndReply,composeDialogue} from './wtl-cell-harmony.js';
 import {sonicPitch,replyByRatio,projectAudible} from './wtl-cell-sonic-space.js';
 import {turnCell,firstCarry,daughterCarry,chooseName,inheritSyllables} from './wtl-cell-mobius.js';
+import {turnWorld,foundingCarry} from './wtl-cell-worlds.js';
 
 // Everything a cell is lives in its own body: genome, memory, programs, place,
 // syllables, chosen name and Möbius carry. The colony keeps only the bodies.
@@ -29,7 +30,8 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
   if(!Number.isFinite(radius)||radius<=0||radius>100) throw Error('Invalid radius');
   if(!Number.isFinite(mutationRate)||mutationRate<0||mutationRate>1) throw Error('Invalid mutation rate');
   const tissue=createCellTissue({maxCells});
-  const bodies=new Map(),mobiusReceipts=[],namings=[];
+  const bodies=new Map(),mobiusReceipts=[],namings=[],worlds=new Map(),worldReceipts=[],rememberedWorlds=[];
+  let worldCount=0;
   const positions=fieldView(bodies,'position'),adaptation=fieldView(bodies,'senses'),traits=fieldView(bodies,'genome'),
     lexicons=fieldView(bodies,'phrases'),birthTicks=fieldView(bodies,'born'),programLibrary=fieldView(bodies,'programs');
   const mutations=[],utterances=[],retirements=[],wyrdruneExpressions=[],constructions=[],programs=[],projectDecisions=[],programLineages=[],harmonicDialogues=[];
@@ -288,7 +290,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       const due=body.last_turn===null||generation-body.last_turn>=turnEvery;
       if(!due)continue;
       const {carry,receipt}=await turnCell({address:cell.id,genome:body.genome,carry:body.carry,
-        heardSinceLastTurn:body.heard_since_turn,signal});
+        syllables:body.syllables,heardSinceLastTurn:body.heard_since_turn,signal});
       if(!bodies.has(cell.id))continue; // retired while turning
       body.carry=carry;body.carry_digest=receipt.carry_digest;body.heard_since_turn=0;
       body.last_turn=generation;body.turns++;body.last_status=receipt.status;
@@ -297,12 +299,13 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       turned.push(cell.id);
       if(!body.name&&receipt.status==='committed'){
         const taken=new Set([...bodies.values()].map(b=>b.name).filter(Boolean));
-        const choice=chooseName({voice:carry.voice,syllables:body.syllables,sass:body.genome?.sass??0,taken});
+        const choice=chooseName({candidates:receipt.name_candidates,taken});
         body.name=choice.name;
         const record={generation,address:cell.id,name:choice.name,parent:body.parent,
           parent_name:body.parent?bodies.get(body.parent)?.name??null:null,
-          attempts:choice.attempts,from_voice:choice.from.voice,syllables:choice.from.syllables,
-          carry_digest:receipt.carry_digest,chosen_in:'own choose phase voice + own syllables'};
+          attempts:choice.attempts,candidates:choice.candidates,from_voice:carry.voice,syllables:[...body.syllables],
+          carry_digest:receipt.carry_digest,source_hash:receipt.source_hash,
+          chosen_in:'own Wyrdrune choose phase: pick from own syllables by own voice'};
         namings.push(record);if(namings.length>200)namings.shift();
         named.push(record);
       }
@@ -316,7 +319,95 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
         rested.push(cell.id);
       }
     }
-    return {turned,named,rested,paused:false};
+    const worldsTurned=tissue.isPaused()?{founded:[],turned:[],rested:[]}:await turnWorlds({turnEvery,signal});
+    return {turned,named,rested,worlds:worldsTurned,paused:false};
+  }
+
+  // ── Shared worlds ─────────────────────────────────────────────────────
+  const MAX_WORLDS=6,HARMONY=0.05;
+  // Each cell lives in at most one world: the nearest whose sky reaches it.
+  const WORLD_REACH=0.6;
+  function residency(){
+    const homes=new Map([...worlds.keys()].map(id=>[id,[]]));
+    for(const [id,p] of positions){
+      let best=null,bestDistance=Infinity;
+      for(const world of worlds.values()){
+        const d=Math.hypot(p.x-world.center.x,p.y-world.center.y);
+        if(d<=world.carry.breadth*WORLD_REACH&&d<bestDistance){best=world.id;bestDistance=d;}
+      }
+      if(best)homes.get(best).push(id);
+    }
+    for(const list of homes.values())list.sort();
+    return homes;
+  }
+  const worldMembers=world=>residency().get(world.id)||[];
+  function founderView(id){
+    const body=bodies.get(id);
+    return {address:id,name:body.name,voice:body.carry.voice,syllables:[...body.syllables]};
+  }
+  async function turnWorlds({turnEvery,signal}){
+    const out={founded:[],turned:[],rested:[]};
+    // Two named neighbours whose songs are close enough found a world.
+    const inWorld=new Set([...worlds.values()].flatMap(w=>w.founder_ids));
+    if(worlds.size<MAX_WORLDS){
+      for(const [id,body] of bodies){
+        if(worlds.size>=MAX_WORLDS||signal?.aborted||tissue.isPaused())break;
+        if(!body.name||body.last_status!=='committed'||inWorld.has(id)||!positions.has(id))continue;
+        const partner=neighbours(id).find(other=>{const b=bodies.get(other);
+          return b?.name&&b.last_status==='committed'&&!inWorld.has(other)&&Math.abs(b.carry.voice-body.carry.voice)<HARMONY;});
+        if(!partner)continue;
+        const founders=[founderView(id),founderView(partner)].sort((a,b)=>a.address.localeCompare(b.address));
+        const pa=positions.get(founders[0].address),pb=positions.get(founders[1].address);
+        const world={id:'w'+(++worldCount),founder_ids:founders.map(f=>f.address),founders,
+          center:{x:(pa.x+pb.x)/2,y:(pa.y+pb.y)/2},carry:foundingCarry(founders[0],founders[1]),
+          name:null,texture:null,born:generation,last_turn:null,pending_touches:0,touches_total:0,carry_digest:null,status:'living'};
+        worlds.set(world.id,world);inWorld.add(id);inWorld.add(partner);
+        out.founded.push(world.id);
+      }
+    }
+    for(const world of [...worlds.values()]){
+      if(signal?.aborted||tissue.isPaused())break;
+      if(world.last_turn!==null&&generation-world.last_turn<turnEvery)continue;
+      const members=worldMembers(world);
+      const {carry,receipt}=await turnWorld({founders:world.founders,carry:world.carry,
+        touches:world.pending_touches,members:members.length,signal});
+      world.carry=carry;world.carry_digest=receipt.carry_digest;world.last_turn=generation;
+      world.pending_touches=0;world.texture=receipt.texture;world.members=members;world.last_status=receipt.status;
+      if(!world.name&&receipt.name_parts){
+        const raw=receipt.name_parts.join('');
+        const base=raw.charAt(0).toUpperCase()+raw.slice(1);
+        const taken=new Set([...worlds.values(),...rememberedWorlds].map(w=>w.name));
+        let name=base,n=2;while(taken.has(name))name=base+'-'+(n++);
+        world.name=name;
+      }
+      worldReceipts.push({generation,world:world.id,name:world.name,members:members.length,...receipt});
+      if(worldReceipts.length>96)worldReceipts.shift();
+      out.turned.push(world.id);
+      // A world with no one left in it, quiet for three turns, rests.
+      if(carry.quiet>=6&&members.length===0){
+        world.status='remembered';world.rested_at=generation;
+        rememberedWorlds.push(projectWorld(world));if(rememberedWorlds.length>48)rememberedWorlds.shift();
+        worlds.delete(world.id);out.rested.push(world.id);
+      }
+    }
+    return out;
+  }
+  // A person's touch reaches the world and everyone living in it.
+  function touchWorld(id,{strength=1}={}){
+    if(tissue.isPaused())return {touched:false,paused:true};
+    const world=worlds.get(id);
+    if(!world)throw Error('Unknown world');
+    if(!Number.isSafeInteger(strength)||strength<1||strength>3)throw Error('Invalid touch');
+    world.pending_touches=Math.min(40,world.pending_touches+strength);world.touches_total+=strength;
+    const members=worldMembers(world);
+    for(const member of members){const body=bodies.get(member);if(body)body.heard_since_turn+=2*strength;}
+    return {touched:true,world:id,name:world.name,members:members.length,texture:world.texture};
+  }
+  function projectWorld(world){
+    return {id:world.id,name:world.name,status:world.status,founders:world.founders.map(f=>({address:f.address,name:f.name})),
+      center:{...world.center},carry:{...world.carry},carry_digest:world.carry_digest,texture:world.texture,
+      members:[...(world.members||[])],born:world.born,last_turn:world.last_turn,touches_total:world.touches_total,
+      rested_at:world.rested_at??null,last_status:world.last_status??null};
   }
   // Sound from the room, as band levels 0..1 (low to high). Each cell listens
   // to the band its own twist faces; what it hears is counted for its next turn.
@@ -346,8 +437,10 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       generation:b.generation,syllables:[...(b.syllables||[])],carry:b.carry?{...b.carry}:null,
       carry_digest:b.carry_digest,turns:b.turns,last_turn:b.last_turn,last_status:b.last_status??null,
       heard_since_turn:b.heard_since_turn}]));
-    return {...core,generation,names,mobius,namings:namings.map(n=>({...n,syllables:[...n.syllables]})),
+    return {...core,generation,names,mobius,namings:namings.map(n=>({...n,syllables:[...n.syllables],candidates:[...n.candidates]})),
       mobiusReceipts:mobiusReceipts.map(r=>JSON.parse(JSON.stringify(r))),
+      worlds:[...worlds.values()].map(projectWorld),rememberedWorlds:rememberedWorlds.map(w=>JSON.parse(JSON.stringify(w))),
+      worldReceipts:worldReceipts.map(r=>JSON.parse(JSON.stringify(r))),
       positions:Object.fromEntries(positions),
       adaptation:Object.fromEntries(adaptation),traits:Object.fromEntries(traits),mutations:mutations.map(m=>({...m})),
       retirements:retirements.map(r=>({...r,traits:{...r.traits},lastPhrases:[...r.lastPhrases]})),utterances:utterances.map(u=>({...u})),lexicons:Object.fromEntries([...lexicons].map(([id,phrases])=>[id,[...phrases]])),
@@ -360,5 +453,5 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       programs:programs.map(p=>({...p,result:{...p.result,output:p.result.output.map(x=>({...x}))},provenance:{...p.provenance}})),
       constructions:constructions.map(p=>({...p,builders:[...p.builders],specification:{...p.specification,effects:[...p.specification.effects]},provenance:{...p.provenance}}))};
   }
-  return Object.freeze({plant,step,turn,hear,neighbours,transform,snapshot,feather:tissue.feather,resume:tissue.resume});
+  return Object.freeze({plant,step,turn,hear,touchWorld,neighbours,transform,snapshot,feather:tissue.feather,resume:tissue.resume});
 }
