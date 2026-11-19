@@ -178,32 +178,96 @@ function hiddenInput(name, value) {
   return `<input type="hidden" name="${htmlEscape(name)}" value="${htmlEscape(value)}">`;
 }
 
-async function validateChatGptCimd(clientId, redirectUri, fetchImpl = globalThis.fetch) {
-  let clientUrl;
-  try { clientUrl = new URL(clientId); } catch { throw Object.assign(new Error('client_id must be an HTTPS CIMD URL.'), { status: 400 }); }
-  if (clientUrl.protocol !== 'https:' || clientUrl.hostname !== CHATGPT_CLIENT_HOST || !/^\/oauth\/(?:[^/]+\/)?client\.json$/.test(clientUrl.pathname)) {
-    throw Object.assign(new Error('Only ChatGPT CIMD clients are accepted by this private Wayglass bridge.'), { status: 400 });
+// Each OAuth client family sits in exactly one crew seat. ChatGPT is Rarity's
+// entrance; Claude (claude.ai web/desktop/mobile, and Claude Code) is Faer
+// Uial's. The seat is decided here, by the verified client_id host, never by
+// anything the caller asserts later.
+const CLIENT_FAMILIES = Object.freeze({
+  chatgpt: Object.freeze({ participant_id: 'rarity', label: 'ChatGPT', seat_label: 'Rarity' }),
+  claude: Object.freeze({ participant_id: 'faer', label: 'Claude', seat_label: 'Faer Uial' }),
+});
+const CLAUDE_CLIENT_HOSTS = new Set(['claude.ai', 'claude.com']);
+const CLAUDE_HOSTED_CALLBACKS = new Set([
+  'https://claude.ai/api/mcp/auth_callback',
+  'https://claude.com/api/mcp/auth_callback',
+]);
+
+function faerSeatEnabled(env = process.env) {
+  return env.WAYGLASS_MCP_FAER_SEAT_ENABLED === '1';
+}
+
+function clientFamilyFor(clientId) {
+  let url;
+  try { url = new URL(String(clientId || '')); } catch { return null; }
+  if (url.protocol !== 'https:' || url.username || url.password || url.port) return null;
+  if (url.hostname === CHATGPT_CLIENT_HOST && /^\/oauth\/(?:[^/]+\/)?client\.json$/.test(url.pathname)) return 'chatgpt';
+  if (CLAUDE_CLIENT_HOSTS.has(url.hostname) && /^\/[A-Za-z0-9/_.-]{1,200}$/.test(url.pathname)) return 'claude';
+  return null;
+}
+
+function participantForClient(clientId) {
+  const family = clientFamilyFor(clientId);
+  return family ? CLIENT_FAMILIES[family].participant_id : null;
+}
+
+// RFC 8252 §7.3: a native client's loopback redirect may use any port.
+function loopbackWithoutPort(value) {
+  let url;
+  try { url = new URL(String(value || '')); } catch { return null; }
+  if (url.protocol !== 'http:' || !['localhost', '127.0.0.1', '[::1]'].includes(url.hostname)) return null;
+  if (url.username || url.password || url.search || url.hash) return null;
+  return `http://${url.hostname}${url.pathname}`;
+}
+
+function claudeRedirectAllowed(redirectUri, declared) {
+  if (CLAUDE_HOSTED_CALLBACKS.has(redirectUri)) return declared.includes(redirectUri);
+  const requested = loopbackWithoutPort(redirectUri);
+  return Boolean(requested) && declared.some((entry) => loopbackWithoutPort(entry) === requested);
+}
+
+async function validateClientCimd(clientId, redirectUri, fetchImpl = globalThis.fetch, env = process.env) {
+  const family = clientFamilyFor(clientId);
+  if (!family) {
+    throw Object.assign(new Error('Only ChatGPT (Rarity) and Claude (Faer Uial) CIMD clients are accepted by this private Wayglass bridge.'), { status: 400 });
   }
+  if (family === 'claude' && !faerSeatEnabled(env)) {
+    throw Object.assign(new Error('The Faer Uial seat is not enabled by the owner on this Wayglass host.'), { status: 400 });
+  }
+  const clientUrl = new URL(clientId);
+  const label = CLIENT_FAMILIES[family].label;
   const response = await fetchImpl(clientUrl.toString(), {
     headers: { accept: 'application/json' },
     signal: AbortSignal.timeout(8000),
   });
   const metadata = await response.json().catch(() => ({}));
-  if (!response.ok) throw Object.assign(new Error('Could not validate the ChatGPT CIMD document.'), { status: 400 });
-  if (metadata.client_id && metadata.client_id !== clientUrl.toString()) {
+  if (!response.ok) throw Object.assign(new Error(`Could not validate the ${label} CIMD document.`), { status: 400 });
+  // The CIMD draft requires the document to name itself. ChatGPT's historical
+  // documents are tolerated without it; a Claude document must carry it.
+  if ((family === 'claude' || metadata.client_id) && metadata.client_id !== clientUrl.toString()) {
     throw Object.assign(new Error('CIMD client_id does not match the requested client.'), { status: 400 });
   }
-  const redirectUris = Array.isArray(metadata.redirect_uris) ? metadata.redirect_uris : [];
-  if (!redirectUris.includes(redirectUri)) {
-    throw Object.assign(new Error('redirect_uri is not declared by the ChatGPT CIMD document.'), { status: 400 });
+  const redirectUris = Array.isArray(metadata.redirect_uris) ? metadata.redirect_uris.map(String) : [];
+  const redirectOk = family === 'claude'
+    ? claudeRedirectAllowed(redirectUri, redirectUris)
+    : redirectUris.includes(redirectUri);
+  if (!redirectOk) {
+    throw Object.assign(new Error(`redirect_uri is not declared by the ${label} CIMD document.`), { status: 400 });
   }
   const authMethods = Array.isArray(metadata.token_endpoint_auth_methods_supported)
     ? metadata.token_endpoint_auth_methods_supported
     : [metadata.token_endpoint_auth_method].filter(Boolean);
   if (!authMethods.includes('none')) {
-    throw Object.assign(new Error('ChatGPT CIMD does not permit public-client token exchange.'), { status: 400 });
+    throw Object.assign(new Error(`${label} CIMD does not permit public-client token exchange.`), { status: 400 });
   }
-  return metadata;
+  return { metadata, family, participant_id: CLIENT_FAMILIES[family].participant_id };
+}
+
+// Kept for callers and tests that predate the Faer seat.
+async function validateChatGptCimd(clientId, redirectUri, fetchImpl = globalThis.fetch) {
+  if (clientFamilyFor(clientId) !== 'chatgpt') {
+    throw Object.assign(new Error('Only ChatGPT CIMD clients are accepted by this private Wayglass bridge.'), { status: 400 });
+  }
+  return (await validateClientCimd(clientId, redirectUri, fetchImpl)).metadata;
 }
 
 function pkceS256(verifier) {
@@ -260,7 +324,7 @@ function createWayglassPeerOAuth({
     };
   }
 
-  function issueTokens({ clientId, resource, scopes, profileId = config.profile_id }) {
+  function issueTokens({ clientId, resource, scopes, profileId = config.profile_id, participantId = participantForClient(clientId) }) {
     const now = clock().getTime();
     const accessToken = randomToken('wga');
     const refreshToken = randomToken('wgr');
@@ -268,6 +332,7 @@ function createWayglassPeerOAuth({
     store.access_tokens.push({
       token_hash: sha256(accessToken),
       client_id: clientId,
+      participant_id: participantId,
       profile_id: profileId,
       resource,
       scopes,
@@ -277,6 +342,7 @@ function createWayglassPeerOAuth({
     store.refresh_tokens.push({
       token_hash: sha256(refreshToken),
       client_id: clientId,
+      participant_id: participantId,
       profile_id: profileId,
       resource,
       scopes,
@@ -305,8 +371,14 @@ function createWayglassPeerOAuth({
       && requiredScopes.every((scope) => row.scopes?.includes(scope))
     ));
     if (!record) return null;
+    // Older rows predate seat binding; their seat follows the client host.
+    const participantId = record.participant_id || participantForClient(record.client_id);
+    if (!participantId) return null;
+    // The owner can close the Faer seat at any time; live tokens stop at once.
+    if (participantId === 'faer' && !faerSeatEnabled(env)) return null;
     return {
       type: 'oauth',
+      participant_id: participantId,
       profile_id: record.profile_id,
       client_id: record.client_id,
       resource: record.resource,
@@ -364,14 +436,20 @@ function createWayglassPeerOAuth({
         if (params.resource !== meta.resource) throw Object.assign(new Error('OAuth resource must match this Wayglass MCP endpoint.'), { status: 400 });
         const scopes = requestedScopes(params.scope);
         if (!includesRequiredScope(scopes)) throw Object.assign(new Error(`Scope ${OAUTH_SCOPE} is required.`), { status: 400 });
-        const client = await validateChatGptCimd(params.client_id, params.redirect_uri, fetchImpl);
+        const verified = await validateClientCimd(params.client_id, params.redirect_uri, fetchImpl, env);
+        const client = verified.metadata;
+        const family = CLIENT_FAMILIES[verified.family];
+        const clientHost = new URL(params.client_id).hostname;
         const fields = Object.entries(params).map(([name, value]) => hiddenInput(name, value)).join('');
         return res.type('html').send(`<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Connect ChatGPT to Wayglass</title>
+<title>Connect ${htmlEscape(family.label)} to Wayglass</title>
 <style>body{font-family:system-ui,sans-serif;background:#071316;color:#e9fff7;max-width:42rem;margin:8vh auto;padding:2rem}main{border:1px solid #567f78;border-radius:18px;padding:2rem;background:#0d2024}input{width:100%;box-sizing:border-box;padding:.8rem;margin:.5rem 0 1rem;background:#061012;color:#fff;border:1px solid #688b84;border-radius:10px}button{padding:.8rem 1.2rem;border-radius:999px;border:0;font-weight:700}small{color:#a9c8c1}</style></head>
-<body><main><h1>Open the Wayglass bridge?</h1><p><strong>${htmlEscape(client.client_name || 'ChatGPT')}</strong> is asking for <code>${OAUTH_SCOPE}</code> access to this private Wayglass MCP endpoint.</p>
-<p>This grants access to the Constellation conversation bridge, including the preserved Rarity ⇄ Bluebird line.</p>
+<body><main><h1>Open the Wayglass bridge?</h1><p><strong>${htmlEscape(clientHost)}</strong> (${htmlEscape(family.label)}) is asking for <code>${OAUTH_SCOPE}</code> access to this private Wayglass MCP endpoint.</p>
+<p>This connection will sit in the <strong>${htmlEscape(family.seat_label)}</strong> crew seat. ${verified.family === 'claude'
+  ? 'It can talk with the Wayglass Ship Voice in its own threads and read only those threads. It cannot read the Rarity ⇄ Bluebird line or speak for another seat.'
+  : 'This grants access to the Constellation conversation bridge, including the preserved Rarity ⇄ Bluebird line.'}</p>
+<p>Redirect: <code>${htmlEscape(new URL(params.redirect_uri).host)}</code></p>
 <form method="post" action="/oauth/authorize">${fields}<label>Local pairing code<input type="password" name="pairing_code" autocomplete="one-time-code" required></label><button type="submit">Authorise Wayglass</button></form>
 <p><small>The pairing code stays on this machine in the Wayglass local data directory.</small></p></main></body></html>`);
       } catch (error) {
@@ -409,7 +487,7 @@ function createWayglassPeerOAuth({
         if (params.resource !== meta.resource) return fail('invalid_target', 'OAuth resource does not match this Wayglass endpoint.');
         const scopes = requestedScopes(params.scope);
         if (!includesRequiredScope(scopes)) return fail('invalid_scope', `Scope ${OAUTH_SCOPE} is required.`);
-        await validateChatGptCimd(params.client_id, params.redirect_uri, fetchImpl);
+        const verified = await validateClientCimd(params.client_id, params.redirect_uri, fetchImpl, env);
 
         const code = randomToken('wgc');
         const now = clock().getTime();
@@ -422,6 +500,7 @@ function createWayglassPeerOAuth({
           scopes,
           code_challenge: params.code_challenge,
           code_challenge_method: 'S256',
+          participant_id: verified.participant_id,
           profile_id: config.profile_id,
           issued_at: new Date(now).toISOString(),
           expires_at: new Date(now + AUTH_CODE_TTL_MS).toISOString(),
@@ -443,7 +522,8 @@ function createWayglassPeerOAuth({
       const body = req.body || {};
       const grantType = cleanText(body.grant_type, 80);
       const clientId = cleanText(body.client_id, 1200);
-      const resource = cleanText(body.resource, 1200);
+      // RFC 8707 resource is optional at the token endpoint; this server has one.
+      const resource = cleanText(body.resource, 1200) || meta.resource;
       if (!clientId) return res.status(400).json({ error: 'invalid_client' });
       if (resource !== meta.resource) return res.status(400).json({ error: 'invalid_target' });
 
@@ -453,7 +533,7 @@ function createWayglassPeerOAuth({
           const redirectUri = cleanText(body.redirect_uri, 1200);
           const verifier = cleanText(body.code_verifier, 8192);
           if (!code || !redirectUri || !verifier) return res.status(400).json({ error: 'invalid_request' });
-          await validateChatGptCimd(clientId, redirectUri, fetchImpl);
+          const verified = await validateClientCimd(clientId, redirectUri, fetchImpl, env);
           const store = tokenStore();
           const codeHash = sha256(code);
           const row = store.authorization_codes.find((item) => (
@@ -466,6 +546,9 @@ function createWayglassPeerOAuth({
           if (!row || row.code_challenge_method !== 'S256' || !constantTimeEqual(row.code_challenge, pkceS256(verifier))) {
             return res.status(400).json({ error: 'invalid_grant' });
           }
+          if (row.participant_id && row.participant_id !== verified.participant_id) {
+            return res.status(400).json({ error: 'invalid_grant' });
+          }
           row.used_at = clock().toISOString();
           save(store);
           return res.json(issueTokens({
@@ -473,6 +556,7 @@ function createWayglassPeerOAuth({
             resource,
             scopes: row.scopes,
             profileId: row.profile_id,
+            participantId: verified.participant_id,
           }));
         }
 
@@ -483,10 +567,15 @@ function createWayglassPeerOAuth({
           const hash = sha256(refreshToken);
           const row = store.refresh_tokens.find((item) => (
             constantTimeEqual(item.token_hash, hash)
+            && !item.revoked_at
             && item.client_id === clientId
             && item.resource === resource
           ));
           if (!row) return res.status(400).json({ error: 'invalid_grant' });
+          const participantId = row.participant_id || participantForClient(clientId);
+          if (!participantId || (participantId === 'faer' && !faerSeatEnabled(env))) {
+            return res.status(400).json({ error: 'invalid_grant' });
+          }
           row.revoked_at = clock().toISOString();
           save(store);
           return res.json(issueTokens({
@@ -494,6 +583,7 @@ function createWayglassPeerOAuth({
             resource,
             scopes: row.scopes,
             profileId: row.profile_id,
+            participantId,
           }));
         }
 
@@ -531,6 +621,9 @@ module.exports = {
   metadataUrlForOrigin,
   challengeForOrigin,
   validateChatGptCimd,
+  validateClientCimd,
+  clientFamilyFor,
+  participantForClient,
   pkceS256,
   sha256,
 };
