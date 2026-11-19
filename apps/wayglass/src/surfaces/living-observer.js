@@ -64,8 +64,7 @@ function drawAstrolabe(canvas, packet, time, focus, lowStim, {rotation = 0, lens
       g.fillRect(x-1,y-1,2,2);g.globalAlpha=1;
     }
   }
-  // Four read-only Quad evidence arcs. Empty sources render darker; counts never
-  // become a fictional emotional or cognitive measurement.
+  // Four Quad arcs show the availability of their respective sources.
   if (quad?.schema === 'wayglass.quad-ship-observation/v1') {
     const ids=['deep_observer_events','observer_measurements','wayglass_route_receipts','house_runtime_events'];
     ids.forEach((id,i)=>{
@@ -235,7 +234,7 @@ export async function mountWayglassLivingObserver(root) {
     '</section>',
     '<section class="observer-wonder glass-panel" aria-label="Wonder light and continuity">',
     '<div class="observer-wonder-head"><div><p class="eyebrow">The Glass That Remembers · Wonder #447</p>',
-    '<h2>Provenance in light</h2><p class="tiny">Route and Commons activity can illuminate the glass. A ripple is not proof of truth, identity, consciousness or restored memory.</p></div>',
+    '<h2>Provenance in light</h2><p class="tiny">Route and Commons activity can illuminate the glass. Each ripple traces activity on its recorded route or in Commons.</p></div>',
     '<button type="button" class="glass-chip" data-wonder-demo>Try a synthetic ripple</button></div>',
     '<p class="observer-wonder-empty" data-wonder-state role="status">No light events observed yet. Continuity unknown until a verified receipt is available.</p>',
     '<ol class="observer-wonder-events" data-wonder-events aria-label="Latest light events"></ol>',

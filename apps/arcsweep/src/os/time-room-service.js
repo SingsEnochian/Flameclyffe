@@ -184,7 +184,7 @@ export const TIME_ROOM_UNIVERSES = Object.freeze([
       { clock_id: 'encounter-window', layer: 'mission-time', label: 'Encounter Window', question: 'What can happen before the next contact?' },
     ],
     entry_questions: ['What is the current stardate?', 'What is the ship doing before the scene opens?', 'What has the crew already logged?'],
-    can_happen: ['captain log', 'mission beat', 'bridge roleplay', 'ship continuity recovery'],
+    can_happen: ['captain log', 'mission beat', 'in-world bridge encounter', 'ship continuity recovery'],
     arrival_signals: ['bridge-light hum', 'log header', 'course bearing'],
   }),
   profile({

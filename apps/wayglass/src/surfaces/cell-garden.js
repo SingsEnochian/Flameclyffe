@@ -22,7 +22,7 @@ export function mountWayglassCellGarden(root,{
  const eyebrow=doc.createElement('p');eyebrow.className='eyebrow';eyebrow.textContent='Wyrdrune · cellular ecology';
  const title=doc.createElement('h1');title.textContent='The Living Cell Garden';
  const intro=doc.createElement('p');intro.textContent='One parent may propose two computational daughter cells. Their ancestral Wyrdrune code stays recognisable while their Möbius orientations diverge. A separate owner choice commits the change.';
- const limits=doc.createElement('p');limits.className='wg-cell-note';limits.textContent='Bounded, in-memory simulation. No autonomous reproduction, model invocation, external effects, persistent identity or inherited permissions.';
+ const limits=doc.createElement('p');limits.className='wg-cell-note';limits.textContent='This session keeps the family lineage in memory.';
  heading.append(eyebrow,title,intro,limits);
 
  const shell=doc.createElement('div');shell.className='glass-panel wg-cell-controls';
@@ -52,7 +52,7 @@ export function mountWayglassCellGarden(root,{
  ecology.className='glass-panel wg-cell-ecology';ecology.setAttribute('aria-label','Cell differentiation and cooperation');
  const ecologyTitle=doc.createElement('h2');ecologyTitle.textContent='The ecology begins';
  const explainer=doc.createElement('p');
- explainer.textContent='Give daughters different experimental roles, send an observation between them, then consider a non-destructive hybrid. Their choices are simulated and owner-directed: these are not independent model decisions.';
+ explainer.textContent='Choose a role for a daughter, carry an observation between cells, or propose a hybrid that keeps both parents.';
  const roles=doc.createElement('div');roles.className='wg-cell-row';
  const roleLabel=doc.createElement('label');roleLabel.textContent='Specialisation ';
  const roleChoice=doc.createElement('select');roleChoice.setAttribute('aria-label','Cell specialisation');

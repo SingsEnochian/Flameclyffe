@@ -14,7 +14,7 @@ const PROFILES=Object.freeze({
     rootHz:146.83,bpm:54,wave:'triangle',texture:'A low confined drone with a restrained, uneven upper voice',
     meaning:'The anchor suggests a confined setting; a second line holds uncertainty rather than a verdict.',
     listenFor:'Listen for tension between the two lines and the quiet return of the low anchor.',
-    why:'The cues orient a fictional investigation without assuming whether any in-world explanation is true.',
+    why:'The cues orient the investigation within The Evil Gene and leave the cause open.',
     provenance:'Wayglass original suggested film-world sound design, not a film soundtrack or canonical frequency',
   }),
 });

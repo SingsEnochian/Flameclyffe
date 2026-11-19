@@ -20,7 +20,7 @@ export const ANCESTRAL_PUBLIC_MANIFEST = Object.freeze({
         'distributed-cognition',
         'relationship-as-state-bearing-entity',
       ]),
-      notes: 'Creator-owned original-fiction root. Public manifest stores fingerprints only; source prose remains private.',
+      notes: 'Creator-owned source for an original world. The public manifest contains fingerprints. The source prose stays private.',
     }),
     Object.freeze({
       root_id: 'ancestral:kalladia-cycle',
@@ -38,7 +38,7 @@ export const ANCESTRAL_PUBLIC_MANIFEST = Object.freeze({
         'somatic-state-display',
         'relationship-as-anchor',
       ]),
-      notes: 'Creator-owned original-fiction root. Public manifest stores fingerprints only; source prose remains private.',
+      notes: 'Creator-owned source for an original world. The public manifest contains fingerprints. The source prose stays private.',
     }),
   ]),
   correspondences: Object.freeze([

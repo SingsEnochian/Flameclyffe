@@ -168,11 +168,11 @@ export function completeWorldAppletFields(world, { terraPrime = false, now = new
   changed = fill(world.competencies, 'worldSystems', terraPrime ? 'Contemporary Earth social, scientific, technological and cultural systems, bounded by actual knowledge and access.' : unknown(world, 'world systems familiarity')) || changed;
   changed = fill(world.competencies, 'movement', terraPrime ? 'Current real mobility and transport capabilities; accessibility-aware.' : unknown(world, 'movement and travel competence')) || changed;
   changed = fill(world.competencies, 'socialContext', terraPrime ? 'Current relationships, communities, institutions and cultural context; live state takes precedence over static canon.' : unknown(world, 'social context')) || changed;
-  changed = fill(world.competencies, 'accessibility', terraPrime ? 'Use current real accommodations and constraints; no fictional override.' : unknown(world, 'competency accessibility')) || changed;
+  changed = fill(world.competencies, 'accessibility', terraPrime ? 'Use the current Waking World accommodations and conditions.' : unknown(world, 'competency accessibility')) || changed;
 
   world.safetyWeave ||= {};
   changed = fill(world.safetyWeave, 'general', 'I remain safe, capable of choosing, and able to return by intention.') || changed;
-  changed = fill(world.safetyWeave, 'exclusions', terraPrime ? 'No fictional rule may overwrite empirical Waking World state, consent, bodily reality or current obligations.' : 'No script converts another participant into a puppet or removes current consent, refusal, privacy or return.') || changed;
+  changed = fill(world.safetyWeave, 'exclusions', terraPrime ? 'Waking World conditions, consent, bodily needs and current obligations retain their own authority.' : 'No script converts another participant into a puppet or removes current consent, refusal, privacy or return.') || changed;
   if (world.safetyWeave.returnAlwaysAvailable === undefined) { world.safetyWeave.returnAlwaysAvailable = true; changed = true; }
   if (world.safetyWeave.anchorIntentGated === undefined) { world.safetyWeave.anchorIntentGated = true; changed = true; }
 

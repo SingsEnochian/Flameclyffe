@@ -172,7 +172,7 @@ The current repository includes local catalogue/synthetic access probes, but an 
 
 IC:
 
-- advance the fiction;
+- continue within the named world;
 - preserve character ownership;
 - do not decide another owner's character's private thoughts, irreversible choices, or unoffered outcomes;
 - leave playable hooks.

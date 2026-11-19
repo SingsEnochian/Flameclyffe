@@ -13,7 +13,7 @@ Core preflight inspected on `wayglass/constellation-runtime-001`:
 
 The complete target is kernel-owned participant continuity plus durable accumulated
 learning, world-specific dossiers, equipment lineage, particular relationships,
-fictional treasury, provider-neutral model context and explicitly adopted OS evolution.
+world-scoped travelling treasury, provider-neutral model context and explicitly adopted OS evolution.
 The UI presents those objects; providers generate proposals; neither owns identity.
 
 Existing PR #436 entry inspection binds a continuation packet to one world. Do not
@@ -27,7 +27,7 @@ identity, relationships, next_owner and unresolved alternatives.
 participant ID. `record(event, actor)` requires a host-supplied authorisation callback.
 `state()` reads and validates history. `dossier(world)` projects active capability grants
 through an explicitly supplied world rules reference and translation map.
-`compileContext(world)` returns labelled fictional context and model instructions.
+`compileContext(world)` returns a source-attributed world dossier and model instructions.
 
 The host owns authentication, accepted evidence verification, world-profile provenance,
 durable storage and model dispatch. A host must resolve `outcome_ref` and `source_ref`

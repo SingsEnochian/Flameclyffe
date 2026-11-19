@@ -67,6 +67,25 @@ test('Watercolour legacy request derives Wayglass ship seat, preserving steward 
     assert.equal(blank.status,200);
     assert.equal((await blank.json()).receipt.input_wyrdrune,undefined);
     assert.match(seen[1].body.messages.at(-1).content,/Dream mode/);
+
+    const gardenInvite={
+      route_id:'wayglass:ship',surface_id:'wayglass:cell-garden',input:'How would you like to appear?',
+    };
+    assert.equal((await request(gardenInvite,false)).status,401);
+    const direct=await request(gardenInvite);
+    assert.equal(direct.status,200);
+    assert.equal((await direct.json()).receipt.channel,'OOC');
+    assert.match(seen[2].body.messages[0].content,/Dialogue context: direct/);
+    const inWorld=await request({...gardenInvite,interaction:{channel:'IC'}});
+    assert.equal(inWorld.status,200);
+    assert.equal((await inWorld.json()).receipt.channel,'IC');
+    assert.match(seen[3].body.messages[0].content,/Dialogue context: in-world/);
+    assert.match(seen[3].body.messages[0].content,/Answer in your own voice/);
+    assert.doesNotMatch(seen[3].body.messages[0].content,/\bfiction(?:al)?\b|roleplay/i);
+    const malformed=await request({...gardenInvite,interaction:{channel:'bad-channel'}});
+    assert.equal(malformed.status,422);
+    assert.match((await malformed.json()).error,/unknown dialogue context/);
+    assert.equal(seen.length,4);
   }finally{
     server.closeAllConnections();
     await new Promise(resolve=>server.close(resolve));

@@ -46,7 +46,7 @@ async function enter(page){
 async function verify(page,profile){
  const room=page.locator('[data-surface="altered-timeline"]');
  const original=page.locator('[data-alt-original-track]'),altered=page.locator('[data-alt-child-track]');
- assert.match(await original.innerText(),/fictional council debates/);
+ assert.match(await original.innerText(),/council debates/);
  assert.match(await altered.innerText(),/unwritten/);
  await page.screenshot({path:resolve(out,profile+'-original.png'),fullPage:true});
  await page.locator('[data-alt-strength]').evaluate(el=>{el.value='80';el.dispatchEvent(new Event('input',{bubbles:true}));});
@@ -60,7 +60,7 @@ async function verify(page,profile){
  const firstStatus=await page.locator('[data-alt-status]').innerText();
  assert.equal(await room.getAttribute('data-altered-state'),'branched',
   'Altered Timeline did not branch: '+firstStatus);
- assert.match(await original.innerText(),/fictional council debates/,'Source must remain unchanged');
+ assert.match(await original.innerText(),/council debates/,'Source must remain unchanged');
  assert.match(await altered.innerText(),/limited pilot with independent audits/);
  assert.equal(await room.locator('[data-alt-ripples] meter').count(),4);
  assert.equal(await page.locator('[data-alt-original]').isDisabled(),true);
@@ -82,7 +82,7 @@ async function verify(page,profile){
  assert.match(await page.locator('[data-alt-child-track]').innerText(),/unwritten/);
  await page.locator('[data-alt-restore]').click();
  assert.match(await page.locator('[data-alt-child-track]').innerText(),/limited pilot/);
- assert.match(await page.locator('[data-alt-original-track]').innerText(),/fictional council debates/);
+ assert.match(await page.locator('[data-alt-original-track]').innerText(),/council debates/);
  await page.locator('[data-alt-feather]').click();
  assert.equal(await room.locator('[data-alt-introduce]').isDisabled(),true);
  assert.equal(await room.getAttribute('data-altered-state'),'paused');
@@ -106,7 +106,7 @@ async function verify(page,profile){
  await page.locator('[data-alt-host-branch]').selectOption({index:1});
  await page.locator('[data-alt-host-restore]').click();
  await page.waitForFunction(()=>document.querySelector('[data-alt-status]')?.textContent?.includes('Returned from House revision'));
- assert.match(await original.innerText(),/fictional council debates/);
+ assert.match(await original.innerText(),/council debates/);
  assert.match(await altered.innerText(),/limited pilot with independent audits/);
  assert.match(await page.locator('[data-alt-evidence-reading]').innerText(),/coevolution: observational-support/);
  await page.emulateMedia({reducedMotion:'reduce'});

@@ -7,7 +7,7 @@ export const STORY_MODE_CONTRACT = Object.freeze({
   value: STORY_MODE_VALUE,
   label: 'Story Mode',
   texture: 'continuous-narrative',
-  purpose: 'Run an inhabitable scene as narrative rather than treating it as generic writing or turn-by-turn roleplay.',
+  purpose: 'Run an inhabitable scene with continuous narrative and room for participant choices.',
   continuity: Object.freeze({
     preserve_pov: true,
     preserve_tense: true,

@@ -153,13 +153,13 @@ export function formatObservationForLLM(packet) {
   // remains unchanged; this text travels only with a user-initiated Writing Room turn.
   return [
     '[Wayglass Living Observer, explicitly shared by the user]',
-    'Direct browser/application readings (not hidden-state detection):',
+    'Browser and application readings:',
     JSON.stringify(packet.direct),
-    'Interpretive UI projection (not a measurement of identity, consciousness, emotion or canon):',
+    'Visual mapping derived from the recorded readings:',
     JSON.stringify(packet.projection.variables),
     'Selected channel explanation: ' + JSON.stringify(describeWayglassObserverChannel(packet, packet.projection.focus)),
     'Transformation provenance: ' + packet.transformation_receipt.rule,
-    'You may explain the interface readings and their visual mapping. Do not present projection variables as observations of any person or AI interior state.',
+    'Explain what the interface observed and how it mapped those readings to the display.',
     '[/Wayglass Living Observer]',
   ].join('\n');
 }

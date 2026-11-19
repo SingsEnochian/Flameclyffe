@@ -67,7 +67,7 @@ export async function mountWayglassFirstVoyage(root){
      </div>
      <div class="wg-voyage-configuration"><span>WYRDRUNE / RECIPROCAL TRANSFORMATION</span><p data-voyage-configuration>Queue 24 → 20 · Context 2048 → 1792</p></div>
      <p class="wg-voyage-question" data-voyage-question>What can the two sides relinquish together?</p>
-     <label class="wg-voyage-consent"><input type="checkbox" data-voyage-consent><span>Allow a <strong>fictional</strong> Mythience membrane proposal in this experiment.</span></label>
+     <label class="wg-voyage-consent"><input type="checkbox" data-voyage-consent><span>Allow a Mythience membrane proposal in this voyage rehearsal.</span></label>
      <p class="tiny">Unchecked consent tests the refusal path. This demonstration never changes actual systems, trains models, or moves between physical worlds.</p>
      <form class="wg-voyage-signin" data-voyage-signin>
        <label for="wg-voyage-key">House Steward sign-in</label>
@@ -152,7 +152,7 @@ export async function mountWayglassFirstVoyage(root){
    try{
      const response=await fetch('/api/v1/wayglass/wyrdrune/first-voyage',{
        method:'POST',credentials:'same-origin',cache:'no-store',signal:controller.signal,
-       headers:{'Content-Type':'application/json'},body:JSON.stringify({mode,fictionConsent:consent.checked}),
+       headers:{'Content-Type':'application/json'},body:JSON.stringify({mode,crossingConsent:consent.checked}),
      });
      const data=await response.json().catch(()=>({}));
      if(!response.ok)throw new Error(data.error||'House host refused the voyage');
@@ -164,7 +164,7 @@ export async function mountWayglassFirstVoyage(root){
      q('[data-voyage-result-flag]').textContent=success?'RETURN VERIFIED':'REFUSAL PRESERVED';
      q('[data-voyage-reading]').textContent=success?
        'Wyrdrune returned proposals from two distinct domains. The Autopoietic Runtime, Tensor engine and Observer contributed receipts. The Watercolour receives a source-bound pigment event, not permission to alter infrastructure.':
-       'Wyrdrune or the fictional membrane declined. The shared voyage did not commit a Return. The choice remains open.';
+       'Wyrdrune or the Mythience membrane declined. The shared voyage did not commit a Return. The choice remains open.';
      q('[data-voyage-return-label]').textContent=success?'Return packet verified':'Refusal remains valid';
      root.querySelectorAll('[data-voyage-fold]').forEach(el=>{if(success)el.dataset.witnessed='true';else delete el.dataset.witnessed;});
      if(success && result.shipwide) {

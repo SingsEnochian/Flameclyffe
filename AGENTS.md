@@ -39,7 +39,7 @@ If a task would silently change another constellation's architecture, stop at a 
 
 ## Wayglass OS and LLM travelling inheritance
 
-For Wayglass OS, ArcSweep evolution, world dossiers, model context, training materials, and continuation evaluation, read and honour `apps/arcsweep/contracts/WAYGLASS_TRAVELLING_INHERITANCE_V0.1.md` alongside the Wayglass core rule and whole-system design law. Rowan authorised this canon on 2026-10-05. Preserve cross-world deeds, skills, gifts, equipment lineage and particular relationships; include Rowan's level-200 start, breakable nominal 300 cap and fictional inexhaustible treasury. Design the complete system before implementation. Do not claim documentation adoption updates runtime behaviour or model weights.
+For Wayglass OS, ArcSweep evolution, world dossiers, model context, training materials, and continuation evaluation, read and honour `apps/arcsweep/contracts/WAYGLASS_TRAVELLING_INHERITANCE_V0.1.md` alongside the Wayglass core rule and whole-system design law. Rowan authorised this canon on 2026-10-05. Preserve cross-world deeds, skills, gifts, equipment lineage and particular relationships; include Rowan's level-200 start, breakable nominal 300 cap and inexhaustible travelling treasury with world-scoped transactions. Design the complete system before implementation. Do not claim documentation adoption updates runtime behaviour or model weights.
 
 ## Required verification inheritance for every agent
 

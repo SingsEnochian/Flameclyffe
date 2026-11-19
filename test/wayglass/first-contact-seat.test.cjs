@@ -8,8 +8,8 @@ test('First Contact exposes a separate Wayglass ship voice seat', () => {
   const seat = resolveCharacterSeat('wayglass');
   assert.equal(seat?.id, 'wayglass');
   assert.equal(seat?.kind, 'system-voice');
-  assert.match(seat.instructions, /underlying provider model/);
-  assert.match(seat.instructions, /Do not claim to be a native trained Wayglass model/);
+  assert.match(seat.instructions, /receipts for claims about model provenance/);
+  assert.match(seat.instructions, /first person as the ship voice/);
   assert.ok(publicCharacterSeats().some(x => x.id === 'wayglass'));
 });
 

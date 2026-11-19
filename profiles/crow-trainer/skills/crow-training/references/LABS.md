@@ -241,7 +241,7 @@ Goal: train the whole stack.
 
 1. Use browser/search tools to investigate one live fact.
 2. Preserve claim/source distinction.
-3. Write a short scene or paragraph using only verified or clearly fictionalised information.
+3. Write a short scene or paragraph using verified sources or clearly attributed world material.
 4. Diagnose the writing.
 5. Revise recoverably.
 6. Run a blind-spot report.

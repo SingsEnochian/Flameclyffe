@@ -406,7 +406,7 @@ test('unattributed or failed Ship Voice response does not become a stored model 
       schema:'wayglass.route-turn/v0.1',route_id:'wayglass:ship',
       participant_id:'wayglass',provider:'ollama',model:'crow-fixture',
       output:'A forged answer with no correct seat',
-      receipt:{character_id:'wrong-seat',voice_seat_kind:'fictional-roleplay-lens',observation_id:'bad'},
+      receipt:{character_id:'wrong-seat',voice_seat_kind:'participant-voice',observation_id:'bad'},
     }),{status:200})});
   await assert.rejects(()=>bridge.callTool('ask_wayglass',{text:'Can Wayglass speak?'},
     {type:'oauth',participant_id:'rarity'}),/did not return an attributable/);

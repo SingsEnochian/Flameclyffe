@@ -11,7 +11,7 @@ const DOORWAY_MAP = Object.freeze({
     { room: 'forge', label: 'Forge Door', purpose: 'Open Forge when world hum, glyph, or embodied making is the ripe next move.' },
   ]),
   'luna-who-called-down-the-moon': Object.freeze([
-    { room: 'scripts', label: 'Story Door', purpose: 'Open Scripts for Moonmere scenes, pack law, healing arcs, and roleplay.' },
+    { room: 'scripts', label: 'Story Door', purpose: 'Open Scripts for Moonmere scenes, pack law, healing arcs, and in-world encounters.' },
     { room: 'records', label: 'Canon Door', purpose: 'Open Records for Luna law, moon phases, names, and continuity.' },
   ]),
   'taveren-vaen': Object.freeze([
@@ -19,7 +19,7 @@ const DOORWAY_MAP = Object.freeze({
     { room: 'records', label: 'Archive Door', purpose: 'Open Records for later-Turning canon, Pattern receipts, and weave continuity.' },
   ]),
   'star-trek-reboot-160': Object.freeze([
-    { room: 'scripts', label: 'Bridge Door', purpose: 'Open Scripts for shipboard scenes, mission beats, and roleplay.' },
+    { room: 'scripts', label: 'Bridge Door', purpose: 'Open Scripts for shipboard scenes, mission beats, and in-world encounters.' },
     { room: 'records', label: 'Ship Log Door', purpose: 'Open Records for stardates, mission logs, crew continuity, and evidence.' },
   ]),
   'bluebird-grove': Object.freeze([

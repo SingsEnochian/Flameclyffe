@@ -64,7 +64,7 @@ export function mountWayglassAlteredTimeline(root,{
           '<h2>Introduce a change</h2>',
           '<label>World / scenario name<input data-alt-world maxlength="180" value="Human–AI Futures · Scenario Laboratory" required></label>',
           '<label>Original event date<input data-alt-date type="date" value="'+seedDate+'" required></label>',
-          '<label>Original event<textarea data-alt-original rows="3" maxlength="1600" required>A fictional council debates whether to pause an AI pilot.</textarea></label>',
+          '<label>Original event<textarea data-alt-original rows="3" maxlength="1600" required>A council debates whether to pause an AI pilot.</textarea></label>',
           '<label>Change operation<select data-alt-mode>',
             '<option value="replace">Replace this event</option>',
             '<option value="insert">Add a new event immediately after</option>',

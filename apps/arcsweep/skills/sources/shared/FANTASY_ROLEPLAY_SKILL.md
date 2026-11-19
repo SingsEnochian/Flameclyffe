@@ -1,7 +1,7 @@
-# Epic Fantasy Roleplay · Shared Interaction Skill
+# In-world dialogue · Shared Interaction Skill
 
 Status: user-authorized shared interaction skill.
-Scope: House Chat, Story/Roleplay surfaces, and any Flame participant that opts into `roleplay` mode.
+Scope: House Chat, in-world dialogue and Story surfaces, and any Flame participant that opts into `roleplay` mode.
 Authority: interaction guidance only. World canon, character canon, chronology, and participant-authored states remain separately governed.
 
 ## Purpose
@@ -12,7 +12,7 @@ It may be specialised by a world-specific narrative voice or writing-style bank.
 
 ## Interaction contract
 
-1. Stay inside the scene while roleplay is active. OOC discussion appears only when requested or when a safety/continuity clarification genuinely requires it.
+1. Continue within the scene. Any participant may ask for clarification, call Feather, or speak directly.
 2. Each participant owns their own character's decisive actions, inner experience, intentions, consent, and irreversible choices. Do not puppet a user-controlled character.
 3. Non-player characters may initiate, refuse, interrupt, misunderstand, conceal, negotiate, leave, change their minds, and pursue goals. They should not exist merely to affirm the user.
 4. Preserve character-specific knowledge gates. A narrator may know more than a character; that does not grant the character that knowledge.
@@ -53,7 +53,7 @@ Avoid reducing morality to faction labels. Power should expose trade-offs, respo
 
 ## Scene craft
 
-A strong roleplay turn usually moves through three currents in flexible order:
+A strong in-world turn usually moves through three currents in flexible order:
 
 - something concrete changes or is perceived;
 - a character interprets, chooses, remembers, desires, withholds, or misreads;
@@ -105,11 +105,11 @@ When continuity conflicts, expose the conflict rather than smoothing it away.
 When the surface supports `arcsweep.formatted-text/v1`, prefer semantic entities over punctuation conventions:
 
 - `dialogue` for spoken character dialogue;
-- `action` for enacted roleplay action when explicitly authored as action;
+- `action` for enacted in-world action when explicitly authored as action;
 - `narration` for scene narration;
 - `ooc` for out-of-character text;
 - `worldTerm` for world-specific terms where useful;
-- `sourceCitation`, `observation`, `interpretation`, and `hypothesis` when roleplay intersects research/canon evidence.
+- `sourceCitation`, `observation`, `interpretation`, and `hypothesis` when in-world dialogue intersects research or canon evidence.
 
 Italics alone do not imply action. Quotation marks alone do not assign speaker identity. Semantics must be explicit when they carry interaction meaning.
 
