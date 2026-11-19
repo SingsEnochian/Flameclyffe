@@ -2,7 +2,12 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const { mkdtempSync, rmSync } = require('node:fs');
+const { tmpdir } = require('node:os');
+const { join } = require('node:path');
+const { createColonyCheckpointStore } = require('../../../lib/wayglass-colony-checkpoint.cjs');
 const { createCellGarden, PHASES, SCHEMA } = require('../../../lib/wayglass-cell-mitosis.cjs');
+const { importColony } = require('../../../scripts/wayglass-import-colony.cjs');
 
 test('WTL mitosis makes two distinguishable, bounded daughters with a preserved lineage', async () => {
   const garden = createCellGarden({ maxActive: 4, maxGeneration: 2 });
@@ -80,4 +85,31 @@ test('a mid-flight Feather invalidates the asynchronous WTL proposal', async () 
   garden.feather();
   await assert.rejects(pending, /Feather|changed culture/i);
   assert.equal(garden.snapshot().pending, null);
+});
+
+test('an in-memory Garden carries its original cells, exchange and Feather into a cold checkpoint', async t => {
+  const directory = mkdtempSync(join(tmpdir(), 'wayglass-colony-import-'));
+  t.after(() => rmSync(directory, { recursive: true, force: true }));
+  const garden = createCellGarden();
+  const proposal = await garden.propose({ cell_id: 'cell:origin', expected_revision: 0 });
+  assert.throws(() => importColony(garden.snapshot(), directory), /pending/);
+  const division = garden.commit({ proposal_id: proposal.proposal_id, expected_revision: 0, owner_confirmed: true });
+  const [from_id, to_id] = division.receipt.daughter_ids;
+  await garden.specialise({ cell_id: from_id, role: 'resonance', expected_revision: 1, owner_confirmed: true });
+  await garden.specialise({ cell_id: to_id, role: 'observation', expected_revision: 2, owner_confirmed: true });
+  await garden.exchange({ from_id, to_id, message: 'A return held through Feather', expected_revision: 3,
+    owner_confirmed: true, receiver_route_approved: true });
+  const original = garden.feather();
+
+  assert.deepEqual(importColony(original, directory), {
+    revision: 4, active: 2, receipts: 4, status: 'feather-stopped', checkpoint: 1, alreadyImported: false,
+  });
+  assert.equal(importColony(original, directory).alreadyImported, true);
+  assert.throws(() => importColony({ ...original, status: 'ready' }, directory), /different colony/);
+  const store = createColonyCheckpointStore(join(directory, 'cell-garden'));
+  const restored = createCellGarden({ store });
+  assert.deepEqual(restored.snapshot(), { ...original, memory: 'local-checkpoint', persistence: true });
+  assert.equal(restored.snapshot().history.at(-1).status, 'delivered-in-memory');
+  restored.resume({ owner_confirmed: true });
+  assert.equal(createCellGarden({ store }).snapshot().status, 'ready');
 });
