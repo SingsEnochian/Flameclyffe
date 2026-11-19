@@ -1615,3 +1615,5 @@ function createWayglassRouter({
 module.exports = createWayglassRouter();
 module.exports.createWayglassRouter = createWayglassRouter;
 
+// Expose the existing adapter for synthetic transport tests without changing routing.
+module.exports.callOllama = callOllama;
