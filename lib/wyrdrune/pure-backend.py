@@ -176,6 +176,14 @@ class Execution:
             return float(value) if isinstance(value, (int, float)) and not isinstance(value, bool) else value
         if kind == "unknown":
             return dict(UNKNOWN)
+        if kind == "list":
+            return [self.expression(item) for item in node["items"]]
+        if kind == "when":
+            # A real choice: only the chosen side is evaluated (RFC-0002).
+            test = self._truth(self.expression(node["test"]), "when")
+            if _is_unknown(test):
+                return dict(UNKNOWN)
+            return self.expression(node["yes"] if test else node["no"])
         if kind == "compare":
             a = self.expression(node["a"])
             b = self.expression(node["b"])
@@ -224,6 +232,8 @@ class Execution:
             op = node["op"]
             if op == "/" and b == 0:
                 raise ValueError("Division by zero")
+            if op == "%" and b == 0:
+                raise ValueError("Wrap by zero")
             if op == "+":
                 result = a + b
             elif op == "-":
@@ -232,6 +242,9 @@ class Execution:
                 result = a * b
             elif op == "/":
                 result = a / b
+            elif op == "%":
+                # Python's float % is floored modulo; the JS runtime matches it.
+                result = float(a) % float(b)
             else:
                 raise TypeError("Invalid WTL expression")
             if not math.isfinite(result):
@@ -252,6 +265,12 @@ class Execution:
                 if len(args) != 2:
                     raise TypeError("votive(name,dedication) requires two arguments")
                 return _votive(*args)
+            if name == "pick":
+                if (len(args) != 2 or not isinstance(args[0], list) or not args[0]
+                        or isinstance(args[1], bool) or not isinstance(args[1], (int, float))
+                        or not math.isfinite(args[1])):
+                    raise TypeError("pick(options,n) requires a non-empty list and a finite number")
+                return args[0][int(math.floor(args[1])) % len(args[0])]
             if name == "bridge":
                 raise HardStop("Bridge capability unavailable: Python backend is pure")
             if name == "star":
