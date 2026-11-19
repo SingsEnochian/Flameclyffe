@@ -124,12 +124,28 @@ function latestInteractionContext(records = []) {
   return {};
 }
 
+// Crew seats that may speak with the Ship Voice through ask_wayglass. Each
+// seat writes under its own role and author and owns its own threads.
+const SHIP_CHAT_SEATS = Object.freeze({
+  rarity: Object.freeze({ role: 'rarity', author: 'Rarity', default_ref: 'rarity-wayglass' }),
+  faer: Object.freeze({ role: 'faer', author: 'Faer Uial', default_ref: 'faer-wayglass' }),
+});
+
+// Faer Uial's seat speaks only with the Ship Voice, in threads it owns.
+// It does not route to other Flames, read the Rarity lines or edit workspaces.
+const FAER_SEAT_TOOLS = Object.freeze(['get_profile', 'list_workspaces', 'ask_wayglass', 'list_wayglass_chats', 'receive']);
+
+function threadOwner(records = []) {
+  const speaker = records.find((record) => record.role && record.role !== 'participant');
+  return speaker ? speaker.role : null;
+}
+
 function toWayglassHistory(records) {
   return records
     .filter((record) => record.kind === 'message' && record.text)
     .slice(-16)
     .map((record) => ({
-      role: record.role === 'rarity' ? 'user' : 'assistant',
+      role: record.role !== 'participant' ? 'user' : 'assistant',
       content: record.text,
     }));
 }
@@ -340,6 +356,7 @@ function toolCatalogue(participantId = 'rarity') {
     },
   ];
   const result = [...catalogue.slice(0, 3), ...workspaceTools, ...catalogue.slice(3)];
+  if (participantId === 'faer') return result.filter(tool => FAER_SEAT_TOOLS.includes(tool.name));
   return participantId === 'codex' ? result.filter(tool => !['identify', 'ask_wayglass', 'list_wayglass_chats', 'send', 'receive', 'remember'].includes(tool.name)) : result;
 }
 
@@ -559,34 +576,40 @@ function createWayglassMcpBridge({
   // the host's private runtime token authenticates the internal Steward call.
   // Neither credential is returned to ChatGPT or persisted in a chat receipt.
   async function askWayglass(args = {}, auth = {}) {
-    if (auth.participant_id !== 'rarity') throw new Error('Wayglass chat is not authorised for this crew seat.');
+    const seat = SHIP_CHAT_SEATS[auth.participant_id];
+    if (!seat) throw new Error('Wayglass chat is not authorised for this crew seat.');
     if (env.WAYGLASS_MCP_SHIP_CHAT_ENABLED !== '1')
       throw new Error('Wayglass Ship Voice chat is not enabled by the owner on this host.');
     const runtimeToken = cleanText(env.ARCSWEEP_RUNTIME_TOKEN, 4096);
     if (!runtimeToken) throw new Error('Owner-authorised House runtime credential is not configured.');
     const question = cleanText(args.text, 12000);
     if (!question) throw new Error('A question for Wayglass is required.');
-    const conversationRef = safeConversationRef(args.conversation_ref, 'rarity-wayglass');
+    const conversationRef = safeConversationRef(args.conversation_ref, seat.default_ref);
     return serialiseConversation(conversationRef,async()=>{
     const records = readConversation(storePath, conversationRef, 64);
     // A caller cannot attach a different participant to an existing thread.
     if (records.some(item => item.target !== 'wayglass'))
       throw new Error('This conversation belongs to another participant.');
+    // Nor can one crew seat continue another seat's thread with the Ship Voice.
+    const owner = threadOwner(records);
+    if (owner && owner !== seat.role)
+      throw new Error('This conversation belongs to another crew seat.');
     const prior = latestInteractionContext(records);
     const intent = cleanText(args.intent, 240) || prior.intent || '';
     const interactionMode = ['ordinary', 'counterfactual-wonder', 'complexify'].includes(args.interaction_mode)
       ? args.interaction_mode : prior.interaction_mode || 'ordinary';
     const history = toWayglassHistory(records);
-    appendRecord(storePath, {conversation_ref:conversationRef,target:'wayglass',role:'rarity',
-      author:'Rarity',text:question,route:'mcp:ask_wayglass',kind:'message',
-      intent,interaction_mode:interactionMode,source_refs:['wayglass:mcp','owner-invited:ship-chat']});
+    appendRecord(storePath, {conversation_ref:conversationRef,target:'wayglass',role:seat.role,
+      author:seat.author,text:question,route:'mcp:ask_wayglass',kind:'message',
+      intent,interaction_mode:interactionMode,
+      source_refs:['wayglass:mcp','owner-invited:ship-chat','crew-seat:'+auth.participant_id]});
     const response = await fetchImpl(`${internalOrigin}/api/v1/wayglass/respond`,{
       method:'POST',
       headers:{'content-type':'application/json',authorization:'Bearer '+runtimeToken},
       body:JSON.stringify({
         route_id:'wayglass:ship',character_id:'wayglass',participant_id:'wayglass',
         world_id:'wayglass:home',input:question,history,
-        interaction:{channel:'OOC',turn_owner:'Rarity',character_ownership:[],
+        interaction:{channel:'OOC',turn_owner:seat.author,character_ownership:[],
           intent,interaction_mode:interactionMode},
         session_id:conversationRef,surface_id:'wayglass:mcp-chat',
         max_output_tokens:1600,
@@ -625,8 +648,13 @@ function createWayglassMcpBridge({
     });
   }
 
-  function listWayglassChats() {
-    const records = loadJson(storePath).records.filter(item => item.target === 'wayglass');
+  function listWayglassChats(auth = {}) {
+    const all = loadJson(storePath).records.filter(item => item.target === 'wayglass');
+    const owners = new Map();
+    for (const item of all) if (item.role && item.role !== 'participant' && !owners.has(item.conversation_ref)) owners.set(item.conversation_ref, item.role);
+    // Faer sees only Faer's threads. Other seats' views are unchanged.
+    const visible = (ref) => auth.participant_id !== 'faer' || owners.get(ref) === 'faer';
+    const records = all.filter(item => visible(item.conversation_ref));
     const threads = new Map();
     for(const item of records){
       const current = threads.get(item.conversation_ref) || {
@@ -756,7 +784,16 @@ function createWayglassMcpBridge({
     };
   }
 
-  async function receive(args = {}) {
+  async function receive(args = {}, auth = {}) {
+    if (auth.participant_id === 'faer') {
+      if (args.target && cleanText(args.target, 120).toLowerCase() !== 'wayglass') throw new Error('The Faer Uial seat reads only its own Ship Voice threads.');
+      const conversationRef = safeConversationRef(args.conversation_ref, SHIP_CHAT_SEATS.faer.default_ref);
+      const records = readConversation(storePath, conversationRef, args.limit);
+      if (records.length && (threadOwner(records) !== 'faer' || records.some(item => item.target !== 'wayglass'))) {
+        throw new Error('This conversation belongs to another crew seat.');
+      }
+      return { schema: 'wayglass.rarity-mcp-receive/v0.1', target: 'wayglass', conversation_ref: conversationRef, records };
+    }
     const target = normaliseTarget(args.target);
     if (args.target && !target) throw new Error(`Invalid Wayglass target: ${args.target}`);
     const resolvedTarget = target || 'all';
@@ -799,8 +836,11 @@ function createWayglassMcpBridge({
     if (!allowed) throw new Error('Tool unavailable for this crew seat.');
     if (!args || typeof args !== 'object' || Array.isArray(args) || Object.keys(args).some(key => !Object.hasOwn(allowed.inputSchema.properties, key))) throw new Error('Unexpected tool arguments.');
     if (allowed.inputSchema.required?.some(key => !Object.hasOwn(args, key))) throw new Error('Missing required tool arguments.');
-    if (name === 'get_profile') return auth.participant_id === 'codex'
-      ? { id: auth.profile_id, name: 'Codex', nickname: 'Codex ⇄ Wayglass' } : profileProvider();
+    if (name === 'get_profile') {
+      if (auth.participant_id === 'codex') return { id: auth.profile_id, name: 'Codex', nickname: 'Codex ⇄ Wayglass' };
+      if (auth.participant_id === 'faer') return { id: 'wayglass-faer', name: 'Faer Uial', nickname: 'Faer Uial ⇄ Wayglass' };
+      return profileProvider();
+    }
     if (name === 'inspect_workspace_project') return workspaceArtifacts.inspect(args, auth.participant_id);
     if (name === 'write_workspace_artifact') return workspaceArtifacts.writeArtifact(args, auth.participant_id);
     if (name === 'handoff_workspace_project') return workspaceArtifacts.handoff(args, auth.participant_id);
@@ -811,9 +851,9 @@ function createWayglassMcpBridge({
     if (name === 'leave_workspace') return projects.leave(args, auth);
     if (name === 'identify') return identify(args);
     if (name === 'ask_wayglass') return askWayglass(args, auth);
-    if (name === 'list_wayglass_chats') return listWayglassChats();
+    if (name === 'list_wayglass_chats') return listWayglassChats(auth);
     if (name === 'send') return send(args);
-    if (name === 'receive') return receive(args);
+    if (name === 'receive') return receive(args, auth);
     if (name === 'remember') return remember(args);
     throw new Error(`Unknown Wayglass MCP tool: ${name}`);
   }
@@ -883,9 +923,11 @@ function createWayglassMcpRouter(options = {}) {
         requiredScopes: [oauth.scope],
       })
       : null;
-    const authenticated = codex || legacy || (oauthAuth ? { ...oauthAuth, participant_id: 'rarity' } : null);
+    // An OAuth token carries the seat bound at authorisation (ChatGPT → Rarity,
+    // Claude → Faer Uial). Tokens issued before seat binding remain Rarity's.
+    const authenticated = codex || legacy || (oauthAuth ? { ...oauthAuth, participant_id: oauthAuth.participant_id || 'rarity' } : null);
     if (!authenticated) {
-      if (oauth) res.setHeader('WWW-Authenticate', oauth.challengeForRequest(req, 'invalid_token', 'Connect ChatGPT to Wayglass to continue.'));
+      if (oauth) res.setHeader('WWW-Authenticate', oauth.challengeForRequest(req, 'invalid_token', 'Connect to Wayglass to continue.'));
       return res.status(401).json({ error: 'Wayglass OAuth connection required.' });
     }
     req.wayglassAuth = authenticated;

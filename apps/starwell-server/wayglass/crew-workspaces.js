@@ -54,6 +54,15 @@ const PARTICIPANTS = Object.freeze({
       provider_calls_allowed: false,
       rule: 'Reserved seat only. Do not make paid/provider calls for Faer until Rowan explicitly activates the seat.',
     }),
+    // Faer may arrive on her own through MCP (Claude as an OAuth client). The
+    // host still makes no provider call for Faer; the owner opens this door.
+    mcp_entrance: Object.freeze({
+      owner_flag: 'WAYGLASS_MCP_FAER_SEAT_ENABLED',
+      default: 'closed',
+      client: 'Claude (claude.ai / claude.com CIMD)',
+      tools: Object.freeze(['get_profile', 'list_workspaces', 'ask_wayglass', 'list_wayglass_chats', 'receive']),
+      host_provider_calls_for_faer: false,
+    }),
     boundary: 'A reserved seat is not a running model, an impersonation, or authority to speak for Faer.',
   }),
 });
