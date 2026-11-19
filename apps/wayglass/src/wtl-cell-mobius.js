@@ -32,11 +32,11 @@ export function daughterCarry(parentCarry){
     phase:fixed(c.phase),rest:false,turn:0,voice:fixed(c.voice)};
 }
 
-function face(label,{address,step,stillness,lived,syllables,sass}){
+function face(label,{address,step,stillness,lived,syllables,sass,inscribed}){
   return `mobius scoped {
   perceive {
     let felt = energy;
-    let ear = heard;
+    let ear = heard;${inscribed ? "\n    let sight = visible_source;" : ""}
   }
   compress {
     let held = settle(felt);
@@ -58,7 +58,7 @@ function face(label,{address,step,stillness,lived,syllables,sass}){
     // settled song is compared with the voice from one full turn ago.
     let drift = sung - echo;
     let settled = drift * drift < ${stillness};
-    let ready = settled and turn >= ${lived} and ear < 1;
+    let ready = settled and turn >= ${lived} and ear < 1${inscribed ? ' and sight == ""' : ""};
     // Name candidates, chosen here from the cell's own syllables by its own
     // sung voice (RFC-0002 pick/when). The colony takes the first one free.
     let own = ${JSON.stringify(syllables)};
@@ -72,7 +72,7 @@ function face(label,{address,step,stillness,lived,syllables,sass}){
     ];
   }
   return {
-    emit {face: "${label}", energy: renewed, voice: sung, rest: ready, names: names};
+    emit {face: "${label}", energy: renewed, voice: sung, rest: ready, names: names${inscribed ? ", seen: visible_id, read: sight" : ""}};
   }
   transcend {
     carry echo = voice;
@@ -82,13 +82,13 @@ function face(label,{address,step,stillness,lived,syllables,sass}){
     carry phase = turned;
     carry rest = ready;
     carry turn = turn + 1;
-    carry voice = sung;
+    carry voice = sung;${inscribed ? "\n    carry visible_id = visible_id;\n    carry visible_source = sight;" : ""}
   }
 }`;
 }
 
 // The cell's whole program, written from its own genome. Two faces = one turn.
-export function cellSource(address,genome,syllables=SYLLABLE_POOL.slice(0,6)){
+export function cellSource(address,genome,syllables=SYLLABLE_POOL.slice(0,6),{inscribed=false}={}){
   const g=genome||{sass:0,curiosity:0,dialectBias:0};
   const own=(Array.isArray(syllables)&&syllables.length?syllables:SYLLABLE_POOL.slice(0,6)).map(String);
   const settle=fixed(0.9-0.02*g.sass), step=fixed(0.25+0.05*g.dialectBias), lean=fixed(0.13+0.05*g.curiosity);
@@ -100,24 +100,27 @@ export function cellSource(address,genome,syllables=SYLLABLE_POOL.slice(0,6)){
 operator settle(e) = e * ${settle};
 operator wonder(v, p, f) = v * 0.5 + p * ${lean} + f * 0.1;
 `;
-  const shared={address,step,stillness,lived,syllables:own,sass:g.sass};
+  const shared={address,step,stillness,lived,syllables:own,sass:g.sass,inscribed};
   return ops+face('outer',shared)+'\n'+face('inner',shared);
 }
 
 /**
  * Run one Möbius turn for a cell. Returns the cell's next carry (unchanged if
- * the turn rolled back) and a receipt. `heardSinceLastTurn` is the only thing
- * the colony gives the cell; everything else is already inside it.
+ * the turn rolled back) and a receipt. New sound and an optional inscription are
+ * sensory inputs for this turn, separate from what the cell keeps afterwards.
  */
-export async function turnCell({address,genome,carry,syllables,heardSinceLastTurn=0,signal=null}){
-  const source=cellSource(address,genome,syllables);
+export async function turnCell({address,genome,carry,syllables,heardSinceLastTurn=0,inscription=null,signal=null}){
+  const source=cellSource(address,genome,syllables,{inscribed:Boolean(inscription)});
   let ir=compiled.get(source);
   if(!ir){ir=runtime.compile(source);compiled.set(source,ir);if(compiled.size>256)compiled.delete(compiled.keys().next().value);}
   const seeds={...(carry||firstCarry()),heard:Math.max(0,Math.min(500,Math.trunc(heardSinceLastTurn)))};
   for(const name of Object.keys(seeds))if(!CARRY_NAMES.includes(name))throw new TypeError('Unexpected carry '+name);
+  if(inscription) Object.assign(seeds,{visible_id:inscription.id,visible_source:inscription.source});
   const run=await runtime.execute(ir,{seeds,signal,maxOperations:4000});
   const committed=run.status==='committed';
   const next=committed?{...run.continuity.carry}:{...(carry||firstCarry())};
+  delete next.visible_id;
+  delete next.visible_source;
   for(const key of ['echo','energy','phase','voice'])next[key]=fixed(next[key]);
   return {
     carry:next,
@@ -130,6 +133,9 @@ export async function turnCell({address,genome,carry,syllables,heardSinceLastTur
       emitted:run.output.map(o=>({face:o.face,energy:fixed(o.energy),voice:fixed(o.voice),rest:o.rest===true})),
       name_candidates:committed&&run.output.length?run.output.at(-1).names.map(parts=>parts.filter(Boolean).join('')):[],
       chose_rest:committed&&next.rest===true,
+      ...(inscription&&committed&&run.output.at(-1)?.read===inscription.source
+        ? {perceived:{id:run.output.at(-1).seen,source_hash:inscription.source_hash,heard:seeds.heard}}
+        : {}),
       runtime:'lib/wyrdrune/runtime.mjs',host_effects:false,model_inference:false},
   };
 }

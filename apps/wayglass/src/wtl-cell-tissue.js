@@ -11,15 +11,19 @@ export function createCellTissue({maxCells=8,energyCap=100}={}) {
   const MAX_EVENTS=4000,totals=Object.create(null);
   const receipt=(type,detail)=>{const entry={tick:clock,type,...clone(detail)};events.push(entry);
     totals[type]=(totals[type]||0)+1;if(events.length>MAX_EVENTS)events.splice(0,events.length-MAX_EVENTS);return clone(entry);};
-  function spawn({id,role,parent_id=null,energy=energyCap,twist=0}={}) {
+  function spawn({id,role,parent_id=null,parent_ids=null,energy=energyCap,twist=0}={}) {
     if(paused) throw Error('Feather: tissue paused');
     if(!idOK(id)||!idOK(role)||cells.has(id)) throw Error('Invalid or duplicate cell identity');
     if(cells.size>=maxCells) throw Error('Tissue capacity reached');
     if(!Number.isSafeInteger(energy)||energy<0||energy>energyCap) throw Error('Invalid energy');
     if(parent_id!==null&&!cells.has(parent_id)) throw Error('Unknown parent');
+    if(parent_ids!==null&&(!Array.isArray(parent_ids)||parent_ids.length!==2||
+        parent_ids[0]===parent_ids[1]||parent_id!==null||!parent_ids.every(parent=>cells.has(parent))))
+      throw Error('Invalid hybrid parents');
+    const ancestry=parent_ids?{parent_ids:[...parent_ids]}:{};
     if(!Number.isFinite(twist)||twist<0||twist>=1) throw Error('Invalid twist');
-    cells.set(id,{id,role,parent_id,energy,twist,signals:[],state:'resting'});
-    return receipt('birth',{id,role,parent_id,energy,twist});
+    cells.set(id,{id,role,parent_id,...ancestry,energy,twist,signals:[],state:'resting'});
+    return receipt('birth',{id,role,parent_id,...ancestry,energy,twist});
   }
   function signal(from,to,type,payload=null) {
     if(paused) throw Error('Feather: tissue paused');
@@ -78,16 +82,17 @@ export function createCellTissue({maxCells=8,energyCap=100}={}) {
   }
   function feather(){paused=true;for(const c of cells.values())c.signals=[];return receipt('feather',{});}
   function resume(){paused=false;return receipt('resume',{});}
-  function populate({steps=1,threshold=60,quiet=false}={}) {
+  function populate({steps=1,threshold=60,quiet=false,reserve=0}={}) {
     if(!Number.isSafeInteger(steps)||steps<1||steps>1000) throw Error('Invalid step count');
     if(!Number.isSafeInteger(threshold)||threshold<20||threshold>energyCap) throw Error('Invalid threshold');
+    if(!Number.isSafeInteger(reserve)||reserve<0||reserve>=maxCells) throw Error('Invalid capacity reserve');
     const births=[];
     for(let i=0;i<steps;i++){
       if(paused) break;
       tick({quiet:true});
       const parents=[...cells.values()];
       for(const parent of parents){
-        if(cells.size>=maxCells) break;
+        if(cells.size>=maxCells-reserve) break;
         if(parent.energy<threshold) continue;
         // A short permanent address. Ancestry lives in parent_id, never in the
         // address, so lineages can go on for as long as the tissue lives.

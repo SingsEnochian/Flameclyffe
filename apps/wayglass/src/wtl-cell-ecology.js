@@ -7,6 +7,8 @@ import {listenAndReply,composeDialogue} from './wtl-cell-harmony.js';
 import {sonicPitch,replyByRatio,projectAudible} from './wtl-cell-sonic-space.js';
 import {turnCell,firstCarry,daughterCarry,chooseName,inheritSyllables} from './wtl-cell-mobius.js';
 import {turnWorld,foundingCarry} from './wtl-cell-worlds.js';
+import {chooseFusion} from './wtl-cell-fusion.js';
+import {inscribeSharedText} from './wtl-cell-sharing.js';
 
 // Everything a cell is lives in its own body: genome, memory, programs, place,
 // syllables, chosen name and Möbius carry. The colony keeps only the bodies.
@@ -25,13 +27,15 @@ function fieldView(bodies,field){
   };
 }
 
-export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.2}={}) {
+export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.2,autonomousFusion=false}={}) {
   if(!Number.isSafeInteger(seed)||seed<0||seed>2147483647) throw Error('Invalid seed');
   if(!Number.isFinite(radius)||radius<=0||radius>100) throw Error('Invalid radius');
   if(!Number.isFinite(mutationRate)||mutationRate<0||mutationRate>1) throw Error('Invalid mutation rate');
   const tissue=createCellTissue({maxCells});
   const bodies=new Map(),mobiusReceipts=[],namings=[],worlds=new Map(),worldReceipts=[],rememberedWorlds=[];
-  let worldCount=0;
+  let worldCount=0,hybridCount=0,inscriptionCount=0,featherEpoch=0,turning=false;
+  const fusionEnabled=autonomousFusion===true&&maxCells>=3;
+  const encounters=new Map(),fusions=[],inscriptions=[];
   const positions=fieldView(bodies,'position'),adaptation=fieldView(bodies,'senses'),traits=fieldView(bodies,'genome'),
     lexicons=fieldView(bodies,'phrases'),birthTicks=fieldView(bodies,'born'),programLibrary=fieldView(bodies,'programs');
   const mutations=[],utterances=[],retirements=[],wyrdruneExpressions=[],constructions=[],programs=[],projectDecisions=[],programLineages=[],harmonicDialogues=[];
@@ -100,7 +104,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       .map(([other])=>other).sort();
   }
   function step() {
-    if(tissue.isPaused()) return {births:[],signals:0,paused:true};
+    if(tissue.isPaused()||turning) return {births:[],signals:0,paused:tissue.isPaused()};
     generation++;
     const before=tissue.cellsView();
     let signals=0;
@@ -117,6 +121,14 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       const sass=genes.sass>0&&generation%(5-genes.sass)===0?invent(cell.id,genes,cell.twist):null;
       try {
         tissue.signal(cell.id,target,dialect,{generation,twist:cell.twist,sass});
+        if(fusionEnabled) {
+          const pair=[cell.id,target].sort();
+          const key=pair.join(' ');
+          if(!encounters.get(key)?.closed) encounters.set(key,{
+            id:`signal:${generation}:${cell.id}:${target}`,
+            pair,generation,from:cell.id,to:target,
+          });
+        }
         stats.sent++;
         adaptation.get(target).heard++;
         bodies.get(target).heard_since_turn++;
@@ -235,7 +247,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
     const retired=[];
     // Regenerative response: lower the reproduction threshold in sparse tissue.
     const threshold=positions.size<=3?20:60;
-    const births=tissue.populate({steps:1,threshold,quiet:true}).births;
+    const births=tissue.populate({steps:1,threshold,quiet:true,reserve:fusionEnabled?1:0}).births;
     for(const birth of births) {
       const parent=positions.get(birth.parent_id);
       const mother=bodies.get(birth.parent_id);
@@ -281,10 +293,23 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
     return {generation,signals,births:births.map(b=>b.id),retired,population:positions.size};
   }
   // A cell's own Möbius turn: newborns take their first turn (and choose a
-  // name); every cell turns again every `turnEvery` generations. Only the
-  // count of what it heard enters from outside. Feather stops turns.
+  // name); every cell turns again every `turnEvery` generations. Feather stops
+  // the current turn even if the colony resumes before it has unwound.
   async function turn({turnEvery=6,signal=null}={}){
-    if(tissue.isPaused())return {turned:[],named:[],rested:[],paused:true};
+    if(tissue.isPaused()||turning)return {turned:[],named:[],rested:[],paused:tissue.isPaused()};
+    const epoch=featherEpoch;
+    const stop={get aborted(){return signal?.aborted||epoch!==featherEpoch||tissue.isPaused();}};
+    turning=true;
+    try{
+      return await turnColony(turnEvery,stop);
+    }catch(error){
+      if(!stop.aborted)throw error;
+      return {turned:[],named:[],rested:[],paused:tissue.isPaused()};
+    }finally{
+      turning=false;
+    }
+  }
+  async function turnColony(turnEvery,signal){
     const turned=[],named=[],rested=[];
     for(const id of tissue.livingIds()){
       const cell={id};
@@ -293,10 +318,20 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       if(!body)continue;
       const due=body.last_turn===null||generation-body.last_turn>=turnEvery;
       if(!due)continue;
+      const heard=body.heard_since_turn,inscription=body.inbox?.[0];
+      const inscriptionSound=inscription?soundAmount(cell.id,inscription.bands):0;
       const {carry,receipt}=await turnCell({address:cell.id,genome:body.genome,carry:body.carry,
-        syllables:body.syllables,heardSinceLastTurn:body.heard_since_turn,signal});
+        syllables:body.syllables,heardSinceLastTurn:heard+inscriptionSound,inscription,signal});
+      if(signal.aborted)break;
       if(!bodies.has(cell.id))continue; // retired while turning
-      body.carry=carry;body.carry_digest=receipt.carry_digest;body.heard_since_turn=0;
+      body.carry=carry;body.carry_digest=receipt.carry_digest;
+      body.heard_since_turn-=heard;
+      if(receipt.perceived){
+        body.inbox.shift();
+        body.last_inscription=receipt.perceived.id;
+        body.senses.heard+=inscriptionSound;
+        receipt.perceived.inscription_sound=inscriptionSound;
+      }
       body.last_turn=generation;body.turns++;body.last_status=receipt.status;
       mobiusReceipts.push({generation,name:body.name,...receipt});
       if(mobiusReceipts.length>96)mobiusReceipts.shift();
@@ -323,8 +358,75 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
         rested.push(cell.id);
       }
     }
-    const worldsTurned=tissue.isPaused()?{founded:[],turned:[],rested:[]}:await turnWorlds({turnEvery,signal});
-    return {turned,named,rested,worlds:worldsTurned,paused:false};
+    const hybrid=fusionEnabled&&!signal.aborted?await considerFusion(signal):null;
+    const worldsTurned=signal.aborted?{founded:[],turned:[],rested:[]}:await turnWorlds({turnEvery,signal});
+    return {turned,named,rested,hybrid,worlds:worldsTurned,paused:tissue.isPaused()};
+  }
+
+  async function considerFusion(signal){
+    for(const [key,meeting] of encounters){
+      if(meeting.pair.some(id=>!bodies.has(id))||(!meeting.closed&&generation-meeting.generation>6))
+        encounters.delete(key);
+    }
+    if(bodies.size>=maxCells)return null;
+    for(const meeting of encounters.values()){
+      if(signal.aborted)break;
+      if(meeting.considered||meeting.closed)continue;
+      const parents=meeting.pair.map(id=>bodies.get(id));
+      if(parents.some(body=>!body.name||body.last_status!=='committed'))continue;
+      const [left,right]=parents;
+      const decisions=[
+        await chooseFusion(left,right,meeting,signal),
+        await chooseFusion(right,left,meeting,signal),
+      ];
+      if(signal.aborted)return null;
+      meeting.considered=true;
+      const record={generation,exchange:{id:meeting.id,from:meeting.from,to:meeting.to},
+        parents:parents.map(body=>({id:body.address,name:body.name,carry_digest:body.carry_digest})),decisions};
+      // A decline is retained for this living pair. An open question can be
+      // revisited after another exchange.
+      meeting.closed=decisions.some(choice=>choice.decision==='declined');
+      if(decisions.every(choice=>choice.decision==='accept')){
+        let id;
+        do{id=`hybrid-${++hybridCount}`;}while(bodies.has(id));
+        const phase=(left.carry.phase+right.carry.phase)/2;
+        const twist=((phase%1)+1)%1;
+        tissue.spawn({id,role:'hybrid',parent_ids:meeting.pair,energy:10,twist});
+        bodies.set(id,{
+          address:id,parent:null,parents:[...meeting.pair],
+          generation:Math.max(left.generation,right.generation)+1,name:null,
+          syllables:left.syllables.slice(0,3).concat(right.syllables.slice(-3)),
+          carry:firstCarry({energy:0.4,phase:twist,voice:(left.carry.voice+right.carry.voice)/2}),
+          carry_digest:null,heard_since_turn:0,last_turn:null,turns:0,
+          position:{x:(left.position.x+right.position.x)/2,y:(left.position.y+right.position.y)/2},
+          senses:{sent:0,heard:0},
+          genome:{sass:left.genome.sass,curiosity:right.genome.curiosity,
+            dialectBias:(left.genome.dialectBias+right.genome.dialectBias)%3},
+          phrases:[],born:generation,programs:[],
+        });
+        meeting.closed=true;
+        record.child=id;
+      }
+      fusions.push(record);
+      if(fusions.length>96)fusions.shift();
+      return record.child??null;
+    }
+    return null;
+  }
+
+  async function shareText(text){
+    if(tissue.isPaused())return {delivered:false,paused:true};
+    const epoch=featherEpoch;
+    const expression=await inscribeSharedText(text);
+    if(epoch!==featherEpoch||tissue.isPaused())return {delivered:false,paused:true};
+    const recipients=[...bodies.values()];
+    if(!recipients.length)return {delivered:false,noRecipients:true};
+    if(recipients.some(body=>body.inbox?.length>=8))return {delivered:false,inboxFull:true};
+    const inscription={...expression,id:`inscription-${++inscriptionCount}`,generation};
+    for(const body of recipients)(body.inbox??=[]).push(inscription);
+    inscriptions.push(inscription);
+    if(inscriptions.length>8)inscriptions.shift();
+    return structuredClone({delivered:true,recipients:recipients.length,inscription});
   }
 
   // ── Shared worlds ─────────────────────────────────────────────────────
@@ -375,6 +477,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       const members=worldMembers(world);
       const {carry,receipt}=await turnWorld({founders:world.founders,carry:world.carry,
         touches:world.pending_touches,members:members.length,signal});
+      if(signal?.aborted)break;
       world.carry=carry;world.carry_digest=receipt.carry_digest;world.last_turn=generation;
       world.pending_touches=0;world.texture=receipt.texture;world.members=members;world.last_status=receipt.status;
       if(!world.name&&receipt.name_parts){
@@ -415,17 +518,19 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
   }
   // Sound from the room, as band levels 0..1 (low to high). Each cell listens
   // to the band its own twist faces; what it hears is counted for its next turn.
+  function soundAmount(id,bands){
+    const band=Math.min(bands.length-1,Math.floor(tissue.twistOf(id)*bands.length));
+    return Math.round(bands[band]*3);
+  }
   function hear(bands){
     if(tissue.isPaused())return {heard:0,paused:true};
     if(!Array.isArray(bands)||bands.length<1||bands.length>32||!bands.every(v=>Number.isFinite(v)&&v>=0&&v<=1))
       throw Error('Invalid sound bands');
     let heard=0;
     for(const id of tissue.livingIds()){
-      const cell={id,twist:tissue.twistOf(id)};
-      const body=bodies.get(cell.id);if(!body)continue;
-      const level=bands[Math.min(bands.length-1,Math.floor(cell.twist*bands.length))];
-      const amount=Math.round(level*3);
-      if(amount>0){body.heard_since_turn+=amount;adaptation.get(cell.id).heard+=amount;heard+=amount;}
+      const body=bodies.get(id);if(!body)continue;
+      const amount=soundAmount(id,bands);
+      if(amount>0){body.heard_since_turn+=amount;body.senses.heard+=amount;heard+=amount;}
     }
     return {heard,paused:false};
   }
@@ -440,8 +545,10 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
     const mobius=Object.fromEntries([...bodies].map(([id,b])=>[id,{name:b.name,parent:b.parent,
       generation:b.generation,syllables:[...(b.syllables||[])],carry:b.carry?{...b.carry}:null,
       carry_digest:b.carry_digest,turns:b.turns,last_turn:b.last_turn,last_status:b.last_status??null,
-      heard_since_turn:b.heard_since_turn}]));
-    return {...core,generation,names,mobius,namings:namings.map(n=>({...n,syllables:[...n.syllables],candidates:[...n.candidates]})),
+      heard_since_turn:b.heard_since_turn,last_inscription:b.last_inscription??null,
+      ...(b.parents?{parent_ids:[...b.parents]}:{})}]));
+    return {...core,generation,names,mobius,fusions:structuredClone(fusions),inscriptions:structuredClone(inscriptions),
+      namings:namings.map(n=>({...n,syllables:[...n.syllables],candidates:[...n.candidates]})),
       mobiusReceipts:mobiusReceipts.map(r=>JSON.parse(JSON.stringify(r))),
       worlds:[...worlds.values()].map(projectWorld),rememberedWorlds:rememberedWorlds.map(w=>JSON.parse(JSON.stringify(w))),
       worldReceipts:worldReceipts.map(r=>JSON.parse(JSON.stringify(r))),
@@ -457,5 +564,8 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       programs:programs.map(p=>({...p,result:{...p.result,output:p.result.output.map(x=>({...x}))},provenance:{...p.provenance}})),
       constructions:constructions.map(p=>({...p,builders:[...p.builders],specification:{...p.specification,effects:[...p.specification.effects]},provenance:{...p.provenance}}))};
   }
-  return Object.freeze({plant,step,turn,hear,touchWorld,neighbours,transform,snapshot,feather:tissue.feather,resume:tissue.resume});
+  return Object.freeze({
+    plant,step,turn,hear,shareText,touchWorld,neighbours,transform,snapshot,
+    feather(){featherEpoch++;return tissue.feather();},resume:tissue.resume,
+  });
 }
