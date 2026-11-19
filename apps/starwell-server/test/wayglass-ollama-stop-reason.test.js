@@ -54,3 +54,27 @@ test('provider error fails closed without manufacturing completion provenance', 
     /provider offline/,
   );
 });
+
+test('local-only transport refuses redirects and carries a cancellation signal', async () => {
+  const controller = new AbortController();
+  let observed;
+  await callOllama(route(), { input: 'Synthetic local transport' }, null,
+    async (_url, options) => {
+      observed = options;
+      return { ok: true, json: async () => ({ message: { content: 'ok' }, done_reason: 'stop' }) };
+    }, { localOnly: true, signal: controller.signal });
+  assert.equal(observed.redirect, 'error');
+  assert.equal(observed.signal.aborted, false);
+  controller.abort();
+  assert.equal(observed.signal.aborted, true);
+});
+
+test('token budget clamps at both limits without changing the reported provider reason', async () => {
+  for (const [requested, expected] of [[1, 64], [999999, 4000]]) {
+    const requests = [];
+    const result = await callOllama(route(), { input: 'Synthetic', max_output_tokens: requested }, null,
+      fakeTransport({ message: { content: 'partial' }, done_reason: 'length' }, requests));
+    assert.equal(requests[0].options.num_predict, expected);
+    assert.equal(result.stop_reason, 'length');
+  }
+});
