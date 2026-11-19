@@ -153,6 +153,10 @@ async function callOllama(route, payload, compiled = null, fetchImpl = globalThi
     output: cleanText(data?.message?.content || data?.response || '', MAX_TEXT),
     thinking: cleanText(data?.message?.thinking || '', MAX_TEXT * 2),
     response_id: null,
+    // Ollama reports completion independently of the rendered/exported text.
+    // Keep its stop reason so partial Wyrdrune drafts can be diagnosed without
+    // inferring truncation from an unfinished sentence.
+    stop_reason: typeof data?.done_reason === 'string' ? cleanText(data.done_reason, 80) : null,
     usage: {
       prompt_tokens: data?.prompt_eval_count ?? null,
       completion_tokens: data?.eval_count ?? null,
@@ -1238,6 +1242,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
           provider: route.provider,
           upstream_provider: null,
           response_id: result.response_id,
+          ...(result.stop_reason != null ? { stop_reason: result.stop_reason } : {}),
           ...(result.provider_conversation_id ? { provider_conversation_id: result.provider_conversation_id } : {}),
           observation_id: observation.observation_id,
           epistemic_register: observation.epistemic_register,
