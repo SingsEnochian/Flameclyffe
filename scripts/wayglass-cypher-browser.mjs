@@ -234,13 +234,35 @@ async function checkWriting(page,profile){
  assert.equal(await reading.isVisible(),true);
  assert.equal(await reading.getAttribute('aria-live'),'off');
  await page.waitForFunction(()=>document.querySelector('#wg-wtl-gloss')?.getAttribute('data-cypher-state')==='reading');
+ const controlTargets=await page.evaluate(()=>{
+  const before=scrollY;
+  const buttons=['wg-send','wg-score-feather','wg-wtl-cypher-skip'];
+  const results=buttons.map(id=>{
+   const button=document.getElementById(id);
+   const initial=button.getBoundingClientRect();
+   scrollTo(0,scrollY+initial.bottom-(innerHeight-16));
+   const rect=button.getBoundingClientRect();
+   const y=(rect.top+rect.bottom)/2;
+   const hits=[rect.left+8,(rect.left+rect.right)/2,rect.right-8]
+    .map(x=>button.contains(document.elementFromPoint(x,y)));
+   return {id,hits,height:rect.height,translate:getComputedStyle(button).translate};
+  });
+  scrollTo(0,before);
+  return results;
+ });
+ for(const target of controlTargets){
+  assert.deepEqual(target.hits,[true,true,true],target.id+' must stay clickable across its width');
+  assert.ok(target.height>=44,target.id+' needs a 44px tap target');
+  assert.equal(target.translate,'none',target.id+' must stay in place during motion');
+ }
  await page.locator('#wg-wtl-cypher-skip').click();
  assert.equal(await reading.getAttribute('data-cypher-state'),'english');
  assert.equal(await reading.locator('.wg-cypher-line').first().getAttribute('lang'),'en-GB');
  await source.fill(original+'\n');
  assert.equal(await reading.isVisible(),false,'Source changes invalidate stale translation');
  assert.equal(await source.inputValue(),original+'\n');
- receipt.scenarios.push({profile,room:'Writing Room',status:'passed',skip:true,source_invalidation:true});
+ receipt.scenarios.push({profile,room:'Writing Room',status:'passed',skip:true,source_invalidation:true,
+  reachable_controls:controlTargets.map(target=>target.id)});
 }
 async function checkCellGarden(page,profile){
  // A mounted native room is evidence, not a model call or public production host.

@@ -97,7 +97,7 @@ export function installMotionChoreography({
     const speed = previous ? Math.hypot(event.clientX - previous.x, event.clientY - previous.y) / Math.max(8, now - previous.at) : 0;
     previous = { x: event.clientX, y: event.clientY, at: now };
     let target = event.target?.closest?.('.glass-chip, .send-jewel');
-    if (target === toggle || target?.matches?.(':disabled, [aria-disabled="true"]')) target = null;
+    if (target === toggle || target?.matches?.(':disabled, [aria-disabled="true"], [data-wg-static-control]')) target = null;
     pending = { material: pointerMaterialState({ x: event.clientX, y: event.clientY,
       width: scope.innerWidth, height: scope.innerHeight, velocity: speed }), target,
       x: event.clientX, y: event.clientY };

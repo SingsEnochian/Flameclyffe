@@ -914,10 +914,18 @@ select option, select optgroup { background-color: #081826; color: #eaf8ff; }
 .wg-writing-room .empty-thread strong { font: 400 1.18rem/1.4 Georgia, serif; color: #b9c7d9; }
 .wg-writing-room .empty-thread small { color: #8396ad; font: .83rem/1.45 system-ui, sans-serif; }
 .wg-empty-feather { width: 61px; height: 61px; display: grid; place-items: center; border: 1px solid rgba(59,144,181,.26); border-radius: 50%; font-size: 1.7rem; color: #90def2; }
-.wg-writing-room .wg-composer { margin: 11px 14px 14px; padding: 0; border: 1px solid rgba(87,154,199,.24); border-radius: 15px; box-shadow: none; background: rgba(2,10,19,.65); outline: none; }
+.wg-writing-room .wg-composer { margin: 11px 14px 14px; padding: 0; border: 1px solid rgba(87,154,199,.24); border-radius: 15px; box-shadow: none; background: rgba(2,10,19,.65); outline: none; translate: none; }
 .wg-writing-room #wg-input { min-height: 108px; max-height: 230px; padding: 15px 16px; border: 0; border-radius: 14px 14px 0 0; resize: vertical; background: transparent; line-height: 1.52; }
 .wg-writing-room #wg-input::placeholder { color: #8096ae; }
-.wg-writing-room .composer-foot { border-top: 1px solid rgba(89,140,185,.14); margin: 0; padding: 9px 10px 9px 14px; flex-wrap: wrap; }
+.wg-writing-room .composer-foot {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  border-top: 1px solid rgba(89,140,185,.14);
+  margin: 0;
+  padding: 10px 12px 10px 14px;
+}
+.wg-writing-room #wg-status { overflow-wrap: anywhere; line-height: 1.45; }
 .wg-writing-room .send-jewel { background: linear-gradient(105deg, rgba(10,99,139,.50), rgba(28,32,83,.48)); border: 1px solid rgba(72, 205, 249, .67); border-radius: 12px; font-size: .83rem; letter-spacing: 0; padding: 11px 15px; box-shadow: inset 0 1px rgba(255,255,255,.14), 0 0 18px rgba(17,137,228,.10); }
 .wg-writing-room .send-jewel span { margin-right: 8px; color: #7be5fc; }
 .wg-writing-room .send-jewel:hover:not(:disabled) { background: #154163; }
@@ -970,7 +978,7 @@ select option, select optgroup { background-color: #081826; color: #eaf8ff; }
   .wg-writing-room .wg-route-block { grid-template-columns: minmax(0,1fr); }
   .wg-writing-room .wg-route-block .route-mineral { display: none; }
   .wg-route-controls { grid-column: 1; }
-  .wg-writing-room .composer-foot { align-items: stretch; }
+  .wg-writing-room .composer-foot { grid-template-columns: minmax(0, 1fr); align-items: stretch; }
   .wg-writing-room .send-jewel { width: 100%; }
   .wg-writing-room .wg-control-ribbon { gap: 8px; }
 }
@@ -1468,8 +1476,8 @@ html[data-wayglass-surface="wayglass:living-watercolor"] #app {
   color: #ebd5a5; text-shadow: 0 0 8px rgba(151,223,218,.5);
 }
 .wg-motion-status { flex-basis: 100%; overflow-wrap: anywhere; color: #d3e4db; }
-:root[data-wg-motion="on"] .glass-chip,
-:root[data-wg-motion="on"] .send-jewel {
+:root[data-wg-motion="on"] .glass-chip:not([data-wg-static-control]),
+:root[data-wg-motion="on"] .send-jewel:not([data-wg-static-control]) {
   translate: var(--wg-magnet-x,0px) var(--wg-magnet-y,0px);
 }
 :root[data-wg-motion="off"] .glass-chip,
@@ -1478,16 +1486,15 @@ html[data-wayglass-surface="wayglass:living-watercolor"] #app {
   .glass-chip, .send-jewel { translate: none !important; }
 }
 
-/* The inherited deck owns its full touch surface. Keep host utilities in the
-   document flow here so they cannot cover the child's bottom navigation. */
-:root[data-wayglass-surface="arcsweep:deck"] .wg-ship-switch {
+/* The inherited deck and Writing Room keep their worktable controls clear. */
+:root:is([data-wayglass-surface="arcsweep:deck"], [data-wayglass-surface="wayglass:writing-room"]) .wg-ship-switch {
   position: relative;
   inset: auto;
   display: block;
   width: fit-content;
   margin: 1rem auto;
 }
-:root[data-wayglass-surface="arcsweep:deck"] .wg-voyage-inbox {
+:root:is([data-wayglass-surface="arcsweep:deck"], [data-wayglass-surface="wayglass:writing-room"]) .wg-voyage-inbox {
   position: relative;
   inset: auto;
   box-sizing: border-box;
