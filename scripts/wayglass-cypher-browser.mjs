@@ -240,7 +240,11 @@ async function checkWriting(page,profile){
   const results=buttons.map(id=>{
    const button=document.getElementById(id);
    const initial=button.getBoundingClientRect();
-   scrollTo(0,scrollY+initial.bottom-(innerHeight-16));
+   // The lowest place a person can actually see: above the five-locus dock
+   // when it sits at the bottom of a phone, otherwise the viewport edge.
+   const dock=document.querySelector('.wg-helm-loci')?.getBoundingClientRect();
+   const floor=dock&&dock.top>innerHeight/2?dock.top:innerHeight;
+   scrollTo(0,scrollY+initial.bottom-(floor-16));
    const rect=button.getBoundingClientRect();
    const y=(rect.top+rect.bottom)/2;
    const hits=[rect.left+8,(rect.left+rect.right)/2,rect.right-8]

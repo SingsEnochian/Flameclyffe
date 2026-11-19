@@ -48,3 +48,113 @@
 .wg-cell-lineage[data-cell-role="observation"]{background:radial-gradient(ellipse at 15% 20%,rgba(227,191,106,.22),transparent 58%),linear-gradient(135deg,rgba(94,79,41,.24),rgba(24,52,55,.12));border-color:rgba(224,198,124,.66)}
 .wg-cell-lineage[data-cell-role="hybrid"]{background:radial-gradient(ellipse at 18% 22%,rgba(118,214,201,.25),transparent 50%),radial-gradient(ellipse at 82% 75%,rgba(238,183,115,.23),transparent 52%);border:2px double rgba(153,216,188,.78)}
 .wg-cell-lineage[data-cell-role="hybrid"] strong{letter-spacing:.015em}
+
+/* ── FAEberpunk Cell Garden ───────────────────────────────────────────────
+   The garden reads as a living culture vessel: a hero membrane with the
+   Colony Radio as an inset instrument, a copper-etched console for owner
+   actions, a provenance rail for status, and the family lineage as a bed of
+   opaline cells. Layout and material only: every control, label, state and
+   consent gate is unchanged. */
+.wg-cell-garden{
+  max-width:min(1500px,100%);padding:clamp(.5rem,1.6vw,1.25rem);gap:clamp(12px,1.4vw,18px);
+  grid-template-columns:minmax(0,1fr);
+  grid-template-areas:"head" "console" "status" "family" "proposal" "ecology";
+}
+.wg-cell-heading{grid-area:head}
+.wg-cell-controls{grid-area:console}
+.wg-cell-status{grid-area:status}
+.wg-cell-family{grid-area:family}
+.wg-cell-proposal{grid-area:proposal}
+.wg-cell-ecology{grid-area:ecology}
+@media(min-width:1100px){
+  .wg-cell-garden{
+    grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);
+    grid-template-areas:"head head" "console family" "status family" "proposal family" "ecology ecology";
+    align-items:start;
+  }
+  .wg-cell-heading{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(280px,.7fr);column-gap:clamp(18px,3vw,44px);align-items:end}
+  .wg-cell-heading>:not(.wg-cell-radio){grid-column:1}
+  .wg-cell-heading .wg-cell-radio{grid-column:2;grid-row:1 / span 4;margin:0;align-self:stretch}
+}
+
+/* Hero membrane: a slowly turning Möbius halo behind the title. Decorative
+   only; it never reports cell state, and it is still when motion is off. */
+.wg-cell-heading{position:relative;overflow:hidden;isolation:isolate;
+  border-color:var(--fae-hairline-copper,rgba(228,195,142,.32));
+  background:
+    radial-gradient(ellipse at 18% 120%,rgba(118,183,164,.22),transparent 60%),
+    radial-gradient(ellipse at 96% -10%,rgba(228,195,142,.16),transparent 52%),
+    var(--fae-panel)}
+.wg-cell-heading::before{content:"";position:absolute;z-index:-1;pointer-events:none;
+  width:min(520px,70vw);aspect-ratio:2/1;left:-6%;top:-38%;border-radius:50%;opacity:.5;
+  background:conic-gradient(from 90deg,transparent 0 12%,rgba(188,239,224,.32) 22%,transparent 34% 62%,rgba(228,195,142,.28) 72%,transparent 84%);
+  -webkit-mask:radial-gradient(closest-side,transparent 58%,#000 60% 66%,transparent 68%);
+  mask:radial-gradient(closest-side,transparent 58%,#000 60% 66%,transparent 68%)}
+:root[data-wg-motion="on"] .wg-cell-heading::before{animation:wg-cell-halo 48s linear infinite}
+@keyframes wg-cell-halo{to{transform:rotate(1turn)}}
+.wg-cell-heading .eyebrow{letter-spacing:.24em;color:var(--fae-copper)}
+.wg-cell-heading h1{font:400 clamp(2rem,4.6vw,3.6rem)/1.02 Georgia,"Times New Roman",serif;letter-spacing:-.02em;margin:.3rem 0 .7rem;color:var(--fae-parchment)}
+.wg-cell-heading>p:not(.eyebrow){max-width:62ch;color:#c9ddd5}
+.wg-cell-note{color:#a9c6bd}
+
+/* Colony Radio: an inset instrument, not a form. */
+.wg-cell-radio{border-color:var(--fae-hairline);border-radius:var(--fae-radius-s,12px);
+  background:linear-gradient(170deg,rgba(3,12,18,.82),rgba(9,27,32,.7));
+  box-shadow:inset 0 1px rgba(232,255,244,.08),inset 0 -18px 40px rgba(0,0,0,.35)}
+.wg-cell-radio h2{font:600 .74rem/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.2em;text-transform:uppercase;color:var(--fae-copper)}
+.wg-cell-radio .wg-cell-row{gap:8px}
+.wg-cell-radio label{width:100%;display:grid;gap:6px;font-size:.8rem;color:#b8d4cb}
+.wg-cell-radio input[type=range]{width:100%}
+
+/* Owner console: grouped, copper for decisions, ember for Feather. */
+.wg-cell-controls{display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;
+  border-color:var(--fae-hairline-copper,rgba(228,195,142,.32));background:var(--fae-recess-2),var(--fae-panel)}
+.wg-cell-controls>label{grid-column:1 / -1;display:grid;gap:6px;font:600 .72rem/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--fae-copper)}
+.wg-cell-controls>label select{width:100%;min-height:44px;font:500 .95rem/1.2 system-ui,sans-serif;letter-spacing:0;text-transform:none}
+.wg-cell-controls button{width:100%;min-height:44px;justify-content:center;text-align:center}
+.wg-cell-garden [data-cell-action="preview"],.wg-cell-garden [data-cell-action="commit"],
+.wg-cell-garden [data-cell-action="fusion-preview"],.wg-cell-garden [data-cell-action="fusion-commit"],
+.wg-cell-garden [data-cell-action="specialise"],.wg-cell-garden [data-cell-action="exchange"]{
+  color:#fff1d6;border-color:rgba(228,195,142,.62);
+  background:linear-gradient(170deg,rgba(104,74,38,.55),rgba(36,28,18,.7))}
+.wg-cell-garden [data-cell-action="feather"]{color:#ffe4d8;border-color:rgba(241,183,160,.6);
+  background:linear-gradient(170deg,rgba(92,38,30,.55),rgba(30,14,14,.75))}
+.wg-cell-garden [data-cell-action="ask-form"]{grid-column:1 / -1}
+.wg-cell-garden button:disabled{filter:saturate(.35);opacity:.5}
+
+/* Status is a provenance rail: what just happened, in the cell's own words. */
+.wg-cell-status{margin:0;padding:12px 14px 12px 16px;border-left:3px solid var(--fae-opal-deep,#76b7a4);
+  border-radius:0 12px 12px 0;background:linear-gradient(90deg,rgba(118,183,164,.14),rgba(5,14,22,.0) 70%);
+  font:500 .86rem/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;color:#d4ece3}
+
+/* Family lineage: a bed of cells. Divided parents fade, never vanish. */
+.wg-cell-family h2,.wg-cell-proposal h2,.wg-cell-ecology h2{font:400 clamp(1.3rem,2.2vw,1.7rem)/1.15 Georgia,serif;color:var(--fae-parchment);margin:0 0 .7rem}
+.wg-cell-family{background:radial-gradient(ellipse at 50% 0,rgba(118,183,164,.12),transparent 60%),var(--fae-panel)}
+.wg-cell-list{grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr))}
+.wg-cell-lineage{position:relative;gap:6px;padding:14px 14px 13px;border-radius:16px;
+  box-shadow:inset 0 1px rgba(236,255,244,.08),0 10px 26px rgba(0,0,0,.28)}
+.wg-cell-lineage strong{font:600 .95rem/1.25 ui-monospace,SFMono-Regular,Menlo,monospace;color:#f2f7ef;overflow-wrap:anywhere}
+.wg-cell-lineage>span:not(.wg-cell-form){color:#b6cfc7;font-size:.82rem}
+.wg-cell-lineage[data-cell-status="active"]::after{content:"";position:absolute;top:12px;right:12px;width:8px;height:8px;border-radius:50%;
+  background:var(--fae-opal-live,#bcefe0);box-shadow:0 0 0 3px rgba(188,239,224,.16)}
+
+.wg-cell-proposal{border-style:dashed;border-color:rgba(228,195,142,.36);background:var(--fae-recess-2)}
+.wg-cell-proposal .wg-cell-note{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.78rem}
+
+/* Ecology: three stations (specialise · exchange · fuse) on one bench. */
+.wg-cell-ecology .wg-cell-row{padding:10px 12px;border:1px solid var(--fae-hairline);border-radius:12px;background:rgba(3,11,17,.4)}
+.wg-cell-ecology .wg-cell-row label{font-size:.85rem;color:#c3dad2}
+.wg-cell-ecology .wg-cell-consent{flex-basis:100%}
+
+@media(max-width:640px){
+  .wg-cell-controls{grid-template-columns:minmax(0,1fr)}
+  .wg-cell-heading h1{font-size:clamp(1.8rem,9vw,2.4rem)}
+}
+@media(prefers-reduced-transparency:reduce){
+  .wg-cell-radio,.wg-cell-controls,.wg-cell-family,.wg-cell-heading{background:#0a1a21}
+}
+@media(forced-colors:active){
+  .wg-cell-lineage,.wg-cell-status,.wg-cell-ecology .wg-cell-row{border:1px solid CanvasText}
+}
+@media(prefers-reduced-motion:reduce){.wg-cell-heading::before{animation:none!important}}
