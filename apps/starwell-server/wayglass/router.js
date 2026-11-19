@@ -10,6 +10,7 @@ const { createRequestGate } = require('../security/wayglass-request-gate');
 const {createAlteredTimelineRouter}=require('./altered-timeline-router.cjs');
 const {createPrivateAtelierRouter}=require('./private-atelier.cjs');
 const {createCellGarden}=require('../wayglass-runtime/wayglass-cell-mitosis.cjs');
+const {createColonyCheckpointStore}=require('../wayglass-runtime/wayglass-colony-checkpoint.cjs');
 const {
   publicWayglassRoutes,
   resolveWayglassRoute,
@@ -563,9 +564,17 @@ async function readQuadSourcesFromSupabase(fetchImpl=globalThis.fetch){
 function createWayglassRouter({
   inheritanceContext = null, fetchImpl = globalThis.fetch, departureStore = createDepartureStore(),
   runtimeSandbox = createRuntimeSandbox(), atelierDirectory,
-  cellGarden = createCellGarden(),
+  cellGarden, colonyDirectory,
 } = {}) {
   const router = express.Router();
+  try {
+    cellGarden ??= createCellGarden({
+      store: colonyDirectory ? createColonyCheckpointStore(colonyDirectory) : null,
+    });
+  } catch {
+    // Keep other rooms available while the existing checkpoint is inspected.
+    cellGarden = null;
+  }
   // Same authenticated House gateway as Wayglass route custody. No separate user identity.
   router.use('/timeline/altered',createAlteredTimelineRouter({authorise:griffStewardAuthorized}));
   router.use('/private-atelier', createPrivateAtelierRouter({
@@ -594,6 +603,8 @@ function createWayglassRouter({
       if (res.destroyed) return;
       if (!authorised())
         return res.status(401).json({ error: 'House Steward sign-in required for cellular lineage' });
+      if (!cellGarden)
+        return res.status(503).json({ error: 'The colony checkpoint needs recovery' });
 
       let heartbeat;
       const unsubscribe = cellGarden.listen((event, payload) => {
@@ -624,10 +635,12 @@ function createWayglassRouter({
       res.setHeader('Cache-Control', 'no-store');
       if (!(await griffStewardAuthorized(req).catch(() => false)))
         return res.status(401).json({ error: 'House Steward sign-in required for cellular lineage' });
+      if (!cellGarden)
+        return res.status(503).json({ error: 'The colony checkpoint needs recovery' });
       next();
     });
   const gardenFailure = (res, error) => res.status(
-    [400, 403, 409].includes(error?.status) ? error.status : 409
+    [400, 403, 409, 503].includes(error?.status) ? error.status : 409
   ).json({ error: String(error?.message || 'Cell garden proposal failed').slice(0, 160) });
   router.get('/cell-garden', (_req, res) => res.json(cellGarden.snapshot()));
   router.post('/cell-garden/preview', async (req, res) => {
@@ -666,13 +679,18 @@ function createWayglassRouter({
     gardenTransition(req, res, (input, options) => cellGarden.specialise(input, options)));
   router.post('/cell-garden/exchange', (req, res) =>
     gardenTransition(req, res, (input, options) => cellGarden.exchange(input, options)));
+  router.post('/cell-garden/form', (req, res) =>
+    gardenTransition(req, res, (input, options) => cellGarden.askForm(input, options)));
   router.post('/cell-garden/fusion/preview', (req, res) =>
     gardenTransition(req, res, (input, options) => cellGarden.proposeFusion(input, options)));
   router.post('/cell-garden/fusion/commit', (req, res) => {
     try { res.json(cellGarden.commitFusion(req.body || {})); }
     catch (error) { gardenFailure(res, error); }
   });
-  router.post('/cell-garden/feather', (_req, res) => res.json(cellGarden.feather()));
+  router.post('/cell-garden/feather', (_req, res) => {
+    try { res.json(cellGarden.feather()); }
+    catch (error) { gardenFailure(res, error); }
+  });
   router.post('/cell-garden/resume', (req, res) => {
     try { res.json(cellGarden.resume(req.body || {})); }
     catch (error) { gardenFailure(res, error); }

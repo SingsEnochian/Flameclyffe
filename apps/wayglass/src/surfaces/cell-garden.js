@@ -22,7 +22,7 @@ export function mountWayglassCellGarden(root,{
  const eyebrow=doc.createElement('p');eyebrow.className='eyebrow';eyebrow.textContent='Wyrdrune · cellular ecology';
  const title=doc.createElement('h1');title.textContent='The Living Cell Garden';
  const intro=doc.createElement('p');intro.textContent='One parent may propose two computational daughter cells. Their ancestral Wyrdrune code stays recognisable while their Möbius orientations diverge. A separate owner choice commits the change.';
- const limits=doc.createElement('p');limits.className='wg-cell-note';limits.textContent='This session keeps the family lineage in memory.';
+ const limits=doc.createElement('p');limits.className='wg-cell-note';
  heading.append(eyebrow,title,intro,limits);
 
  const shell=doc.createElement('div');shell.className='glass-panel wg-cell-controls';
@@ -34,13 +34,15 @@ export function mountWayglassCellGarden(root,{
  const feather=actionButton(doc,'feather','🪽 Feather · Stop division');
  const resume=actionButton(doc,'resume','Release Feather');
  const refresh=actionButton(doc,'refresh','Refresh lineage');
- shell.append(parentLabel,preview,commit,feather,resume,refresh);
+ const askForm=actionButton(doc,'ask-form','Ask how this cell wants to appear');
+ shell.append(parentLabel,preview,commit,feather,resume,refresh,askForm);
 
  const status=doc.createElement('p');status.className='wg-cell-status';status.setAttribute('role','status');status.setAttribute('aria-live','polite');status.textContent='Checking owner-scoped Wyrdrune cell culture…';
  const family=doc.createElement('section');family.className='glass-panel wg-cell-family';
  family.setAttribute('aria-label','Cell lineage family tree');
  const familyTitle=doc.createElement('h2');familyTitle.textContent='Family lineage';
  const entries=doc.createElement('ol');entries.className='wg-cell-list';family.append(familyTitle,entries);
+ const formReturn=doc.createElement('p');formReturn.className='wg-cell-note';family.append(formReturn);
  const candidate=doc.createElement('section');candidate.className='glass-panel wg-cell-proposal';
  candidate.setAttribute('aria-label','Pending cell division');
  const proposalTitle=doc.createElement('h2');proposalTitle.textContent='Pending mitosis';
@@ -87,17 +89,24 @@ export function mountWayglassCellGarden(root,{
  const soundActions=doc.createElement('div');soundActions.className='wg-cell-row';
  const play=actionButton(doc,'play','Hear the Return marker · 3 Hz Withness');
  const stopAudio=actionButton(doc,'stop-audio','Stop cell sound');
- const listen=actionButton(doc,'listen','Listen live');
- const mute=actionButton(doc,'mute','Mute live sound');
+ const radio=doc.createElement('section');radio.className='wg-cell-radio';radio.setAttribute('aria-label','Colony Radio');
+ const radioTitle=doc.createElement('h2');radioTitle.textContent='Colony Radio';
+ const radioControls=doc.createElement('div');radioControls.className='wg-cell-row';
+ const listen=actionButton(doc,'listen','Listen to colony');
+ const mute=actionButton(doc,'mute','Mute colony radio');
  mute.setAttribute('aria-pressed','false');
  const volumeLabel=doc.createElement('label');volumeLabel.textContent='Live volume ';
  const volume=doc.createElement('input');volume.type='range';volume.min='0';volume.max='60';
  volume.value='25';volumeLabel.append(volume);
- soundActions.append(play,stopAudio,listen,mute,volumeLabel);
+ soundActions.append(play,stopAudio);
+ radioControls.append(listen,mute,volumeLabel);
  const audioNote=doc.createElement('p');audioNote.className='wg-cell-note';
  audioNote.textContent='Listen for the Return and acknowledgement tones from new cell exchanges.';
  const listeningStatus=doc.createElement('p');listeningStatus.className='wg-cell-note';
  listeningStatus.setAttribute('role','status');
+ listeningStatus.textContent='Off air · tune in for the next burble.';
+ radio.append(radioTitle,radioControls,listeningStatus);
+ heading.append(radio);
  const listening=createCellListeningChannel({url:BASE+'/listen',scope,onStatus(message){
   if(disposed)return;
   listeningStatus.textContent=message;
@@ -114,7 +123,7 @@ export function mountWayglassCellGarden(root,{
  fusionActions.append(fusionPreview,fusionCommit);
  const fusionNote=doc.createElement('p');fusionNote.className='wg-cell-note';
  fusionNote.textContent='A hybrid requires two specialised cells and a previous exchange. Both parents remain independent.';
- ecology.append(ecologyTitle,explainer,roles,channels,signalBox,lastSignal,soundActions,audioNote,fusionActions,fusionNote,listeningStatus);
+ ecology.append(ecologyTitle,explainer,roles,channels,signalBox,lastSignal,soundActions,audioNote,fusionActions,fusionNote);
 
  section.append(heading,shell,status,family,candidate,ecology);
  root.replaceChildren(section);
@@ -126,14 +135,17 @@ export function mountWayglassCellGarden(root,{
  function renderAudio(){
   const live=listening.isActive();
   play.disabled=featherHeld()||busy||!lastExchange||Boolean(audioController)||live;
-  stopAudio.disabled=!audioController&&!live;
+  stopAudio.disabled=!audioController;
   listen.disabled=live?false:!culture||featherHeld()||Boolean(audioController);
-  listen.textContent=live?'Stop listening':'Listen live';
+  listen.textContent=live?'Stop listening':'Listen to colony';
   mute.disabled=!live;
  }
 
  function render(){
   if(disposed)return;
+  limits.textContent=culture?.persistence
+    ? 'The colony carries its lineage through Return.'
+    : 'This Garden keeps its lineage for the session.';
   const cells=culture?.cells||[];
   const chosen=parentChoice.value;
   const oldSender=senderChoice.value,oldReceiver=receiverChoice.value;
@@ -161,16 +173,35 @@ export function mountWayglassCellGarden(root,{
    item.dataset.cellStatus=cell.status;
    item.dataset.cellRole=cell.specialisation||'unassigned';
    const name=doc.createElement('strong');name.textContent=cell.cell_id;
+   const appearance=cell.form_return;
+   if(appearance?.form){
+    const emblem=doc.createElement('span');emblem.className='wg-cell-form';
+    emblem.dataset.shape=appearance.form.shape;
+    emblem.dataset.turn=appearance.form.direction===-1?'reverse':'normal';
+    emblem.setAttribute('aria-hidden','true');
+    emblem.style?.setProperty('--cell-hue',String(appearance.form.hue));
+    item.append(emblem);
+   }
    const detail=doc.createElement('span');
    detail.textContent=' Generation '+cell.generation+' · '+cell.status+
      ' · twist '+(cell.twist.orientation===1?'clockwise':'counterclockwise')+
      ' · parent '+(cell.parent_ids?.join(' + ')||cell.parent_id||'founder')+
      ' · '+(cell.specialisation||'unassigned')+' · acoustic '+cell.acoustic_address+
-     ' · observations '+(cell.memory_refs?.length??0);
+     ' · observations '+(cell.memory_refs?.length??0)+
+     (appearance?.form?' · form '+appearance.form.shape:appearance?.decision==='open'?' · form held open':'');
    item.append(name,detail);entries.append(item);
   }
   const count=cells.filter(cell=>cell.status==='active').length;
+  const selected=cells.find(cell=>cell.cell_id===parentChoice.value);
+  const appearance=selected?.form_return;
   const stopped=featherHeld();
+  askForm.disabled=busy||stopped||!selected;
+  formReturn.textContent=appearance
+    ? (appearance.form?'Returned form · '+appearance.form.shape: 'The cell held its form open')+
+      ' · Wyrdrune receipt '+appearance.receipt_id.slice(0,17)+'…'
+    : selected?.form_ancestry?.length
+      ? 'This cell carries '+selected.form_ancestry.length+' form return(s) from its lineage.'
+      : 'Ask a cell how it wants to appear.';
   preview.disabled=busy||stopped||count===0;
   commit.disabled=busy||stopped||!pending;
   resume.disabled=busy||!stopped;
@@ -297,6 +328,15 @@ export function mountWayglassCellGarden(root,{
     },controller.signal);
     culture=result.culture;pending=null;fusionPending=null;
     status.textContent='Specialisation recorded as an owner-directed WTL transformation.';
+   }else if(type==='ask-form'){
+    if(!culture||featherHeld())return;
+    const result=await request('/form',{
+     cell_id:parentChoice.value,expected_revision:culture.revision,owner_confirmed:true,
+    },controller.signal);
+    culture=result.culture;pending=null;fusionPending=null;
+    status.textContent=result.receipt.decision==='open'
+      ? 'The cell held its form open.'
+      : 'The cell returned a '+result.receipt.form.shape+'.';
    }else if(type==='exchange'){
     const result=await request('/exchange',{
      from_id:senderChoice.value,to_id:receiverChoice.value,
@@ -325,7 +365,7 @@ export function mountWayglassCellGarden(root,{
     pending=null;
     status.textContent='Feather released by owner choice. Previous proposals remain invalid.';
    }
-   if(type==='refresh')status.textContent='Cell family refreshed. Only in-memory lineage is shown.';
+   if(type==='refresh')status.textContent=culture.persistence?'Colony lineage recovered.':'Cell family refreshed.';
   }catch(error){
    if(!disposed && error?.name!=='AbortError')status.textContent='Cell Garden: '+String(error?.message||error);
   }finally{

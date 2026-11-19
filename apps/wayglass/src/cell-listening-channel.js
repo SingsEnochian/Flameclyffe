@@ -33,7 +33,7 @@ export function createCellListeningChannel({
     }
     const run={controller:new AbortController(),context:null,stream:null,output:null};
     session=run;
-    onStatus('Connecting to the Cell Garden…');
+    onStatus('Tuning to Colony Radio…');
     try{
       run.context=new Context();
       await run.context.resume();
@@ -69,7 +69,7 @@ export function createCellListeningChannel({
         onFeather();
       });
       run.stream.addEventListener('error',()=>{
-        if(session===run)stop('Live connection closed. Choose Listen to reconnect.');
+        if(session===run)stop('Live connection closed. Choose Listen to colony to reconnect.');
       });
     }catch{
       if(session===run)stop('Live cell sound could not start.');

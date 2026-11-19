@@ -152,7 +152,7 @@ test('Garden UI keeps acoustic exchange opt-in and proposes a hybrid without rep
  off();
 });
 
-test('Garden Listen plays a fresh burble with live gain controls and stops it on Feather',async()=>{
+test('Colony Radio plays a fresh burble with live gain controls and stops it on Feather',async()=>{
  const root=new Element('main',doc);
  let source,stream,gain,closed=0,started=0,stopped=0;
  const playing=Promise.withResolvers();
@@ -188,17 +188,18 @@ test('Garden Listen plays a fresh burble with live gain controls and stops it on
  });
  await next();
  const section=root.children[0];
- const garden=section.children[5];
- const actions=garden.children[6];
- const listen=actions.children[2],mute=actions.children[3],slider=actions.children[4].children[0];
+ const radio=section.children[0].children.find(child=>child.attributes['aria-label']==='Colony Radio');
+ const [listen,mute,volumeLabel]=radio.children[1].children;
+ const slider=volumeLabel.children[0];
  assert.equal(stream,undefined);
  assert.equal(listen.disabled,false);
+ assert.equal(listen.textContent,'Listen to colony');
  click(section,'listen');await next();
  stream.dispatchEvent(new MessageEvent('ready'));
  assert.equal(started,0);
  const frame={schema:'wyrdrune.acoustic-frame/v0.1',marker:369,resolution:'open'};
  const receipt={
-  schema:'wayglass.cell-exchange/v0.1',status:'delivered-in-memory',revision:3,
+  schema:'wayglass.cell-exchange/v0.1',status:'delivered-to-checkpoint',revision:3,
   from_id:'cell:a',to_id:'cell:b',
   acoustic:{encoding:'marker-and-open-status-only',
    request:{...frame,kind:1,sender:2,recipient:3},

@@ -21,6 +21,24 @@
 .wg-cell-consent{max-width:100%;text-wrap:pretty}
 .wg-cell-row button:disabled{opacity:.48;cursor:not-allowed}
 
+.wg-cell-radio{margin-top:1rem;padding:1rem;border:1px solid rgba(166,220,190,.4);border-radius:1rem;background:rgba(6,24,28,.72)}
+.wg-cell-radio h2{margin:0 0 .6rem;font-size:1.2rem}
+.wg-cell-radio p{margin:.65rem 0 0}
+.wg-cell-radio button,.wg-cell-controls [data-cell-action="ask-form"]{min-height:44px}
+.wg-cell-radio input[type=range]{max-width:100%;accent-color:#a4d8b3}
+.wg-cell-form{
+  display:block;width:2.1rem;height:2.1rem;margin-bottom:.35rem;
+  background:radial-gradient(circle at 36% 30%,hsl(var(--cell-hue,165) 78% 86%),hsl(var(--cell-hue,165) 52% 48%) 58%,transparent 100%);
+  box-shadow:0 0 .85rem hsl(var(--cell-hue,165) 60% 55% / .32);
+  border-radius:50%;
+}
+.wg-cell-form[data-shape="crescent"]{border-radius:50%;clip-path:polygon(0 0,100% 0,58% 36%,55% 63%,100% 100%,0 100%)}
+.wg-cell-form[data-shape="ribbon"]{border-radius:68% 23% 70% 27%;scale:1 .65}
+.wg-cell-form[data-shape="bloom"]{border-radius:65% 35% 65% 35%;rotate:45deg}
+:root[data-wg-motion="on"] .wg-cell-form{animation:wg-cell-form-turn 14s linear infinite}
+.wg-cell-form[data-turn="reverse"]{animation-direction:reverse!important}
+@keyframes wg-cell-form-turn{to{transform:rotate(1turn)}}
+
 /* Differentiation is visible without sound or inferred model activity. */
 .wg-cell-lineage[data-cell-role="resonance"]{background:radial-gradient(ellipse at 72% 28%,rgba(92,178,229,.24),transparent 58%),linear-gradient(130deg,rgba(26,65,97,.25),rgba(18,36,56,.13));border-color:rgba(127,204,248,.64)}
 .wg-cell-lineage[data-cell-role="observation"]{background:radial-gradient(ellipse at 15% 20%,rgba(227,191,106,.22),transparent 58%),linear-gradient(135deg,rgba(94,79,41,.24),rgba(24,52,55,.12));border-color:rgba(224,198,124,.66)}

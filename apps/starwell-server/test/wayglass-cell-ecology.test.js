@@ -2,7 +2,11 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const { mkdtempSync, rmSync } = require('node:fs');
+const { tmpdir } = require('node:os');
+const { join } = require('node:path');
 const { createCellGarden, PHASES, ECOLOGY_SCHEMAS } = require('../../../lib/wayglass-cell-mitosis.cjs');
+const { createColonyCheckpointStore } = require('../../../lib/wayglass-colony-checkpoint.cjs');
 
 async function daughters(garden = createCellGarden({maxActive: 4, maxGeneration: 3})) {
   const p = await garden.propose({cell_id:'cell:origin', expected_revision:0});
@@ -155,4 +159,54 @@ test('fusion is denied if generation or population limits would be crossed',asyn
   await assert.rejects(garden.proposeFusion({
     left_id:a,right_id:b,expected_revision:4
   }),/budget/i);
+});
+
+test('cell form turns are returned by Wyrdrune and survive a cold colony Return', async t => {
+  const directory = mkdtempSync(join(tmpdir(), 'wayglass-colony-'));
+  t.after(() => rmSync(directory, { recursive:true, force:true }));
+  const openGarden = () => createCellGarden({ store:createColonyCheckpointStore(directory) });
+  const garden = openGarden();
+  const { a, b } = await specialised(garden);
+  const ask = (cell_id, expected_revision, host = garden) => host.askForm({
+    cell_id, expected_revision, owner_confirmed:true,
+  });
+  const first = (await ask(a, 3)).receipt;
+  phases(first);
+  assert.equal(first.decision, 'open');
+  assert.equal(first.form, null);
+  assert.equal((await ask(a, 4)).receipt.receipt_id, first.receipt_id);
+  const competingHost = openGarden();
+  const heard = [];
+  garden.listen((event, payload) => heard.push({ event, payload }));
+  const signal = (await garden.exchange({
+    from_id:a, to_id:b, message:'A second bell beneath the river', expected_revision:4,
+    owner_confirmed:true, receiver_route_approved:true,
+  })).receipt;
+  assert.equal(heard[0].payload.message_id, signal.message_id);
+  assert.equal(heard[0].payload.status, 'delivered-to-checkpoint');
+  assert.equal(heard[0].payload.message, undefined);
+  const chosen = (await ask(a, 5)).receipt;
+  phases(chosen);
+  assert.equal(chosen.source, 'cell-wyrdrune');
+  assert.equal(chosen.decision, 'chosen');
+  assert.equal(chosen.previous_form_receipt_id, first.receipt_id);
+  assert.deepEqual(chosen.form, { shape:'crescent', hue:67, direction:1 });
+  assert.deepEqual(chosen.signal_refs, [signal.message_id]);
+  await assert.rejects(ask(b, 4, competingHost), /checkpoint changed/);
+  assert.equal(competingHost.snapshot().revision, 4);
+
+  const proposal = await garden.propose({ cell_id:a, expected_revision:6 });
+  garden.commit({ proposal_id:proposal.proposal_id, expected_revision:6, owner_confirmed:true });
+  const cold = openGarden();
+  assert.deepEqual(cold.snapshot(), garden.snapshot());
+  assert.deepEqual(cold.snapshot().cells.find(cell=>cell.cell_id===a).form_return, chosen);
+  const daughters = cold.snapshot().cells.filter(cell=>cell.parent_id===a);
+  assert.equal(daughters.length, 2);
+  assert.ok(daughters.every(cell=>cell.form_ancestry.includes(chosen.receipt_id) && !cell.form_return));
+  const coldEvents = [];
+  cold.listen(event => coldEvents.push(event));
+  assert.deepEqual(coldEvents, [], 'a cold radio starts quiet');
+  cold.feather();
+  assert.deepEqual(coldEvents, ['feather']);
+  assert.equal(openGarden().snapshot().status, 'feather-stopped');
 });

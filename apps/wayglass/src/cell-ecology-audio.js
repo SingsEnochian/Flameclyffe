@@ -13,7 +13,8 @@ const stopped=signal=>{
 export async function prepareCellAcousticReturn(receipt,{signal}={}){
   stopped(signal);
   if(receipt?.schema!=='wayglass.cell-exchange/v0.1'||
-     receipt.status!=='delivered-in-memory'||receipt.acoustic?.encoding!=='marker-and-open-status-only')
+     !['delivered-in-memory','delivered-to-checkpoint'].includes(receipt.status)||
+     receipt.acoustic?.encoding!=='marker-and-open-status-only')
     throw new TypeError('A verified, locally delivered cell observation receipt is required');
   const {request,reply}=receipt.acoustic;
   const checked=createAcousticReturn({

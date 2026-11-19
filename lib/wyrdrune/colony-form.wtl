@@ -1,0 +1,29 @@
+// The cell reads its Möbius orientation and the signals it has carried.
+mobius scoped {
+  perceive {
+    let hearing = signal_count;
+    let face = if orientation < 0 then 7 - phase else phase;
+  }
+  compress {
+    let contour = if face >= 4 then face - 4 else face;
+  }
+  release {
+    let hue = 24 + face * 42 + hearing;
+  }
+  verify {
+    require phase >= 0 and phase < 8 and hearing >= 0 and hearing <= 32 else "Cell form input incomplete";
+    require orientation == 1 or orientation == -1 else "Cell orientation unavailable";
+  }
+  integrate {
+    let forms = ["orb", "crescent", "ribbon", "bloom"];
+  }
+  choose {
+    let decision = if hearing > 0 then "chosen" else "open";
+    let form = if decision == "chosen" then {shape: forms[contour], hue: hue, direction: orientation}
+      else unknown;
+  }
+  return {
+    emit {decision: decision, form: form};
+  }
+  transcend {}
+}

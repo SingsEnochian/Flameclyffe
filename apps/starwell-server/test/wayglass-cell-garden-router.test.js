@@ -141,6 +141,14 @@ test('House-authenticated cell garden only divides after a separate explicit app
   assert.deepEqual(payload.acoustic, committed.acoustic);
   assert.equal('message' in payload, false);
   assert.equal('wtl' in payload, false);
+  const formInput = {cell_id:a,expected_revision:6,owner_confirmed:true};
+  assert.equal((await fetchGarden('/form',formInput,false)).status,401);
+  const form = await fetchGarden('/form',formInput);
+  assert.equal(form.status,200);
+  const formResult = await form.json();
+  assert.equal(formResult.receipt.decision,'chosen');
+  assert.equal(formResult.receipt.cell_id,a);
+  assert.equal(formResult.receipt.wtl.phase_receipts.length,8);
   assert.equal((await fetchGarden('/feather', {})).status, 200);
   assert.equal(await readEvent(), 'event: feather\ndata: {}');
   assert.equal((await reader.read()).done, true);
