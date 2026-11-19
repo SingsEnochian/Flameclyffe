@@ -1286,3 +1286,4 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
 module.exports = createWayglassRouter();
 module.exports.createWayglassRouter = createWayglassRouter;
 
+module.exports.callOllama = callOllama;
