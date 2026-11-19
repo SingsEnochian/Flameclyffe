@@ -95,7 +95,7 @@ export async function mountLivingWatercolorSurface(root) {
             '<div class="wc-faepunk-touch-main"><button id="wc-first-touch" type="button" class="wc-faepunk-orb" aria-describedby="wc-touch-description wc-touch-status" aria-label="Touch Wayglass: run an authenticated Wyrdrune simulation">',
               '<span class="wc-faepunk-orb-halo" aria-hidden="true">✧</span><span class="wc-faepunk-orb-label">Touch</span></button>',
               '<div class="wc-faepunk-touch-meta"><strong>Touch the current</strong>',
-              '<p id="wc-touch-description">A real Wyrdrune run, a visible response. Synthetic test data only.</p></div></div>',
+              '<p id="wc-touch-description">Try a Wyrdrune rehearsal and see how your touch changes the watercolour.</p></div></div>',
             '<div class="wc-faepunk-modes" role="group" aria-label="Wyrdrune co-evolution profile">',
               '<button type="button" data-wc-touch-mode="repair" aria-pressed="true">Soothe</button>',
               '<button type="button" data-wc-touch-mode="expand" aria-pressed="false">Bloom</button></div>',

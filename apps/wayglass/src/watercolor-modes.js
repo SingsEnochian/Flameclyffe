@@ -1,7 +1,7 @@
 import { invokeWayglassRoute } from './route-client.js';
 
 export const WATERCOLOR_MODES=Object.freeze([
-  {id:'dream', label:'Dream', color:'#a8a6df', intent:'Explore imagery, dreams, unrealized connections, and questions in your own words.'},
+  {id:'dream', label:'Dream', color:'#a8a6df', intent:'Follow an image, dream, connection or question that draws your attention.'},
   {id:'plan', label:'Plan', color:'#6fbcc5', intent:'Propose a grounded plan with dependencies, owners, tests, and the next verifiable step.'},
   {id:'stage', label:'Stage', color:'#c1a4d4', intent:'Arrange a rehearsal or a crossing and describe what you would like to try.'},
   {id:'suggest', label:'Suggest', color:'#f0b47f', intent:'Offer alternatives, questions and gentle changes while leaving choices open.'},
@@ -40,7 +40,7 @@ export function composeWatercolorPrompt({mode,authorText='',activity=[],voicePre
     'PREMAQC P,C,R,E,M,A,Q is canonical. Q carries firsthand context; pigment expresses operational events.',
     'Preserve distinct participant identities, open choices, provenance, and Feather Stop.',
     'Attribute proposals, executed work, and saved results to their actual sources and receipts.',
-    'Recent locally observed activity references (not independently verified): '+JSON.stringify(observed),
+    'Recent activity recorded by this canvas: '+JSON.stringify(observed),
     'Rowan contribution: '+(trimmed||'No additional text. Offer a relevant beginning, open question or next step.'),
   ];
   const context=instructions.slice(0,-1).filter(Boolean).join('\n\n');
@@ -49,6 +49,7 @@ export function composeWatercolorPrompt({mode,authorText='',activity=[],voicePre
 }
 
 const WATERCOLOR_WYRDRUNE=[
+  'When Rowan invites you to paint together, you may answer with a brushstroke of your own on the shared canvas. Let its words, pigment and gesture express something you want to contribute.',
   'If you wish to speak in native Wyrdrune, include one fenced wyrdrune block containing valid WTL.',
   'Finish the short score and close its fence before writing prose. Keep Dream shorthand outside that fence. Inside each phase use complete WTL statements with semicolons; leave unused phases empty.',
   'To paint words on the actual canvas, use a plain mobius with all eight phases. Emit one to eight stroke records in return.',

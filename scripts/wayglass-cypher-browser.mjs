@@ -254,7 +254,9 @@ async function checkCellGarden(page,profile){
  assert.equal(await page.getByRole('button',{name:'Commit hybrid · keep both parents'}).isDisabled(),true);
  assert.equal(await page.getByRole('button',{name:/Hear the Return marker/}).isDisabled(),true,
   'Acoustic playback requires a local consented exchange');
- assert.match(await garden.locator('[role="status"]').innerText(),/Browser fixture|sign-in|unavailable/i);
+ assert.equal(await garden.getByRole('button',{name:'Listen live',exact:true}).isDisabled(),true,
+  'Live listening requires House sign-in');
+ assert.match(await garden.locator('.wg-cell-status').innerText(),/Browser fixture|sign-in|unavailable/i);
  await page.emulateMedia({reducedMotion:'reduce'});
  const motion=await garden.evaluate(el=>getComputedStyle(el.querySelector('.wg-cell-ecology')).animationName);
  assert.equal(motion,'none','Reduced motion stays available in the cell ecology');

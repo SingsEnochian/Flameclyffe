@@ -86,6 +86,7 @@ test('Wayglass ship voice can answer in Watercolour with exact seat and model re
   assert.equal(dispatched.routeId,'wayglass:ship');
   assert.equal(dispatched.input,'  What do you notice?\n');
   assert.match(dispatched.surfaceContext,/requested mode: Dream/);
+  assert.match(dispatched.surfaceContext,/you may answer with a brushstroke of your own on the shared canvas/);
   assert.doesNotMatch(dispatched.surfaceContext,/What do you notice/);
   assert.equal(response.route_id,'wayglass:ship');
   assert.equal(response.text,returned.output);

@@ -323,7 +323,7 @@ export function createObserverInterior({
       run_id: 'dream-run:' + hashString(association.id + '|' + at),
       created_at: at,
       status: 'dream-derived-hypothesis',
-      possibility: 'This could be false. But what if these observations belong in the same question?',
+      possibility: 'What if these observations belong in the same question?',
       association: association.summary,
       provenance: {
         question_id: association.question_id,
