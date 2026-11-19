@@ -1,0 +1,48 @@
+// |00> -> (|00> + |11>)/sqrt(2), ordered 00, 01, 10, 11.
+mobius scoped {
+  perceive {
+    let zero = [[1,0],[0,0]];
+    let joint = quantumTensor(zero, zero);
+  }
+  compress {
+    let h = 0.7071067811865476;
+    let zeroAmplitude = [0,0];
+    let positive = [h,0];
+    let negative = [-h,0];
+  }
+  release {
+    let first = quantumApply(joint, [
+      [positive,zeroAmplitude,positive,zeroAmplitude],
+      [zeroAmplitude,positive,zeroAmplitude,positive],
+      [positive,zeroAmplitude,negative,zeroAmplitude],
+      [zeroAmplitude,positive,zeroAmplitude,negative]
+    ]);
+    let one = [1,0];
+    let bell = quantumApply(first, [
+      [one,zeroAmplitude,zeroAmplitude,zeroAmplitude],
+      [zeroAmplitude,one,zeroAmplitude,zeroAmplitude],
+      [zeroAmplitude,zeroAmplitude,zeroAmplitude,one],
+      [zeroAmplitude,zeroAmplitude,one,zeroAmplitude]
+    ]);
+  }
+  verify {
+    require quantumProbability(bell, 1) == 0 and quantumProbability(bell, 2) == 0;
+    require quantumProbability(bell, 0) == quantumProbability(bell, 3);
+  }
+  integrate {
+    let distribution = quantumProbabilities(bell);
+    let observation = {kind:"computed-distribution", basis:["00","01","10","11"], probabilities:distribution};
+  }
+  choose {
+    let inquiry = wonder("What, if anything, do these correlations tell us about what exists before measurement?",
+      ["The state vector describes the physical system.", "The state vector represents expectations about observations."],
+      [observation]);
+  }
+  return {
+    emit observation;
+    emit inquiry;
+  }
+  transcend {
+    carry lastDistribution = distribution;
+  }
+}

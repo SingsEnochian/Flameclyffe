@@ -41,9 +41,9 @@ function ensureOxAlpha(form) {
 }
 
 function modeCopy(mode) {
-  if (mode === 'roleplay') return 'Fantasy Roleplay skill active · participant agency and IC/OOC boundaries enforced.';
-  if (mode === 'story') return 'Story skill active · longform scene continuity with roleplay boundaries retained.';
-  return 'Chat mode · no fantasy interaction skill injected.';
+  if (mode === 'roleplay') return 'In-world dialogue · Each participant speaks for themselves.';
+  if (mode === 'story') return 'Story · Keep continuity through the scene.';
+  return 'Chat · Speak directly.';
 }
 
 function ensureModeSelector(form) {
@@ -53,7 +53,7 @@ function ensureModeSelector(form) {
   const wrap = document.createElement('section');
   wrap.className = 'house-interaction-mode';
   wrap.dataset.houseInteractionMode = 'true';
-  wrap.innerHTML = `<div><strong>Interaction</strong><span data-house-mode-copy></span></div><div class="house-mode-buttons" role="group" aria-label="House interaction mode">${HOUSE_INTERACTION_MODES.map((mode) => `<button type="button" data-house-mode="${mode}">${mode === 'chat' ? 'Chat' : mode === 'roleplay' ? 'Roleplay' : 'Story'}</button>`).join('')}</div>`;
+  wrap.innerHTML = `<div><strong>Interaction</strong><span data-house-mode-copy></span></div><div class="house-mode-buttons" role="group" aria-label="House interaction mode">${HOUSE_INTERACTION_MODES.map((mode) => `<button type="button" data-house-mode="${mode}">${mode === 'chat' ? 'Chat' : mode === 'roleplay' ? 'In-world' : 'Story'}</button>`).join('')}</div>`;
   composer.insertAdjacentElement('beforebegin', wrap);
   const paint = () => {
     const mode = readHouseInteractionMode();

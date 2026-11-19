@@ -1,0 +1,19 @@
+// Wayglass supplies verified evidence as carried input.
+// This program determines which source digest can cross to the next cycle.
+mobius scoped {
+  perceive {}
+  compress {}
+  release {}
+  verify {
+    require compatible else "Candidate did not match expected output";
+    require selfConsistent else "Candidate replay diverged";
+  }
+  integrate {}
+  choose {
+    let selected = if approved then candidate else parent;
+  }
+  return {
+    emit selected;
+  }
+  transcend {}
+}

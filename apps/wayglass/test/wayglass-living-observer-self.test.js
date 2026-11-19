@@ -130,7 +130,7 @@ test('Dream Sandbox recombines distinct trace lenses without mutating direct evi
   const dream = interior.runDreamSandbox();
   assert.equal(dream.schema, 'wayglass.observer-dream-sandbox/v0.1');
   assert.equal(dream.status, 'dream-derived-hypothesis');
-  assert.match(dream.possibility, /This could be false/);
+  assert.match(dream.possibility, /^What if these observations belong in the same question\?$/);
   assert.match(dream.association, /time|memory/);
   assert.equal(dream.provenance.trace_ids.length, 2);
   assert.equal(new Set(dream.provenance.trace_ids).size, 2);

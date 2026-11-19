@@ -6,7 +6,7 @@ import { WAYGLASS_WORLD_SEATS, findWayglassWorldSeat, wayglassWorldStatus } from
 test('The Evil Gene is a separate film world, with Griff distinct from Bluebird and Evil TV', () => {
   const world = findWayglassWorldSeat('evil-gene:film-2015');
   assert.ok(world);
-  assert.equal(world.kind, 'fictional-film-world');
+  assert.equal(world.kind, 'film-sourced-world');
   assert.equal(world.character.name, 'Griff Krenshaw');
   assert.equal(world.character.provider, 'spicychat');
   assert.equal(world.character.desired_route_id, 'flame:griff:spicychat');

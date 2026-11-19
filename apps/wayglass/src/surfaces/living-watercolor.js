@@ -95,7 +95,7 @@ export async function mountLivingWatercolorSurface(root) {
             '<div class="wc-faepunk-touch-main"><button id="wc-first-touch" type="button" class="wc-faepunk-orb" aria-describedby="wc-touch-description wc-touch-status" aria-label="Touch Wayglass: run an authenticated Wyrdrune simulation">',
               '<span class="wc-faepunk-orb-halo" aria-hidden="true">✧</span><span class="wc-faepunk-orb-label">Touch</span></button>',
               '<div class="wc-faepunk-touch-meta"><strong>Touch the current</strong>',
-              '<p id="wc-touch-description">A real Wyrdrune run, a visible response. Synthetic test data only.</p></div></div>',
+              '<p id="wc-touch-description">Try a Wyrdrune rehearsal and see how your touch changes the watercolour.</p></div></div>',
             '<div class="wc-faepunk-modes" role="group" aria-label="Wyrdrune co-evolution profile">',
               '<button type="button" data-wc-touch-mode="repair" aria-pressed="true">Soothe</button>',
               '<button type="button" data-wc-touch-mode="expand" aria-pressed="false">Bloom</button></div>',
@@ -408,19 +408,21 @@ export async function mountLivingWatercolorSurface(root) {
           }
           body.before(controls,note,display,original);
           note.hidden=native.executable;
-          function play({focus=false,still=false}={}){
+          function play({focus=false,still=false,direction='english'}={}){
             voiceCypher?.stop();
             display.hidden=false;
             const reduce=still||reduced||featherStopped||document.documentElement.dataset.wgMotion==='off';
+            reveal.textContent=native.executable?(direction==='wyrdrune'?'Reveal Wyrdrune':'Reveal English'):'Reveal original words';
             reveal.hidden=reduce;
             if(focus&&!reduce)reveal.focus({preventScroll:true});
             const onComplete=()=>{
               if(document.activeElement===reveal)replay.focus({preventScroll:true});
               reveal.hidden=true;
+              if(native.executable)replay.textContent=direction==='english'?'Return to Wyrdrune':'Read in British English';
             };
             if(native.executable){
               voiceCypher=animateWyrdruneCypher(display,{
-                source:native.source,reducedMotion:reduce,...cypherRunOptions(readCypherPace()),onComplete,
+                source:native.source,direction,reducedMotion:reduce,...cypherRunOptions(readCypherPace()),onComplete,
               });
             }else{
               const line=document.createElement('p');
@@ -433,7 +435,9 @@ export async function mountLivingWatercolorSurface(root) {
               voiceCypher={stop:run.reveal};
             }
           }
-          replay.addEventListener('click',()=>play({focus:true}));
+          replay.addEventListener('click',()=>play({
+            focus:true,direction:native.executable&&display.getAttribute('data-cypher-state')==='english'?'wyrdrune':'english',
+          }));
           reveal.addEventListener('click',()=>voiceCypher?.stop());
           play({still:!animateLatest||turn!==turns.at(-1)});
         }
@@ -540,7 +544,8 @@ export async function mountLivingWatercolorSurface(root) {
     const notes=q('wc-voice-notes').value.trim(),author=q('wc-voice-author').value.trim();
     if(notes&&!author){feedback.textContent='Add who authored the voice notes before sharing them.';q('wc-voice-author').focus();return;}
     busy=true;invite.disabled=true;q('wc-first-contact').disabled=true;
-    const authorText=prompt.value.trim(),requestedMode=mode,requestedRoute=routeId,epoch=++requestEpoch;
+    const requestedMode=mode,requestedRoute=routeId,epoch=++requestEpoch;
+    const authorText=requestedRoute==='wayglass:ship'?prompt.value:prompt.value.trim();
     const request={mode:requestedMode,authorText,routeId:requestedRoute,sessionId:session};
     feedback.textContent='Inviting a '+activeMode().label.toLowerCase()+' contribution…';
     try{

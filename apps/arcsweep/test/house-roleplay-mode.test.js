@@ -7,11 +7,11 @@ const stream = await readFile(new URL('../src/flame-chat-stream-client.js', impo
 const portable = await readFile(new URL('../src/oxalpha-portable-chat.js', import.meta.url), 'utf8');
 const bootstrap = await readFile(new URL('../src/sidecar-bootstrap.js', import.meta.url), 'utf8');
 
-test('House Chat exposes Chat, Roleplay, Story and inserts Ox Alpha as a selectable Flame', () => {
+test('House Chat exposes Chat, In-world, Story and inserts Ox Alpha as a selectable Flame', () => {
   assert.match(sidecar, /HOUSE_INTERACTION_MODES/);
   assert.match(sidecar, /value=\"oxalpha\"/);
   assert.match(sidecar, /Ox Alpha/);
-  assert.match(sidecar, /Roleplay/);
+  assert.match(sidecar, /In-world/);
   assert.match(sidecar, /Story/);
   assert.match(bootstrap, /house-roleplay-mode\.js/);
 });

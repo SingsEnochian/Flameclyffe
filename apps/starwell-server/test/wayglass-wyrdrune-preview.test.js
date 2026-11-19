@@ -55,6 +55,34 @@ test('WTL owner-only HTTP preview preserves Eightfold records and never contacts
     const denial = await json({source:source.replace('emit "held";','emit bridge("python","run",1);')},{authorization:'Bearer '+token});
     assert.equal(denial.status,400);
     assert.match((await denial.json()).error,/Bridge capability unavailable/);
+    const auth = {authorization:'Bearer '+token};
+    const checked = await json({source,checkOperators:true},auth);
+    assert.equal((await checked.json()).receiptHash,preview.receiptHash);
+    const invalid = await json({source:'operator capture() = free;\n'+source,checkOperators:true},auth);
+    assert.equal(invalid.status,400);
+    assert.deepEqual((await invalid.json()).diagnostics,[
+      {operator:'capture',code:'unbound-parameter',name:'free'},
+    ]);
+    const badOption = await json({source,checkOperators:'false'},auth);
+    assert.equal(badOption.status,400);
+    const typed = 'operator twice(x: number): number = x * 2;\n' +
+      source.replace('emit "held";', 'emit twice(3);');
+    const inspect = await json({source:typed,mode:'typed-inspect'},auth);
+    assert.equal(inspect.status,200);
+    const artifact = await inspect.json();
+    assert.equal(artifact.schema,'wyrdrune.typed-ir/v0.1');
+    assert.deepEqual(artifact.effects.required, []);
+    const typedPreview = await json({source:typed,mode:'typed-preview'},auth);
+    assert.equal(typedPreview.status,200);
+    assert.equal((await typedPreview.json()).values[3],6);
+    const bridge = 'effect "host" "read";\n' +
+      source.replace('emit "held";','emit if true then 1 else bridge("host","read");');
+    const bridgeInspect = await json({source:bridge,mode:'typed-inspect'},auth);
+    assert.equal((await bridgeInspect.json()).effects.required[0].provider,'host');
+    const refusedBridge = await json({source:bridge,mode:'typed-preview'},auth);
+    assert.equal(refusedBridge.status,400);
+    assert.equal((await refusedBridge.json()).effects.required[0].operation,'read');
+    assert.equal((await json({source:typed,mode:'typed-inspect'})).status,401);
     const bad = await json({source:'not a Wyrdrune rite'},{authorization:'Bearer '+token});
     assert.equal(bad.status,400);
     const tooLong = await json({source:'x'.repeat(16001)},{authorization:'Bearer '+token});

@@ -1,0 +1,30 @@
+// Original Wyrdrune composition. Voice labels belong to the authored score.
+mobius scoped {
+  perceive {
+    let scene = prose("The Lantern at the Threshold", [
+"""The lantern did not brighten when the door opened.
+It leaned toward the dark, as if listening.""",
+"""Beyond the sill, rain rested on the leaves.
+Someone had left room beside the light."""
+    ]);
+  }
+  compress {}
+  release {
+    let call = utterance("invocation", "Keeper", "I light this for what may return.");
+    let reply = utterance("response", "Reader", "I come while the door is open.");
+  }
+  verify { require true; }
+  integrate {
+    let score = ritual("The Lantern at the Threshold", [
+      call,
+      silence(1200),
+      reply,
+      utterance("offering", "Keeper", "There is room beside the light."),
+      utterance("witness", "Reader", "I have heard you."),
+      utterance("return", "Keeper", "The lantern stays.")
+    ]);
+  }
+  choose {}
+  return { emit scene; emit score; }
+  transcend {}
+}

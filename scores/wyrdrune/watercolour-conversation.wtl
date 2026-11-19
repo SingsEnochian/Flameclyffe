@@ -1,0 +1,40 @@
+// A local input adapter supplies numeric features for each stretch of the
+// conversation. Pitch, cadence, orchestration and timing are composed here.
+operator note(voice, time, duration, pitch, destination, gain) = {
+  voice:voice, at:time, length:duration, pitch:pitch, destination:destination, level:gain
+};
+operator phrase(index, colour, motion, cadence, descent, withness, balance, density) = [
+  note("hearth", index * 5.25 + 0.12, 1.24, 158 + colour * 74, 158 + colour * 74, balance * (0.075 + density * 0.045)),
+  note("light", index * 5.25 + 0.28 - withness * 0.16, 1.25, (158 + colour * 74) * 1.5, (158 + colour * 74) * 1.5, (1 - balance) * (0.075 + density * 0.045)),
+  note("wood", index * 5.25 + 1.12, 0.18, 344 + colour * 108, 344 + colour * 108, 0.03 + motion * 0.035 + cadence * 0.025),
+  note("wood", index * 5.25 + 1.39 - motion * 0.08, 0.16, 392 + colour * 104, 392 + colour * 104, 0.025 + motion * 0.04 + cadence * 0.025),
+  note("wood", index * 5.25 + 1.66 - motion * 0.16, 0.14, 430 + colour * 120, 430 + colour * 120, 0.018 + motion * 0.045 + cadence * 0.025),
+  note("glass", index * 5.25 + 1.93 - motion * 0.24, 0.27 + cadence * 0.56, 468 + colour * 132, 468 + colour * 132, 0.026 + density * 0.024 + cadence * 0.035),
+  note("wash", index * 5.25 + 2.85, 0.36 + density * 0.34, 390 + colour * 190, 390 + colour * 190 - descent * 70, 0.022 + density * 0.046 + descent * 0.014),
+  note("wash", index * 5.25 + 3.54, 0.65, 390 + colour * 190 - descent * 70, 362 + colour * 150 - descent * 130, 0.018 + density * 0.042 + descent * 0.015),
+  note("glass", index * 5.25 + 4.27, 0.42, 558 + colour * 84, 558 + colour * 84, descent * 0.08),
+  note("hearth", index * 5.25 + 4.25, 0.58, 158 + colour * 74, 158 + colour * 74, 0.035 + withness * 0.043)
+];
+
+mobius {
+  perceive { let sections = conversation_phrases(); }
+  compress {}
+  release {}
+  verify {}
+  integrate {}
+  choose {}
+  return {}
+  transcend {}
+}
+mobius {
+  perceive {}
+  compress {}
+  release {}
+  verify {}
+  integrate {}
+  choose {
+    emit {schema:"wayglass.timed-score/v1", title:"Watercolour conversation", duration:conversation_duration(), sections:sections};
+  }
+  return {}
+  transcend {}
+}

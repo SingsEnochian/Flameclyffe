@@ -19,6 +19,12 @@ import { installVoyageInbox } from './voyage-inbox.js';
 import { createWayglassSpellingController } from './spelling-assistance.js';
 import { mountWayglassSurface, registerWayglassSurface, registerWayglassSurfaceAlias, listWayglassSurfaces } from './surface-registry.js';
 import { mountWayglassWorldContinuitySurface } from './surfaces/world-continuity.js';
+import { mountWayglassWorldDeck } from './surfaces/world-deck.js';
+import { mountWayglassCellGarden } from './surfaces/cell-garden.js';
+import { mountWtlInterfaceAtelier } from './surfaces/wtl-interface-atelier.js';
+import { mountWayglassRuntimeSandbox } from './surfaces/runtime-sandbox.js';
+import './wtl-interface-atelier.css';
+import './surfaces/cell-garden.css';
 import { mountWayglassWritingRoom } from './surfaces/writing-room.js';
 import { mountWayglassSystemsSurface } from './surfaces/systems.js';
 import { mountWayglassSpectrumSurface } from './surfaces/spectral-field.js';
@@ -75,6 +81,10 @@ registerWayglassSurface({surface_id:'wayglass:triptych-lift',label:'The Möbius 
 registerWayglassSurface({surface_id:'wayglass:altered-timeline',label:'Altered Timeline · Change and Return',mount:mountWayglassAlteredTimeline});
 
 registerWayglassSurface({surface_id:'wayglass:world-continuity',label:'Wayglass · World & Continuity',mount:mountWayglassWorldContinuitySurface});
+registerWayglassSurface({surface_id:'wayglass:world-deck',label:'Wayglass · Native World Deck',mount:mountWayglassWorldDeck});
+registerWayglassSurface({surface_id:'wayglass:cell-garden',label:'Wyrdrune · Living Cell Garden',mount:mountWayglassCellGarden});
+registerWayglassSurface({surface_id:'wayglass:wtl-interface-atelier',label:'WTL · Living Interface Atelier',mount:mountWtlInterfaceAtelier});
+registerWayglassSurface({surface_id:'wayglass:runtime-sandbox',label:'Wayglass · Runtime Sandbox',mount:mountWayglassRuntimeSandbox});
 
 registerWayglassSurface({
   surface_id: 'wayglass:writing-room',

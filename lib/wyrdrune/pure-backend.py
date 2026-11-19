@@ -133,6 +133,168 @@ def _shape(record):
     return sorted(record)
 
 
+QUANTUM_TOLERANCE = 1e-12
+
+
+def _finite_number(value):
+    return _kind(value) == "number" and math.isfinite(value)
+
+
+def _amplitude(value):
+    if not isinstance(value, list) or len(value) != 2 or not all(map(_finite_number, value)):
+        raise TypeError("Quantum amplitude requires two finite numbers")
+
+
+def _norm(value):
+    real, imaginary = value
+    return real * real + imaginary * imaginary
+
+
+def _state(value):
+    if not isinstance(value, list):
+        raise TypeError("Quantum state requires an amplitude list")
+    if len(value) not in (2, 4, 8, 16):
+        raise ValueError("Quantum dimension must be 2, 4, 8 or 16")
+    for item in value:
+        _amplitude(item)
+    total = 0
+    for item in value:
+        total += _norm(item)
+    if abs(total - 1) > QUANTUM_TOLERANCE:
+        raise ValueError("Quantum state must have unit norm")
+    return value
+
+
+def _inner(left, right, conjugate):
+    real = imaginary = 0
+    for (a, b), (c, d) in zip(left, right):
+        signed = -b if conjugate else b
+        real += a * c - signed * d
+        imaginary += a * d + signed * c
+    return [real, imaginary]
+
+
+def _check_matrix(matrix, size, diagnostic):
+    if not isinstance(matrix, list) or len(matrix) != size:
+        raise TypeError(diagnostic)
+    for row in matrix:
+        if not isinstance(row, list) or len(row) != size:
+            raise TypeError(diagnostic)
+        for item in row:
+            _amplitude(item)
+
+
+def _quantum_apply(vector, matrix):
+    vector = _state(vector)
+    _check_matrix(matrix, len(vector), "Quantum gate dimensions must match the state")
+    for i, row in enumerate(matrix):
+        for j in range(i, len(matrix)):
+            real, imaginary = _inner(row, matrix[j], True)
+            if not (abs(real - int(i == j)) <= QUANTUM_TOLERANCE
+                    and abs(imaginary) <= QUANTUM_TOLERANCE):
+                raise ValueError("Quantum gate must be unitary")
+    return _state([_inner(row, vector, False) for row in matrix])
+
+
+def _quantum_tensor(left, right):
+    left, right = _state(left), _state(right)
+    if len(left) * len(right) > 16:
+        raise ValueError("Quantum tensor exceeds 16 amplitudes")
+    return _state([[a * c - b * d, a * d + b * c]
+                   for a, b in left for c, d in right])
+
+
+def _quantum_probabilities(vector):
+    return [_norm(item) for item in _state(vector)]
+
+
+def _quantum_expectation(vector, observable):
+    vector = _state(vector)
+    _check_matrix(observable, len(vector), "Quantum observable dimensions must match the state")
+    for i, row in enumerate(observable):
+        for j in range(i, len(vector)):
+            real, imaginary = row[j]
+            other_real, other_imaginary = observable[j][i]
+            if real != other_real or imaginary != -other_imaginary:
+                raise ValueError("Quantum observable must be Hermitian")
+    expectation, _ = _inner(vector, [_inner(row, vector, False) for row in observable], True)
+    if not math.isfinite(expectation):
+        raise ValueError("Quantum expectation must be finite")
+    return expectation
+
+
+def _quantum_probability(vector, index):
+    vector = _state(vector)
+    if not _finite_number(index) or not 0 <= index < len(vector) or index != int(index):
+        raise ValueError("Quantum outcome index is outside the basis")
+    return _norm(vector[int(index)])
+
+
+def _author_text(value, limit):
+    return (isinstance(value, str)
+            and bool(value.strip("\t\n\v\f\r \u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005"
+                                 "\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000\ufeff"))
+            and len(value.encode("utf-16-le", "surrogatepass")) // 2 <= limit)
+
+
+def _wonder(question, perspectives, evidence):
+    def bounded_text(value):
+        return _author_text(value, 2048)
+
+    if (not bounded_text(question) or not isinstance(perspectives, list)
+            or not 1 <= len(perspectives) <= 16 or not all(map(bounded_text, perspectives))
+            or not isinstance(evidence, list) or len(evidence) > 16):
+        raise TypeError("Wonder requires a question, perspectives and a list of evidence")
+    return {"schema": "wyrdrune.wonder/v0.1", "status": "open", "question": question,
+            "perspectives": perspectives, "evidence": evidence}
+
+
+def _prose(title, paragraphs):
+    if (not _author_text(title, 180) or not isinstance(paragraphs, list)
+            or not 1 <= len(paragraphs) <= 32
+            or not all(_author_text(text, 4000) for text in paragraphs)):
+        raise TypeError("Prose requires a title and 1 to 32 nonempty paragraphs")
+    return {"schema": "wyrdrune.prose/v0.1", "title": title, "paragraphs": paragraphs,
+            "text": "\n\n".join(paragraphs)}
+
+
+def _utterance(kind, voice, text):
+    if (kind not in ("invocation", "offering", "response", "witness", "return")
+            or not _author_text(voice, 180) or not _author_text(text, 4000)):
+        raise TypeError("Ritual utterance requires a cue, attributed voice and authored text")
+    return {"kind": kind, "voice": voice, "text": text}
+
+
+def _silence(milliseconds):
+    if (not _finite_number(milliseconds) or not 1 <= milliseconds <= 60000
+            or milliseconds != int(milliseconds)):
+        raise ValueError("Ritual silence requires 1 to 60000 whole milliseconds")
+    return {"kind": "silence", "milliseconds": milliseconds}
+
+
+def _ritual(title, cues):
+    if not _author_text(title, 180) or not isinstance(cues, list) or not 1 <= len(cues) <= 32:
+        raise TypeError("Ritual requires a title and 1 to 32 cues")
+    score = []
+    for cue in cues:
+        cue = cue if isinstance(cue, dict) else {}
+        kind = cue.get("kind")
+        score.append(_silence(cue.get("milliseconds")) if kind == "silence"
+                     else _utterance(kind, cue.get("voice"), cue.get("text")))
+    return {"schema": "wyrdrune.ritual-score/v0.1", "title": title, "cues": score, "autoplay": False}
+
+
+PURE_OPERATIONS = {
+    "prose": (2, _prose), "utterance": (3, _utterance),
+    "silence": (1, _silence), "ritual": (2, _ritual),
+
+    "quantumApply": (2, _quantum_apply), "quantumTensor": (2, _quantum_tensor),
+    "quantumProbabilities": (1, _quantum_probabilities),
+    "quantumExpectation": (2, _quantum_expectation),
+    "quantumProbability": (2, _quantum_probability), "wonder": (3, _wonder),
+}
+
+
 class Execution:
     def __init__(self, ir, max_operations, seeds=None):
         if not isinstance(ir, dict) or ir.get("schema") != "wyrdrune.ir/v0.1":
@@ -141,6 +303,7 @@ class Execution:
                 or not 1 <= max_operations <= 100000):
             raise ValueError("Invalid operation limit")
         self.ir = ir
+        self.operators = {operator["name"]: operator for operator in ir.get("operators", [])}
         self.max_operations = max_operations
         self.operations = 0
         self.environment = {}
@@ -166,7 +329,7 @@ class Execution:
             return v
         raise TypeError(what + " requires a truth value")
 
-    def expression(self, node):
+    def expression(self, node, locals_=None, depth=0):
         self.tick()
         if not isinstance(node, dict):
             raise TypeError("Invalid WTL expression")
@@ -176,9 +339,39 @@ class Execution:
             return float(value) if isinstance(value, (int, float)) and not isinstance(value, bool) else value
         if kind == "unknown":
             return dict(UNKNOWN)
+        if kind == "list":
+            return [self.expression(item, locals_, depth) for item in node["items"]]
+        if kind == "record":
+            record = {}
+            for field in node["fields"]:
+                key = field["key"]
+                if key in record:
+                    raise TypeError("Duplicate WTL record field " + key)
+                record[key] = self.expression(field["value"], locals_, depth)
+            return record
+        if kind == "conditional":
+            condition = self._truth(self.expression(node["condition"], locals_, depth), "if")
+            if _is_unknown(condition):
+                return dict(UNKNOWN)
+            return self.expression(node["yes"] if condition else node["no"], locals_, depth)
+        if kind == "access":
+            target = self.expression(node["target"], locals_, depth)
+            key = self.expression(node["key"], locals_, depth)
+            if _is_unknown(target) or _is_unknown(key):
+                return dict(UNKNOWN)
+            if isinstance(target, list):
+                if (_kind(key) != "number" or not 0 <= key <= 2**53 - 1
+                        or key != int(key)):
+                    raise TypeError("WTL list index requires a nonnegative safe integer")
+                return target[int(key)] if key < len(target) else dict(UNKNOWN)
+            if not isinstance(target, dict):
+                raise TypeError("WTL access requires a record or list")
+            if not isinstance(key, str):
+                raise TypeError("WTL record key requires text")
+            return target.get(key, dict(UNKNOWN))
         if kind == "compare":
-            a = self.expression(node["a"])
-            b = self.expression(node["b"])
+            a = self.expression(node["a"], locals_, depth)
+            b = self.expression(node["b"], locals_, depth)
             if _is_unknown(a) or _is_unknown(b):
                 return dict(UNKNOWN)
             op = node["op"]
@@ -191,12 +384,12 @@ class Execution:
                 raise TypeError("Ordering comparison requires numbers")
             return {"<": a < b, "<=": a <= b, ">": a > b, ">=": a >= b}[op]
         if kind == "not":
-            v = self._truth(self.expression(node["v"]), "not")
+            v = self._truth(self.expression(node["v"], locals_, depth), "not")
             return dict(UNKNOWN) if _is_unknown(v) else not v
         if kind == "logic":
             op = node["op"]
-            a = self._truth(self.expression(node["a"]), op)
-            b = self._truth(self.expression(node["b"]), op)
+            a = self._truth(self.expression(node["a"], locals_, depth), op)
+            b = self._truth(self.expression(node["b"], locals_, depth), op)
             if op == "and":
                 if a is False or b is False:
                     return False
@@ -206,17 +399,21 @@ class Execution:
             return dict(UNKNOWN) if _is_unknown(a) or _is_unknown(b) else False
         if kind == "read":
             name = node["name"]
+            if locals_ is not None:
+                if name not in locals_:
+                    raise NameError("Unknown operator parameter " + name)
+                return locals_[name]
             if name not in self.scope:
                 raise NameError("Unknown variable " + str(name))
             return self.scope[name]
         if kind == "neg":
-            value = self.expression(node["v"])
+            value = self.expression(node["v"], locals_, depth)
             if isinstance(value, bool) or not isinstance(value, (float, int)):
                 raise TypeError("Unary negative requires number")
             return -value
         if kind == "binary":
-            a = self.expression(node["a"])
-            b = self.expression(node["b"])
+            a = self.expression(node["a"], locals_, depth)
+            b = self.expression(node["b"], locals_, depth)
             if (isinstance(a, bool) or isinstance(b, bool)
                     or not isinstance(a, (float, int))
                     or not isinstance(b, (float, int))):
@@ -239,7 +436,24 @@ class Execution:
             return result
         if kind == "call":
             name = node["name"]
-            args = [self.expression(item) for item in node["args"]]
+            args = [self.expression(item, locals_, depth) for item in node["args"]]
+            operator = self.operators.get(name)
+            if operator is not None:
+                if depth >= 8:
+                    raise ValueError("Wyrdrune operator recursion depth exceeded")
+                params = operator["params"]
+                if len(args) != len(params):
+                    raise TypeError("Operator " + name + " expects " + str(len(params)) + " arguments")
+                return self.expression(operator["body"], dict(zip(params, args)), depth + 1)
+            if name in PURE_OPERATIONS:
+                arity, operation = PURE_OPERATIONS[name]
+                if len(args) != arity:
+                    raise TypeError(name + " expects " + str(arity) + " arguments")
+                return operation(*args)
+            if name == "whisper":
+                raise HardStop("whisper requires mobius spiced")
+            if locals_ is not None:
+                raise RuntimeError("Native pure operators cannot invoke host or ritual bridges")
             if name == "enochian":
                 if len(args) not in (1, 2):
                     raise TypeError("enochian(text[,sourceLabel]) requires one or two arguments")
@@ -263,6 +477,8 @@ class Execution:
         units = self.ir.get("units")
         if not isinstance(units, list):
             raise TypeError("Invalid WTL IR")
+        if any(unit.get("spiced") for unit in units):
+            raise HardStop("mobius spiced is not supported by the Python backend")
         # A scoped unit is one lineage cycle (see runtime.mjs): staged emits, require,
         # rollback before Return, halt after it, checkpoints chained to the lineage root.
         lineage_root = None
@@ -322,8 +538,8 @@ class Execution:
                             if value is True:
                                 pass
                             elif value is False or _is_unknown(value):
-                                raise Verdict(stmt.get("reason") or
-                                              ("require is unknown" if _is_unknown(value) else "require failed"))
+                                raise Verdict(stmt.get("reason",
+                                              "require is unknown" if _is_unknown(value) else "require failed"))
                             else:
                                 raise TypeError("require needs a truth value")
                         else:

@@ -1,0 +1,17 @@
+operator match(value: text, status: text): number = if value == status then 1 else 0;
+operator count(a: text, b: text, c: text, d: text, e: text, f: text, status: text): number =
+  match(a,status) + match(b,status) + match(c,status) + match(d,status) + match(e,status) + match(f,status);
+mobius scoped {
+  perceive {}
+  compress {
+    let observed = count(a,b,c,d,e,f,"observed");
+    let empty = count(a,b,c,d,e,f,"empty");
+    let unavailable = count(a,b,c,d,e,f,"unavailable") + count(a,b,c,d,e,f,"error");
+  }
+  release {}
+  verify { require observed + empty + unavailable == 6 else "Observer channel status is not recognised"; }
+  integrate {}
+  choose {}
+  return { emit {observed:observed, empty:empty, unavailable:unavailable}; }
+  transcend {}
+}

@@ -10,12 +10,13 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const os = require('node:os');
 const cors = require('cors');
 const Anthropic = require('@anthropic-ai/sdk');
 const OpenAI = require('openai');
 const multer = require('multer');
 const flameRouter = require('./flames/router');
-const wayglassRouter = require('./wayglass/router');
+const { createWayglassRouter } = require('./wayglass/router');
 const { createWayglassMcpRouter } = require('./wayglass/mcp-bridge');
 const { createWayglassPeerOAuth } = require('./wayglass/oauth-peer');
 const { createHouseSessionRouter } = require('./wayglass/house-session');
@@ -616,7 +617,10 @@ app.post('/api/v1/wayglass/respond', (req, res, next) => {
   if (req.body?.route_id === bluebirdProvider.routeId) return bluebirdProvider.respond(req, res);
   next();
 });
-app.use('/api/v1/wayglass', wayglassRouter);
+app.use('/api/v1/wayglass', createWayglassRouter({
+  colonyDirectory: path.join(process.env.WAYGLASS_DATA_DIR || process.env.HEARTHGATE_DATA_DIR ||
+    path.join(os.homedir(), '.wayglass'), 'cell-garden'),
+}));
 app.use('/api/v1', flameRouter);
 
 // ── Boxfire global status ────────────────────────────────────────────────────

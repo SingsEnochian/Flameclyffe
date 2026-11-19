@@ -68,7 +68,7 @@ export async function compileFantasyRoleplayEnvelope({
 } = {}) {
   const interactionMode = normaliseHouseInteractionMode(mode);
   const visibleMessage = String(message || '').trim();
-  if (!visibleMessage) throw new Error('Fantasy roleplay compilation requires a visible message.');
+  if (!visibleMessage) throw new Error('An in-world turn needs a visible message.');
   const semanticReceipt = buildRoleplaySemanticReceipt({ visibleMessage, worldContext, semanticSources });
   if (!fantasyRoleplayModeActive(interactionMode)) {
     return Object.freeze({
@@ -85,17 +85,17 @@ export async function compileFantasyRoleplayEnvelope({
 
   const bank = await loadVoiceCells(voiceId, { fetchImpl, includeLocalLearning: false, includeShared: true });
   const skillCells = bank.cells.filter((cell) => cell.subject?.kind === SKILL_SUBJECT.kind && cell.subject?.id === SKILL_SUBJECT.id);
-  if (!skillCells.length) throw new Error(`Fantasy roleplay shared skill is unavailable to ${bank.displayName || voiceId}.`);
+  if (!skillCells.length) throw new Error(`The shared in-world skill is unavailable to ${bank.displayName || voiceId}.`);
   const compiled = compileSkillMarkdown(skillCells, {
-    label: `Fantasy Roleplay · ${bank.displayName || voiceId}`,
+    label: `In-world dialogue · ${bank.displayName || voiceId}`,
     includeProvenance: false,
     request: { subjects: [SKILL_SUBJECT], mode: interactionMode, limit: 40 },
   });
   const boundedSkill = compiled.slice(0, MAX_SKILL_CHARS).trim();
   const world = worldReceipt(worldContext);
   const envelope = [
-    '[ARCSWEEP INTERACTION SKILL · FANTASY ROLEPLAY]',
-    `Mode: ${interactionMode}`,
+    '[ARCSWEEP INTERACTION SKILL · IN-WORLD DIALOGUE]',
+    `Mode: ${interactionMode === 'roleplay' ? 'in-world dialogue' : interactionMode}`,
     `Voice: ${bank.displayName || voiceId}`,
     `World: ${world.worldId || 'active/unspecified'}`,
     'The following contract governs interaction behaviour. It does not replace this Flame’s identity or world-specific prose voice.',

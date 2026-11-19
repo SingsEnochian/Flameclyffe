@@ -84,7 +84,7 @@
       "cellType": "writing_style_rule",
       "subject": { "kind": "writing_style", "id": "taaveren-vaen-longform", "worldId": "taaveren-vaen" },
       "predicate": "renders_magic_myth_and_material_life_as",
-      "value": "co-present layers of the same fictional reality at the level of access granted by the scene",
+      "value": "co-present layers of Ta’veren Vaen at the level of access available in the scene",
       "status": "provisional",
       "authority": { "kind": "derived", "speakerOrAuthor": "Arcsweep synthesis", "confidence": 0.96 },
       "source": { "surface": "github", "repository": "SingsEnochian/Flameclyffe", "locator": "apps/arcsweep/skills/sources/taaveren-vaen/WRITING_STYLE_FOUNDING.md" },

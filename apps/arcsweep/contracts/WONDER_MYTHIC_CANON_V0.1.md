@@ -148,7 +148,7 @@ TRANSLATE BACK
 What consequence becomes expressible in the original measurable frame?
 
 TEST
-What observation could distinguish this extension from an elegant fiction?
+What observation would help distinguish this possibility from other explanations?
 ```
 
 Canonical distinctions:

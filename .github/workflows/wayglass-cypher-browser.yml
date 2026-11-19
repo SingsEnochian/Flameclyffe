@@ -2,6 +2,8 @@ name: Wayglass Living Cypher Browser
 on:
   pull_request:
     paths:
+      - 'apps/wayglass/src/main.js'
+      - 'apps/wayglass/src/surface-registry.js'
       - 'apps/wayglass/src/wyrdrune-*'
       - 'apps/wayglass/src/surfaces/universal-codex*'
       - 'apps/wayglass/src/surfaces/arcsweep-writing.js'

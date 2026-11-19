@@ -1,0 +1,28 @@
+// Executable WTL v0.1: one scoped cell; no external effects.
+operator double(x) = x * 2;
+mobius scoped {
+  perceive {
+    let observation = 1;
+  }
+  compress {
+    let compact = double(observation);
+  }
+  release {
+    let expanded = compact + 1;
+  }
+  verify {
+    require expanded == 3 else "cell transformation must be reversible";
+  }
+  integrate {
+    withness {participants: [{id: "observer", role: "witness", presence: true, agency: "free"}, {id: "cell", role: "transformer", presence: true, agency: "free"}], field: expanded, agreement: "observation only", commitment: "no external effects"};
+  }
+  choose {
+    let chosen = expanded;
+  }
+  return {
+    emit chosen;
+  }
+  transcend {
+    carry value = chosen;
+  }
+}

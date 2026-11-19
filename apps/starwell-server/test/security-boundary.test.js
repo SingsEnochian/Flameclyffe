@@ -7,6 +7,7 @@ const test = require('node:test');
 const {
   isAllowedLocalOrigin,
   localCorsOptions,
+  localDevicePermissions,
   redactHearthgateConfig,
   sanitiseHearthgateConfig,
 } = require('../security/local-boundary');
@@ -97,4 +98,13 @@ test('redacts secrets before configuration crosses IPC', () => {
   assert.equal(redacted.keys.custom[0].name, 'HYDRADB_API_KEY');
   assert.equal(JSON.stringify(redacted).includes('ant-secret'), false);
   assert.equal(JSON.stringify(redacted).includes('hydra-secret'), false);
+});
+
+test('the Wayglass document may request microphone permission for its acoustic cells', () => {
+  for (const pathname of ['/wayglass/', '/wayglass/index.html']) {
+    assert.equal(localDevicePermissions(pathname), 'camera=(), microphone=(self), geolocation=(), usb=(), serial=()');
+  }
+  for (const pathname of ['/', '/arcsweep/', '/api/v1/wayglass', '/wayglass/assets/app.js']) {
+    assert.equal(localDevicePermissions(pathname), 'camera=(), microphone=(), geolocation=(), usb=(), serial=()');
+  }
 });

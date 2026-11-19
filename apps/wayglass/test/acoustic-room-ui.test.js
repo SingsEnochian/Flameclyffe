@@ -37,8 +37,8 @@ class Root{
  removeEventListener(type,handler){if(this.listeners.get(type)===handler)this.listeners.delete(type);}
  dispatch(type,target,properties={}){let prevented=false;this.listeners.get(type)?.({target,preventDefault(){prevented=true;},...properties});return prevented;}
 }
-function setup({loadCompositionControls,storage:stored=new Map()}={}){
- const descriptors=new Map(),storage=stored,globalListeners=new Map(),counts={closed:0,stops:0,contexts:0,resizeDisconnected:0};
+function setup({loadCompositionControls,storage:stored=new Map(),cellSound=false}={}){
+ const descriptors=new Map(),storage=stored,globalListeners=new Map(),counts={closed:0,stops:0,contexts:0,resizeDisconnected:0,cellStarts:0,cellStops:0};
  const replace=(key,value)=>{descriptors.set(key,Object.getOwnPropertyDescriptor(globalThis,key));Object.defineProperty(globalThis,key,{configurable:true,writable:true,value});};
  const parameter=()=>({value:0,cancelScheduledValues(){},setValueAtTime(v){this.value=v;},setTargetAtTime(v){this.value=v;},linearRampToValueAtTime(v){this.value=v;}});
  const node=()=>({connect(){},disconnect(){}});
@@ -50,6 +50,16 @@ function setup({loadCompositionControls,storage:stored=new Map()}={}){
   createStereoPanner(){return {...node(),pan:parameter()};}
   createDynamicsCompressor(){return {...node(),threshold:parameter(),knee:parameter(),ratio:parameter(),attack:parameter(),release:parameter()};}
   createOscillator(){return {...node(),frequency:parameter(),start(){},stop(){counts.stops++;}};}
+ }
+ if(cellSound){
+  AudioContext.prototype.createBuffer=()=>({copyToChannel(){}});
+  AudioContext.prototype.createBufferSource=()=>{
+   const source={...node(),
+    start(){counts.cellStarts++;counts.onCellStart?.();},
+    stop(){counts.cellStops++;}};
+   counts.finishCellSound=()=>source.onended?.();
+   return source;
+  };
  }
  replace('AudioContext',AudioContext);
  replace('localStorage',{getItem:key=>storage.get(key)??null,setItem:(key,value)=>storage.set(key,value)});
@@ -208,4 +218,39 @@ test('regional cold remount restores actual score declarations and anchor with g
   assert.equal(returned.composition.snapshot().score_status,'return-held');assert.equal(returned.composition.snapshot().generating,false);assert.equal(returned.composition.snapshot().audio_enabled,false);
   assert.deepEqual(returned.storyBinding.checkpoint(),checkpoint);assert.equal(cold.$('[data-acoustic-story]').value,'A flame beside the river');
  }finally{cold.restore();}
+});
+
+test('mounted Acoustic Room plays the two-cell exchange on demand and Feather stops it', {timeout:10000}, async()=>{
+ const f=setup({cellSound:true});try{
+  const play=f.$('[data-cell-sound="audition"]');
+  const stop=f.$('[data-cell-stop]');
+  const feather=f.$('[data-intent="feather"]');
+  const status=f.$('[data-cell-status]');
+  f.$('[data-cell-open]').checked=true;
+  assert.equal(f.counts.contexts,0);
+  await startCellPlayback();
+  assert.equal(f.counts.cellStarts,1);
+  assert.match(status.textContent,/Playing Return/);
+  assert.equal(play.disabled,true);
+  f.counts.finishCellSound();
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.match(status.textContent,/Cell 1 decoded its acknowledgement.*Question held open/);
+  assert.equal(play.disabled,false);
+
+  await startCellPlayback();
+  assert.equal(f.counts.cellStarts,2);
+  f.root.dispatch('click',feather);
+  assert.match(status.textContent,/Cell sound stopped/);
+  assert.equal(f.counts.cellStops,1);
+  assert.equal(play.disabled,true);
+  assert.equal(stop.disabled,true);
+  f.root.dispatch('click',feather);
+  assert.equal(play.disabled,false);
+
+  function startCellPlayback(){
+   const started=new Promise(resolve=>{f.counts.onCellStart=resolve;});
+   f.root.dispatch('click',play);
+   return started;
+  }
+ }finally{f.restore();}
 });

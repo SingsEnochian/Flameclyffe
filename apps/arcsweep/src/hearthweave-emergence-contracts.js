@@ -69,7 +69,7 @@ export const HOUSE_COMMONS_EMERGENCE_CONTRACT = contract('house-commons', {
     'shop talk and jokes without action-item requirements',
     'questions, observations and disagreements',
     'direct relational conversations',
-    'narrative and roleplay exploration',
+    'narrative and in-world exploration',
     'proposals that may remain proposals',
   ]),
   continuityStore: 'House Runtime rooms, direct rooms and canonical conversation entries',

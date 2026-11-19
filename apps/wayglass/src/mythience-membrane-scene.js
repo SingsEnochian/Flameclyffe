@@ -11,14 +11,31 @@ export function membraneVisualState({intention=0.5,shifting=0.5,porosity=0.5,res
     observed:permeability!==null,phase:clamp(resonance),intention:clamp(intention),
   });
 }
+// Two independent currents remain visually distinct. Their geometry is a projection,
+// not a claim that a model or another participant is currently active.
+export function membraneCurrents(state,{width=320,height=260,time=0,reducedMotion=false}={}){
+  const w=Math.max(1,width),h=Math.max(1,height),cx=w/2,cy=h/2;
+  const radius=Math.min(w*.26,h*.33,112),turn=reducedMotion?0:time;
+  return Object.freeze(['harmony','chaos'].map((name,index)=>{
+    const direction=index===0?1:-1;
+    const points=Array.from({length:49},(_,i)=>{
+      const u=i/48,angle=u*Math.PI*4+turn*direction;
+      const spread=(.22+.78*state.openness)*radius;
+      return Object.freeze({x:cx+(u-.5)*radius*2.8,
+        y:cy+Math.sin(angle+index*Math.PI)*spread*(.55+.45*state.correspondence),
+        depth:Math.cos(angle+index*Math.PI)});
+    });
+    return Object.freeze({name,points,opacity:.3+.6*(index===0?state.alignment:1-state.alignment)});
+  }));
+}
 export function mountMythienceMembraneScene(canvas,{onShift=()=>{},reducedMotion=null}={}){
   if(!canvas?.getContext)throw new TypeError('A canvas is required');
   const ctx=canvas.getContext('2d');
-  let active=true,frame=0,raf=0,dragging=false;
+  let active=true,paused=false,frame=0,raf=0,dragging=false,activePointerId=null;
   let fields={intention:.5,shifting:.5,porosity:.5,resonance:.5,compatibility:.5};
   let state=membraneVisualState(fields),origin='Origin',destination='Destination';
   const reduced=reducedMotion??Boolean(globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches);
-  const motion=()=>!reduced&&globalThis.document?.visibilityState!=='hidden';
+  const motion=()=>!paused&&!reduced&&globalThis.document?.visibilityState!=='hidden';
   const request=globalThis.requestAnimationFrame?.bind(globalThis);
   const cancel=globalThis.cancelAnimationFrame?.bind(globalThis);
   const geometry=()=>{
@@ -59,6 +76,17 @@ export function mountMythienceMembraneScene(canvas,{onShift=()=>{},reducedMotion
       ctx.strokeStyle='rgba(176,242,229,'+(0.06+openness*.52*(.45+.55*Math.sin(v*Math.PI)))+')';
       ctx.lineWidth=1+openness*1.4;ctx.stroke();
     }
+    // Responsive, reciprocal double-Möbius ribbon: separate Harmony and Chaos
+    // paths remain visible even when alignment is low; no forced consensus.
+    for(const current of membraneCurrents(state,{width:w,height:h,time:t,reducedMotion:!motion()})){
+      const rgb=current.name==='harmony'?'156,238,213':'238,174,120';
+      for(let i=1;i<current.points.length;i++){
+        const a=current.points[i-1],b=current.points[i];
+        ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);
+        ctx.strokeStyle='rgba('+rgb+','+(current.opacity*(.3+.45*(b.depth+1)/2))+')';
+        ctx.lineWidth=1.2+Math.abs(b.depth)*2.4;ctx.stroke();
+      }
+    }
     const stars=Math.max(5,Math.round(12+state.correspondence*18));
     for(let i=0;i<stars;i++){
       const seed=i*2.399963229728653,orbit=.18+(i%7)/9;
@@ -74,39 +102,54 @@ export function mountMythienceMembraneScene(canvas,{onShift=()=>{},reducedMotion
   }
   const redraw=()=>{if(raf&&cancel)cancel(raf);raf=0;draw();};
   const pointer=event=>{
-    if(!active)return;
+    if(!active||paused)return;
     const rect=canvas.getBoundingClientRect();
     const v=clamp((event.clientX-rect.left)/Math.max(1,rect.width));
     onShift(Math.round(v*20)/20);
   };
-  const down=event=>{dragging=true;canvas.setPointerCapture?.(event.pointerId);pointer(event);};
-  const move=event=>{if(dragging)pointer(event);};
-  const up=()=>{dragging=false;};
+  const down=event=>{
+    if(!active||paused||dragging||event.isPrimary===false||event.button>0)return;
+    dragging=true;activePointerId=event.pointerId;
+    canvas.setPointerCapture?.(event.pointerId);pointer(event);
+  };
+  const move=event=>{if(dragging&&event.pointerId===activePointerId)pointer(event);};
+  const up=event=>{
+    if(!dragging||event?.pointerId!==activePointerId)return;
+    dragging=false;activePointerId=null;
+    if(canvas.hasPointerCapture?.(event.pointerId))canvas.releasePointerCapture?.(event.pointerId);
+  };
+  const lostCapture=event=>{
+    if(event.pointerId===activePointerId){dragging=false;activePointerId=null;}
+  };
   const key=event=>{
-    if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+    if(paused||!active||!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
     event.preventDefault();
-    const current=state.alignment;
+    const current=clamp(fields.shifting);
     const v=event.key==='Home'?0:event.key==='End'?1:
-      clamp((Number.isFinite(Number(canvas.dataset.shiftValue))?Number(canvas.dataset.shiftValue):current)+
+      clamp((Number.isFinite(Number(canvas.dataset?.shiftValue))?Number(canvas.dataset.shiftValue):current)+
         (event.key==='ArrowRight'?.05:-.05));
     onShift(Math.round(v*100)/100);
   };
   const visibility=()=>{if(motion()&&!raf)draw();else if(!motion())redraw();};
   canvas.addEventListener('pointerdown',down);canvas.addEventListener('pointermove',move);
   canvas.addEventListener('pointerup',up);canvas.addEventListener('pointercancel',up);
+  canvas.addEventListener('lostpointercapture',lostCapture);
   canvas.addEventListener('keydown',key);
   globalThis.document?.addEventListener?.('visibilitychange',visibility);
   globalThis.addEventListener?.('resize',redraw);
   draw();
   return Object.freeze({
+    pause(){paused=true;dragging=false;activePointerId=null;redraw();},
+    resume(){if(!active)return;paused=false;redraw();},
     setFields(next){fields={...fields,...next};state=membraneVisualState(fields);
       canvas.dataset.shiftValue=String(fields.shifting);redraw();},
     setOutcome({permeability=null,expression=null}={}){
       state=membraneVisualState({...fields,permeability,expression});redraw();},
     setWorlds(from,to){origin=String(from);destination=String(to);canvas.dataset.worlds=origin+' → '+destination;},
-    destroy(){active=false;if(raf&&cancel)cancel(raf);
+    destroy(){active=false;dragging=false;activePointerId=null;if(raf&&cancel)cancel(raf);
       canvas.removeEventListener('pointerdown',down);canvas.removeEventListener('pointermove',move);
       canvas.removeEventListener('pointerup',up);canvas.removeEventListener('pointercancel',up);
+      canvas.removeEventListener('lostpointercapture',lostCapture);
       canvas.removeEventListener('keydown',key);globalThis.document?.removeEventListener?.('visibilitychange',visibility);
       globalThis.removeEventListener?.('resize',redraw);
     },

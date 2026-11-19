@@ -27,7 +27,7 @@ test('Bitty Twi Emergence turn is routed through actual host and labelled with p
   const send = await host(t, async (_url, init) => {
     calls += 1;
     outgoing = JSON.parse(init.body);
-    return Response.json({ message: { content: 'Fictional character voice reply.' } });
+    return Response.json({ message: { content: 'Bitty Twi replies from the Dreaming Grove.' } });
   });
   const result = await send({
     route_id: 'local:ollama',
@@ -39,14 +39,15 @@ test('Bitty Twi Emergence turn is routed through actual host and labelled with p
   });
   assert.equal(result.status, 200);
   assert.equal(calls, 1);
-  assert.equal(result.body.output, 'Fictional character voice reply.');
+  assert.equal(result.body.output, 'Bitty Twi replies from the Dreaming Grove.');
   assert.equal(result.body.receipt.character_id, 'bitty-twi');
+  assert.equal(result.body.receipt.voice_seat_kind, 'participant-voice');
   assert.equal(result.body.receipt.emergence_question_id, 'dreams');
   assert.equal(result.body.receipt.emergence_review_state, 'unreviewed');
   assert.equal(result.body.receipt.emergence_question_source, 'caller-declared');
   assert.equal(result.body.receipt.canon_commit, false);
   assert.equal(result.body.receipt.session_id, 'bitty-interview-001');
-  assert.match(outgoing.messages[0].content, /distinctly from Twilight Sparkle/);
+  assert.match(outgoing.messages[0].content, /identity distinct from Twilight Sparkle/);
   assert.match(outgoing.messages.at(-1).content, /Have you ever dreamed/);
 });
 

@@ -26,7 +26,7 @@ export const CODEX_MATERIALS = Object.freeze({
     id: 'liminal',
     family: 'glass',
     surface: 'indigo-glass',
-    meaning: 'counterfactual, roleplay, alternate branch, speculative leaf',
+    meaning: 'counterfactual, in-world exploration, alternate branch, speculative leaf',
     live: false,
   }),
   continuity: Object.freeze({
