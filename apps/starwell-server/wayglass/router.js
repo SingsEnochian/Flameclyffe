@@ -184,6 +184,8 @@ async function callOllama(route, payload, compiled = null, fetchImpl = globalThi
     response_id: null,
     returned_model: cleanText(data?.model, 180) || null,
     inputWyrdrune,
+    // Provider completion metadata is not inferred from displayed Wyrdrune text.
+    stop_reason: typeof data?.done_reason === 'string' ? cleanText(data.done_reason, 80) : null,
     usage: {
       prompt_tokens: data?.prompt_eval_count ?? null,
       completion_tokens: data?.eval_count ?? null,
@@ -1598,6 +1600,7 @@ function createWayglassRouter({
           checkpoint_storage_id: payload.checkpoint_storage_id || null,
           ...(compiled ? { inheritance_context: compiled.reference } : {}),
           thinking_exposed: Boolean(result.thinking),
+          ...(result.stop_reason != null ? { stop_reason: result.stop_reason } : {}),
           usage: result.usage,
         },
       });
