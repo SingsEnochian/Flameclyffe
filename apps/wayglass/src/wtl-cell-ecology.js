@@ -223,6 +223,18 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       birthTicks.set(birth.id,generation);
       // Descendants receive a copy of an executable ancestor program, not a pointer.
       const parentPrograms=programLibrary.get(birth.parent_id)||[];
+      // Early mitosis can precede the five-tick authoring cadence. Give the
+      // parent a bounded executable program before copying it to offspring.
+      // This preserves genuine parent-to-child provenance rather than inventing
+      // a descendant-only ancestor, and does not invoke host capabilities.
+      if(parentPrograms.length===0){
+        const parentCell=tissue.snapshot().cells.find(c=>c.id===birth.parent_id);
+        const source=authorCellProgram(parentCell,traits.get(birth.parent_id),generation);
+        const compiled=compileCellProgram(source);
+        const verified=executeCellProgram(compiled);
+        if(verified.status!=='completed')throw Error('Parent program verification failed');
+        parentPrograms.push({id:'program-birth-'+generation+'-'+birth.parent_id,source,generation});
+      }
       const inheritedProgram=parentPrograms.at(-1);
       const childPrograms=inheritedProgram?[{...inheritedProgram}]:[];
       programLibrary.set(birth.id,childPrograms);
