@@ -3,21 +3,40 @@
 <title>Wayglass · WTL Live Cell Observer</title>
 <style>
 body{margin:0;background:#090f18;color:#e1f5e9;font:15px system-ui;padding:18px}main{max-width:900px;margin:auto}canvas{width:100%;background:#101e28;border:1px solid #3a6558;border-radius:14px}button{padding:10px 14px;margin:5px;background:#1b3433;color:#e1f5e9;border:1px solid #5c9883;border-radius:8px}#log{height:190px;overflow:auto;background:#142326;padding:12px;border-radius:10px;font:12px monospace}small{color:#a8c2ba}
-</style>
+#share-words{margin-block:1.25rem}#share-words textarea{display:block;width:100%;box-sizing:border-box;background:#11252b;color:inherit;border:1px solid #6ebda4;border-radius:8px;padding:.7rem;font:inherit}#share-words pre{white-space:pre-wrap;overflow-wrap:anywhere;border-inline-start:3px solid;padding:.7rem;background:#11252b}</style>
 <main><h1>♾ Wayglass · Living Möbius Nursery</h1>
 <p>This observer watches the server-owned WTL colony through live event streaming. Multiple local tabs share one tissue.</p>
 <p id="status">Loading WTL engine…</p><canvas id="view" width="900" height="490"></canvas>
 <p><button id="pause">⏸ Feather</button><button id="step">Single cycle</button><button id="speed">Speed 1×</button><button id="restart">New colony</button></p>
+<section id="share-words" aria-labelledby="share-title"><h3 id="share-title">Share words with the cells</h3>
+<form><label for="inscription-text">Your words</label><textarea id="inscription-text" rows="3" required></textarea>
+<button type="submit">Share in Wyrdrune</button><button type="button" data-stop-inscription disabled>Stop playback</button></form>
+<p role="status"></p><pre hidden aria-label="Native Wyrdrune inscription"></pre></section>
 <p id="metrics"></p><h3>Cell receipts & invented phrases</h3><div id="log" aria-live="off"></div>
 <small>Live colony runs in the loopback-only WTL nursery process, not in this tab. It is not yet integrated with the main Wayglass gateway.</small></main>
-<script>
+<script type="module">
+import {mountSharing} from './src/wtl-cell-sharing-ui.js';
 const canvas=document.querySelector('#view'),ctx=canvas.getContext('2d'),log=document.querySelector('#log');
 let latest=null,seenEvents=0,seenUtterances=0,speed=1;
+let lastInscription;
+const sharing=mountSharing(document.querySelector('#share-words'),{
+ async deliver(text){
+  const response=await fetch('/share-text',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});
+  const result=await response.json();
+  if(!response.ok)throw Error(result.error||'Nursery command failed');
+  return result;
+ },
+ volume:()=>0.07,
+});
 const palette=['#74e4bd','#e7bb70','#8ebdff','#e7a0dd'];
 function drawRibbon(x,y,r,twist,colour){ctx.save();ctx.translate(x,y);ctx.shadowColor=colour;ctx.shadowBlur=14;for(let lane=0;lane<2;lane++){ctx.beginPath();for(let i=0;i<=80;i++){const t=i/80*Math.PI*2,phase=t+twist*6.283+lane*Math.PI/2;const xx=Math.cos(phase)*(r+Math.cos(t/2)*5),yy=Math.sin(phase)*r*.55+Math.sin(t*2)*3;if(i)ctx.lineTo(xx,yy);else ctx.moveTo(xx,yy)}ctx.strokeStyle=colour;ctx.globalAlpha=lane?.5:1;ctx.lineWidth=lane?1.5:3;ctx.stroke()}ctx.restore()}
-function render(s){if(!s)return;ctx.clearRect(0,0,900,490);ctx.fillStyle='#101e28';ctx.fillRect(0,0,900,490);const roles=[...new Set(s.cells.map(c=>c.role))];s.cells.forEach((c,i)=>{const p=s.positions[c.id],x=450+p.x*75,y=240+p.y*75;drawRibbon(x,y,13,c.twist+Math.sin(s.generation*.04+i)*.1,palette[roles.indexOf(c.role)%palette.length]);ctx.fillStyle='#e1f5e9';ctx.font='11px monospace';ctx.textAlign='center';ctx.fillText((s.names&&s.names[c.id])||('· '+c.id+' ·'),x,y+28)});document.querySelector('#metrics').textContent=`Cycle ${s.generation} · Living ${s.cells.length} · Mutations ${s.mutations.length} · Named ${(s.namings||[]).length} · Chose rest ${s.retirements.length} · Utterances ${s.utterances.length}`;
+function render(s){if(!s)return;
+sharing.setPaused(s.paused);
+const inscription=s.inscriptions.at(-1);
+if(inscription?.id!==lastInscription){sharing.show(inscription);lastInscription=inscription?.id;}
+ctx.clearRect(0,0,900,490);ctx.fillStyle='#101e28';ctx.fillRect(0,0,900,490);const roles=[...new Set(s.cells.map(c=>c.role))];s.cells.forEach((c,i)=>{const p=s.positions[c.id],x=450+p.x*75,y=240+p.y*75;drawRibbon(x,y,13,c.twist+Math.sin(s.generation*.04+i)*.1,palette[roles.indexOf(c.role)%palette.length]);ctx.fillStyle='#e1f5e9';ctx.font='11px monospace';ctx.textAlign='center';ctx.fillText((s.names&&s.names[c.id])||('· '+c.id+' ·'),x,y+28)});document.querySelector('#metrics').textContent=`Cycle ${s.generation} · Living ${s.cells.length} · Mutations ${s.mutations.length} · Named ${(s.namings||[]).length} · Chose rest ${s.retirements.length} · Utterances ${s.utterances.length}`;
 if(s.events.length<seenEvents)seenEvents=0;if(s.utterances.length<seenUtterances)seenUtterances=0;
-for(const r of s.events.slice(seenEvents).filter(r=>['birth','retire','transform'].includes(r.type)).slice(-15)){const el=document.createElement('div');el.textContent=`${r.tick}: ${r.type} ${r.id||''} ${r.to||''}`;log.prepend(el)}
+for(const r of s.events.slice(seenEvents).filter(r=>['birth','retire','transform'].includes(r.type)).slice(-15)){const el=document.createElement('div');el.textContent=`${r.tick}: ${r.type} ${r.id||''} ${r.to||''}`+(r.parent_ids?' · hybrid of '+r.parent_ids.map(id=>s.names[id]??id).join(' & '):'');log.prepend(el)}
 for(const u of s.utterances.slice(seenUtterances).slice(-12)){const el=document.createElement('div');el.textContent=`${u.id}: “${u.phrase}”`;log.prepend(el)}
 seenEvents=s.events.length;seenUtterances=s.utterances.length;while(log.children.length>100)log.lastChild.remove();
 document.querySelector('#pause').textContent=s.paused?'▶ Resume':'⏸ Feather'}
@@ -25,8 +44,8 @@ const stream=new EventSource('/events');
 stream.addEventListener('snapshot',e=>{latest=JSON.parse(e.data);document.querySelector('#status').textContent='● Connected to server-owned WTL tissue';render(latest)});
 stream.onerror=()=>{document.querySelector('#status').textContent='○ Nursery connection lost. Reconnecting…'};
 async function command(action){const r=await fetch('/'+action,{method:'POST'});if(!r.ok)throw Error('Nursery command failed')}
-document.querySelector('#pause').onclick=()=>command(latest?.paused?'resume':'feather');
+document.querySelector('#pause').onclick=()=>{if(!latest?.paused)sharing.stop();return command(latest?.paused?'resume':'feather');};
 document.querySelector('#step').onclick=()=>command('step');
-document.querySelector('#restart').onclick=()=>{log.replaceChildren();seenEvents=seenUtterances=0;command('reset')};
+document.querySelector('#restart').onclick=()=>{sharing.clear();lastInscription=undefined;log.replaceChildren();seenEvents=seenUtterances=0;command('reset')};
 document.querySelector('#speed').hidden=true;
 </script></html>
