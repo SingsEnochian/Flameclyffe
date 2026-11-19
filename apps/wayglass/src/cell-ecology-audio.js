@@ -43,15 +43,15 @@ export async function prepareCellAcousticReturn(receipt,{signal}={}){
 }
 
 /** User-gesture-only local playback. No microphone, capture or provider call. */
-export async function playCellReturn(receipt,{scope=globalThis,signal}={}){
+export async function playCellReturn(receipt,{scope=globalThis,signal,output}={}){
   stopped(signal);
   const Context=scope.AudioContext||scope.webkitAudioContext;
-  if(typeof Context!=='function')throw new Error('Web Audio is unavailable on this device');
-  // Open on the user gesture before asynchronous WTL verification.
-  const context=new Context();
+  if(!output&&typeof Context!=='function')throw new Error('Web Audio is unavailable on this device');
+  const context=output?.context??new Context();
   let source=null;
+  let gain=null;
   try{
-    await context.resume();
+    if(!output)await context.resume();
     stopped(signal);
     const prepared=await prepareCellAcousticReturn(receipt,{signal});
     stopped(signal);
@@ -60,9 +60,12 @@ export async function playCellReturn(receipt,{scope=globalThis,signal}={}){
     for(let i=0;i<pcm.channels.length;i++)buffer.copyToChannel(pcm.channels[i],i);
     source=context.createBufferSource();
     source.buffer=buffer;
-    const gain=context.createGain();
-    gain.gain.value=0.6;
-    source.connect(gain);gain.connect(context.destination);
+    if(output)source.connect(output);
+    else{
+      gain=context.createGain();
+      gain.gain.value=0.6;
+      source.connect(gain);gain.connect(context.destination);
+    }
     await new Promise((resolve,reject)=>{
       let done=false;
       const finish=error=>{
@@ -87,6 +90,7 @@ export async function playCellReturn(receipt,{scope=globalThis,signal}={}){
     };
   } finally {
     try{source?.disconnect()}catch{}
-    try{if(context.state!=='closed')await context.close()}catch{}
+    try{gain?.disconnect?.()}catch{}
+    try{if(!output&&context.state!=='closed')await context.close()}catch{}
   }
 }

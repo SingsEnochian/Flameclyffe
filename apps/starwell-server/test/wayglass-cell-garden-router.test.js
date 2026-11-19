@@ -34,6 +34,7 @@ test('House-authenticated cell garden only divides after a separate explicit app
     }
   );
   assert.equal((await fetchGarden('', undefined, false)).status, 401);
+  assert.equal((await fetchGarden('/listen', undefined, false)).status, 401);
   assert.equal((await fetchGarden('/preview', { cell_id: 'cell:origin', expected_revision: 0 }, false)).status, 401);
   const beforeCulture = await (await fetchGarden('')).json();
   assert.equal(beforeCulture.cells.length, 1);
@@ -105,4 +106,43 @@ test('House-authenticated cell garden only divides after a separate explicit app
   assert.equal((await fetchGarden('/fusion/commit',{
     proposal_id:fusion.proposal_id,expected_revision:5,owner_confirmed:true
   })).status,409);
+
+  const stream = await fetch(origin + '/ship/cell-garden/listen', {
+    headers: { authorization: 'Bearer fixture-owner-cell-garden' },
+    signal: AbortSignal.timeout(10_000),
+  });
+  assert.equal(stream.status, 200);
+  assert.match(stream.headers.get('content-type'), /^text\/event-stream/);
+  const reader = stream.body.pipeThrough(new TextDecoderStream()).getReader();
+  let buffered = '';
+  async function readEvent() {
+    while (!buffered.includes('\n\n')) {
+      const { done, value } = await reader.read();
+      assert.equal(done, false, 'the live stream ended before an event arrived');
+      buffered += value;
+    }
+    const end = buffered.indexOf('\n\n');
+    const event = buffered.slice(0, end);
+    buffered = buffered.slice(end + 2);
+    return event;
+  }
+  assert.equal(await readEvent(), 'event: ready\ndata: {}');
+  const live = await fetchGarden('/exchange', {
+    from_id: b, to_id: a, message: 'a fresh exchange', expected_revision: 5,
+    owner_confirmed: true, receiver_route_approved: true,
+  });
+  assert.equal(live.status, 200);
+  const committed = (await live.json()).receipt;
+  const [eventName, eventData] = (await readEvent()).split('\n');
+  assert.equal(eventName, 'event: exchange');
+  const payload = JSON.parse(eventData.slice('data: '.length));
+  assert.equal(payload.message_id, committed.message_id, 'no historical exchange was replayed');
+  assert.equal(payload.revision, 6);
+  assert.deepEqual(payload.acoustic, committed.acoustic);
+  assert.equal('message' in payload, false);
+  assert.equal('wtl' in payload, false);
+  assert.equal((await fetchGarden('/feather', {})).status, 200);
+  assert.equal(await readEvent(), 'event: feather\ndata: {}');
+  assert.equal((await reader.read()).done, true);
+  assert.match(await (await fetchGarden('/listen')).text(), /^event: feather/);
 });

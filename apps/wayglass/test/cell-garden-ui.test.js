@@ -151,3 +151,77 @@ test('Garden UI keeps acoustic exchange opt-in and proposes a hybrid without rep
  assert.equal(starts,0);
  off();
 });
+
+test('Garden Listen plays a fresh burble with live gain controls and stops it on Feather',async()=>{
+ const root=new Element('main',doc);
+ let source,stream,gain,closed=0,started=0,stopped=0;
+ const playing=Promise.withResolvers();
+ const scope={
+  AudioContext:class{
+   state='suspended';
+   destination={};
+   async resume(){this.state='running';}
+   async close(){closed++;this.state='closed';}
+   createGain(){gain={context:this,gain:{value:0},connect(){}};return gain;}
+   createBuffer(){return {copyToChannel(){}};}
+   createBufferSource(){
+    source={
+     connect(output){assert.equal(output,gain);},disconnect(){},
+     start(){started++;playing.resolve();},
+     stop(){stopped++;source.onended?.();},
+    };
+    return source;
+   }
+  },
+  EventSource:class extends EventTarget{
+   constructor(url){
+    super();
+    assert.equal(url,'/api/v1/wayglass/cell-garden/listen');
+    stream=this;
+   }
+   close(){this.closed=true;}
+  },
+ };
+ const culture={status:'ready',cells:[founder],history:[],revision:0};
+ const dispose=mountWayglassCellGarden(root,{
+  scope,fetchImpl:async()=>({ok:true,json:async()=>culture}),
+ });
+ await next();
+ const section=root.children[0];
+ const garden=section.children[5];
+ const actions=garden.children[6];
+ const listen=actions.children[2],mute=actions.children[3],slider=actions.children[4].children[0];
+ assert.equal(stream,undefined);
+ assert.equal(listen.disabled,false);
+ click(section,'listen');await next();
+ stream.dispatchEvent(new MessageEvent('ready'));
+ assert.equal(started,0);
+ const frame={schema:'wyrdrune.acoustic-frame/v0.1',marker:369,resolution:'open'};
+ const receipt={
+  schema:'wayglass.cell-exchange/v0.1',status:'delivered-in-memory',revision:3,
+  from_id:'cell:a',to_id:'cell:b',
+  acoustic:{encoding:'marker-and-open-status-only',
+   request:{...frame,kind:1,sender:2,recipient:3},
+   reply:{...frame,kind:2,sender:3,recipient:2},
+  },
+ };
+ for(let i=0;i<2;i++)
+  stream.dispatchEvent(new MessageEvent('exchange',{data:JSON.stringify(receipt)}));
+ await playing.promise;
+ assert.equal(gain.gain.value,.25);
+ click(section,'mute');
+ assert.equal(mute.attributes['aria-pressed'],'true');
+ assert.equal(gain.gain.value,0);
+ slider.value='38';slider.listeners.input();
+ assert.equal(gain.gain.value,0);
+ click(section,'mute');
+ assert.equal(gain.gain.value,.38);
+ stream.dispatchEvent(new MessageEvent('feather'));
+ await next();
+ assert.equal(stopped,1);
+ assert.equal(started,1);
+ assert.equal(closed,1);
+ assert.equal(stream.closed,true);
+ assert.equal(listen.disabled,true);
+ dispose();
+});

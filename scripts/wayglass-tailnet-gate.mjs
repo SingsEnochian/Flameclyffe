@@ -73,7 +73,11 @@ export function createTailnetGate({ port = TAILNET_GATE_PORT, hostPort = HOST_PO
       response.pipe(res);
     });
     upstream.on('timeout', () => upstream.destroy(new Error('Wayglass host timed out')));
+    res.once('close', () => {
+      if (!res.writableFinished) upstream.destroy();
+    });
     upstream.on('error', () => {
+      if (res.destroyed) return;
       if (!res.headersSent) {
         res.writeHead(502, { 'Content-Type':'application/json', 'Cache-Control':'no-store' });
         res.end(JSON.stringify({ error:'Local Wayglass host is unavailable' }));

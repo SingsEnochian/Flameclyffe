@@ -249,7 +249,7 @@ function spicyChatHeaders(token) {
   };
 }
 
-async function griffStewardAuthorized(req) {
+async function houseStewardCheck(req) {
   // Local host only: do not substitute a route label or a browser-origin header
   // for a cryptographically validated House session.
   const modulePath = pathToFileURL(path.join(__dirname, '../wayglass-runtime/house-session.mjs')).href;
@@ -260,7 +260,11 @@ async function griffStewardAuthorized(req) {
       authorization: req.get('authorization') || '',
     },
   });
-  return Boolean(authoriseHouseRequest(request, { get: name => process.env[name] }));
+  return () => Boolean(authoriseHouseRequest(request, { get: name => process.env[name] }));
+}
+
+async function griffStewardAuthorized(req) {
+  return (await houseStewardCheck(req))();
 }
 
 async function callSpicyChat(route, payload, compiled = null, fetchImpl = globalThis.fetch) {
@@ -577,6 +581,39 @@ function createWayglassRouter({
   }));
   // Owner-scoped Wyrdrune cellular ecology. Preview executes pure WTL; only a
   // second explicit House-authorised choice commits an in-memory division.
+  // A live listener occupies its own connection budget so it cannot block Feather.
+  router.get('/cell-garden/listen', createRequestGate({ maxRequests: 12 }),
+    async (req, res) => {
+      res.setHeader('Cache-Control', 'no-store');
+      const authorised = await houseStewardCheck(req).catch(() => () => false);
+      if (res.destroyed) return;
+      if (!authorised())
+        return res.status(401).json({ error: 'House Steward sign-in required for cellular lineage' });
+
+      let heartbeat;
+      const unsubscribe = cellGarden.listen((event, payload) => {
+        if (!authorised() || !write(event, payload) || event === 'feather') res.end();
+      });
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('X-Accel-Buffering', 'no');
+      function write(event, payload) {
+        return !res.destroyed && !res.writableEnded &&
+          res.write('event: ' + event + '\ndata: ' + JSON.stringify(payload) + '\n\n');
+      }
+      res.once('close', () => {
+        unsubscribe?.();
+        clearInterval(heartbeat);
+      });
+      if (!unsubscribe) {
+        write('feather', {});
+        return res.end();
+      }
+      if (!write('ready', {})) return res.end();
+      heartbeat = setInterval(() => {
+        if (!authorised() || !res.write(': heartbeat\n\n')) res.end();
+      }, 15_000);
+      heartbeat.unref();
+    });
   router.use('/cell-garden', createRequestGate({ maxRequests: 24, maxConcurrent: 4 }),
     async (req, res, next) => {
       res.setHeader('Cache-Control', 'no-store');

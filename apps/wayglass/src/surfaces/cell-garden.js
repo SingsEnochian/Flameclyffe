@@ -1,5 +1,6 @@
 import {WAYGLASS_FEATHER_EVENT, wayglassSomaticSound} from '../somatic-sound.js';
 import {playCellReturn} from '../cell-ecology-audio.js';
+import {createCellListeningChannel} from '../cell-listening-channel.js';
 
 const BASE='/api/v1/wayglass/cell-garden';
 const actionButton=(doc,action,label)=>{
@@ -86,19 +87,50 @@ export function mountWayglassCellGarden(root,{
  const soundActions=doc.createElement('div');soundActions.className='wg-cell-row';
  const play=actionButton(doc,'play','Hear the Return marker · 3 Hz Withness');
  const stopAudio=actionButton(doc,'stop-audio','Stop cell sound');
- soundActions.append(play,stopAudio);
+ const listen=actionButton(doc,'listen','Listen live');
+ const mute=actionButton(doc,'mute','Mute live sound');
+ mute.setAttribute('aria-pressed','false');
+ const volumeLabel=doc.createElement('label');volumeLabel.textContent='Live volume ';
+ const volume=doc.createElement('input');volume.type='range';volume.min='0';volume.max='60';
+ volume.value='25';volumeLabel.append(volume);
+ soundActions.append(play,stopAudio,listen,mute,volumeLabel);
  const audioNote=doc.createElement('p');audioNote.className='wg-cell-note';
- audioNote.textContent='Sound encodes a cell-addressed Return marker and acknowledgement, not the observation text. Playback is off until you request it. No microphone is used.';
+ audioNote.textContent='Listen for the Return and acknowledgement tones from new cell exchanges.';
+ const listeningStatus=doc.createElement('p');listeningStatus.className='wg-cell-note';
+ listeningStatus.setAttribute('role','status');
+ const listening=createCellListeningChannel({url:BASE+'/listen',scope,onStatus(message){
+  if(disposed)return;
+  listeningStatus.textContent=message;
+  renderAudio();
+ },onFeather(){
+  culture={...culture,status:'feather-stopped'};
+  pending=null;fusionPending=null;controller?.abort();
+  render();
+ }});
+ let muted=false;
  const fusionActions=doc.createElement('div');fusionActions.className='wg-cell-row';
  const fusionPreview=actionButton(doc,'fusion-preview','Propose hybrid');
  const fusionCommit=actionButton(doc,'fusion-commit','Commit hybrid · keep both parents');
  fusionActions.append(fusionPreview,fusionCommit);
  const fusionNote=doc.createElement('p');fusionNote.className='wg-cell-note';
  fusionNote.textContent='A hybrid requires two specialised cells and a previous exchange. Both parents remain independent.';
- ecology.append(ecologyTitle,explainer,roles,channels,signalBox,lastSignal,soundActions,audioNote,fusionActions,fusionNote);
+ ecology.append(ecologyTitle,explainer,roles,channels,signalBox,lastSignal,soundActions,audioNote,fusionActions,fusionNote,listeningStatus);
 
  section.append(heading,shell,status,family,candidate,ecology);
  root.replaceChildren(section);
+
+ function featherHeld(){
+  return culture?.status==='feather-stopped'||sound.snapshot?.().feather_stopped===true;
+ }
+
+ function renderAudio(){
+  const live=listening.isActive();
+  play.disabled=featherHeld()||busy||!lastExchange||Boolean(audioController)||live;
+  stopAudio.disabled=!audioController&&!live;
+  listen.disabled=live?false:!culture||featherHeld()||Boolean(audioController);
+  listen.textContent=live?'Stop listening':'Listen live';
+  mute.disabled=!live;
+ }
 
  function render(){
   if(disposed)return;
@@ -138,7 +170,7 @@ export function mountWayglassCellGarden(root,{
    item.append(name,detail);entries.append(item);
   }
   const count=cells.filter(cell=>cell.status==='active').length;
-  const stopped=culture?.status==='feather-stopped'||sound.snapshot?.().feather_stopped===true;
+  const stopped=featherHeld();
   preview.disabled=busy||stopped||count===0;
   commit.disabled=busy||stopped||!pending;
   resume.disabled=busy||!stopped;
@@ -162,8 +194,7 @@ export function mountWayglassCellGarden(root,{
       (x.to_id===sender.cell_id&&x.from_id===receiver.cell_id)))||
     sender.specialisation===receiver.specialisation;
   fusionCommit.disabled=busy||stopped||!fusionPending;
-  play.disabled=stopped||busy||!lastExchange||Boolean(audioController);
-  stopAudio.disabled=!audioController;
+  renderAudio();
   lastSignal.textContent=lastExchange
     ? 'Last observation: '+lastExchange.from_id+' → '+lastExchange.to_id+' · '+lastExchange.message+
       ' · WTL '+lastExchange.wtl.source_hash.slice(0,12)+'…'
@@ -211,12 +242,23 @@ export function mountWayglassCellGarden(root,{
    pending=null;fusionPending=null;audioController?.abort();controller?.abort();sound.feather();
    return;
   }
+  if(type==='listen'){
+   if(listening.isActive())listening.stop();
+   else if(culture&&!featherHeld()&&!audioController)await listening.start();
+   return;
+  }
+  if(type==='mute'){
+   muted=!muted;listening.setMuted(muted);mute.setAttribute('aria-pressed',String(muted));
+   return;
+  }
   if(type==='stop-audio'){
-   audioController?.abort();audioController=null;status.textContent='Cell sound stopped.';
+   audioController?.abort();audioController=null;
+   if(listening.isActive())listening.stop();
+   status.textContent='Cell sound stopped.';
    render();return;
   }
   if(type==='play'){
-   if(!lastExchange||audioController||culture?.status==='feather-stopped')return;
+   if(!lastExchange||audioController||listening.isActive()||featherHeld())return;
    const playback=new AbortController();audioController=playback;render();
    try{
     status.textContent='Playing addressed Wyrdrune Return with 3 Hz Withness…';
@@ -263,7 +305,7 @@ export function mountWayglassCellGarden(root,{
     },controller.signal);
     culture=result.culture;lastExchange=result.receipt;
     routeConsent.checked=false;pending=null;fusionPending=null;
-    status.textContent='Typed local observation delivered. Sound remains off until requested.';
+    status.textContent='Typed local observation delivered.';
    }else if(type==='fusion-preview'){
     fusionPending=await request('/fusion/preview',{
      left_id:senderChoice.value,right_id:receiverChoice.value,expected_revision:culture.revision
@@ -298,6 +340,7 @@ export function mountWayglassCellGarden(root,{
  function onSharedFeather(event){
   if(event.detail?.stopped!==true||disposed)return;
   pending=null;fusionPending=null;audioController?.abort();controller?.abort();
+  listening.stop('Feather held. Listening stopped.');
   status.textContent='Feather requested. Outstanding cell proposals are invalidated.';
   render();
   // Feather is itself a user-stop event. Never let a late preview race past it.
@@ -309,13 +352,16 @@ export function mountWayglassCellGarden(root,{
  }
  section.addEventListener('click',onClick);
  const onInput=()=>render();
+ const onVolume=()=>listening.setVolume(Number(volume.value)/100);
+ volume.addEventListener('input',onVolume);
  section.addEventListener('input',onInput);
  section.addEventListener('change',onInput);
  scope.addEventListener?.(WAYGLASS_FEATHER_EVENT,onSharedFeather);
  void act('refresh');
  return ()=>{
   if(disposed)return;disposed=true;
-  controller?.abort();audioController?.abort();
+  controller?.abort();audioController?.abort();listening.stop();
+  volume.removeEventListener('input',onVolume);
   section.removeEventListener('click',onClick);
   section.removeEventListener('input',onInput);
   section.removeEventListener('change',onInput);
