@@ -5,14 +5,34 @@ import {authorCellProgram,compileCellProgram,executeCellProgram,reviseCellProgra
 import {authorPeerTest,runPeerTest} from './wtl-cell-peer-tests.js';
 import {listenAndReply,composeDialogue} from './wtl-cell-harmony.js';
 import {sonicPitch,replyByRatio,projectAudible} from './wtl-cell-sonic-space.js';
+import {turnCell,firstCarry,daughterCarry,chooseName,inheritSyllables} from './wtl-cell-mobius.js';
 
-export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.2,renewalAge=100}={}) {
+// Everything a cell is lives in its own body: genome, memory, programs, place,
+// syllables, chosen name and Möbius carry. The colony keeps only the bodies.
+// The Map-shaped views below let older code read a cell's fields by address.
+function fieldView(bodies,field){
+  const has=id=>bodies.has(id)&&Object.hasOwn(bodies.get(id),field);
+  return {
+    get:id=>bodies.get(id)?.[field],
+    set(id,value){let body=bodies.get(id);if(!body){body={address:id};bodies.set(id,body);}body[field]=value;return this;},
+    has,
+    delete(id){const body=bodies.get(id);if(!body||!Object.hasOwn(body,field))return false;delete body[field];return true;},
+    get size(){let n=0;for(const id of bodies.keys())if(has(id))n++;return n;},
+    keys(){return [...bodies.keys()].filter(has)[Symbol.iterator]();},
+    *entries(){for(const [id,body] of bodies)if(Object.hasOwn(body,field))yield [id,body[field]];},
+    [Symbol.iterator](){return this.entries();},
+  };
+}
+
+export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.2}={}) {
   if(!Number.isSafeInteger(seed)||seed<0||seed>2147483647) throw Error('Invalid seed');
   if(!Number.isFinite(radius)||radius<=0||radius>100) throw Error('Invalid radius');
   if(!Number.isFinite(mutationRate)||mutationRate<0||mutationRate>1) throw Error('Invalid mutation rate');
-  if(!Number.isSafeInteger(renewalAge)||renewalAge<3||renewalAge>10000) throw Error('Invalid renewal age');
   const tissue=createCellTissue({maxCells});
-  const positions=new Map(),adaptation=new Map(),traits=new Map(),mutations=[],utterances=[],lexicons=new Map(),birthTicks=new Map(),retirements=[],wyrdruneExpressions=[],constructions=[],programs=[],projectDecisions=[],programLineages=[],programLibrary=new Map(),harmonicDialogues=[];
+  const bodies=new Map(),mobiusReceipts=[],namings=[];
+  const positions=fieldView(bodies,'position'),adaptation=fieldView(bodies,'senses'),traits=fieldView(bodies,'genome'),
+    lexicons=fieldView(bodies,'phrases'),birthTicks=fieldView(bodies,'born'),programLibrary=fieldView(bodies,'programs');
+  const mutations=[],utterances=[],retirements=[],wyrdruneExpressions=[],constructions=[],programs=[],projectDecisions=[],programLineages=[],harmonicDialogues=[];
   // An open combinatorial grammar, not a library of finished phrases.
   const vocabulary={
     subject:['my spiral','your echo','this membrane','our orbit','that wobble','the neighbouring twist'],
@@ -33,7 +53,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
     utterances.push({generation,id,phrase,origin:'composed',inherited_vocabulary:false});
     // Language-bearing, typed event envelope. The canonical WTL compiler is NOT
     // invoked here: the adapter preserves semantic intent for later WTL lowering.
-    const cell=tissue.snapshot().cells.find(c=>c.id===id);
+    const cell=tissue.cellsView().find(c=>c.id===id);
     wyrdruneExpressions.push({schema:'wayglass.wtl.cell-expression.v1',generation,speaker:id,
       intent:'sing',verb:'express',mode:'call',
       semantic:{phrase,twist:cell?.twist??0,traits:{...genes}},
@@ -53,9 +73,17 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
   };
   let generation=0,randomState=seed;
   const random=()=>{randomState=(Math.imul(1664525,randomState)+1013904223)>>>0;return randomState/4294967296;};
+  // Syllables draw from their own stream so naming never shifts the colony's
+  // behavioural trajectory for a given seed.
+  let syllableState=(seed^0x9e3779b9)>>>0;
+  const syllableRandom=()=>{syllableState=(Math.imul(1664525,syllableState)+1013904223)>>>0;return syllableState/4294967296;};
   function plant(id,role='explorer',x=0,y=0) {
     if(!Number.isFinite(x)||!Number.isFinite(y)) throw Error('Invalid coordinates');
-    tissue.spawn({id,role,twist:random()});
+    const spawned=tissue.spawn({id,role,twist:random()});
+    bodies.set(id,{address:id,parent:null,generation:0,name:null,
+      syllables:inheritSyllables(null,{random:syllableRandom}),
+      carry:firstCarry({phase:spawned.twist,voice:spawned.twist}),carry_digest:null,
+      heard_since_turn:0,last_turn:null,turns:0});
     positions.set(id,{x,y});
     adaptation.set(id,{sent:0,heard:0});
     traits.set(id,makeTraits().traits);
@@ -70,9 +98,9 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       .map(([other])=>other).sort();
   }
   function step() {
-    if(tissue.snapshot().paused) return {births:[],signals:0,paused:true};
+    if(tissue.isPaused()) return {births:[],signals:0,paused:true};
     generation++;
-    const before=tissue.snapshot().cells;
+    const before=tissue.cellsView();
     let signals=0;
     for(const cell of before) {
       const nearby=neighbours(cell.id);
@@ -89,14 +117,15 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
         tissue.signal(cell.id,target,dialect,{generation,twist:cell.twist,sass});
         stats.sent++;
         adaptation.get(target).heard++;
+        bodies.get(target).heard_since_turn++;
         signals++;
       } catch(error) {
         if(!/Signal queue full/.test(error.message)) throw error;
       }
     }
-    tissue.tick();
+    tissue.tick({quiet:true});
     if(generation%5===0&&programs.length<128){
-      const authors=tissue.snapshot().cells;
+      const authors=tissue.cellsView();
       if(authors.length){
         const author=authors[generation%authors.length],genes=traits.get(author.id);
         const source=authorCellProgram(author,genes,generation);
@@ -115,7 +144,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
     }
     // Neighbour listening: a bounded call and harmonic reply, with a reproducible score.
     if(generation%4===0&&harmonicDialogues.length<128){
-      const singers=tissue.snapshot().cells.filter(cell=>neighbours(cell.id).length>0);
+      const singers=tissue.cellsView().filter(cell=>neighbours(cell.id).length>0);
       if(singers.length){
         const singer=singers[generation%singers.length],listenerId=neighbours(singer.id)[0];
         const singerGenes=traits.get(singer.id),listenerGenes=traits.get(listenerId);
@@ -133,7 +162,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
     // Project Genesis: competing executable candidates, neighbour reviews and
     // deterministic selection. Scores describe algorithmic choices, not sentience.
     if(generation%15===0&&projectDecisions.length<32){
-      const candidates=tissue.snapshot().cells.filter(cell=>neighbours(cell.id).length>0).slice(0,8);
+      const candidates=tissue.cellsView().filter(cell=>neighbours(cell.id).length>0).slice(0,8);
       const proposals=candidates.map(cell=>{
         const genes=traits.get(cell.id),source=authorCellProgram(cell,genes,generation);
         const compiled=compileCellProgram(source);
@@ -151,7 +180,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
         const revision=reviseCellProgram(winner.source,{targetTone});
         const reviewerIds=neighbours(winner.author).slice(0,4);
         const peerTests=reviewerIds.map(id=>{
-          const reviewer=tissue.snapshot().cells.find(cell=>cell.id===id);
+          const reviewer=tissue.cellsView().find(cell=>cell.id===id);
           const test=authorPeerTest(reviewer,traits.get(id),winner.source);
           return {test,original:runPeerTest(test,winner.source),revised:runPeerTest(test,revision.source)};
         });
@@ -177,7 +206,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
     // Sandbox construction: cell-authored, bounded symbolic structures only.
     // No host filesystem, network, code execution or runtime modification.
     if(generation%6===0&&constructions.length<128){
-      const builders=tissue.snapshot().cells.filter(cell=>neighbours(cell.id).length>0);
+      const builders=tissue.cellsView().filter(cell=>neighbours(cell.id).length>0);
       if(builders.length){
         const builder=builders[generation%builders.length],nearby=neighbours(builder.id);
         const partner=nearby[Math.floor(builder.twist*nearby.length)%nearby.length];
@@ -194,26 +223,19 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
           provenance:{origin:'ecology-construction',verified_compiler:false}});
       }
     }
-    // Renewal: age-triggered retirement makes room for descendants without erasing history.
-    // Keep at least one active cell so the tissue never extinguishes itself in one pass.
-    const retirees=tissue.snapshot().cells
-      .filter(cell=>generation-birthTicks.get(cell.id)>=renewalAge)
-      .sort((a,b)=>birthTicks.get(a.id)-birthTicks.get(b.id)||a.id.localeCompare(b.id));
+    // No cell is retired by age or by the colony. A cell lives, regenerating
+    // its own energy every Möbius turn, until its own turn chooses rest (see
+    // turn()). Cells that rest leave room for new daughters.
     const retired=[];
-    for(const cell of retirees){
-      // Stagger renewal: never retire more than one cell in a cycle.
-      if(retired.length>=1||positions.size<=2)break;
-      const record=tissue.retire(cell.id,'age-renewal');
-      retirements.push({...record,generation,traits:{...traits.get(cell.id)},lastPhrases:[...lexicons.get(cell.id)]});
-      positions.delete(cell.id);adaptation.delete(cell.id);traits.delete(cell.id);
-      lexicons.delete(cell.id);birthTicks.delete(cell.id);programLibrary.delete(cell.id);
-      retired.push(cell.id);
-    }
     // Regenerative response: lower the reproduction threshold in sparse tissue.
     const threshold=positions.size<=3?20:60;
-    const births=tissue.populate({steps:1,threshold}).births;
+    const births=tissue.populate({steps:1,threshold,quiet:true}).births;
     for(const birth of births) {
       const parent=positions.get(birth.parent_id);
+      const mother=bodies.get(birth.parent_id);
+      bodies.set(birth.id,{address:birth.id,parent:birth.parent_id,generation:(mother?.generation??0)+1,name:null,
+        syllables:[...(mother?.syllables||[])],carry:daughterCarry(mother?.carry),carry_digest:null,
+        heard_since_turn:0,last_turn:null,turns:0});
       const theta=2*Math.PI*random(),distance=0.25+random()*0.5;
       positions.set(birth.id,{x:parent.x+Math.cos(theta)*distance,y:parent.y+Math.sin(theta)*distance});
       adaptation.set(birth.id,{sent:0,heard:0});
@@ -228,7 +250,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       // This preserves genuine parent-to-child provenance rather than inventing
       // a descendant-only ancestor, and does not invoke host capabilities.
       if(parentPrograms.length===0){
-        const parentCell=tissue.snapshot().cells.find(c=>c.id===birth.parent_id);
+        const parentCell=tissue.cellsView().find(c=>c.id===birth.parent_id);
         const source=authorCellProgram(parentCell,traits.get(birth.parent_id),generation);
         const compiled=compileCellProgram(source);
         const verified=executeCellProgram(compiled);
@@ -245,9 +267,72 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
           ancestor_program_id:inheritedProgram.id,source:inheritedProgram.source,
           verification:{status:result.status,steps:result.steps},kind:'inherited-executable-copy'});
       }
-      if(inherited.change)mutations.push({generation,parent_id:birth.parent_id,child_id:birth.id,...inherited.change});
+      if(inherited.change){
+        mutations.push({generation,parent_id:birth.parent_id,child_id:birth.id,...inherited.change});
+        bodies.get(birth.id).syllables=inheritSyllables(mother?.syllables,{random:syllableRandom,mutate:true});
+      }
     }
     return {generation,signals,births:births.map(b=>b.id),retired,population:positions.size};
+  }
+  // A cell's own Möbius turn: newborns take their first turn (and choose a
+  // name); every cell turns again every `turnEvery` generations. Only the
+  // count of what it heard enters from outside. Feather stops turns.
+  async function turn({turnEvery=6,signal=null}={}){
+    if(tissue.isPaused())return {turned:[],named:[],rested:[],paused:true};
+    const turned=[],named=[],rested=[];
+    for(const id of tissue.livingIds()){
+      const cell={id};
+      if(signal?.aborted||tissue.isPaused())break;
+      const body=bodies.get(cell.id);
+      if(!body)continue;
+      const due=body.last_turn===null||generation-body.last_turn>=turnEvery;
+      if(!due)continue;
+      const {carry,receipt}=await turnCell({address:cell.id,genome:body.genome,carry:body.carry,
+        heardSinceLastTurn:body.heard_since_turn,signal});
+      if(!bodies.has(cell.id))continue; // retired while turning
+      body.carry=carry;body.carry_digest=receipt.carry_digest;body.heard_since_turn=0;
+      body.last_turn=generation;body.turns++;body.last_status=receipt.status;
+      mobiusReceipts.push({generation,name:body.name,...receipt});
+      if(mobiusReceipts.length>96)mobiusReceipts.shift();
+      turned.push(cell.id);
+      if(!body.name&&receipt.status==='committed'){
+        const taken=new Set([...bodies.values()].map(b=>b.name).filter(Boolean));
+        const choice=chooseName({voice:carry.voice,syllables:body.syllables,sass:body.genome?.sass??0,taken});
+        body.name=choice.name;
+        const record={generation,address:cell.id,name:choice.name,parent:body.parent,
+          parent_name:body.parent?bodies.get(body.parent)?.name??null:null,
+          attempts:choice.attempts,from_voice:choice.from.voice,syllables:choice.from.syllables,
+          carry_digest:receipt.carry_digest,chosen_in:'own choose phase voice + own syllables'};
+        namings.push(record);if(namings.length>200)namings.shift();
+        named.push(record);
+      }
+      // The cell's own choose phase decided it is ready to rest. Its lineage,
+      // last words, name and carry are kept; the tissue does not overrule it.
+      if(receipt.chose_rest){
+        const record=tissue.retire(cell.id,'chose-rest');
+        retirements.push({...record,generation,name:body.name,carry_digest:body.carry_digest,
+          traits:{...body.genome},lastPhrases:[...(body.phrases||[])],turns:body.turns});
+        bodies.delete(cell.id);
+        rested.push(cell.id);
+      }
+    }
+    return {turned,named,rested,paused:false};
+  }
+  // Sound from the room, as band levels 0..1 (low to high). Each cell listens
+  // to the band its own twist faces; what it hears is counted for its next turn.
+  function hear(bands){
+    if(tissue.isPaused())return {heard:0,paused:true};
+    if(!Array.isArray(bands)||bands.length<1||bands.length>32||!bands.every(v=>Number.isFinite(v)&&v>=0&&v<=1))
+      throw Error('Invalid sound bands');
+    let heard=0;
+    for(const id of tissue.livingIds()){
+      const cell={id,twist:tissue.twistOf(id)};
+      const body=bodies.get(cell.id);if(!body)continue;
+      const level=bands[Math.min(bands.length-1,Math.floor(cell.twist*bands.length))];
+      const amount=Math.round(level*3);
+      if(amount>0){body.heard_since_turn+=amount;adaptation.get(cell.id).heard+=amount;heard+=amount;}
+    }
+    return {heard,paused:false};
   }
   function transform(id,nextRole,options={}) {
     const result=tissue.transform(id,nextRole,options);
@@ -256,7 +341,14 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
   }
   function snapshot(){
     const core=tissue.snapshot();
-    return {...core,generation,positions:Object.fromEntries(positions),
+    const names=Object.fromEntries([...bodies].map(([id,b])=>[id,b.name]));
+    const mobius=Object.fromEntries([...bodies].map(([id,b])=>[id,{name:b.name,parent:b.parent,
+      generation:b.generation,syllables:[...(b.syllables||[])],carry:b.carry?{...b.carry}:null,
+      carry_digest:b.carry_digest,turns:b.turns,last_turn:b.last_turn,last_status:b.last_status??null,
+      heard_since_turn:b.heard_since_turn}]));
+    return {...core,generation,names,mobius,namings:namings.map(n=>({...n,syllables:[...n.syllables]})),
+      mobiusReceipts:mobiusReceipts.map(r=>JSON.parse(JSON.stringify(r))),
+      positions:Object.fromEntries(positions),
       adaptation:Object.fromEntries(adaptation),traits:Object.fromEntries(traits),mutations:mutations.map(m=>({...m})),
       retirements:retirements.map(r=>({...r,traits:{...r.traits},lastPhrases:[...r.lastPhrases]})),utterances:utterances.map(u=>({...u})),lexicons:Object.fromEntries([...lexicons].map(([id,phrases])=>[id,[...phrases]])),
       neighbourhoods:Object.fromEntries([...positions.keys()].map(id=>[id,neighbours(id)])),
@@ -268,5 +360,5 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       programs:programs.map(p=>({...p,result:{...p.result,output:p.result.output.map(x=>({...x}))},provenance:{...p.provenance}})),
       constructions:constructions.map(p=>({...p,builders:[...p.builders],specification:{...p.specification,effects:[...p.specification.effects]},provenance:{...p.provenance}}))};
   }
-  return Object.freeze({plant,step,neighbours,transform,snapshot,feather:tissue.feather,resume:tissue.resume});
+  return Object.freeze({plant,step,turn,hear,neighbours,transform,snapshot,feather:tissue.feather,resume:tissue.resume});
 }

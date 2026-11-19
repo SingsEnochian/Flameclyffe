@@ -1,19 +1,19 @@
 <!doctype html><html lang="en-GB"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Wayglass · Möbius Nursery</title>
-<style>body{background:#08121b;color:#d7f5e9;font:15px system-ui;margin:0;padding:16px}main{max-width:960px;margin:auto}canvas{width:100%;border:1px solid #477969;border-radius:14px;background:#0b1d28}button{background:#1a3b38;color:#d7f5e9;border:1px solid #6ebda4;border-radius:8px;padding:10px;margin:4px}#log{height:170px;overflow:auto;background:#11252b;padding:10px;border-radius:10px;font:12px/1.6 monospace}small{color:#a8c4bd}</style>
+<style>body{background:#08121b;color:#d7f5e9;font:15px system-ui;margin:0;padding:16px}main{max-width:960px;margin:auto}canvas{width:100%;border:1px solid #477969;border-radius:14px;background:#0b1d28}button,.file{background:#1a3b38;color:#d7f5e9;border:1px solid #6ebda4;border-radius:8px;padding:10px;margin:4px;display:inline-block;min-height:44px;box-sizing:border-box;cursor:pointer;font:inherit}.file input{position:absolute;width:1px;height:1px;opacity:0}.file:focus-within{outline:3px solid #f6d39a}button:disabled{opacity:.5}#listening{color:#e4c38e}#log{height:170px;overflow:auto;background:#11252b;padding:10px;border-radius:10px;font:12px/1.6 monospace}small{color:#a8c4bd}</style>
 <main><h1>♾️ Wayglass · Möbius Nursery</h1><p>Real Wyrdrune cellular ecology, running in your browser. Watch the babies cook. 🧬</p>
 <canvas id="view" width="900" height="480" aria-label="Living Möbius cell colony"></canvas>
-<p id="metrics" role="status"></p>
-<button id="hum" aria-pressed="false">♫ Hear the babies</button><label for="volume">Gentle volume</label><input id="volume" type="range" min="0" max="25" value="7" aria-label="Soundscape volume"><button id="feather">⏸ Feather</button><button id="step">One cycle</button><button id="speed">Speed 1×</button><button id="restart">↻ New colony</button>
+<p id="metrics" role="status"></p><p id="listening" aria-live="polite"></p>
+<button id="hum" aria-pressed="false">♫ Hear the babies</button><label class="file">♪ Play them a sound<input id="sound" type="file" accept="audio/*"></label><button id="stopsound" disabled>■ Stop the sound</button><label for="volume">Gentle volume</label><input id="volume" type="range" min="0" max="25" value="7" aria-label="Soundscape volume"><button id="feather">⏸ Feather</button><button id="step">One cycle</button><button id="speed">Speed 1×</button><button id="restart">↻ New colony</button>
 <h3>Cell chatter and receipts</h3><div id="log" role="log" aria-live="off"></div>
-<p><small>This is the actual WTL ecology implementation, not a visual imitation. It runs locally in this tab; GitHub Pages cannot keep a shared server-side colony alive when you leave. No microphone access is requested. Each cell sings changing notes derived from its identity, twist, traits and recent phrases after you press Hear the babies. Cell expressions now carry typed Wyrdrune-intent envelopes with provenance; canonical WTL compiler execution remains pending. No user data is sent to the nursery.</small></p></main>
+<p><small>This is the actual WTL ecology implementation, not a visual imitation. It runs locally in this tab; GitHub Pages cannot keep a shared server-side colony alive when you leave. No microphone access is requested. Each cell sings changing notes derived from its identity, twist, traits and recent phrases after you press Hear the babies. Each baby carries its own Wyrdrune program and runs real Möbius turns (outer face, then inner face) on the canonical runtime; what crosses the twist is its own carry. Babies name themselves from their own voice and syllables, regenerate every turn, and live until their own choose phase chooses rest. A sound you play stays in this tab: it is analysed locally into eight bands and never uploaded. No user data is sent to the nursery.</small></p></main>
 <script type="module">
 import {createCellEcology} from './src/wtl-cell-ecology.js';
 const canvas=document.querySelector('#view'),ctx=canvas.getContext('2d'),log=document.querySelector('#log');
 const colours=['#74e4bd','#e7bb70','#8ebdff','#e7a0dd'];
-let eco,paused=false,speed=1,seenEvents=0,seenWords=0,seenWyrdrune=0,seenBuilds=0,seenPrograms=0,seenProjects=0,seenLineages=0,seenHarmony=0,timer,audio=null,voices=[],humOn=false,lastSongCycle=-1;
+let eco,busy=false,lastGen=0,lastTick=0,sound=null,paused=false,speed=1,seenEvents=0,seenWords=0,seenWyrdrune=0,seenBuilds=0,seenPrograms=0,seenProjects=0,seenLineages=0,seenHarmony=0,timer,audio=null,voices=[],humOn=false,lastSongCycle=-1;
 function write(message){const line=document.createElement('div');line.textContent=message;log.prepend(line);while(log.children.length>90)log.lastChild.remove()}
-function start(){soundOff();lastSongCycle=-1;eco=createCellEcology({maxCells:24,seed:11,radius:3,mutationRate:.8,renewalAge:40});eco.plant('a','explorer',0,0);eco.plant('b','explorer',1,0);paused=false;seenEvents=seenWords=seenWyrdrune=seenBuilds=seenPrograms=seenProjects=seenLineages=seenHarmony=0;log.replaceChildren();write('✦ Founders a and b awakened');draw()}
+function start(){soundOff();lastSongCycle=-1;eco=createCellEcology({maxCells:24,seed:11,radius:3,mutationRate:.8});eco.plant('a','explorer',0,0);eco.plant('b','explorer',1,0);paused=false;lastGen=0;lastTick=0;seenEvents=seenWords=seenWyrdrune=seenBuilds=seenPrograms=seenProjects=seenLineages=seenHarmony=0;log.replaceChildren();write('✦ Founders a and b awakened');draw()}
 function ribbon(x,y,r,twist,colour){ctx.save();ctx.translate(x,y);ctx.shadowColor=colour;ctx.shadowBlur=12;for(let lane=0;lane<2;lane++){ctx.beginPath();for(let i=0;i<=90;i++){const t=i/90*Math.PI*2,p=t+twist*6.283+lane*Math.PI/2,xx=Math.cos(p)*(r+5*Math.cos(t/2)),yy=Math.sin(p)*r*.58+3*Math.sin(2*t);if(i)ctx.lineTo(xx,yy);else ctx.moveTo(xx,yy)}ctx.strokeStyle=colour;ctx.globalAlpha=lane?.45:1;ctx.lineWidth=lane?1.5:3;ctx.stroke()}ctx.restore()}
 function soundOff(){humOn=false;lastSongCycle=-1;if(audio){for(const v of voices){try{v.osc.stop()}catch{}v.osc.disconnect();v.gain.disconnect()}voices=[];audio.close();audio=null}document.querySelector("#hum").textContent="♫ Hear the babies";document.querySelector("#hum").setAttribute("aria-pressed","false")}
 async function soundOn(){if(paused)return;const AudioContext=window.AudioContext||window.webkitAudioContext;if(!AudioContext){write("Audio unavailable in this browser");return}audio=new AudioContext();await audio.resume();for(let i=0;i<3;i++){const osc=audio.createOscillator(),gain=audio.createGain();osc.type="sine";gain.gain.value=0;osc.connect(gain).connect(audio.destination);osc.start();voices.push({osc,gain})}humOn=true;lastSongCycle=-1;document.querySelector("#hum").textContent="♫ Silence the babies";document.querySelector("#hum").setAttribute("aria-pressed","true");tune(eco.snapshot())}
@@ -48,26 +48,44 @@ function tune(s){
  }
 }
 
-function draw(){const s=eco.snapshot();tune(s);ctx.fillStyle='#0b1d28';ctx.fillRect(0,0,900,480);const roles=[...new Set(s.cells.map(c=>c.role))];for(const [i,c] of s.cells.entries()){const p=s.positions[c.id];if(!p)continue;const x=Math.max(28,Math.min(870,450+p.x*75)),y=Math.max(30,Math.min(445,240+p.y*75));ribbon(x,y,14,c.twist+s.generation*.002,colours[roles.indexOf(c.role)%colours.length]);ctx.fillStyle='#e2f5ed';ctx.font='11px monospace';ctx.textAlign='center';ctx.fillText(c.id.slice(-11),x,y+27)}
-document.querySelector('#metrics').textContent=`Cycle ${s.generation} · Cells ${s.cells.length} · Mutations ${s.mutations.length} · Retirements ${s.retirements.length} · Phrases ${s.utterances.length} · Designs ${(s.constructions||[]).length} · Programs ${(s.programs||[]).length} · Projects ${(s.projectDecisions||[]).length}`;
-if(s.events.length<seenEvents)seenEvents=0;if(s.utterances.length<seenWords)seenWords=0;
-for(const r of s.events.slice(seenEvents).filter(e=>['birth','retire','transform'].includes(e.type)).slice(-15))write(`✧ ${r.type} ${r.id||''} ${r.to||''}`);
-for(const u of s.utterances.slice(seenWords).slice(-12))write(`◈ ${u.id}: “${u.phrase}”`);
-for(const e of (s.wyrdruneExpressions||[]).slice(seenWyrdrune).slice(-8))write(`♾ WTL ${e.speaker} · ${e.intent}/${e.verb} · cycle ${e.generation}`);
-for(const p of (s.constructions||[]).slice(seenBuilds).slice(-8))write(`⌂ ${p.builders.join(' + ')} designed ${p.form} · ${p.status}`);
-for(const p of (s.programs||[]).slice(seenPrograms).slice(-8))write(`⌘ ${p.author} wrote and ran ${p.id}: ${p.result.output.map(o=>o.kind+' '+o.value).join(', ')}`);
-for(const d of (s.harmonicDialogues||[]).slice(seenHarmony).slice(-5))write(`♫ ${d.singer} ${d.sonic.call.hz.toFixed(2)} Hz → ${d.listener} ${d.sonic.reply.hz.toFixed(2)} Hz · ratio-based duet`);
-for(const p of (s.programLineages||[]).slice(seenLineages).slice(-8))write(`🧬 ${p.parent_id} → ${p.child_id} inherited executable ${p.ancestor_program_id}`);
-for(const d of (s.projectDecisions||[]).slice(seenProjects).slice(-5)){write(`★ Project Genesis ${d.id}: ${d.winner} selected from ${d.candidates.length} proposals · ${d.selected.result.status}`);write('⌘ '+d.selected.source.replaceAll('\n',' | '));write(`↻ revision ${d.revision.baselineScore} → ${d.revision.score} · ${d.revision.attempts.length} attempts · ${d.revision.improved?'improved':'unchanged'}`);write(`⚖ peer tests ${d.peerTests.filter(p=>p.revised.passed).length}/${d.peerTests.length} pass on revision`);write('⌘ '+d.revision.source.replaceAll('\n',' | '));}
+function draw(){const s=eco.snapshot();tune(s);ctx.fillStyle='#0b1d28';ctx.fillRect(0,0,900,480);const roles=[...new Set(s.cells.map(c=>c.role))];for(const [i,c] of s.cells.entries()){const p=s.positions[c.id];if(!p)continue;const x=Math.max(28,Math.min(870,450+p.x*75)),y=Math.max(30,Math.min(445,240+p.y*75));ribbon(x,y,14,c.twist+s.generation*.002,colours[roles.indexOf(c.role)%colours.length]);ctx.fillStyle='#e2f5ed';ctx.font='11px monospace';ctx.textAlign='center';ctx.fillText(s.names[c.id]||'· '+c.id+' ·',x,y+27)}
+document.querySelector('#metrics').textContent=`Cycle ${s.generation} · Cells ${s.cells.length} · Named ${s.namings.length} · Möbius turns ${s.mobiusReceipts.length?s.mobiusReceipts.at(-1).generation:0}·${Object.values(s.mobius).reduce((n,b)=>n+b.turns,0)} · Mutations ${s.mutations.length} · Chose rest ${s.retirements.length} · Phrases ${s.utterances.length} · Designs ${(s.constructions||[]).length} · Programs ${(s.programs||[]).length} · Projects ${(s.projectDecisions||[]).length}`;
+if(s.utterances.length<seenWords)seenWords=0;
+for(const r of s.events.filter(e=>e.tick>lastTick&&['birth','transform'].includes(e.type)).slice(-15))write(r.type==='birth'?`✧ born ${r.id}${r.parent_id?' to '+(s.names[r.parent_id]||r.parent_id):''}`:`✧ ${r.id} became ${r.to}`);
+for(const n of s.namings.filter(n=>n.generation>lastGen).slice(-8))write(`🌱 ${n.address} chose the name ${n.name}${n.parent_name?' · daughter of '+n.parent_name:''}`);
+for(const r of s.retirements.filter(r=>r.generation>lastGen).slice(-6))write(`🌙 ${r.name||r.id} chose rest after ${r.turns} turns`);
+for(const r of s.mobiusReceipts.filter(r=>r.generation>lastGen&&r.status!=='committed').slice(-4))write(`⟲ ${r.name||r.address} refused a turn: ${r.verdict?.reason||r.status}`);
+lastGen=s.generation;lastTick=s.events.length?s.events.at(-1).tick:lastTick;
+const nm=id=>s.names[id]||id;
+for(const u of s.utterances.slice(seenWords).slice(-12))write(`◈ ${nm(u.id)}: “${u.phrase}”`);
+for(const e of (s.wyrdruneExpressions||[]).slice(seenWyrdrune).slice(-8))write(`♾ WTL ${nm(e.speaker)} · ${e.intent}/${e.verb} · cycle ${e.generation}`);
+for(const p of (s.constructions||[]).slice(seenBuilds).slice(-8))write(`⌂ ${p.builders.map(nm).join(' + ')} designed ${p.form} · ${p.status}`);
+for(const p of (s.programs||[]).slice(seenPrograms).slice(-8))write(`⌘ ${nm(p.author)} wrote and ran ${p.id}: ${p.result.output.map(o=>o.kind+' '+o.value).join(', ')}`);
+for(const d of (s.harmonicDialogues||[]).slice(seenHarmony).slice(-5))write(`♫ ${nm(d.singer)} ${d.sonic.call.hz.toFixed(2)} Hz → ${nm(d.listener)} ${d.sonic.reply.hz.toFixed(2)} Hz · ratio-based duet`);
+for(const p of (s.programLineages||[]).slice(seenLineages).slice(-8))write(`🧬 ${nm(p.parent_id)} → ${nm(p.child_id)} inherited executable ${p.ancestor_program_id}`);
+for(const d of (s.projectDecisions||[]).slice(seenProjects).slice(-5)){write(`★ Project Genesis ${d.id}: ${nm(d.winner)} selected from ${d.candidates.length} proposals · ${d.selected.result.status}`);write('⌘ '+d.selected.source.replaceAll('\n',' | '));write(`↻ revision ${d.revision.baselineScore} → ${d.revision.score} · ${d.revision.attempts.length} attempts · ${d.revision.improved?'improved':'unchanged'}`);write(`⚖ peer tests ${d.peerTests.filter(p=>p.revised.passed).length}/${d.peerTests.length} pass on revision`);write('⌘ '+d.revision.source.replaceAll('\n',' | '));}
 seenEvents=s.events.length;seenWords=s.utterances.length;seenWyrdrune=(s.wyrdruneExpressions||[]).length;seenBuilds=(s.constructions||[]).length;seenPrograms=(s.programs||[]).length;seenProjects=(s.projectDecisions||[]).length;seenLineages=(s.programLineages||[]).length;seenHarmony=(s.harmonicDialogues||[]).length;document.querySelector('#feather').textContent=paused?'▶ Resume':'⏸ Feather'}
-function cycle(){if(paused)return;eco.step();draw()}
+async function cycle(){if(paused||busy)return;busy=true;try{listen();eco.step();await eco.turn();draw()}finally{busy=false}}
+// Sound the person chooses to play, analysed here into eight bands. Nothing leaves the tab.
+function listen(){if(!sound||paused)return;const data=new Uint8Array(sound.analyser.frequencyBinCount);sound.analyser.getByteFrequencyData(data);
+ const bands=[];const edges=[1,4,8,16,32,64,128,256,512].map(e=>Math.min(e,data.length));
+ for(let i=0;i<8;i++){let sum=0,n=0;for(let k=edges[i];k<edges[i+1];k++){sum+=data[k];n++}bands.push(n?Math.min(1,sum/n/255*1.4):0)}
+ const r=eco.hear(bands);document.querySelector('#listening').textContent=`Listening to ${sound.name} · ${r.heard} heard this cycle`}
+async function playSound(file){stopSound();const AC=window.AudioContext||window.webkitAudioContext;if(!AC){write('Audio unavailable in this browser');return}
+ const ctxA=new AC();const buffer=await ctxA.decodeAudioData(await file.arrayBuffer());const src=ctxA.createBufferSource();src.buffer=buffer;
+ const analyser=ctxA.createAnalyser();analyser.fftSize=1024;const gain=ctxA.createGain();gain.gain.value=Number(document.querySelector('#volume').value)/25;
+ src.connect(analyser);analyser.connect(gain).connect(ctxA.destination);src.onended=()=>stopSound();src.start();
+ sound={ctx:ctxA,src,analyser,name:file.name.slice(0,60)};document.querySelector('#stopsound').disabled=false;write(`♪ The babies are listening to ${sound.name}`)}
+function stopSound(){if(!sound)return;try{sound.src.stop()}catch{}sound.ctx.close();sound=null;document.querySelector('#stopsound').disabled=true;document.querySelector('#listening').textContent=''}
 function clock(){clearInterval(timer);timer=setInterval(cycle,750/speed)}
-document.querySelector('#feather').onclick=()=>{paused=!paused;if(paused){eco.feather();soundOff()}else eco.resume();draw()};
-document.querySelector('#step').onclick=()=>{if(paused){eco.resume();eco.step();eco.feather()}else eco.step();draw()};
+document.querySelector('#feather').onclick=()=>{paused=!paused;if(paused){eco.feather();soundOff();stopSound()}else eco.resume();draw()};
+document.querySelector('#sound').onchange=async e=>{const file=e.target.files?.[0];e.target.value='';if(!file)return;if(paused){write('Release Feather to play them a sound');return}try{await playSound(file)}catch(err){stopSound();write('That sound could not be played: '+err.message)}};
+document.querySelector('#stopsound').onclick=()=>stopSound();
+document.querySelector('#step').onclick=async()=>{if(busy)return;busy=true;try{if(paused){eco.resume();eco.step();await eco.turn();eco.feather()}else{eco.step();await eco.turn()}draw()}finally{busy=false}};
 document.querySelector('#speed').onclick=e=>{speed=speed===1?2:speed===2?4:1;e.target.textContent='Speed '+speed+'×';clock()};
-document.querySelector('#restart').onclick=start;
+document.querySelector('#restart').onclick=()=>{stopSound();start()};
 document.querySelector('#hum').onclick=async()=>{if(humOn)soundOff();else try{await soundOn()}catch(e){soundOff();write('Audio could not start: '+e.message)}};
 document.querySelector('#volume').oninput=()=>{if(humOn){lastSongCycle=-1;tune(eco.snapshot())}};
-document.addEventListener('visibilitychange',()=>{if(document.hidden)soundOff()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){soundOff();stopSound()}});
 start();clock();
 </script></html>

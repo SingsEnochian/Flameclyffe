@@ -11,10 +11,12 @@ const files=new Map([
   ['/src/wtl-cell-tissue.js',new URL('./src/wtl-cell-tissue.js',import.meta.url)]
 ]);
 let ecology,interval;const clients=new Set();
-function reset(){ecology=createCellEcology({maxCells:24,seed:11,radius:3,mutationRate:0.8,renewalAge:40});ecology.plant('a','explorer',0,0);ecology.plant('b','explorer',1,0)}
+function reset(){ecology=createCellEcology({maxCells:24,seed:11,radius:3,mutationRate:0.8});ecology.plant('a','explorer',0,0);ecology.plant('b','explorer',1,0)}
 function send(res,snapshot){res.write('event: snapshot\ndata: '+JSON.stringify(snapshot)+'\n\n')}
 function broadcast(){const snapshot=ecology.snapshot();for(const res of clients){try{send(res,snapshot)}catch{clients.delete(res)}}}
-reset();interval=setInterval(()=>{if(!ecology.snapshot().paused){ecology.step();broadcast()}},750);interval.unref?.();
+// One cycle at a time: a step, then any Möbius turns that are due.
+let busy=false;
+reset();interval=setInterval(async()=>{if(busy||ecology.snapshot().paused)return;busy=true;try{ecology.step();await ecology.turn();broadcast()}finally{busy=false}},750);interval.unref?.();
 const server=http.createServer(async(req,res)=>{
   const allowedHost='127.0.0.1:'+port;
   if(req.headers.host!==allowedHost){res.writeHead(403);res.end('Host denied');return}
@@ -33,7 +35,7 @@ const server=http.createServer(async(req,res)=>{
   if(req.method==='POST'&&['/feather','/resume','/step','/reset'].includes(pathname)){
     if(pathname==='/feather')ecology.feather();
     if(pathname==='/resume')ecology.resume();
-    if(pathname==='/step'){const paused=ecology.snapshot().paused;if(paused)ecology.resume();ecology.step();if(paused)ecology.feather()}
+    if(pathname==='/step'){const paused=ecology.snapshot().paused;if(paused)ecology.resume();ecology.step();await ecology.turn();if(paused)ecology.feather()}
     if(pathname==='/reset')reset();
     broadcast();res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({ok:true}));return;
   }
