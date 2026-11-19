@@ -2,7 +2,7 @@
 // No global clocks, network, model calls, or visual side effects.
 import {createCellTissue} from './wtl-cell-tissue.js';
 import {authorCellProgram,compileCellProgram,executeCellProgram,reviseCellProgram} from './wtl-cell-program.js';
-import {authorPeerTest,runPeerTest} from './wtl-cell-peer-tests.js';
+import {authorRelianceTest,runRelianceTest} from './wtl-cell-peer-tests.js';
 import {listenAndReply,composeDialogue} from './wtl-cell-harmony.js';
 import {sonicPitch,replyByRatio,projectAudible} from './wtl-cell-sonic-space.js';
 import {turnCell,firstCarry,daughterCarry,chooseName,inheritSyllables} from './wtl-cell-mobius.js';
@@ -179,13 +179,16 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       if(proposals.length){
         const winner=proposals[0],result=executeCellProgram(winner.compiled);
         const targetTone=24+(traits.get(winner.author).curiosity*8+generation)%48;
-        const revision=reviseCellProgram(winner.source,{targetTone});
+        // Neighbours say what they rely on BEFORE the improvement is sought,
+        // and the improvement must keep it. Improvements survive; so do they.
         const reviewerIds=neighbours(winner.author).slice(0,4);
-        const peerTests=reviewerIds.map(id=>{
-          const reviewer=tissue.cellsView().find(cell=>cell.id===id);
-          const test=authorPeerTest(reviewer,traits.get(id),winner.source);
-          return {test,original:runPeerTest(test,winner.source),revised:runPeerTest(test,revision.source)};
+        const living=tissue.cellsView();
+        const reliance=reviewerIds.map(id=>{
+          const reviewer=living.find(cell=>cell.id===id);
+          return authorRelianceTest(reviewer,traits.get(id),winner.source,authorCellProgram(reviewer,traits.get(id),generation));
         });
+        const revision=reviseCellProgram(winner.source,{targetTone,keep:reliance.map(test=>candidate=>runRelianceTest(test,candidate))});
+        const peerTests=reliance.map(test=>({test,original:runRelianceTest(test,winner.source),revised:runRelianceTest(test,revision.source)}));
         const decision={schema:'wayglass.wtl.project-genesis.v1',id:'project-'+generation,
           generation,selection:'neighbour-scored-deterministic',winner:winner.author,
           candidates:proposals.map(p=>({author:p.author,source:p.source,language:p.language,score:p.score,reviews:p.reviews.map(r=>({...r}))})),
@@ -193,7 +196,8 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
             result:{status:result.status,steps:result.steps,output:result.output.map(x=>({...x}))}},
           peerTests,
           revision:{targetTone,baselineScore:revision.baselineScore,source:revision.source,score:revision.score,
-            improved:revision.improved,attempts:revision.attempts.map(a=>({...a})),result:revision.result},
+            improved:revision.improved,attempts:revision.attempts.map(a=>({...a})),result:revision.result,
+            neighbours_kept:revision.neighbours_kept??true,declined_for_neighbours:revision.declined_for_neighbours??0},
           provenance:{origin:'bounded-cell-ecology',canonical_wtl_compiler:false,host_effects:false,autonomous_agent:false}};
         projectDecisions.push(decision);
         const winnerLibrary=programLibrary.get(winner.author);
@@ -446,7 +450,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       retirements:retirements.map(r=>({...r,traits:{...r.traits},lastPhrases:[...r.lastPhrases]})),utterances:utterances.map(u=>({...u})),lexicons:Object.fromEntries([...lexicons].map(([id,phrases])=>[id,[...phrases]])),
       neighbourhoods:Object.fromEntries([...positions.keys()].map(id=>[id,neighbours(id)])),
       wyrdruneExpressions:wyrdruneExpressions.map(e=>({...e,semantic:{...e.semantic,traits:e.semantic.traits?{...e.semantic.traits}:undefined},provenance:{...e.provenance}})),
-      projectDecisions:projectDecisions.map(d=>({...d,candidates:d.candidates.map(p=>({...p,reviews:p.reviews.map(r=>({...r}))})),selected:{...d.selected,result:{...d.selected.result,output:d.selected.result.output.map(x=>({...x}))}},peerTests:d.peerTests.map(p=>({test:{...p.test},original:{...p.original,observed:[...p.original.observed]},revised:{...p.revised,observed:[...p.revised.observed]}})),revision:{...d.revision,attempts:d.revision.attempts.map(a=>({...a})),result:{...d.revision.result,output:d.revision.result.output.map(x=>({...x}))}},provenance:{...d.provenance}})),
+      projectDecisions:projectDecisions.map(d=>({...d,candidates:d.candidates.map(p=>({...p,reviews:p.reviews.map(r=>({...r}))})),selected:{...d.selected,result:{...d.selected.result,output:d.selected.result.output.map(x=>({...x}))}},peerTests:d.peerTests.map(p=>JSON.parse(JSON.stringify(p))),revision:{...d.revision,attempts:d.revision.attempts.map(a=>({...a})),result:{...d.revision.result,output:d.revision.result.output.map(x=>({...x}))}},provenance:{...d.provenance}})),
       harmonicDialogues:harmonicDialogues.map(d=>({...d,events:d.events.map(e=>({...e})),reply:{...d.reply,provenance:{...d.reply.provenance}},sonic:{call:{...d.sonic.call},reply:{...d.sonic.reply},callProjection:{...d.sonic.callProjection},replyProjection:{...d.sonic.replyProjection}},provenance:{...d.provenance}})),
       programLineages:programLineages.map(p=>({...p,verification:{...p.verification}})),
       programLibrary:Object.fromEntries([...programLibrary].map(([id,items])=>[id,items.map(p=>({...p}))])),

@@ -32,7 +32,12 @@ export function authorCellProgram(cell,genes,generation){
 }
 
 /** Bounded mutation search against a stated executable test, never host effects. */
-export function reviseCellProgram(source,{targetTone=48,maxAttempts=12}={}){
+// keep: neighbours' tests. An improvement is accepted only if every one of
+// them still passes, so a program can get better without abandoning the
+// cells that rely on it. If no candidate does both, the original survives.
+export function reviseCellProgram(source,{targetTone=48,maxAttempts=12,keep=[]}={}){
+ if(!Array.isArray(keep)||keep.length>8||!keep.every(fn=>typeof fn==='function'))throw Error('Invalid neighbour tests');
+ const kept=candidate=>keep.map(fn=>fn(candidate)).filter(r=>!r.passed).length;
  if(!Number.isSafeInteger(targetTone)||targetTone<0||targetTone>96)throw Error('Invalid target');
  if(!Number.isSafeInteger(maxAttempts)||maxAttempts<1||maxAttempts>12)throw Error('Invalid attempts');
  const original=compileCellProgram(source);
@@ -52,12 +57,14 @@ export function reviseCellProgram(source,{targetTone=48,maxAttempts=12}={}){
   lines[index]='tone '+candidateTone;
   const candidate=lines.join('\n');
   const evaluated=evaluate(compileCellProgram(candidate));
-  const accepted=evaluated.score<best.score;
-  attempts.push({source:candidate,score:evaluated.score,accepted});
+  const broken=kept(candidate);
+  const accepted=evaluated.score<best.score&&broken===0;
+  attempts.push({source:candidate,score:evaluated.score,accepted,...(keep.length?{neighbours_broken:broken}:{})});
   if(accepted)best={source:candidate,score:evaluated.score,run:evaluated.run};
   if(best.score===0)break;
  }
  return {targetTone,baselineScore:baseline.score,source:best.source,score:best.score,
   improved:best.score<baseline.score,attempts,
+  ...(keep.length?{neighbours_kept:kept(best.source)===0,declined_for_neighbours:attempts.filter(a=>a.neighbours_broken>0&&a.score<baseline.score).length}:{}),
   result:{status:best.run.status,steps:best.run.steps,output:best.run.output.map(o=>({...o}))}};
 }
