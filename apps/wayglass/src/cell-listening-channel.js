@@ -1,12 +1,43 @@
 import {playCellReturn} from './cell-ecology-audio.js';
+import {canRecordRadio,captureRadioMix,colonyTake} from './cell-radio-recording.js';
 
 /** A local monitor for committed cell signals, opened by the Listen control. */
 export function createCellListeningChannel({
-  url,scope=globalThis,onStatus=()=>{},onFeather=()=>{},
+  url,scope=globalThis,onStatus=()=>{},onFeather=()=>{},onRecordStatus=()=>{},
 }={}){
   let session=null;
   let volume=.25;
   let muted=false;
+  let recording=null;
+
+  function canRecord(){
+    return Boolean(session?.ready && canRecordRadio(session.output,scope));
+  }
+
+  function startRecording(){
+    if(!canRecord()||recording)return;
+    try{
+      const capture=captureRadioMix(session.output,scope);
+      recording={capture,stopping:false,session};
+      onRecordStatus('Recording Colony Radio…');
+      void capture.done.then(({clip,error})=>{
+        recording=null;
+        if(clip)colonyTake(scope).save(clip);
+        onRecordStatus(error||'Recording ready to preview and download.');
+      });
+    }catch{
+      onRecordStatus('Recording could not start on this device.');
+    }
+  }
+
+  function stopRecording(){
+    if(!recording)return null;
+    if(!recording.stopping){
+      recording.stopping=true;
+      onRecordStatus('Finishing recording…');
+    }
+    return recording.capture.stop();
+  }
 
   function updateGain(){
     if(session?.output)session.output.gain.value=muted?0:volume;
@@ -18,8 +49,13 @@ export function createCellListeningChannel({
     if(previous){
       previous.controller.abort();
       previous.stream?.close();
-      if(previous.context&&previous.context.state!=='closed')
-        void previous.context.close().catch(()=>{});
+      const done=recording?.session===previous?stopRecording():null;
+      const close=()=>{
+        if(previous.context&&previous.context.state!=='closed')
+          return previous.context.close().catch(()=>{});
+      };
+      if(done)void done.then(close);
+      else void close();
     }
     onStatus(message);
   }
@@ -46,7 +82,11 @@ export function createCellListeningChannel({
       let queue=Promise.resolve();
       let lastRevision=-1;
       const quiet='Listening · quiet until a cell exchange';
-      run.stream.addEventListener('ready',()=>{if(session===run)onStatus(quiet);});
+      run.stream.addEventListener('ready',()=>{
+        if(session!==run)return;
+        run.ready=true;
+        onStatus(quiet);
+      });
       run.stream.addEventListener('exchange',event=>{
         if(session!==run)return;
         let receipt;
@@ -78,6 +118,8 @@ export function createCellListeningChannel({
 
   return {
     start,stop,isActive:()=>Boolean(session),
+    canRecord,startRecording,stopRecording,
+    recordingState:()=>recording?.stopping?'finishing':recording?'recording':'idle',
     setVolume(value){volume=Math.max(0,Math.min(.6,Number(value)||0));updateGain();},
     setMuted(value){muted=Boolean(value);updateGain();},
   };

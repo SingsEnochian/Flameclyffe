@@ -1,6 +1,7 @@
 import {WAYGLASS_FEATHER_EVENT, wayglassSomaticSound} from '../somatic-sound.js';
 import {playCellReturn} from '../cell-ecology-audio.js';
 import {createCellListeningChannel} from '../cell-listening-channel.js';
+import {colonyTake} from '../cell-radio-recording.js';
 
 const BASE='/api/v1/wayglass/cell-garden';
 const actionButton=(doc,action,label)=>{
@@ -94,26 +95,40 @@ export function mountWayglassCellGarden(root,{
  const radioControls=doc.createElement('div');radioControls.className='wg-cell-row';
  const listen=actionButton(doc,'listen','Listen to colony');
  const mute=actionButton(doc,'mute','Mute colony radio');
+ const record=actionButton(doc,'record','Record radio');
  mute.setAttribute('aria-pressed','false');
  const volumeLabel=doc.createElement('label');volumeLabel.textContent='Live volume ';
  const volume=doc.createElement('input');volume.type='range';volume.min='0';volume.max='60';
  volume.value='25';volumeLabel.append(volume);
  soundActions.append(play,stopAudio);
- radioControls.append(listen,mute,volumeLabel);
+ radioControls.append(listen,mute,volumeLabel,record);
  const audioNote=doc.createElement('p');audioNote.className='wg-cell-note';
  audioNote.textContent='Listen for the Return and acknowledgement tones from new cell exchanges.';
  const listeningStatus=doc.createElement('p');listeningStatus.className='wg-cell-note';
  listeningStatus.setAttribute('role','status');
  listeningStatus.textContent='Off air · tune in for the next burble.';
- radio.append(radioTitle,radioControls,listeningStatus);
+ const recordStatus=doc.createElement('p');recordStatus.className='wg-cell-note';
+ recordStatus.setAttribute('role','status');
+ const recordingPanel=doc.createElement('div');recordingPanel.className='wg-cell-recording';
+ recordingPanel.hidden=true;
+ const recordingPlayer=doc.createElement('audio');recordingPlayer.controls=true;recordingPlayer.preload='metadata';
+ recordingPlayer.setAttribute('aria-label','Preview last Colony Radio recording');
+ const download=doc.createElement('a');download.className='glass-chip';download.textContent='Download recording';
+ recordingPanel.append(recordingPlayer,download);
+ radio.append(radioTitle,radioControls,listeningStatus,recordStatus,recordingPanel);
  heading.append(radio);
  const listening=createCellListeningChannel({url:BASE+'/listen',scope,onStatus(message){
   if(disposed)return;
   listeningStatus.textContent=message;
   renderAudio();
+ },onRecordStatus(message){
+  if(disposed)return;
+  recordStatus.textContent=message;
+  renderAudio();
  },onFeather(){
   culture={...culture,status:'feather-stopped'};
   pending=null;fusionPending=null;controller?.abort();
+  recordingPlayer.pause?.();
   render();
  }});
  let muted=false;
@@ -127,6 +142,19 @@ export function mountWayglassCellGarden(root,{
 
  section.append(heading,shell,status,family,candidate,ecology);
  root.replaceChildren(section);
+ const urls=scope.URL??globalThis.URL;
+ let recordingUrl=null;
+ const offTake=colonyTake(scope).subscribe(clip=>{
+  if(!clip)return;
+  recordingPlayer.pause?.();
+  if(recordingUrl)urls.revokeObjectURL(recordingUrl);
+  recordingUrl=urls.createObjectURL(clip.blob);
+  recordingPlayer.src=recordingUrl;
+  download.href=recordingUrl;
+  download.download=clip.filename;
+  recordingPanel.hidden=false;
+  renderAudio();
+ });
 
  function featherHeld(){
   return culture?.status==='feather-stopped'||sound.snapshot?.().feather_stopped===true;
@@ -139,6 +167,11 @@ export function mountWayglassCellGarden(root,{
   listen.disabled=live?false:!culture||featherHeld()||Boolean(audioController);
   listen.textContent=live?'Stop listening':'Listen to colony';
   mute.disabled=!live;
+  const recorder=listening.recordingState();
+  record.disabled=recorder==='finishing'||(recorder==='idle'&&!listening.canRecord());
+  record.textContent=recorder==='recording'?'Stop recording':recorder==='finishing'?'Finishing…':'Record radio';
+  record.dataset.recording=String(recorder==='recording');
+  recordingPlayer.hidden=featherHeld();
  }
 
  function render(){
@@ -282,6 +315,14 @@ export function mountWayglassCellGarden(root,{
    muted=!muted;listening.setMuted(muted);mute.setAttribute('aria-pressed',String(muted));
    return;
   }
+  if(type==='record'){
+   if(listening.recordingState()==='recording')listening.stopRecording();
+   else if(!featherHeld()){
+    recordingPlayer.pause?.();
+    listening.startRecording();
+   }
+   return;
+  }
   if(type==='stop-audio'){
    audioController?.abort();audioController=null;
    if(listening.isActive())listening.stop();
@@ -381,6 +422,7 @@ export function mountWayglassCellGarden(root,{
   if(event.detail?.stopped!==true||disposed)return;
   pending=null;fusionPending=null;audioController?.abort();controller?.abort();
   listening.stop('Feather held. Listening stopped.');
+  recordingPlayer.pause?.();
   status.textContent='Feather requested. Outstanding cell proposals are invalidated.';
   render();
   // Feather is itself a user-stop event. Never let a late preview race past it.
@@ -401,6 +443,9 @@ export function mountWayglassCellGarden(root,{
  return ()=>{
   if(disposed)return;disposed=true;
   controller?.abort();audioController?.abort();listening.stop();
+  offTake();
+  recordingPlayer.pause?.();
+  if(recordingUrl)urls.revokeObjectURL(recordingUrl);
   volume.removeEventListener('input',onVolume);
   section.removeEventListener('click',onClick);
   section.removeEventListener('input',onInput);

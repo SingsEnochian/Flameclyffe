@@ -26,6 +26,10 @@
 .wg-cell-radio p{margin:.65rem 0 0}
 .wg-cell-radio button,.wg-cell-controls [data-cell-action="ask-form"]{min-height:44px}
 .wg-cell-radio input[type=range]{max-width:100%;accent-color:#a4d8b3}
+.wg-cell-radio [data-recording="true"]{border-color:#edaa9a}
+.wg-cell-recording:not([hidden]){display:flex;align-items:center;flex-wrap:wrap;gap:.6rem;margin-top:.65rem}
+.wg-cell-recording audio{max-width:100%;min-width:0}
+.wg-cell-recording a{display:inline-grid;align-items:center;min-height:44px;text-decoration:none}
 .wg-cell-form{
   display:block;width:2.1rem;height:2.1rem;margin-bottom:.35rem;
   background:radial-gradient(circle at 36% 30%,hsl(var(--cell-hue,165) 78% 86%),hsl(var(--cell-hue,165) 52% 48%) 58%,transparent 100%);

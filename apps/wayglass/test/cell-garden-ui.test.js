@@ -152,9 +152,14 @@ test('Garden UI keeps acoustic exchange opt-in and proposes a hybrid without rep
  off();
 });
 
-test('Colony Radio plays a fresh burble with live gain controls and stops it on Feather',async()=>{
+test('Colony Radio records the live mix and saves the take when Feather stops it',async()=>{
  const root=new Element('main',doc);
  let source,stream,gain,closed=0,started=0,stopped=0;
+ let recorder,trackStopped=false,mic=0;
+ const revoked=[];
+ const track={stop(){trackStopped=true;}};
+ const destination={stream:{getTracks:()=>[track]}};
+ const connections=new Set();
  const playing=Promise.withResolvers();
  const scope={
   AudioContext:class{
@@ -162,7 +167,11 @@ test('Colony Radio plays a fresh burble with live gain controls and stops it on 
    destination={};
    async resume(){this.state='running';}
    async close(){closed++;this.state='closed';}
-   createGain(){gain={context:this,gain:{value:0},connect(){}};return gain;}
+   createGain(){
+    gain={context:this,gain:{value:0},connect(node){connections.add(node);},disconnect(node){connections.delete(node);}};
+    return gain;
+   }
+   createMediaStreamDestination(){return destination;}
    createBuffer(){return {copyToChannel(){}};}
    createBufferSource(){
     source={
@@ -181,6 +190,30 @@ test('Colony Radio plays a fresh burble with live gain controls and stops it on 
    }
    close(){this.closed=true;}
   },
+  MediaRecorder:class extends EventTarget{
+   static isTypeSupported(type){return type==='audio/webm;codecs=opus';}
+   state='inactive';
+   constructor(input,{mimeType}){
+    super();
+    assert.equal(input,destination.stream);
+    this.mimeType=mimeType;
+    recorder=this;
+   }
+   start(){this.state='recording';}
+   stop(){
+    assert.equal(closed,0,'keep the audio graph open for the final chunk');
+    this.state='inactive';
+    queueMicrotask(()=>{
+     this.dispatchEvent(new MessageEvent('dataavailable',{data:new Blob(['burble'],{type:this.mimeType})}));
+     this.dispatchEvent(new Event('stop'));
+    });
+   }
+  },
+  navigator:{mediaDevices:{getUserMedia(){mic++;}}},
+  URL:{
+   createObjectURL(blob){assert.equal(blob.size,6);return 'blob:colony-take';},
+   revokeObjectURL(url){revoked.push(url);},
+  },
  };
  const culture={status:'ready',cells:[founder],history:[],revision:0};
  const dispose=mountWayglassCellGarden(root,{
@@ -189,13 +222,19 @@ test('Colony Radio plays a fresh burble with live gain controls and stops it on 
  await next();
  const section=root.children[0];
  const radio=section.children[0].children.find(child=>child.attributes['aria-label']==='Colony Radio');
- const [listen,mute,volumeLabel]=radio.children[1].children;
+ const [listen,mute,volumeLabel,record]=radio.children[1].children;
  const slider=volumeLabel.children[0];
  assert.equal(stream,undefined);
  assert.equal(listen.disabled,false);
+ assert.equal(record.disabled,true);
  assert.equal(listen.textContent,'Listen to colony');
  click(section,'listen');await next();
  stream.dispatchEvent(new MessageEvent('ready'));
+ assert.equal(record.disabled,false);
+ click(section,'record');
+ assert.equal(record.textContent,'Stop recording');
+ assert.ok(connections.has(destination));
+ assert.equal(recorder.state,'recording');
  assert.equal(started,0);
  const frame={schema:'wyrdrune.acoustic-frame/v0.1',marker:369,resolution:'open'};
  const receipt={
@@ -222,7 +261,15 @@ test('Colony Radio plays a fresh burble with live gain controls and stops it on 
  assert.equal(stopped,1);
  assert.equal(started,1);
  assert.equal(closed,1);
+ assert.equal(trackStopped,true);
+ assert.equal(connections.has(destination),false);
+ assert.equal(mic,0);
+ const [preview,download]=radio.children[4].children;
+ assert.equal(preview.hidden,true,'Feather holds recording preview');
+ assert.equal(download.href,'blob:colony-take');
+ assert.match(download.download,/^colony-radio-.*\.webm$/);
  assert.equal(stream.closed,true);
  assert.equal(listen.disabled,true);
  dispose();
+ assert.deepEqual(revoked,['blob:colony-take']);
 });
