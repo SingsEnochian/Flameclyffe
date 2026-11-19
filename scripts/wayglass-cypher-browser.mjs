@@ -183,9 +183,14 @@ async function checkCodex(page,profile){
  }));
  assert.match(material.background,/labradorite|data:image|url\(/);
  assert.equal(material.busy,'true');
+ // The first full-rune frame lands no earlier than ~14 × 95ms after a line
+ // starts, and lines are staggered. A starved CI runner delayed every timer
+ // past 7.5s once (run 44319875713) while the same check passed elsewhere, so
+ // allow the animation real time. The assertion itself is unchanged: glyphs
+ // must visibly appear before English.
  await page.waitForFunction(()=>document.querySelector(
   '[data-codex-english] [data-cypher-visual-phase="full-runes"]'
- ),null,{timeout:7500});
+ ),null,{timeout:20000});
  const runeSample=await page.locator('[data-codex-english] [data-cypher-visual-phase="full-runes"]').first().innerText();
  assert.match(runeSample,/[ᚠ-ᛟ⋈◇⊕⟁⌘]/u,'Ritual passage must visibly become glyphs, not merely ordinary text with a glow');
  await page.screenshot({path:resolve(output,profile+'-cypher-runes.png'),fullPage:true});
