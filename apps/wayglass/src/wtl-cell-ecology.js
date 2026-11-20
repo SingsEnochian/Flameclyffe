@@ -426,7 +426,8 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
     for(const body of recipients)(body.inbox??=[]).push(inscription);
     inscriptions.push(inscription);
     if(inscriptions.length>8)inscriptions.shift();
-    return structuredClone({delivered:true,recipients:recipients.length,inscription});
+    const recipient_cells=recipients.map(body=>({address:body.address,name:body.name??null}));
+    return structuredClone({delivered:true,recipients:recipients.length,recipient_cells,inscription});
   }
 
   // ── Shared worlds ─────────────────────────────────────────────────────
@@ -527,12 +528,18 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
     if(!Array.isArray(bands)||bands.length<1||bands.length>32||!bands.every(v=>Number.isFinite(v)&&v>=0&&v<=1))
       throw Error('Invalid sound bands');
     let heard=0;
+    const listeners=[];
     for(const id of tissue.livingIds()){
       const body=bodies.get(id);if(!body)continue;
       const amount=soundAmount(id,bands);
-      if(amount>0){body.heard_since_turn+=amount;body.senses.heard+=amount;heard+=amount;}
+      if(amount>0){
+        body.heard_since_turn+=amount;
+        body.senses.heard+=amount;
+        heard+=amount;
+        listeners.push({address:id,name:body.name??null});
+      }
     }
-    return {heard,paused:false};
+    return {heard,listeners,paused:false};
   }
   function transform(id,nextRole,options={}) {
     const result=tissue.transform(id,nextRole,options);
