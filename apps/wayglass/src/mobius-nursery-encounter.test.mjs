@@ -20,3 +20,13 @@ test('identity collision and unprovenanced signals rejected',()=>{
  assert.throws(()=>encounter({left,right:left,signal,consent}),/Distinct/);
  assert.throws(()=>encounter({left,right,signal:{...signal,source:''},consent}),/Attributed/);
 });
+
+test('signal modalities alter shared projection but never carried identity',()=>{
+ const a=encounter({left,right,signal:{...signal,kind:'touch'},consent});
+ const b=encounter({left,right,signal:{...signal,kind:'sound'},consent});
+ assert.equal(a.proposed_field.kind,'touch');
+ assert.ok(b.proposed_field.resonance>a.proposed_field.resonance);
+ assert.equal(a.proposed_field.phase,b.proposed_field.phase);
+ assert.equal(left.revision,2);assert.equal(right.revision,7);
+ assert.equal(a.canon_adopted,false);assert.equal(b.persisted,false);
+});
