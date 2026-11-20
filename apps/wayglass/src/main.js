@@ -8,6 +8,8 @@ import './faeberpunk-rooms.css';
 import './faeberpunk-immersive.css';
 import './watercolor-live-field.css';
 import './wyrdrune-cypher-material.css';
+import './wtl-nursery-view.css';
+import {mountMobiusNursery} from './wtl-nursery-view.js';
 import { openWayglassAuthorization } from './authorization.js';
 import { installWayglassField } from './glass-field.js';
 import { installMotionChoreography } from './motion-choreography.js';
@@ -162,6 +164,9 @@ registerWayglassSurface({
   label: 'Wayglass · Toybox',
   mount: mountWayglassToybox,
 });
+
+// The babies' room: a tab-local Wyrdrune colony. No host, sign-in or model.
+registerWayglassSurface({surface_id:'wayglass:mobius-nursery',label:'Wayglass · Möbius Nursery',mount:root=>mountMobiusNursery(root)});
 
 const browserEmbodiment = Object.freeze({
   body_id: 'browser-host',

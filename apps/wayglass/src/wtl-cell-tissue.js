@@ -6,7 +6,11 @@ export function createCellTissue({maxCells=8,energyCap=100}={}) {
   const cells=new Map(),events=[]; let clock=0,paused=false,offspring=0;
   const clone=v=>JSON.parse(JSON.stringify(v));
   const idOK=id=>typeof id==='string'&&/^[a-zA-Z0-9][a-zA-Z0-9:_-]{0,63}$/.test(id);
-  const receipt=(type,detail)=>{const entry={tick:clock,type,...clone(detail)};events.push(entry);return clone(entry);};
+  // A long life keeps a long log: the newest receipts stay inspectable and a
+  // running tally by type is never lost, so snapshots stay light.
+  const MAX_EVENTS=4000,totals=Object.create(null);
+  const receipt=(type,detail)=>{const entry={tick:clock,type,...clone(detail)};events.push(entry);
+    totals[type]=(totals[type]||0)+1;if(events.length>MAX_EVENTS)events.splice(0,events.length-MAX_EVENTS);return clone(entry);};
   function spawn({id,role,parent_id=null,energy=energyCap,twist=0}={}) {
     if(paused) throw Error('Feather: tissue paused');
     if(!idOK(id)||!idOK(role)||cells.has(id)) throw Error('Invalid or duplicate cell identity');
@@ -27,7 +31,7 @@ export function createCellTissue({maxCells=8,energyCap=100}={}) {
     target.signals.push({from,type,payload:JSON.parse(serialized)});
     return receipt('signal',{from,to,signal_type:type});
   }
-  function tick() {
+  function tick({quiet=false}={}) {
     if(paused) return receipt('paused',{});
     clock++;
     for(const cell of cells.values()){
@@ -36,7 +40,7 @@ export function createCellTissue({maxCells=8,energyCap=100}={}) {
       if(msg){cell.energy-=2;cell.state='active';receipt('perceive',{id:cell.id,from:msg.from,signal_type:msg.type});}
       else {cell.state='resting';cell.energy=Math.min(energyCap,cell.energy+1);}
     }
-    return snapshot();
+    return quiet?null:snapshot();
   }
   function divide(parent_id,child_id) {
     if(paused) throw Error('Feather: tissue paused');
@@ -74,24 +78,50 @@ export function createCellTissue({maxCells=8,energyCap=100}={}) {
   }
   function feather(){paused=true;for(const c of cells.values())c.signals=[];return receipt('feather',{});}
   function resume(){paused=false;return receipt('resume',{});}
-  function populate({steps=1,threshold=60}={}) {
+  function populate({steps=1,threshold=60,quiet=false}={}) {
     if(!Number.isSafeInteger(steps)||steps<1||steps>1000) throw Error('Invalid step count');
     if(!Number.isSafeInteger(threshold)||threshold<20||threshold>energyCap) throw Error('Invalid threshold');
     const births=[];
     for(let i=0;i<steps;i++){
       if(paused) break;
-      tick();
+      tick({quiet:true});
       const parents=[...cells.values()];
       for(const parent of parents){
         if(cells.size>=maxCells) break;
         if(parent.energy<threshold) continue;
-        const child_id=`${parent.id}:m${++offspring}`;
+        // A short permanent address. Ancestry lives in parent_id, never in the
+        // address, so lineages can go on for as long as the tissue lives.
+        let child_id;do{child_id=`c${++offspring}`;}while(cells.has(child_id));
         if(child_id.length>64) {receipt('division-skipped',{id:parent.id,reason:'id-length'});continue;}
         births.push(divide(parent.id,child_id));
       }
     }
-    return clone({births,snapshot:snapshot()});
+    return quiet?{births}:clone({births,snapshot:snapshot()});
   }
-  function snapshot(){return clone({schema:'wayglass.wtl-cell-tissue/v0.1',clock,paused,cells:[...cells.values()],events});}
-  return Object.freeze({spawn,signal,tick,divide,transform,retire,populate,feather,resume,snapshot});
+  function snapshot(){return clone({schema:'wayglass.wtl-cell-tissue/v0.1',clock,paused,cells:[...cells.values()],events,event_totals:{...totals}});}
+  // Cheap reads for per-cell loops; snapshot() deep-copies the whole event log.
+  const isPaused=()=>paused;
+  const livingIds=()=>[...cells.keys()];
+  const cellsView=()=>clone([...cells.values()]);
+  const twistOf=id=>cells.get(id)?.twist;
+  // Everything the tissue is, as plain data, and back again. Used to keep a
+  // colony across a closed tab; validated on the way in, never trusted.
+  function exportState(){return clone({clock,paused,offspring,cells:[...cells.values()],events,totals:{...totals}});}
+  function importState(state){
+    if(!state||!Number.isSafeInteger(state.clock)||typeof state.paused!=='boolean'||!Number.isSafeInteger(state.offspring)
+      ||!Array.isArray(state.cells)||!Array.isArray(state.events)||!state.totals||typeof state.totals!=='object')throw Error('Invalid tissue state');
+    if(state.cells.length>maxCells)throw Error('Saved tissue exceeds capacity');
+    const next=new Map();
+    for(const cell of state.cells){
+      if(!cell||!idOK(cell.id)||!idOK(cell.role)||next.has(cell.id)||!Number.isSafeInteger(cell.energy)||cell.energy<0||cell.energy>energyCap
+        ||!Number.isFinite(cell.twist)||cell.twist<0||cell.twist>=1||(cell.parent_id!==null&&!idOK(cell.parent_id))||!Array.isArray(cell.signals))throw Error('Invalid saved cell');
+      next.set(cell.id,clone(cell));
+    }
+    cells.clear();for(const [id,cell] of next)cells.set(id,cell);
+    events.splice(0,events.length,...clone(state.events).slice(-MAX_EVENTS));
+    for(const key of Object.keys(totals))delete totals[key];
+    for(const [key,value] of Object.entries(state.totals))if(Number.isSafeInteger(value))totals[key]=value;
+    clock=state.clock;paused=state.paused;offspring=state.offspring;
+  }
+  return Object.freeze({spawn,signal,tick,divide,transform,retire,populate,feather,resume,snapshot,isPaused,livingIds,twistOf,cellsView,exportState,importState});
 }

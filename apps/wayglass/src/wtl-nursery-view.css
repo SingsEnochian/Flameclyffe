@@ -1,0 +1,23 @@
+/* Möbius Nursery room. Scoped so the ship's own styles are untouched. */
+
+.wg-mobius-nursery{background:#08121b;color:#d7f5e9;font:15px system-ui;margin:0;padding:16px}
+.wg-mobius-nursery{max-width:960px;margin:auto}
+.wg-mobius-nursery canvas{width:100%;border:1px solid #477969;border-radius:14px;background:#0b1d28}
+.wg-mobius-nursery button,.wg-mobius-nursery .file{background:#1a3b38;color:#d7f5e9;border:1px solid #6ebda4;border-radius:8px;padding:10px;margin:4px;display:inline-block;min-height:44px;box-sizing:border-box;cursor:pointer;font:inherit}
+.wg-mobius-nursery .file input{position:absolute;width:1px;height:1px;opacity:0}
+.wg-mobius-nursery .file:focus-within{outline:3px solid #f6d39a}
+.wg-mobius-nursery button:disabled{opacity:.5}
+.wg-mobius-nursery #listening{color:#e4c38e}
+.wg-mobius-nursery #log{height:170px;overflow:auto;background:#11252b;padding:10px;border-radius:10px;font:12px/1.6 monospace}
+.wg-mobius-nursery small{color:#a8c4bd}
+.wg-mobius-nursery{max-width:1000px;margin:auto;padding:16px;color:#d7f5e9;font:15px system-ui}
+.wg-mobius-nursery h1{font:400 clamp(1.8rem,4vw,2.8rem)/1.05 Georgia,serif;margin:.2rem 0 .4rem}
+.wg-nursery-play{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:10px 0}
+.wg-nursery-play button[aria-pressed="true"]{border-color:#e4c38e;color:#fff1d6;background:#3a2e1c}
+.wg-nursery-play label{display:inline-flex;align-items:center;gap:6px}
+.wg-nursery-play input{min-height:44px;width:6ch;border-radius:8px;border:1px solid #6ebda4;background:#071820;color:#e9f4ee;padding:0 8px;font:inherit}
+.wg-mobius-nursery canvas{touch-action:manipulation;cursor:pointer}
+
+.wg-mobius-nursery #yours{margin:.3rem 0 1rem;padding-left:1.2rem;font-size:.92rem;color:#f3eedf}
+.wg-mobius-nursery #yours li{margin:.15rem 0}
+.wg-mobius-nursery #kept{color:#a9c6bd;font-size:.85rem}

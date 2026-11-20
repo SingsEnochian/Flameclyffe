@@ -3,8 +3,10 @@ on:
   pull_request:
     paths:
       - 'apps/wayglass/nursery/**'
+      - 'apps/wayglass/src/wtl-nursery-view.*'
       - 'apps/wayglass/wtl-nursery-server.mjs'
       - 'apps/wayglass/src/wtl-cell-*.js'
+      - 'lib/wyrdrune/runtime.mjs'
       - 'apps/wayglass/test/wtl-cell-*.test.js'
       - '.github/workflows/wtl-nursery.yml'
       - '.github/workflows/pages.yml'
@@ -31,8 +33,13 @@ jobs:
           node --check apps/wayglass/src/wtl-cell-peer-tests.js
           node --check apps/wayglass/src/wtl-cell-harmony.js
           node --check apps/wayglass/src/wtl-cell-sonic-space.js
+          node --check apps/wayglass/src/wtl-cell-mobius.js
+          node --check apps/wayglass/src/wtl-cell-digest.js
+          node --check apps/wayglass/src/wtl-cell-runtime.js
+          node --check apps/wayglass/src/wtl-cell-worlds.js
+          node --check apps/wayglass/src/wtl-nursery-view.js
           test -s apps/wayglass/nursery/index.html
-          grep -Fq 'createCellEcology' apps/wayglass/nursery/index.html
+          grep -Fq 'mountMobiusNursery' apps/wayglass/nursery/index.html
           if grep -Fq 'wayglass-nursery' .github/workflows/pages.yml; then
             echo 'Owner-only nursery must not be published on public GitHub Pages' >&2
             exit 1
@@ -45,17 +52,17 @@ jobs:
           PID=$!
           trap 'kill "$PID" 2>/dev/null || true' EXIT
           for i in $(seq 1 40); do
-            if curl -fsS http://127.0.0.1:3844/snapshot -o /tmp/wtl-nursery.json; then break; fi
+            if curl -fsS http://127.0.0.1:3845/snapshot -o /tmp/wtl-nursery.json; then break; fi
             sleep 0.25
           done
           node -e "const s=require('/tmp/wtl-nursery.json');if(s.cells.length<2)process.exit(1)"
-          curl -fsSN --max-time 3 http://127.0.0.1:3844/events > /tmp/wtl-events || test "$?" -eq 28
+          curl -fsSN --max-time 3 http://127.0.0.1:3845/events > /tmp/wtl-events || test "$?" -eq 28
           grep -Fq 'event: snapshot' /tmp/wtl-events
           grep -Fq 'data: {' /tmp/wtl-events
-          curl -fsS -X POST -H 'Origin: http://127.0.0.1:3844' http://127.0.0.1:3844/feather
-          curl -fsS http://127.0.0.1:3844/snapshot -o /tmp/wtl-paused.json
+          curl -fsS -X POST -H 'Origin: http://127.0.0.1:3845' http://127.0.0.1:3845/feather
+          curl -fsS http://127.0.0.1:3845/snapshot -o /tmp/wtl-paused.json
           node -e "const s=require('/tmp/wtl-paused.json');if(!s.paused)process.exit(1)"
-          curl -fsS -X POST -H 'Origin: http://127.0.0.1:3844' http://127.0.0.1:3844/resume
+          curl -fsS -X POST -H 'Origin: http://127.0.0.1:3845' http://127.0.0.1:3845/resume
       - name: Assemble standalone nursery preview artifact
         shell: bash
         run: |
@@ -68,6 +75,13 @@ jobs:
           cp apps/wayglass/src/wtl-cell-peer-tests.js /tmp/wayglass-nursery-preview/src/
           cp apps/wayglass/src/wtl-cell-harmony.js /tmp/wayglass-nursery-preview/src/
           cp apps/wayglass/src/wtl-cell-sonic-space.js /tmp/wayglass-nursery-preview/src/
+          cp apps/wayglass/src/wtl-cell-mobius.js /tmp/wayglass-nursery-preview/src/
+          cp apps/wayglass/src/wtl-cell-digest.js /tmp/wayglass-nursery-preview/src/
+          cp apps/wayglass/src/wtl-cell-worlds.js /tmp/wayglass-nursery-preview/src/
+          cp apps/wayglass/src/wtl-nursery-view.js apps/wayglass/src/wtl-nursery-view.css /tmp/wayglass-nursery-preview/src/
+          # The preview has no repository lib/; give the runtime door a sibling copy.
+          cp lib/wyrdrune/runtime.mjs /tmp/wayglass-nursery-preview/src/wyrdrune-runtime.mjs
+          echo "export {createWyrdruneRuntime} from './wyrdrune-runtime.mjs';" > /tmp/wayglass-nursery-preview/src/wtl-cell-runtime.js
           cat > /tmp/wayglass-nursery-preview/README.txt <<'EOF'
           Wayglass WTL Möbius Nursery · private CI inspection artifact
           Contains the actual WTL ecology and tissue modules.

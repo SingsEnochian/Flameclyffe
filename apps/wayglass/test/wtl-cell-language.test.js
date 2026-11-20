@@ -8,8 +8,11 @@ test('cells compose traceable phrases and inherit recent phrase memory',()=>{
   ecology.plant('b','explorer',1,0);
   for(let i=0;i<35;i++)ecology.step();
   const state=ecology.snapshot();
-  assert.equal(state.utterances.length,192);
-  assert.equal(new Set(state.utterances.map(u=>u.phrase)).size,181);
+  // Pinned for seed 11. Daughters now get short addresses (c1, c2, …), and a
+  // daughter's twist variation reads her address length, so the trajectory
+  // moved from 192/181 when addresses stopped carrying their whole ancestry.
+  assert.equal(state.utterances.length,162);
+  assert.equal(new Set(state.utterances.map(u=>u.phrase)).size,152);
   assert.ok(state.utterances.every(u=>state.lexicons[u.id]&&u.origin==='composed'));
   assert.ok(state.cells.some(c=>c.parent_id));
 });
