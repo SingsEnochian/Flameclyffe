@@ -65,6 +65,9 @@ test('shared words compile exactly and reach each cell as text and sound',async(
   const first=await eco.shareText(text);
   const second=await eco.shareText('Hear the next line.');
   assert.equal(first.recipients,2);
+  assert.deepEqual(first.recipient_cells,[{address:'a',name:null},{address:'b',name:null}]);
+  assert.deepEqual(second.recipient_cells,first.recipient_cells);
+  assert.equal(eco.snapshot().mobiusReceipts.filter(receipt=>receipt.perceived).length,0);
   assert.equal(first.inscription.text,text);
   assert.deepEqual(first.inscription.phases,phases);
   assert.match(first.inscription.source,/perceive \{ let ᚹ = /u);
@@ -77,6 +80,9 @@ test('shared words compile exactly and reach each cell as text and sound',async(
   const read=eco.snapshot().mobiusReceipts.filter(receipt=>receipt.perceived?.id===second.inscription.id);
   assert.deepEqual(read.map(receipt=>receipt.address),['a','b']);
   assert.ok(read.every(receipt=>receipt.perceived.inscription_sound>0));
+  const named=await eco.shareText('Welcome by name.');
+  assert.deepEqual(Object.fromEntries(named.recipient_cells.map(cell=>[cell.address,cell.name])),eco.snapshot().names);
+  for(const receipt of read)assert.equal(named.recipient_cells.find(cell=>cell.address===receipt.address)?.name,receipt.name);
   eco.feather();
   assert.deepEqual(await eco.shareText('Hold this.'),{delivered:false,paused:true});
 });

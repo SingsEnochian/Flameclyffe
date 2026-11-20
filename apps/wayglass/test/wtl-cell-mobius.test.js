@@ -100,7 +100,8 @@ test('sound from the room reaches each cell through the band its twist faces',()
   ecology.plant('a');ecology.plant('b','explorer',0.5,0);
   const loud=ecology.hear(Array(8).fill(1));
   assert.equal(loud.heard,6);
-  assert.equal(ecology.hear(Array(8).fill(0)).heard,0);
+  assert.deepEqual(loud.listeners,[{address:'a',name:null},{address:'b',name:null}]);
+  assert.deepEqual(ecology.hear(Array(8).fill(0)),{heard:0,listeners:[],paused:false});
   assert.throws(()=>ecology.hear([2]),/Invalid sound bands/);
   ecology.feather();
   assert.deepEqual(ecology.hear(Array(8).fill(1)),{heard:0,paused:true});
