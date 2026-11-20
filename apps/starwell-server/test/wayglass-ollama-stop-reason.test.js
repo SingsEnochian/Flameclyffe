@@ -78,3 +78,24 @@ test('token budget clamps at both limits without changing the reported provider 
     assert.equal(result.stop_reason, 'length');
   }
 });
+
+test('aborted provider request propagates cancellation without a fabricated model reply', async () => {
+  const controller = new AbortController();
+  controller.abort();
+  let observedSignal;
+  await assert.rejects(
+    callOllama(route(), { input: 'Synthetic cancellation' }, null,
+      async (_url, options) => {
+        observedSignal = options.signal;
+        if (options.signal.aborted) {
+          const error = new Error('Synthetic provider cancelled');
+          error.name = 'AbortError';
+          throw error;
+        }
+        return { ok: true, json: async () => ({ message: { content: 'must not appear' } }) };
+      }, { localOnly: true, signal: controller.signal }),
+    { name: 'AbortError', message: 'Synthetic provider cancelled' },
+  );
+  assert.equal(observedSignal, controller.signal);
+  assert.equal(observedSignal.aborted, true);
+});
