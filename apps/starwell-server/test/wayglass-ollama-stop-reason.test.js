@@ -96,6 +96,9 @@ test('aborted provider request propagates cancellation without a fabricated mode
       }, { localOnly: true, signal: controller.signal }),
     { name: 'AbortError', message: 'Synthetic provider cancelled' },
   );
-  assert.equal(observedSignal, controller.signal);
+  // Caller cancellation is composed with the router timeout.
+  // The transport sees a derived signal, not the caller's signal object.
+  assert.notEqual(observedSignal, controller.signal);
   assert.equal(observedSignal.aborted, true);
+  assert.equal(controller.signal.aborted, true);
 });
