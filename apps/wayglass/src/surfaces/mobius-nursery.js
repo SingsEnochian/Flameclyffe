@@ -21,7 +21,7 @@ export function mountMobiusNursery(root) {
   stage.style.cssText='width:100%;height:min(55vh,440px);min-height:260px;overflow:hidden;border-radius:20px;background:#080d16';
   const scene=new THREE.Scene();
   const camera=new THREE.PerspectiveCamera(48,1,0.1,100);camera.position.z=9;
-  let renderer,frame=0,disposed=false,raf=0,active=false;
+  let renderer,disposed=false,raf=0,active=false;
   const reduced=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
   const rings=[];
   try {
@@ -39,9 +39,9 @@ export function mountMobiusNursery(root) {
     const resize=()=>{if(disposed)return;const w=stage.clientWidth,h=stage.clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false);};
     const observer=typeof ResizeObserver==='function'?new ResizeObserver(resize):null;
     observer?.observe(stage);resize();
-    const draw=()=>{if(disposed)return;if(!reduced?.matches&&active){frame++;rings.forEach((m,i)=>{m.rotation.y+=(i?-.003:.003);m.rotation.x+=.0015;});}renderer.render(scene,camera);if(!reduced?.matches&&active)raf=requestAnimationFrame(draw);};
-    const start=()=>{if(!disposed&&!raf){active=true;draw();}};
-    const stop=()=>{active=false;cancelAnimationFrame(raf);raf=0;renderer.render(scene,camera);};
+    const draw=()=>{if(disposed)return;if(!reduced?.matches&&active){rings.forEach((m,i)=>{m.rotation.y+=(i?-.003:.003);m.rotation.x+=.0015;});}renderer.render(scene,camera);if(!reduced?.matches&&active)raf=requestAnimationFrame(draw);};
+    const start=()=>{if(!disposed&&!reduced?.matches&&!raf){active=true;draw();}};
+    const stop=()=>{active=false;cancelAnimationFrame(raf);raf=0;if(!disposed)renderer.render(scene,camera);};
     const status=host.querySelector('[data-status]');
     host.querySelector('[data-encounter]').addEventListener('click',()=>{
       const consent={'nursery:a':host.querySelector('[data-consent="a"]').checked,'nursery:b':host.querySelector('[data-consent="b"]').checked};
@@ -50,9 +50,12 @@ export function mountMobiusNursery(root) {
       if(result.status==='proposal')start();else stop();
     });
     host.querySelector('[data-feather]').addEventListener('click',()=>{stop();status.textContent='Feather. Encounter stopped. Nothing persisted.';});
-    host._disposeNursery=()=>{disposed=true;stop();observer?.disconnect();rings.forEach(m=>{m.geometry.dispose();m.material.dispose();});renderer.dispose();host.remove();};
-    if(reduced?.matches)renderer.render(scene,camera);
-    else start();
+    for(const input of host.querySelectorAll('[data-consent]'))input.addEventListener('change',()=>{
+      if(!input.checked){stop();status.textContent='Consent withdrawn. Encounter stopped; nothing persisted.';}
+    });
+    host._disposeNursery=()=>{stop();disposed=true;observer?.disconnect();rings.forEach(m=>{m.geometry.dispose();m.material.dispose();});renderer.dispose();host.remove();};
+    // Initial render is static until a mutually consented encounter is proposed.
+    renderer.render(scene,camera);
   }catch(error){
     statusFallback(host,error);
   }
