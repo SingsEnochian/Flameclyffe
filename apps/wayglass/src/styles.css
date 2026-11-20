@@ -710,3 +710,29 @@ button { font: inherit; cursor: pointer; }
   .tv-fields.three-col { grid-template-columns: 1fr; }
   .wg-shell-nav { border-radius: 22px; }
 }
+
+
+/* Motion Anything-inspired semantic motion: quiet at rest, responsive to intent. */
+.wg-motion-toggle { margin-left: auto; }
+:root[data-wg-motion="on"] .glass-chip:not(.wg-motion-toggle),
+:root[data-wg-motion="on"] .send-jewel {
+  translate: var(--wg-magnet-x, 0px) var(--wg-magnet-y, 0px);
+  transition: translate 180ms cubic-bezier(.2,.8,.2,1), border-color 180ms ease, box-shadow 220ms ease;
+}
+:root[data-wg-motion="on"] .glass-chip:focus-visible,
+:root[data-wg-motion="on"] .send-jewel:focus-visible {
+  box-shadow: 0 0 0 2px rgba(110,238,226,.5), 0 0 22px rgba(83,213,211,.18);
+}
+:root[data-wg-motion="on"] .turn-card {
+  animation: wg-arrive 330ms cubic-bezier(.18,.8,.24,1) both;
+}
+@keyframes wg-arrive {
+  from { opacity: .25; translate: 0 8px; }
+  to { opacity: 1; translate: 0 0; }
+}
+:root[data-wg-motion="off"] .glass-chip,
+:root[data-wg-motion="off"] .send-jewel,
+:root[data-wg-motion="off"] .turn-card { animation: none !important; translate: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  .glass-chip, .send-jewel, .turn-card { animation: none !important; translate: none !important; }
+}
