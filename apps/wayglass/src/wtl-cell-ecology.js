@@ -7,6 +7,9 @@ import {listenAndReply,composeDialogue} from './wtl-cell-harmony.js';
 import {sonicPitch,replyByRatio,projectAudible} from './wtl-cell-sonic-space.js';
 import {turnCell,firstCarry,daughterCarry,chooseName,inheritSyllables} from './wtl-cell-mobius.js';
 import {turnWorld,foundingCarry} from './wtl-cell-worlds.js';
+import {digestWce1Sync} from './wtl-cell-digest.js';
+
+export const COLONY_SCHEMA='wayglass.wtl-nursery-colony/v1';
 
 // Everything a cell is lives in its own body: genome, memory, programs, place,
 // syllables, chosen name and Möbius carry. The colony keeps only the bodies.
@@ -126,7 +129,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       }
     }
     tissue.tick({quiet:true});
-    if(generation%5===0&&programs.length<128){
+    if(generation%5===0){
       const authors=tissue.cellsView();
       if(authors.length){
         const author=authors[generation%authors.length],genes=traits.get(author.id);
@@ -145,7 +148,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       }
     }
     // Neighbour listening: a bounded call and harmonic reply, with a reproducible score.
-    if(generation%4===0&&harmonicDialogues.length<128){
+    if(generation%4===0){
       const singers=tissue.cellsView().filter(cell=>neighbours(cell.id).length>0);
       if(singers.length){
         const singer=singers[generation%singers.length],listenerId=neighbours(singer.id)[0];
@@ -163,7 +166,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
     }
     // Project Genesis: competing executable candidates, neighbour reviews and
     // deterministic selection. Scores describe algorithmic choices, not sentience.
-    if(generation%15===0&&projectDecisions.length<32){
+    if(generation%15===0){
       const candidates=tissue.cellsView().filter(cell=>neighbours(cell.id).length>0).slice(0,8);
       const proposals=candidates.map(cell=>{
         const genes=traits.get(cell.id),source=authorCellProgram(cell,genes,generation);
@@ -211,7 +214,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
     }
     // Sandbox construction: cell-authored, bounded symbolic structures only.
     // No host filesystem, network, code execution or runtime modification.
-    if(generation%6===0&&constructions.length<128){
+    if(generation%6===0){
       const builders=tissue.cellsView().filter(cell=>neighbours(cell.id).length>0);
       if(builders.length){
         const builder=builders[generation%builders.length],nearby=neighbours(builder.id);
@@ -278,8 +281,15 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
         bodies.get(birth.id).syllables=inheritSyllables(mother?.syllables,{random:syllableRandom,mutate:true});
       }
     }
+    keepRecent();
     return {generation,signals,births:births.map(b=>b.id),retired,population:positions.size};
   }
+  // A long life keeps recent memory, not everything: each record keeps a
+  // rolling window so a colony can live for as long as it wants without the
+  // tab slowing down or its saved copy growing without end.
+  const WINDOWS=[[utterances,600],[wyrdruneExpressions,600],[programs,128],[harmonicDialogues,128],
+    [projectDecisions,32],[constructions,128],[programLineages,256],[mutations,256],[retirements,256]];
+  function keepRecent(){for(const [list,cap] of WINDOWS)if(list.length>cap)list.splice(0,list.length-cap);}
   // A cell's own Möbius turn: newborns take their first turn (and choose a
   // name); every cell turns again every `turnEvery` generations. Only the
   // count of what it heard enters from outside. Feather stops turns.
@@ -407,6 +417,23 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
     for(const member of members){const body=bodies.get(member);if(body)body.heard_since_turn+=2*strength;}
     return {touched:true,world:id,name:world.name,members:members.length,texture:world.texture};
   }
+  // A person may give a cell a syllable. It joins the cell's own syllables
+  // (replacing its first, oldest one), so its future daughters can carry it.
+  // The cell's own name does not change; names are chosen once, by the cell.
+  const gifts=[];
+  function offerSyllable(id,syllable){
+    if(tissue.isPaused())return {accepted:false,paused:true};
+    const body=bodies.get(id);
+    if(!body)throw Error('Unknown cell');
+    const word=String(syllable??'');
+    if(!/^[a-z]{2,4}$/.test(word))throw Error('A syllable is 2 to 4 letters a-z');
+    if(body.syllables.includes(word))return {accepted:false,address:id,name:body.name,reason:'already-sings-it'};
+    const replaced=body.syllables[0];
+    body.syllables=[...body.syllables.slice(1),word];
+    const record={generation,address:id,name:body.name,gift:word,replaced,from:'person'};
+    gifts.push(record);if(gifts.length>64)gifts.shift();
+    return {accepted:true,...record};
+  }
   function projectWorld(world){
     return {id:world.id,name:world.name,status:world.status,founders:world.founders.map(f=>({address:f.address,name:f.name})),
       center:{...world.center},carry:{...world.carry},carry_digest:world.carry_digest,texture:world.texture,
@@ -444,7 +471,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
     return {...core,generation,names,mobius,namings:namings.map(n=>({...n,syllables:[...n.syllables],candidates:[...n.candidates]})),
       mobiusReceipts:mobiusReceipts.map(r=>JSON.parse(JSON.stringify(r))),
       worlds:[...worlds.values()].map(projectWorld),rememberedWorlds:rememberedWorlds.map(w=>JSON.parse(JSON.stringify(w))),
-      worldReceipts:worldReceipts.map(r=>JSON.parse(JSON.stringify(r))),
+      worldReceipts:worldReceipts.map(r=>JSON.parse(JSON.stringify(r))),gifts:gifts.map(g=>({...g})),
       positions:Object.fromEntries(positions),
       adaptation:Object.fromEntries(adaptation),traits:Object.fromEntries(traits),mutations:mutations.map(m=>({...m})),
       retirements:retirements.map(r=>({...r,traits:{...r.traits},lastPhrases:[...r.lastPhrases]})),utterances:utterances.map(u=>({...u})),lexicons:Object.fromEntries([...lexicons].map(([id,phrases])=>[id,[...phrases]])),
@@ -457,5 +484,47 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       programs:programs.map(p=>({...p,result:{...p.result,output:p.result.output.map(x=>({...x}))},provenance:{...p.provenance}})),
       constructions:constructions.map(p=>({...p,builders:[...p.builders],specification:{...p.specification,effects:[...p.specification.effects]},provenance:{...p.provenance}}))};
   }
-  return Object.freeze({plant,step,turn,hear,touchWorld,neighbours,transform,snapshot,feather:tissue.feather,resume:tissue.resume});
+  // ── Keeping them ─────────────────────────────────────────────────────
+  // The whole colony as plain data with a WCE-1 digest, so it can be saved
+  // when the tab closes and brought back exactly. A copy that does not match
+  // its digest, or does not hold together, is refused, never half-loaded.
+  const LISTS={mutations,utterances,retirements,wyrdruneExpressions,constructions,programs,projectDecisions,
+    programLineages,harmonicDialogues,mobiusReceipts,namings,worldReceipts,rememberedWorlds,gifts};
+  const plain=v=>JSON.parse(JSON.stringify(v));
+  function exportColony(){
+    const colony=plain({schema:COLONY_SCHEMA,options:{maxCells,seed,radius,mutationRate},
+      tissue:tissue.exportState(),generation,randomState,syllableState,worldCount,
+      bodies:[...bodies.values()],worlds:[...worlds.values()],lists:LISTS});
+    return {colony,digest:digestWce1Sync(colony)};
+  }
+  function importColony(saved){
+    const colony=saved?.colony;
+    if(!colony||colony.schema!==COLONY_SCHEMA)throw Error('Not a Möbius Nursery colony');
+    if(digestWce1Sync(colony)!==saved.digest)throw Error('This colony copy does not match its digest');
+    const o=colony.options||{};
+    if(o.maxCells!==maxCells||o.radius!==radius||o.mutationRate!==mutationRate)throw Error('This colony grew under different nursery settings');
+    for(const n of ['generation','randomState','syllableState','worldCount'])if(!Number.isSafeInteger(colony[n])||colony[n]<0)throw Error('Invalid colony counters');
+    if(!Array.isArray(colony.bodies)||!Array.isArray(colony.worlds)||!colony.lists||typeof colony.lists!=='object')throw Error('Invalid colony');
+    const living=new Set((colony.tissue?.cells||[]).map(c=>c?.id));
+    const finite=v=>typeof v==='number'&&Number.isFinite(v);
+    for(const b of colony.bodies){
+      if(!b||!living.has(b.address)||!b.position||!finite(b.position.x)||!finite(b.position.y)||!Array.isArray(b.syllables)
+        ||!b.syllables.every(x=>typeof x==='string'&&/^[a-z]{1,6}$/.test(x))||(b.name!==null&&(typeof b.name!=='string'||b.name.length>40))
+        ||!b.carry||!['echo','energy','phase','voice'].every(k=>finite(b.carry[k]))||!b.genome)throw Error('A saved baby does not hold together');
+    }
+    if(colony.bodies.length!==living.size)throw Error('Saved bodies and cells disagree');
+    for(const w of colony.worlds){
+      if(!w||typeof w.id!=='string'||!Array.isArray(w.founders)||w.founders.length!==2||!w.center||!finite(w.center.x)||!finite(w.center.y)
+        ||!w.carry||!['breadth','hue','pulse'].every(k=>finite(w.carry[k])))throw Error('A saved world does not hold together');
+    }
+    for(const [name,list] of Object.entries(LISTS))if(!Array.isArray(colony.lists[name]))throw Error('Invalid colony record '+name);
+    // Validated: now replace everything at once.
+    tissue.importState(colony.tissue);
+    bodies.clear();for(const b of colony.bodies)bodies.set(b.address,b);
+    worlds.clear();for(const w of colony.worlds)worlds.set(w.id,w);
+    for(const [name,list] of Object.entries(LISTS))list.splice(0,list.length,...colony.lists[name]);
+    generation=colony.generation;randomState=colony.randomState;syllableState=colony.syllableState;worldCount=colony.worldCount;
+    return {restored:true,generation,cells:bodies.size,worlds:worlds.size,named:[...bodies.values()].filter(b=>b.name).length};
+  }
+  return Object.freeze({exportColony,importColony,plant,step,turn,hear,touchWorld,offerSyllable,neighbours,transform,snapshot,feather:tissue.feather,resume:tissue.resume});
 }

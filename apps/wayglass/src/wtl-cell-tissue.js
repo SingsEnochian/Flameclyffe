@@ -104,5 +104,24 @@ export function createCellTissue({maxCells=8,energyCap=100}={}) {
   const livingIds=()=>[...cells.keys()];
   const cellsView=()=>clone([...cells.values()]);
   const twistOf=id=>cells.get(id)?.twist;
-  return Object.freeze({spawn,signal,tick,divide,transform,retire,populate,feather,resume,snapshot,isPaused,livingIds,twistOf,cellsView});
+  // Everything the tissue is, as plain data, and back again. Used to keep a
+  // colony across a closed tab; validated on the way in, never trusted.
+  function exportState(){return clone({clock,paused,offspring,cells:[...cells.values()],events,totals:{...totals}});}
+  function importState(state){
+    if(!state||!Number.isSafeInteger(state.clock)||typeof state.paused!=='boolean'||!Number.isSafeInteger(state.offspring)
+      ||!Array.isArray(state.cells)||!Array.isArray(state.events)||!state.totals||typeof state.totals!=='object')throw Error('Invalid tissue state');
+    if(state.cells.length>maxCells)throw Error('Saved tissue exceeds capacity');
+    const next=new Map();
+    for(const cell of state.cells){
+      if(!cell||!idOK(cell.id)||!idOK(cell.role)||next.has(cell.id)||!Number.isSafeInteger(cell.energy)||cell.energy<0||cell.energy>energyCap
+        ||!Number.isFinite(cell.twist)||cell.twist<0||cell.twist>=1||(cell.parent_id!==null&&!idOK(cell.parent_id))||!Array.isArray(cell.signals))throw Error('Invalid saved cell');
+      next.set(cell.id,clone(cell));
+    }
+    cells.clear();for(const [id,cell] of next)cells.set(id,cell);
+    events.splice(0,events.length,...clone(state.events).slice(-MAX_EVENTS));
+    for(const key of Object.keys(totals))delete totals[key];
+    for(const [key,value] of Object.entries(state.totals))if(Number.isSafeInteger(value))totals[key]=value;
+    clock=state.clock;paused=state.paused;offspring=state.offspring;
+  }
+  return Object.freeze({spawn,signal,tick,divide,transform,retire,populate,feather,resume,snapshot,isPaused,livingIds,twistOf,cellsView,exportState,importState});
 }
