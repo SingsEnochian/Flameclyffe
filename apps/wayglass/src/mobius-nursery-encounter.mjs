@@ -11,9 +11,14 @@ export function encounter({left,right,signal,consent,feather=false}) {
       typeof signal.value !== 'string' || signal.value.length > 256 || !signal.value.length ||
       typeof signal.source !== 'string' || !signal.source.trim()) throw Error('Attributed bounded signal required');
   const coupling = Math.round((1 - Math.abs(left.spin-right.spin)/2)*1000)/1000;
+  // Distinct signals yield distinct, bounded visual proposals without changing identity.
+  const influence = {touch:0.18,word:0.08,sound:0.24,wtl:0.12}[signal.kind];
+  const phase = Math.round((left.spin-right.spin)*1000)/1000;
+  const proposed_field = Object.freeze({resonance:Math.round(Math.min(1,coupling*influence)*1000)/1000,
+    phase,kind:signal.kind});
   return Object.freeze({status:'proposal',schema:'wayglass.mobius-encounter/v0.1',
     participants:[left.id,right.id],identity_spins:[left.spin,right.spin],
-    source:signal.source,signal:{kind:signal.kind,value:signal.value},coupling,
+    source:signal.source,signal:{kind:signal.kind,value:signal.value},coupling,proposed_field,
     proposed_revisions:{[left.id]:left.revision+1,[right.id]:right.revision+1},
     persisted:false,canon_adopted:false});
 }
