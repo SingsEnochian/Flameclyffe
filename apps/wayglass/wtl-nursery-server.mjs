@@ -7,7 +7,7 @@ const host='127.0.0.1',port=Number(process.env.WTL_NURSERY_PORT||3844);
 if(!Number.isSafeInteger(port)||port<1024||port>65535)throw Error('Invalid nursery port');
 const files=new Map([
   ['/',new URL('./wtl-cell-observer.html',import.meta.url)],
-  ...['sharing','sharing-ui','runtime','digest'].map(name=>{
+  ...['sharing','sharing-ui','runtime','digest','worktable-ui'].map(name=>{
     const path=`src/wtl-cell-${name}.js`;
     return ['/'+path,new URL('./'+path,import.meta.url)];
   }),
@@ -35,11 +35,12 @@ const server=http.createServer(async(req,res)=>{
   if(req.method==='GET'&&pathname==='/snapshot'){
     res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify(ecology.snapshot()));return;
   }
-  if(req.method==='POST'&&pathname==='/share-text'){
+  if(req.method==='POST'&&['/share-text','/play-program'].includes(pathname)){
     const colony=ecology;
+    const play=pathname==='/play-program';
     res.setHeader('Content-Type','application/json; charset=utf-8');
     if(req.headers['content-type']!=='application/json'){
-      res.writeHead(415);res.end(JSON.stringify({error:'Send JSON with a text field.'}));return;
+      res.writeHead(415);res.end(JSON.stringify({error:play?'Send a program turn as JSON.':'Send JSON with a text field.'}));return;
     }
     try{
       const body=[];
@@ -52,12 +53,14 @@ const server=http.createServer(async(req,res)=>{
         }
         body.push(chunk);
       }
-      const {text}=JSON.parse(Buffer.concat(body).toString('utf8'));
-      const result=await colony.shareText(text);
-      if(result.delivered)broadcast();
+      const input=JSON.parse(Buffer.concat(body).toString('utf8'));
+      const result=play?await colony.playProgram(input):await colony.shareText(input.text);
+      if(result.delivered||result.status==='committed')broadcast();
+      if(play)res.statusCode=({invalid:400,missing:404,changed:409,'feather-stopped':409})[result.status]??200;
       res.end(JSON.stringify(result));
     }catch(error){
-      res.writeHead(400);res.end(JSON.stringify({error:error instanceof TypeError?error.message:'Could not share this inscription.'}));
+      res.writeHead(400);res.end(JSON.stringify({error:error instanceof TypeError?error.message
+        :play?'Could not play the program.':'Could not share this inscription.'}));
     }
     return;
   }

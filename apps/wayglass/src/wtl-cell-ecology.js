@@ -9,6 +9,7 @@ import {turnCell,firstCarry,daughterCarry,chooseName,inheritSyllables} from './w
 import {turnWorld,foundingCarry} from './wtl-cell-worlds.js';
 import {chooseFusion} from './wtl-cell-fusion.js';
 import {inscribeSharedText} from './wtl-cell-sharing.js';
+import {createCellWorktables} from './wtl-cell-worktable.js';
 
 // Everything a cell is lives in its own body: genome, memory, programs, place,
 // syllables, chosen name and Möbius carry. The colony keeps only the bodies.
@@ -36,6 +37,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
   let worldCount=0,hybridCount=0,inscriptionCount=0,featherEpoch=0,turning=false;
   const fusionEnabled=autonomousFusion===true&&maxCells>=3;
   const encounters=new Map(),fusions=[],inscriptions=[];
+  const worktables=createCellWorktables();
   const positions=fieldView(bodies,'position'),adaptation=fieldView(bodies,'senses'),traits=fieldView(bodies,'genome'),
     lexicons=fieldView(bodies,'phrases'),birthTicks=fieldView(bodies,'born'),programLibrary=fieldView(bodies,'programs');
   const mutations=[],utterances=[],retirements=[],wyrdruneExpressions=[],constructions=[],programs=[],projectDecisions=[],programLineages=[],harmonicDialogues=[];
@@ -212,6 +214,8 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
             neighbours_kept:revision.neighbours_kept??true,declined_for_neighbours:revision.declined_for_neighbours??0},
           provenance:{origin:'bounded-cell-ecology',canonical_wtl_compiler:false,host_effects:false,autonomous_agent:false}};
         projectDecisions.push(decision);
+        worktables.publish({id:decision.id,author:{id:winner.author,name:bodies.get(winner.author).name},
+          score:revision.source,reviewers:reviewerIds});
         const winnerLibrary=programLibrary.get(winner.author);
         winnerLibrary.push({id:decision.id+'-revision',source:revision.source,generation});
         if(winnerLibrary.length>8)winnerLibrary.shift();
@@ -430,6 +434,22 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
     return structuredClone({delivered:true,recipients:recipients.length,recipient_cells,inscription});
   }
 
+  async function playProgram({id,note,visitorId,expectedSession,expectedRevision}={}){
+    const epoch=featherEpoch;
+    const signal={get aborted(){return epoch!==featherEpoch||tissue.isPaused();}};
+    const peers=()=>[...bodies.values()].filter(body=>body.last_status==='committed').map(body=>({
+      id:body.address,name:body.name,voice:Math.min(1,Math.abs(body.carry.voice)),willingness:body.carry.energy,
+    }));
+    const result=await worktables.play({id,note,visitorId,expectedSession,expectedRevision,generation,peers,signal});
+    const answer=result.turn?.actions.find(action=>action.actor.kind==='cell'&&action.joined);
+    const neighbour=bodies.get(answer?.actor.id);
+    if(neighbour){
+      neighbour.heard_since_turn++;
+      neighbour.senses.heard++;
+    }
+    return result;
+  }
+
   // ── Shared worlds ─────────────────────────────────────────────────────
   const MAX_WORLDS=6,HARMONY=0.05;
   // Each cell lives in at most one world: the nearest whose sky reaches it.
@@ -555,6 +575,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       heard_since_turn:b.heard_since_turn,last_inscription:b.last_inscription??null,
       ...(b.parents?{parent_ids:[...b.parents]}:{})}]));
     return {...core,generation,names,mobius,fusions:structuredClone(fusions),inscriptions:structuredClone(inscriptions),
+      worktables:worktables.snapshot(),
       namings:namings.map(n=>({...n,syllables:[...n.syllables],candidates:[...n.candidates]})),
       mobiusReceipts:mobiusReceipts.map(r=>JSON.parse(JSON.stringify(r))),
       worlds:[...worlds.values()].map(projectWorld),rememberedWorlds:rememberedWorlds.map(w=>JSON.parse(JSON.stringify(w))),
@@ -572,7 +593,7 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
       constructions:constructions.map(p=>({...p,builders:[...p.builders],specification:{...p.specification,effects:[...p.specification.effects]},provenance:{...p.provenance}}))};
   }
   return Object.freeze({
-    plant,step,turn,hear,shareText,touchWorld,neighbours,transform,snapshot,
+    plant,step,turn,hear,shareText,playProgram,touchWorld,neighbours,transform,snapshot,
     feather(){featherEpoch++;return tissue.feather();},resume:tissue.resume,
   });
 }

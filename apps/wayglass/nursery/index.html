@@ -1,12 +1,24 @@
 <!doctype html><html lang="en-GB"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Wayglass · Möbius Nursery</title>
-<style>body{background:#08121b;color:#d7f5e9;font:15px system-ui;margin:0;padding:16px}main{max-width:960px;margin:auto}canvas{width:100%;border:1px solid #477969;border-radius:14px;background:#0b1d28}button,.file{background:#1a3b38;color:#d7f5e9;border:1px solid #6ebda4;border-radius:8px;padding:10px;margin:4px;display:inline-block;min-height:44px;box-sizing:border-box;cursor:pointer;font:inherit}.file input{position:absolute;width:1px;height:1px;opacity:0}.file:focus-within{outline:3px solid #f6d39a}button:disabled{opacity:.5}#listening{color:#e4c38e}#log{height:170px;overflow:auto;background:#11252b;padding:10px;border-radius:10px;font:12px/1.6 monospace}small{color:#a8c4bd}#share-words{margin-block:1.25rem}#share-words textarea{display:block;width:100%;box-sizing:border-box;background:#11252b;color:inherit;border:1px solid #6ebda4;border-radius:8px;padding:.7rem;font:inherit}#share-words pre{white-space:pre-wrap;overflow-wrap:anywhere;border-inline-start:3px solid;padding:.7rem;background:#11252b}</style>
+<style>body{background:#08121b;color:#d7f5e9;font:15px system-ui;margin:0;padding:16px}main{max-width:960px;margin:auto}canvas{width:100%;border:1px solid #477969;border-radius:14px;background:#0b1d28}button,.file{background:#1a3b38;color:#d7f5e9;border:1px solid #6ebda4;border-radius:8px;padding:10px;margin:4px;display:inline-block;min-height:44px;box-sizing:border-box;cursor:pointer;font:inherit}.file input{position:absolute;width:1px;height:1px;opacity:0}.file:focus-within{outline:3px solid #f6d39a}button:disabled{opacity:.5}#listening{color:#e4c38e}#log{height:170px;overflow:auto;background:#11252b;padding:10px;border-radius:10px;font:12px/1.6 monospace}small{color:#a8c4bd}#share-words{margin-block:1.25rem}#share-words textarea{display:block;width:100%;box-sizing:border-box;background:#11252b;color:inherit;border:1px solid #6ebda4;border-radius:8px;padding:.7rem;font:inherit}#share-words pre{white-space:pre-wrap;overflow-wrap:anywhere;border-inline-start:3px solid;padding:.7rem;background:#11252b}#worktables{margin-block:1.25rem;padding:1rem;border:1px solid #5c9883;border-radius:12px}
+#worktables select,#worktables input{min-height:44px;background:#11252b;color:inherit;border:1px solid #6ebda4;border-radius:8px;padding-inline:.5rem;font:inherit}
+#worktables button{min-height:44px}#worktables li{padding-inline-start:.6rem}#worktables pre{white-space:pre-wrap;overflow-wrap:anywhere}
+</style>
 <main><h1>♾️ Wayglass · Möbius Nursery</h1><p>Real Wyrdrune cellular ecology, running in your browser. Watch the babies cook. 🧬</p>
 <canvas id="view" width="900" height="480" aria-label="Living Möbius cell colony"></canvas>
 <p id="metrics" role="status"></p>
 <section aria-label="Shared worlds"><h3>Worlds the babies made</h3><p id="worlds-help"><small>Touch a world on the canvas, or with these buttons. A touch reaches everyone living in it and changes its next turn.</small></p><div id="worlds"></div><button id="feel" aria-pressed="false">〰 Feel the worlds (vibration)</button></section><p id="listening" aria-live="polite"></p>
 <button id="hum" aria-pressed="false">♫ Hear the babies</button><label class="file">♪ Play them a sound<input id="sound" type="file" accept="audio/*"></label><button id="stopsound" disabled>■ Stop the sound</button><label for="volume">Gentle volume</label><input id="volume" type="range" min="0" max="25" value="7" aria-label="Soundscape volume"><button id="feather">⏸ Feather</button><button id="step">One cycle</button><button id="speed">Speed 1×</button><button id="restart">↻ New colony</button>
 <details id="sound-listeners" hidden><summary>Who heard the sound?</summary><ul></ul></details>
+<section id="worktables" aria-labelledby="worktable-title" hidden>
+<h3 id="worktable-title">Programs you can play together</h3>
+<label for="cell-program">Cell-authored program</label> <select id="cell-program"></select>
+<form><label for="offered-note">Note to offer</label> <input id="offered-note" type="number" min="24" max="96" value="48" required>
+<button type="submit">Offer note</button></form>
+<p role="status"></p><ol data-program-output aria-label="Latest program turn"></ol>
+<button type="button" data-hear-program disabled>Hear this turn</button>
+<details><summary>Executable Wyrdrune</summary><pre></pre></details>
+</section>
 <section id="share-words" aria-labelledby="share-title"><h3 id="share-title">Share words with the cells</h3>
 <form><label for="inscription-text">Your words</label><textarea id="inscription-text" rows="3" required></textarea>
 <button type="submit">Share in Wyrdrune</button><button type="button" data-stop-inscription disabled>Stop playback</button></form>
@@ -19,6 +31,7 @@
 <p><small>This is the actual WTL ecology implementation, not a visual imitation. It runs locally in this tab; GitHub Pages cannot keep a shared server-side colony alive when you leave. No microphone access is requested. Each cell sings changing notes derived from its identity, twist, traits and recent phrases after you press Hear the babies. Each baby carries its own Wyrdrune program and runs real Möbius turns (outer face, then inner face) on the canonical runtime; what crosses the twist is its own carry. Babies name themselves inside their own Wyrdrune choose phase from their own syllables, found shared worlds with a neighbour whose song is close to theirs (each world is its own Wyrdrune program with its own colour, note, texture and reach, and names itself), regenerate every turn, and live until their own choose phase chooses rest. A sound you play stays in this tab: it is analysed locally into eight bands and never uploaded. Shared words and their score stay on this device.</small></p></main>
 <script type="module">
 import {mountSharing} from './src/wtl-cell-sharing-ui.js';
+import {mountCellWorktables} from './src/wtl-cell-worktable-ui.js';
 import {createCellEcology} from './src/wtl-cell-ecology.js';
 import {createNurseryLog} from './src/wtl-cell-log.js';
 const canvas=document.querySelector('#view'),ctx=canvas.getContext('2d'),log=document.querySelector('#log');
@@ -100,6 +113,18 @@ function updateMessageListeners(snapshot){
   }
   if(changed.has(latestMessage))showMessageListeners(latestMessage);
 }
+const worktable=mountCellWorktables(document.querySelector('#worktables'),{
+ play:input=>eco.playProgram(input),
+ volume:()=>Number(document.querySelector('#volume').value)/100,
+ onTurn:turn=>{
+   for(const action of turn.actions){
+     const name=action.actor.name??'You';
+     const response=action.joined?`${Math.round(action.output.pitch)} Hz`:'chose to listen';
+     write(`♫ ${turn.program} · ${name} · ${response}`,turn.generation);
+   }
+   draw();
+ },
+});
 const sharing=mountSharing(document.querySelector('#share-words'),{
  deliver:async text=>{
    const run=logRun;
@@ -129,7 +154,7 @@ function write(message,cycle=logCycle,run=logRun){
   log.prepend(line);
   while(log.children.length>90)log.lastChild.remove();
 }
-function start(){logRun=archive.beginRun();logCycle=0;pendingMessages.clear();latestMessage=null;messageListeners.hidden=true;soundListeners.hidden=true;sharing.clear();soundOff();lastSongCycle=-1;eco=createCellEcology({maxCells:24,seed:11,radius:3,mutationRate:.8,autonomousFusion:true});eco.plant('a','explorer',0,0);eco.plant('b','explorer',1,0);paused=false;lastGen=0;lastTick=0;seenWorldNames.clear();seenFusions.clear();ripples=[];seenEvents=seenWords=seenWyrdrune=seenBuilds=seenPrograms=seenProjects=seenLineages=seenHarmony=0;log.replaceChildren();write('✦ Founders a and b awakened');draw()}
+function start(){eco?.feather();logRun=archive.beginRun();logCycle=0;pendingMessages.clear();latestMessage=null;messageListeners.hidden=true;soundListeners.hidden=true;sharing.clear();soundOff();lastSongCycle=-1;eco=createCellEcology({maxCells:24,seed:11,radius:3,mutationRate:.8,autonomousFusion:true});eco.plant('a','explorer',0,0);eco.plant('b','explorer',1,0);paused=false;lastGen=0;lastTick=0;seenWorldNames.clear();seenFusions.clear();ripples=[];seenEvents=seenWords=seenWyrdrune=seenBuilds=seenPrograms=seenProjects=seenLineages=seenHarmony=0;log.replaceChildren();write('✦ Founders a and b awakened');draw()}
 function ribbon(x,y,r,twist,colour){ctx.save();ctx.translate(x,y);ctx.shadowColor=colour;ctx.shadowBlur=12;for(let lane=0;lane<2;lane++){ctx.beginPath();for(let i=0;i<=90;i++){const t=i/90*Math.PI*2,p=t+twist*6.283+lane*Math.PI/2,xx=Math.cos(p)*(r+5*Math.cos(t/2)),yy=Math.sin(p)*r*.58+3*Math.sin(2*t);if(i)ctx.lineTo(xx,yy);else ctx.moveTo(xx,yy)}ctx.strokeStyle=colour;ctx.globalAlpha=lane?.45:1;ctx.lineWidth=lane?1.5:3;ctx.stroke()}ctx.restore()}
 function soundOff(){humOn=false;lastSongCycle=-1;if(audio){for(const v of worldVoices){try{v.osc.stop()}catch{}v.osc.disconnect();v.gain.disconnect()}worldVoices=[];for(const v of voices){try{v.osc.stop()}catch{}v.osc.disconnect();v.gain.disconnect()}voices=[];audio.close();audio=null}document.querySelector("#hum").textContent="♫ Hear the babies";document.querySelector("#hum").setAttribute("aria-pressed","false")}
 async function soundOn(){if(paused)return;const AudioContext=window.AudioContext||window.webkitAudioContext;if(!AudioContext){write("Audio unavailable in this browser");return}audio=new AudioContext();await audio.resume();for(let i=0;i<3;i++){const osc=audio.createOscillator(),gain=audio.createGain();osc.type="sine";gain.gain.value=0;osc.connect(gain).connect(audio.destination);osc.start();voices.push({osc,gain})}
@@ -200,7 +225,7 @@ function touch(id){if(paused){write('Release Feather to touch a world');return}
  }catch(e){write('That world could not be touched: '+e.message)}}
 canvas.addEventListener('pointerdown',e=>{const s=eco.snapshot();const rect=canvas.getBoundingClientRect();const x=(e.clientX-rect.left)*canvas.width/rect.width,y=(e.clientY-rect.top)*canvas.height/rect.height;
  let best=null,bd=Infinity;for(const w of s.worlds){const c=toCanvas(w.center),d=Math.hypot(x-c.x,y-c.y);if(d<=reach(w)&&d<bd){best=w;bd=d}}if(best)touch(best.id)});
-function draw(){const s=eco.snapshot();logCycle=s.generation;tune(s);updateMessageListeners(s);
+function draw(){const s=eco.snapshot();logCycle=s.generation;tune(s);updateMessageListeners(s);worktable.update(s);
 sharing.setPaused(paused);
 for(const fusion of s.fusions){
  const key=fusion.exchange.id;
