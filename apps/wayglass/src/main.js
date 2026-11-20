@@ -45,6 +45,7 @@ import {createWatercolorVoyageWatcher} from './watercolor-voyage-watch.js';
 import { divineWayglassTensorKernel, dispatchWyrdruneTensorKernel } from './tensor-webgpu.js';
 import {observeIntegratedVoyage,latestIntegratedVoyage,subscribeIntegratedVoyage} from './integrated-voyage-visual.js';
 import { mountLivingWatercolorSurface } from './surfaces/living-watercolor.js';
+import { mountMobiusNursery } from './surfaces/mobius-nursery.js';
 import { mountJourneyBeforeDestinationSurface } from './surfaces/journey-before-destination.js';
 import { WAYGLASS_ENTRY_SURFACE, resolveWayglassEntry } from './wayglass-entry.js';
 import { subscribeWayglassObserver } from './living-observer-model.js';
@@ -70,6 +71,7 @@ const fullSpectrum = createWayglassSpectralField();
 
 registerWayglassSurface({surface_id:'wayglass:sound-composition',label:'Wayglass · Spatial Soundstage',mount:root=>mountWayglassSoundComposition(root,{composition:wayglassSomaticSound.composition,soundscape:wayglassSomaticSound,storyBinding:wayglassStoryScoreBinding})});
 registerWayglassSurface({surface_id:WAYGLASS_ENTRY_SURFACE,label:'Living Watercolor',mount:mountLivingWatercolorSurface});
+registerWayglassSurface({surface_id:'wayglass:mobius-nursery',label:'Möbius Nursery · Three.js',mount:mountMobiusNursery});
 registerWayglassSurface({surface_id:'wayglass:journey-before-destination',label:'Journey Before Destination',mount:mountJourneyBeforeDestinationSurface});
 registerWayglassSurface({surface_id:'wayglass:triptych-lift',label:'The Möbius Lift · Triptych navigation',mount:root=>mountWayglassTriptychLift(root,{navigate:navigateAndFocus})});
 registerWayglassSurface({surface_id:'wayglass:altered-timeline',label:'Altered Timeline · Change and Return',mount:mountWayglassAlteredTimeline});
