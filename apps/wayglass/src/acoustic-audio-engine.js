@@ -80,6 +80,7 @@ export function createAcousticAudioEngine({AudioContext = null,scope=globalThis}
     const effectiveStatus = running && !disposed && context?.state && context.state !== 'running' ? context.state : status;
     return {supported:hasAudio(), running: active, disposed, status: !hasAudio()?'unsupported':effectiveStatus, muted: settings.muted, mono: settings.mono,
       ambience: settings.ambience, pending: Boolean(pending), lastError,
+      audioTime: active && Number.isFinite(context?.currentTime) ? context.currentTime : null,
       buses: {navigation: active && !settings.muted, ambience: active && !settings.muted && settings.ambience,
         status: active && !settings.muted}, activeSignals: voices.size, presentedEvents: presented.size};
   }
