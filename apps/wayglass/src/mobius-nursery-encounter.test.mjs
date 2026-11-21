@@ -30,3 +30,12 @@ test('signal modalities alter shared projection but never carried identity',()=>
  assert.equal(left.revision,2);assert.equal(right.revision,7);
  assert.equal(a.canon_adopted,false);assert.equal(b.persisted,false);
 });
+
+test('inherited consent never substitutes for either participant opt-in',()=>{
+ const inherited=Object.create({'mote:a':true,'mote:b':true});
+ assert.equal(encounter({left,right,signal,consent:inherited}).status,'declined');
+ inherited['mote:a']=true;
+ assert.equal(encounter({left,right,signal,consent:inherited}).status,'declined');
+ inherited['mote:b']=true;
+ assert.equal(encounter({left,right,signal,consent:inherited}).status,'proposal');
+});
