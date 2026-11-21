@@ -22,6 +22,8 @@ export function createMiniMindGloss({endpoint,route='local',ownerAuthorised=fals
       if(!response.ok)throw Error('MiniMind route returned HTTP '+response.status);
       const data=await response.json();
       if(signal?.aborted)return Object.freeze({status:'stopped',reason:'Feather'});
+      // Consent can be withdrawn while a delegate is responding. Never present a late result as approved.
+      if(consent[participant.id]!==true)return Object.freeze({status:'declined',participant_id:participant.id});
       const candidate=data?.choices?.[0]?.message?.content;
       if(typeof candidate!=='string'||!candidate.trim()||candidate.length>2048)throw Error('Invalid local model response');
       return Object.freeze({schema:'wayglass.minimind-gloss/v0.1',status:'proposal',participant_id:participant.id,model:MINIMIND_MODEL,endpoint_kind:route==='local'?'loopback':'owner-cloud-proxy',phrase,gloss:candidate.trim(),persisted:false,canon_adopted:false});
