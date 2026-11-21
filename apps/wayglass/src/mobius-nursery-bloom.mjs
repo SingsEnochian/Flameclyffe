@@ -14,8 +14,9 @@ export function composeNurseryBloom(proposal) {
       resonance<0 || resonance>1 || Math.abs(phase)>2 ||
       !['touch','word','sound','wtl'].includes(kind))
     throw new Error('Invalid bounded encounter geometry');
-  const seed=[proposal.source,kind,proposal.signal?.value,...proposal.participants,
-    ...proposal.identity_spins].join('|');
+  // Length-safe structural encoding prevents delimiter-collision between identities and signals.
+  const seed=JSON.stringify([proposal.source,kind,proposal.signal.value,
+    proposal.participants,proposal.identity_spins]);
   let hash=2166136261;
   for (const char of seed) hash=Math.imul(hash^char.charCodeAt(0),16777619)>>>0;
   const rand=()=>{hash=(Math.imul(hash,1664525)+1013904223)>>>0;return hash/4294967296;};
