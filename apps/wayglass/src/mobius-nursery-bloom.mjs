@@ -2,7 +2,12 @@
 // The proposal never changes participant identity, carries state, or declares canon.
 export function composeNurseryBloom(proposal) {
   if (!proposal || proposal.status !== 'proposal' || !proposal.proposed_field ||
-      !Array.isArray(proposal.identity_spins) || proposal.identity_spins.length !== 2)
+      !Array.isArray(proposal.identity_spins) || proposal.identity_spins.length !== 2 ||
+      !Array.isArray(proposal.participants) || proposal.participants.length !== 2 ||
+      proposal.participants.some(id=>typeof id!=='string'||!id.trim()||id.length>128) ||
+      proposal.participants[0]===proposal.participants[1] ||
+      typeof proposal.source!=='string' || !proposal.source.trim() || proposal.source.length>256 ||
+      typeof proposal.signal?.value!=='string' || proposal.signal.value.length>512)
     throw new Error('A consented encounter proposal is required');
   const {resonance,phase,kind}=proposal.proposed_field;
   if (![resonance,phase,...proposal.identity_spins].every(Number.isFinite) ||
