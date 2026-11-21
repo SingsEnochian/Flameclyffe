@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import {encounter} from '../mobius-nursery-encounter.mjs';
+import {createNurseryJournal} from '../mobius-nursery-journal.mjs';
 
 // Owner-local, proposal-only visualization. No remote calls or automatic persistence.
 export function mountMobiusNursery(root) {
@@ -24,6 +25,7 @@ export function mountMobiusNursery(root) {
   let renderer,disposed=false,raf=0,active=false;
   const reduced=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
   const rings=[];
+  const journal=createNurseryJournal();
   try {
     renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,powerPreference:'low-power'});
     renderer.setPixelRatio(Math.min(globalThis.devicePixelRatio||1,2));
@@ -49,16 +51,18 @@ export function mountMobiusNursery(root) {
       const result=encounter({left:{id:'nursery:a',spin:0.2,revision:0},right:{id:'nursery:b',spin:-0.4,revision:0},consent,signal:{kind:host.querySelector('[data-signal]').value,value:'encounter',source:'wayglass:nursery-ui'}});
       status.textContent=result.status==='proposal'?`Encounter proposed. ${result.proposed_field.kind} resonance ${result.proposed_field.resonance}. Neither history has changed.`:'Encounter declined. Both participants must opt in.';
       if(result.status==='proposal'){
+        journal.record(result);
+        status.textContent += ` Observations in this visit: ${journal.snapshot().length}.`;
         const strength=result.proposed_field.resonance;
         rings.forEach((m,i)=>{m.scale.setScalar(1+strength*(i?0.6:1));m.material.emissiveIntensity=0.35+strength;});
         renderer.render(scene,camera);start();
       }else{stop();resetField();}
     });
-    host.querySelector('[data-feather]').addEventListener('click',()=>{stop();resetField();status.textContent='Feather. Encounter stopped. Nothing persisted.';});
+    host.querySelector('[data-feather]').addEventListener('click',()=>{journal.feather();stop();resetField();status.textContent='Feather. Encounter stopped. Nothing persisted.';});
     for(const input of host.querySelectorAll('[data-consent]'))input.addEventListener('change',()=>{
-      if(!input.checked){stop();resetField();status.textContent='Consent withdrawn. Encounter stopped; nothing persisted.';}
+      if(!input.checked){journal.feather();stop();resetField();status.textContent='Consent withdrawn. Encounter stopped; nothing persisted.';}
     });
-    host._disposeNursery=()=>{stop();disposed=true;observer?.disconnect();rings.forEach(m=>{m.geometry.dispose();m.material.dispose();});renderer.dispose();host.remove();};
+    host._disposeNursery=()=>{journal.feather();stop();disposed=true;observer?.disconnect();rings.forEach(m=>{m.geometry.dispose();m.material.dispose();});renderer.dispose();host.remove();};
     // Initial render is static until a mutually consented encounter is proposed.
     renderer.render(scene,camera);
   }catch(error){
