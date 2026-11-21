@@ -40,6 +40,8 @@ import {faeberpunkLocusLinks,faeberpunkLocusForRoom} from './faeberpunk-loci.js'
 import { mountWayglassQuadGestalt } from './surfaces/quad-eightfold.js';
 import { installQuadFeatherListener, readLatestQuadGestalt, subscribeQuadGestalt } from './quad-eightfold-client.js';
 import { publishWatercolorActivity } from './watercolor-bridge.js';
+import {installMagicTelemetry} from './magic-telemetry-client.js';
+import {mountMagicLoom,mountMagicTelemetryPanel} from './surfaces/magic-loom.js';
 import {installWatercolorRouteActivity} from './watercolor-live-observer.js';
 import {createWatercolorVoyageWatcher} from './watercolor-voyage-watch.js';
 import { divineWayglassTensorKernel, dispatchWyrdruneTensorKernel } from './tensor-webgpu.js';
@@ -67,6 +69,8 @@ document.documentElement.dataset.wayglassAr = ar.supported ? 'ready' : ar.reason
 
 FIRST_WAYGLASS_ORGANS.forEach(registerWayglassOrgan);
 const fullSpectrum = createWayglassSpectralField();
+async function mountWithMagicPanel(root,mount,options){const stop=await mount(root);const dispose=mountMagicTelemetryPanel(root.firstElementChild||root,options);return()=>{dispose();if(typeof stop==='function')stop();};}
+registerWayglassSurface({surface_id:'wayglass:magic-loom',label:'Wayglass · Wyrdrune Loom',mount:mountMagicLoom});
 
 registerWayglassSurface({surface_id:'wayglass:sound-composition',label:'Wayglass · Spatial Soundstage',mount:root=>mountWayglassSoundComposition(root,{composition:wayglassSomaticSound.composition,soundscape:wayglassSomaticSound,storyBinding:wayglassStoryScoreBinding})});
 registerWayglassSurface({surface_id:WAYGLASS_ENTRY_SURFACE,label:'Living Watercolor',mount:mountLivingWatercolorSurface});
@@ -85,7 +89,7 @@ registerWayglassSurface({
 registerWayglassSurfaceAlias('arcsweep:deck', 'wayglass:world-continuity');
 registerWayglassSurfaceAlias('arcsweep:writing-room', 'wayglass:writing-room');
 
-registerWayglassSurface({surface_id:'wayglass:universal-codex',label:'Wayglass · Universal Codex',mount:mountUniversalCodex});
+registerWayglassSurface({surface_id:'wayglass:universal-codex',label:'Wayglass · Universal Codex',mount:root=>mountWithMagicPanel(root,mountUniversalCodex,{codex:true})});
 
 
 
@@ -146,7 +150,7 @@ subscribeQuadGestalt(reading=>{
 registerWayglassSurface({
   surface_id: 'wayglass:living-observer',
   label: 'Wayglass · Living Observer',
-  mount: mountWayglassLivingObserver,
+  mount: root=>mountWithMagicPanel(root,mountWayglassLivingObserver),
 });
 
 registerWayglassSurface({
@@ -300,6 +304,8 @@ subscribeMythience(encounter=>{
 });
 // Always observe route activity across the ship, even when Watercolour is not mounted.
 installWatercolorRouteActivity();
+const magicPigments=new Set(['genesis','correspondence','alchemy','sympatheia','probability','embodiment','mythience','worldsmith','withness']);
+installMagicTelemetry({onActivity:event=>{const kind=event.status==='failed'||event.status==='feather'?'magic:failed':magicPigments.has(event.engine)?'magic:'+event.engine:null;if(!kind)return;publishWatercolorActivity({kind,actor:event.cell,receipt:{schema:event.schema,receipt_id:event.hash},observedAt:event.time,intensity:Math.min(.85,.22+Math.log1p(event.elapsedMs||0)/10)});}});
 // Read-only 30-second voyage-message watch. Old messages become baseline,
 // only new arrivals are painted. Failed/unauthorised hosts back off and stop.
 createWatercolorVoyageWatcher();
