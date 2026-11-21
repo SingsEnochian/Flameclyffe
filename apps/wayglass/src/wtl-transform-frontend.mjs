@@ -4,8 +4,18 @@ import {root,transform,trace,meaning} from './wtl-transform-semantics.mjs';
 const MAX_SOURCE=512,MAX_DEPTH=24;
 export function parseWTL(source){
  if(typeof source!=='string'||source.length>MAX_SOURCE)throw SyntaxError('WTL source must be a bounded string');
- const tokens=source.match(/[A-Za-z][A-Za-z0-9_]*|[-+]?(?:\d+(?:\.\d+)?|\.\d+)|[(),@]/g)||[];
- if(tokens.join('')!==source.replace(/\s+/g,''))throw SyntaxError('Unexpected WTL character');
+ const tokens=[];
+ const tokenPattern=/[A-Za-z][A-Za-z0-9_]*|[-+]?(?:\\d+(?:\\.\\d+)?|\\.\\d+)|[(),@]/y;
+ let offset=0;
+ while(offset<source.length){
+  if(/\\s/.test(source[offset])){offset++;continue;}
+  tokenPattern.lastIndex=offset;
+  const match=tokenPattern.exec(source);
+  if(!match)throw SyntaxError('Unexpected WTL character at offset '+offset);
+  tokens.push(match[0]);offset=tokenPattern.lastIndex;
+ }
+ // Whitespace may separate tokens, but never splice a name or numeric literal.
+ if(tokens.length>128)throw SyntaxError('WTL token limit');
  let at=0;
  function expr(depth){
   if(depth>MAX_DEPTH)throw SyntaxError('WTL nesting limit');
