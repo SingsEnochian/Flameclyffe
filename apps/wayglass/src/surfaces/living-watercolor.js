@@ -38,6 +38,35 @@ export function spatialWithnessPigment(seconds, {beatHz=3, crossing=true}={}){
   ];
 }
 
+// Project the *actual* host-selected score and current audio clock, not a fabricated beat trace.
+export function soundtrackPigment(projection){
+  const score=projection?.score,t=projection?.audioTime;
+  if(!score||!Number.isFinite(t)||!Number.isFinite(score.rootHz)||!Number.isFinite(score.counterpartHz)||!Number.isFinite(score.foregroundGain)||!Number.isFinite(score.atmosphereGain))return [];
+  const delta=Math.abs(score.counterpartHz-score.rootHz);
+  // Deliberately slow visual mapping; this is not the measured waveform or oscillator phase.
+  const speed=Math.min(2,delta/30), angle=2*Math.PI*speed*t;
+  return [score.rootHz,score.counterpartHz].map((hz,i)=>({
+    x:.5+.26*Math.cos(angle+i*Math.PI),y:.5+.20*Math.sin(angle+i*Math.PI),
+    color:i?'#79e1ce':'#e8cf91',amount:.025+.08*Math.min(1,Math.max(0,(i?score.atmosphereGain:score.foregroundGain)/.06)),
+    radius:.035,dx:.08*Math.sin(angle+i*Math.PI),dy:.04*Math.cos(angle+i*Math.PI),
+  }));
+}
+export function nurseryTurnPigment(turn){
+  if(!turn||typeof turn.program!=='string'||!turn.program||!Number.isSafeInteger(turn.revision)||turn.revision<1||
+    !Number.isSafeInteger(turn.generation)||turn.generation<0||!Array.isArray(turn.actions)||turn.actions.length<1||turn.actions.length>8)throw Error('Expected a bounded Nursery worktable turn');
+  const actions=turn.actions.filter(a=>a?.joined===true&&a.actor?.kind==='cell');
+  if(!actions.length)throw Error('No participating cell in this turn');
+  return actions.map((a,i)=>{
+    const o=a.output;
+    if(typeof a.actor.id!=='string'||typeof a.actor.name!=='string'||!a.actor.name||a.actor.name.length>100||
+      typeof a.source_hash!=='string'||!a.source_hash||typeof a.carry_digest!=='string'||!a.carry_digest||
+      !Number.isFinite(o?.pitch)||o.pitch<=0||o.pitch>10000||!Number.isFinite(o.hue)||o.hue<0||o.hue>=360)throw Error('Incomplete cell attribution or score');
+    const rgb=[0,8,4].map(n=>{const k=(n+o.hue/30)%12;return Math.round(255*(.65-.27*Math.max(-1,Math.min(k-3,9-k,1)))).toString(16).padStart(2,'0')}).join('');
+    return {actor:a.actor.name,pitch:o.pitch,source_hash:a.source_hash,carry_digest:a.carry_digest,
+      stroke:{x:.2+.6*(i+1)/(actions.length+1),y:.5,color:'#'+rgb,amount:.35,radius:.07}};
+  });
+}
+
 export function findWatercolorWyrdrune(reply,{allowDraft=false}={}){
   let draft=null;
   const blocks=/^```([\w-]*)[ \t]*\r?\n([\s\S]*?)(^```[ \t]*(?=\r?$)|(?![\s\S]))/gm;
@@ -171,7 +200,10 @@ export async function mountLivingWatercolorSurface(root) {
           '<label for="wc-spatial-beat">Difference frequency</label><select id="wc-spatial-beat"><option value="3">3 Hz</option><option value="6">6 Hz</option><option value="9">9 Hz</option></select>',
           '<label for="wc-spatial-path">Voice paths</label><select id="wc-spatial-path"><option value="cross">Crossing voices</option><option value="still">Stationary voices</option></select>',
           '<button id="wc-spatial-play" class="glass-chip" type="button" aria-pressed="false">Paint the score</button>',
-          '<p id="wc-spatial-status" class="tiny" role="status">Visual score projection · not measured sound or Nursery activity.</p></fieldset>',
+          '<p id="wc-spatial-status" class="tiny" role="status">Visual score projection · not measured sound or Nursery activity.</p>',
+          '<label><input id="wc-score-follow" type="checkbox" checked> Follow playing Wyrdrune soundtrack in pigment</label>',
+          '<label for="wc-nursery-turn">Import Nursery worktable turn (JSON)</label><input id="wc-nursery-turn" type="file" accept=".json,application/json">',
+          '<p id="wc-nursery-status" class="tiny" role="status">No Nursery turn imported.</p></fieldset>',
           '<label for="wc-note">Offer a direction</label>',
           '<textarea id="wc-note" rows="3" maxlength="300" placeholder="For example: more gold when something is verified…"></textarea>',
           '<button class="glass-chip" type="button" id="wc-suggest">Place a suggestion</button>',
@@ -318,6 +350,10 @@ export async function mountLivingWatercolorSurface(root) {
         spatialPreview.seconds+=Math.min((ts-lastFrame)/1000,.12);
         if(spatialPreview.seconds>=18)endSpatialPreview('Score returned open · visual projection complete.');
         else for(const stroke of spatialWithnessPigment(spatialPreview.seconds,spatialPreview))fluid.inject(stroke);
+      }
+      if(q('wc-score-follow').checked&&!featherStopped&&document.documentElement.dataset.wgMotion!=='off'){
+        const projection=shipSoundscape.snapshot().projection;
+        for(const stroke of soundtrackPigment(projection))fluid.inject(stroke);
       }
       fluid.step(Math.min((ts-lastFrame)/42,1.5));
       paint();
@@ -690,12 +726,33 @@ export async function mountLivingWatercolorSurface(root) {
     button.textContent=paused?'Fluid paused':'Fluid on';
     if(paused&&spatialPreview)endSpatialPreview('Score paused · pigment retained.');
     spatialButton.disabled=paused||featherStopped;
+    nurseryInput.disabled=paused||featherStopped;
     button.setAttribute('aria-pressed',String(!paused));
     button.classList.toggle('active',!paused);
     feedback.textContent=paused?'Fluid paused by owner':'Fluid released';
     updateInspector();
   });
   const spatialButton=q('wc-spatial-play'),spatialStatus=q('wc-spatial-status');
+  const nurseryInput=q('wc-nursery-turn'),nurseryStatus=q('wc-nursery-status');
+  const importedTurns=new Set();
+  listen(nurseryInput,'change',async()=>{
+    const file=nurseryInput.files?.[0];nurseryInput.value='';
+    if(!file||stopped||featherStopped||paused)return;
+    if(file.size>256000){nurseryStatus.textContent='Turn exceeds import limit.';return;}
+    const epoch=requestEpoch;
+    try{
+      const data=JSON.parse(await file.text());
+      if(stopped||featherStopped||paused||epoch!==requestEpoch)return;
+      const turn=data.turn??data, marks=nurseryTurnPigment(turn);
+      const key=JSON.stringify([turn.program,turn.revision,turn.generation,marks.map(m=>m.carry_digest)]);
+      if(importedTurns.has(key)){nurseryStatus.textContent='This turn is already painted.';return;}
+      importedTurns.add(key);
+      if(importedTurns.size>128)importedTurns.delete(importedTurns.values().next().value);
+      for(const mark of marks)fluid.inject(mark.stroke);
+      paint();
+      nurseryStatus.textContent='Imported turn '+turn.revision+' · '+marks.map(m=>m.actor+' '+Math.round(m.pitch)+' Hz').join(' · ')+' · local file, attribution not independently verified.';
+    }catch(error){if(!stopped)nurseryStatus.textContent='Import declined: '+error.message;}
+  });
   function endSpatialPreview(message){
     spatialPreview=null;spatialButton.setAttribute('aria-pressed','false');spatialButton.textContent='Paint the score';
     if(message)spatialStatus.textContent=message;
@@ -745,6 +802,7 @@ export async function mountLivingWatercolorSurface(root) {
     hapticButton.textContent=state.haptics_enabled?'Haptics on':'Haptics off';
     featherButton.textContent=featherStopped?'Release Feather':'Feather Stop';
     spatialButton.disabled=featherStopped||paused;
+    nurseryInput.disabled=featherStopped||paused;
     if((featherStopped||paused)&&spatialPreview)endSpatialPreview('Score stopped · pigment retained.');
     invite.disabled=busy||!routeId||featherStopped;q('wc-first-contact').disabled=busy||!routeId||featherStopped;
     q('wc-flow').textContent=paused?'Fluid paused':'Fluid on';q('wc-flow').setAttribute('aria-pressed',String(!paused));q('wc-flow').classList.toggle('active',!paused);
