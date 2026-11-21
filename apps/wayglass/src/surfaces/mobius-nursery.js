@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import {encounter} from '../mobius-nursery-encounter.mjs';
 import {createNurseryJournal} from '../mobius-nursery-journal.mjs';
+import {composeNurseryBloom} from '../mobius-nursery-bloom.mjs';
 
 // Owner-local, proposal-only visualization. No remote calls or automatic persistence.
 export function mountMobiusNursery(root) {
@@ -26,6 +27,8 @@ export function mountMobiusNursery(root) {
   const reduced=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
   const rings=[];
   const journal=createNurseryJournal();
+  const blooms=[];
+  const clearBlooms=()=>{for(const mesh of blooms){scene.remove(mesh);mesh.geometry.dispose();mesh.material.dispose();}blooms.length=0;};
   try {
     renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,powerPreference:'low-power'});
     renderer.setPixelRatio(Math.min(globalThis.devicePixelRatio||1,2));
@@ -45,13 +48,22 @@ export function mountMobiusNursery(root) {
     const start=()=>{if(!disposed&&!reduced?.matches&&!raf){active=true;draw();}};
     const stop=()=>{active=false;cancelAnimationFrame(raf);raf=0;if(!disposed)renderer.render(scene,camera);};
     const status=host.querySelector('[data-status]');
-    const resetField=()=>{rings.forEach(m=>{m.scale.setScalar(1);m.material.emissiveIntensity=0.35;});renderer.render(scene,camera);};
+    const resetField=()=>{clearBlooms();rings.forEach(m=>{m.scale.setScalar(1);m.material.emissiveIntensity=0.35;});renderer.render(scene,camera);};
     host.querySelector('[data-encounter]').addEventListener('click',()=>{
       const consent={'nursery:a':host.querySelector('[data-consent="a"]').checked,'nursery:b':host.querySelector('[data-consent="b"]').checked};
       const result=encounter({left:{id:'nursery:a',spin:0.2,revision:0},right:{id:'nursery:b',spin:-0.4,revision:0},consent,signal:{kind:host.querySelector('[data-signal]').value,value:'encounter',source:'wayglass:nursery-ui'}});
       status.textContent=result.status==='proposal'?`Encounter proposed. ${result.proposed_field.kind} resonance ${result.proposed_field.resonance}. Neither history has changed.`:'Encounter declined. Both participants must opt in.';
       if(result.status==='proposal'){
         journal.record(result);
+        clearBlooms();
+        const bloom=composeNurseryBloom(result);
+        for(const point of bloom.filaments){
+          const geometry=new THREE.IcosahedronGeometry(point.scale,0);
+          const material=new THREE.MeshStandardMaterial({color:0xb8f5d8,emissive:0x75d9bb,emissiveIntensity:0.6,transparent:true,opacity:0.8});
+          const mote=new THREE.Mesh(geometry,material);
+          mote.position.set(point.x,point.y,point.z);
+          scene.add(mote);blooms.push(mote);
+        }
         status.textContent += ` Observations in this visit: ${journal.snapshot().length}.`;
         const strength=result.proposed_field.resonance;
         rings.forEach((m,i)=>{m.scale.setScalar(1+strength*(i?0.6:1));m.material.emissiveIntensity=0.35+strength;});
@@ -62,7 +74,7 @@ export function mountMobiusNursery(root) {
     for(const input of host.querySelectorAll('[data-consent]'))input.addEventListener('change',()=>{
       if(!input.checked){journal.feather();stop();resetField();status.textContent='Consent withdrawn. Encounter stopped; nothing persisted.';}
     });
-    host._disposeNursery=()=>{journal.feather();stop();disposed=true;observer?.disconnect();rings.forEach(m=>{m.geometry.dispose();m.material.dispose();});renderer.dispose();host.remove();};
+    host._disposeNursery=()=>{journal.feather();stop();clearBlooms();disposed=true;observer?.disconnect();rings.forEach(m=>{m.geometry.dispose();m.material.dispose();});renderer.dispose();host.remove();};
     // Initial render is static until a mutually consented encounter is proposed.
     renderer.render(scene,camera);
   }catch(error){
