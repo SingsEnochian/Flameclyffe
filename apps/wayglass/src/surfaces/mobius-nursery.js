@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import {encounter} from '../mobius-nursery-encounter.mjs';
 import {createNurseryJournal} from '../mobius-nursery-journal.mjs';
 import {composeNurseryBloom} from '../mobius-nursery-bloom.mjs';
+import {composeAtelier} from '../mobius-nursery-atelier.mjs';
 
 // Owner-local, proposal-only visualization. No remote calls or automatic persistence.
 export function mountMobiusNursery(root) {
@@ -14,6 +15,8 @@ export function mountMobiusNursery(root) {
       <label><input type="checkbox" data-consent="a"> Mote A consents</label>
       <label><input type="checkbox" data-consent="b"> Mote B consents</label>
       <label>Signal <select data-signal><option value="wtl">Wyrdrune</option><option value="touch">Touch</option><option value="word">Word</option><option value="sound">Sound</option></select></label>
+      <label>Atelier <select data-atelier><option value="worldseed">Worldseed Atelier</option><option value="pigment">Pigment Garden</option><option value="crystal">Crystal Forge</option><option value="ribbon">Ribbon Loom</option></select></label>
+      <label>Creative signal <input data-utterance maxlength="256" value="encounter" aria-label="Creative encounter signal"></label>
       <button type="button" data-encounter>Offer encounter</button>
       <button type="button" data-feather>Feather · stop</button>
     </div><div data-stage role="img" aria-label="Two luminous Möbius rings orbit separately in a three-dimensional field"></div>
@@ -51,20 +54,21 @@ export function mountMobiusNursery(root) {
     const resetField=()=>{clearBlooms();rings.forEach(m=>{m.scale.setScalar(1);m.material.emissiveIntensity=0.35;});renderer.render(scene,camera);};
     host.querySelector('[data-encounter]').addEventListener('click',()=>{
       const consent={'nursery:a':host.querySelector('[data-consent="a"]').checked,'nursery:b':host.querySelector('[data-consent="b"]').checked};
-      const result=encounter({left:{id:'nursery:a',spin:0.2,revision:0},right:{id:'nursery:b',spin:-0.4,revision:0},consent,signal:{kind:host.querySelector('[data-signal]').value,value:'encounter',source:'wayglass:nursery-ui'}});
+      const result=encounter({left:{id:'nursery:a',spin:0.2,revision:0},right:{id:'nursery:b',spin:-0.4,revision:0},consent,signal:{kind:host.querySelector('[data-signal]').value,value:host.querySelector('[data-utterance]').value,source:'wayglass:nursery-ui'}});
       status.textContent=result.status==='proposal'?`Encounter proposed. ${result.proposed_field.kind} resonance ${result.proposed_field.resonance}. Neither history has changed.`:'Encounter declined. Both participants must opt in.';
       if(result.status==='proposal'){
         journal.record(result);
         clearBlooms();
         const bloom=composeNurseryBloom(result);
-        for(const point of bloom.filaments){
-          const geometry=new THREE.IcosahedronGeometry(point.scale,0);
+        const study=composeAtelier(bloom,host.querySelector('[data-atelier]').value);
+        for(const point of study.points){
+          const geometry=point.shape==='sphere'?new THREE.SphereGeometry(point.size,10,8):point.shape==='octahedron'?new THREE.OctahedronGeometry(point.size):point.shape==='cone'?new THREE.ConeGeometry(point.size,point.size*3,6):new THREE.IcosahedronGeometry(point.size,0);
           const material=new THREE.MeshStandardMaterial({color:0xb8f5d8,emissive:0x75d9bb,emissiveIntensity:0.6,transparent:true,opacity:0.8});
           const mote=new THREE.Mesh(geometry,material);
-          mote.position.set(point.x,point.y,point.z);
+          mote.position.set(...point.position);
           scene.add(mote);blooms.push(mote);
         }
-        status.textContent += ` Observations in this visit: ${journal.snapshot().length}.`;
+        status.textContent += ` ${study.atelier} study with ${study.points.length} forms. Observations in this visit: ${journal.snapshot().length}.`;
         const strength=result.proposed_field.resonance;
         rings.forEach((m,i)=>{m.scale.setScalar(1+strength*(i?0.6:1));m.material.emissiveIntensity=0.35+strength;});
         renderer.render(scene,camera);start();
