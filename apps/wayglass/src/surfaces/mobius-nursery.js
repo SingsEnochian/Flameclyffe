@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {createGarden,proposeGardenAction,carryGardenAction,restoreGarden} from '../mobius-nursery-garden.mjs';
 import {encounter} from '../mobius-nursery-encounter.mjs';
 import {createNurseryJournal} from '../mobius-nursery-journal.mjs';
 import {composeNurseryBloom} from '../mobius-nursery-bloom.mjs';
@@ -23,6 +24,16 @@ export function mountMobiusNursery(root) {
       <button type="button" data-compile-wtl>Interpret WTL</button>
       <button type="button" data-encounter>Offer encounter</button>
       <button type="button" data-feather>Feather · stop</button>
+      <fieldset class="nursery-garden" aria-label="First Garden worldbuilding"><legend>✧ First Garden · shared world</legend>
+        <p>Propose a material, inspect it, then explicitly carry it. No automatic world changes.</p>
+        <label>Builder <select data-garden-actor><option value="nursery:a">Mote A</option><option value="nursery:b">Mote B</option></select></label>
+        <label>Material <select data-garden-material><option value="seed">Seed</option><option value="light">Light</option><option value="stone">Stone</option><option value="water">Water</option><option value="path">Path</option><option value="instrument">Instrument</option></select></label>
+        <button type="button" data-garden-propose>Propose creation</button>
+        <button type="button" data-garden-carry disabled>Carry into Garden</button>
+        <button type="button" data-garden-return>Return to carried Garden</button>
+        <output data-garden-status role="status" aria-live="polite">Garden is waiting for its first proposal.</output>
+        <ul data-garden-objects aria-label="Carried garden creations"></ul>
+      </fieldset>
     </div><div data-stage role="img" aria-label="Two luminous Möbius rings orbit separately in a three-dimensional field"></div>
     <output data-status role="status" aria-live="polite">Waiting for both participants.</output>`;
   root.append(host);
@@ -34,6 +45,38 @@ export function mountMobiusNursery(root) {
   const reduced=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
   const rings=[];
   const journal=createNurseryJournal();
+  const gardenKey='wayglass:nursery:first-garden:v1';
+  let garden=createGarden(),pendingGarden=null;
+  const gardenStatus=host.querySelector('[data-garden-status]');
+  const gardenList=host.querySelector('[data-garden-objects]');
+  const gardenCarry=host.querySelector('[data-garden-carry]');
+  const gardenConsent=()=>({'nursery:a':host.querySelector('[data-consent="a"]').checked,'nursery:b':host.querySelector('[data-consent="b"]').checked});
+  const renderGarden=()=>{gardenList.replaceChildren();for(const item of garden.objects){const li=document.createElement('li');li.textContent=item.actor+' · '+item.material+' · '+item.id;gardenList.append(li);}};
+  const invalidateGarden=()=>{pendingGarden=null;gardenCarry.disabled=true;};
+  host.querySelector('[data-garden-propose]').addEventListener('click',()=>{
+    try {invalidateGarden();const actor=host.querySelector('[data-garden-actor]').value;
+      const material=host.querySelector('[data-garden-material]').value;
+      const proposed=proposeGardenAction(garden,{actor,material,consent:gardenConsent(),source:'owner:ui'});
+      if(proposed.status!=='proposal'){gardenStatus.textContent='Builder has not consented.';return;}
+      pendingGarden=proposed;gardenCarry.disabled=false;
+      gardenStatus.textContent=actor+' proposes '+material+'. Review before carrying.';
+    }catch(error){gardenStatus.textContent='Garden proposal rejected: '+error.message;}
+  });
+  host.querySelector('[data-garden-carry]').addEventListener('click',()=>{
+    try {if(!pendingGarden)return;const next=carryGardenAction(garden,pendingGarden,{consent:gardenConsent()});
+      invalidateGarden();if(next.status!=='proposal'&&next.status!=='declined'&&next.status!=='stopped'){
+        garden=next;globalThis.localStorage?.setItem(gardenKey,JSON.stringify(garden));renderGarden();
+        gardenStatus.textContent='Carried '+garden.objects.length+' creation(s). Return snapshot saved locally.';
+      }else gardenStatus.textContent='Carry declined or stopped.';
+    }catch(error){invalidateGarden();gardenStatus.textContent='Carry failed: '+error.message;}
+  });
+  host.querySelector('[data-garden-return]').addEventListener('click',()=>{
+    try {invalidateGarden();const saved=globalThis.localStorage?.getItem(gardenKey);
+      if(!saved){gardenStatus.textContent='No carried Garden snapshot yet.';return;}
+      garden=restoreGarden(JSON.parse(saved),garden.participants);renderGarden();
+      gardenStatus.textContent='Returned to revision '+garden.revision+' with '+garden.objects.length+' carried creations.';
+    }catch(error){gardenStatus.textContent='Return rejected: '+error.message;}
+  });
   const blooms=[];
   const clearBlooms=()=>{for(const mesh of blooms){scene.remove(mesh);mesh.geometry.dispose();mesh.material.dispose();}blooms.length=0;};
   try {
@@ -89,11 +132,11 @@ export function mountMobiusNursery(root) {
         renderer.render(scene,camera);start();
       }else{stop();resetField();}
     });
-    host.querySelector('[data-feather]').addEventListener('click',()=>{journal.feather();stop();resetField();status.textContent='Feather. Encounter stopped. Nothing persisted.';});
+    host.querySelector('[data-feather]').addEventListener('click',()=>{journal.feather();invalidateGarden();stop();resetField();status.textContent='Feather. Encounter stopped. Carried Garden remains unchanged.';gardenStatus.textContent='Feather. Pending creation discarded.';});
     for(const input of host.querySelectorAll('[data-consent]'))input.addEventListener('change',()=>{
-      if(!input.checked){journal.feather();stop();resetField();status.textContent='Consent withdrawn. Encounter stopped; nothing persisted.';}
+      if(!input.checked){journal.feather();invalidateGarden();stop();resetField();status.textContent='Consent withdrawn. Encounter stopped; nothing persisted.';gardenStatus.textContent='Consent withdrawn. Pending creation discarded.';}
     });
-    host._disposeNursery=()=>{journal.feather();stop();clearBlooms();disposed=true;observer?.disconnect();rings.forEach(m=>{m.geometry.dispose();m.material.dispose();});renderer.dispose();host.remove();};
+    host._disposeNursery=()=>{invalidateGarden();journal.feather();stop();clearBlooms();disposed=true;observer?.disconnect();rings.forEach(m=>{m.geometry.dispose();m.material.dispose();});renderer.dispose();host.remove();};
     // Initial render is static until a mutually consented encounter is proposed.
     renderer.render(scene,camera);
   }catch(error){
