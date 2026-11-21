@@ -1,10 +1,13 @@
 // Optional MiniMind-3 gloss adapter. Proposal-only: never executes WTL, persists state or selects canon.
-// Explicit local transport is injected; no external network or implicit model download.
+// Transport is injected. Cloud requests require an owner-authenticated Wayglass proxy, never direct provider credentials.
 export const MINIMIND_MODEL='jingyaogong/minimind-3';
 const SAFE_ID=/^[\w.:-]{1,128}$/;
-export function createMiniMindGloss({endpoint,fetchImpl=globalThis.fetch}={}){
-  if(typeof endpoint!=='string'||!/^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d{1,5})?\/v1\/chat\/completions$/.test(endpoint))
-    throw Error('MiniMind requires an explicit loopback OpenAI-compatible endpoint');
+export function createMiniMindGloss({endpoint,route='local',ownerAuthorised=false,fetchImpl=globalThis.fetch}={}){
+  const local = typeof endpoint==='string' && /^http:\/\/(?:localhost|127\.0\.0\.1)(?::\d{1,5})?\/v1\/chat\/completions$/.test(endpoint);
+  const cloud = route==='cloud' && ownerAuthorised===true && typeof endpoint==='string' &&
+    /^\/api\/v1\/wayglass\/models\/minimind\/gloss$/.test(endpoint);
+  if(!((route==='local' && local)||cloud))
+    throw Error('MiniMind requires local loopback or an owner-authorised same-origin Wayglass cloud proxy');
   if(typeof fetchImpl!=='function')throw TypeError('Fetch transport required');
   return async function gloss({phrase,context='',participant,consent,feather=false,signal}={}){
     if(feather)return Object.freeze({status:'stopped',reason:'Feather'});
@@ -16,12 +19,12 @@ export function createMiniMindGloss({endpoint,fetchImpl=globalThis.fetch}={}){
     let response;
     try{
       response=await fetchImpl(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:MINIMIND_MODEL,messages,stream:false,temperature:0,max_tokens:96}),signal});
-      if(!response.ok)throw Error('Local model returned HTTP '+response.status);
+      if(!response.ok)throw Error('MiniMind route returned HTTP '+response.status);
       const data=await response.json();
       if(signal?.aborted)return Object.freeze({status:'stopped',reason:'Feather'});
       const candidate=data?.choices?.[0]?.message?.content;
       if(typeof candidate!=='string'||!candidate.trim()||candidate.length>2048)throw Error('Invalid local model response');
-      return Object.freeze({schema:'wayglass.minimind-gloss/v0.1',status:'proposal',participant_id:participant.id,model:MINIMIND_MODEL,endpoint_kind:'loopback',phrase,gloss:candidate.trim(),persisted:false,canon_adopted:false});
+      return Object.freeze({schema:'wayglass.minimind-gloss/v0.1',status:'proposal',participant_id:participant.id,model:MINIMIND_MODEL,endpoint_kind:route==='local'?'loopback':'owner-cloud-proxy',phrase,gloss:candidate.trim(),persisted:false,canon_adopted:false});
     }catch(error){if(signal?.aborted||error?.name==='AbortError')return Object.freeze({status:'stopped',reason:'Feather'});throw error;}
   };
 }
