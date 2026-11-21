@@ -27,6 +27,7 @@ const DESTINATIONS=Object.freeze({
   'wayglass:toybox':'commons',
   'wayglass:mythience-crossing':'creation',
   'wayglass:magic-loom':'creation',
+  'wayglass:lawsmith':'creation',
 });
 export function shipDeckGroup(surfaceId){return DESTINATIONS[surfaceId]||'commons';}
 export function shipDeckMatches({label='',surface_id=''},search=''){
