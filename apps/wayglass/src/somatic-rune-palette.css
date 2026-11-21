@@ -1,0 +1,6 @@
+.wg-rune-toggle{position:fixed;right:1rem;bottom:1rem;z-index:1100;border:1px solid #a9cfbd;border-radius:999px;padding:.65rem 1rem;background:#10201f;color:#e6f8ef;cursor:pointer}
+.wg-rune-panel{position:fixed;right:1rem;bottom:4.5rem;z-index:1101;width:min(32rem,calc(100vw - 2rem));max-height:min(68vh,38rem);overflow:auto;background:#101e20;color:#eef9f2;border:1px solid #8dbba9;border-radius:1rem;padding:1rem;box-shadow:0 1rem 4rem #0008}
+.wg-rune-panel[hidden]{display:none}.wg-rune-panel header{display:flex;gap:1rem;align-items:center;justify-content:space-between}.wg-rune-panel button{cursor:pointer;color:inherit;background:#203437;border:1px solid #9db5ad;border-radius:.5rem}.wg-rune-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(6rem,1fr));gap:.5rem}
+.wg-rune-key{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:6rem;padding:.4rem;gap:.4rem}.wg-rune-key svg{height:3.5rem;width:4.8rem;fill:#e0bc86}.wg-rune-key span{font-size:.72rem;line-height:1.15;text-align:center}
+.wg-rune-key:focus-visible,.wg-rune-toggle:focus-visible{outline:3px solid #f5cb7d;outline-offset:2px}
+@media(prefers-reduced-motion:reduce){.wg-rune-panel *{animation:none!important;transition:none!important}}
