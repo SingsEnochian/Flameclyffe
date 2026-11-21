@@ -43,6 +43,8 @@ import { publishWatercolorActivity } from './watercolor-bridge.js';
 import {installMagicTelemetry} from './magic-telemetry-client.js';
 import {mountMagicLoom,mountMagicTelemetryPanel} from './surfaces/magic-loom.js';
 import {mountLawsmith} from './surfaces/lawsmith.js';
+import {installSomaticRunePalette} from './somatic-rune-palette.js';
+import './somatic-rune-palette.css';
 import {installWatercolorRouteActivity} from './watercolor-live-observer.js';
 import {createWatercolorVoyageWatcher} from './watercolor-voyage-watch.js';
 import { divineWayglassTensorKernel, dispatchWyrdruneTensorKernel } from './tensor-webgpu.js';
@@ -61,6 +63,7 @@ const root = document.querySelector('#app');
 // The local entry and other configured provider routes remain independently usable.
 installWayglassField({ host: document.body });
 installKeyboardControls({ root: document });
+installSomaticRunePalette({host:document.body});
 
 const embodiment = detectEmbodimentCapabilities(globalThis);
 const ar = await detectARSupport(globalThis);
