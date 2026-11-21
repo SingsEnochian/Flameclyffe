@@ -3,6 +3,7 @@ import {encounter} from '../mobius-nursery-encounter.mjs';
 import {createNurseryJournal} from '../mobius-nursery-journal.mjs';
 import {composeNurseryBloom} from '../mobius-nursery-bloom.mjs';
 import {composeAtelier} from '../mobius-nursery-atelier.mjs';
+import {compileWTL} from '../wtl-transform-frontend.mjs';
 
 // Owner-local, proposal-only visualization. No remote calls or automatic persistence.
 export function mountMobiusNursery(root) {
@@ -17,6 +18,8 @@ export function mountMobiusNursery(root) {
       <label>Signal <select data-signal><option value="wtl">Wyrdrune</option><option value="touch">Touch</option><option value="word">Word</option><option value="sound">Sound</option></select></label>
       <label>Atelier <select data-atelier><option value="worldseed">Worldseed Atelier</option><option value="pigment">Pigment Garden</option><option value="crystal">Crystal Forge</option><option value="ribbon">Ribbon Loom</option></select></label>
       <label>Creative signal <input data-utterance maxlength="256" value="encounter" aria-label="Creative encounter signal"></label>
+      <label>WTL derivation <input data-wtl maxlength="512" value="wonder(tend(worldseed))" aria-label="WTL transformation expression"></label>
+      <button type="button" data-compile-wtl>Interpret WTL</button>
       <button type="button" data-encounter>Offer encounter</button>
       <button type="button" data-feather>Feather · stop</button>
     </div><div data-stage role="img" aria-label="Two luminous Möbius rings orbit separately in a three-dimensional field"></div>
@@ -51,6 +54,11 @@ export function mountMobiusNursery(root) {
     const start=()=>{if(!disposed&&!reduced?.matches&&!raf){active=true;draw();}};
     const stop=()=>{active=false;cancelAnimationFrame(raf);raf=0;if(!disposed)renderer.render(scene,camera);};
     const status=host.querySelector('[data-status]');
+    host.querySelector('[data-compile-wtl]').addEventListener('click',()=>{
+      try {const compiled=compileWTL(host.querySelector('[data-wtl]').value);
+        status.textContent=`WTL ${compiled.ir.semanticType}: ${compiled.meaning}. Lineage: ${compiled.lineage.join(' → ')}. Proposal only; no effects or persistence.`;
+      } catch(error) {status.textContent=`WTL rejected: ${error.message}`;}
+    });
     const resetField=()=>{clearBlooms();rings.forEach(m=>{m.scale.setScalar(1);m.material.emissiveIntensity=0.35;});renderer.render(scene,camera);};
     host.querySelector('[data-encounter]').addEventListener('click',()=>{
       const consent={'nursery:a':host.querySelector('[data-consent="a"]').checked,'nursery:b':host.querySelector('[data-consent="b"]').checked};
