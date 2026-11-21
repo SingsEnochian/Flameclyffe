@@ -18,12 +18,18 @@ export function proposeGardenAction(state,{actor,material,x=0,y=0,consent={},fea
 }
 export function carryGardenAction(state,proposal,{consent={},feather=false}={}){
  if(feather)return {status:'stopped',reason:'Feather'};
- if(proposal?.status!=='proposal'||proposal.baseRevision!==state.revision||!state.participants.includes(proposal.item.actor))throw Error('Stale or invalid garden proposal');
+ if(state?.schema!==GARDEN_SCHEMA||!Array.isArray(state.objects)||state.objects.length>=64||!Array.isArray(state.participants))throw Error('Invalid garden state or capacity');
+ if(proposal?.status!=='proposal'||proposal.baseRevision!==state.revision||!state.participants.includes(proposal.item?.actor))throw Error('Stale or invalid garden proposal');
+ const item=proposal.item;
+ if(item.id!==item.actor+':'+(state.revision+1)||!MATERIALS.includes(item.material)||!Number.isFinite(item.x)||!Number.isFinite(item.y)||Math.abs(item.x)>1||Math.abs(item.y)>1||!validId(item.source)||state.objects.some(o=>o.id===item.id))throw Error('Invalid or replayed garden proposal');
  if(consent[proposal.item.actor]!==true)return {status:'declined',actor:proposal.item.actor};
  return {schema:GARDEN_SCHEMA,revision:state.revision+1,participants:[...state.participants],objects:[...state.objects,{...proposal.item}],history:[...state.history,{revision:state.revision+1,action:'carry',itemId:proposal.item.id,source:proposal.item.source}],carried:true};
 }
 export function restoreGarden(snapshot,participants){
- if(snapshot?.schema!==GARDEN_SCHEMA||!Number.isSafeInteger(snapshot.revision)||snapshot.revision<0||!Array.isArray(snapshot.objects)||snapshot.objects.length>64||!Array.isArray(snapshot.history)||snapshot.history.length!==snapshot.revision||JSON.stringify(snapshot.participants)!==JSON.stringify(participants))throw Error('Invalid or mismatched Return snapshot');
- for(const o of snapshot.objects)if(!validId(o.id)||!participants.includes(o.actor)||!MATERIALS.includes(o.material)||!Number.isFinite(o.x)||!Number.isFinite(o.y)||Math.abs(o.x)>1||Math.abs(o.y)>1||!validId(o.source))throw Error('Invalid carried object');
+ if(snapshot?.schema!==GARDEN_SCHEMA||!Number.isSafeInteger(snapshot.revision)||snapshot.revision<0||snapshot.revision>64||!Array.isArray(snapshot.objects)||snapshot.objects.length!==snapshot.revision||!Array.isArray(snapshot.history)||snapshot.history.length!==snapshot.revision||!Array.isArray(participants)||JSON.stringify(snapshot.participants)!==JSON.stringify(participants))throw Error('Invalid or mismatched Return snapshot');
+ for(let i=0;i<snapshot.objects.length;i++){
+  const o=snapshot.objects[i],h=snapshot.history[i];
+  if(!participants.includes(o.actor)||o.id!==o.actor+':'+(i+1)||!MATERIALS.includes(o.material)||!Number.isFinite(o.x)||!Number.isFinite(o.y)||Math.abs(o.x)>1||Math.abs(o.y)>1||!validId(o.source)||h?.revision!==i+1||h.action!=='carry'||h.itemId!==o.id||h.source!==o.source)throw Error('Invalid carried object or Return history');
+ }
  return structuredClone(snapshot);
 }
