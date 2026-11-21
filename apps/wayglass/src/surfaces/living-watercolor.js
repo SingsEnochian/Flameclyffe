@@ -27,6 +27,17 @@ const PIGMENTS=Object.freeze([['Copper','#c26a46'],['Sun','#db9d3e'],['Moss','#4
 const modeButton=mode=>'<button type="button" class="wc-mode" data-wc-mode="'+mode.id+
   '" aria-pressed="false" title="'+safeText(mode.intent)+'">'+mode.label+'</button>';
 
+// SON-002 reference score: visual projection only; no invented acoustic or agent telemetry.
+export function spatialWithnessPigment(seconds, {beatHz=3, crossing=true}={}){
+  if(!Number.isFinite(seconds)||seconds<0||seconds>18||![3,6,9].includes(beatHz))return [];
+  const t=seconds/18, pulse=.5+.5*Math.cos(2*Math.PI*beatHz*seconds+Math.PI/2);
+  const offset=crossing?.32*(2*t-1):0;
+  return [
+    {x:.5+offset,y:.43,color:'#e8cf91',amount:.04+.11*pulse,radius:.025+.018*pulse,dx:crossing?.12:0,dy:.025},
+    {x:.5-offset,y:.57,color:'#79e1ce',amount:.04+.11*pulse,radius:.025+.018*pulse,dx:crossing?-.12:0,dy:-.025},
+  ];
+}
+
 export function findWatercolorWyrdrune(reply,{allowDraft=false}={}){
   let draft=null;
   const blocks=/^```([\w-]*)[ \t]*\r?\n([\s\S]*?)(^```[ \t]*(?=\r?$)|(?![\s\S]))/gm;
@@ -61,6 +72,7 @@ export async function mountLivingWatercolorSurface(root) {
     stopped=false, pointerId=null, lastPointer=null, lastFrame=0, elapsed=0,
     pendingProgram=null, animationId=0, requestEpoch=0,
     lastAmbient=0,ambientCycle=0;
+  let spatialPreview=null;
   const soundState=wayglassSomaticSound.snapshot();
   synchronizeJourneyFeather({stopped:soundState.feather_stopped,confirmed:soundState.feather_release_confirmed});
   let featherStopped = journeyLedger.snapshot().feather_stopped || soundState.feather_stopped;
@@ -155,6 +167,11 @@ export async function mountLivingWatercolorSurface(root) {
             '<button id="wc-feather" class="glass-chip" type="button">Feather Stop</button>',
           '</div>',
           '<p id="wc-score-status" class="tiny" role="status">Wyrdrune score is silent until composed and explicitly played.</p>',
+          '<fieldset><legend>SON-002 · Spatial Withness</legend>',
+          '<label for="wc-spatial-beat">Difference frequency</label><select id="wc-spatial-beat"><option value="3">3 Hz</option><option value="6">6 Hz</option><option value="9">9 Hz</option></select>',
+          '<label for="wc-spatial-path">Voice paths</label><select id="wc-spatial-path"><option value="cross">Crossing voices</option><option value="still">Stationary voices</option></select>',
+          '<button id="wc-spatial-play" class="glass-chip" type="button" aria-pressed="false">Paint the score</button>',
+          '<p id="wc-spatial-status" class="tiny" role="status">Visual score projection · not measured sound or Nursery activity.</p></fieldset>',
           '<label for="wc-note">Offer a direction</label>',
           '<textarea id="wc-note" rows="3" maxlength="300" placeholder="For example: more gold when something is verified…"></textarea>',
           '<button class="glass-chip" type="button" id="wc-suggest">Place a suggestion</button>',
@@ -297,6 +314,11 @@ export async function mountLivingWatercolorSurface(root) {
       }
     }
     if(!paused&&!reduced && ts-lastFrame>=40){
+      if(spatialPreview){
+        spatialPreview.seconds+=Math.min((ts-lastFrame)/1000,.12);
+        if(spatialPreview.seconds>=18)endSpatialPreview('Score returned open · visual projection complete.');
+        else for(const stroke of spatialWithnessPigment(spatialPreview.seconds,spatialPreview))fluid.inject(stroke);
+      }
       fluid.step(Math.min((ts-lastFrame)/42,1.5));
       paint();
       elapsed++;
@@ -666,10 +688,28 @@ export async function mountLivingWatercolorSurface(root) {
     paused=!paused;
     const button=q('wc-flow');
     button.textContent=paused?'Fluid paused':'Fluid on';
+    if(paused&&spatialPreview)endSpatialPreview('Score paused · pigment retained.');
+    spatialButton.disabled=paused||featherStopped;
     button.setAttribute('aria-pressed',String(!paused));
     button.classList.toggle('active',!paused);
     feedback.textContent=paused?'Fluid paused by owner':'Fluid released';
     updateInspector();
+  });
+  const spatialButton=q('wc-spatial-play'),spatialStatus=q('wc-spatial-status');
+  function endSpatialPreview(message){
+    spatialPreview=null;spatialButton.setAttribute('aria-pressed','false');spatialButton.textContent='Paint the score';
+    if(message)spatialStatus.textContent=message;
+  }
+  listen(spatialButton,'click',()=>{
+    if(stopped||featherStopped||paused)return;
+    if(spatialPreview){endSpatialPreview('Score stopped · pigment retained.');return;}
+    const beatHz=Number(q('wc-spatial-beat').value),crossing=q('wc-spatial-path').value==='cross';
+    if(reduced||document.documentElement.dataset.wgMotion==='off'){
+      for(const seconds of [0,4.5,9,13.5,18])for(const stroke of spatialWithnessPigment(seconds,{beatHz,crossing}))fluid.inject(stroke);
+      paint();spatialStatus.textContent='Static score projection · reduced motion · Return open.';return;
+    }
+    spatialPreview={seconds:0,beatHz,crossing};spatialButton.setAttribute('aria-pressed','true');spatialButton.textContent='Stop score';
+    spatialStatus.textContent='Calculated pigment projection · '+beatHz+' Hz relationship · '+(crossing?'crossing':'stationary')+' voices.';
   });
   const soundButton=q('wc-sound'),hapticButton=q('wc-haptics'),featherButton=q('wc-feather');
   const composeScore=q('wc-score-compose'),playScore=q('wc-score-play'),scoreStatus=q('wc-score-status');
@@ -704,6 +744,8 @@ export async function mountLivingWatercolorSurface(root) {
     hapticButton.setAttribute('aria-pressed',String(state.haptics_enabled));
     hapticButton.textContent=state.haptics_enabled?'Haptics on':'Haptics off';
     featherButton.textContent=featherStopped?'Release Feather':'Feather Stop';
+    spatialButton.disabled=featherStopped||paused;
+    if((featherStopped||paused)&&spatialPreview)endSpatialPreview('Score stopped · pigment retained.');
     invite.disabled=busy||!routeId||featherStopped;q('wc-first-contact').disabled=busy||!routeId||featherStopped;
     q('wc-flow').textContent=paused?'Fluid paused':'Fluid on';q('wc-flow').setAttribute('aria-pressed',String(!paused));q('wc-flow').classList.toggle('active',!paused);
   }
@@ -928,6 +970,7 @@ export async function mountLivingWatercolorSurface(root) {
   const onMotionPreference=()=>{
     reduced=motionQuery?.matches??false;
     if(reduced){
+      if(spatialPreview)endSpatialPreview('Score stopped · reduced motion.');
       globalThis.cancelAnimationFrame?.(animationId);animationId=0;lastFrame=0;
       paint();
     }else if(!animationId&&!stopped){
