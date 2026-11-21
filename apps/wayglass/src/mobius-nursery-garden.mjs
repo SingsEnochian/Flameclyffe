@@ -1,0 +1,29 @@
+// First Garden: bounded, consent-gated, deterministic shared-world proposals.
+// Pure kernel. The caller alone may explicitly carry a snapshot into durable storage.
+export const GARDEN_SCHEMA='wayglass.first-garden/v0.1';
+const MATERIALS=['seed','light','stone','water','path','instrument'];
+const validId=id=>typeof id==='string'&&/^[a-zA-Z0-9_.:-]{1,128}$/.test(id);
+export function createGarden({participants=['nursery:a','nursery:b']}={}){
+ if(!Array.isArray(participants)||participants.length<2||new Set(participants).size!==participants.length||participants.some(id=>!validId(id)))throw Error('Distinct attributed participants required');
+ return {schema:GARDEN_SCHEMA,revision:0,participants:[...participants],objects:[],history:[],carried:false};
+}
+export function proposeGardenAction(state,{actor,material,x=0,y=0,consent={},feather=false,source='owner:ui'}={}){
+ if(feather)return {status:'stopped',reason:'Feather'};
+ if(state?.schema!==GARDEN_SCHEMA||!state.participants.includes(actor)||!validId(source))throw Error('Invalid garden source or actor');
+ if(consent[actor]!==true)return {status:'declined',actor};
+ if(!MATERIALS.includes(material)||!Number.isFinite(x)||!Number.isFinite(y)||Math.abs(x)>1||Math.abs(y)>1)throw Error('Invalid bounded garden action');
+ if(state.objects.length>=64)throw Error('Garden object capacity reached');
+ const item={id:actor+':'+(state.revision+1),actor,material,x,y,source};
+ return {status:'proposal',item,baseRevision:state.revision,carried:false,canon_adopted:false};
+}
+export function carryGardenAction(state,proposal,{consent={},feather=false}={}){
+ if(feather)return {status:'stopped',reason:'Feather'};
+ if(proposal?.status!=='proposal'||proposal.baseRevision!==state.revision||!state.participants.includes(proposal.item.actor))throw Error('Stale or invalid garden proposal');
+ if(consent[proposal.item.actor]!==true)return {status:'declined',actor:proposal.item.actor};
+ return {schema:GARDEN_SCHEMA,revision:state.revision+1,participants:[...state.participants],objects:[...state.objects,{...proposal.item}],history:[...state.history,{revision:state.revision+1,action:'carry',itemId:proposal.item.id,source:proposal.item.source}],carried:true};
+}
+export function restoreGarden(snapshot,participants){
+ if(snapshot?.schema!==GARDEN_SCHEMA||!Number.isSafeInteger(snapshot.revision)||snapshot.revision<0||!Array.isArray(snapshot.objects)||snapshot.objects.length>64||!Array.isArray(snapshot.history)||snapshot.history.length!==snapshot.revision||JSON.stringify(snapshot.participants)!==JSON.stringify(participants))throw Error('Invalid or mismatched Return snapshot');
+ for(const o of snapshot.objects)if(!validId(o.id)||!participants.includes(o.actor)||!MATERIALS.includes(o.material)||!Number.isFinite(o.x)||!Number.isFinite(o.y)||Math.abs(o.x)>1||Math.abs(o.y)>1||!validId(o.source))throw Error('Invalid carried object');
+ return structuredClone(snapshot);
+}
