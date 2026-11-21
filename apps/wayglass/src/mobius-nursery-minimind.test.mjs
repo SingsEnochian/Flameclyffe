@@ -20,3 +20,15 @@ test('rejects remote endpoints, missing attribution and invalid responses',async
  await assert.rejects(gloss({phrase:'Yu',participant,consent}));
  await assert.rejects(gloss({phrase:'Yu',participant:{id:'bad id'},consent}));
 });
+
+test('cloud route is same-origin proxy only and requires owner-authorised client context',async()=>{
+ const path='/api/v1/wayglass/models/minimind/gloss';
+ assert.throws(()=>createMiniMindGloss({route:'cloud',endpoint:path}));
+ assert.throws(()=>createMiniMindGloss({route:'cloud',ownerAuthorised:true,endpoint:'https://provider.example/v1/chat/completions'}));
+ let called=0;
+ const gloss=createMiniMindGloss({route:'cloud',ownerAuthorised:true,endpoint:path,fetchImpl:async(url)=>{called++;assert.equal(url,path);return {ok:true,json:async()=>({choices:[{message:{content:'Possible meaning'}}]})};}});
+ const result=await gloss({phrase:'Solsolyu',participant,consent});
+ assert.equal(result.endpoint_kind,'owner-cloud-proxy');
+ assert.equal(result.persisted,false);
+ assert.equal(called,1);
+});
