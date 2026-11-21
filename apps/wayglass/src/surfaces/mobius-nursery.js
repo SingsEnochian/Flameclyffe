@@ -4,6 +4,7 @@ import {createNurseryJournal} from '../mobius-nursery-journal.mjs';
 import {composeNurseryBloom} from '../mobius-nursery-bloom.mjs';
 import {composeAtelier} from '../mobius-nursery-atelier.mjs';
 import {compileWTL} from '../wtl-transform-frontend.mjs';
+import {prepareNurserySignal} from '../wtl-nursery-bridge.mjs';
 
 // Owner-local, proposal-only visualization. No remote calls or automatic persistence.
 export function mountMobiusNursery(root) {
@@ -62,7 +63,13 @@ export function mountMobiusNursery(root) {
     const resetField=()=>{clearBlooms();rings.forEach(m=>{m.scale.setScalar(1);m.material.emissiveIntensity=0.35;});renderer.render(scene,camera);};
     host.querySelector('[data-encounter]').addEventListener('click',()=>{
       const consent={'nursery:a':host.querySelector('[data-consent="a"]').checked,'nursery:b':host.querySelector('[data-consent="b"]').checked};
-      const result=encounter({left:{id:'nursery:a',spin:0.2,revision:0},right:{id:'nursery:b',spin:-0.4,revision:0},consent,signal:{kind:host.querySelector('[data-signal]').value,value:host.querySelector('[data-utterance]').value,source:'wayglass:nursery-ui'}});
+      let prepared;
+      try {prepared=prepareNurserySignal({kind:host.querySelector('[data-signal]').value,
+        value:host.querySelector('[data-utterance]').value,
+        wtlSource:host.querySelector('[data-wtl]').value,consent});}
+      catch(error){stop();resetField();status.textContent=`Encounter rejected: ${error.message}`;return;}
+      if(prepared.status==='declined'){stop();resetField();status.textContent='Encounter declined. Both participants must opt in.';return;}
+      const result=encounter({left:{id:'nursery:a',spin:0.2,revision:0},right:{id:'nursery:b',spin:-0.4,revision:0},consent,signal:prepared.signal});
       status.textContent=result.status==='proposal'?`Encounter proposed. ${result.proposed_field.kind} resonance ${result.proposed_field.resonance}. Neither history has changed.`:'Encounter declined. Both participants must opt in.';
       if(result.status==='proposal'){
         journal.record(result);
