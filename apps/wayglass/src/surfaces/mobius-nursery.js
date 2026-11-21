@@ -36,6 +36,23 @@ export function mountMobiusNursery(root) {
       </fieldset>
     </div><div data-stage role="img" aria-label="Two luminous Möbius rings orbit separately in a three-dimensional field"></div>
     <output data-status role="status" aria-live="polite">Waiting for both participants.</output>`;
+  const gardenStyle=document.createElement('style');
+  gardenStyle.textContent=`
+    .wayglass-nursery{color:#e9f9ef;max-width:100%;padding:clamp(12px,2vw,28px);background:radial-gradient(ellipse at 10% 0%,#254c4840,transparent 55%),linear-gradient(145deg,#07141b,#131322);border:1px solid #8bd7c35c;border-radius:24px}
+    .wayglass-nursery .nursery-controls{display:flex;flex-wrap:wrap;gap:12px;align-items:end}
+    .wayglass-nursery label{display:inline-flex;flex-direction:column;gap:5px;min-width:140px}
+    .wayglass-nursery input,.wayglass-nursery select,.wayglass-nursery button{font:inherit;min-height:42px;border-radius:12px;border:1px solid #9acdbd70;padding:8px 12px;color:#f2fff8;background:#182c32}
+    .wayglass-nursery button{cursor:pointer;background:linear-gradient(120deg,#174e50,#33334c)}
+    .wayglass-nursery button:focus-visible,.wayglass-nursery input:focus-visible,.wayglass-nursery select:focus-visible{outline:3px solid #f8c77e;outline-offset:3px}
+    .wayglass-nursery button:disabled{opacity:.45;cursor:not-allowed}
+    .wayglass-nursery .nursery-garden{flex:1 1 100%;display:flex;flex-wrap:wrap;gap:12px;align-items:end;border:1px solid #8bd7c36b;border-radius:22px;padding:16px;background:radial-gradient(circle at 85% 15%,#e4b26c20,transparent 48%),#10252b}
+    .wayglass-nursery .nursery-garden legend{color:#f5d79a;font-weight:700;padding:0 10px}
+    .wayglass-nursery .nursery-garden p,.wayglass-nursery .nursery-garden output,.wayglass-nursery .nursery-garden ul{flex:1 1 100%;margin:0}
+    .wayglass-nursery [data-garden-objects]{display:flex;flex-wrap:wrap;gap:8px;list-style:none;padding:0}
+    .wayglass-nursery [data-garden-objects] li{padding:7px 12px;border:1px solid #b7dbb377;border-radius:999px;background:#1e3c3d}
+    @media(prefers-reduced-motion:reduce){.wayglass-nursery *{animation:none!important;transition:none!important}}
+  `;
+  host.prepend(gardenStyle);
   root.append(host);
   const stage=host.querySelector('[data-stage]');
   stage.style.cssText='width:100%;height:min(55vh,440px);min-height:260px;overflow:hidden;border-radius:20px;background:#080d16';
@@ -65,7 +82,7 @@ export function mountMobiusNursery(root) {
   host.querySelector('[data-garden-carry]').addEventListener('click',()=>{
     try {if(!pendingGarden)return;const next=carryGardenAction(garden,pendingGarden,{consent:gardenConsent()});
       invalidateGarden();if(next.status!=='proposal'&&next.status!=='declined'&&next.status!=='stopped'){
-        garden=next;globalThis.localStorage?.setItem(gardenKey,JSON.stringify(garden));renderGarden();
+        garden=next;globalThis.localStorage?.setItem(gardenKey,JSON.stringify(garden));renderGarden();renderGardenStage();
         gardenStatus.textContent='Carried '+garden.objects.length+' creation(s). Return snapshot saved locally.';
       }else gardenStatus.textContent='Carry declined or stopped.';
     }catch(error){invalidateGarden();gardenStatus.textContent='Carry failed: '+error.message;}
@@ -73,11 +90,26 @@ export function mountMobiusNursery(root) {
   host.querySelector('[data-garden-return]').addEventListener('click',()=>{
     try {invalidateGarden();const saved=globalThis.localStorage?.getItem(gardenKey);
       if(!saved){gardenStatus.textContent='No carried Garden snapshot yet.';return;}
-      garden=restoreGarden(JSON.parse(saved),garden.participants);renderGarden();
+      garden=restoreGarden(JSON.parse(saved),garden.participants);renderGarden();renderGardenStage();
       gardenStatus.textContent='Returned to revision '+garden.revision+' with '+garden.objects.length+' carried creations.';
     }catch(error){gardenStatus.textContent='Return rejected: '+error.message;}
   });
   const blooms=[];
+  const gardenMeshes=[];
+  const renderGardenStage=()=>{
+    for(const mesh of gardenMeshes){scene.remove(mesh);mesh.geometry.dispose();mesh.material.dispose();}
+    gardenMeshes.length=0;
+    for(const [i,item] of garden.objects.entries()){
+      const palette={seed:0x93d69a,light:0xffd79b,stone:0x9bb5c9,water:0x64c9df,path:0xd6a7e8,instrument:0xf0b5a0};
+      const geometry=item.material==='stone'?new THREE.DodecahedronGeometry(.14):item.material==='light'?new THREE.SphereGeometry(.12,12,8):new THREE.IcosahedronGeometry(.13,1);
+      const material=new THREE.MeshStandardMaterial({color:palette[item.material],emissive:palette[item.material],emissiveIntensity:.4,roughness:.3});
+      const mesh=new THREE.Mesh(geometry,material);
+      const angle=i*2.399963;const radius=.4+Math.sqrt(i+1)*.22;
+      mesh.position.set(Math.cos(angle)*radius,Math.sin(angle)*radius,-.8);
+      scene.add(mesh);gardenMeshes.push(mesh);
+    }
+    renderer.render(scene,camera);
+  };
   const clearBlooms=()=>{for(const mesh of blooms){scene.remove(mesh);mesh.geometry.dispose();mesh.material.dispose();}blooms.length=0;};
   try {
     renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,powerPreference:'low-power'});
@@ -136,7 +168,7 @@ export function mountMobiusNursery(root) {
     for(const input of host.querySelectorAll('[data-consent]'))input.addEventListener('change',()=>{
       if(!input.checked){journal.feather();invalidateGarden();stop();resetField();status.textContent='Consent withdrawn. Encounter stopped; nothing persisted.';gardenStatus.textContent='Consent withdrawn. Pending creation discarded.';}
     });
-    host._disposeNursery=()=>{invalidateGarden();journal.feather();stop();clearBlooms();disposed=true;observer?.disconnect();rings.forEach(m=>{m.geometry.dispose();m.material.dispose();});renderer.dispose();host.remove();};
+    host._disposeNursery=()=>{invalidateGarden();journal.feather();stop();clearBlooms();for(const mesh of gardenMeshes){scene.remove(mesh);mesh.geometry.dispose();mesh.material.dispose();}disposed=true;observer?.disconnect();rings.forEach(m=>{m.geometry.dispose();m.material.dispose();});renderer.dispose();host.remove();};
     // Initial render is static until a mutually consented encounter is proposed.
     renderer.render(scene,camera);
   }catch(error){
