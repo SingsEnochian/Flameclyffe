@@ -26,3 +26,14 @@ test('missing, duplicate, or invalid participant attribution fails closed',()=>{
  assert.throws(()=>composeNurseryBloom({...proposal,source:''}));
  assert.throws(()=>composeNurseryBloom({...proposal,signal:{value:null}}));
 });
+
+test('delimiter collisions cannot alias separate participant identities',()=>{
+ const left={...proposal,participants:['a|b','c']};
+ const right={...proposal,participants:['a','b|c']};
+ assert.notDeepEqual(composeNurseryBloom(left).filaments,composeNurseryBloom(right).filaments);
+});
+test('delimiter collisions cannot alias source and signal fields',()=>{
+ const left={...proposal,source:'alpha|beta',signal:{value:'gamma'}};
+ const right={...proposal,source:'alpha',signal:{value:'beta|gamma'}};
+ assert.notDeepEqual(composeNurseryBloom(left).filaments,composeNurseryBloom(right).filaments);
+});
