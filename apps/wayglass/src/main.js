@@ -42,6 +42,7 @@ import { installQuadFeatherListener, readLatestQuadGestalt, subscribeQuadGestalt
 import { publishWatercolorActivity } from './watercolor-bridge.js';
 import {installMagicTelemetry} from './magic-telemetry-client.js';
 import {mountMagicLoom,mountMagicTelemetryPanel} from './surfaces/magic-loom.js';
+import {mountLawsmith} from './surfaces/lawsmith.js';
 import {installWatercolorRouteActivity} from './watercolor-live-observer.js';
 import {createWatercolorVoyageWatcher} from './watercolor-voyage-watch.js';
 import { divineWayglassTensorKernel, dispatchWyrdruneTensorKernel } from './tensor-webgpu.js';
@@ -71,6 +72,7 @@ FIRST_WAYGLASS_ORGANS.forEach(registerWayglassOrgan);
 const fullSpectrum = createWayglassSpectralField();
 async function mountWithMagicPanel(root,mount,options){const stop=await mount(root);const dispose=mountMagicTelemetryPanel(root.firstElementChild||root,options);return()=>{dispose();if(typeof stop==='function')stop();};}
 registerWayglassSurface({surface_id:'wayglass:magic-loom',label:'Wayglass · Wyrdrune Loom',mount:mountMagicLoom});
+registerWayglassSurface({surface_id:'wayglass:lawsmith',label:'Wayglass · Lawsmith / Kernel Becoming',mount:mountLawsmith});
 
 registerWayglassSurface({surface_id:'wayglass:sound-composition',label:'Wayglass · Spatial Soundstage',mount:root=>mountWayglassSoundComposition(root,{composition:wayglassSomaticSound.composition,soundscape:wayglassSomaticSound,storyBinding:wayglassStoryScoreBinding})});
 registerWayglassSurface({surface_id:WAYGLASS_ENTRY_SURFACE,label:'Living Watercolor',mount:mountLivingWatercolorSurface});
