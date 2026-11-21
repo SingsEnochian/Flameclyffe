@@ -9,7 +9,9 @@ export function createGarden({participants=['nursery:a','nursery:b']}={}){
 }
 export function proposeGardenAction(state,{actor,material,x=0,y=0,consent={},feather=false,source='owner:ui'}={}){
  if(feather)return {status:'stopped',reason:'Feather'};
- if(state?.schema!==GARDEN_SCHEMA||!state.participants.includes(actor)||!validId(source))throw Error('Invalid garden source or actor');
+ if(state?.schema!==GARDEN_SCHEMA||!Array.isArray(state.participants)||!state.participants.includes(actor)||!validId(source))throw Error('Invalid garden source or actor');
+ // Never issue a new proposal from a corrupted or tampered Return snapshot.
+ restoreGarden(state,state.participants);
  if(consent[actor]!==true)return {status:'declined',actor};
  if(!MATERIALS.includes(material)||!Number.isFinite(x)||!Number.isFinite(y)||Math.abs(x)>1||Math.abs(y)>1)throw Error('Invalid bounded garden action');
  if(state.objects.length>=64)throw Error('Garden object capacity reached');
@@ -28,7 +30,7 @@ export function carryGardenAction(state,proposal,{consent={},feather=false}={}){
  return {schema:GARDEN_SCHEMA,revision:state.revision+1,participants:[...state.participants],objects:[...state.objects,{...proposal.item}],history:[...state.history,{revision:state.revision+1,action:'carry',itemId:proposal.item.id,source:proposal.item.source}],carried:true};
 }
 export function restoreGarden(snapshot,participants){
- if(snapshot?.schema!==GARDEN_SCHEMA||!Number.isSafeInteger(snapshot.revision)||snapshot.revision<0||snapshot.revision>64||!Array.isArray(snapshot.objects)||snapshot.objects.length!==snapshot.revision||!Array.isArray(snapshot.history)||snapshot.history.length!==snapshot.revision||!Array.isArray(participants)||participants.length<2||new Set(participants).size!==participants.length||participants.some(id=>!validId(id))||JSON.stringify(snapshot.participants)!==JSON.stringify(participants))throw Error('Invalid or mismatched Return snapshot');
+ if(snapshot?.schema!==GARDEN_SCHEMA||typeof snapshot.carried!=='boolean'||snapshot.carried!==(snapshot.revision>0)||!Number.isSafeInteger(snapshot.revision)||snapshot.revision<0||snapshot.revision>64||!Array.isArray(snapshot.objects)||snapshot.objects.length!==snapshot.revision||!Array.isArray(snapshot.history)||snapshot.history.length!==snapshot.revision||!Array.isArray(participants)||participants.length<2||new Set(participants).size!==participants.length||participants.some(id=>!validId(id))||JSON.stringify(snapshot.participants)!==JSON.stringify(participants))throw Error('Invalid or mismatched Return snapshot');
  for(let i=0;i<snapshot.objects.length;i++){
   const o=snapshot.objects[i],h=snapshot.history[i];
   if(!participants.includes(o.actor)||o.id!==o.actor+':'+(i+1)||!MATERIALS.includes(o.material)||!Number.isFinite(o.x)||!Number.isFinite(o.y)||Math.abs(o.x)>1||Math.abs(o.y)>1||!validId(o.source)||h?.revision!==i+1||h.action!=='carry'||h.itemId!==o.id||h.source!==o.source)throw Error('Invalid carried object or Return history');
