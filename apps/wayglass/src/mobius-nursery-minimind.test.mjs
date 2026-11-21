@@ -57,3 +57,21 @@ test('Feather abort during in-flight local response discards late gloss',async()
  assert.equal(result.status,'stopped');
  assert.equal(result.gloss,undefined);
 });
+
+test('prototype-inherited permission is never participant consent, before or after transport',async()=>{
+ let calls=0;
+ const inherited=Object.create({'mote:a':true});
+ const gloss=createMiniMindGloss({endpoint,fetchImpl:async()=>{calls++;return {ok:true,json:async()=>({choices:[{message:{content:'Unapproved gloss'}}]})};}});
+ assert.equal((await gloss({phrase:'Yu',participant,consent:inherited})).status,'declined');
+ assert.equal(calls,0);
+ const permissions={'mote:a':true};
+ let release;
+ const pending=new Promise(resolve=>{release=resolve;});
+ const late=createMiniMindGloss({endpoint,fetchImpl:async()=>{calls++;await pending;return {ok:true,json:async()=>({choices:[{message:{content:'Late gloss'}}]})};}});
+ const request=late({phrase:'Yu',participant,consent:permissions});
+ delete permissions['mote:a'];
+ Object.setPrototypeOf(permissions,{'mote:a':true});
+ release();
+ assert.equal((await request).status,'declined');
+ assert.equal(calls,1);
+});
