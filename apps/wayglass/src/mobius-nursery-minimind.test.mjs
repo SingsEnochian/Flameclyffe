@@ -32,3 +32,28 @@ test('cloud route is same-origin proxy only and requires owner-authorised client
  assert.equal(result.persisted,false);
  assert.equal(called,1);
 });
+
+test('withdrawal during in-flight cloud response discards gloss without persistence',async()=>{
+ const permissions={'mote:a':true};
+ let release;
+ const pending=new Promise(resolve=>{release=resolve;});
+ const gloss=createMiniMindGloss({route:'cloud',ownerAuthorised:true,endpoint:'/api/v1/wayglass/models/minimind/gloss',fetchImpl:async()=>{await pending;return {ok:true,json:async()=>({choices:[{message:{content:'Late proposal'}}]})};}});
+ const request=gloss({phrase:'Solsolyu',participant,consent:permissions});
+ permissions['mote:a']=false;
+ release();
+ const result=await request;
+ assert.equal(result.status,'declined');
+ assert.equal(result.gloss,undefined);
+});
+test('Feather abort during in-flight local response discards late gloss',async()=>{
+ const controller=new AbortController();
+ let release;
+ const pending=new Promise(resolve=>{release=resolve;});
+ const gloss=createMiniMindGloss({endpoint,fetchImpl:async()=>{await pending;return {ok:true,json:async()=>({choices:[{message:{content:'Late gloss'}}]})};}});
+ const request=gloss({phrase:'Solsolyu',participant,consent,signal:controller.signal});
+ controller.abort();
+ release();
+ const result=await request;
+ assert.equal(result.status,'stopped');
+ assert.equal(result.gloss,undefined);
+});
