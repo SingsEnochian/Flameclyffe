@@ -20,9 +20,12 @@ export function createShipSoundscape({audio=createAcousticAudioEngine(),scoreSto
   let source='owner',extended=null,revision=0,playingExtended=false;
   const subscribers=new Set();
   function snapshot(){
+    const acoustic=audio.getState();
+    const sounding=source==='extended'&&playingExtended&&acoustic.running;
     return Object.freeze({
       schema:'wayglass.ship-soundscape/v1',
-      source,source_ref:SHIP_SCORE_SOURCES[source],playing:source==='extended'&&playingExtended&&audio.getState().running,
+      source,source_ref:SHIP_SCORE_SOURCES[source],playing:sounding,
+      projection:sounding?Object.freeze({score:extended.score, audioTime:acoustic.audioTime??null, program_sha256:extended.program_sha256}):null,
       score_ready:!!extended,score_digest:source==='extended'?extended?.program_sha256??null:null,
       story_digest:source==='extended'?extended?.story_sha256??null:null,
       original_program:source==='owner'?audio.composition.snapshot().program??null:null,
@@ -63,7 +66,9 @@ export function createShipSoundscape({audio=createAcousticAudioEngine(),scoreSto
     if(feather.snapshot().feather_stopped)throw new Error('Feather Stop active');
     if(!extended)throw new Error('Compose a verified Wyrdrune host score first.');
     if(source!=='extended')selectExtended();
+    const token=revision;
     const state=await audio.start(); // Called directly from a user gesture.
+    if(token!==revision||feather.snapshot().feather_stopped)return snapshot();
     if(!state.running)throw new Error('Audio unavailable: '+(state.lastError||state.status));
     audio.update({muted:false,ambience:true,mono,score:extended.score});
     playingExtended=true;return notify();
