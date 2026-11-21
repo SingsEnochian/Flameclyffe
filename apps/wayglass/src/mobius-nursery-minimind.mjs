@@ -1,9 +1,9 @@
 // Optional MiniMind-3 gloss adapter. Proposal-only: never executes WTL, persists state or selects canon.
 // Explicit local transport is injected; no external network or implicit model download.
 export const MINIMIND_MODEL='jingyaogong/minimind-3';
-const SAFE_ID=/^[\\w.:-]{1,128}$/;
+const SAFE_ID=/^[\w.:-]{1,128}$/;
 export function createMiniMindGloss({endpoint,fetchImpl=globalThis.fetch}={}){
-  if(typeof endpoint!=='string'||!/^https?:\\/\\/(?:localhost|127\\.0\\.0\\.1)(?::\\d{1,5})?\\/v1\\/chat\\/completions$/.test(endpoint))
+  if(typeof endpoint!=='string'||!/^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d{1,5})?\/v1\/chat\/completions$/.test(endpoint))
     throw Error('MiniMind requires an explicit loopback OpenAI-compatible endpoint');
   if(typeof fetchImpl!=='function')throw TypeError('Fetch transport required');
   return async function gloss({phrase,context='',participant,consent,feather=false,signal}={}){
