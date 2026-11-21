@@ -14,3 +14,10 @@ test('rejects unknown roots, invalid operators, injection and trailing tokens',(
  for(const source of ['erase(worldseed)','tend(rewrite_history)','tend(worldseed);evil','worldseed worldseed','tend(worldseed, twist@2)','tend('.repeat(30)+'worldseed'+')'.repeat(30)])assert.throws(()=>compileWTL(source));
  assert.throws(()=>parseWTL(''.padEnd(513,'a')));
 });
+
+test('tokenizer rejects split identifiers and maintains normal spaced syntax',()=>{
+ assert.throws(()=>compileWTL('wo rldseed'));
+ assert.throws(()=>compileWTL('wonder(world seed)'));
+ assert.throws(()=>compileWTL('tend(worldseed, twist@0 .5)'));
+ assert.equal(compileWTL('wonder ( tend ( worldseed ) )').ir.semanticType,'OpenQuestion');
+});
