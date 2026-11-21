@@ -5,7 +5,8 @@ export function encounter({left,right,signal,consent,feather=false}) {
     Number.isFinite(p.spin) && p.spin >= -1 && p.spin <= 1 &&
     Number.isSafeInteger(p.revision) && p.revision >= 0;
   if (!valid(left) || !valid(right) || left.id === right.id) throw Error('Distinct valid participants required');
-  if (!consent || consent[left.id] !== true || consent[right.id] !== true)
+  if (!consent || !Object.hasOwn(consent, left.id) || !Object.hasOwn(consent, right.id) ||
+      consent[left.id] !== true || consent[right.id] !== true)
     return Object.freeze({status:'declined',participants:[left.id,right.id]});
   if (!signal || !['touch','word','sound','wtl'].includes(signal.kind) ||
       typeof signal.value !== 'string' || signal.value.length > 256 || !signal.value.length ||
