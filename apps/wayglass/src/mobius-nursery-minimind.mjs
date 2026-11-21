@@ -2,6 +2,7 @@
 // Transport is injected. Cloud requests require an owner-authenticated Wayglass proxy, never direct provider credentials.
 export const MINIMIND_MODEL='jingyaogong/minimind-3';
 const SAFE_ID=/^[\w.:-]{1,128}$/;
+const hasExplicitConsent=(consent,id)=>consent!==null && typeof consent==='object' && Object.hasOwn(consent,id) && consent[id]===true;
 export function createMiniMindGloss({endpoint,route='local',ownerAuthorised=false,fetchImpl=globalThis.fetch}={}){
   const local = typeof endpoint==='string' && /^http:\/\/(?:localhost|127\.0\.0\.1)(?::\d{1,5})?\/v1\/chat\/completions$/.test(endpoint);
   const cloud = route==='cloud' && ownerAuthorised===true && typeof endpoint==='string' &&
@@ -12,7 +13,7 @@ export function createMiniMindGloss({endpoint,route='local',ownerAuthorised=fals
   return async function gloss({phrase,context='',participant,consent,feather=false,signal}={}){
     if(feather)return Object.freeze({status:'stopped',reason:'Feather'});
     if(!participant||typeof participant.id!=='string'||!SAFE_ID.test(participant.id))throw Error('Attributed participant required');
-    if(!consent||consent[participant.id]!==true)return Object.freeze({status:'declined',participant_id:participant.id});
+    if(!consent||!hasExplicitConsent(consent,participant.id))return Object.freeze({status:'declined',participant_id:participant.id});
     if(typeof phrase!=='string'||!phrase.trim()||phrase.length>256||typeof context!=='string'||context.length>1024)throw Error('Bounded phrase and context required');
     if(signal?.aborted)return Object.freeze({status:'stopped',reason:'Feather'});
     const messages=[{role:'system',content:'Suggest a tentative British English gloss for a fictional Wyrdrune phrase. Never claim canonical meaning. Reply with one concise proposal only.'},{role:'user',content:JSON.stringify({phrase,context})}];
@@ -23,7 +24,7 @@ export function createMiniMindGloss({endpoint,route='local',ownerAuthorised=fals
       const data=await response.json();
       if(signal?.aborted)return Object.freeze({status:'stopped',reason:'Feather'});
       // Consent can be withdrawn while a delegate is responding. Never present a late result as approved.
-      if(consent[participant.id]!==true)return Object.freeze({status:'declined',participant_id:participant.id});
+      if(!hasExplicitConsent(consent,participant.id))return Object.freeze({status:'declined',participant_id:participant.id});
       const candidate=data?.choices?.[0]?.message?.content;
       if(typeof candidate!=='string'||!candidate.trim()||candidate.length>2048)throw Error('Invalid local model response');
       return Object.freeze({schema:'wayglass.minimind-gloss/v0.1',status:'proposal',participant_id:participant.id,model:MINIMIND_MODEL,endpoint_kind:route==='local'?'loopback':'owner-cloud-proxy',phrase,gloss:candidate.trim(),persisted:false,canon_adopted:false});
