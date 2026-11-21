@@ -12,7 +12,7 @@ export function proposeGardenAction(state,{actor,material,x=0,y=0,consent={},fea
  if(state?.schema!==GARDEN_SCHEMA||!Array.isArray(state.participants)||!state.participants.includes(actor)||!validId(source))throw Error('Invalid garden source or actor');
  // Never issue a new proposal from a corrupted or tampered Return snapshot.
  restoreGarden(state,state.participants);
- if(consent[actor]!==true)return {status:'declined',actor};
+ if(!Object.hasOwn(consent,actor)||consent[actor]!==true)return {status:'declined',actor};
  if(!MATERIALS.includes(material)||!Number.isFinite(x)||!Number.isFinite(y)||Math.abs(x)>1||Math.abs(y)>1)throw Error('Invalid bounded garden action');
  if(state.objects.length>=64)throw Error('Garden object capacity reached');
  const item={id:actor+':'+(state.revision+1),actor,material,x,y,source};
@@ -26,7 +26,7 @@ export function carryGardenAction(state,proposal,{consent={},feather=false}={}){
  if(proposal?.status!=='proposal'||proposal.baseRevision!==state.revision||!state.participants.includes(proposal.item?.actor))throw Error('Stale or invalid garden proposal');
  const item=proposal.item;
  if(item.id!==item.actor+':'+(state.revision+1)||!MATERIALS.includes(item.material)||!Number.isFinite(item.x)||!Number.isFinite(item.y)||Math.abs(item.x)>1||Math.abs(item.y)>1||!validId(item.source)||state.objects.some(o=>o.id===item.id))throw Error('Invalid or replayed garden proposal');
- if(consent[proposal.item.actor]!==true)return {status:'declined',actor:proposal.item.actor};
+ if(!Object.hasOwn(consent,proposal.item.actor)||consent[proposal.item.actor]!==true)return {status:'declined',actor:proposal.item.actor};
  return {schema:GARDEN_SCHEMA,revision:state.revision+1,participants:[...state.participants],objects:[...state.objects,{...proposal.item}],history:[...state.history,{revision:state.revision+1,action:'carry',itemId:proposal.item.id,source:proposal.item.source}],carried:true};
 }
 export function restoreGarden(snapshot,participants){
