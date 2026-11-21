@@ -35,3 +35,15 @@ Status: **approved plan; NOT deployed**. Source of truth: `wayglass/current`; `m
 - No production provisioning, credential changes, merges, or deployment authorised by this document. Owner's agreement authorises progressing through the gates, not spending or bypassing access controls.
 
 Next owner: integration/build worker for gate 1, then verified test runner for gate 2. Cloud provisioning remains blocked pending concrete provider/cost and owner identity approval.
+
+## Free-first owner direction (2026-11-21)
+
+Rowan explicitly authorises preparing owner-only deployment and selecting/building a free option when feasible. Do not purchase or provision anything billable without presenting provider, monthly cost and security configuration for approval. No credit card entry, account creation or production credential changes are delegated by this direction.
+
+**Preferred evaluation candidate:** Oracle Cloud Infrastructure Always Free Ampere A1 (published 2 OCPUs, 12 GB RAM; eligible shared block storage). Pair with Cloudflare Access Free + named Tunnel. Budget target: **$0/month** only if all resources remain within Always Free quotas; external domain registration, backups, outbound usage and model inference may cost extra and are not approved. Verify Arm64 native dependencies, capacity in selected home region, quotas, idle reclaim policy, storage, network and Cloudflare DNS/domain prerequisites before recommending provisioning. OCI account verification may require payment-card information; owner must do that directly.
+
+**Fallback evaluation:** Google Cloud Compute Engine e2-micro free tier in eligible US region, 30 GB standard disk and 1 GB outbound monthly, likely too small for full Wayglass host. No automatic upgrade or trial-credit spend.
+
+**Security:** no direct public origin, no publicly accessible API, owner identity allowlist and MFA, Access full hostname, tunnel to loopback/private service, separate app-level authentication, least privilege, backups, Feather and cold Return. Cloudflare Access Free may require account billing details.
+
+**Evidence:** OCI https://docs.oracle.com/en-us/iaas/Content/FreeTier/freetier_topic-Always_Free_Resources.htm ; Cloudflare https://www.cloudflare.com/sase/products/access/ ; GCP https://docs.cloud.google.com/free/docs/free-cloud-features . Prices/limits checked 2026-11-21. No accounts or infrastructure provisioned, no live hostname.
