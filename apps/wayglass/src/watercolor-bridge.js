@@ -21,6 +21,9 @@ const DEFAULT_COLORS=Object.freeze({
   'fold:hearth':'#bf9a88',
   'form:morph':'#b9b0dd',
   'mythience:crossing':'#79d8c8',
+  'magic:genesis':'#d5b86e','magic:correspondence':'#91d7bd','magic:alchemy':'#e3ae7c',
+  'magic:sympatheia':'#91acd8','magic:probability':'#c6b4df','magic:embodiment':'#e0bc9c',
+  'magic:mythience':'#88c9b9','magic:worldsmith':'#77b6a4','magic:withness':'#dfdfbd','magic:failed':'#b46675',
 });
 const KINDS=new Set(Object.keys(DEFAULT_COLORS));
 const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
