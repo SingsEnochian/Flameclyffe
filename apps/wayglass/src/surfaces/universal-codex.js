@@ -19,6 +19,22 @@ const EXAMPLE=[
   '  transcend { emit 1; }',
   '}',
 ].join('\n');
+const ALMOST_EXAMPLE=[
+  'mobius scoped {',
+  '  perceive {',
+  '    let possibilities = almost("Axiom of Almost",["spiral","crystal","unformed"]);',
+  '    let writing = resonanceNode("wayglass:writing",0.30,0);',
+  '    let watercolour = resonanceNode("wayglass:watercolour",0.35,1);',
+  '  }',
+  '  compress { let related = relateAlmost(possibilities,"spiral","crystal","coexisting"); let field = resonanceField([writing,watercolour],0.45,100); }',
+  '  release { let held = holdAlmost(related,"unformed"); }',
+  '  verify { require true else "Remain open"; }',
+  '  integrate { let remembered = shadowAlmost(held,"spiral"); }',
+  '  choose { let proposed = proposeAlmost(remembered,"crystal"); }',
+  '  @return { emit proposed; emit singResonance(field); }',
+  '  @transcend { carry question = "What could emerge?"; }',
+  '}',
+].join('\\n');
 const PHASES=Object.freeze(['Perceive','Compress','Release','Verify','Integrate','Choose','Return','Transcend']);
 function safeSessionGet(key) { try {return globalThis.sessionStorage?.getItem(key)??null;}catch{return null;} }
 function safeSessionSet(key,value) { try {globalThis.sessionStorage?.setItem(key,value);return true;}catch{return false;} }
@@ -63,6 +79,7 @@ export function mountUniversalCodex(root){
           '<p class="tiny" id="codex-source-help">Your source remains editable. Preview requires House Steward authorisation; English reading compiles locally without invoking a model.</p>',
           '<div class="wg-codex-toolbar">',
             '<button type="button" class="glass-chip" data-codex-example>Load original sample</button>',
+            '<button type="button" class="glass-chip" data-codex-almost>Load Axiom of Almost</button>',
             '<label class="wg-cypher-tempo">Glyph tempo <select aria-label="Wyrdrune glyph tempo" data-codex-pace>'+CYPHER_PACE_OPTIONS+'</select></label>',
             '<button type="button" class="glass-chip" data-codex-translate>Read in English</button>',
             '<button type="button" class="glass-chip wg-cypher-skip" data-codex-skip disabled>Reveal English now</button>',
@@ -116,6 +133,7 @@ export function mountUniversalCodex(root){
   };
   listen(editor,'input',invalidate);
   listen(q('[data-codex-example]'),'click',()=>{editor.value=EXAMPLE;invalidate();editor.focus();});
+  listen(q('[data-codex-almost]'),'click',()=>{editor.value=ALMOST_EXAMPLE;invalidate();editor.focus();});
   listen(q('[data-codex-translate]'),'click',()=>{
     if(held()||stopped){status.textContent=held()?'Feather is held. Release it before translating.':'This Codex mount is no longer active.';return;}
     cypher?.stop();
