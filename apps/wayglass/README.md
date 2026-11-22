@@ -1,10 +1,10 @@
 > Current integrated source: [`wayglass/current`](../../WAYGLASS_CURRENT.md). Start all new Wayglass work there.
 
-# Wayglass v0.1 · embryonic kernel + embodiment shell
+# Wayglass OS · whole-vessel runtime
 
-Wayglass is intended to become both a native learned cognitive substrate and the operating environment that carries worlds, continuity, routes, tools, and embodiments. ArcSweep is inherited as native Wayglass world/continuity and writing organs; its older namespace and source tree remain as compatibility/provenance lineage rather than a separate runtime destination.
+Wayglass is the native operating environment and cognitive substrate architecture that carries worlds, continuity, routes, tools, participants and embodiments. ArcSweep is inherited as native Wayglass world, continuity, writing, acoustic and instrument organs; its older namespace and source tree remain as compatibility/provenance lineage rather than a separate runtime destination.
 
-**Current truth:** this repository does not yet contain a Wayglass-native trained LLM. The executable slice contains the kernel boot contract, local and external model routes, embodiment capability detection, and native Wayglass surfaces backed by inherited ArcSweep state modules. External/seed models are explicitly marked non-native so scaffolding cannot be mistaken for the finished Wayglass mind.
+**Native model ecology:** Wayglass owns its cognitive architecture, native model development, training, evaluation, memory, route selection and earned route promotion. Local and external models are registered as distinct substrates with attributable lineage; the native model lane is part of the operating system rather than a separate product.
 
 This first vertical slice proves:
 
@@ -20,7 +20,7 @@ This first vertical slice proves:
 - a refractive Three.js background field;
 - glass controls with restrained audio/haptic feedback;
 - keyboard command bridge and AR capability detection;
-- first `wayglass.kernel/v0.1` boot contract separating persistent system identity from body and cognitive substrate.
+- `wayglass.kernel/v0.1` boot contract separating persistent system identity from body and cognitive substrate; and the unified eight-system vessel kernel (`wayglass.os/v1`) that composes the registered organs and deck surfaces into one operating environment.
 
 ## Run
 
@@ -102,3 +102,23 @@ Standing Toybox laws:
 
 Research provenance and licence posture live in `docs/research/WAYGLASS_TOYBOX_GITHUB_INGEST_V0_1.md`.
 
+
+
+## Whole-vessel operating system
+
+The native vessel kernel boots eight cooperating systems as one Wayglass OS:
+
+1. Authority & Kernel
+2. Wyrdrune Native Language
+3. Eightfold & Double Möbius
+4. Sensory Body
+5. Observer & Science
+6. Constellation Agency
+7. Return & Universe
+8. Cloud, Host & Install
+
+The live system map is available through `globalThis.__wayglassOS.kernel.inspect()`. Each system reports its registered organs, deck surfaces, interfaces and assembly state. The same kernel owns the boot receipt, system inspection, event subscription and ship-wide Feather lifecycle.
+
+The canonical Wyrdrune whole-vessel programme lives at `lib/wyrdrune/wayglass-vessel-plan.wtl`. It composes two carried Möbius cycles, verifies all eight systems, declares Withness, produces a boot plan and returns a launch anchor. It executes through the shared Wyrdrune parser and runtime.
+
+Architecture and acceptance: `docs/wayglass/WAYGLASS_WHOLE_VESSEL_OS_20261122.md`.
