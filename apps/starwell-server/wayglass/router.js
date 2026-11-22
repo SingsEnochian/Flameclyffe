@@ -1259,8 +1259,16 @@ function createWayglassRouter({
     } catch (error) {
       const invalid = error instanceof SyntaxError || error instanceof TypeError || error instanceof RangeError ||
         error instanceof ReferenceError || /Bridge capability unavailable|Feather|operation budget|Duplicate binding|Unknown binding/.test(error.message);
+      // A failed preview is not a moral verdict on the source or its author.
+      // Classify known technical outcomes without granting execution authority.
+      const detail = String(error?.message || 'Preview could not be completed');
+      const reason = /Feather/i.test(detail) ? 'participant_stop'
+        : /Bridge capability unavailable/i.test(detail) ? 'capability_unavailable'
+        : /operation budget/i.test(detail) ? 'resource_limit'
+        : invalid ? 'invalid_or_unsupported_wtl' : 'preview_execution_failed';
       return res.status(invalid ? 400 : 422).json({
-        error: 'Wyrdrune preview rejected: ' + cleanText(error.message, 250),
+        reason,
+        error: 'Wyrdrune preview could not complete: ' + cleanText(detail, 250),
         ...(Array.isArray(error.diagnostics) ? { diagnostics: error.diagnostics } : {}),
         ...(error.effects ? { effects: error.effects } : {}),
       });
