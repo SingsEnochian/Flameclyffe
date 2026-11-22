@@ -1,6 +1,6 @@
 import { wayglassSomaticSound } from '../somatic-sound.js';
 
-export function mountWayglassRuntimeSandbox(root) {
+export function mountWayglassRuntimeSandbox(root, { signal: roomSignal } = {}) {
   root.innerHTML = `
     <section class="wg-surface glass-panel">
       <h1>Wayglass Runtime Sandbox</h1>
@@ -22,6 +22,12 @@ export function mountWayglassRuntimeSandbox(root) {
   const status = root.querySelector('[data-sandbox-status]');
   const output = root.querySelector('[data-sandbox-receipt]');
   let pending = null, disposed = false;
+  const onRoomAbort = () => {
+    disposed = true;
+    pending?.abort('room-navigation');
+  };
+  if (roomSignal?.aborted) onRoomAbort();
+  else roomSignal?.addEventListener('abort', onRoomAbort, { once: true });
 
   async function request(suffix = '', body, signal) {
     const options = { credentials: 'same-origin', cache: 'no-store', signal };
@@ -56,7 +62,7 @@ export function mountWayglassRuntimeSandbox(root) {
   }
 
   async function operation(run) {
-    if (pending || disposed) return;
+    if (pending || disposed || roomSignal?.aborted) return;
     if (wayglassSomaticSound.snapshot().feather_stopped) {
       status.textContent = 'Feather is holding the sandbox.';
       return;
@@ -123,7 +129,8 @@ export function mountWayglassRuntimeSandbox(root) {
   void operation(update);
   return () => {
     disposed = true;
-    pending?.abort();
+    roomSignal?.removeEventListener('abort', onRoomAbort);
+    pending?.abort('room-disposed');
     globalThis.removeEventListener('wayglass:feather', onFeather);
   };
 }
