@@ -44,6 +44,7 @@ import {installMagicTelemetry} from './magic-telemetry-client.js';
 import {mountMagicLoom,mountMagicTelemetryPanel} from './surfaces/magic-loom.js';
 import {mountLawsmith} from './surfaces/lawsmith.js';
 import {mountNurseryResonance} from './surfaces/nursery-resonance.js';
+import {shipResonance} from './ship-resonance.mjs';
 import {installSomaticRunePalette} from './somatic-rune-palette.js';
 import './somatic-rune-palette.css';
 import {installWatercolorRouteActivity} from './watercolor-live-observer.js';
@@ -279,7 +280,7 @@ function updateFeatherButton(stopped){
   featherButton.textContent=stopped?'🪽 Held':'🪽 Feather';
 }
 updateFeatherButton(wayglassSomaticSound.snapshot().feather_stopped);
-featherButton.addEventListener('click',()=>wayglassSomaticSound.feather());
+featherButton.addEventListener('click',()=>{shipResonance.feather();wayglassSomaticSound.feather();});
 globalThis.addEventListener('wayglass:feather',event=>updateFeatherButton(event.detail?.stopped===true));
 const helmNav=document.createElement('button');helmNav.type='button';helmNav.className='glass-chip wg-helm-nav';
 helmNav.textContent='⌘  Ship map';helmNav.setAttribute('aria-controls',shell.id);helmNav.setAttribute('aria-expanded','false');
@@ -312,18 +313,32 @@ subscribeMythience(encounter=>{
 // Always observe route activity across the ship, even when Watercolour is not mounted.
 installWatercolorRouteActivity();
 const magicPigments=new Set(['genesis','correspondence','alchemy','sympatheia','probability','embodiment','mythience','worldsmith','withness']);
-installMagicTelemetry({onActivity:event=>{const kind=event.status==='failed'||event.status==='feather'?'magic:failed':magicPigments.has(event.engine)?'magic:'+event.engine:null;if(!kind)return;publishWatercolorActivity({kind,actor:event.cell,receipt:{schema:event.schema,receipt_id:event.hash},observedAt:event.time,intensity:Math.min(.85,.22+Math.log1p(event.elapsedMs||0)/10)});}});
+installMagicTelemetry({onActivity:event=>{shipResonance.observe({organ:'wayglass:magic',kind:'telemetry:'+String(event.engine||'unknown').slice(0,50),strength:0.45,provenance:'authenticated-magic-telemetry'});const kind=event.status==='failed'||event.status==='feather'?'magic:failed':magicPigments.has(event.engine)?'magic:'+event.engine:null;if(!kind)return;publishWatercolorActivity({kind,actor:event.cell,receipt:{schema:event.schema,receipt_id:event.hash},observedAt:event.time,intensity:Math.min(.85,.22+Math.log1p(event.elapsedMs||0)/10)});}});
 // Read-only 30-second voyage-message watch. Old messages become baseline,
 // only new arrivals are painted. Failed/unauthorised hosts back off and stop.
 createWatercolorVoyageWatcher();
 subscribeWayglassObserver(record=>{
   if(!record||!['started','completed','failed'].includes(record.status))return;
+  shipResonance.observe({organ:'wayglass:routes',kind:'route:'+record.status,strength:record.status==='completed'?.7:.25,provenance:'local-route-observer'});
   routeLabel.textContent='ROUTE / '+record.status.toUpperCase()+(record.route_id?' · '+record.route_id:'');
   helm.dataset.routeState=record.status;
 });
+function shipOrganForRoom(id){
+  if(id.includes('nursery'))return 'wayglass:nursery';
+  if(id.includes('watercolor'))return 'wayglass:watercolour';
+  if(id.includes('codex'))return 'wayglass:codex';
+  if(id.includes('writing'))return 'wayglass:writing';
+  if(id.includes('sound')||id.includes('acoustic')||id.includes('voice'))return 'wayglass:sound';
+  if(id.includes('observer')||id.includes('spectral'))return 'wayglass:observer';
+  if(id.includes('magic')||id.includes('lawsmith'))return 'wayglass:magic';
+  if(id.includes('world')||id.includes('timeline')||id.includes('mythience'))return 'wayglass:worlds';
+  if(id.includes('journey'))return 'wayglass:continuity';
+  return 'wayglass:system';
+}
 function mountSurface(surfaceId){
   const request=mountQueue.then(async()=>{
     const result=await mountWayglassSurface(surfaceId,root);
+    shipResonance.observe({organ:shipOrganForRoom(surfaceId),kind:'room-entered',strength:0.35,provenance:'local-room-navigation'});
     fullSpectrum.setScope({room:surfaceId});
     fullSpectrum.capture({kind:'world',strength:.55,motion:.32,continuity:.82,intent:.65,
       source_ref:'wayglass:room-crossing'});
@@ -399,6 +414,8 @@ const wayglass = Object.freeze({
 });
 
 globalThis.__wayglassOS = wayglass;
+// Read-only inspectable shipwide resonance projection. The bus never controls routes.
+globalThis.__wayglassShipResonance=Object.freeze({snapshot:()=>shipResonance.snapshot(),subscribe:fn=>shipResonance.subscribe(fn)});
 
 const roomQuery=new URLSearchParams(globalThis.location?.search||'').get('room');
 const entry=resolveWayglassEntry({available:listWayglassSurfaces(),room:roomQuery});
