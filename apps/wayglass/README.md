@@ -106,7 +106,7 @@ Research provenance and licence posture live in `docs/research/WAYGLASS_TOYBOX_G
 
 ## Whole-vessel operating system
 
-The native vessel kernel boots eight cooperating systems as one Wayglass OS:
+The native vessel kernel boots eight cooperating systems as one Wayglass OS. The Wyrdrune Program Workbench is a native creation deck with a source editor, programme library, typed-IR viewer, source-hash verification, execution ledger and Spell Wizard. It compiles and runs authored WTL through the authenticated Wayglass host, using the same canonical parser/runtime as the rest of the ship. The first whole-vessel programme composes the eight system lanes and returns its Möbius checkpoints.\n\nThe eight systems are:
 
 1. Authority & Kernel
 2. Wyrdrune Native Language
@@ -117,7 +117,7 @@ The native vessel kernel boots eight cooperating systems as one Wayglass OS:
 7. Return & Universe
 8. Cloud, Host & Install
 
-The live system map is available through `globalThis.__wayglassOS.kernel.inspect()`. Each system reports its registered organs, deck surfaces, interfaces and assembly state. The same kernel owns the boot receipt, system inspection, event subscription and ship-wide Feather lifecycle.
+Open the Program Workbench with `?room=programs`, or from the Ship Systems and Creation decks. The live system map is available through `globalThis.__wayglassOS.kernel.inspect()`. Each system reports its registered organs, deck surfaces, interfaces and assembly state. The same kernel owns the boot receipt, system inspection, event subscription and ship-wide Feather lifecycle.
 
 The canonical Wyrdrune whole-vessel programme lives at `lib/wyrdrune/wayglass-vessel-plan.wtl`. It composes two carried Möbius cycles, verifies all eight systems, declares Withness, produces a boot plan and returns a launch anchor. It executes through the shared Wyrdrune parser and runtime.
 
