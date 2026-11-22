@@ -985,7 +985,7 @@ export async function mountLivingWatercolorSurface(root) {
       globalThis.removeEventListener?.(WAYGLASS_FEATHER_EVENT,onFeather);
       wayglassSomaticSound.stop();
       globalThis.cancelAnimationFrame?.(animationId);
-      fluid.dispose();settled.dispose();
+      imageResolver.dispose();fluid.dispose();settled.dispose();
     },
     fluid,
   };
