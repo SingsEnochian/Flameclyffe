@@ -1,6 +1,6 @@
 import {mountWayglassSoundComposition} from './surfaces/sound-composition.js';
 import {wayglassSomaticSound} from './somatic-sound.js';
-import {wayglassStoryScoreBinding,installWayglassStoryComposition} from './story-score-binding.js';
+import {wayglassStoryScoreBinding,installWayglassStoryComposition,runWayglassStoryScore} from './story-score-binding.js';
 import './styles.css';
 import './authorization.css';
 import './faeberpunk.css';
@@ -371,6 +371,12 @@ const wayglass = Object.freeze({
     releaseFeather: actor => vesselKernel.releaseFeather({ actor, explicit: true }),
   }),
   soundCompositionState:()=>{const s=wayglassSomaticSound.composition.snapshot();return Object.freeze({score_status:s.score_status,generating:s.generating,audio_enabled:s.audio_enabled,sequence:s.sequence,last_error:s.last_error,voice_count:s.layers.length,declared_context:wayglassStoryScoreBinding.getContext()!==null});},
+  storyScore: Object.freeze({
+    inspect: () => wayglassStoryScoreBinding.checkpoint(),
+    run: runWayglassStoryScore,
+    play: () => wayglassSomaticSound.composition.startGeneration({confirmed:true}),
+    pause: () => wayglassSomaticSound.composition.pauseGeneration(),
+  }),
   surfaces: listWayglassSurfaces,
   organs: listWayglassOrgans,
   quadGestalt: readLatestQuadGestalt,
