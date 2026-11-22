@@ -1125,6 +1125,38 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     }
   });
 
+  router.post('/wyrdrune/runs', createRequestGate({ maxRequests: 30, maxConcurrent: 3 }), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required to save a Wyrdrune execution receipt.' });
+    }
+    const source = req.body?.source;
+    const status = req.body?.status;
+    const receipt = req.body?.execution_receipt;
+    const context = req.body?.context;
+    if (typeof source !== 'string' || !source.trim() || source.length > 50000 ||
+        !['committed', 'rolled-back', 'failed', 'compiled', 'held'].includes(status) ||
+        !receipt || typeof receipt !== 'object' || Array.isArray(receipt) ||
+        JSON.stringify(receipt).length > 250000 ||
+        !context || typeof context !== 'object' || Array.isArray(context)) {
+      return res.status(400).json({ error: 'A bounded Wyrdrune source, execution status, receipt and context are required.' });
+    }
+    try {
+      const store = createWayglassProgramStore();
+      const program = req.body?.program_slug ? await store.getProgram(req.body.program_slug) : null;
+      const run = await store.saveRun({
+        programId: program?.program_id || null,
+        source,
+        status,
+        executionReceipt: receipt,
+        context,
+      });
+      return res.status(201).json({ schema: 'wayglass.program-run-save/v1', run });
+    } catch (error) {
+      return res.status(503).json({ error: cleanText(error?.message || 'Wyrdrune execution receipt could not be stored.', 300) });
+    }
+  });
+
   router.post('/wyrdrune/workbench', createRequestGate({ maxRequests: 24, maxConcurrent: 2 }), async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     if (!(await griffStewardAuthorized(req).catch(() => false))) {
