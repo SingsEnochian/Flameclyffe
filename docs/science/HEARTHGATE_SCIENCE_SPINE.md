@@ -9,7 +9,7 @@
 
 This document updates the science spine so the current Hearthgate mathematics is interpreted consistently across the whole system.
 
-The new mathematics is not a claim that external physics has been proved. It is the formal operating law of the Hearthgate engine:
+The new mathematics is the formal operating law of the Hearthgate engine. Its relationship to established physical theories is an active research and comparison lane:
 
 ```text
 accepted state
