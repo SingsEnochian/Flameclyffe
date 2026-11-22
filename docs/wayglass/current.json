@@ -191,6 +191,20 @@
         "continuous-addressed-sound-regions-and-declared-affinity"
       ],
       "note": "Preserves canonical First Contact/Astra routes. PR570 is superseded by the canonical-based integration review because its branch requires linear history; source branches are preserved. No deployed host SHA, installed Windows build or live participant invocation established."
+    },
+    {
+      "branch": "wayglass/whole-pizza-os-20261122",
+      "target": "wayglass/current",
+      "status": "candidate-native-eight-system-kernel-and-wyrdrune-workbench",
+      "scope": [
+        "native-wayglass-eight-system-vessel-kernel",
+        "organ-and-surface-assembly-map",
+        "whole-vessel-wyrdrune-two-cycle-programme",
+        "authenticated-wyrdrune-compile-and-execute-workbench",
+        "program-viewer-and-spell-wizard",
+        "feather-aware-vessel-lifecycle"
+      ],
+      "note": "Integrates the current organ/surface registries into one vessel kernel and adds a source-verified Wyrdrune execution deck. Runtime acceptance is determined by exact-head CI."
     }
   ]
 }
