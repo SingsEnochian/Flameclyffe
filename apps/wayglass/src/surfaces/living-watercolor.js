@@ -302,6 +302,7 @@ export async function mountLivingWatercolorSurface(root) {
     if(painted.size&&!settledPixels)settledPixels=settled.pixels({background});
     const underlay=painted.size?settledPixels:null;
     bitmap.data.set(fluid.pixels({background,underlay}));
+    imageResolver.setPigmentPixels(bitmap.data,fluid.width,fluid.height);
     off.putImageData(bitmap,0,0);
     const w=canvas.clientWidth,h=canvas.clientHeight;
     if(w&&h){
