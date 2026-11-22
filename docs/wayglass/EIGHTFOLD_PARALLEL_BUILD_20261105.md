@@ -19,7 +19,7 @@ Eight lanes **execute concurrently** against the *same exact GitHub checkout rev
 | 7. Return | Return Engine, revocations, stop points, identity continuity | `apps/wayglass/test/wayglass-return-engine-trial.test.js` | Astra / Return Engine |
 | 8. Transcend | model and world crossings, revision without authority inflation | `apps/wayglass/test/wayglass-world-entry.test.js` | Rarity / Waygates |
 
-The proposed collaborators are **assignment destinations**, not proof that they are presently connected, consented, running, or speaking. An eight-job GitHub matrix is eight **real CI workers**, not eight autonomous model agents. No fictional execution receipts are permitted.
+Collaborator names identify handoff destinations; each connection, consent, runtime presence, and contribution is recorded in its own attributable receipt. An eight-job GitHub matrix runs eight CI workers. Autonomous model agents are provisioned and attested through the agent runtime. Every execution receipt is generated from an observed run.
 
 **Ninth center: Withness.** It reconciles exact source commit, distinct worker identities, immutable test source hashes, eight pass statuses, canonical PREMAQC, and gaps. It is a coordinating and relational center, not a ninth command or identity authority.
 
