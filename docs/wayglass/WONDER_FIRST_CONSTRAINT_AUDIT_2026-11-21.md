@@ -104,3 +104,7 @@ The prior executor change checked cancellation before phase receipts and complet
 ## Wyrdrune Wonder: preview lifecycle Feather
 
 Inspected the pure `lib/wayglass-wyrdrune-ritual.cjs` wrapper and found that `signal` previously reached only the `execute` call. Added typed `participant_stop` checks before compilation, before execution, after awaited execution and before returning the sealed digest receipt. Added a regression asserting pre-aborted signal takes precedence over malformed WTL source. Commits `5ae0cd477825190446bf617397cc7ecd4cc5ec4c`, `5c23698e1a3ddd5d70e1fe26e5445feab89aabcb`. These checks are cooperative at synchronous boundaries; they do not preempt a synchronous compiler or digest mid-call. CI still not verified; no merge/deploy.
+
+## First-class Wyrdrune Wonder v0.1
+
+Added pure `wonder(question)` intrinsic to the canonical `lib/wyrdrune/runtime.mjs` evaluator, producing `{kind:'wyrdrune.wonder/v0.1',question,answer:UNKNOWN,status:'open'}`. It requires nonempty text up to 1024 characters and reserves the operator name to prevent accidental shadowing. It invokes no host effects, models or external bridges. Added ritual-preview tests for open question preservation, deterministic receipt hash and empty-question validation. Code `0a1a0e6d803ee6e84f45b71946a7810d323a564b`, tests `6dff56c961da9a611286b4524ab75c1c11a9d57c`. **Not yet a multi-hypothesis inquiry engine, and no test/CI pass verified.** No merge/deploy.
