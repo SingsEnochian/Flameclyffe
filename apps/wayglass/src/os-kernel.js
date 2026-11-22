@@ -204,7 +204,11 @@ export function createWayglassOSKernel({
     if (featherHeld) return snapshot();
     featherHeld = true;
     revision += 1;
-    publish('os:feather', { reason: String(reason), stopped: ['audio', 'haptics', 'sensory-output', 'active-work', 'invitations'] });
+    const detail = { reason: String(reason), stopped: ['audio', 'haptics', 'sensory-output', 'active-work', 'invitations'] };
+    publish('os:feather', detail);
+    if (typeof globalThis.dispatchEvent === 'function' && typeof globalThis.CustomEvent === 'function') {
+      globalThis.dispatchEvent(new CustomEvent('wayglass:os:feather', { detail: freezeDeep({ ...detail, revision }) }));
+    }
     return snapshot();
   }
 
@@ -215,7 +219,11 @@ export function createWayglassOSKernel({
     if (!featherHeld) return snapshot();
     featherHeld = false;
     revision += 1;
-    publish('os:feather-released', { actor: String(actor).trim() });
+    const detail = { actor: String(actor).trim() };
+    publish('os:feather-released', detail);
+    if (typeof globalThis.dispatchEvent === 'function' && typeof globalThis.CustomEvent === 'function') {
+      globalThis.dispatchEvent(new CustomEvent('wayglass:os:feather-released', { detail: freezeDeep({ ...detail, revision }) }));
+    }
     return snapshot();
   }
 
