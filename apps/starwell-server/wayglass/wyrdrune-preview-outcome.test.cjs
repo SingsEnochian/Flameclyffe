@@ -52,3 +52,10 @@ test('unauthorised host effect is a boundary error, not a backend failure', () =
   assert.equal(result.reason, 'unauthorised_effect');
   assert.equal(result.invalid, true);
 });
+
+test('non-Error throws are classified without a secondary exception', () => {
+  const result = classifyPreviewOutcome(null);
+  assert.equal(result.reason, 'preview_execution_failed');
+  assert.equal(result.invalid, false);
+  assert.equal(result.detail, 'Preview could not be completed');
+});
