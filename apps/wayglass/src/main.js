@@ -176,6 +176,9 @@ const vesselBootReceipt = vesselKernel.boot();
 globalThis.addEventListener('wayglass:feather', event => {
   if (event.detail?.stopped === true) vesselKernel.feather('sensory-feather');
 });
+globalThis.addEventListener('wayglass:os:feather', () => {
+  try { globalThis.navigator?.vibrate?.(0); } catch { /* device adapter owns haptic availability */ }
+});
 
 const browserEmbodiment = Object.freeze({
   body_id: 'browser-host',
