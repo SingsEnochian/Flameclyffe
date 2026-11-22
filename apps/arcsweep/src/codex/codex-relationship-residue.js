@@ -20,7 +20,7 @@ export function codexRelationshipResidue(growthSnapshot = {}) {
         aspectIds: Object.freeze(aspectIds),
         traceCount,
         turns,
-        // Thickness is visual recurrence only. It is not a claim about affection, preference, or status.
+        // Braid weight encodes observed interaction recurrence. Affection, preference, and status retain their own participant-authored or evidenced sources.
         braidWeight: traceCount >= 8 ? 'deep' : traceCount >= 4 ? 'established' : 'new',
         lineWeight: Math.min(3, 0.75 + Math.log2(Math.max(1, traceCount + turns / 4)) * 0.45),
         lastAt: collaborator.lastAt || '',
