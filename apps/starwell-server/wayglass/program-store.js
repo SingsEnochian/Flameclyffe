@@ -16,7 +16,7 @@ function clean(value, max = 500) {
 
 function createWayglassProgramStore({ env = process.env, fetchImpl = globalThis.fetch } = {}) {
   function credentials() {
-    const url = clean(env.SUPABASE_URL || env.VITE_SUPABASE_URL, 300).replace(/\/$/, '');
+    const url = clean(env.SUPABASE_URL || env.SUPABASE_PROJECT_URL || env.VITE_SUPABASE_URL || 'https://rufrmjyusalnifpegllj.supabase.co', 300).replace(/\/$/, '');
     const key = clean(env.SUPABASE_SECRET_KEY || env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SERVICE_KEY, 1000);
     if (!url || !key) throw new Error('Wayglass program storage requires the server-side Supabase secret.');
     if (typeof fetchImpl !== 'function') throw new Error('Wayglass program storage requires fetch.');
