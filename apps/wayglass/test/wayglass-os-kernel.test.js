@@ -8,7 +8,7 @@ const organIds = [
   'living-observer','memory-flight-recorder',
 ];
 const surfaceIds = [
-  'systems','world-continuity','writing-room','native-voice','sound-composition',
+  'systems','world-continuity','writing-room','program-workbench','native-voice','sound-composition',
   'universal-codex','quad-gestalt','living-watercolor','acoustic-room','spectral-field',
   'living-observer','library','commons','mythience-crossing','journey-before-destination',
   'altered-timeline',
