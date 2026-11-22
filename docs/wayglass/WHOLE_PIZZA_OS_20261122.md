@@ -13,7 +13,7 @@
 7. **Return & Universe** — one universe registry, sovereign worlds, memory, continuity and cold return.
 8. **Cloud, Host & Install** — Hearthgate desktop, protected cloud routes, MCP, Supabase, storage, Windows installation and iPad surface.
 
-The native vessel kernel composes the existing organ and surface registries into one boot receipt, system map, subscription bus and Feather lifecycle. The Program Workbench is a native Wayglass deck with source editor, WTL programme library, typed-IR viewer, source-hash verification, execution ledger and Spell Wizard. It invokes the canonical Wyrdrune runtime through an authenticated host endpoint.
+The native vessel kernel composes the existing organ and surface registries into one boot receipt, system map, subscription bus and Feather lifecycle. The Program Workbench is a native Wayglass deck with source editor, persistent Supabase WTL programme library, immutable revision history, typed-IR viewer, source-hash verification, execution ledger and Spell Wizard. It invokes the canonical Wyrdrune runtime through an authenticated host endpoint.
 
 ## Native Wyrdrune vessel programme
 
