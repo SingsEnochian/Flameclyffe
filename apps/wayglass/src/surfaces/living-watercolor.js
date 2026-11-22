@@ -12,6 +12,7 @@ import { listWayglassRoutes } from '../route-client.js';
 import { signInHouseSteward } from '../house-steward-session.js';
 import { wayglassSomaticSound, SOUND_EVENTS, WAYGLASS_FEATHER_EVENT } from '../somatic-sound.js';
 import {createWatercolorContinuity} from '../watercolor-continuity.js';
+import {createWatercolorImageResolver} from '../watercolor-image-resolver.js';
 import { journeyLedger } from '../journey-before-destination.js';
 import {synchronizeJourneyFeather} from './journey-before-destination.js';
 import {touchWayglass} from '../first-touch-client.js';
@@ -84,6 +85,12 @@ export async function mountLivingWatercolorSurface(root) {
           '<div class="wc-live-field" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>',
           '<div class="wc-live-insight" role="status" aria-live="polite"><strong id="wc-live-title">Ambient current · listening</strong><small id="wc-live-detail">Local pigment moves independently. No agent activity claimed.</small></div>',
           '<canvas id="wc-fluid" class="wc-fluid" aria-label="Watercolor canvas. Drag a finger, mouse or Pencil to paint; use arrow keys to move and Enter or Space to paint." aria-describedby="wc-paint-help wc-word-paint-status" tabindex="0"></canvas>',
+          '<canvas id="wc-resolved-image" aria-label="Resolved image overlay, reversible to flowing pigment" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;object-fit:contain" aria-hidden="true"></canvas>',
+          '<div class="wc-image-tools" style="position:absolute;top:4.5rem;right:1rem;z-index:5;display:flex;gap:.35rem;flex-wrap:wrap;max-width:70%">',
+            '<button type="button" id="wc-image-emerge" class="glass-chip">Resolve image</button>',
+            '<label class="glass-chip" for="wc-image-file">Reference image</label><input type="file" id="wc-image-file" accept="image/png,image/jpeg,image/webp,image/gif" style="max-width:11rem">',
+            '<button type="button" id="wc-image-dissolve" class="glass-chip">Dissolve image</button>',
+          '</div>',
           '<div class="wc-stage-meta" aria-hidden="true">WAYGLASS / AQUARELLE / PREMAQC</div>',
           '<button id="wc-instruments-toggle" type="button" class="wc-instruments-toggle glass-chip" aria-controls="wc-workbench" aria-expanded="false" aria-label="Open or close Wayglass instruments">✦ Instruments</button>',
           '<button id="wc-focus-paint" type="button" class="wc-focus-paint glass-chip" aria-pressed="false">Focus painting</button>',
@@ -175,6 +182,26 @@ export async function mountLivingWatercolorSurface(root) {
   function listen(target,type,handler){target.addEventListener(type,handler);cleanups.push(()=>target.removeEventListener(type,handler));}
   const q=id=>root.querySelector('#'+id);
   const canvas=q('wc-fluid'),stage=root.querySelector('.wc-stage');
+  const imageResolver=createWatercolorImageResolver(q('wc-resolved-image'));
+  imageResolver.feather(featherStopped);
+  let imageFrameTime=0,imageSeed=0;
+  listen(q('wc-image-emerge'),'click',()=>{
+    if(stopped||featherStopped)return;
+    imageResolver.emerge(++imageSeed*31);
+  });
+  listen(q('wc-image-dissolve'),'click',()=>{
+    if(stopped||featherStopped)return;
+    imageResolver.dissolve();
+  });
+  listen(q('wc-image-file'),'change',async event=>{
+    if(stopped||featherStopped)return;
+    const file=event.target.files?.[0];
+    if(!file)return;
+    try{await imageResolver.resolveFile(file);}catch(error){
+      if(!stopped)q('wc-image-file').title=String(error.message);
+    }
+    event.target.value='';
+  });
   const instrumentsToggle=q('wc-instruments-toggle'),surface=root.querySelector('.wc-surface');
   // The Living Watercolour is a place first. Desktop instruments are a real
   // drawer: opening it reallocates space instead of occluding the drawing area.
@@ -282,6 +309,9 @@ export async function mountLivingWatercolorSurface(root) {
       ctx.imageSmoothingEnabled=true;
       ctx.imageSmoothingQuality='high';
       ctx.drawImage(buffer,0,0,canvas.width,canvas.height);
+      const now=globalThis.performance?.now?.()??0;
+      imageResolver.render(cw,ch,imageFrameTime?Math.max(0,now-imageFrameTime):16);
+      imageFrameTime=now;
     }
   }
   function frame(ts) {
@@ -744,12 +774,12 @@ export async function mountLivingWatercolorSurface(root) {
       if(featherStopped){
         if(journeyLedger.snapshot().feather_stopped)journeyLedger.resume({confirmed:true});
         wayglassSomaticSound.releaseFeather({confirmed:true});
-        featherStopped=false;
+        featherStopped=false;imageResolver.feather(false);
         feedback.textContent='Feather released by your explicit choice. Sound remains off.';
       }else{
         if(!journeyLedger.snapshot().feather_stopped)journeyLedger.supportFold('feather');
         wayglassSomaticSound.feather();
-        featherStopped=true;paused=true;pointerId=null;lastPointer=null;requestEpoch++;busy=false;
+        featherStopped=true;imageResolver.feather(true);paused=true;pointerId=null;lastPointer=null;requestEpoch++;busy=false;
         touchEpoch++;touchAbort?.abort();touchAbort=null;touchOrb.disabled=true;
         root.querySelector('.wc-faepunk-touch').dataset.running='false';
         touchStatus.textContent='Feather held. The touch engine is paused.';
@@ -903,12 +933,12 @@ export async function mountLivingWatercolorSurface(root) {
     synchronizeJourneyFeather(event.detail);
     if(event.detail.stopped){
       voiceCypher?.stop();
-      featherStopped=true;paused=true;pointerId=null;lastPointer=null;requestEpoch++;busy=false;
+      featherStopped=true;imageResolver.feather(true);paused=true;pointerId=null;lastPointer=null;requestEpoch++;busy=false;
       touchEpoch++;touchAbort?.abort();touchAbort=null;touchOrb.disabled=true;
       root.querySelector('.wc-faepunk-touch').dataset.running='false';
       touchStatus.textContent='Feather held. The touch engine is paused.';
     }else if(event.detail.confirmed===true){
-      featherStopped=false;
+      featherStopped=false;imageResolver.feather(false);
       touchOrb.disabled=false;
       touchStatus.textContent='Feather released by explicit action. Touch when ready.';
     }
