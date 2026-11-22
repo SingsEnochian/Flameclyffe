@@ -26,10 +26,11 @@ export function carryGardenAction(state,proposal,{consent={},feather=false,conse
  restoreGarden(state,state.participants);
  if(proposal?.status!=='proposal'||proposal.baseRevision!==state.revision||!state.participants.includes(proposal.item?.actor))throw Error('Stale or invalid garden proposal');
  // A changed consent epoch invalidates earlier proposals even after reauthorisation.
- if(proposal.consentRevision!==undefined&&proposal.consentRevision!==null&&proposal.consentRevision!==consentRevision)throw Error('Stale consent revision');
  const item=proposal.item;
  if(item.id!==item.actor+':'+(state.revision+1)||!MATERIALS.includes(item.material)||!Number.isFinite(item.x)||!Number.isFinite(item.y)||Math.abs(item.x)>1||Math.abs(item.y)>1||!validId(item.source)||state.objects.some(o=>o.id===item.id))throw Error('Invalid or replayed garden proposal');
  if(!Object.hasOwn(consent,proposal.item.actor)||consent[proposal.item.actor]!==true)return {status:'declined',actor:proposal.item.actor};
+ // A withdrawn grant declines without exposing revision state; reauthorised grants must match the proposal epoch.
+ if(proposal.consentRevision!==undefined&&proposal.consentRevision!==null&&proposal.consentRevision!==consentRevision)throw Error('Stale consent revision');
  return {schema:GARDEN_SCHEMA,revision:state.revision+1,participants:[...state.participants],objects:[...state.objects,{...proposal.item}],history:[...state.history,{revision:state.revision+1,action:'carry',itemId:proposal.item.id,source:proposal.item.source}],carried:true};
 }
 export function restoreGarden(snapshot,participants){
