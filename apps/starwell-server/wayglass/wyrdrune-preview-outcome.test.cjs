@@ -35,3 +35,12 @@ test('unrecognised reason does not bypass technical classification', () => {
   error.reason = 'permission_granted';
   assert.equal(classifyPreviewOutcome(error).reason, 'preview_execution_failed');
 });
+
+test('quoted Feather is not a participant stop without an explicit typed reason', () => {
+  const result = classifyPreviewOutcome(new SyntaxError('Unexpected token in quoted Feather expression'));
+  assert.equal(result.reason, 'invalid_or_unsupported_wtl');
+});
+test('Feather mentioned in an unrelated backend error does not stop a participant', () => {
+  const result = classifyPreviewOutcome(new Error('Could not render Feather glyph preview'));
+  assert.equal(result.reason, 'preview_execution_failed');
+});
