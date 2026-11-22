@@ -172,3 +172,7 @@ Inspected the current shared parser and found `null` parsed as an identifier, no
 ## Wyrdrune known() typed operator purity repair
 
 Reviewed `inspectCall` in typed IR and found that built-in `known(value)` was typed as a valid call but rejected with `operator-effect` when used in a user-defined operator. Extended the pure builtin exception to include `known` (commit `832281f9e8606f885d999494a0ca5d1418d7be41`) and added a regression test invoking `known` through typed `resolved(value: data): truth` (commit `bc64836848e50f043fa04c1c76677a5afe4a3e13`). At inspection, Wayglass Check, Wyrdrune Two-Backend Parity, and Gate 6 Adversarial Integrity for preceding commit were still queued, with no job logs or passing result. This change remains unverified and unmerged.
+
+## Wyrdrune operator-inspection parity repair
+
+Source inspection found `inspectOperators` in `runtime.mjs` classified `known(value)` as `nonportable-call` even though the runtime executes it and typed IR accepts it as a pure builtin. Added `known` to the inspector's builtin arity handling (commit `e47f7aa9687a03b602604f5d8775337404704371`) and a regression in `typed-ir.test.cjs` asserting zero diagnostics for an operator calling `known` (commit `a1351d39fe012b477e90f44df3fedd429eff5a77`). The integration branch has not been executed locally; GitHub runners were queued at the preceding check. Do not claim passing tests or deployment.
