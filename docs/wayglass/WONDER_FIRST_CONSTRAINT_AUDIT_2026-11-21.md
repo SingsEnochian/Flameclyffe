@@ -76,3 +76,7 @@ Inspected `lib/wyrdrune/runtime.mjs` (the implementation loaded by `lib/wyrdrune
 ## Verification follow-up and test syntax correction
 
 GitHub workflow lookup for audit commit `a5380ffc4eac2965b58b3c67d901bfe07073cd94` returned queued/pending workflows, including Wayglass Check, Wyrdrune Two-Backend Parity, Gate 6 and Gate 7. No completed/pass result established. During source inspection of `lib/wayglass-wyrdrune-ritual.test.cjs`, newly inserted assertion callbacks contained literal `\\n` tokens outside JavaScript strings; repaired them into real newlines in commit `41b8eb58f6a5fc93d4bb665069fb78dc0c57e4ad`. Existing string-escaped newline sequences used to construct WTL programmes were preserved. Reopened the source to verify the callback structure. **No local test run, CI success, merge or deployment established.**
+
+## Typed unauthorised-effect status correction
+
+Found that Starwell's `REASONS` accepted `unauthorised_effect`, but `INVALID_REASONS` omitted it. Consequently, an explicitly typed missing-owner-authorisation error would have been returned as HTTP 422 rather than the route's 400 boundary classification. Added `unauthorised_effect` to `INVALID_REASONS` and a dedicated regression test. Commits `457f1534e78c89f007c4547d8d7a38ae1caed5db`, `cffef0c81bd05ce7a738dc075b66ef8c51760e64`. Existing route authentication and preview no-dispatch semantics are unchanged. Workflow checks for prior audit commit were queued; no passing CI or live execution established.
