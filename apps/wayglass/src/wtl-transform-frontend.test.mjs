@@ -29,3 +29,9 @@ test('exported WTL lowering rejects cyclic and excessively deep caller ASTs',()=
  for(let i=0;i<30;i++)deep={type:'Transform',operator:'tend',subject:deep,twist:0};
  assert.throws(()=>lowerWTL(deep),/depth limit|cycle/);
 });
+
+test('unrecognised experimental vocabulary is a dialect limitation, not a safety verdict',()=>{
+ assert.throws(()=>compileWTL('tend(rewrite_history)'),{name:'RangeError',message:/Unsupported WTL experimental root: rewrite_history/});
+ assert.throws(()=>compileWTL('explore(worldseed)'),{name:'RangeError',message:/Unsupported WTL experimental transformation: explore/});
+ assert.equal(compileWTL('wonder(worldseed)').ir.semanticType,'OpenQuestion');
+});
