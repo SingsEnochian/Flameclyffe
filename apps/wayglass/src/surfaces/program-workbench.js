@@ -234,10 +234,11 @@ export async function mountWayglassProgramWorkbench(root) {
           if (!result.last || result.last.event_id === previousEventId || !result.atlas || result.atlas_error) {
             throw new Error(result.atlas_error || result.error || 'The Wyrdrune spectral programme returned an incomplete Atlas frame.');
           }
+          const nativeHash = activeProgram === 'resonance-atlas' ? result.atlas.source_hash : result.last.source_hash;
           const execution = {
             schema: activeProgram === 'resonance-atlas' ? 'wayglass.resonance-atlas-workbench/v1' : 'wayglass.full-spectrum-workbench/v1',
             status: 'committed',
-            source_hash: result.last.source_hash,
+            source_hash: nativeHash,
             spectrum: result.last,
             atlas: result.atlas,
             learning: result.learning,
@@ -255,9 +256,9 @@ export async function mountWayglassProgramWorkbench(root) {
             persistence = { status: 'saved', run_id: run.run_id };
           } catch (error) { persistence = { status: 'unavailable', detail: String(error?.message || error) }; }
           receipt = {
-            schema: 'wayglass.wyrdrune-workbench/v1', mode, source_hash: result.last.source_hash,
+            schema: 'wayglass.wyrdrune-workbench/v1', mode, source_hash: nativeHash,
             source_verified: true,
-            ir: { schema: 'wyrdrune.native-program-receipt/v1', sourceHash: result.last.source_hash, phase_receipts: result.atlas.provenance || [] },
+            ir: { schema: 'wyrdrune.native-program-receipt/v1', sourceHash: nativeHash, phase_receipts: activeProgram === 'resonance-atlas' ? result.atlas.phase_receipts : result.last.phase_receipts },
             execution, persistence,
           };
         } finally {
