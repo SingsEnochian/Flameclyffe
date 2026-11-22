@@ -47,13 +47,25 @@ export async function mountWayglassSurface(surfaceId, root) {
   mountEpochs.set(root, epoch);
   const prior = activeMounts.get(root);
   activeMounts.delete(root);
+  if (prior?.controller) prior.controller.abort('room-navigation');
   if (prior?.cleanup) prior.cleanup();
-  const result = await surface.mount(root);
+  const controller = new AbortController();
+  activeMounts.set(root, { surfaceId: resolvedId, controller, cleanup: null });
+  let result;
+  try {
+    // Existing one-argument mounts remain compatible; new rooms can observe signal.
+    result = await surface.mount(root, { signal: controller.signal, surfaceId: resolvedId });
+  } catch (error) {
+    controller.abort('mount-failed');
+    if (mountEpochs.get(root) === epoch) activeMounts.delete(root);
+    throw error;
+  }
   const cleanup = typeof result === 'function' ? result : (typeof result?.destroy === 'function' ? () => result.destroy() : null);
   if (mountEpochs.get(root) !== epoch) {
+    controller.abort('superseded-room');
     if (cleanup) cleanup();
     return result;
   }
-  activeMounts.set(root, { surfaceId: resolvedId, cleanup });
+  activeMounts.set(root, { surfaceId: resolvedId, controller, cleanup });
   return result;
 }
