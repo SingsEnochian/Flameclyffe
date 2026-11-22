@@ -31,7 +31,7 @@ Explicit mono amplitude modulation:
 y(t) = A [1 + m sin(2π fm t)] sin(2π fc t) / (1+m), 0 ≤ m ≤ 1
 ```
 
-Here the envelope is in the physical signal. The reference renderer uses `fm=5.5` Hz as a demonstration fixture, not a claim about therapeutic effect.
+Here the envelope is in the physical signal. The reference renderer sets `fm=5.5` Hz as a synthesis parameter and emits that modulation in the audio signal. Therapeutic outcomes are evaluated through a separate outcomes protocol.
 
 ## Film-grade acceptance
 
