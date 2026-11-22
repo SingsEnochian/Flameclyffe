@@ -4,7 +4,7 @@
 // exception-message heuristics. Only known outcomes are accepted; unknown labels
 // never become policy decisions or new execution privileges.
 const REASONS = new Set([
-  'participant_stop', 'capability_unavailable', 'resource_limit',
+  'participant_stop', 'capability_unavailable', 'unauthorised_effect', 'resource_limit',
   'invalid_or_unsupported_wtl', 'preview_execution_failed',
 ]);
 const INVALID_REASONS = new Set([
