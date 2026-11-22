@@ -192,5 +192,14 @@
       ],
       "note": "Preserves canonical First Contact/Astra routes. PR570 is superseded by the canonical-based integration review because its branch requires linear history; source branches are preserved. No deployed host SHA, installed Windows build or live participant invocation established."
     }
-  ]
+  ],
+  "governance": {
+    "one_ship_contract": "docs/wayglass/ONE_SHIP_DIRECTIVE.md",
+    "contract_version": "2026-11-22",
+    "status": "proposed-on-wayglass-current",
+    "required_for": "all Wayglass programs, automations, workflows, branches and handoffs",
+    "change_propagation": "update contract impact map and this register in the same change set; validate generated copies before integration",
+    "single_mission_issue": 583,
+    "current_reconciliation_train_pr": 661
+  }
 }
