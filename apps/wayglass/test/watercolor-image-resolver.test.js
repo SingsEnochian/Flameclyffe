@@ -40,3 +40,20 @@ test('both emergent and reference resolution share the reversible pigment apertu
  assert.equal(resolver.snapshot().sourceRetained,true);
  resolver.dispose();
 });
+
+test('live pigment chroma masks both image sources without mutating the sample',()=>{
+ let masks=0;
+ const maskContext={createImageData:(w,h)=>({data:new Uint8ClampedArray(w*h*4)}),putImageData(){masks++;}};
+ const surface={width:0,height:0,getContext:()=>({...context,globalCompositeOperation:'source-over'})};
+ const resolver=createWatercolorImageResolver(surface,{scope:{document:{createElement:()=>({width:0,height:0,getContext:()=>maskContext})}}});
+ const rgba=new Uint8ClampedArray([220,60,20,255,40,40,40,255]);
+ const before=[...rgba];
+ resolver.setPigmentPixels(rgba,2,1);
+ resolver.render(200,100,16);
+ assert.deepEqual([...rgba],before);
+ resolver.feather(true);
+ resolver.setPigmentPixels(new Uint8ClampedArray(8),2,1);
+ assert.equal(resolver.snapshot().stopped,true);
+ resolver.dispose();
+ assert.equal(masks,0); // no image has been selected, so no compositing yet
+});
