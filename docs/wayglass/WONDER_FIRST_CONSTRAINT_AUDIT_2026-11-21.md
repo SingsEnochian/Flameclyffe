@@ -156,3 +156,7 @@ In `lib/wyrdrune/runtime.mjs`, explicitly reject null and non-object targets bef
 ## Wyrdrune typed records and Unknown regression expansion
 
 Added typed-IR regression cases for present and missing record fields, Unknown propagation through access, and typed-preflight rejection of null/number/boolean access. Commit `aef8dbc37d78a1deb520ade2c3f8bc444ea8c5e5` in `lib/wyrdrune/typed-ir.test.cjs`. This exercises existing language semantics rather than introducing a new grammar feature. Tests not executed; do not treat expected results as verified. Direct runtime-only null access remains an open test coverage gap.
+
+## Wyrdrune pure known(value) primitive
+
+Introduced pure `known(value)` as a single-argument runtime builtin that returns false only for the canonical Unknown value, true for concrete values including false, zero and null. Reserved its operator name and added a typed-IR signature `data -> truth`. Commits `047a8f0e639cd79b20926b1d9ee7842546764b23` (runtime), `6fcfb1c2ffec6a1e3fc681a8b2215963be483ba4` (typed IR), `ba02b11d8b3f185751d3d7623e909b0d73869464` (tests). This permits explicit conditional decisions without collapsing Unknown into false. Tests and browser parity have not yet been executed or verified. No merge or deployment.
