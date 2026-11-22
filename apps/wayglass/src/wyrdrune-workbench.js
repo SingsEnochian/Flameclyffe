@@ -72,3 +72,24 @@ export async function saveWyrdruneProgram({
   }
   return Object.freeze(data);
 }
+
+export async function saveWyrdruneRun({
+  source, status, executionReceipt, context = {}, programSlug = null, fetchImpl = fetch,
+} = {}) {
+  if (typeof source !== 'string' || !source.trim() || source.length > 50000) {
+    throw new TypeError('Run source must be nonempty Wyrdrune text.');
+  }
+  const response = await fetchImpl('/api/v1/wayglass/wyrdrune/runs', {
+    method: 'POST', credentials: 'same-origin', cache: 'no-store',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      source, status, execution_receipt: executionReceipt, context, program_slug: programSlug,
+    }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || 'Wyrdrune run receipt could not be saved.');
+  if (data.schema !== 'wayglass.program-run-save/v1' || !data.run?.run_id) {
+    throw new TypeError('The Wayglass run ledger returned an invalid receipt.');
+  }
+  return Object.freeze(data.run);
+}
