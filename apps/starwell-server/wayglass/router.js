@@ -1118,9 +1118,15 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
         if (!Number.isFinite(number) || number < 0 || number > 1) throw new TypeError('Vessel plan fraction must be between zero and one.');
         return number;
       };
+      const executionController = new AbortController();
+      req.once('aborted', () => executionController.abort());
+      res.once('close', () => {
+        if (!res.writableEnded) executionController.abort();
+      });
       const execution = await Wyrdrune.execute(ir, {
         principal: { id: 'house-steward-session', authorized: true },
         maxOperations: 6000,
+        signal: executionController.signal,
         bridges: {
           os: {
             lane_total: async () => context.system_count,
