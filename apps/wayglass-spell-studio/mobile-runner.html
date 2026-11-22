@@ -708,11 +708,11 @@ return Object.freeze({PHASES,compile,execute,inspectOperators,geometryStar,UNKNO
 }
 
 
-const engine=createWyrdruneRuntime({hashSource:s=>'mobile:'+s.length});
+const engine=createWyrdruneRuntime({hashSource:s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return 'fnv1a32:'+(h>>>0).toString(16).padStart(8,'0')}});
 const el=id=>document.getElementById(id);
 const q=s=>JSON.stringify(s);
 function draft(){const intention=el('intent').value.trim()||'What becomes possible?',question=el('question').value.trim()||'What remains open?';el('source').value='mobius {\n perceive { let intention = '+q(intention)+'; }\n compress { let seed = 1; }\n release { let potential = seed + 1; }\n verify { emit potential > seed; }\n integrate { let inquiry = wonder(intention); }\n choose { emit inquiry; }\n return { emit {potential:potential, question:intention}; }\n transcend { emit '+q(question)+'; }\n}\n';el('status').textContent='Draft ready';el('result').textContent='';}
-function compileOnly(){try{const ir=engine.compile(el('source').value);el('status').textContent='Compiled '+ir.units.length+' Möbius unit(s).';el('result').textContent=JSON.stringify(ir,null,2);return ir}catch(e){el('status').textContent='Compile failed: '+e.message;el('result').textContent=String(e.stack||e);return null}}
+function compileOnly(){try{const ir=engine.compile(el('source').value);el('status').textContent='Compiled '+ir.units.length+' Möbius unit(s). Symbolic glyphs do not invoke external effects.';el('result').textContent=JSON.stringify(ir,null,2);return ir}catch(e){el('status').textContent='Compile failed: '+e.message;el('result').textContent=String(e.stack||e);return null}}
 el('draft').onclick=draft;el('compile').onclick=compileOnly;
 el('run').onclick=async()=>{const ir=compileOnly();if(!ir)return;el('status').textContent='Executing pure WTL locally…';try{const result=await engine.execute(ir,{maxOperations:2000});el('result').textContent=JSON.stringify(result,null,2);el('status').textContent='Execution finished: '+(result.status||'result returned')}catch(e){el('status').textContent='Execution stopped: '+e.message;el('result').textContent=String(e.stack||e)}};
 el('feather').onclick=()=>{el('run').disabled=true;el('status').textContent='Feather: further execution disabled until refresh. In-flight work is not interrupted.'};
