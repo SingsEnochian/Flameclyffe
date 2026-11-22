@@ -1262,8 +1262,8 @@ function createWayglassRouter({
       return res.status(invalid ? 400 : 422).json({
         reason,
         error: 'Wyrdrune preview could not complete: ' + cleanText(detail, 250),
-        ...(Array.isArray(error.diagnostics) ? { diagnostics: error.diagnostics } : {}),
-        ...(error.effects ? { effects: error.effects } : {}),
+        ...(Array.isArray(error?.diagnostics) ? { diagnostics: error?.diagnostics } : {}),
+        ...(error?.effects ? { effects: error.effects } : {}),
       });
     }
   });
