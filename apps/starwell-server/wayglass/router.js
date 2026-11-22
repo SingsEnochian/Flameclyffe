@@ -1,6 +1,7 @@
 'use strict';
 
 const { randomUUID } = require('node:crypto');
+const Wyrdrune = require('../../../lib/wyrdrune/wyrdrune.cjs');
 const path = require('node:path');
 const { pathToFileURL } = require('node:url');
 const express = require('express');
@@ -1066,6 +1067,106 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       return res.status(400).json({
         schema: 'wayglass.wyrdrune-story-soundscape-error/v0.1',
         error: cleanText(error?.message || 'Wyrdrune scoring refused the input.', 250),
+      });
+    }
+  });
+
+  router.post('/wyrdrune/workbench', createRequestGate({ maxRequests: 24, maxConcurrent: 2 }), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required to run native Wyrdrune programmes.' });
+    }
+    const source = req.body?.source;
+    const mode = req.body?.mode === 'compile' ? 'compile' : req.body?.mode === 'execute' ? 'execute' : null;
+    if (!mode) return res.status(400).json({ error: 'Choose compile or execute.' });
+    if (typeof source !== 'string' || !source.trim() || source.length > 50000) {
+      return res.status(400).json({ error: 'WTL source must be nonempty text of at most 50000 characters.' });
+    }
+    try {
+      const ir = Wyrdrune.compile(source);
+      if (mode === 'compile') {
+        return res.json({
+          schema: 'wayglass.wyrdrune-workbench/v1',
+          mode,
+          source_hash: ir.sourceHash,
+          ir,
+          dispatch: 'none',
+          external_effects: [],
+        });
+      }
+
+      const supplied = req.body?.context && typeof req.body.context === 'object' ? req.body.context : {};
+      const systemCount = Number(supplied.system_count);
+      const assembledSystems = Number(supplied.assembled_systems);
+      if (!Number.isSafeInteger(systemCount) || systemCount !== 8 ||
+          !Number.isSafeInteger(assembledSystems) || assembledSystems < 0 || assembledSystems > systemCount) {
+        return res.status(400).json({ error: 'Vessel context requires the live eight-system count and assembled-system count.' });
+      }
+      const systemIds = Array.isArray(supplied.system_ids)
+        ? supplied.system_ids.slice(0, 8).map(value => cleanText(value, 100))
+        : [];
+      const context = Object.freeze({
+        system_count: systemCount,
+        assembled_systems: assembledSystems,
+        system_ids: Object.freeze(systemIds),
+      });
+      const fraction = value => {
+        const number = Number(value);
+        if (!Number.isFinite(number) || number < 0 || number > 1) throw new TypeError('Vessel plan fraction must be between zero and one.');
+        return number;
+      };
+      const execution = await Wyrdrune.execute(ir, {
+        principal: { id: 'house-steward-session', authorized: true },
+        maxOperations: 6000,
+        bridges: {
+          os: {
+            lane_total: async () => context.system_count,
+            lane_present: async () => context.assembled_systems,
+            compose_boot_plan: async ({ arguments: [value] }) => ({
+              kind: 'wayglass.boot-plan/v1',
+              fraction: fraction(value),
+              systems: context.system_ids,
+              assembled_systems: context.assembled_systems,
+              system_count: context.system_count,
+              action: 'compose-native-vessel-boot',
+            }),
+            checkpoint: async ({ arguments: [value] }) => ({
+              kind: 'wayglass.vessel-checkpoint/v1',
+              fraction: fraction(value),
+              system_ids: context.system_ids,
+            }),
+            compose_launch_plan: async ({ arguments: [value] }) => ({
+              kind: 'wayglass.launch-plan/v1',
+              fraction: fraction(value),
+              systems: context.system_ids,
+              system_count: context.system_count,
+              action: 'compose-native-vessel-launch',
+            }),
+            return_anchor: async ({ arguments: [value] }) => ({
+              kind: 'wayglass.vessel-return-anchor/v1',
+              fraction: fraction(value),
+              system_ids: context.system_ids,
+            }),
+          },
+        },
+      });
+      return res.json({
+        schema: 'wayglass.wyrdrune-workbench/v1',
+        mode,
+        source_hash: ir.sourceHash,
+        ir,
+        execution,
+        context,
+        dispatch: 'none',
+        external_effects: [],
+        world_mutation: false,
+      });
+    } catch (error) {
+      const invalid = error instanceof SyntaxError || error instanceof TypeError || error instanceof RangeError ||
+        error instanceof ReferenceError || /Bridge capability unavailable|Feather|operation budget|Duplicate binding|Unknown binding/.test(error.message);
+      return res.status(invalid ? 400 : 422).json({
+        schema: 'wayglass.wyrdrune-workbench-error/v1',
+        error: cleanText(error?.message || 'Wyrdrune programme execution failed.', 300),
       });
     }
   });
