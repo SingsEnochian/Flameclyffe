@@ -202,7 +202,6 @@ export async function mountWayglassProgramWorkbench(root) {
         programSlug: activeSlug,
         signal: activeController.signal,
       });
-      lastReceipt = receipt;
       irView.textContent = JSON.stringify(receipt.ir, null, 2);
       hashView.textContent = receipt.source_hash.slice(0, 16) + '…';
       if (mode === 'compile') {
@@ -216,10 +215,10 @@ export async function mountWayglassProgramWorkbench(root) {
         stateView.textContent = 'Compiled';
         status.textContent = 'WTL compiled and source hash verified.';
       } else {
-        outputView.textContent = JSON.stringify(receipt.execution, null, 2);
+        outputView.textContent = JSON.stringify({ execution: receipt.execution, persistence: receipt.persistence }, null, 2);
         stateView.textContent = receipt.execution.status === 'committed' ? 'Committed' : 'Rolled back';
         status.textContent = receipt.execution.status === 'committed'
-          ? 'Wyrdrune execution returned its phase receipts and continuity record.'
+          ? (receipt.persistence?.status === 'saved' ? 'Wyrdrune execution and run receipt saved to the Wayglass library.' : 'Wyrdrune execution returned its phase receipts and continuity record.')
           : 'The programme returned to its last committed point. Inspect the verification verdict.';
       }
     } catch (error) {
@@ -282,11 +281,9 @@ export async function mountWayglassProgramWorkbench(root) {
       const existing = programs.findIndex(program => program.slug === item.slug);
       if (existing >= 0) programs.splice(existing, 1, item);
       else programs.push(item);
-      const option = [...select.options].find(option => option.value === item.id);
-      if (option) option.textContent = item.label;
-      else select.add(new Option(item.label + ' · v' + item.version, item.id));
       activeProgram = item.id;
       activeSlug = item.slug;
+      select.replaceChildren(...programs.map(program => new Option(program.label + (program.version ? ' · v' + program.version : ''), program.id)));
       select.value = item.id;
       stateView.textContent = 'Saved v' + item.version;
       status.textContent = 'Programme and immutable revision saved to the Supabase Wayglass library.';
@@ -305,6 +302,7 @@ export async function mountWayglassProgramWorkbench(root) {
     const values = Object.fromEntries(new FormData(form).entries());
     editor.value = wizardProgram(values);
     activeProgram = 'spell-wizard:' + Date.now().toString(36);
+    activeSlug = null;
     updateCount();
     irView.textContent = 'New Wyrdrune source composed. Compile to inspect the typed program.';
     outputView.textContent = 'Not executed yet.';
@@ -329,8 +327,10 @@ export async function mountWayglassProgramWorkbench(root) {
           version: record.version,
         };
         const existing = programs.findIndex(program => program.slug === item.slug);
-        if (existing >= 0) programs.splice(existing, 1, item);
-        else programs.push(item);
+        if (existing >= 0) {
+          item.id = programs[existing].id;
+          programs.splice(existing, 1, item);
+        } else programs.push(item);
       }
       select.replaceChildren(...programs.map(item => new Option(item.label + (item.version ? ' · v' + item.version : ''), item.id)));
       select.value = activeProgram;
