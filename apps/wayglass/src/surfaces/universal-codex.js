@@ -34,7 +34,7 @@ const ALMOST_EXAMPLE=[
   '  @return { emit proposed; emit singResonance(field); }',
   '  @transcend { carry question = "What could emerge?"; }',
   '}',
-].join('\\n');
+].join('\n');
 const PHASES=Object.freeze(['Perceive','Compress','Release','Verify','Integrate','Choose','Return','Transcend']);
 function safeSessionGet(key) { try {return globalThis.sessionStorage?.getItem(key)??null;}catch{return null;} }
 function safeSessionSet(key,value) { try {globalThis.sessionStorage?.setItem(key,value);return true;}catch{return false;} }
