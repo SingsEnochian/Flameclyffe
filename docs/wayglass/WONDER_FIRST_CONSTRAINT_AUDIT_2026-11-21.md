@@ -96,3 +96,7 @@ The `/wyrdrune/preview` route previously called `previewWyrdruneRitual` without 
 ## Feather checkpoints before publication
 
 Reviewed the canonical WTL executor's phase loop. A cancellation could occur while an awaited expression was finishing, after the last statement tick but before the phase receipt or completed-cycle accounting. Added a `checkFeather` helper, reused by `tick`, and checked it immediately before each phase receipt and completed-cycle increment, without consuming extra operation-budget ticks. Commit `fe5aed01678f1ce5e8e4960dbf7683576f1aea03`. This narrows the cancellation/publication gap; it does not make already-invoked external bridge side effects reversible, nor establish live browser Feather controls. Tests and CI remain unverified.
+
+## Late Feather: lineage and final-result guards
+
+The prior executor change checked cancellation before phase receipts and completed-cycle counts, but the carried-cycle branch still published `register` and `checkpoints` before its next Feather check. Added a cancellation check before lineage checkpoint/carry publication and a final check before result assembly. Commit `44989753d43284e35001643de3dd08962348c2ea`. This is a targeted synchronous publication-boundary improvement, not atomic rollback of earlier output or external effects. CI checks for prior commit remained queued; no tests passed or deployment verified.
