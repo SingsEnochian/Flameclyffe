@@ -20,3 +20,31 @@ test('stale async room mount cannot reclaim cleanup ownership',async()=>{
  await mountWayglassSurface('test:fast-room',root);
  assert.equal(newClean,1,'new room is cleaned on subsequent navigation');
 });
+
+test('navigation aborts departing room and passes an opt-in cancellation signal',async()=>{
+ const {registerWayglassSurface,mountWayglassSurface}=await import(registryUrl);
+ let departingSignal,arrivingSignal;
+ registerWayglassSurface({surface_id:'test:abort-departing',mount:(_root,{signal})=>{departingSignal=signal;return ()=>{};}});
+ registerWayglassSurface({surface_id:'test:abort-arriving',mount:(_root,{signal})=>{arrivingSignal=signal;return ()=>{};}});
+ const root={};
+ await mountWayglassSurface('test:abort-departing',root);
+ assert.equal(departingSignal.aborted,false);
+ await mountWayglassSurface('test:abort-arriving',root);
+ assert.equal(departingSignal.aborted,true);
+ assert.equal(arrivingSignal.aborted,false);
+});
+test('failed async mount aborts its own signal without reclaiming a newer room',async()=>{
+ const {registerWayglassSurface,mountWayglassSurface}=await import(registryUrl);
+ let fail,signal,clean=0;
+ const gate=new Promise((_,reject)=>{fail=reject;});
+ registerWayglassSurface({surface_id:'test:reject-late',mount:async(_root,ctx)=>{signal=ctx.signal;await gate;}});
+ registerWayglassSurface({surface_id:'test:survivor',mount:()=>()=>{clean++;}});
+ const root={};
+ const stale=mountWayglassSurface('test:reject-late',root);
+ await mountWayglassSurface('test:survivor',root);
+ fail(new Error('synthetic stale failure'));
+ await assert.rejects(stale,/synthetic stale failure/);
+ assert.equal(signal.aborted,true);
+ await mountWayglassSurface('test:survivor',root);
+ assert.equal(clean,1);
+});
