@@ -1,0 +1,9 @@
+{
+  "schema": "wayglass.change-impact/v1",
+  "governing_contract": "docs/wayglass/ONE_SHIP_DIRECTIVE.md",
+  "canonical_development_branch": "wayglass/current",
+  "single_mission_issue": 583,
+  "reconciliation_train_pr": 661,
+  "policy": "Every implementation change must add/update an impact entry in this file in the same PR. Entries identify changed paths, affected organs, dependent checks, provenance and rollback. The validator rejects implementation changes without a matching entry.",
+  "entries": []
+}
