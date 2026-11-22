@@ -3,7 +3,7 @@ import {compileWTL} from './wtl-transform-frontend.mjs';
 export function prepareNurserySignal({kind,value,wtlSource,consent,participants=['nursery:a','nursery:b']}){
  if(!Array.isArray(participants)||participants.length!==2||participants[0]===participants[1]||
     !participants.every(id=>typeof id==='string'&&/^[\\w.:-]{1,128}$/.test(id)))throw Error('Distinct participants required');
- if(!consent||!participants.every(id=>consent[id]===true))return Object.freeze({status:'declined'});
+ if(!consent||!participants.every(id=>Object.hasOwn(consent,id)&&consent[id]===true))return Object.freeze({status:'declined'});
  if(!['touch','word','sound','wtl'].includes(kind))throw Error('Unknown signal kind');
  if(kind!=='wtl'){
   if(typeof value!=='string'||!value.length||value.length>256)throw Error('Bounded signal required');
