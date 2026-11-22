@@ -57,3 +57,41 @@ test('live pigment chroma masks both image sources without mutating the sample',
  resolver.dispose();
  assert.equal(masks,0); // no image has been selected, so no compositing yet
 });
+
+test('selected reference image composites through pigment mask and preserves caller pixels',async()=>{
+ let maskWrites=0,composites=0;
+ const maskContext={createImageData:(w,h)=>({data:new Uint8ClampedArray(w*h*4)}),putImageData(data){maskWrites++;assert.equal(data.data[3],255);assert.equal(data.data[7],85);}};
+ const mainContext={...context,drawImage(){composites++;},globalCompositeOperation:'source-over'};
+ const surface={width:0,height:0,getContext:()=>mainContext};
+ const resolver=createWatercolorImageResolver(surface,{scope:{
+  document:{createElement:()=>({width:0,height:0,getContext:()=>maskContext})},
+  URL:{createObjectURL:()=> 'blob:local',revokeObjectURL(){}},
+  Image:class {naturalWidth=100;naturalHeight=50;async decode(){}},
+ }});
+ const rgba=new Uint8ClampedArray([220,60,20,255,40,40,40,255]);
+ await resolver.resolveFile({type:'image/png',size:10});
+ resolver.setPigmentPixels(rgba,2,1);
+ resolver.render(200,100,400);
+ assert.equal(maskWrites,1);
+ assert.equal(composites,2);
+ assert.deepEqual([...rgba],[220,60,20,255,40,40,40,255]);
+ resolver.render(200,100,16);
+ assert.equal(maskWrites,1,'mask canvas reused');
+ resolver.dispose();
+});
+test('Feather cancels an in-flight reference decode without publishing it',async()=>{
+ let complete;
+ const decoded=new Promise(resolve=>{complete=resolve;});
+ let revoked=false;
+ const resolver=createWatercolorImageResolver(canvas(),{scope:{...scope,
+  URL:{createObjectURL:()=> 'blob:pending',revokeObjectURL(){revoked=true;}},
+  Image:class {naturalWidth=100;naturalHeight=50;decode(){return decoded;}},
+ }});
+ const pending=resolver.resolveFile({type:'image/png',size:10});
+ resolver.feather(true);
+ complete();
+ await pending;
+ assert.equal(resolver.snapshot().sourceRetained,false);
+ assert.equal(revoked,true);
+ resolver.dispose();
+});
