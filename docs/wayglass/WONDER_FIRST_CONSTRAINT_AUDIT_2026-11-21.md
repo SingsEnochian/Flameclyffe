@@ -108,3 +108,7 @@ Inspected the pure `lib/wayglass-wyrdrune-ritual.cjs` wrapper and found that `si
 ## First-class Wyrdrune Wonder v0.1
 
 Added pure `wonder(question)` intrinsic to the canonical `lib/wyrdrune/runtime.mjs` evaluator, producing `{kind:'wyrdrune.wonder/v0.1',question,answer:UNKNOWN,status:'open'}`. It requires nonempty text up to 1024 characters and reserves the operator name to prevent accidental shadowing. It invokes no host effects, models or external bridges. Added ritual-preview tests for open question preservation, deterministic receipt hash and empty-question validation. Code `0a1a0e6d803ee6e84f45b71946a7810d323a564b`, tests `6dff56c961da9a611286b4524ab75c1c11a9d57c`. **Not yet a multi-hypothesis inquiry engine, and no test/CI pass verified.** No merge/deploy.
+
+## System-wide WTL Wonder parity: typed IR and operator inspection
+
+Following introduction of native `wonder(question)`, inspected `lib/wyrdrune/typed-ir.cjs` and `inspectOperators` in `lib/wyrdrune/runtime.mjs`. Both omitted the new intrinsic: typed mode would report `unknown-call`, and user-defined operators calling Wonder would be flagged as `nonportable-call`. Added typed builtin signature `TEXT → RECORD` and pure preflight recognition of a single question parameter. Added regression for typed preview and checkOperators. Commits `0c11d88f53669422ad43c0200d3eb37dc2649cab`, `bb76a8f5364b7f660be2ca646e769e2ef9e9d2da`, `22f5285ece5b72357f17558b77765577edf4520a`. **These are consistency fixes, not evidence of a whole-ship deployment.** No tests/CI verified yet.
