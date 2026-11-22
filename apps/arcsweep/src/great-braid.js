@@ -1,4 +1,5 @@
 import { sha256Hex } from '../../starwell/src/world-tone-fold-approval.js';
+import { createPossibilityTopology } from './possibility-topology.js';
 
 export const GREAT_BRAID_SCHEMA = 'arcsweep.great-braid-receipt/v1';
 export const GREAT_BRAID_PUBLISH_SCHEMA = 'arcsweep.great-braid-publish-receipt/v1';
@@ -53,6 +54,7 @@ export async function createGreatBraidReceipt({
   for (const type of REQUIRED_PROJECTIONS) invariant(projection(bridgeTest.envelope, type), `${type} projection receipt is required`);
 
   const at = stamp(generatedAt, 'generatedAt');
+  const possibilityTopology = createPossibilityTopology({ arc, runtimePacket, bridgeTest, worldseedSnapshot });
   const core = {
     schema: GREAT_BRAID_SCHEMA,
     schema_version: 1,
@@ -76,6 +78,7 @@ export async function createGreatBraidReceipt({
         record_fingerprint: runtimePacket.lineage.deep_time_record_fingerprint,
         review_receipt_id: runtimePacket.lineage.review_receipt_id,
       },
+      possibility_topology: possibilityTopology,
       bifrost: {
         crossing_id: bridgeTest.envelope.crossing_id,
         crossing_receipt_id: bridgeTest.envelope.lineage?.receipt_id || null,
@@ -102,6 +105,7 @@ export async function createGreatBraidReceipt({
         plugin_id: 'arcsweep-runtime-bridge',
         event_type: 'arcsweep.great-braid.receipted',
         rail_key: PROJECT_ZERO_EVENT_RAIL_KEY,
+        topology_schema: possibilityTopology.schema,
       },
       commons: {
         thread_id: commonsThreadId.trim(),
@@ -166,7 +170,7 @@ export function greatBraidCommonsEntry(receipt) {
       { kind: 'feedback', id: receipt.stages.observer_premaqc_math.cycle_id, label: 'Observer → PREMAQC → Math Spine' },
       { kind: 'world', id: receipt.stages.worldseed.world_id, label: 'Worldseed destination' },
     ],
-    text: `Great Braid receipted · ${receipt.arc.intention}\n${receipt.arc.world_id} → DEEPTime → Bifröst → ${receipt.stages.worldseed.world_id} → Glyph/Runa/Storywork → Project Zero → Commons\nReceipt: ${receipt.receipt_id}`,
+    text: `Great Braid receipted · ${receipt.arc.intention}\n${receipt.arc.world_id} → DEEPTime → Possibility Topology → Bifröst → ${receipt.stages.worldseed.world_id} → Glyph/Runa/Storywork → Project Zero → Commons\nReceipt: ${receipt.receipt_id}`,
     great_braid: {
       receipt_id: receipt.receipt_id,
       fingerprint: receipt.receipt_fingerprint,
