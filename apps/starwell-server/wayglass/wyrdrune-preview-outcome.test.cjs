@@ -22,3 +22,16 @@ test('unknown failures do not invent a policy or user-intent verdict', () => {
   assert.equal(result.reason, 'preview_execution_failed');
   assert.equal(result.invalid, false);
 });
+
+test('explicit typed runtime reason overrides misleading exception text', () => {
+  const error = new Error('Feather is mentioned in a quoted source');
+  error.reason = 'invalid_or_unsupported_wtl';
+  const result = classifyPreviewOutcome(error);
+  assert.equal(result.reason, 'invalid_or_unsupported_wtl');
+  assert.equal(result.invalid, true);
+});
+test('unrecognised reason does not bypass technical classification', () => {
+  const error = new Error('backend unavailable');
+  error.reason = 'permission_granted';
+  assert.equal(classifyPreviewOutcome(error).reason, 'preview_execution_failed');
+});
