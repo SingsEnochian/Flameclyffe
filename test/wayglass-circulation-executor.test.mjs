@@ -42,6 +42,6 @@ test('failed diagnostics cannot produce a passed execution receipt', () => {
   });
   assert.match(body, /State: failed/);
   assert.ok(body.includes(executionMarker));
-  assert.match(body, /not a claim that the issue is resolved/);
+  assert.match(body, /Issue lifecycle: tracked independently in GitHub/);
   assert.doesNotMatch(body, /broken/);
 });
