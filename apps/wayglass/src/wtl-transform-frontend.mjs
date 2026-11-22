@@ -31,11 +31,15 @@ export function parseWTL(source){
  }
  const ast=expr(0);if(at!==tokens.length)throw SyntaxError('Trailing WTL tokens');return ast;
 }
-export function lowerWTL(ast){
+export function lowerWTL(ast, depth=0, seen=new WeakSet()){
  if(!ast||typeof ast!=='object')throw TypeError('Invalid AST');
+ // The exported lowering API also accepts caller-provided ASTs, not just parseWTL output.
+ // Bound depth and reject cyclic graphs before recursive descent.
+ if(depth>MAX_DEPTH||seen.has(ast))throw TypeError('WTL AST exceeds depth limit or contains a cycle');
+ seen.add(ast);
  if(ast.type==='Root'){const node=root(ast.name);return Object.freeze({type:'WTL.Root',node,semanticType:'Possibility'});}
  if(ast.type!=='Transform')throw TypeError('Unknown AST node');
- const child=lowerWTL(ast.subject);
+ const child=lowerWTL(ast.subject,depth+1,seen);
  const node=transform(ast.operator,child.node,{twist:ast.twist});
  return Object.freeze({type:'WTL.Derivation',node,semanticType:ast.operator==='wonder'?'OpenQuestion':'TendedPossibility',inputType:child.semanticType,origin:trace(node),effects:Object.freeze([])});
 }
