@@ -160,3 +160,7 @@ Added typed-IR regression cases for present and missing record fields, Unknown p
 ## Wyrdrune pure known(value) primitive
 
 Introduced pure `known(value)` as a single-argument runtime builtin that returns false only for the canonical Unknown value, true for concrete values including false, zero and null. Reserved its operator name and added a typed-IR signature `data -> truth`. Commits `047a8f0e639cd79b20926b1d9ee7842546764b23` (runtime), `6fcfb1c2ffec6a1e3fc681a8b2215963be483ba4` (typed IR), `ba02b11d8b3f185751d3d7623e909b0d73869464` (tests). This permits explicit conditional decisions without collapsing Unknown into false. Tests and browser parity have not yet been executed or verified. No merge or deployment.
+
+## Wyrdrune match-unknown first grammar slice
+
+Added `match subject { unknown: expression, else: expression }` syntax to shared WTL parser, evaluation of only the selected arm, typed-IR inference of both arms, and structural operator-call inspection for both arms. Runtime/parser commit `7eca20b962ab1daed02fe7675b276bda33aa349f`, typed IR `40492a94248a3eaec4378d8c9baf663595b9f298`, operator inspection `b11a8c36cc2ae2ab910f84abd197fb7a2723d70e`, regression tests `3b25dd28a665cfd559ddafad0d1f91cda41fd017`. This is a deliberately restricted first pattern-matching slice, not general destructuring/pattern matching. **Tests not run** and two-backend parity not verified. Keep on integration branch pending actual execution and CI.
