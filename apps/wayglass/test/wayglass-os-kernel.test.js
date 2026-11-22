@@ -5,7 +5,7 @@ import { createWayglassOSKernel, WAYGLASS_OS_SYSTEMS } from '../src/os-kernel.js
 const organIds = [
   'world-continuity-core','presence-nervous-system','voice-consent-gate',
   'gateway-double-mobius','quad-eightfold-gestalt','sensorium',
-  'living-observer','memory-flight-recorder',
+  'living-observer','memory-flight-recorder','mythience-membrane',
 ];
 const surfaceIds = [
   'systems','world-continuity','writing-room','program-workbench','native-voice','sound-composition',
@@ -32,6 +32,7 @@ test('Wayglass OS boots as one eight-system vessel over the native organ and sur
   assert.equal(state.building_systems, 0);
   assert.equal(state.entryway, 'wayglass:living-watercolor');
   assert.equal(state.vessel, 'Wayglass');
+  assert.equal(state.organs.registered, 9);
   assert.deepEqual(state.systems.map(x => x.id), WAYGLASS_OS_SYSTEMS.map(x => x.id));
 });
 
