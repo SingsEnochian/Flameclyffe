@@ -2,7 +2,6 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { once } = require('node:events');
-const { readFile } = require('node:fs/promises');
 const path = require('node:path');
 const express = require('express');
 const createWayglassRouter = require('../wayglass/router');
