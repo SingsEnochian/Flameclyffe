@@ -45,7 +45,7 @@ const SYSTEMS = Object.freeze([
     id: 'constellation-agency',
     name: 'Constellation Agency',
     purpose: 'Coordinates named participants, model routes, worker processes, visits, contributions and shared work.',
-    organs: ['wayglass.organ.presence-nervous-system', 'wayglass.organ.voice-consent-gate'],
+    organs: ['wayglass.organ.presence-nervous-system', 'wayglass.organ.voice-consent-gate', 'wayglass.organ.mythience-membrane'],
     surfaces: ['wayglass:commons', 'wayglass:writing-room', 'wayglass:mythience-crossing'],
     interfaces: ['Constellation Runtime', 'Commons', 'participant invitations', 'attributed turn ledger'],
   }),
