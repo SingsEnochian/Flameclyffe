@@ -85,7 +85,7 @@ export async function mountLivingWatercolorSurface(root) {
           '<div class="wc-live-field" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>',
           '<div class="wc-live-insight" role="status" aria-live="polite"><strong id="wc-live-title">Ambient current · listening</strong><small id="wc-live-detail">Local pigment moves independently. No agent activity claimed.</small></div>',
           '<canvas id="wc-fluid" class="wc-fluid" aria-label="Watercolor canvas. Drag a finger, mouse or Pencil to paint; use arrow keys to move and Enter or Space to paint." aria-describedby="wc-paint-help wc-word-paint-status" tabindex="0"></canvas>',
-          '<canvas id="wc-resolved-image" aria-label="Resolved image overlay, reversible to flowing pigment" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;object-fit:contain" aria-hidden="true"></canvas>',
+          '<canvas id="wc-resolved-image" aria-label="Resolved image overlay, reversible to flowing pigment" style="position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;object-fit:contain" aria-hidden="true"></canvas>',
           '<div class="wc-image-tools" style="position:absolute;top:4.5rem;right:1rem;z-index:5;display:flex;gap:.35rem;flex-wrap:wrap;max-width:70%">',
             '<button type="button" id="wc-image-emerge" class="glass-chip">Resolve image</button>',
             '<label class="glass-chip" for="wc-image-file">Reference image</label><input type="file" id="wc-image-file" accept="image/png,image/jpeg,image/webp,image/gif" style="max-width:11rem">',
@@ -188,16 +188,18 @@ export async function mountLivingWatercolorSurface(root) {
   listen(q('wc-image-emerge'),'click',()=>{
     if(stopped||featherStopped)return;
     imageResolver.emerge(++imageSeed*31);
+    paint();
   });
   listen(q('wc-image-dissolve'),'click',()=>{
     if(stopped||featherStopped)return;
     imageResolver.dissolve();
+    paint();
   });
   listen(q('wc-image-file'),'change',async event=>{
     if(stopped||featherStopped)return;
     const file=event.target.files?.[0];
     if(!file)return;
-    try{await imageResolver.resolveFile(file);}catch(error){
+    try{await imageResolver.resolveFile(file);if(!stopped&&!featherStopped)paint();}catch(error){
       if(!stopped)q('wc-image-file').title=String(error.message);
     }
     event.target.value='';
