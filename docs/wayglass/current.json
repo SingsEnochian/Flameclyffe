@@ -223,6 +223,15 @@
     "anon_authenticated_access": false,
     "service_role_access": true,
     "seeded_program": "wayglass-vessel-plan",
-    "seeded_version": 1
+    "seeded_version": 1,
+    "builtin_programs": [
+      "wayglass-vessel-plan",
+      "story-soundscape",
+      "full-spectrum",
+      "resonance-atlas"
+    ],
+    "seeded_programs": 4,
+    "revisions_per_seed": 1,
+    "source_hashes_verified": true
   }
 }
