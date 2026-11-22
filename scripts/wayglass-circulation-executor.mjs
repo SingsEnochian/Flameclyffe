@@ -69,7 +69,7 @@ export function diagnosticReceipt({ issue, result, sha, runUrl, hadSelection = f
     hadSelection ? 'Wayglass scheduled circulation: existing selection executed.'
       : 'Wayglass scheduled circulation: selection and bounded diagnostic executed.',
     'Task: #' + issue.number + ' · ' + issue.title,
-    'State: ' + result.status + ' (not a claim that the issue is resolved).',
+    'Diagnostic run: ' + result.status + ' · Issue lifecycle: tracked independently in GitHub.',
     'Executed: node --test ' + result.path,
     'Source commit: ' + sha,
     'Exit code: ' + (result.exit_code ?? 'unavailable'),
