@@ -176,3 +176,7 @@ Reviewed `inspectCall` in typed IR and found that built-in `known(value)` was ty
 ## Wyrdrune operator-inspection parity repair
 
 Source inspection found `inspectOperators` in `runtime.mjs` classified `known(value)` as `nonportable-call` even though the runtime executes it and typed IR accepts it as a pure builtin. Added `known` to the inspector's builtin arity handling (commit `e47f7aa9687a03b602604f5d8775337404704371`) and a regression in `typed-ir.test.cjs` asserting zero diagnostics for an operator calling `known` (commit `a1351d39fe012b477e90f44df3fedd429eff5a77`). The integration branch has not been executed locally; GitHub runners were queued at the preceding check. Do not claim passing tests or deployment.
+
+## Wyrdrune composable match grammar repair
+
+Reviewed shared expression parser and found `match` only parsed at `expr()` entry, preventing use inside parenthesised arithmetic, call arguments, and nested matches. Refactored `matchExpression()` into the atom parser while retaining the existing Unknown/else two-arm semantics (commit `7a8647ad6a37b94eaae4d19c888702ed21d76a5d`). Added tests for arithmetic composition, nested match, known(match), and operator-inspection traversal (commit `d18ae30a11f4ce88de252ccbe96231ed62d7283a`). CI jobs for previous head were queued; these new tests are not executed and the branch is not merged or deployed.
