@@ -84,3 +84,7 @@ Found that Starwell's `REASONS` accepted `unauthorised_effect`, but `INVALID_REA
 ## Remaining executor hard-stop reasons
 
 Audited all `new WyrdruneHardStop` sites in `lib/wyrdrune/runtime.mjs`. Added `invalid_or_unsupported_wtl` to missing spiced seed, whisper outside spiced context, invalid expression and invalid statement; added `capability_unavailable` to missing ritual-register adapters. Preserved existing Feather, budget, bridge and owner-authorisation distinctions. Added a ritual-preview regression asserting missing spiced seed is a technical outcome. Commits `a2eab0a8c9c9a2d41cf0a6d584f889927b0ac88d`, `bb941be698d5a87aa9d03fcd9887261f4c0e57bb`. Latest prior CI check still queued; these new commits are not verified by passing tests. No merge/deploy.
+
+## Null-safe Starwell preview error path
+
+Inspected `apps/starwell-server/wayglass/router.js` and found preview catch reading `error.diagnostics` and `error.effects` directly after `classifyPreviewOutcome(error)`. A thrown `null` would cause a secondary TypeError and obscure the original preview failure. Changed optional fields to null-safe reads and added `classifyPreviewOutcome(null)` regression in the existing Starwell outcome test. Commits `de9dda65ea55b838b60deef5ff559d66294da447`, `13bf36c3105ce0dacf753bad4d98b97bfcf57bd9`. GitHub's Wayglass Check, Wyrdrune parity and Gates 6/7 remained queued for preceding commit; no test success or deployment verified. Local Git clone was unavailable in this environment due to DNS resolution failure, so no local repository test run occurred.
