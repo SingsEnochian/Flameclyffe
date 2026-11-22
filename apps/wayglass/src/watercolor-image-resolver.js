@@ -66,9 +66,17 @@ export function createWatercolorImageResolver(canvas,{scope=globalThis}={}) {
     if(source&&opacity>.001){
       const img=source.image,iw=img.naturalWidth||img.width,ih=img.naturalHeight||img.height;
       const scale=Math.min(width/iw,height/ih);
-      ctx.globalAlpha=clamp(opacity);
+      // A growing, feathered pigment window reveals the image from the centre.
+      // The image remains a separate presentation layer; no source pixels change.
+      const reveal=clamp(opacity);
+      ctx.save();
+      ctx.beginPath();
+      ctx.ellipse(width/2,height/2,Math.max(.01,width*.72*reveal),
+        Math.max(.01,height*.72*reveal),0,0,Math.PI*2);
+      ctx.clip();
+      ctx.globalAlpha=reveal;
       ctx.drawImage(img,(width-iw*scale)/2,(height-ih*scale)/2,iw*scale,ih*scale);
-      ctx.globalAlpha=1;
+      ctx.restore();
     }
   }
   function dissolve(){assertLive();if(stopped)return snapshot();target=0;return snapshot();}
