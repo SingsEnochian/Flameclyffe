@@ -106,7 +106,7 @@ Research provenance and licence posture live in `docs/research/WAYGLASS_TOYBOX_G
 
 ## Whole-vessel operating system
 
-The native vessel kernel boots eight cooperating systems as one Wayglass OS. The Wyrdrune Program Workbench is a native creation deck with a source editor, programme library, typed-IR viewer, source-hash verification, execution ledger and Spell Wizard. It compiles and runs authored WTL through the authenticated Wayglass host, using the same canonical parser/runtime as the rest of the ship. The first whole-vessel programme composes the eight system lanes and returns its Möbius checkpoints.\n\nThe eight systems are:
+The native vessel kernel boots eight cooperating systems as one Wayglass OS. The Wyrdrune Program Workbench is a native creation deck with a source editor, persistent Supabase programme library, immutable revision history, typed-IR viewer, source-hash verification, execution ledger and Spell Wizard. It compiles and runs authored WTL through the authenticated Wayglass host, using the same canonical parser/runtime as the rest of the ship. The first whole-vessel programme composes the eight system lanes and returns its Möbius checkpoints.\n\nThe eight systems are:
 
 1. Authority & Kernel
 2. Wyrdrune Native Language
