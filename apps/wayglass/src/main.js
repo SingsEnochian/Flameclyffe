@@ -39,7 +39,7 @@ import {mountWayglassAlteredTimeline} from './surfaces/altered-timeline.js';
 import {faeberpunkLocusLinks,faeberpunkLocusForRoom} from './faeberpunk-loci.js';
 import { mountWayglassQuadGestalt } from './surfaces/quad-eightfold.js';
 import { installQuadFeatherListener, readLatestQuadGestalt, subscribeQuadGestalt } from './quad-eightfold-client.js';
-import { publishWatercolorActivity } from './watercolor-bridge.js';
+import { publishWatercolorActivity,subscribeWatercolorActivity } from './watercolor-bridge.js';
 import {installMagicTelemetry} from './magic-telemetry-client.js';
 import {mountMagicLoom,mountMagicTelemetryPanel} from './surfaces/magic-loom.js';
 import {mountLawsmith} from './surfaces/lawsmith.js';
@@ -314,6 +314,8 @@ subscribeMythience(encounter=>{
 });
 // Always observe route activity across the ship, even when Watercolour is not mounted.
 installWatercolorRouteActivity();
+// Observe Watercolour activity as a ship instrument. Never publish back into the bridge.
+subscribeWatercolorActivity(event=>shipResonance.observe({organ:'wayglass:watercolour',kind:'pigment:'+event.kind,strength:event.intensity,provenance:'watercolour-presentation-event'}));
 const magicPigments=new Set(['genesis','correspondence','alchemy','sympatheia','probability','embodiment','mythience','worldsmith','withness']);
 installMagicTelemetry({onActivity:event=>{shipResonance.observe({organ:'wayglass:magic',kind:'telemetry:'+String(event.engine||'unknown').slice(0,50),strength:0.45,provenance:'authenticated-magic-telemetry'});const kind=event.status==='failed'||event.status==='feather'?'magic:failed':magicPigments.has(event.engine)?'magic:'+event.engine:null;if(!kind)return;publishWatercolorActivity({kind,actor:event.cell,receipt:{schema:event.schema,receipt_id:event.hash},observedAt:event.time,intensity:Math.min(.85,.22+Math.log1p(event.elapsedMs||0)/10)});}});
 // Read-only 30-second voyage-message watch. Old messages become baseline,
