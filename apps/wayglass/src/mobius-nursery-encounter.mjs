@@ -18,8 +18,8 @@ export function encounter({left,right,signal,consent,feather=false}) {
   const proposed_field = Object.freeze({resonance:Math.round(Math.min(1,coupling*influence)*1000)/1000,
     phase,kind:signal.kind});
   return Object.freeze({status:'proposal',schema:'wayglass.mobius-encounter/v0.1',
-    participants:[left.id,right.id],identity_spins:[left.spin,right.spin],
-    source:signal.source,signal:{kind:signal.kind,value:signal.value},coupling,proposed_field,
-    proposed_revisions:{[left.id]:left.revision+1,[right.id]:right.revision+1},
+    participants:Object.freeze([left.id,right.id]),identity_spins:Object.freeze([left.spin,right.spin]),
+    source:signal.source,signal:Object.freeze({kind:signal.kind,value:signal.value}),coupling,proposed_field,
+    proposed_revisions:Object.freeze(Object.assign(Object.create(null),{[left.id]:left.revision+1,[right.id]:right.revision+1})),
     persisted:false,canon_adopted:false});
 }
