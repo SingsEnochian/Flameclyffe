@@ -50,7 +50,7 @@ test('proposal lineage is immutable and cannot pollute inherited revision keys',
  assert.throws(()=>{p.proposed_revisions['mote:a']=999;},TypeError);
  assert.equal(p.proposed_revisions['mote:a'],3);
  const a={id:'__proto__',spin:0,revision:0},b={id:'mote:b',spin:0,revision:0};
- const q=encounter({left:a,right:b,signal,consent:{'__proto__':true,'mote:b':true}});
+ const q=encounter({left:a,right:b,signal,consent:{['__proto__']:true,'mote:b':true}});
  assert.equal(Object.getPrototypeOf(q.proposed_revisions),null);
  assert.equal(q.proposed_revisions['__proto__'],1);
 });
