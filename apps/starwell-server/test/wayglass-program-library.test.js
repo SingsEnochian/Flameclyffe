@@ -32,6 +32,9 @@ test('Wayglass programme library lists, saves and versions source through the au
         },
       }), { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
+    if (String(url).includes('/wayglass_program_runs')) {
+      return new Response(JSON.stringify([{ run_id: 'run-1', status: JSON.parse(options.body).status }]), { status: 201 });
+    }
     if (String(url).includes('/wayglass_program_revisions')) {
       return new Response(JSON.stringify([{ revision_id: 'revision-2', version: 2 }]), { status: 200 });
     }
@@ -76,6 +79,15 @@ test('Wayglass programme library lists, saves and versions source through the au
     assert.equal(history.status, 200);
     const revisions = await history.json();
     assert.equal(revisions.revisions[0].version, 2);
+
+    const runResponse = await send(base.replace('/programs', '/runs'), 'POST', {
+      source, status: 'committed', execution_receipt: { phase_receipts: [1, 2] },
+      context: { program: 'wayglass-vessel-plan' }, program_slug: 'wayglass-vessel-plan',
+    });
+    assert.equal(runResponse.status, 201);
+    const run = await runResponse.json();
+    assert.equal(run.schema, 'wayglass.program-run-save/v1');
+    assert.equal(run.run.run_id, 'run-1');
 
     assert.ok(calls.every(call => call.options.headers.apikey === 'server-side-secret-only'));
     assert.ok(calls.every(call => call.options.headers.authorization === 'Bearer server-side-secret-only'));
