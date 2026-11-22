@@ -168,3 +168,7 @@ Added `match subject { unknown: expression, else: expression }` syntax to shared
 ## Wyrdrune null literal / typed IR reconciliation
 
 Inspected the current shared parser and found `null` parsed as an identifier, not a literal. Added literal parsing (`eafd6723fd12d8161bc91f7eab6ce545a53e7554`), fixed typed-IR inference to return `null` rather than `truth` (`5f01431d58826695ca82d584e7131c06e563348b`), and added typed null/Unknown regression while correcting match-test diagnostic expectation from `unknown-variable` to `unbound-name` (`a6884cbf63144a970eb822049eba1a9a2b35b532`). Prior tests referencing `null` had not established working semantics. GitHub workflow runs checked for preceding head `d3723eea2b0c6e49cf636862e93978ca6700a6b9` remained queued/pending; no passing CI or local execution claimed for this pass. No merge/deploy.
+
+## Wyrdrune known() typed operator purity repair
+
+Reviewed `inspectCall` in typed IR and found that built-in `known(value)` was typed as a valid call but rejected with `operator-effect` when used in a user-defined operator. Extended the pure builtin exception to include `known` (commit `832281f9e8606f885d999494a0ca5d1418d7be41`) and added a regression test invoking `known` through typed `resolved(value: data): truth` (commit `bc64836848e50f043fa04c1c76677a5afe4a3e13`). At inspection, Wayglass Check, Wyrdrune Two-Backend Parity, and Gate 6 Adversarial Integrity for preceding commit were still queued, with no job logs or passing result. This change remains unverified and unmerged.
