@@ -21,9 +21,10 @@ export function mountWayglassCellGarden(root,{
   disposed=true;pending=null;fusionPending=null;
   controller?.abort('room-navigation');audioController?.abort('room-navigation');
  };
+
+ let audioController=null,lastExchange=null;
  if(roomSignal?.aborted)onRoomAbort();
  else roomSignal?.addEventListener('abort',onRoomAbort,{once:true});
- let audioController=null,lastExchange=null;
  const section=doc.createElement('section');
  section.className='wg-surface wg-cell-garden';section.dataset.surface='wayglass-cell-garden';
  const heading=doc.createElement('header');heading.className='glass-panel wg-cell-heading';
