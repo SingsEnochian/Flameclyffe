@@ -60,7 +60,7 @@ mobius {
 export async function mountWayglassProgramWorkbench(root) {
   let activeProgram = 'vessel-plan';
   let pending = false;
-  let lastReceipt = null;
+  let activeController = null;
   root.innerHTML = `
     <section class="wg-surface wg-program-workbench" data-surface="wayglass-program-workbench">
       <header class="wg-surface-head glass-panel">
@@ -160,6 +160,7 @@ export async function mountWayglassProgramWorkbench(root) {
   async function run(mode) {
     if (pending) return;
     pending = true;
+    activeController = new AbortController();
     compileButton.disabled = true;
     runButton.disabled = true;
     loadButton.disabled = true;
@@ -177,6 +178,7 @@ export async function mountWayglassProgramWorkbench(root) {
         mode,
         context,
         programId: activeProgram,
+        signal: activeController.signal,
       });
       lastReceipt = receipt;
       irView.textContent = JSON.stringify(receipt.ir, null, 2);
@@ -199,10 +201,17 @@ export async function mountWayglassProgramWorkbench(root) {
           : 'The programme returned to its last committed point. Inspect the verification verdict.';
       }
     } catch (error) {
-      stateView.textContent = 'Error';
-      outputView.textContent = String(error?.message || error);
-      status.textContent = 'Wyrdrune workbench reported an error.';
+      if (error?.name === 'AbortError') {
+        stateView.textContent = 'Held';
+        outputView.textContent = 'Execution halted by Feather. The interrupted scoped cycle did not commit new output.';
+        status.textContent = 'Feather held the active Wyrdrune programme.';
+      } else {
+        stateView.textContent = 'Error';
+        outputView.textContent = String(error?.message || error);
+        status.textContent = 'Wyrdrune workbench reported an error.';
+      }
     } finally {
+      activeController = null;
       pending = false;
       compileButton.disabled = false;
       runButton.disabled = false;
@@ -210,6 +219,10 @@ export async function mountWayglassProgramWorkbench(root) {
     }
   }
 
+  const onFeather = () => {
+    if (activeController) activeController.abort();
+  };
+  globalThis.addEventListener('wayglass:os:feather', onFeather);
   editor.addEventListener('input', updateCount);
   loadButton.addEventListener('click', loadProgram);
   select.addEventListener('change', loadProgram);
@@ -235,6 +248,8 @@ export async function mountWayglassProgramWorkbench(root) {
   });
 
   return () => {
+    globalThis.removeEventListener('wayglass:os:feather', onFeather);
+    activeController?.abort();
     for (const button of [compileButton, runButton, loadButton]) button.disabled = true;
     if (dialog.open) dialog.close();
   };
