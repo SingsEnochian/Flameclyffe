@@ -20,7 +20,8 @@ const context = {
 };
 
 test('native Wyrdrune workbench requires an authenticated House Steward session', async () => {
-  const old = process.env.ARCSWEEP_RUNTIME_TOKEN;
+  const old = Object.fromEntries(['ARCSWEEP_RUNTIME_TOKEN','SUPABASE_URL','SUPABASE_PROJECT_URL','VITE_SUPABASE_URL','SUPABASE_SECRET_KEY','SUPABASE_SERVICE_ROLE_KEY','SUPABASE_SERVICE_KEY'].map(key => [key, process.env[key]]));
+  for (const key of Object.keys(old)) if (key !== 'ARCSWEEP_RUNTIME_TOKEN') delete process.env[key];
   const token = 'wayglass-workbench-private-test-' + 'a'.repeat(40);
   process.env.ARCSWEEP_RUNTIME_TOKEN = token;
   const app = express();
@@ -89,7 +90,9 @@ test('native Wyrdrune workbench requires an authenticated House Steward session'
   } finally {
     server.closeAllConnections();
     await new Promise(resolve => server.close(resolve));
-    if (old === undefined) delete process.env.ARCSWEEP_RUNTIME_TOKEN;
-    else process.env.ARCSWEEP_RUNTIME_TOKEN = old;
+    for (const [key, value] of Object.entries(old)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
   }
 });
