@@ -8,7 +8,7 @@ const REASONS = new Set([
   'invalid_or_unsupported_wtl', 'preview_execution_failed',
 ]);
 const INVALID_REASONS = new Set([
-  'participant_stop', 'capability_unavailable', 'resource_limit',
+  'participant_stop', 'capability_unavailable', 'unauthorised_effect', 'resource_limit',
   'invalid_or_unsupported_wtl',
 ]);
 function classifyPreviewOutcome(error) {
