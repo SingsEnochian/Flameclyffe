@@ -67,6 +67,8 @@ jobs:
       - name: Install host dependencies for HTTP integration tests
         run: npm ci --prefix apps/starwell-server --omit=dev --ignore-scripts
       - run: npm run wayglass:test
+      - name: Verify First Garden Return and MiniMind consent/Feather boundaries
+        run: node --test apps/wayglass/src/mobius-nursery-garden.test.mjs apps/wayglass/src/mobius-nursery-minimind.test.mjs
       - name: Run Return Trial 001 paired continuation
         run: node scripts/wayglass-return-trial-001.mjs
       - name: Preserve Return Trial 001 outcome receipts
@@ -93,6 +95,3 @@ jobs:
       - name: Verify staged host
         run: test -f apps/starwell-server/public/wayglass/index.html
 
-      - run: npm run wayglass:stage:vercel
-      - name: Verify preview browser bundle
-        run: test -f dist/starwell/wayglass/index.html
