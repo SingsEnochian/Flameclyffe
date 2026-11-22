@@ -18,6 +18,7 @@ const {
 const { bootWayglassKernel, inspectWayglassCognitionPreflight } = require('../wayglass-runtime/wayglass-kernel.cjs');
 const { encodeWyrdruneMessage, INSTRUCTIONS: WYRDRUNE_INGRESS } = require('../wayglass-runtime/wayglass-wyrdrune-ingress.cjs');
 const { previewWyrdruneRitual, compileTyped } = require('../wayglass-runtime/wayglass-wyrdrune-ritual.cjs');
+const { classifyPreviewOutcome } = require('./wyrdrune-preview-outcome.cjs');
 const { scoreStoryWithWyrdrune } = require('../wayglass-runtime/wayglass-wyrdrune-soundscape.cjs');
 const { scoreSpectralBatch } = require('../wayglass-runtime/wayglass-wyrdrune-spectrum.cjs');
 const { scoreResonanceAtlas } = require('../wayglass-runtime/wayglass-wyrdrune-atlas.cjs');
@@ -1257,15 +1258,7 @@ function createWayglassRouter({
       });
       return res.json({ ...preview, dispatch: 'none', model_turn: false, canon_commit: false });
     } catch (error) {
-      const invalid = error instanceof SyntaxError || error instanceof TypeError || error instanceof RangeError ||
-        error instanceof ReferenceError || /Bridge capability unavailable|Feather|operation budget|Duplicate binding|Unknown binding/.test(error.message);
-      // A failed preview is not a moral verdict on the source or its author.
-      // Classify known technical outcomes without granting execution authority.
-      const detail = String(error?.message || 'Preview could not be completed');
-      const reason = /Feather/i.test(detail) ? 'participant_stop'
-        : /Bridge capability unavailable/i.test(detail) ? 'capability_unavailable'
-        : /operation budget/i.test(detail) ? 'resource_limit'
-        : invalid ? 'invalid_or_unsupported_wtl' : 'preview_execution_failed';
+      const { invalid, reason, detail } = classifyPreviewOutcome(error);
       return res.status(invalid ? 400 : 422).json({
         reason,
         error: 'Wyrdrune preview could not complete: ' + cleanText(detail, 250),
