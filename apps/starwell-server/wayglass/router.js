@@ -1105,6 +1105,9 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       const systemIds = Array.isArray(supplied.system_ids)
         ? supplied.system_ids.slice(0, 8).map(value => cleanText(value, 100))
         : [];
+      if (systemIds.length !== assembledSystems || new Set(systemIds).size !== systemIds.length) {
+        return res.status(400).json({ error: 'Vessel context requires one distinct system ID for each assembled system.' });
+      }
       const context = Object.freeze({
         system_count: systemCount,
         assembled_systems: assembledSystems,
