@@ -152,3 +152,7 @@ Repaired the incorrect escaped-parenthesis regex in the `wonder("")` rejection t
 ## Wyrdrune runtime: record-access error boundary
 
 In `lib/wyrdrune/runtime.mjs`, explicitly reject null and non-object targets before `Object.getOwnPropertyDescriptor`, preventing host JavaScript reflection errors from escaping WTL's record/list access semantics. Commit `6950807b459134a3448fb9c01dca9b9664eb6c22`. Added a null-access regression assertion to `lib/wayglass-wyrdrune-ritual.test.cjs`, commit `6fd84b4ce4366e3a1c6388a352ea2a193aac68fc`. Neither end-to-end execution nor CI has been verified; test may be rejected earlier by typed preflight, so runtime-level coverage remains to be added. No merge or deployment.
+
+## Wyrdrune typed records and Unknown regression expansion
+
+Added typed-IR regression cases for present and missing record fields, Unknown propagation through access, and typed-preflight rejection of null/number/boolean access. Commit `aef8dbc37d78a1deb520ade2c3f8bc444ea8c5e5` in `lib/wyrdrune/typed-ir.test.cjs`. This exercises existing language semantics rather than introducing a new grammar feature. Tests not executed; do not treat expected results as verified. Direct runtime-only null access remains an open test coverage gap.
