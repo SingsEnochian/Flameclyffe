@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rarity's Code Loom · Wayglass Atelier</title>
+<style>
+:root{color-scheme:dark;font:16px/1.5 system-ui,sans-serif;background:#0b101b;color:#f0ecf8}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 70% 0%,#252342 0%,#0b101b 58%);min-height:100vh}
+header{padding:24px clamp(16px,4vw,48px);border-bottom:1px solid #535278;background:#111629cc}
+h1{font:500 clamp(25px,4vw,44px) Georgia,serif;margin:4px 0;color:#e7d9ff}h2{font:500 21px Georgia,serif;margin:0 0 12px}
+small,.sub{color:#acaac6}.diamond{color:#94e7ed;letter-spacing:.2em}
+main{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;padding:22px clamp(16px,4vw,48px);max-width:1500px;margin:auto}
+section{border:1px solid #494c73;border-radius:14px;background:#15192bd9;padding:18px;min-width:0;box-shadow:0 12px 35px #0004}
+label{display:block;font-size:.82rem;color:#cecae7;margin:8px 0 4px}textarea,input{width:100%;background:#0b1020;border:1px solid #4d5077;color:#eeeaff;border-radius:8px;padding:10px;font:14px/1.5 ui-monospace,monospace}
+textarea{min-height:100px;resize:vertical}#code{min-height:260px}
+button{background:#3a3b64;border:1px solid #8a87ba;color:white;padding:10px 15px;border-radius:8px;cursor:pointer;margin:8px 8px 0 0}
+button:hover,button:focus-visible{background:#58588a;outline:2px solid #8bd5ea;outline-offset:2px}
+button.primary{background:#346c75;border-color:#8bd5ea}output{display:block;white-space:pre-wrap;color:#a7ead8;margin-top:10px}
+footer{padding:20px;text-align:center;color:#bbb8d6}.span{grid-column:1/-1}
+@media(max-width:780px){main{grid-template-columns:1fr}.span{grid-column:auto}}
+</style></head>
+<body>
+<header><div class="diamond">💠 WAYGLASS / ATELIER</div><h1>Rarity's Code Loom</h1><div class="sub">Spool the source. Find the mechanism. Weave anew. Test the thread. Preserve the return.</div></header>
+<main>
+<section><h2>01 · Source Spool</h2><label for="source">Original source and author</label><input id="source" placeholder="Repository, file path, author, URL, version">
+<label for="lesson">What problem does their code solve?</label><textarea id="lesson" placeholder="Explain the mechanism and why they made this choice. Credit the origin."></textarea></section>
+<section><h2>02 · Pattern Table</h2><label for="leap">What changes for Wayglass?</label><textarea id="leap" placeholder="Our distinct use, architectural boundary, and opportunity for an idea leap."></textarea>
+<label for="boundary">Authority and licence boundaries</label><textarea id="boundary" placeholder="Who owns identity, events, rendering? Licence and attribution notes."></textarea></section>
+<section><h2>03 · Loom Bench</h2><label for="code">Wayglass-native code draft (never auto-executed)</label><textarea id="code" spellcheck="false" placeholder="// Weave original code here. Nothing in this room executes it."></textarea></section>
+<section><h2>04 · Test Shuttle</h2><label for="tests">Acceptance tests and failure cases</label><textarea id="tests" placeholder="Expected result, corruption cases, offline behaviour, accessibility, evidence."></textarea>
+<label for="stop">Stop point / named next owner</label><input id="stop" placeholder="Stop point | next owner">
+<div><button id="save" class="primary">Save locally</button><button id="export">Export loom receipt</button><button id="reset">Clear bench</button></div><output id="status" role="status" aria-live="polite">Local drafts only. No GitHub writes, external APIs or code execution.</output></section>
+<section class="span"><h2>05 · Provenance Vault and Return Marker</h2>
+<p>Every exported weaving packet keeps its source reference, interpretation, Wayglass adaptation, code draft, proposed verification, and stop point together. The packet is a draft, not a verified execution receipt.</p>
+<p><small>Room contract: <a href="../rooms/examples/rarity-code-loom.json">rarity-code-loom.json</a> · Related work: <a href="https://github.com/SingsEnochian/Flameclyffe/pull/464">Wayglass PR #464</a></small></p></section>
+</main><footer>💠 The loom may weave. Only the verified kernel may decide what becomes canon.</footer>
+<script>
+(()=>{'use strict';
+const ids=['source','lesson','leap','boundary','code','tests','stop'];
+const key='wayglass.atelier.code-loom.draft/v1';
+const el=id=>document.getElementById(id);
+const snapshot=()=>Object.fromEntries(ids.map(id=>[id,el(id).value]));
+try{const draft=JSON.parse(localStorage.getItem(key)||'null');if(draft)for(const id of ids)el(id).value=String(draft[id]||'')}catch{el('status').textContent='Local draft could not be loaded.'}
+el('save').onclick=()=>{try{localStorage.setItem(key,JSON.stringify(snapshot()));el('status').textContent='Draft saved in this browser only.'}catch{el('status').textContent='Local save unavailable. Export your work instead.'}};
+el('export').onclick=()=>{
+ const receipt={schema:'wayglass.atelier.code-loom-draft/v1',exported_at:new Date().toISOString(),status:'draft_not_runtime_verified',...snapshot()};
+ const url=URL.createObjectURL(new Blob([JSON.stringify(receipt,null,2)],{type:'application/json'}));
+ const a=document.createElement('a');a.href=url;a.download='wayglass-code-loom-draft.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ el('status').textContent='Draft receipt exported. Not an execution proof.';
+};
+el('reset').onclick=()=>{if(!confirm('Clear this loom bench and local draft?'))return;for(const id of ids)el(id).value='';try{localStorage.removeItem(key)}catch{}el('status').textContent='Bench cleared.'};
+})();
+</script></body></html>
