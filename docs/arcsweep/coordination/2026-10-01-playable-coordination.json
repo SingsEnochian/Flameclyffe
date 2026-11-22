@@ -1,0 +1,48 @@
+{
+  "schema": "arcsweep.coordination-map/v1",
+  "generated_at": "2026-10-01T13:44:00-04:00",
+  "timezone": "America/New_York",
+  "playable_target": {
+    "front_door": "PR #417 House Workspace OS",
+    "deep_surface": "ArcSweep",
+    "required_today": [
+      "responsive workspace loads",
+      "living-glass theme switching works",
+      "agent inspector works",
+      "named handoff create/acknowledge/complete works",
+      "Crow Trainer desk is reachable",
+      "ArcSweep transition is reachable",
+      "runtime presence does not fabricate connectivity"
+    ]
+  },
+  "lanes": [
+    {"lane":"workspace","prs":[417],"role":"playable front door","promotion":"candidate-today"},
+    {"lane":"presentation","prs":[414],"role":"full Palette Atlas / Universal Skin / Living Glass source","promotion":"independent-review"},
+    {"lane":"accountability","prs":[408,418],"role":"durable receipts plus weekly review/audit","promotion":"reconcile-before-durable-state"},
+    {"lane":"astra-runtime","prs":[406,409],"merged_into_branch":[407],"role":"Presence Fabric, provider seams, runtime witness","promotion":"needs-browser-witness"},
+    {"lane":"cognitive-loop","prs":[400],"role":"Observer/DEEP to cognition to receipt","promotion":"needs-real-readonly-event"},
+    {"lane":"constellation-seats","prs":[393,405],"role":"Laya/Nikola bounded cognition seats","promotion":"independent-runtime-witness"},
+    {"lane":"canon-ingest","prs":[402],"role":"Epra private packet to redacted public receipt","promotion":"needs-authorised-real-packet"},
+    {"lane":"training-control","prs":[415],"role":"Crow Trainer interactive control surface","promotion":"disposable-install-and-exam"},
+    {"lane":"training-experiment","prs":[416],"role":"Character Becoming/Four-Gate QLoRA experiment","promotion":"results-are-evidence-not-promotion"},
+    {"lane":"curriculum","prs":[411,412,413],"role":"Character Becoming, AI University, Four-Gate doctrine","promotion":"review-separately"}
+  ],
+  "sovereignty": [
+    "workspace != cognition",
+    "theme != identity",
+    "presence != authority",
+    "route != canon",
+    "proposal != decision",
+    "training result != promotion",
+    "foreign context = read-only by default",
+    "shared names != shared architecture"
+  ],
+  "known_external_blockers": [
+    {
+      "surface":"PR #417 Vercel preview",
+      "state":"blocked",
+      "cause":"provider build-rate limit",
+      "interpretation":"not an application build failure"
+    }
+  ]
+}
