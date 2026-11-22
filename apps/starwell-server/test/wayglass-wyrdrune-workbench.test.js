@@ -60,7 +60,7 @@ test('native Wyrdrune workbench requires an authenticated House Steward session'
 
     const partial = await send({
       source, mode: 'execute',
-      context: { ...context, assembled_systems: 6 },
+      context: { ...context, assembled_systems: 6, system_ids: context.system_ids.slice(0, 6) },
     }, { authorization: 'Bearer ' + token });
     assert.equal(partial.status, 200);
     const held = await partial.json();
