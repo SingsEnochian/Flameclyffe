@@ -77,6 +77,7 @@ const fullSpectrum = createWayglassSpectralField();
 async function mountWithMagicPanel(root,mount,options){const stop=await mount(root);const dispose=mountMagicTelemetryPanel(root.firstElementChild||root,options);return()=>{dispose();if(typeof stop==='function')stop();};}
 registerWayglassSurface({surface_id:'wayglass:magic-loom',label:'Wayglass · Wyrdrune Loom',mount:mountMagicLoom});
 registerWayglassSurface({surface_id:'wayglass:lawsmith',label:'Wayglass · Lawsmith / Kernel Becoming',mount:mountLawsmith});
+registerWayglassSurface({surface_id:'wayglass:nursery-resonance',label:'Wayglass · Nursery Resonance Laboratory',mount:mountNurseryResonance});
 
 registerWayglassSurface({surface_id:'wayglass:sound-composition',label:'Wayglass · Spatial Soundstage',mount:root=>mountWayglassSoundComposition(root,{composition:wayglassSomaticSound.composition,soundscape:wayglassSomaticSound,storyBinding:wayglassStoryScoreBinding})});
 registerWayglassSurface({surface_id:WAYGLASS_ENTRY_SURFACE,label:'Living Watercolor',mount:mountLivingWatercolorSurface});
