@@ -1,0 +1,722 @@
+<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Wayglass WTL Mobile Runner</title><style>:root{color-scheme:dark}body{margin:0;background:radial-gradient(circle at top right,#284a3d,#0b1718 60%);color:#f1ead7;font:16px system-ui}main{max-width:860px;margin:auto;padding:18px}h1{font:2.2rem Georgia,serif;color:#b6f3d0}section{background:#152b2b;border:1px solid #46685d;border-radius:18px;padding:16px;margin:14px 0}textarea,input{width:100%;box-sizing:border-box;border:1px solid #638579;border-radius:10px;background:#08191b;color:#f2eedb;padding:12px;font:inherit}textarea{min-height:95px}#source{min-height:350px;font:13px/1.6 monospace}#result{white-space:pre-wrap;overflow-wrap:anywhere;max-height:500px;overflow:auto;font:12px/1.5 monospace}button{background:#b6f3d0;color:#10221c;border:0;border-radius:10px;padding:12px;margin:5px 4px 5px 0;font-weight:700;min-height:44px}button:disabled{opacity:.45}label{display:block;margin:10px 0 4px;color:#b6f3d0}small{color:#c6d2c9}</style></head><body><main><p>✧ WAYGLASS · WYRDRUNE</p><h1>Spell Studio · Run</h1><p>WTL parsing and local pure execution. No network or external bridges.</p><section><h2>Spell Wizard</h2><label for="intent">Intention</label><textarea id="intent">What might Atlas become next?</textarea><label for="question">Open question</label><input id="question" value="What shall we explore next?"><button id="draft">Weave draft</button></section><section><h2>WTL Program</h2><textarea id="source" spellcheck="false" aria-label="WTL program"></textarea><div><button id="compile">Compile</button><button id="run">▶ Execute</button><button id="feather">🪽 Feather</button><button id="save">Save .wtl</button><label for="file">Import .wtl</label><input id="file" type="file" accept=".wtl,.txt"></div><p id="status" role="status"></p></section><section><h2>IR / execution receipt</h2><pre id="result"></pre></section><small>Experimental native parser/executor bundle. Not a security sandbox or authenticated capability system. Run trusted code only. Feather blocks subsequent runs, not in-flight synchronous work.</small></main><script>const CUES = new Set(['invocation', 'offering', 'response', 'witness', 'return']);
+
+function authorText(value, limit) {
+  return typeof value === 'string' && value.trim().length > 0 && value.length <= limit;
+}
+
+function prose(title, paragraphs) {
+  if (!authorText(title, 180) || !Array.isArray(paragraphs) || paragraphs.length < 1 ||
+      paragraphs.length > 32 || !paragraphs.every(text => authorText(text, 4000))) {
+    throw new TypeError('Prose requires a title and 1 to 32 nonempty paragraphs');
+  }
+  return { schema: 'wyrdrune.prose/v0.1', title, paragraphs, text: paragraphs.join('\n\n') };
+}
+
+function utterance(kind, voice, text) {
+  if (!CUES.has(kind) || !authorText(voice, 180) || !authorText(text, 4000)) {
+    throw new TypeError('Ritual utterance requires a cue, attributed voice and authored text');
+  }
+  return { kind, voice, text };
+}
+
+function silence(milliseconds) {
+  if (!Number.isSafeInteger(milliseconds) || milliseconds < 1 || milliseconds > 60000) {
+    throw new RangeError('Ritual silence requires 1 to 60000 whole milliseconds');
+  }
+  return { kind: 'silence', milliseconds };
+}
+
+function ritual(title, cues) {
+  if (!authorText(title, 180) || !Array.isArray(cues) || cues.length < 1 || cues.length > 32) {
+    throw new TypeError('Ritual requires a title and 1 to 32 cues');
+  }
+  const score = cues.map(cue => cue?.kind === 'silence' ? silence(cue.milliseconds)
+    : utterance(cue?.kind, cue?.voice, cue?.text));
+  return { schema: 'wyrdrune.ritual-score/v0.1', title, cues: score, autoplay: false };
+}
+
+const expressionOperations = [
+  ['prose', { parameters: ['text', 'list'], result: 'record', run: prose }],
+  ['utterance', { parameters: ['text', 'text', 'text'], result: 'record', run: utterance }],
+  ['silence', { parameters: ['number'], result: 'record', run: silence }],
+  ['ritual', { parameters: ['text', 'list'], result: 'record', run: ritual }],
+];
+
+;
+
+
+// Finite pure-state circuits in the computational basis, most significant bit first.
+// Serialized complex values are [real, imaginary] and use explicit binary64 arithmetic.
+const MAX_DIMENSION = 16;
+const TOLERANCE = 1e-12;
+const norm = ([real, imaginary]) => real * real + imaginary * imaginary;
+
+function amplitude(value) {
+  if (!Array.isArray(value) || value.length !== 2 || !value.every(Number.isFinite)) {
+    throw new TypeError('Quantum amplitude requires two finite numbers');
+  }
+  return value;
+}
+
+function dimension(length) {
+  if (![2, 4, 8, 16].includes(length)) throw new RangeError('Quantum dimension must be 2, 4, 8 or 16');
+}
+
+function state(value) {
+  if (!Array.isArray(value)) throw new TypeError('Quantum state requires an amplitude list');
+  dimension(value.length);
+  value.forEach(amplitude);
+  const total = value.reduce((sum, entry) => sum + norm(entry), 0);
+  if (Math.abs(total - 1) > TOLERANCE) throw new RangeError('Quantum state must have unit norm');
+  return value;
+}
+
+function inner(left, right, conjugate) {
+  let real = 0, imaginary = 0;
+  for (let i = 0; i < left.length; i++) {
+    const [a, b] = left[i], [c, d] = right[i];
+    const signed = conjugate ? -b : b;
+    real += a * c - signed * d;
+    imaginary += a * d + signed * c;
+  }
+  return [real, imaginary];
+}
+
+function checkMatrix(matrix, size, diagnostic) {
+  if (!Array.isArray(matrix) || matrix.length !== size) throw new TypeError(diagnostic);
+  for (const row of matrix) {
+    if (!Array.isArray(row) || row.length !== size) throw new TypeError(diagnostic);
+    row.forEach(amplitude);
+  }
+}
+
+function quantumApply(vector, matrix) {
+  const input = state(vector);
+  checkMatrix(matrix, input.length, 'Quantum gate dimensions must match the state');
+  for (let i = 0; i < matrix.length; i++) {
+    for (let j = i; j < matrix.length; j++) {
+      const [real, imaginary] = inner(matrix[i], matrix[j], true);
+      if (!(Math.abs(real - Number(i === j)) <= TOLERANCE && Math.abs(imaginary) <= TOLERANCE)) {
+        throw new RangeError('Quantum gate must be unitary');
+      }
+    }
+  }
+  return state(matrix.map(row => inner(row, input, false)));
+}
+
+function quantumTensor(left, right) {
+  const a = state(left), b = state(right);
+  if (a.length * b.length > MAX_DIMENSION) throw new RangeError('Quantum tensor exceeds 16 amplitudes');
+  return state(a.flatMap(([x, y]) => b.map(([u, v]) => [x * u - y * v, x * v + y * u])));
+}
+
+function quantumProbabilities(vector) {
+  return state(vector).map(norm);
+}
+
+function quantumExpectation(vector, observable) {
+  const input = state(vector);
+  checkMatrix(observable, input.length, 'Quantum observable dimensions must match the state');
+  for (let i = 0; i < input.length; i++) {
+    for (let j = i; j < input.length; j++) {
+      const [real, imaginary] = observable[i][j];
+      const [otherReal, otherImaginary] = observable[j][i];
+      if (real !== otherReal || imaginary !== -otherImaginary) {
+        throw new RangeError('Quantum observable must be Hermitian');
+      }
+    }
+  }
+  const [expectation] = inner(input, observable.map(row => inner(row, input, false)), true);
+  if (!Number.isFinite(expectation)) throw new RangeError('Quantum expectation must be finite');
+  return expectation;
+}
+
+function quantumProbability(vector, index) {
+  const input = state(vector);
+  if (!Number.isSafeInteger(index) || index < 0 || index >= input.length) {
+    throw new RangeError('Quantum outcome index is outside the basis');
+  }
+  return norm(input[index]);
+}
+
+function wonder(question, perspectives, evidence) {
+  if (typeof question !== 'string' || !question.trim() || question.length > 2048 ||
+      !Array.isArray(perspectives) || perspectives.length < 1 || perspectives.length > 16 ||
+      !perspectives.every(text => typeof text === 'string' && text.trim() && text.length <= 2048) ||
+      !Array.isArray(evidence) || evidence.length > 16) {
+    throw new TypeError('Wonder requires a question, perspectives and a list of evidence');
+  }
+  return { schema: 'wyrdrune.wonder/v0.1', status: 'open', question, perspectives, evidence };
+}
+
+const operations = new Map([
+  ...expressionOperations,
+  ['quantumApply', { parameters: ['list', 'list'], result: 'list', run: quantumApply }],
+  ['quantumTensor', { parameters: ['list', 'list'], result: 'list', run: quantumTensor }],
+  ['quantumProbabilities', { parameters: ['list'], result: 'list', run: quantumProbabilities }],
+  ['quantumExpectation', { parameters: ['list', 'list'], result: 'number', run: quantumExpectation }],
+  ['quantumProbability', { parameters: ['list', 'number'], result: 'number', run: quantumProbability }],
+  ['wonder', { parameters: ['text', 'list', 'list'], result: 'record', run: wonder }],
+]);
+
+const pureOperation = name => operations.get(name);
+for (const operation of operations.values()) {
+  Object.freeze(operation.parameters);
+  Object.freeze(operation);
+}
+
+;
+
+
+// Shared canonical WTL parser/evaluator; Node and browser hosts inject bridges and hashing.
+// Integrates #581 (portable runtime), #580 (named pure operators) and #587 (`mobius scoped` + `carry`).
+const PHASES = Object.freeze(['perceive','compress','release','verify','integrate','choose','return','transcend']);
+const IDENT = /^[\p{L}_][\p{L}\p{N}_]*$/u;
+// Unknown is a first-class open value (RFC-0001 §5): neither true, false nor an error.
+const UNKNOWN = Object.freeze({wtl:'unknown'});
+const isUnknown = v => v!==null&&typeof v==='object'&&v.wtl==='unknown'&&Object.keys(v).length===1;
+// Hard stops end execution outright (Feather, budget, denied capability, malformed IR).
+// Every other fault inside a scoped cycle becomes a verdict and the cycle rolls back.
+class WyrdruneHardStop extends Error {
+ constructor(message, reason = 'preview_execution_failed') { super(message); this.reason = reason; }
+ get name(){return 'WyrdruneHardStop';}
+}
+class Verdict extends Error {}
+// continuityDigest: WCE-1 digest, injected by the host (Node: canonical.cjs). Needed only by
+// programmes that use scoped circuits or seeds; absent, such programmes fail closed.
+function createWyrdruneRuntime({hashSource,ritualFunctions={},continuityDigest=null}={}) {
+const {enochianInscription,angelicLetter,votive,archangel}=ritualFunctions;
+const canonicalDigest=value=>{if(typeof continuityDigest!=='function')throw new TypeError('Continuity digest adapter required for carried execution');return continuityDigest(value);};
+function tokenize(src) {
+  const tokens=[]; let i=0;
+  while(i<src.length){
+    const part=src.slice(i), white=/^\s+/.exec(part), comment=/^\/\/[^\n]*/.exec(part);
+    if(white||comment){i+=(white||comment)[0].length;continue;}
+    if (part.startsWith('"""')) {
+      const end = part.indexOf('"""', 3);
+      if (end < 0) throw new SyntaxError('Unclosed multiline text at character ' + i);
+      tokens.push({v:JSON.stringify(part.slice(3, end)),at:i});
+      i += end + 3;
+      continue;
+    }
+    const m=/^(?:\d+(?:\.\d+)?|[\p{L}_][\p{L}\p{N}_]*|"(?:\\(?:["\\/bfnrt]|u[0-9a-fA-F]{4})|[^"\\])*"|==|!=|<=|>=|[<>{}()[\]:,;=+*\/-])/u.exec(part);
+    if(!m)throw new SyntaxError('Unexpected token at character '+i);
+    tokens.push({v:m[0],at:i});i+=m[0].length;
+  }
+  tokens.push({v:'<eof>',at:i});return tokens;
+}
+// lineage: compile every unit as a scoped lineage (RFC-0001 semantics). Default keeps v0.1.
+function compile(source,{lineage=false,typed=false}={}){
+  if(typeof source!=='string'||source.length>100000)throw new TypeError('WTL source must be text up to 100 KB');
+  if(typeof hashSource!=='function')throw new TypeError('Source hash adapter required for compilation');
+  const toks=tokenize(source);let n=0;
+  const see=()=>toks[n].v, eat=v=>{if(see()!==v)throw new SyntaxError('Expected '+v+', got '+see()+' at '+toks[n].at);return toks[n++].v;};
+  const id=()=>{const t=see();if(!IDENT.test(t))throw new SyntaxError('Expected identifier at '+toks[n].at);n++;return t;};
+  function atom(){let v=see();
+    if(v==='match' && toks[n+1]?.v!=='(')return matchExpression();
+    if(v==='('){eat('(');const e=expr();eat(')');return e;}
+    if(v==='['){eat('[');const items=[];while(see()!==']'){items.push(expr());if(see()!==',')break;eat(',');}eat(']');return {k:'list',items};}
+    if(v==='{'){eat('{');const fields=[];while(see()!=='}'){const key=see()[0]==='\"'?(v=>{n++;return JSON.parse(v);})(see()):id();eat(':');fields.push({key,value:expr()});if(see()!==',')break;eat(',');}eat('}');return {k:'record',fields};}
+    if(v[0]==='"'){n++;return {k:'literal',v:JSON.parse(v)};}
+    if(/^\d/.test(v)){n++;return {k:'literal',v:Number(v)};}
+    if(v==='true'||v==='false'){n++;return {k:'literal',v:v==='true'};}
+    if(v==='null'){n++;return {k:'literal',v:null};}
+    if(v==='unknown'){n++;return {k:'unknown'};}
+    if(IDENT.test(v)){n++;if(see()==='('){eat('(');const args=[];if(see()!==')'){do{args.push(expr());if(see()!==',')break;eat(',');}while(true);}eat(')');return {k:'call',name:v,args};}return {k:'read',name:v};}
+    throw new SyntaxError('Unexpected expression token '+v);
+  }
+  function unary() {
+    if (see() === '-') {
+      eat('-');
+      return {k:'neg',v:unary()};
+    }
+    let target = atom();
+    while (see() === '[') {
+      eat('[');
+      const key = expr();
+      eat(']');
+      target = {k:'access',target,key};
+    }
+    return target;
+  }
+  function mul(){let x=unary();while(['*','/'].includes(see())){const op=toks[n++].v;x={k:'binary',op,a:x,b:unary()};}return x;}
+  function add(){let x=mul();while(['+','-'].includes(see())){const op=toks[n++].v;x={k:'binary',op,a:x,b:mul()};}return x;}
+  const COMPARE=['==','!=','<','<=','>','>='];
+  function cmp(){let x=add();if(COMPARE.includes(see())){const op=toks[n++].v;x={k:'compare',op,a:x,b:add()};
+    if(COMPARE.includes(see()))throw new SyntaxError('Comparisons do not chain; join them with and');}return x;}
+  function negation(){if(see()==='not'){n++;return {k:'not',v:negation()};}return cmp();}
+  function conjunction(){let x=negation();while(see()==='and'){n++;x={k:'logic',op:'and',a:x,b:negation()};}return x;}
+  function conditionalAhead() {
+    // "if" was already a legal identifier. Look for "then" in this expression
+    // before trying the conditional grammar, ignoring nested delimiters and strings.
+    let depth = 0;
+    for (let i = n + 1; i < toks.length; i++) {
+      const token = toks[i].v;
+      if (depth === 0) {
+        if (token === 'then') return true;
+        if ([')', ']', '}', ',', ';', ':', 'else', '<eof>'].includes(token)) return false;
+      }
+      if (['(', '[', '{'].includes(token)) depth++;
+      if ([')', ']', '}'].includes(token)) depth--;
+    }
+    return false;
+  }
+  function matchExpression() {
+    eat('match');
+    const subject=disjunction();
+    eat('{');
+    eat('unknown');eat(':');
+    const whenUnknown=expr();
+    eat(',');
+    eat('else');eat(':');
+    const otherwise=expr();
+    eat('}');
+    return {k:'match-unknown',subject,whenUnknown,otherwise};
+  }
+  function expr() {
+    if (see() === 'if' && conditionalAhead()) {
+      const start = n++;
+      let condition;
+      try {
+        condition = disjunction();
+      } catch (error) {
+        if (!(error instanceof SyntaxError)) throw error;
+      }
+      if (condition && see() === 'then') {
+        eat('then');
+        const yes = expr();
+        eat('else');
+        return {k:'conditional',condition,yes,no:expr()};
+      }
+      n = start;
+    }
+    return disjunction();
+  }
+  function disjunction(){let x=conjunction();while(see()==='or'){n++;x={k:'logic',op:'or',a:x,b:conjunction()};}return x;}
+  // carry: what crosses the twist. Only in Transcend, only in a scoped unit
+  // (RFC-0001 §8 phase restriction; stable diagnostic phrases for conformance).
+  function statement(phase,scoped){const op=id();if(op==='WITHNESS'||op==='withness'){if(phase!=='integrate')throw new SyntaxError('withness declaration is only allowed in integrate');if(!scoped)throw new SyntaxError('withness declaration requires scoped or spiced mobius');const e=expr();if(see()===';')eat(';');return {k:'withness',e};}if(op==='let'||op==='set'){const name=id();eat('=');const e=expr();eat(';');return {k:op,name,e};}if(op==='emit'){const e=expr();eat(';');return {k:'emit',e};}
+    if(op==='pause'){
+      if(phase!=='choose')throw new SyntaxError('pause is only allowed in choose');
+      eat('(');const beat=expr();eat(')');eat(';');return {k:'pause',beat};
+    }
+    // require: Verify's power to say no. Only in Verify, only where a failure can roll back.
+    if(op==='require'){
+      if(phase!=='verify')throw new SyntaxError('require is only allowed in verify');
+      if(!scoped)throw new SyntaxError('require requires a scoped mobius unit');
+      const e=expr();let reason=null;
+      if(see()==='else'){n++;const t=see();if(t[0]!=='"')throw new SyntaxError('require … else expects a text reason');n++;reason=JSON.parse(t);}
+      eat(';');return reason===null?{k:'require',e}:{k:'require',e,reason};
+    }
+    if(op==='carry'){
+      if(phase!=='transcend')throw new SyntaxError('carry is only allowed in transcend');
+      if(!scoped)throw new SyntaxError('carry requires a scoped mobius unit');
+      const name=id();eat('=');const e=expr();eat(';');return {k:'carry',name,e};
+    }
+    throw new SyntaxError('Unknown WTL statement: '+op);}
+  function block(phase,scoped){eat('{');const body=[];while(see()!=='}'){if(see()==='<eof>')throw new SyntaxError('Unclosed block');body.push(statement(phase,scoped));}eat('}');return body;}
+  // Native Wyrdrune may grow through pure, named expression operators.
+  // Declarations are reversible source, not arbitrary JavaScript execution.
+  const effects=[], signatures=[];
+  const textLiteral=()=>{
+    const value=see();
+    if(value[0]!=='"')throw new SyntaxError('Expected effect target text at '+toks[n].at);
+    n++;
+    return JSON.parse(value);
+  };
+  while(typed&&see()==='effect'){
+    eat('effect');
+    const provider=textLiteral(), operation=textLiteral();
+    eat(';');
+    effects.push({provider,operation});
+  }
+  const operators=[];
+  while(see()==='operator'){
+    eat('operator');const name=id();
+    if(['bridge','star','enochian','angelicLetter','votive','archangel','whisper','wonder','known','fields','withField','withoutField','pause','WITHNESS','withness'].includes(name)
+      ||operators.some(item=>item.name===name))throw new SyntaxError('Reserved or duplicate operator '+name);
+    eat('(');const params=[], parameterTypes=[];
+    if(see()!==')'){
+      do{
+        const p=id();
+        if(params.includes(p))throw new SyntaxError('Duplicate operator parameter '+p);
+        params.push(p);
+        if(typed){eat(':');parameterTypes.push(id());}
+        if(see()!==',')break;
+        eat(',');
+      }while(true);
+    }
+    eat(')');
+    if(typed){eat(':');signatures.push({name,parameterTypes,resultType:id()});}
+    eat('=');const body=expr();eat(';');
+    if(params.length>8||operators.length>=24)throw new SyntaxError('Operator budget exceeded');
+    operators.push({name,params,body});
+  }
+  const units=[];let shape=null;while(see()!=='<eof>'){
+    eat('mobius');
+    // `mobius scoped { … }`: bindings stay inside the unit; only `carry` crosses.
+    // Plain `mobius { … }` keeps the v0.1 shared environment unchanged.
+    const style=['scoped','spiced'].includes(see())?toks[n++].v:null;
+    const scoped=Boolean(style)||lineage;
+    const spiced=style==='spiced';
+    eat('{');const phases=[];
+    for(const phase of PHASES){eat(phase);phases.push({phase,body:block(phase,scoped)});}
+    eat('}');
+    if(scoped){
+      const names=phases[7].body.filter(x=>x.k==='carry').map(x=>x.name);
+      if(new Set(names).size!==names.length)throw new SyntaxError('carry binds a name twice');
+      // The self keeps its shape across the twist: every scoped unit that carries
+      // must carry exactly the same names. A unit that carries nothing passes the
+      // register through unchanged (its own bindings stay inside it).
+      const key=[...names].sort().join('\u0000');
+      if(shape!==null&&names.length&&key!==shape)throw new SyntaxError('carry must bind exactly the seeds');
+      if(shape===null&&names.length)shape=key;
+      units.push({k:'mobius',scope:'carried',...(spiced?{spiced:true}:{}),phases});
+    }else units.push({k:'mobius',phases});
+  }
+  if(!units.length)throw new SyntaxError('Expected mobius block');
+  // Fields appear only when used, so programmes without operators keep their v0.1 IR exactly.
+  const ir=Object.freeze({schema:'wyrdrune.ir/v0.1',sourceHash:hashSource(source),units,...(operators.length?{operators}:{})});
+  return typed ? {ir,signatures,effects} : ir;
+}
+// Source inspection visits both conditional arms and never invokes an operator or host adapter.
+function inspectOperators(ir) {
+  if (ir?.schema !== 'wyrdrune.ir/v0.1') throw new TypeError('Invalid WTL IR');
+  const declarations = new Map((ir.operators ?? []).map(operator => [operator.name, operator]));
+  const diagnostics = [];
+
+  for (const {name, params, body} of declarations.values()) {
+    const parameterNames = new Set(params);
+    const pending = [body];
+    while (pending.length) {
+      const node = pending.pop();
+      if (node.k === 'read' && !parameterNames.has(node.name)) {
+        diagnostics.push({operator:name, code:'unbound-parameter', name:node.name});
+      }
+      if (node.k === 'call') {
+        const target = declarations.get(node.name);
+        const parameters = target?.params ?? (node.name === 'wonder' ? (node.args.length===1?['question']:['question','perspectives','evidence']) : node.name === 'known' ? ['value'] : node.name === 'fields' ? ['record'] : node.name === 'withField' ? ['record','key','value'] : node.name === 'withoutField' ? ['record','key'] : pureOperation(node.name)?.parameters);
+        if (!parameters) {
+          diagnostics.push({operator:name, code:'nonportable-call', name:node.name});
+        } else if (parameters.length !== node.args.length) {
+          diagnostics.push({operator:name, code:'operator-arity', name:node.name,
+            expected:parameters.length, actual:node.args.length});
+        }
+      }
+      // A visitor over structural children only. The call graph is not expanded,
+      // so recursive declarations can be inspected without executing a cycle.
+      switch (node.k) {
+        case 'neg':
+        case 'not':
+          pending.push(node.v);
+          break;
+        case 'binary':
+        case 'compare':
+        case 'logic':
+          pending.push(node.b, node.a);
+          break;
+        case 'match-unknown':
+          pending.push(node.otherwise, node.whenUnknown, node.subject);
+          break;
+        case 'conditional':
+          pending.push(node.no, node.yes, node.condition);
+          break;
+        case 'access':
+          pending.push(node.key, node.target);
+          break;
+        case 'list':
+          pending.push(...node.items.slice().reverse());
+          break;
+        case 'record':
+          pending.push(...node.fields.map(field => field.value).reverse());
+          break;
+        case 'call':
+          pending.push(...node.args.slice().reverse());
+          break;
+      }
+    }
+  }
+  return Object.freeze({
+    schema:'wyrdrune.operator-inspection/v0.1',
+    sourceHash:ir.sourceHash,
+    status:diagnostics.length ? 'diagnostics' : 'checked',
+    diagnostics:Object.freeze(diagnostics.map(item => Object.freeze(item))),
+  });
+}
+function geometryStar(radius){
+  if(!Number.isFinite(radius)||radius<=0||radius>1000000)throw new RangeError('star radius must be finite, positive, at most 1000000');
+  return {kind:'loki-chaos-star/v1',points:PHASES.map((phase,i)=>({phase,x:radius*Math.cos(i*Math.PI/4-Math.PI/2),y:radius*Math.sin(i*Math.PI/4-Math.PI/2)})),center:{name:'withness',x:0,y:0}};
+}
+function carryRecord(value,label){
+  if(!value||typeof value!=='object'||Array.isArray(value))throw new TypeError(label+' must be a record');
+  const names=Object.keys(value);
+  if(names.length>64)throw new RangeError(label+' may bind at most 64 names');
+  for(const name of names)if(!IDENT.test(name))throw new TypeError(label+' has an invalid name '+name);
+  canonicalDigest(value); // carried values must be WCE-1 canonical (finite, plain data)
+  return Object.freeze({...value});
+}
+const shapeOf=record=>Object.keys(record).sort().join('\u0000');
+async function execute(ir,{bridges={},principal=null,signal=null,maxOperations=10000,seeds,spiceSeed}={}){
+  if(ir?.schema!=='wyrdrune.ir/v0.1')throw new TypeError('Invalid WTL IR');
+  if(!Number.isSafeInteger(maxOperations)||maxOperations<1||maxOperations>100000)throw new RangeError('Invalid operation limit');
+  const env=new Map(),output=[],receipts=[];let operations=0;
+  const usesSpice=ir.units.some(u=>u.spiced);
+  if(usesSpice&&(!Number.isSafeInteger(spiceSeed)||spiceSeed<0||spiceSeed>4294967295))throw new WyrdruneHardStop('mobius spiced requires an explicit unsigned 32-bit spiceSeed', 'invalid_or_unsupported_wtl');
+  let noiseState=usesSpice?((spiceSeed^0x9e3779b9)>>>0):0;
+  if(usesSpice&&noiseState===0)noiseState=0x6d2b79f5;
+  const nextWhisper=()=>{noiseState^=noiseState<<13;noiseState^=noiseState>>>17;noiseState^=noiseState<<5;return (noiseState>>>0)/4294967296;};
+  let activeSpiced=false;
+  let pauseCount=0,totalPauseMs=0;
+  // The carry register: seeds in, each scoped unit's carry out. Plain units neither
+  // read nor write it. Recorded only when the programme uses it.
+  const continuing=seeds!==undefined||ir.units.some(u=>u.scope==='carried');
+  let register=seeds===undefined?Object.freeze({}):carryRecord(seeds,'seeds');
+  const seedsDigest=continuing?canonicalDigest(register):null,crossings=[];
+  let scope=env;
+  const operators=new Map((ir.operators||[]).map(entry=>[entry.name,entry]));
+  const checkFeather=()=>{if(signal?.aborted)throw new WyrdruneHardStop('Feather: execution stopped', 'participant_stop');};
+  const tick=()=>{checkFeather();if(++operations>maxOperations)throw new WyrdruneHardStop('WTL operation budget exceeded', 'resource_limit');};
+  const truth=(v,what)=>{if(v===true||v===false||isUnknown(v))return v;throw new TypeError(what+' requires a truth value');};
+  const plain=v=>typeof v==='number'||typeof v==='string'||typeof v==='boolean';
+  async function evalExpr(x,locals=null,depth=0){tick();switch(x.k){
+    case 'literal':return x.v;
+    case 'list':{const items=[];for(const item of x.items)items.push(await evalExpr(item,locals,depth));return items;}
+    case 'record':{const record=Object.create(null);for(const field of x.fields){if(Object.hasOwn(record,field.key))throw new TypeError('Duplicate WTL record field '+field.key);record[field.key]=await evalExpr(field.value,locals,depth);}return record;}
+    case 'unknown':return UNKNOWN;
+    case 'match-unknown': {
+      const value=await evalExpr(x.subject,locals,depth);
+      return evalExpr(isUnknown(value)?x.whenUnknown:x.otherwise,locals,depth);
+    }
+    case 'conditional': {
+      const condition = truth(await evalExpr(x.condition, locals, depth), 'if');
+      if (isUnknown(condition)) return UNKNOWN;
+      return evalExpr(condition ? x.yes : x.no, locals, depth);
+    }
+    case 'access': {
+      const target = await evalExpr(x.target, locals, depth);
+      const key = await evalExpr(x.key, locals, depth);
+      if (isUnknown(target) || isUnknown(key)) return UNKNOWN;
+      if (Array.isArray(target)) {
+        if (!Number.isSafeInteger(key) || key < 0) throw new TypeError('WTL list index requires a nonnegative safe integer');
+        if (key >= target.length) return UNKNOWN;
+      } else {
+        if (target === null || typeof target !== 'object')
+          throw new TypeError('WTL access requires a record or list');
+        const prototype = Object.getPrototypeOf(target);
+        if (prototype !== null && prototype !== Object.prototype)
+          throw new TypeError('WTL access requires a record or list');
+        if (typeof key !== 'string') throw new TypeError('WTL record key requires text');
+      }
+      const entry = Object.getOwnPropertyDescriptor(target, key);
+      return entry && Object.hasOwn(entry, 'value') ? entry.value : UNKNOWN;
+    }
+    case 'compare':{const a=await evalExpr(x.a,locals,depth),b=await evalExpr(x.b,locals,depth);
+      if(isUnknown(a)||isUnknown(b))return UNKNOWN;
+      if(x.op==='=='||x.op==='!='){if(!plain(a)||!plain(b))throw new TypeError('Equality requires numbers, text or truth values');return (a===b)===(x.op==='==');}
+      if(typeof a!=='number'||typeof b!=='number')throw new TypeError('Ordering comparison requires numbers');
+      return x.op==='<'?a<b:x.op==='<='?a<=b:x.op==='>'?a>b:a>=b;}
+    case 'not':{const v=truth(await evalExpr(x.v,locals,depth),'not');return isUnknown(v)?UNKNOWN:!v;}
+    case 'logic':{const a=truth(await evalExpr(x.a,locals,depth),x.op),b=truth(await evalExpr(x.b,locals,depth),x.op);
+      // Kleene logic, both sides always evaluated (identical operation counts in every backend).
+      if(x.op==='and')return a===false||b===false?false:isUnknown(a)||isUnknown(b)?UNKNOWN:true;
+      return a===true||b===true?true:isUnknown(a)||isUnknown(b)?UNKNOWN:false;}
+    case 'read':if(locals){if(!Object.hasOwn(locals,x.name))throw new ReferenceError('Unknown operator parameter '+x.name);return locals[x.name];}
+      if(!scope.has(x.name))throw new ReferenceError('Unknown variable '+x.name);return scope.get(x.name);
+    case 'neg':{const v=await evalExpr(x.v,locals,depth);if(typeof v!=='number')throw new TypeError('Unary negative requires number');return -v;}
+    case 'binary':{const a=await evalExpr(x.a,locals,depth),b=await evalExpr(x.b,locals,depth);if(typeof a!=='number'||typeof b!=='number')throw new TypeError('Arithmetic requires numbers');if(x.op==='/'&&b===0)throw new RangeError('Division by zero');const v=({'+':()=>a+b,'-':()=>a-b,'*':()=>a*b,'/':()=>a/b})[x.op]();if(!Number.isFinite(v))throw new RangeError('Nonfinite arithmetic');return v;}
+    case 'call':{
+      const args=[];for(const a of x.args)args.push(await evalExpr(a,locals,depth));
+      if(x.name==='fields' || x.name==='withField' || x.name==='withoutField'){
+        const expected=x.name==='fields'?1:x.name==='withoutField'?2:3;
+        if(args.length!==expected)throw new TypeError(x.name+' expects '+expected+' arguments');
+        const record=args[0];
+        if(record===null || typeof record!=='object' || Array.isArray(record) ||
+           ![null,Object.prototype].includes(Object.getPrototypeOf(record)))
+          throw new TypeError(x.name+' requires a plain record');
+        const names=Object.keys(record).sort();
+        if(x.name==='fields')return names;
+        const key=args[1];
+        if(typeof key!=='string'||!IDENT.test(key))
+          throw new TypeError('withField key requires a valid identifier');
+        if(x.name==='withField' && names.length>=64 && !Object.hasOwn(record,key))
+          throw new RangeError('withField record may have at most 64 fields');
+        const result=Object.create(null);
+        for(const name of names) {
+          if(x.name==='withoutField' && name===key)continue;
+          const descriptor=Object.getOwnPropertyDescriptor(record,name);
+          if(!descriptor || !Object.hasOwn(descriptor,'value'))
+            throw new TypeError('withField requires data fields');
+          Object.defineProperty(result,name,{value:descriptor.value,enumerable:true,writable:true,configurable:true});
+        }
+        if(x.name==='withField')Object.defineProperty(result,key,{value:args[2],enumerable:true,writable:true,configurable:true});
+        return result;
+      }
+      if(x.name==='known'){
+        if(args.length!==1)throw new TypeError('known(value) requires exactly one argument');
+        return !isUnknown(args[0]);
+      }
+      if(x.name==='wonder'){
+        if(args.length===1){
+          if(typeof args[0]!=='string'||!args[0].trim()||args[0].length>1024)
+            throw new TypeError('Wonder requires a question of at most 1024 characters');
+          return Object.freeze({kind:'wyrdrune.wonder/v0.1',question:args[0],answer:UNKNOWN,status:'open'});
+        }
+        const validText=value=>typeof value==='string'&&value.trim().length>0&&value.length<=2048;
+        if(args.length!==3||!validText(args[0])||!Array.isArray(args[1])||
+          args[1].length<1||args[1].length>16||!args[1].every(validText)||
+          !Array.isArray(args[2])||args[2].length>16)
+          throw new TypeError('Wonder requires a question, perspectives and a list of evidence');
+        return {schema:'wyrdrune.wonder/v0.1',status:'open',question:args[0],perspectives:args[1],evidence:args[2]};
+      }
+      if(x.name==='whisper'){
+        if(!activeSpiced)throw new WyrdruneHardStop('whisper requires mobius spiced', 'invalid_or_unsupported_wtl');
+        if(args.length!==2||args.some(v=>typeof v!=='number'||!Number.isFinite(v))||args[1]<0)throw new TypeError('whisper(value,amplitude) requires two finite numbers and nonnegative amplitude');
+        const value=args[0]+(nextWhisper()*2-1)*args[1];
+        if(!Number.isFinite(value))throw new RangeError('Nonfinite whisper');
+        return value;
+      }
+      if(operators.has(x.name)){
+        if(depth>=8)throw new RangeError('Wyrdrune operator recursion depth exceeded');
+        const operator=operators.get(x.name);
+        if(args.length!==operator.params.length)throw new TypeError('Operator '+x.name+' expects '+operator.params.length+' arguments');
+        return evalExpr(operator.body,Object.fromEntries(operator.params.map((name,i)=>[name,args[i]])),depth+1);
+      }
+      const pure = pureOperation(x.name);
+      if (pure) {
+        if (args.length !== pure.parameters.length) {
+          throw new TypeError(x.name + ' expects ' + pure.parameters.length + ' arguments');
+        }
+        return pure.run(...args);
+      }
+      if(locals)throw new Error('Native pure operators cannot invoke host or ritual bridges');
+      if(x.name==='enochian'){
+        if(typeof enochianInscription!=='function')throw new WyrdruneHardStop('Ritual register unavailable', 'capability_unavailable');
+        if(args.length<1||args.length>2)throw new TypeError('enochian(text[,sourceLabel]) requires one or two arguments');
+        return enochianInscription(args[0],args.length===2?args[1]:'author-supplied');
+      }
+      if(x.name==='angelicLetter'){
+        if(typeof angelicLetter!=='function')throw new WyrdruneHardStop('Ritual register unavailable', 'capability_unavailable');
+        if(args.length!==1)throw new TypeError('angelicLetter(index) requires one argument');
+        return angelicLetter(args[0]);
+      }
+      if(x.name==='votive'){
+        if(typeof votive!=='function')throw new WyrdruneHardStop('Ritual register unavailable', 'capability_unavailable');
+        if(args.length!==2)throw new TypeError('votive(name,dedication) requires two arguments');
+        return votive(args[0],args[1]);
+      }
+      if(x.name==='archangel'){
+        if(typeof archangel!=='function')throw new WyrdruneHardStop('Ritual register unavailable', 'capability_unavailable');
+        if(args.length!==2)throw new TypeError('archangel(name,crossing) requires two arguments');
+        return archangel(args[0],args[1]);
+      }
+      if(x.name==='star'){if(args.length!==1)throw new TypeError('star(radius) requires one argument');return geometryStar(args[0]);}
+      if(x.name==='bridge'){
+        if(args.length<2||typeof args[0]!=='string'||typeof args[1]!=='string')throw new TypeError('bridge(provider,operation,...) requires strings');
+        const [provider,operation,...payload]=args;const handler=bridges[provider]?.[operation];if(typeof handler!=='function')throw new WyrdruneHardStop('Bridge capability unavailable: '+provider+'.'+operation, 'capability_unavailable');
+        if(!principal?.authorized)throw new WyrdruneHardStop('Bridge requires verified owner authorization', 'unauthorised_effect');
+        const result=await handler(Object.freeze({principal,arguments:payload,signal}));tick();return result;
+      }
+      throw new ReferenceError('Unknown WTL function '+x.name);
+    }
+    default:throw new WyrdruneHardStop('Invalid WTL expression', 'invalid_or_unsupported_wtl');
+  }}
+  // A scoped unit is one lineage cycle (RFC-0001 §7): emits are staged and committed at
+  // Return; a fault or a failed require before Return discards the cycle; a fault after
+  // Return keeps committed work but nothing crosses. Either way the lineage stops there.
+  const lineageRoot=continuing?canonicalDigest({source_hash:ir.sourceHash,ir_digest:canonicalDigest(ir),seeds:register,participant:principal?.id??null,intent:null,...(usesSpice?{spice_seed:spiceSeed,spice_algorithm:'xorshift32/v1'}:{})}):null;
+  const checkpoints=[];let status='committed',verdict=null,completed=0;
+  for(const [index,unit] of ir.units.entries()){
+    const carried=unit.scope==='carried',carriedIn=register,out={};
+    activeSpiced=unit.spiced===true;
+    if(carried){
+      const carriesOut=unit.phases[7].body.filter(x=>x.k==='carry').map(x=>x.name);
+      if(Object.keys(register).length&&carriesOut.length&&shapeOf(register)!==[...carriesOut].sort().join('\u0000'))
+        throw new TypeError('carry must bind exactly the seeds');
+      scope=new Map(Object.entries(register)); // carried values arrive as this unit's own bindings
+    }else scope=env;
+    let staged=carried?[]:null,committed=!carried,phaseNow=null;
+    try{
+      for(const {phase,body} of unit.phases){phaseNow=phase;tick();const target=committed?output:staged,start=target.length;
+      for(const stmt of body){tick();if(stmt.k==='let'){if(scope.has(stmt.name))throw new SyntaxError('Duplicate binding '+stmt.name);scope.set(stmt.name,await evalExpr(stmt.e));}
+      else if(stmt.k==='set'){if(!scope.has(stmt.name))throw new ReferenceError('Unknown binding '+stmt.name);scope.set(stmt.name,await evalExpr(stmt.e));}
+      else if(stmt.k==='emit')target.push(await evalExpr(stmt.e));
+      else if(stmt.k==='pause'){
+        // pause(frequency_hz) is one period of silence: 1000/f milliseconds.
+        // It scores time, never sleeps, invokes a device, or starts audio.
+        const hz=await evalExpr(stmt.beat);
+        if(typeof hz!=='number'||!Number.isFinite(hz)||hz<0.25||hz>40)
+          throw new RangeError('pause requires a beat frequency from 0.25 to 40 Hz');
+        const durationMs=1000/hz;
+        if(++pauseCount>8||totalPauseMs+durationMs>4000)
+          throw new RangeError('Wyrdrune silence budget exceeded');
+        totalPauseMs+=durationMs;
+        target.push(Object.freeze({kind:'wyrdrune.pause/v0.1',beat_hz:hz,
+          duration_ms:durationMs,autoplay:false}));
+      }
+      else if(stmt.k==='withness'){
+        if(scope.has('withness'))throw new TypeError('Duplicate WITHNESS declaration');
+        const raw=await evalExpr(stmt.e);
+        if(!raw||typeof raw!=='object'||Array.isArray(raw)||!Array.isArray(raw.participants)||raw.participants.length<2||raw.participants.length>8)throw new TypeError('WITHNESS requires two to eight declared participants');
+        const identities=new Set();
+        for(const p of raw.participants){
+          if(!p||typeof p!=='object'||Array.isArray(p)||typeof p.id!=='string'||!p.id.trim()||typeof p.role!=='string'||!p.role.trim()||p.agency!=='free'||!Object.hasOwn(p,'presence'))throw new TypeError('WITHNESS participant requires id, role, presence and free agency');
+          if(identities.has(p.id))throw new TypeError('WITHNESS participants must remain distinct');identities.add(p.id);
+        }
+        if(!Object.hasOwn(raw,'field')||typeof raw.agreement!=='string'||typeof raw.commitment!=='string')throw new TypeError('WITHNESS requires field, agreement and commitment');
+        const record={kind:'wyrdrune.withness/v0.1',...raw};canonicalDigest(record);scope.set('withness',record);
+      }
+      else if(stmt.k==='carry'&&carried)out[stmt.name]=await evalExpr(stmt.e);
+      else if(stmt.k==='require'&&carried){const v=await evalExpr(stmt.e);
+        if(v===true){} else if(v===false||isUnknown(v))throw new Verdict(stmt.reason??(isUnknown(v)?'require is unknown':'require failed'));
+        else throw new TypeError('require needs a truth value');}
+      else throw new WyrdruneHardStop('Invalid statement', 'invalid_or_unsupported_wtl');}
+      checkFeather(); // Do not publish a phase receipt after cancellation during an awaited expression.
+      receipts.push(Object.freeze({phase,emitted:target.length-start,operations,sourceHash:ir.sourceHash,principalId:principal?.id??null}));
+      if(!committed&&phase==='return'){output.push(...staged);staged=null;committed=true;}
+      }
+      if(carried){
+        const next=Object.keys(out).length?carryRecord(out,'carry'):register;
+        const cycle=checkpoints.length+1;
+        const checkpoint=Object.freeze({cycle,face:cycle%2?'outer':'inner',
+          prev:cycle===1?lineageRoot:canonicalDigest(checkpoints.at(-1)),
+          state:canonicalDigest(Object.fromEntries(scope)),carry:canonicalDigest(next)});
+        checkFeather(); // Check before publishing lineage checkpoint and carry transition.
+        register=next;checkpoints.push(checkpoint);
+        crossings.push(Object.freeze({unit:index,carried_in:canonicalDigest(carriedIn),carried_out:canonicalDigest(register),names:Object.keys(register).sort()}));
+      }
+      checkFeather();
+      completed+=1;
+    }catch(error){
+      if(!carried||error instanceof WyrdruneHardStop)throw error;
+      status=committed?'halted':'rolled-back';
+      verdict=Object.freeze({status:'failed',unit:index,phase:phaseNow,reason:String(error?.message??error),
+        committed_output:committed});
+      break;
+    }
+  }
+  checkFeather(); // Never return a completed preview after a late participant stop.
+  scope=env;
+  const result={schema:'wyrdrune.execution/v0.1',sourceHash:ir.sourceHash,output,bindings:Object.fromEntries(env),receipts,withness:{center:'withness',completedCycles:continuing?completed:ir.units.length}};
+  if(continuing){
+    result.continuity={schema:'wyrdrune.continuity/v0.1',seeds_digest:seedsDigest,carry:register,carry_digest:canonicalDigest(register),crossings};
+    result.status=status;result.verdict=verdict;result.checkpoints=checkpoints;result.lineage=Object.freeze({root:lineageRoot,intent:null});
+    if(usesSpice)result.spice=Object.freeze({seed:spiceSeed,algorithm:'xorshift32/v1',replayable:true});
+  }
+  return result;
+}
+return Object.freeze({PHASES,compile,execute,inspectOperators,geometryStar,UNKNOWN,isUnknown,WyrdruneHardStop});
+}
+
+
+const engine=createWyrdruneRuntime({hashSource:s=>'mobile:'+s.length});
+const el=id=>document.getElementById(id);
+const q=s=>JSON.stringify(s);
+function draft(){const intention=el('intent').value.trim()||'What becomes possible?',question=el('question').value.trim()||'What remains open?';el('source').value='mobius {\n perceive { let intention = '+q(intention)+'; }\n compress { let seed = 1; }\n release { let potential = seed + 1; }\n verify { emit potential > seed; }\n integrate { let inquiry = wonder(intention); }\n choose { emit inquiry; }\n return { emit {potential:potential, question:intention}; }\n transcend { emit '+q(question)+'; }\n}\n';el('status').textContent='Draft ready';el('result').textContent='';}
+function compileOnly(){try{const ir=engine.compile(el('source').value);el('status').textContent='Compiled '+ir.units.length+' Möbius unit(s).';el('result').textContent=JSON.stringify(ir,null,2);return ir}catch(e){el('status').textContent='Compile failed: '+e.message;el('result').textContent=String(e.stack||e);return null}}
+el('draft').onclick=draft;el('compile').onclick=compileOnly;
+el('run').onclick=async()=>{const ir=compileOnly();if(!ir)return;el('status').textContent='Executing pure WTL locally…';try{const result=await engine.execute(ir,{maxOperations:2000});el('result').textContent=JSON.stringify(result,null,2);el('status').textContent='Execution finished: '+(result.status||'result returned')}catch(e){el('status').textContent='Execution stopped: '+e.message;el('result').textContent=String(e.stack||e)}};
+el('feather').onclick=()=>{el('run').disabled=true;el('status').textContent='Feather: further execution disabled until refresh. In-flight work is not interrupted.'};
+el('save').onclick=()=>{const url=URL.createObjectURL(new Blob([el('source').value],{type:'text/plain'}));const a=document.createElement('a');a.href=url;a.download='wayglass-spell.wtl';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+el('file').onchange=async e=>{const f=e.target.files?.[0];if(f&&f.size<=100000){el('source').value=await f.text();el('status').textContent='Imported '+f.name}else el('status').textContent='File missing or too large'};
+draft();
+</script></body></html>
