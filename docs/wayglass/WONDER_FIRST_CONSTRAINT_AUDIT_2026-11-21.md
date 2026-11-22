@@ -100,3 +100,7 @@ Reviewed the canonical WTL executor's phase loop. A cancellation could occur whi
 ## Late Feather: lineage and final-result guards
 
 The prior executor change checked cancellation before phase receipts and completed-cycle counts, but the carried-cycle branch still published `register` and `checkpoints` before its next Feather check. Added a cancellation check before lineage checkpoint/carry publication and a final check before result assembly. Commit `44989753d43284e35001643de3dd08962348c2ea`. This is a targeted synchronous publication-boundary improvement, not atomic rollback of earlier output or external effects. CI checks for prior commit remained queued; no tests passed or deployment verified.
+
+## Wyrdrune Wonder: preview lifecycle Feather
+
+Inspected the pure `lib/wayglass-wyrdrune-ritual.cjs` wrapper and found that `signal` previously reached only the `execute` call. Added typed `participant_stop` checks before compilation, before execution, after awaited execution and before returning the sealed digest receipt. Added a regression asserting pre-aborted signal takes precedence over malformed WTL source. Commits `5ae0cd477825190446bf617397cc7ecd4cc5ec4c`, `5c23698e1a3ddd5d70e1fe26e5445feab89aabcb`. These checks are cooperative at synchronous boundaries; they do not preempt a synchronous compiler or digest mid-call. CI still not verified; no merge/deploy.
