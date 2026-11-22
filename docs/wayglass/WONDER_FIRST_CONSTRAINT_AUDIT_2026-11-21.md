@@ -112,3 +112,7 @@ Added pure `wonder(question)` intrinsic to the canonical `lib/wyrdrune/runtime.m
 ## System-wide WTL Wonder parity: typed IR and operator inspection
 
 Following introduction of native `wonder(question)`, inspected `lib/wyrdrune/typed-ir.cjs` and `inspectOperators` in `lib/wyrdrune/runtime.mjs`. Both omitted the new intrinsic: typed mode would report `unknown-call`, and user-defined operators calling Wonder would be flagged as `nonportable-call`. Added typed builtin signature `TEXT → RECORD` and pure preflight recognition of a single question parameter. Added regression for typed preview and checkOperators. Commits `0c11d88f53669422ad43c0200d3eb37dc2649cab`, `bb76a8f5364b7f660be2ca646e769e2ef9e9d2da`, `22f5285ece5b72357f17558b77765577edf4520a`. **These are consistency fixes, not evidence of a whole-ship deployment.** No tests/CI verified yet.
+
+## Deeper Wonder: effect-free typed operators
+
+Inspected `inspectCall` in `lib/wyrdrune/typed-ir.cjs`. Despite its builtin signature, `wonder(question)` was still flagged as `operator-effect` in a user-defined typed operator because the classifier recognised only named operators and the older pureOperation table. Exempted the native pure Wonder intrinsic from this effect diagnostic. Added a typed operator regression. Code `9feccf05be1bf3d14e4a7134a3385f9a353cce52`, test `30987ccc09c0c27795ac2c70c28ea5b76c998104`. This does not relax bridge-effect checks. No CI/test execution verified; no merge/deploy.
