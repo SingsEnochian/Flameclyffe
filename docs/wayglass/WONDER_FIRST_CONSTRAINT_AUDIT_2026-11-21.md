@@ -184,3 +184,7 @@ Reviewed shared expression parser and found `match` only parsed at `expr()` entr
 ## Wyrdrune world-record construction primitives
 
 Added pure `withField(record,key,value)` and `fields(record)` to the shared runtime (commit `200a79f79ba0186016ad702d4c66a315dad9fc4c`). `withField` validates plain records and identifier keys, enforces a 64-field upper bound on additions, copies own data properties to a null-prototype record and returns an updated record without mutating the input. `fields` produces sorted field names. Added typed-IR signatures and pure-operator allowance (commit `a33345a9e65c9f321fd3a2ab0fbdb82cd851c79f`) and regression cases for original-state preservation, nested pure operator usage, field order, and typed rejection (commit `828089f42a6bde5b2e2b915f6770451d6c050fb5`). No tests or cross-backend parity run; no merge/deployment. These are record primitives, not persistent world storage or a world scheduler.
+
+## Wyrdrune reversible world-state shaping
+
+Added pure `withoutField(record,key)` to shared runtime (commit `dba719acbe8ff1ca20555c636aeefd6131e5da7c`), typed-IR builtin and operator purity (commit `c24552c6304aba47b6c4407095d5be2f546bd5f4`), and regression cases for preserving original records, absent-field Unknown behaviour, portable operator inspection, and invalid key types (commit `08fa7eb0ec46e977f5887c92a833e186a0893c79`). This is a pure record transformation only, not persisted history, rollback, or a transaction. Tests remain unexecuted and the integration branch unmerged.
