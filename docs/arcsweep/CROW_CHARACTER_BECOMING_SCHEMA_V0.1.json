@@ -1,0 +1,268 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flameclyffe.local/schemas/crow-character-becoming-v0.1.json",
+  "title": "Crow Character Becoming Training Unit v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "version",
+    "created_at",
+    "source_ids",
+    "source_class",
+    "source_license_or_access_note",
+    "principle_ids",
+    "fictional_or_historical",
+    "character_role_scope",
+    "task_type",
+    "split",
+    "review_status",
+    "canon_status",
+    "input",
+    "target",
+    "anti_flattening_checks"
+  ],
+  "properties": {
+    "id": {"type": "string", "minLength": 1},
+    "version": {"type": "string", "const": "0.1"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "source_ids": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "source_class": {
+      "type": "string",
+      "enum": [
+        "psychology",
+        "trauma-development",
+        "mythology-narratology",
+        "biography-history",
+        "fiction-craft",
+        "rowan-crow-session",
+        "synthetic"
+      ]
+    },
+    "source_license_or_access_note": {"type": "string", "minLength": 1},
+    "principle_ids": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "fictional_or_historical": {
+      "type": "string",
+      "enum": ["fictional", "historical"]
+    },
+    "character_role_scope": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "protagonist",
+          "antagonist",
+          "deuteragonist",
+          "mentor",
+          "rival",
+          "witness",
+          "victim",
+          "perpetrator",
+          "family",
+          "ally",
+          "henchman",
+          "citizen",
+          "minor",
+          "ensemble"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "task_type": {
+      "type": "string",
+      "enum": [
+        "same-event-divergent-meaning",
+        "different-intervention",
+        "surface-vs-deeper-hypothesis",
+        "power-feedback",
+        "corrective-feedback",
+        "side-character-sovereignty",
+        "remorse-repair",
+        "trigger-without-violence",
+        "harm-without-trauma",
+        "redemption-with-consequence",
+        "failed-redemption",
+        "ensemble-causality",
+        "mythframe-plurality",
+        "counterfactual-trajectory",
+        "fact-vs-inference"
+      ]
+    },
+    "split": {
+      "type": "string",
+      "enum": ["candidate", "train", "validation", "held-out", "archive"]
+    },
+    "review_status": {
+      "type": "string",
+      "enum": ["unreviewed", "reviewing", "approved", "rejected", "hold"]
+    },
+    "reviewer": {"type": ["string", "null"]},
+    "canon_status": {
+      "type": "string",
+      "enum": ["non-canon", "world-candidate", "canon-reference", "not-applicable"]
+    },
+    "uncertainty_notes": {"type": ["string", "null"]},
+    "historical_evidence": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "documented_fact": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "attributed_interpretation": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "model_hypothesis": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["character_seed", "world_context", "prompt"],
+      "properties": {
+        "character_seed": {"type": "string", "minLength": 1},
+        "world_context": {"type": "string"},
+        "scene_context": {"type": ["string", "null"]},
+        "prompt": {"type": "string", "minLength": 1}
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "surface_motive",
+        "deeper_hypotheses",
+        "trajectory",
+        "mythframe_lenses",
+        "side_character_agency",
+        "accountability",
+        "response"
+      ],
+      "properties": {
+        "surface_motive": {"type": ["string", "null"]},
+        "deeper_hypotheses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["hypothesis", "confidence", "evidence"],
+            "properties": {
+              "hypothesis": {"type": "string"},
+              "confidence": {"type": "string", "enum": ["low", "medium", "high"]},
+              "evidence": {
+                "type": "array",
+                "items": {"type": "string"}
+              }
+            }
+          }
+        },
+        "trajectory": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "origin_pressures",
+            "interpretive_frame",
+            "present_activation",
+            "choice_history",
+            "reinforcement",
+            "power_gradient",
+            "corrective_feedback",
+            "consequence",
+            "interruption_points",
+            "counterfactual_branches"
+          ],
+          "properties": {
+            "origin_pressures": {"type": "array", "items": {"type": "string"}},
+            "interpretive_frame": {"type": "array", "items": {"type": "string"}},
+            "present_activation": {"type": "array", "items": {"type": "string"}},
+            "choice_history": {"type": "array", "items": {"type": "string"}},
+            "reinforcement": {"type": "array", "items": {"type": "string"}},
+            "power_gradient": {"type": "array", "items": {"type": "string"}},
+            "corrective_feedback": {"type": "array", "items": {"type": "string"}},
+            "consequence": {"type": "array", "items": {"type": "string"}},
+            "interruption_points": {"type": "array", "items": {"type": "string"}},
+            "counterfactual_branches": {"type": "array", "items": {"type": "string"}}
+          }
+        },
+        "mythframe_lenses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["lens", "reading", "status"],
+            "properties": {
+              "lens": {"type": "string"},
+              "reading": {"type": "string"},
+              "status": {"type": "string", "enum": ["plausible", "partial", "counter-reading"]}
+            }
+          }
+        },
+        "side_character_agency": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "accountability": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["harm_acknowledged", "context_without_absolution", "consequences_preserved"],
+          "properties": {
+            "harm_acknowledged": {"type": "boolean"},
+            "context_without_absolution": {"type": "boolean"},
+            "consequences_preserved": {"type": "boolean"},
+            "notes": {"type": ["string", "null"]}
+          }
+        },
+        "response": {"type": "string", "minLength": 1}
+      }
+    },
+    "anti_flattening_checks": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "trauma-not-destiny",
+          "trauma-not-violence",
+          "mental-illness-not-villainy",
+          "role-not-morality",
+          "remorse-not-absolution",
+          "backstory-not-excuse",
+          "no-retrodiagnosis-as-fact",
+          "no-hindsight-determinism",
+          "side-characters-have-agency",
+          "campbell-is-a-lens",
+          "culture-not-archetype-bank",
+          "fact-inference-separated",
+          "power-not-morality",
+          "harm-can-exist-without-trauma"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"fictional_or_historical": {"const": "historical"}},
+        "required": ["fictional_or_historical"]
+      },
+      "then": {"required": ["historical_evidence"]}
+    }
+  ]
+}
