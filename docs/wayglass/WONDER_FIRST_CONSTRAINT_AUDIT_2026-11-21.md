@@ -34,3 +34,9 @@ This pass is **not** an exhaustive read of the repository, all branches, all run
 ## Non-negotiable audit restraint
 
 Do not remove technical resource limits, user consent, owner-only authentication, privacy boundaries, anti-injection source/authority separation, or proportional protection against concrete grave harm. Repair false positives and overbroad *interpretation* rather than dismantling execution boundaries.
+
+## Implemented follow-up: WTL dialect diagnostics
+
+In `wtl-transform-semantics.mjs`, unknown experimental roots/operators now raise `RangeError` with an explicit **Unsupported WTL experimental** vocabulary message rather than an undifferentiated `Error('Unknown ...')`. Regression fixtures distinguish `rewrite_history` as an unsupported root and `explore` as an unsupported operator; neither is represented as morally forbidden. This is a diagnostic improvement only, **not** expanded compiler grammar or a proof that other WTL backends accept these expressions. Commits `dfa9ff8c45c4c202f0bc3fcda7776e4c73fc17bb`, `75ab40ecbecace49edd4688b2e0c4019fa247d33`. Test execution/CI pending.
+
+**Scope correction:** Web Search Shield code was located and inspected, but no active Wayglass caller was established. Its production relevance is **unverified**; do not rank it as an active shipwide blocker without tracing a live import/call path.
