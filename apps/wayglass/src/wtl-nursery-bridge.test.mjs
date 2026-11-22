@@ -16,3 +16,11 @@ test('invalid WTL and long signals fail closed',()=>{
  assert.throws(()=>prepareNurserySignal({kind:'wtl',wtlSource:'erase(worldseed)',consent}));
  assert.throws(()=>prepareNurserySignal({kind:'word',value:'x'.repeat(257),consent}));
 });
+
+test('real participant IDs are accepted, invalid IDs and inherited grants fail closed',()=>{
+ const participants=['nursery:a','nursery:b'];
+ assert.equal(prepareNurserySignal({kind:'touch',value:'seed',participants,consent}).status,'ready');
+ assert.throws(()=>prepareNurserySignal({kind:'touch',value:'seed',participants:['nursery:a','bad id'],consent}),/Distinct participants/);
+ const inherited=Object.create({'nursery:a':true,'nursery:b':true});
+ assert.equal(prepareNurserySignal({kind:'touch',value:'seed',participants,consent:inherited}).status,'declined');
+});
