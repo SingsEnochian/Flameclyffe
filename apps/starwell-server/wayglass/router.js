@@ -2,6 +2,7 @@
 
 const { randomUUID } = require('node:crypto');
 const Wyrdrune = require('../../../lib/wyrdrune/wyrdrune.cjs');
+const { createWayglassProgramStore } = require('./program-store');
 const path = require('node:path');
 const { pathToFileURL } = require('node:url');
 const express = require('express');
@@ -1071,6 +1072,59 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     }
   });
 
+  router.get('/wyrdrune/programs', createRequestGate({ maxRequests: 30, maxConcurrent: 4 }), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required to open the Wyrdrune programme library.' });
+    }
+    try {
+      const programs = await createWayglassProgramStore().listPrograms();
+      return res.json({ schema: 'wayglass.program-library/v1', programs });
+    } catch (error) {
+      return res.status(503).json({ schema: 'wayglass.program-library-error/v1', error: cleanText(error?.message || 'Programme library unavailable.', 300) });
+    }
+  });
+
+  router.post('/wyrdrune/programs', createRequestGate({ maxRequests: 20, maxConcurrent: 2 }), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required to save a Wyrdrune programme.' });
+    }
+    try {
+      const saved = await createWayglassProgramStore().saveProgram({
+        slug: req.body?.slug,
+        title: req.body?.title,
+        description: req.body?.description,
+        source: req.body?.source,
+        metadata: req.body?.metadata,
+        changeNote: req.body?.change_note,
+      });
+      return res.status(201).json({ schema: 'wayglass.program-save/v1', ...saved });
+    } catch (error) {
+      const invalid = error instanceof TypeError || /invalid|requires|must use/i.test(String(error?.message || ''));
+      return res.status(invalid ? 400 : 503).json({
+        schema: 'wayglass.program-save-error/v1',
+        error: cleanText(error?.message || 'Programme save failed.', 300),
+      });
+    }
+  });
+
+  router.get('/wyrdrune/programs/:slug/revisions', createRequestGate({ maxRequests: 30, maxConcurrent: 4 }), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required to inspect programme history.' });
+    }
+    try {
+      const store = createWayglassProgramStore();
+      const program = await store.getProgram(req.params.slug);
+      if (!program) return res.status(404).json({ error: 'Wyrdrune programme not found.' });
+      const revisions = await store.listRevisions(program.program_id);
+      return res.json({ schema: 'wayglass.program-revisions/v1', program: { program_id: program.program_id, slug: program.slug, version: program.version }, revisions });
+    } catch (error) {
+      return res.status(503).json({ error: cleanText(error?.message || 'Programme history unavailable.', 300) });
+    }
+  });
+
   router.post('/wyrdrune/workbench', createRequestGate({ maxRequests: 24, maxConcurrent: 2 }), async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     if (!(await griffStewardAuthorized(req).catch(() => false))) {
@@ -1085,11 +1139,27 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     try {
       const ir = Wyrdrune.compile(source);
       if (mode === 'compile') {
+        let persistence = { status: 'not-saved' };
+        try {
+          const store = createWayglassProgramStore();
+          const program = req.body?.program_slug ? await store.getProgram(req.body.program_slug) : null;
+          const run = await store.saveRun({
+            programId: program?.program_id || null,
+            source,
+            status: 'compiled',
+            executionReceipt: { schema: 'wayglass.wyrdrune-compile-receipt/v1', source_hash: ir.sourceHash, ir },
+            context: { mode, program_slug: cleanText(req.body?.program_slug || '', 80) },
+          });
+          persistence = { status: 'saved', run_id: run?.run_id || null };
+        } catch (error) {
+          persistence = { status: 'unavailable', detail: cleanText(error?.message || 'Programme receipt storage unavailable.', 180) };
+        }
         return res.json({
           schema: 'wayglass.wyrdrune-workbench/v1',
           mode,
           source_hash: ir.sourceHash,
           ir,
+          persistence,
           dispatch: 'none',
           external_effects: [],
         });
@@ -1159,6 +1229,21 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
           },
         },
       });
+      let persistence = { status: 'not-saved' };
+      try {
+        const store = createWayglassProgramStore();
+        const program = req.body?.program_slug ? await store.getProgram(req.body.program_slug) : null;
+        const run = await store.saveRun({
+          programId: program?.program_id || null,
+          source,
+          status: execution.status === 'committed' ? 'committed' : 'rolled-back',
+          executionReceipt: execution,
+          context: { ...context, program_slug: cleanText(req.body?.program_slug || '', 80) },
+        });
+        persistence = { status: 'saved', run_id: run?.run_id || null };
+      } catch (error) {
+        persistence = { status: 'unavailable', detail: cleanText(error?.message || 'Programme receipt storage unavailable.', 180) };
+      }
       return res.json({
         schema: 'wayglass.wyrdrune-workbench/v1',
         mode,
@@ -1166,6 +1251,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
         ir,
         execution,
         context,
+        persistence,
         dispatch: 'none',
         external_effects: [],
         world_mutation: false,
