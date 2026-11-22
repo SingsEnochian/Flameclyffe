@@ -3,13 +3,13 @@ import storyScoreSource from '../../../../lib/wyrdrune/story-soundscape.wtl?raw'
 import fullSpectrumSource from '../../../../lib/wyrdrune/full-spectrum.wtl?raw';
 import resonanceAtlasSource from '../../../../lib/wyrdrune/resonance-atlas.wtl?raw';
 import './program-workbench.css';
-import { runWyrdruneProgram } from '../wyrdrune-workbench.js';
+import { runWyrdruneProgram, listWyrdrunePrograms, saveWyrdruneProgram } from '../wyrdrune-workbench.js';
 
 const PROGRAMS = Object.freeze([
-  { id: 'vessel-plan', label: 'Wayglass · Whole Vessel Plan', source: vesselPlanSource },
-  { id: 'story-soundscape', label: 'StorySoundscape · Double Möbius', source: storyScoreSource },
-  { id: 'full-spectrum', label: 'Full Spectrum · Wyrdrune', source: fullSpectrumSource },
-  { id: 'resonance-atlas', label: 'Resonance Atlas · Four Scales', source: resonanceAtlasSource },
+  { id: 'vessel-plan', slug: 'wayglass-vessel-plan', label: 'Wayglass · Whole Vessel Plan', source: vesselPlanSource },
+  { id: 'story-soundscape', slug: 'story-soundscape', label: 'StorySoundscape · Double Möbius', source: storyScoreSource },
+  { id: 'full-spectrum', slug: 'full-spectrum', label: 'Full Spectrum · Wyrdrune', source: fullSpectrumSource },
+  { id: 'resonance-atlas', slug: 'resonance-atlas', label: 'Resonance Atlas · Four Scales', source: resonanceAtlasSource },
 ]);
 
 const escapeHtml = value => String(value ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;')
@@ -58,7 +58,9 @@ mobius {
 }
 
 export async function mountWayglassProgramWorkbench(root) {
+  const programs = [...PROGRAMS];
   let activeProgram = 'vessel-plan';
+  let activeSlug = 'wayglass-vessel-plan';
   let pending = false;
   let activeController = null;
   root.innerHTML = `
@@ -86,6 +88,7 @@ export async function mountWayglassProgramWorkbench(root) {
         </label>
         <div class="wg-program-actions">
           <button type="button" class="glass-chip" data-program-load>Load</button>
+          <button type="button" class="glass-chip" data-program-save>Save Programme</button>
           <button type="button" class="glass-chip" data-spell-wizard>Spell Wizard</button>
           <button type="button" class="glass-chip" data-program-compile>Compile</button>
           <button type="button" class="glass-chip primary" data-program-run>Run Wyrdrune</button>
@@ -107,6 +110,19 @@ export async function mountWayglassProgramWorkbench(root) {
           <pre data-program-output aria-live="polite">Run a programme to inspect phase receipts, outputs and return continuity.</pre>
         </section>
       </div>
+      <dialog class="wg-spell-wizard glass-panel" data-save-dialog aria-labelledby="wg-save-title">
+        <form method="dialog" data-save-form>
+          <p class="eyebrow">Wayglass · durable programme library</p>
+          <h2 id="wg-save-title">Save Wyrdrune Programme</h2>
+          <label>Programme title<input name="title" required maxlength="160" value="Wayglass Programme"></label>
+          <label>Library slug<input name="slug" required maxlength="80" pattern="[a-z0-9][a-z0-9-]{1,79}" value="wayglass-programme"></label>
+          <label>Description<input name="description" maxlength="1200" value="Native Wyrdrune programme"></label>
+          <div class="wg-program-actions">
+            <button type="button" class="glass-chip" data-save-cancel>Return</button>
+            <button type="submit" class="glass-chip primary">Save Revision</button>
+          </div>
+        </form>
+      </dialog>
       <dialog class="wg-spell-wizard glass-panel" data-spell-dialog aria-labelledby="wg-spell-title">
         <form method="dialog" data-spell-form>
           <p class="eyebrow">Wyrdrune · authored programme</p>
@@ -136,6 +152,9 @@ export async function mountWayglassProgramWorkbench(root) {
   const loadButton = root.querySelector('[data-program-load]');
   const dialog = root.querySelector('[data-spell-dialog]');
   const form = root.querySelector('[data-spell-form]');
+  const saveDialog = root.querySelector('[data-save-dialog]');
+  const saveForm = root.querySelector('[data-save-form]');
+  const saveButton = root.querySelector('[data-program-save]');
 
   const updateCount = () => { sourceCount.textContent = editor.value.length + ' characters'; };
   editor.value = vesselPlanSource;
@@ -144,9 +163,10 @@ export async function mountWayglassProgramWorkbench(root) {
   select.value = activeProgram;
 
   function loadProgram() {
-    const selected = PROGRAMS.find(item => item.id === select.value);
+    const selected = programs.find(item => item.id === select.value);
     if (!selected) return;
     activeProgram = selected.id;
+    activeSlug = selected.slug || null;
     editor.value = selected.source;
     lastReceipt = null;
     updateCount();
@@ -164,6 +184,7 @@ export async function mountWayglassProgramWorkbench(root) {
     compileButton.disabled = true;
     runButton.disabled = true;
     loadButton.disabled = true;
+    saveButton.disabled = true;
     status.textContent = mode === 'compile' ? 'Compiling Wyrdrune source…' : 'Executing native Wyrdrune programme…';
     stateView.textContent = mode === 'compile' ? 'Compiling' : 'Executing';
     try {
@@ -178,6 +199,7 @@ export async function mountWayglassProgramWorkbench(root) {
         mode,
         context,
         programId: activeProgram,
+        programSlug: activeSlug,
         signal: activeController.signal,
       });
       lastReceipt = receipt;
@@ -216,6 +238,7 @@ export async function mountWayglassProgramWorkbench(root) {
       compileButton.disabled = false;
       runButton.disabled = false;
       loadButton.disabled = false;
+      saveButton.disabled = false;
     }
   }
 
@@ -229,6 +252,53 @@ export async function mountWayglassProgramWorkbench(root) {
   compileButton.addEventListener('click', () => void run('compile'));
   runButton.addEventListener('click', () => void run('execute'));
   root.querySelector('[data-spell-wizard]')?.addEventListener('click', () => dialog.showModal());
+  saveButton.addEventListener('click', () => {
+    const current = programs.find(item => item.id === activeProgram);
+    saveForm.elements.title.value = current?.label || 'New Wyrdrune Programme';
+    saveForm.elements.slug.value = activeSlug || 'new-wyrdrune-programme';
+    saveForm.elements.description.value = 'Native Wyrdrune programme';
+    saveDialog.showModal();
+  });
+  root.querySelector('[data-save-cancel]')?.addEventListener('click', () => saveDialog.close());
+  saveForm.addEventListener('submit', async event => {
+    event.preventDefault();
+    const values = Object.fromEntries(new FormData(saveForm).entries());
+    saveButton.disabled = true;
+    status.textContent = 'Saving programme and immutable source revision to the Wayglass library…';
+    try {
+      const saved = await saveWyrdruneProgram({
+        slug: values.slug,
+        title: values.title,
+        description: values.description,
+        source: editor.value,
+      });
+      const item = {
+        id: saved.program.slug,
+        slug: saved.program.slug,
+        label: saved.program.title,
+        source: editor.value,
+        version: saved.program.version,
+      };
+      const existing = programs.findIndex(program => program.slug === item.slug);
+      if (existing >= 0) programs.splice(existing, 1, item);
+      else programs.push(item);
+      const option = [...select.options].find(option => option.value === item.id);
+      if (option) option.textContent = item.label;
+      else select.add(new Option(item.label + ' · v' + item.version, item.id));
+      activeProgram = item.id;
+      activeSlug = item.slug;
+      select.value = item.id;
+      stateView.textContent = 'Saved v' + item.version;
+      status.textContent = 'Programme and immutable revision saved to the Supabase Wayglass library.';
+      saveDialog.close();
+    } catch (error) {
+      stateView.textContent = 'Save failed';
+      outputView.textContent = String(error?.message || error);
+      status.textContent = 'Programme save failed. Your source remains in the editor.';
+    } finally {
+      saveButton.disabled = false;
+    }
+  });
   root.querySelector('[data-spell-cancel]')?.addEventListener('click', () => dialog.close());
   form.addEventListener('submit', event => {
     event.preventDefault();
@@ -247,10 +317,35 @@ export async function mountWayglassProgramWorkbench(root) {
     button.addEventListener('click', () => globalThis.__wayglassOS?.mount(button.dataset.wayglassRoom));
   });
 
+  async function refreshLibrary() {
+    try {
+      const stored = await listWyrdrunePrograms();
+      for (const record of stored) {
+        const item = {
+          id: record.slug,
+          slug: record.slug,
+          label: record.title,
+          source: record.source,
+          version: record.version,
+        };
+        const existing = programs.findIndex(program => program.slug === item.slug);
+        if (existing >= 0) programs.splice(existing, 1, item);
+        else programs.push(item);
+      }
+      select.replaceChildren(...programs.map(item => new Option(item.label + (item.version ? ' · v' + item.version : ''), item.id)));
+      select.value = activeProgram;
+      status.textContent = stored.length + ' saved Wyrdrune programme(s) loaded from the Wayglass library.';
+    } catch (error) {
+      status.textContent = 'Native Wyrdrune editor ready. Library connection: ' + String(error?.message || error);
+    }
+  }
+  void refreshLibrary();
+
   return () => {
     globalThis.removeEventListener('wayglass:os:feather', onFeather);
     activeController?.abort();
     for (const button of [compileButton, runButton, loadButton]) button.disabled = true;
     if (dialog.open) dialog.close();
+    if (saveDialog.open) saveDialog.close();
   };
 }
