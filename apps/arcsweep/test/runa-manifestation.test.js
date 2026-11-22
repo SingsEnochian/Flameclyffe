@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { createRunaManifestationAdapter } from '../src/os/runa-manifestation.js';
+import { StorySoundscape } from '../src/story-soundscape.js';
 
 function fakeStory() {
   return {
@@ -26,7 +27,7 @@ function fakeStory() {
     startHum() { this.humActive = true; },
     stopHum() { this.humActive = false; },
     stopHeartfield() { this.heartfieldActive = false; },
-    stopBluebirdHome() {},
+    stopBluebirdWeightedHome() {},
     playWorldTone(frequency, duration) { this.tones.push({ frequency, duration }); },
     snapshot() {
       return {
@@ -76,6 +77,88 @@ test('World Hum manifests through the existing StorySoundscape instance', async 
   adapter.stopWorldHum('test');
   assert.equal(story.humActive, false);
   assert.equal(receipts.at(-1).kind, 'world-hum-stop');
+});
+
+function mountedStory() {
+  const story = new StorySoundscape();
+  // Exercise real world resolution and arm/stop methods without audio hardware.
+  story.context = { state: 'running', currentTime: 10 };
+  story.startHum = function () { this.humActive = true; };
+  story.restartHum = () => {};
+  story.playWorldTone = function (frequency) { this.lastFrequency = frequency; };
+  return story;
+}
+
+test('World Hum and Glyph Voice preserve the real live custom profile, including omitted context', async () => {
+  for (const id of ['custom-world', 'house-world-taveren-vaen']) {
+    const story = mountedStory();
+    story.setWorld({ id, name: 'Live world' });
+    story.setRoot(287);
+    story.setWaveform('square');
+    story.setOvertones(5);
+    const profile = { ...story.world };
+    const soundfontMap = story.soundfontMap;
+    const adapter = createRunaManifestationAdapter({ storyProvider: () => story });
+    const receipt = await adapter.startWorldHum({ world_id: id, world_name: 'Live world', world: { id, soundscape: { rootHz: 100, waveform: 'triangle', overtones: 1 } } });
+    assert.deepEqual(story.world, profile);
+    assert.equal(receipt.root_hz, 287);
+    assert.equal(receipt.waveform, 'square');
+    await adapter.setGlyphSonification({ world_id: id });
+    assert.deepEqual(story.world, profile);
+    await adapter.startWorldHum();
+    assert.deepEqual(story.world, profile);
+    assert.equal(story.soundfontMap, soundfontMap);
+    const stroke = adapter.observeGlyphStroke({ stroke_id: 'custom-root-stroke' });
+    assert.equal(stroke.root_hz, 287);
+    assert.equal(story.lastFrequency, stroke.frequency_hz);
+  }
+});
+
+test('explicit tuning overrides merge with the live profile; world switches use their own profile', async () => {
+  const story = mountedStory();
+  story.setWorld({ id: 'custom-world', name: 'Custom', soundscape: { rootHz: 287, waveform: 'square', overtones: 5 } });
+  const adapter = createRunaManifestationAdapter({ storyProvider: () => story });
+  await adapter.startWorldHum({ root_hz: 300 });
+  assert.deepEqual(story.world, { worldId: 'custom-world', worldName: 'Custom', rootHz: 300, waveform: 'square', overtones: 5 });
+  await adapter.setGlyphSonification({ waveform: 'sine', overtones: 2 });
+  assert.equal(story.world.rootHz, 300);
+  assert.equal(story.world.waveform, 'sine');
+  assert.equal(story.world.overtones, 2);
+  await adapter.startWorldHum({ world_id: 'house-world-luna', world_name: 'Luna' });
+  assert.equal(story.world.rootHz, 432);
+  assert.equal(story.world.waveform, 'triangle');
+  await adapter.startWorldHum({ world_id: 'other-custom', world: { id: 'other-custom', name: 'Other', soundscape: { rootHz: 315, waveform: 'sawtooth', overtones: 4 } } });
+  assert.deepEqual(story.world, { worldId: 'other-custom', worldName: 'Other', rootHz: 315, waveform: 'sawtooth', overtones: 4 });
+  await adapter.startWorldHum({ world_id: 'third-custom', root_hz: 444, world: { id: 'third-custom', soundscape: { rootHz: 315 } } });
+  assert.equal(story.world.rootHz, 444);
+});
+
+test('Feather invokes real Bluebird shutdown, clearing its timer, voices and tactile proxy nodes', (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const story = mountedStory();
+  const stopped = [];
+  const disconnected = [];
+  const notes = [];
+  story.bluebirdActive = true;
+  story.bluebirdSomaticProxy = true;
+  story.bluebirdTimer = setTimeout(() => assert.fail('bounded timer was not cancelled'), 480000);
+  story.bluebirdOutput = { disconnect: () => disconnected.push('output') };
+  story.soundfontSynth = { noteOff: (...note) => notes.push(note) };
+  story.bluebirdNodes = ['voice', 'somatic-proxy'].map((id) => ({
+    source: { stop: (when) => stopped.push({ id, when }) },
+    extras: [{ disconnect: () => disconnected.push(id) }],
+  }));
+  const adapter = createRunaManifestationAdapter({ storyProvider: () => story });
+  const receipt = adapter.feather();
+  assert.equal(story.bluebirdActive, false);
+  assert.equal(story.bluebirdTimer, null);
+  assert.equal(story.bluebirdOutput, null);
+  assert.deepEqual(story.bluebirdNodes, []);
+  assert.deepEqual(stopped.map(({ id }) => id), ['voice', 'somatic-proxy']);
+  assert.equal(notes.length, 3);
+  assert.ok(receipt.stopped.includes('bluebird-weighted-home'));
+  t.mock.timers.tick(480000);
+  assert.deepEqual(disconnected, ['voice', 'somatic-proxy', 'output']);
 });
 
 test('Safe Gateway reuses the existing Möbius engine and preserves its 5.5 Hz offset plan', async () => {
