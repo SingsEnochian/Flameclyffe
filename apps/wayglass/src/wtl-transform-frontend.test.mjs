@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {compileWTL,parseWTL} from './wtl-transform-frontend.mjs';
+import {compileWTL,parseWTL,lowerWTL} from './wtl-transform-frontend.mjs';
 test('parses and lowers noncommutative nested transformations',()=>{
  const a=compileWTL('wonder(tend(worldseed))');
  const b=compileWTL('tend(wonder(worldseed))');
@@ -20,4 +20,12 @@ test('tokenizer rejects split identifiers and maintains normal spaced syntax',()
  assert.throws(()=>compileWTL('wonder(world seed)'));
  assert.throws(()=>compileWTL('tend(worldseed, twist@0 .5)'));
  assert.equal(compileWTL('wonder ( tend ( worldseed ) )').ir.semanticType,'OpenQuestion');
+});
+
+test('exported WTL lowering rejects cyclic and excessively deep caller ASTs',()=>{
+ const cyclic={type:'Transform',operator:'wonder',twist:0};cyclic.subject=cyclic;
+ assert.throws(()=>lowerWTL(cyclic),/depth limit|cycle/);
+ let deep={type:'Root',name:'worldseed'};
+ for(let i=0;i<30;i++)deep={type:'Transform',operator:'tend',subject:deep,twist:0};
+ assert.throws(()=>lowerWTL(deep),/depth limit|cycle/);
 });
