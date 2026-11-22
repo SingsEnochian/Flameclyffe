@@ -80,3 +80,7 @@ GitHub workflow lookup for audit commit `a5380ffc4eac2965b58b3c67d901bfe07073cd9
 ## Typed unauthorised-effect status correction
 
 Found that Starwell's `REASONS` accepted `unauthorised_effect`, but `INVALID_REASONS` omitted it. Consequently, an explicitly typed missing-owner-authorisation error would have been returned as HTTP 422 rather than the route's 400 boundary classification. Added `unauthorised_effect` to `INVALID_REASONS` and a dedicated regression test. Commits `457f1534e78c89f007c4547d8d7a38ae1caed5db`, `cffef0c81bd05ce7a738dc075b66ef8c51760e64`. Existing route authentication and preview no-dispatch semantics are unchanged. Workflow checks for prior audit commit were queued; no passing CI or live execution established.
+
+## Remaining executor hard-stop reasons
+
+Audited all `new WyrdruneHardStop` sites in `lib/wyrdrune/runtime.mjs`. Added `invalid_or_unsupported_wtl` to missing spiced seed, whisper outside spiced context, invalid expression and invalid statement; added `capability_unavailable` to missing ritual-register adapters. Preserved existing Feather, budget, bridge and owner-authorisation distinctions. Added a ritual-preview regression asserting missing spiced seed is a technical outcome. Commits `a2eab0a8c9c9a2d41cf0a6d584f889927b0ac88d`, `bb941be698d5a87aa9d03fcd9887261f4c0e57bb`. Latest prior CI check still queued; these new commits are not verified by passing tests. No merge/deploy.
