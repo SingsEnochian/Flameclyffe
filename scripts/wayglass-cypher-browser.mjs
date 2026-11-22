@@ -220,7 +220,7 @@ async function checkCodex(page,profile){
   reduced_motion:true,original_source_preserved:true});
 }
 async function checkWriting(page,profile){
- await shipRoom(page,'arcsweep:writing-room');
+ await shipRoom(page,'wayglass:writing-room'); // Navigation uses canonical room IDs; legacy alias remains valid for direct routing.
  await page.locator('#wg-wtl-details').waitFor();
  await page.locator('#wg-wtl-details summary').click();
  await page.locator('#wg-wtl-example').click();
