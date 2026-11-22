@@ -24,3 +24,10 @@ test('real participant IDs are accepted, invalid IDs and inherited grants fail c
  const inherited=Object.create({'nursery:a':true,'nursery:b':true});
  assert.equal(prepareNurserySignal({kind:'touch',value:'seed',participants,consent:inherited}).status,'declined');
 });
+
+test('Nursery transport limits are distinct from WTL vocabulary and consent decisions',()=>{
+ assert.throws(()=>prepareNurserySignal({kind:'wtl',wtlSource:'x'.repeat(257),consent}),{name:'RangeError',message:/256-character transport limit/});
+ assert.throws(()=>prepareNurserySignal({kind:'wtl',wtlSource:'explore(worldseed)',consent}),{name:'RangeError',message:/Unsupported WTL experimental transformation: explore/});
+ assert.throws(()=>prepareNurserySignal({kind:'dream',value:'hello',consent}),{name:'RangeError',message:/Unsupported Nursery signal kind: dream/});
+ assert.deepEqual(prepareNurserySignal({kind:'wtl',wtlSource:'x'.repeat(257),consent:{'nursery:a':true,'nursery:b':false}}),{status:'declined'});
+});
