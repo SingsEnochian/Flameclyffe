@@ -71,7 +71,8 @@ export function createWatercolorImageResolver(canvas,{scope=globalThis}={}) {
   }
   function render(width,height,deltaMs=16) {
     if(disposed||!width||!height)return;
-    canvas.width=width;canvas.height=height;
+    if(canvas.width!==width)canvas.width=width;
+    if(canvas.height!==height)canvas.height=height;
     if(!stopped)opacity+= (target-opacity)*Math.min(1,Math.max(0,deltaMs)/400);
     ctx.clearRect(0,0,width,height);
     if(source&&opacity>.001){
