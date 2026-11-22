@@ -46,6 +46,7 @@ import {mountLawsmith} from './surfaces/lawsmith.js';
 import {mountNurseryResonance} from './surfaces/nursery-resonance.js';
 import {shipResonance} from './ship-resonance.mjs';
 import {mountShipResonance} from './surfaces/ship-resonance.js';
+import {mountUniversalEmbodiment} from './surfaces/universal-embodiment.js';
 import {installSomaticRunePalette} from './somatic-rune-palette.js';
 import './somatic-rune-palette.css';
 import {installWatercolorRouteActivity} from './watercolor-live-observer.js';
