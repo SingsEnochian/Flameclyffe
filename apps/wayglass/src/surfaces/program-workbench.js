@@ -1,5 +1,5 @@
 import vesselPlanSource from '../../../../lib/wyrdrune/wayglass-vessel-plan.wtl?raw';
-import storyScoreSource from '../../../../lib/wyrdrune/story-soundscape.wtl?raw';
+import storyScoreSource from '../../../../scores/wyrdrune/story-soundscape-v0.1.wtl?raw';
 import fullSpectrumSource from '../../../../lib/wyrdrune/full-spectrum.wtl?raw';
 import resonanceAtlasSource from '../../../../lib/wyrdrune/resonance-atlas.wtl?raw';
 import './program-workbench.css';
