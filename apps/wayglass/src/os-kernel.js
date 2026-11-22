@@ -14,7 +14,7 @@ const SYSTEMS = Object.freeze([
     name: 'Wyrdrune Native Language',
     purpose: 'One executable language for ritual, prose, typed computation, sound, glyphs, morphology and world programs.',
     organs: [],
-    surfaces: ['wayglass:writing-room', 'wayglass:native-voice', 'wayglass:sound-composition', 'wayglass:universal-codex'],
+    surfaces: ['wayglass:writing-room', 'wayglass:program-workbench', 'wayglass:native-voice', 'wayglass:sound-composition', 'wayglass:universal-codex'],
     interfaces: ['WTL parser', 'typed IR', 'runtime', 'cross-backend parity', 'Any-to-Any transduction'],
   }),
   Object.freeze({
