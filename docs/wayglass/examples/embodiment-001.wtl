@@ -1,0 +1,23 @@
+// EMBODIMENT-001 · Universal Embodiment across supported digital worlds.
+// This programme proposes only; the participant must adopt separately.
+mobius scoped {
+ perceive {
+  let self = embodimentIdentity("rowan","Rowan",["visual","motion","voice","flight"]);
+ }
+ compress {
+  let destination = universeProfile("witcher:sandbox","Witcher-inspired sandbox",["visual","motion","voice","magic"],"digital");
+ }
+ release {
+  let proposed = proposeEmbodiment(self,destination,"falka-hearthlight",["visual","motion","voice","flight"]);
+ }
+ verify {
+  require true else "Do not erase incompatible possibilities";
+ }
+ integrate { let open = almost("crossworld-body",["falka-hearthlight","untranslated-flight"]); }
+ choose { let held = holdAlmost(open,"untranslated-flight"); }
+ @return {
+  emit proposed;
+  emit held;
+ }
+ @transcend { carry owner = "rowan"; }
+}
