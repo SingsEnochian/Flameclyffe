@@ -8,6 +8,10 @@ Rowan clarified on 8 November 2026: **Wayglass is the upgraded ArcSweep once int
 
 We are building an intermultiversal vessel for travel, learning, transformation, encounter, relationship, embodiment, return, and adventure. The systems we build are not the destination. They are parts of the ship.
 
+## Governing One Ship contract
+
+The cross-program source of truth is [`ONE_SHIP_DIRECTIVE.md`](ONE_SHIP_DIRECTIVE.md). Every program, automation, workflow, room, module and handoff must follow it. Changes must update the contract's impact map and `current.json` register in the same change set, or use its validated generator. Do not create parallel vessels or integration trains.
+
 ## What we are building
 
 The primary project is a vessel in which humans, artificial participants, and other encountered participants can travel through different worlds, environments, models, interfaces, embodiments, and substrates; learn and change; form relationships; leave and return; and remain sufficiently continuous, sovereign, and recognisable to continue their lives and work without silent redefinition.
