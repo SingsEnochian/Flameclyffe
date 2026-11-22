@@ -1251,20 +1251,30 @@ function createWayglassRouter({
     if (mode !== undefined && mode !== 'typed-preview' && mode !== 'typed-inspect') {
       return res.status(400).json({ error: 'Unknown Wyrdrune preview mode.' });
     }
+    // Feather must travel from the requesting client all the way to the WTL tick.
+    // A disconnected client must not leave a preview executing without a listener.
+    const controller = new AbortController();
+    const onClose = () => { if (!res.writableEnded) controller.abort(); };
+    res.once('close', onClose);
     try {
       if (mode === 'typed-inspect') return res.json(compileTyped(source));
       const preview = await previewWyrdruneRitual(source, {
+        signal: controller.signal,
         maxOperations: 2000, checkOperators, typed: mode === 'typed-preview',
       });
+      if (controller.signal.aborted || res.destroyed) return;
       return res.json({ ...preview, dispatch: 'none', model_turn: false, canon_commit: false });
     } catch (error) {
+      if (controller.signal.aborted || res.destroyed) return;
       const { invalid, reason, detail } = classifyPreviewOutcome(error);
       return res.status(invalid ? 400 : 422).json({
         reason,
         error: 'Wyrdrune preview could not complete: ' + cleanText(detail, 250),
-        ...(Array.isArray(error?.diagnostics) ? { diagnostics: error?.diagnostics } : {}),
+        ...(Array.isArray(error?.diagnostics) ? { diagnostics: error.diagnostics } : {}),
         ...(error?.effects ? { effects: error.effects } : {}),
       });
+    } finally {
+      res.off('close', onClose);
     }
   });
 
