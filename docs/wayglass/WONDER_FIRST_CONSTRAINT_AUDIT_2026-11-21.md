@@ -164,3 +164,7 @@ Introduced pure `known(value)` as a single-argument runtime builtin that returns
 ## Wyrdrune match-unknown first grammar slice
 
 Added `match subject { unknown: expression, else: expression }` syntax to shared WTL parser, evaluation of only the selected arm, typed-IR inference of both arms, and structural operator-call inspection for both arms. Runtime/parser commit `7eca20b962ab1daed02fe7675b276bda33aa349f`, typed IR `40492a94248a3eaec4378d8c9baf663595b9f298`, operator inspection `b11a8c36cc2ae2ab910f84abd197fb7a2723d70e`, regression tests `3b25dd28a665cfd559ddafad0d1f91cda41fd017`. This is a deliberately restricted first pattern-matching slice, not general destructuring/pattern matching. **Tests not run** and two-backend parity not verified. Keep on integration branch pending actual execution and CI.
+
+## Wyrdrune null literal / typed IR reconciliation
+
+Inspected the current shared parser and found `null` parsed as an identifier, not a literal. Added literal parsing (`eafd6723fd12d8161bc91f7eab6ce545a53e7554`), fixed typed-IR inference to return `null` rather than `truth` (`5f01431d58826695ca82d584e7131c06e563348b`), and added typed null/Unknown regression while correcting match-test diagnostic expectation from `unknown-variable` to `unbound-name` (`a6884cbf63144a970eb822049eba1a9a2b35b532`). Prior tests referencing `null` had not established working semantics. GitHub workflow runs checked for preceding head `d3723eea2b0c6e49cf636862e93978ca6700a6b9` remained queued/pending; no passing CI or local execution claimed for this pass. No merge/deploy.
