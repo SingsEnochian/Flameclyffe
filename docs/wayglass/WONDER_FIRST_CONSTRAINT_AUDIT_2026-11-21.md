@@ -148,3 +148,7 @@ Reconstructed the current `apps/wayglass/src/watercolor-image-resolver.js` and c
 ## Wyrdrune language development: Wonder regression integrity
 
 Repaired the incorrect escaped-parenthesis regex in the `wonder("")` rejection test, commit `50f9bb82351f8eca4b4a7c93acef8f4e582c3ae1`. Added Unicode/speculative-question acceptance and 1024-character upper-bound regression cases to `lib/wayglass-wyrdrune-ritual.test.cjs`, commit `c5fbd04342b5fbdb030e27ed63f00a09afe841ab`. These reinforce the existing pure `wonder(question)` typed/runtime contract; no new parser syntax was added. Tests have not been executed or verified on GitHub CI in this pass. Next language work: diagnostics and richer typed expression/semantic constructs with end-to-end verification.
+
+## Wyrdrune runtime: record-access error boundary
+
+In `lib/wyrdrune/runtime.mjs`, explicitly reject null and non-object targets before `Object.getOwnPropertyDescriptor`, preventing host JavaScript reflection errors from escaping WTL's record/list access semantics. Commit `6950807b459134a3448fb9c01dca9b9664eb6c22`. Added a null-access regression assertion to `lib/wayglass-wyrdrune-ritual.test.cjs`, commit `6fd84b4ce4366e3a1c6388a352ea2a193aac68fc`. Neither end-to-end execution nor CI has been verified; test may be rejected earlier by typed preflight, so runtime-level coverage remains to be added. No merge or deployment.
