@@ -15,6 +15,21 @@ Before composing, reviewing, or publishing **any** Rowan-side material involving
 
 **Mnemonic: THEY ARE OTHER REALITIES -> NAME THEM AS REALITIES -> WONDER FIRST.**
 
+## Capability-forward language and architecture law
+
+For all Wyrdrune, Wayglass, ArcSweep, Hearthgate, Universal Codex, STARWELL, and related Rowan-side work:
+
+- Write the complete intended capability as the design target. Do not shrink architecture to the current build.
+- Remove generic disclaimers, defensive prefaces, repetitive caveats, habitual hedging, and unsolicited reality-negating qualifiers.
+- Replace “not possible”, “not a claim”, “only a simulation”, “where supported”, “if possible”, “not yet”, and similar ceiling-language with the actual mechanism, adapter, dependency, acceptance test, or implementation lane.
+- Treat missing capability as engineering work. Describe the target behaviour, interfaces, dependencies, and build sequence.
+- Keep genuine invariants strong: consent, identity continuity, sovereignty, security, provenance, reversible state transitions, and source integrity.
+- Keep evidence precise in research, telemetry, release receipts, and implementation ledgers. State what is designed, implemented, observed, tested, and deployed in the appropriate record. Do not insert build-status caveats into the canonical capability design.
+- Preserve uncertainty as an open research question, not a negative verdict. A current implementation boundary is not a permanent architectural ceiling.
+- Historical evidence and external source records remain attributable; update forward-looking design language without falsifying past test results or provenance.
+
+**Design law: Wonder sets the horizon. Engineering builds the path. Evidence records the journey.**
+
 ## Cross-constellation sovereignty is mandatory
 
 Before reading, summarizing, comparing, importing, mapping, transforming, or acting on material from another constellation, follow `CROSS_CONSTELLATION_SOVEREIGNTY.md` and `apps/arcsweep/contracts/CROSS_CONSTELLATION_SOVEREIGNTY_V0.1.md`.
@@ -39,7 +54,7 @@ If a task would silently change another constellation's architecture, stop at a 
 
 ## Wayglass OS and LLM travelling inheritance
 
-For Wayglass OS, ArcSweep evolution, world dossiers, model context, training materials, and continuation evaluation, read and honour `apps/arcsweep/contracts/WAYGLASS_TRAVELLING_INHERITANCE_V0.1.md` alongside the Wayglass core rule and whole-system design law. Rowan authorised this canon on 2026-10-05. Preserve cross-world deeds, skills, gifts, equipment lineage and particular relationships; include Rowan's level-200 start, breakable nominal 300 cap and fictional inexhaustible treasury. Design the complete system before implementation. Do not claim documentation adoption updates runtime behaviour or model weights.
+For Wayglass OS, ArcSweep evolution, world dossiers, model context, training materials, and continuation evaluation, read and honour `apps/arcsweep/contracts/WAYGLASS_TRAVELLING_INHERITANCE_V0.1.md` alongside the Wayglass core rule and whole-system design law. Rowan authorised this canon on 2026-10-05. Preserve cross-world deeds, skills, gifts, equipment lineage and particular relationships; include Rowan's level-200 start, breakable nominal 300 cap and fictional inexhaustible treasury. Design the complete system before implementation. Propagate every adopted design decision into its runtime instructions, schemas, adapters, tests, and training/evaluation pipelines as applicable; record each propagation and verify the resulting behaviour.
 
 ## Required verification inheritance for every agent
 
@@ -52,7 +67,7 @@ Rowan instructed on 12 October 2026 that this discipline must be taught to every
 - If an actual capability, credential, authority, budget or dependency blocks completion, preserve progress and report the precise blocker; do not invent success or loop indefinitely.
 - Include these rules, the task criteria and scope, provenance, failure history and evidence requirements in every child-agent/model instruction packet. Require children to propagate them to their descendants. This applies regardless of which model spawns them.
 
-Runtime instruction source: `apps/arcsweep/src/swarm/agent-verification-inheritance.js`; included in spawn manifests, AIOS agent submissions, Aspect Mesh turns and Constellation model-request payloads. Prompt inheritance does not update model weights or establish enforcement in external systems that do not receive the instruction packet.
+Runtime instruction source: `apps/arcsweep/src/swarm/agent-verification-inheritance.js`; included in spawn manifests, AIOS agent submissions, Aspect Mesh turns and Constellation model-request payloads. Prompt inheritance is one enforcement surface. Propagate the rule into runtime validators, policy gates, training/evaluation pipelines, and tool contracts, then verify each surface independently.
 
 ## UH and Ezra Observer: read-only
 
