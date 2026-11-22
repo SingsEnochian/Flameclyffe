@@ -356,8 +356,9 @@ locusNav.addEventListener('click',event=>{
 });
 
 const wayglass = Object.freeze({
-  schema: 'wayglass.os/v1',
+  schema: 'wayglass.os/v0.1',
   kernel: Object.freeze({
+    schema: vesselKernel.schema,
     boot: () => vesselBootReceipt,
     inspect: () => vesselKernel.inspect(),
     system: id => vesselKernel.system(id),
