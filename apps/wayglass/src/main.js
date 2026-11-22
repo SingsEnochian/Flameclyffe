@@ -175,6 +175,9 @@ const vesselKernel = createWayglassOSKernel({
 const vesselBootReceipt = vesselKernel.boot();
 globalThis.addEventListener('wayglass:feather', event => {
   if (event.detail?.stopped === true) vesselKernel.feather('sensory-feather');
+  else if (event.detail?.stopped === false && event.detail?.confirmed === true) {
+    vesselKernel.releaseFeather({ actor: 'owner-confirmed', explicit: true });
+  }
 });
 globalThis.addEventListener('wayglass:os:feather', () => {
   try { globalThis.navigator?.vibrate?.(0); } catch { /* device adapter owns haptic availability */ }
@@ -368,7 +371,7 @@ const wayglass = Object.freeze({
     inspect: () => vesselKernel.inspect(),
     system: id => vesselKernel.system(id),
     subscribe: listener => vesselKernel.subscribe(listener),
-    releaseFeather: actor => vesselKernel.releaseFeather({ actor, explicit: true }),
+    releaseFeather: ({ actor, confirmed = false } = {}) => vesselKernel.releaseFeather({ actor, explicit: confirmed === true }),
   }),
   soundCompositionState:()=>{const s=wayglassSomaticSound.composition.snapshot();return Object.freeze({score_status:s.score_status,generating:s.generating,audio_enabled:s.audio_enabled,sequence:s.sequence,last_error:s.last_error,voice_count:s.layers.length,declared_context:wayglassStoryScoreBinding.getContext()!==null});},
   storyScore: Object.freeze({
