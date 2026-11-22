@@ -1,6 +1,6 @@
 # Wayglass v0.1 · continuity-first kernel architecture
 
-**Status:** executable embryonic kernel + Waygate / Return Engine crossing boundary / native Wayglass LLM not yet trained / not production-promoted  
+**Status:** continuity-first kernel architecture; Waygate and Return Engine crossing boundary; native Wayglass cognitive lineage and full operating environment are active build lanes  
 **Updated:** 2026-10-16
 
 ## Governing identity
@@ -9,7 +9,7 @@
 
 Wayglass is the persistent AI-native cognitive/world operating system. It is not ArcSweep, not a browser shell, not a particular model provider, and not a host operating system. The target Wayglass system includes both a learned native cognitive lineage and the operating environment that carries worlds, continuity, authority, tools, routes, receipts, and embodiments.
 
-The body may change. The cognitive substrate may change. Neither change is allowed to manufacture identity continuity by assertion.
+The body and cognitive substrate may evolve independently. Identity continuity travels through explicit lineage, declarations, relationships, and witnessed return across every transformation.
 
 > Identity is not the body. Continuity is not the substrate. A Waygate preserves the world across both.
 
@@ -166,7 +166,7 @@ Every crossing receipt explicitly records:
 - `authority_grant: false`
 - `continuation_content_promoted: false`
 
-The receipt proves what boundary was evaluated and what the result was. It does not prove subjective identity, consciousness, or native-model continuity.
+The receipt records the evaluated crossing boundary, its inputs, checks, and outcome. Participant identity declarations, cognitive lineage, and continuity evidence travel as their own linked records.
 
 ### Model observation boundary
 
@@ -205,7 +205,7 @@ Research basis: `docs/research/MULTI_HARNESS_RL_WAYGLASS_INGEST_2026_10.md`.
 The current executable route families are:
 
 - `local:ollama` — local-first seed route; defaults to `ornith-1.5` unless configured otherwise; non-native lineage.
-- `openai:gpt` — server-side OpenAI route; external lineage; provider storage disabled by Wayglass request where supported.
+- `openai:gpt` — server-side OpenAI route; external lineage; provider storage disabled by explicit Wayglass route configuration.
 - `humain:m3-preview` — HUMAIN Node preview route; external preview lineage.
 - `humain:m3-sandbox` — HUMAIN Node sandbox route; external sandbox lineage.
 
@@ -219,7 +219,7 @@ HUMAIN Node is an upstream provider, not a House authority and not the Wayglass 
 
 The integration keeps provider recording/retention semantics separate from local Wayglass persistence. Model availability, catalogue entitlement, thinking, streaming and Research Access capabilities must be promoted only after authenticated runtime evidence proves them.
 
-The current repository includes local catalogue/synthetic access probes, but an authenticated HUMAIN success is **not yet claimed**.
+The provider promotion path advances from local catalogue and synthetic access probes to authenticated inference, route receipts, and continuity trials.
 
 ## Co-writing surface contract
 
