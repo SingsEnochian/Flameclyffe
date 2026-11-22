@@ -3,7 +3,7 @@ import storyScoreSource from '../../../../lib/wyrdrune/story-soundscape.wtl?raw'
 import fullSpectrumSource from '../../../../lib/wyrdrune/full-spectrum.wtl?raw';
 import resonanceAtlasSource from '../../../../lib/wyrdrune/resonance-atlas.wtl?raw';
 import './program-workbench.css';
-import { runWyrdruneProgram, listWyrdrunePrograms, saveWyrdruneProgram } from '../wyrdrune-workbench.js';
+import { runWyrdruneProgram, listWyrdrunePrograms, saveWyrdruneProgram, saveWyrdruneRun } from '../wyrdrune-workbench.js';
 
 const PROGRAMS = Object.freeze([
   { id: 'vessel-plan', slug: 'wayglass-vessel-plan', label: 'Wayglass · Whole Vessel Plan', source: vesselPlanSource },
@@ -195,15 +195,82 @@ export async function mountWayglassProgramWorkbench(root) {
         assembled_systems: live.assembled_systems,
         system_ids: live.systems.filter(item => item.state === 'ASSEMBLED').map(item => item.id),
       } : null;
-      const receipt = await runWyrdruneProgram(editor.value, {
-        mode,
-        context,
-        programId: activeProgram,
-        programSlug: activeSlug,
-        signal: activeController.signal,
-      });
+      const builtin = PROGRAMS.find(item => item.id === activeProgram);
+      const unchangedBuiltin = Boolean(builtin && editor.value.trim() === builtin.source.trim());
+      let receipt;
+      if (mode === 'execute' && unchangedBuiltin && activeProgram === 'story-soundscape') {
+        const storyScore = globalThis.__wayglassOS?.storyScore;
+        if (typeof storyScore?.run !== 'function') throw new Error('Native StorySoundscape runtime is not mounted.');
+        const execution = await storyScore.run({ signal: activeController.signal });
+        let persistence = { status: 'unavailable' };
+        try {
+          const run = await saveWyrdruneRun({
+            source: editor.value, status: 'committed', executionReceipt: execution,
+            context: { program: activeProgram, source_ref: execution.source_ref },
+            programSlug: activeSlug,
+          });
+          persistence = { status: 'saved', run_id: run.run_id };
+        } catch (error) { persistence = { status: 'unavailable', detail: String(error?.message || error) }; }
+        receipt = {
+          schema: 'wayglass.wyrdrune-workbench/v1', mode, source_hash: execution.sourceHash,
+          source_verified: true,
+          ir: { schema: 'wyrdrune.native-program-receipt/v1', sourceHash: execution.sourceHash, source_ref: execution.source_ref, phase_receipts: execution.phase_receipts },
+          execution: { ...execution, status: 'committed' }, persistence,
+        };
+      } else if (mode === 'execute' && unchangedBuiltin && ['full-spectrum', 'resonance-atlas'].includes(activeProgram)) {
+        const field = globalThis.__wayglassOS?.fullSpectrum;
+        if (typeof field?.observe !== 'function') throw new Error('Native Full Spectrum runtime is not mounted.');
+        if (!field.status().active) field.observe();
+        try {
+          if (!field.capture({ kind: 'system', strength: .72, motion: .3, continuity: .9, intent: .8, source_ref: 'wayglass:program-workbench' })) {
+            throw new Error('The spectral field did not accept the programme event.');
+          }
+          const result = await field.flush();
+          if (activeController.signal.aborted) {
+            const stopped = new Error('Feather held the spectral programme.');
+            stopped.name = 'AbortError';
+            throw stopped;
+          }
+          if (!result.last || !result.atlas || result.atlas_error) {
+            throw new Error(result.atlas_error || result.error || 'The Wyrdrune spectral programme returned an incomplete Atlas frame.');
+          }
+          const execution = {
+            schema: activeProgram === 'resonance-atlas' ? 'wayglass.resonance-atlas-workbench/v1' : 'wayglass.full-spectrum-workbench/v1',
+            status: 'committed',
+            source_hash: result.last.source_hash,
+            spectrum: result.last,
+            atlas: result.atlas,
+            learning: result.learning,
+            learning_error: result.learning_error,
+            history: result.history.slice(-4),
+          };
+          let persistence = { status: 'unavailable' };
+          try {
+            const run = await saveWyrdruneRun({
+              source: editor.value, status: 'committed',
+              executionReceipt: execution,
+              context: { program: activeProgram, system_count: live?.system_count ?? null, assembled_systems: live?.assembled_systems ?? null },
+              programSlug: activeSlug,
+            });
+            persistence = { status: 'saved', run_id: run.run_id };
+          } catch (error) { persistence = { status: 'unavailable', detail: String(error?.message || error) }; }
+          receipt = {
+            schema: 'wayglass.wyrdrune-workbench/v1', mode, source_hash: result.last.source_hash,
+            source_verified: true,
+            ir: { schema: 'wyrdrune.native-program-receipt/v1', sourceHash: result.last.source_hash, phase_receipts: result.atlas.provenance || [] },
+            execution, persistence,
+          };
+        } finally {
+          if (field.status().active) field.pause();
+        }
+      } else {
+        receipt = await runWyrdruneProgram(editor.value, {
+          mode, context, programId: activeProgram, programSlug: activeSlug,
+          signal: activeController.signal,
+        });
+      }
       irView.textContent = JSON.stringify(receipt.ir, null, 2);
-      hashView.textContent = receipt.source_hash.slice(0, 16) + '…';
+      hashView.textContent = String(receipt.source_hash || receipt.ir?.sourceHash || 'unhashed').slice(0, 16) + '…';
       if (mode === 'compile') {
         outputView.textContent = 'Compilation complete. No programme was executed.\n\n' + JSON.stringify({
           schema: receipt.schema,
