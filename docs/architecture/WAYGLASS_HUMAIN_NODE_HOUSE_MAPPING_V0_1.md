@@ -128,10 +128,10 @@ The following Node-style abstractions fit Wayglass and House well when implement
 3. **Live catalogue discovery.** Treat the provider catalogue as observed capability state, not hard-coded truth.
 4. **Routing policy.** Choose routes by capability, availability, locality, privacy exposure, cost and latency.
 5. **Health checks and failover.** Failure of an upstream route must not prevent Wayglass boot.
-6. **Usage receipts.** Capture provider request id, model, token counts, timestamps and cost when available.
+6. **Usage receipts.** Capture provider request ID, model, token counts, timestamps, and cost through the route adapter; represent unavailable provider fields explicitly in the receipt.
 7. **Budgets.** Compute/cost/context-exposure budgets may constrain routing.
 8. **Per-route data policy.** Recording, retention, training eligibility and locality are visible route metadata.
-9. **Unified client seam.** OpenAI-compatible transport is a practical lingua franca where supported, without forcing internal Wayglass state into that schema.
+9. **Unified client seam.** OpenAI-compatible transport is a practical lingua franca. Explicit adapters translate Wayglass-native state into the transport schema and restore it on return.
 
 ## Controls we must not inherit as authority
 
