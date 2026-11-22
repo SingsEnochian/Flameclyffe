@@ -731,8 +731,10 @@ for(const [id,name,kind,path,photo] of manuscriptRunes){
   const field=el('source'),record=JSON.stringify({glyph_id:id,label:name,category:kind,source_photo:photo});
   const statement='emit '+record.replace(/"([^"]+)":/g,'$1:')+';';
   const source=field.value;
-  if(/choose\s*\{/.test(source)){field.value=source.replace(/choose\s*\{/,'choose {\n  '+statement+'\n');}
-  else {field.value='mobius {\n perceive { emit "Rune selected"; }\n compress { emit "symbolic"; }\n release { emit "open"; }\n verify { emit true; }\n integrate { emit "manuscript"; }\n choose { '+statement+' }\n return { emit "return.open"; }\n transcend { emit "Meaning remains participant-correctable"; }\n}';}
+  // Preserve existing WTL, including programs without a choose phase.
+  // A selected glyph is a separate symbolic Möbius unit, never a world mutation.
+  const unit='mobius {\n perceive { emit "Rune selected"; }\n compress { emit "symbolic"; }\n release { emit "open"; }\n verify { emit true; }\n integrate { emit "manuscript"; }\n choose { '+statement+' }\n return { emit "return.open"; }\n transcend { emit "Meaning remains participant-correctable"; }\n}';
+  field.value=source.trim()?source.replace(/\s*$/,'')+'\n\n'+unit+'\n':unit+'\n';
   el('status').textContent=name+' inserted as executable symbolic record. Compile and Execute to inspect the receipt.';field.focus();
  };runeContainer.append(button);
 }
