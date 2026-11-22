@@ -17,6 +17,7 @@ on:
   push:
     branches:
       - main
+      - fix/hearthgate-production-audit-20261025
     tags:
       - "hearthgate-v*"
     paths:
