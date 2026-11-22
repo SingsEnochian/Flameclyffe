@@ -5,6 +5,7 @@ export function createWatercolorImageResolver(canvas,{scope=globalThis}={}) {
   const ctx=canvas.getContext('2d');
   if(!ctx)throw new TypeError('A 2D canvas context is required');
   let source=null,opacity=0,target=0,stopped=false,disposed=false,epoch=0;
+  let pigment=null;
   const clamp=n=>Math.max(0,Math.min(1,n));
   const assertLive=()=>{if(disposed)throw new Error('Image resolver disposed');};
   function setSource(next,kind) {
@@ -58,6 +59,15 @@ export function createWatercolorImageResolver(canvas,{scope=globalThis}={}) {
       return setSource(image,'reference');
     } finally {scope.URL.revokeObjectURL(url);}
   }
+  function setPigmentPixels(pixels,width,height) {
+    assertLive();
+    if(stopped)return;
+    if(!Number.isInteger(width)||!Number.isInteger(height)||width<1||height<1||
+       width*height>32768||!pixels||pixels.length!==width*height*4)
+      throw new RangeError('Bounded RGBA pigment sample required');
+    // Snapshot the fluid sample: no aliasing of the simulation buffer.
+    pigment={width,height,rgba:new Uint8ClampedArray(pixels)};
+  }
   function render(width,height,deltaMs=16) {
     if(disposed||!width||!height)return;
     canvas.width=width;canvas.height=height;
@@ -77,11 +87,30 @@ export function createWatercolorImageResolver(canvas,{scope=globalThis}={}) {
       ctx.globalAlpha=reveal;
       ctx.drawImage(img,(width-iw*scale)/2,(height-ih*scale)/2,iw*scale,ih*scale);
       ctx.restore();
+      // Pigment density determines local visibility, not the source image.
+      // Destination-in keeps the image's own alpha and avoids mutating the fluid.
+      if(pigment&&ctx.createImageData&&ctx.putImageData&&scope.document?.createElement){
+        const mask=scope.document.createElement('canvas');
+        mask.width=pigment.width;mask.height=pigment.height;
+        const m=mask.getContext('2d');
+        if(m?.createImageData&&m?.putImageData){
+          const data=m.createImageData(pigment.width,pigment.height);
+          for(let i=0;i<pigment.rgba.length;i+=4){
+            const r=pigment.rgba[i],g=pigment.rgba[i+1],b=pigment.rgba[i+2];
+            const spread=Math.max(r,g,b)-Math.min(r,g,b);
+            data.data[i]=255;data.data[i+1]=255;data.data[i+2]=255;
+            data.data[i+3]=Math.round(85+170*Math.min(1,spread/75));
+          }
+          m.putImageData(data,0,0);
+          ctx.save();ctx.globalCompositeOperation='destination-in';
+          ctx.drawImage(mask,0,0,width,height);ctx.restore();
+        }
+      }
     }
   }
   function dissolve(){assertLive();if(stopped)return snapshot();target=0;return snapshot();}
   function feather(value=true){assertLive();stopped=Boolean(value);if(stopped)epoch++;return snapshot();}
   function snapshot(){return Object.freeze({kind:source?.kind??null,opacity,target,stopped,sourceRetained:!!source});}
   function dispose(){disposed=true;epoch++;source=null;canvas.width=0;canvas.height=0;}
-  return Object.freeze({emerge,resolveFile,render,dissolve,feather,snapshot,dispose});
+  return Object.freeze({emerge,resolveFile,setPigmentPixels,render,dissolve,feather,snapshot,dispose});
 }
