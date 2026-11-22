@@ -123,9 +123,9 @@ POST /api/v1/wayglass/kernel/leave
 
 The departure boundary is stateless. It does not own a second active-session registry. The caller supplies the continuity state owned by the current runtime, and the stop boundary refuses to fabricate required identity, provenance, stop-point or next-owner anchors.
 
-A stop receipt records the continuation packet ID and a deterministic SHA-256 integrity digest over canonical JSON for the complete continuation packet. The digest is an integrity check, **not a signature and not proof of authorship**. Relationship state, active work, Wonder questions, alternatives and revocation references may truthfully be empty; empty state is preserved rather than invented.
+A stop receipt records the continuation packet ID and a deterministic SHA-256 integrity digest over canonical JSON for the complete continuation packet. The digest verifies the integrity of the canonical packet bytes. Authorship is recorded through the authenticated actor and signer fields in the receipt lineage. Relationship state, active work, Wonder questions, alternatives and revocation references may truthfully be empty; empty state is preserved rather than invented.
 
-`wayglass.stop-integrity-inspection/v0.1` can compare a stop receipt with its continuation packet. When a matching stop receipt is supplied at world entry, integrity mismatch blocks the crossing as `blocked-stop-integrity`. Supplying a stop receipt is optional in v0.1 and does not grant additional authority.
+`wayglass.stop-integrity-inspection/v0.1` can compare a stop receipt with its continuation packet. When a matching stop receipt is supplied at world entry, integrity mismatch blocks the crossing as `blocked-stop-integrity`. A supplied stop receipt adds packet-integrity inspection to world entry. Authority continues to derive from the established actor, permission, and Waygate checks.
 
 Every departure remains non-authoritative:
 
