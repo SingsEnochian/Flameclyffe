@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { webcrypto } from 'node:crypto';
-import { runWyrdruneProgram, listWyrdrunePrograms, saveWyrdruneProgram } from '../src/wyrdrune-workbench.js';
+import { runWyrdruneProgram, listWyrdrunePrograms, saveWyrdruneProgram, saveWyrdruneRun } from '../src/wyrdrune-workbench.js';
 
 const source = 'mobius { perceive { let x = 2; } compress { let y = x * 3; } release { let z = y + 1; } verify { emit z; } integrate { emit z; } choose { emit z; } return { emit "held"; } transcend { emit "next"; } }';
 const response = (status, data) => ({ ok: status >= 200 && status < 300, status, async json() { return data; } });
@@ -116,4 +116,23 @@ test('workbench saves an immutable source revision and verifies its source hash'
     },
   });
   assert.equal(saved.program.version, 1);
+});
+
+test('workbench persists native execution receipts in the Wayglass run ledger', async () => {
+  const result = await saveWyrdruneRun({
+    source,
+    status: 'committed',
+    executionReceipt: { phase_receipts: Array.from({ length: 16 }, (_, index) => index) },
+    context: { system_count: 8 },
+    programSlug: 'wayglass-vessel-plan',
+    fetchImpl: async (url, options) => {
+      assert.equal(url, '/api/v1/wayglass/wyrdrune/runs');
+      assert.equal(options.method, 'POST');
+      const body = JSON.parse(options.body);
+      assert.equal(body.program_slug, 'wayglass-vessel-plan');
+      assert.equal(body.execution_receipt.phase_receipts.length, 16);
+      return response(201, { schema: 'wayglass.program-run-save/v1', run: { run_id: 'run-42', status: 'committed' } });
+    },
+  });
+  assert.equal(result.run_id, 'run-42');
 });
