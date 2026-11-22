@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-11-22T15:30:09.485Z",
+  "generated_at": "2026-11-22T21:28:42.653Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,51 +13,51 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-11-22T10:30",
+    "time": "2026-11-22T16:15",
     "sky": "Day",
     "current": {
-      "time": "2026-11-22T10:30",
+      "time": "2026-11-22T16:15",
       "interval": 900,
-      "temperature_2m": 67.3,
+      "temperature_2m": 64.4,
       "relative_humidity_2m": 89,
       "is_day": 1,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 3,
-      "cloud_cover": 83,
-      "pressure_msl": 1012.5,
-      "wind_speed_10m": 9.1,
-      "wind_direction_10m": 252
+      "cloud_cover": 100,
+      "pressure_msl": 1013.1,
+      "wind_speed_10m": 7.8,
+      "wind_direction_10m": 262
     }
   },
   "space_weather": {
     "kp": {
-      "value": 0,
-      "time_tag": "2026-11-22T12:00:00",
-      "a_running": 0
+      "value": 0.67,
+      "time_tag": "2026-11-22T18:00:00",
+      "a_running": 3
     },
     "solar_wind": {
-      "time_tag": "2026-11-22T15:26:00Z",
-      "bz": 2,
+      "time_tag": "2026-11-22T21:24:00Z",
+      "bz": -2,
       "bt": 2,
       "density": null,
-      "speed": 368
+      "speed": 342
     }
   },
   "moon": {
-    "age_days": 12.73,
-    "illumination": 95.4,
-    "name": "Waxing Gibbous"
+    "age_days": 12.98,
+    "illumination": 96.4,
+    "name": "Full Moon"
   },
   "field": {
-    "P": 0.5144444444444445,
-    "C": 0.3347619047619048,
-    "R": 0.8183333333333334,
-    "E": 0.5823076923076923,
-    "M": 0.9540000000000001,
-    "A": 0.6653846153846154,
+    "P": 0.5211111111111113,
+    "C": 0.2538095238095239,
+    "R": 0.775,
+    "E": 0.6801648351648352,
+    "M": 0.9640000000000001,
+    "A": 0.6,
     "Q": null,
-    "dpdt": 0.8183333333333334,
+    "dpdt": 0.775,
     "dynamic_axes": [
       "P",
       "C",
