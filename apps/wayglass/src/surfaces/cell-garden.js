@@ -13,9 +13,16 @@ const actionButton=(doc,action,label)=>{
 /** Owner-only visual projection of an in-memory, server-authored WTL lineage. */
 export function mountWayglassCellGarden(root,{
   fetchImpl=globalThis.fetch, scope=globalThis, sound=wayglassSomaticSound,
+  signal:roomSignal,
 }={}){
  const doc=root.ownerDocument;
  let disposed=false,busy=false,pending=null,fusionPending=null,culture=null,controller=null;
+ const onRoomAbort=()=>{
+  disposed=true;pending=null;fusionPending=null;
+  controller?.abort('room-navigation');audioController?.abort('room-navigation');
+ };
+ if(roomSignal?.aborted)onRoomAbort();
+ else roomSignal?.addEventListener('abort',onRoomAbort,{once:true});
  let audioController=null,lastExchange=null;
  const section=doc.createElement('section');
  section.className='wg-surface wg-cell-garden';section.dataset.surface='wayglass-cell-garden';
@@ -278,6 +285,7 @@ export function mountWayglassCellGarden(root,{
  }
 
  async function request(path,body,signal){
+  if(disposed||roomSignal?.aborted)throw new DOMException('Room departed','AbortError');
   const response=await fetchImpl(BASE+path,{
    method:body===undefined?'GET':'POST',
    credentials:'same-origin',
@@ -293,7 +301,9 @@ export function mountWayglassCellGarden(root,{
  }
 
  async function refreshCulture(){
-  culture=await request('',undefined,controller?.signal);
+  const refreshed=await request('',undefined,controller?.signal);
+  if(disposed||roomSignal?.aborted)return culture;
+  culture=refreshed;
   if(pending && culture.revision!==pending.expected_revision)pending=null;
   if(fusionPending && culture.revision!==fusionPending.expected_revision)fusionPending=null;
   lastExchange=[...(culture.history||[])].reverse().find(x=>x.schema==='wayglass.cell-exchange/v0.1')||null;
@@ -410,7 +420,7 @@ export function mountWayglassCellGarden(root,{
   }catch(error){
    if(!disposed && error?.name!=='AbortError')status.textContent='Cell Garden: '+String(error?.message||error);
   }finally{
-   controller=null;busy=false;render();
+   controller=null;busy=false;if(!disposed)render();
   }
  }
 
@@ -441,7 +451,9 @@ export function mountWayglassCellGarden(root,{
  scope.addEventListener?.(WAYGLASS_FEATHER_EVENT,onSharedFeather);
  void act('refresh');
  return ()=>{
-  if(disposed)return;disposed=true;
+  if(disposed && !roomSignal?.aborted)return;
+  disposed=true;
+  roomSignal?.removeEventListener('abort',onRoomAbort);
   controller?.abort();audioController?.abort();listening.stop();
   offTake();
   recordingPlayer.pause?.();
