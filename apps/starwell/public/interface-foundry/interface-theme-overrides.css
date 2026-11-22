@@ -1,0 +1,62 @@
+.interface-foundry[data-interface-theme="arcsweep-hud"] {
+  --if-accent:#6be1dd !important;
+  --if-accent-alt:#9a78c7 !important;
+  --if-signal:#d6b46f !important;
+  --if-surface:#050507 !important;
+  --if-surface-raised:#11151b !important;
+  --if-text:#edf4f1 !important;
+  --if-muted:#8e9b99 !important;
+  --if-line:rgba(107,225,221,.16) !important;
+  --if-glow:rgba(107,225,221,.07) !important;
+  background:
+    radial-gradient(circle at 14% 0%,rgba(107,225,221,.055),transparent 30rem),
+    radial-gradient(circle at 86% 8%,rgba(214,180,111,.035),transparent 24rem),
+    linear-gradient(180deg,#050507,#080a0d 54%,#050507);
+}
+
+.interface-foundry[data-interface-theme="jcink"] {
+  --if-accent:#72d8d2 !important;
+  --if-accent-alt:#9a78c7 !important;
+  --if-signal:#d2b26e !important;
+  --if-surface:#050507 !important;
+  --if-surface-raised:#12141a !important;
+  --if-text:#edf1ef !important;
+  --if-muted:#929c9a !important;
+  --if-line:rgba(114,216,210,.16) !important;
+  --if-glow:rgba(114,216,210,.065) !important;
+  background:
+    radial-gradient(circle at 12% 0%,rgba(114,216,210,.05),transparent 30rem),
+    radial-gradient(circle at 88% 12%,rgba(154,120,199,.03),transparent 24rem),
+    linear-gradient(180deg,#050507,#090a0e 52%,#050507);
+}
+
+.interface-foundry[data-interface-theme="universal-codex"] {
+  --if-glow:rgba(215,187,115,.07) !important;
+}
+
+.interface-foundry[data-interface-theme="house-commons"] {
+  --if-glow:rgba(143,197,184,.065) !important;
+}
+
+/* ArcSweep and JCINK now share the same dark-board material grammar.
+   The distinction is semantic/component mapping, not loud neon palette. */
+.interface-foundry[data-interface-theme="arcsweep-hud"] .if-demo-card,
+.interface-foundry[data-interface-theme="jcink"] .if-demo-card {
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.024),transparent 30%),
+    radial-gradient(circle at 82% 12%,color-mix(in srgb,var(--if-accent) 4%,transparent),transparent 20rem),
+    linear-gradient(180deg,rgba(18,20,27,.98),rgba(7,8,12,.985));
+}
+
+.interface-foundry[data-interface-theme="arcsweep-hud"] .if-catalogue button.active,
+.interface-foundry[data-interface-theme="jcink"] .if-catalogue button.active {
+  box-shadow:
+    inset 2px 0 var(--if-accent),
+    inset 0 1px rgba(255,255,255,.035),
+    0 16px 34px rgba(0,0,0,.28);
+}
+
+.interface-foundry[data-interface-theme="arcsweep-hud"] .if-status-rune,
+.interface-foundry[data-interface-theme="jcink"] .if-status-rune {
+  text-shadow:none;
+}
