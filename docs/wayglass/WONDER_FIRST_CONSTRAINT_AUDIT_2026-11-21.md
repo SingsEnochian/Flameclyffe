@@ -116,3 +116,7 @@ Following introduction of native `wonder(question)`, inspected `lib/wyrdrune/typ
 ## Deeper Wonder: effect-free typed operators
 
 Inspected `inspectCall` in `lib/wyrdrune/typed-ir.cjs`. Despite its builtin signature, `wonder(question)` was still flagged as `operator-effect` in a user-defined typed operator because the classifier recognised only named operators and the older pureOperation table. Exempted the native pure Wonder intrinsic from this effect diagnostic. Added a typed operator regression. Code `9feccf05be1bf3d14e4a7134a3385f9a353cce52`, test `30987ccc09c0c27795ac2c70c28ea5b76c998104`. This does not relax bridge-effect checks. No CI/test execution verified; no merge/deploy.
+
+## Wider Wonder: runic cypher and semantic provenance
+
+Inspected `apps/wayglass/src/wyrdrune-cypher.js`, `apps/wayglass/src/wyrdrune-morph.js`, `lib/wyrdrune/gloss.mjs`, and `docs/wiki/kelyra/kelyra-seed-lexicon.json`. The current cypher uses visual intermediate rune symbols; these are not yet a canonical semantic glyph alphabet. The Kelyra seed lexicon contains hel, kel, rin, varu and yomi with authored meanings; do not silently assign them to Wonder. Added a source-faithful en-GB gloss for `wonder(question)` as an open Wonder question, with regression test. Code `4572e9765826a1b37b1e10a928cc94b227e573c9`, test `91525f314034086e241e71ee2ccef25ffa12640e`. No invented glyph equivalences, no test pass verified, no deployment.
