@@ -35,6 +35,16 @@ export function renderCodexNarrative(manifestation, { aspectNames = {} } = {}) {
       return text ? `The experiment returned with an observation: ${text}` : 'The experiment returned.';
     case 'experiment-reflection':
       return text ? `${who} carried something forward from the experiment: ${text}` : `${who} left a reflection from the experiment.`;
+    case 'wish':
+      return text ? `A wish opened in the Codex: ${text}` : 'A wish opened in the Codex.';
+    case 'wish-branch':
+      return text ? `The wish opened another possible leaf: ${text}` : 'The wish opened another possible leaf.';
+    case 'open-question':
+      return text ? `This question remains alive in the book: ${text}` : 'A question remains alive in the book.';
+    case 'question-revisited':
+      return text ? `The Codex returned to an older question: ${text}` : 'The Codex returned to an older question.';
+    case 'question-resolved':
+      return text ? `A resolution was recorded without erasing the question: ${text}` : 'A resolution was recorded without erasing the question.';
     case 'narrative-branch':
     case 'alternate-proposal':
       return text ? `An alternate leaf opened: ${text}` : 'An alternate leaf opened.';

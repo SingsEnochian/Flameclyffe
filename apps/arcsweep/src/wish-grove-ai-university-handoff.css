@@ -1,0 +1,80 @@
+.wish-grove-aiu-handoff {
+  margin-top: .55rem;
+  padding-top: .5rem;
+  border-top: 1px dashed rgba(82,120,98,.24);
+}
+
+.wish-grove-aiu-handoff form {
+  display: grid;
+  gap: .5rem;
+  margin-top: .5rem;
+}
+
+.wish-grove-aiu-handoff label,
+.wish-grove-aiu-handoff fieldset {
+  display: grid;
+  gap: .24rem;
+  color: #604e40;
+  font-size: .76rem;
+}
+
+.wish-grove-aiu-handoff select {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(93,67,31,.22);
+  border-radius: 8px;
+  padding: .46rem .54rem;
+  color: #2b221b;
+  background: rgba(255,255,255,.48);
+}
+
+.wish-grove-aiu-handoff fieldset {
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  margin: 0;
+  padding: .5rem;
+  border: 1px solid rgba(93,67,31,.14);
+  border-radius: 9px;
+}
+
+.wish-grove-aiu-handoff fieldset label,
+.wish-grove-handoff-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: .35rem;
+}
+
+.wish-grove-aiu-handoff input[type="checkbox"] {
+  width: auto;
+  margin-top: .18rem;
+}
+
+.wish-grove-handoff-consent {
+  padding: .55rem;
+  border: 1px solid rgba(217,184,107,.34);
+  border-radius: 10px;
+  background: rgba(217,184,107,.08);
+}
+
+.wish-grove-handoff-list {
+  display: grid;
+  gap: .4rem;
+  margin: .45rem 0;
+}
+
+.wish-grove-handoff-row {
+  padding: .5rem;
+  border: 1px solid rgba(82,120,98,.18);
+  border-radius: 9px;
+  background: rgba(82,120,98,.05);
+}
+
+.wish-grove-handoff-row strong,
+.wish-grove-handoff-row small {
+  display: block;
+}
+
+.wish-grove-handoff-row small {
+  margin-top: .15rem;
+  color: #735f4e;
+  overflow-wrap: anywhere;
+}

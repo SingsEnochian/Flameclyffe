@@ -1,0 +1,113 @@
+.wish-grove-world-tree {
+  margin-top: 1rem;
+  padding: .9rem;
+  border: 1px solid rgba(82,120,98,.28);
+  border-radius: 15px;
+  background: rgba(255,255,255,.17);
+}
+
+.wish-grove-world-tree > header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .8rem;
+}
+
+.wish-grove-world-tree h3 {
+  margin: .15rem 0;
+  color: #294a3b;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.wish-grove-world-tree-note {
+  margin: .45rem 0;
+  color: #735f4e;
+  font-size: .76rem;
+}
+
+.wish-grove-world-tree-frame {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 240px;
+  margin-top: .65rem;
+  overflow: hidden;
+  border: 1px solid rgba(93,67,31,.18);
+  border-radius: 16px;
+  background:
+    linear-gradient(90deg, rgba(82,120,98,.06), rgba(255,255,255,.04)),
+    radial-gradient(circle at 16% 50%, rgba(217,184,107,.13), transparent 25%),
+    radial-gradient(circle at 55% 50%, rgba(82,120,98,.11), transparent 38%),
+    rgba(248,239,219,.56);
+}
+
+.wish-grove-world-tree-frame svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.wish-grove-world-tree-edge {
+  stroke: rgba(82,120,98,.27);
+  stroke-width: .28;
+}
+
+.wish-grove-world-tree-edge[data-edge-kind="branch-branch"] {
+  stroke: rgba(164,95,55,.42);
+  stroke-dasharray: 1.5 1.1;
+}
+
+.wish-grove-world-tree-node {
+  cursor: pointer;
+}
+
+.wish-grove-world-tree-node circle {
+  stroke: rgba(255,255,255,.92);
+  stroke-width: .45;
+}
+
+.wish-grove-world-tree-node[data-tree-kind="wish"] circle {
+  fill: rgba(217,184,107,.9);
+}
+
+.wish-grove-world-tree-node[data-tree-kind="branch"] circle {
+  fill: rgba(164,95,55,.78);
+}
+
+.wish-grove-world-tree-node[data-tree-kind="question"] circle {
+  fill: rgba(82,120,98,.88);
+}
+
+.wish-grove-world-tree-node[data-tree-kind="anchor"] circle {
+  fill: rgba(78,88,122,.72);
+}
+
+.wish-grove-world-tree-node[data-tree-kind="reference"] circle {
+  fill: rgba(103,198,193,.72);
+}
+
+.wish-grove-world-tree-node:hover circle,
+.wish-grove-world-tree-node:focus circle {
+  stroke: #5b3d22;
+  stroke-width: .85;
+}
+
+.wish-grove-world-tree-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem;
+  margin-top: .55rem;
+}
+
+.wish-grove-world-tree-legend span {
+  padding: .18rem .4rem;
+  border-radius: 999px;
+  background: rgba(92,72,43,.07);
+  color: #604e40;
+  font-size: .7rem;
+}
+
+@media (max-width: 820px) {
+  .wish-grove-world-tree-frame {
+    aspect-ratio: 1 / 1;
+  }
+}

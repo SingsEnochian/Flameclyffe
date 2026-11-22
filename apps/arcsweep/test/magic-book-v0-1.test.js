@@ -86,8 +86,9 @@ test('receipt ledger is bounded and keeps newest entries', () => {
   assert.deepEqual(receipts.map((item) => item.receipt_id), ['receipt-3', 'receipt-4', 'receipt-5']);
 });
 
-test('Magic Book has exactly the v0.1 proof pages', () => {
-  assert.deepEqual(MAGIC_BOOK_PAGES.map((page) => page.id), ['threshold', 'glyph-forge', 'receipts']);
+test('Universal Codex pages include the Wish Grove without removing the original proof pages', () => {
+  assert.deepEqual(MAGIC_BOOK_PAGES.map((page) => page.id), ['threshold', 'wish-grove', 'glyph-forge', 'receipts']);
+  assert.equal(pageById('wish-grove').kind, 'possibility');
 });
 
 test('live Magic Book surface uses Three.js only for embodiment while DOM stays interactive', async () => {

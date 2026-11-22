@@ -1,0 +1,88 @@
+.wish-grove-execution {
+  margin-top: .6rem;
+  padding: .6rem;
+  border: 1px solid rgba(164,95,55,.2);
+  border-radius: 11px;
+  background: rgba(164,95,55,.035);
+}
+
+.wish-grove-execution > header,
+.wish-grove-execution-return > header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .55rem;
+}
+
+.wish-grove-execution > header div,
+.wish-grove-execution > header strong {
+  display: block;
+}
+
+.wish-grove-execution-note {
+  margin: .35rem 0;
+  color: #735f4e;
+  font-size: .74rem;
+}
+
+.wish-grove-execution form {
+  display: grid;
+  gap: .5rem;
+  margin-top: .45rem;
+}
+
+.wish-grove-execution form > label {
+  display: grid;
+  gap: .22rem;
+  color: #604e40;
+  font-size: .76rem;
+}
+
+.wish-grove-execution select {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(93,67,31,.22);
+  border-radius: 8px;
+  padding: .44rem .52rem;
+  background: rgba(255,255,255,.48);
+  color: #2b221b;
+}
+
+.wish-grove-execution-consent {
+  display: flex !important;
+  align-items: flex-start;
+  gap: .35rem !important;
+  padding: .55rem;
+  border: 1px solid rgba(164,95,55,.25);
+  border-radius: 9px;
+  background: rgba(164,95,55,.055);
+}
+
+.wish-grove-execution-consent input {
+  width: auto;
+  margin-top: .18rem;
+}
+
+.wish-grove-execution-returns {
+  display: grid;
+  gap: .45rem;
+  margin-top: .5rem;
+}
+
+.wish-grove-execution-return {
+  padding: .55rem;
+  border: 1px solid rgba(82,120,98,.2);
+  border-radius: 9px;
+  background: rgba(82,120,98,.055);
+}
+
+.wish-grove-execution-return p {
+  margin: .32rem 0;
+  color: #604e40;
+  font-size: .76rem;
+}
+
+.wish-grove-execution-ingested {
+  color: #315f43 !important;
+  font-weight: 700;
+}

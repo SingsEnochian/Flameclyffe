@@ -5,6 +5,7 @@ export const MAGIC_BOOK_RECEIPTS_KEY = 'hearthgate.arcsweep.magic-book.receipts.
 
 export const MAGIC_BOOK_PAGES = Object.freeze([
   Object.freeze({ id: 'threshold', label: 'Threshold', glyph: '⌂', kind: 'binding' }),
+  Object.freeze({ id: 'wish-grove', label: 'Wish Grove', glyph: '✦', kind: 'possibility' }),
   Object.freeze({ id: 'glyph-forge', label: 'Glyph Forge', glyph: 'ᚴ', kind: 'instrument' }),
   Object.freeze({ id: 'receipts', label: 'Receipts', glyph: '⌁', kind: 'archive' }),
 ]);
