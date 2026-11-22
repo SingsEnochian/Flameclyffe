@@ -14,6 +14,11 @@ export const PROVENANCE_CLASSES = Object.freeze({
   'hypothesis-boundary': Object.freeze({ label: 'Hypothesis boundary', authority: 'boundary', tone: 'boundary' }),
   'world-canon': Object.freeze({ label: 'World canon', authority: 'steward-reviewed-canon', tone: 'canon' }),
   'model-inference': Object.freeze({ label: 'Model inference', authority: 'non-authoritative-inference', tone: 'model' }),
+  'active-research': Object.freeze({ label: 'Active research', authority: 'research-frontier', tone: 'research' }),
+  phenomenology: Object.freeze({ label: 'Phenomenology', authority: 'first-person-report', tone: 'phenomenology' }),
+  analogy: Object.freeze({ label: 'Analogy', authority: 'structural-comparison', tone: 'analogy' }),
+  symbolic: Object.freeze({ label: 'Symbolic', authority: 'symbolic-meaning', tone: 'symbolic' }),
+  mythic: Object.freeze({ label: 'Mythic', authority: 'mythic-interpretation', tone: 'mythic' }),
   unknown: Object.freeze({ label: 'Unknown', authority: 'none', tone: 'unknown' }),
 });
 

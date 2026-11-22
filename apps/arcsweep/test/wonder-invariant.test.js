@@ -25,6 +25,8 @@ test('Wonder + mythic canon preserves wonder, mythic meaning, and native languag
     'attend',
     'preserve',
     'compare',
+    'trace-transduction',
+    'preserve-alternatives',
     'test',
     'remember',
     'interpret-only-as-evidence-earns',

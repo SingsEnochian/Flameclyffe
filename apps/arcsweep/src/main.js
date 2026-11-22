@@ -131,6 +131,7 @@ const PRIMARY_NAV = [
   ['waking-thread', 'Waking Thread', '⌁'],
   ['forge', 'Forge', '✦'],
   ['deep-observer', 'Field', '◈'],
+  ['resonance-chamber', 'Resonance', '◎'],
   ['settings', 'Settings', '⚙'],
 ];
 
@@ -976,6 +977,60 @@ function renderKelyranSchool() {
     </section>`;
 }
 
+function renderResonanceChamber() {
+  return `
+    <section class="resonance-room" data-resonance-room id="resonance-room">
+      <article class="panel resonance-room-hero">
+        <p class="eyebrow">Wonder Field · living spatial prototype</p>
+        <h1>Resonance Chamber</h1>
+        <p class="lede">One shared field state drives geometry, refractive glass, spatial motion, and optional audio/haptic transduction. Drag inside the chamber to move the source locus.</p>
+        <div class="resonance-room-badges" aria-label="Chamber invariants">
+          <span>field → form</span>
+          <span>source → transduction → perception</span>
+          <span>simulation ≠ measurement</span>
+          <span>receipted changes</span>
+        </div>
+      </article>
+      <section class="resonance-room-layout">
+        <article class="resonance-room-stage" aria-label="Interactive resonance field">
+          <canvas class="resonance-room-canvas" data-resonance-canvas aria-label="Three-dimensional resonance field. Drag to move the source."></canvas>
+          <div class="resonance-room-stage-overlay">
+            <div class="resonance-room-readout">
+              <strong data-resonance-summary>Loading field…</strong>
+              <small data-resonance-status>Move the source, tune the field, or pulse the chamber.</small>
+            </div>
+            <span class="resonance-room-mode" data-resonance-renderer>Loading renderer…</span>
+          </div>
+        </article>
+        <aside class="panel resonance-room-controls" aria-label="Resonance field controls">
+          <p class="eyebrow">Field state</p>
+          <label><span>Frequency <output data-resonance-output="frequency_hz">174 Hz</output></span><input data-resonance-key="frequency_hz" type="range" min="55" max="880" step="1" value="174"></label>
+          <label><span>Amplitude <output data-resonance-output="amplitude">0.58</output></span><input data-resonance-key="amplitude" type="range" min="0.05" max="1" step="0.01" value="0.58"></label>
+          <label><span>Mode order <output data-resonance-output="mode_order">n=3</output></span><input data-resonance-key="mode_order" type="range" min="1" max="9" step="1" value="3"></label>
+          <label><span>Phase <output data-resonance-output="phase_radians">0.00 rad</output></span><input data-resonance-key="phase_radians" type="range" min="-3.1416" max="3.1416" step="0.02" value="0"></label>
+          <label><span>Damping <output data-resonance-output="damping">0.16</output></span><input data-resonance-key="damping" type="range" min="0" max="0.85" step="0.01" value="0.16"></label>
+          <label><span>Coupling <output data-resonance-output="coupling">0.48</output></span><input data-resonance-key="coupling" type="range" min="0" max="1" step="0.01" value="0.48"></label>
+          <div class="resonance-room-actions">
+            <button type="button" data-resonance-pulse>Pulse chamber</button>
+            <button type="button" class="quiet" data-resonance-calibrate>Sensory calibration</button>
+            <button type="button" class="quiet" data-resonance-reset>Reset field</button>
+          </div>
+          <section class="resonance-room-trace">
+            <p class="eyebrow">Inspectable transduction chain</p>
+            <dl>
+              <div><dt>Source</dt><dd data-resonance-trace="source">174 Hz simulated oscillator</dd></div>
+              <div><dt>Medium</dt><dd data-resonance-trace="medium">resonance-chamber</dd></div>
+              <div><dt>Geometry</dt><dd data-resonance-trace="geometry">bounded chamber</dd></div>
+              <div><dt>Transduction</dt><dd data-resonance-trace="transduction">field → glass → perception</dd></div>
+              <div><dt>Provenance</dt><dd data-resonance-trace="provenance">simulated ArcSweep state</dd></div>
+            </dl>
+            <div class="resonance-room-receipts" data-resonance-receipts></div>
+          </section>
+        </aside>
+      </section>
+    </section>`;
+}
+
 function currentView() {
   if (activeRoom === 'portal') return renderPortal();
   if (activeRoom === 'worlds') return renderWorlds();
@@ -987,6 +1042,7 @@ function currentView() {
   if (activeRoom === 'settings') return renderSettings();
   if (activeRoom === 'applet-deck') return renderAppletManager();
   if (activeRoom === 'deep-observer') return renderDeepObserver();
+  if (activeRoom === 'resonance-chamber') return renderResonanceChamber();
   if (activeRoom === 'kelyran-school') return renderKelyranSchool();
   if (COLLECTION_ROOM_DEFINITIONS[activeRoom]) return renderCollectionRoom(activeRoom);
   if (WORLD_SECTION_DEFINITIONS[activeRoom] || activeRoom === 'appearance') return renderWorldSection(activeRoom);
