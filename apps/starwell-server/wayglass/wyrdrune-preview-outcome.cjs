@@ -18,8 +18,8 @@ function classifyPreviewOutcome(error) {
   if (explicit) return { invalid: INVALID_REASONS.has(explicit), reason: explicit, detail };
   const invalid = error instanceof SyntaxError || error instanceof TypeError ||
     error instanceof RangeError || error instanceof ReferenceError ||
-    /Bridge capability unavailable|Feather|operation budget|Duplicate binding|Unknown binding/.test(detail);
-  const reason = /Feather/i.test(detail) ? 'participant_stop'
+    /Bridge capability unavailable|operation budget|Duplicate binding|Unknown binding/.test(detail) || /^Feather(?: requested| stop|$)/i.test(detail);
+  const reason = /^Feather(?: requested| stop|$)/i.test(detail) ? 'participant_stop'
     : /Bridge capability unavailable/i.test(detail) ? 'capability_unavailable'
     : /operation budget/i.test(detail) ? 'resource_limit'
     : invalid ? 'invalid_or_unsupported_wtl' : 'preview_execution_failed';
