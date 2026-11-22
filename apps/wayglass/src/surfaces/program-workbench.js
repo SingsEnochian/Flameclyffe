@@ -168,7 +168,6 @@ export async function mountWayglassProgramWorkbench(root) {
     activeProgram = selected.id;
     activeSlug = selected.slug || null;
     editor.value = selected.source;
-    lastReceipt = null;
     updateCount();
     irView.textContent = 'Programme loaded. Compile to inspect its typed IR.';
     outputView.textContent = 'No execution for this source revision.';
@@ -221,6 +220,7 @@ export async function mountWayglassProgramWorkbench(root) {
         const field = globalThis.__wayglassOS?.fullSpectrum;
         if (typeof field?.observe !== 'function') throw new Error('Native Full Spectrum runtime is not mounted.');
         if (!field.status().active) field.observe();
+        const previousEventId = field.status().last?.event_id || null;
         try {
           if (!field.capture({ kind: 'system', strength: .72, motion: .3, continuity: .9, intent: .8, source_ref: 'wayglass:program-workbench' })) {
             throw new Error('The spectral field did not accept the programme event.');
@@ -231,7 +231,7 @@ export async function mountWayglassProgramWorkbench(root) {
             stopped.name = 'AbortError';
             throw stopped;
           }
-          if (!result.last || !result.atlas || result.atlas_error) {
+          if (!result.last || result.last.event_id === previousEventId || !result.atlas || result.atlas_error) {
             throw new Error(result.atlas_error || result.error || 'The Wyrdrune spectral programme returned an incomplete Atlas frame.');
           }
           const execution = {
