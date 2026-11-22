@@ -44,3 +44,11 @@ test('Feather mentioned in an unrelated backend error does not stop a participan
   const result = classifyPreviewOutcome(new Error('Could not render Feather glyph preview'));
   assert.equal(result.reason, 'preview_execution_failed');
 });
+
+test('unauthorised host effect is a boundary error, not a backend failure', () => {
+  const error = new Error('Bridge requires verified owner authorization');
+  error.reason = 'unauthorised_effect';
+  const result = classifyPreviewOutcome(error);
+  assert.equal(result.reason, 'unauthorised_effect');
+  assert.equal(result.invalid, true);
+});
