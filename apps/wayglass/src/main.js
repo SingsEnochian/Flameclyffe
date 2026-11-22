@@ -39,7 +39,16 @@ import {mountWayglassAlteredTimeline} from './surfaces/altered-timeline.js';
 import {faeberpunkLocusLinks,faeberpunkLocusForRoom} from './faeberpunk-loci.js';
 import { mountWayglassQuadGestalt } from './surfaces/quad-eightfold.js';
 import { installQuadFeatherListener, readLatestQuadGestalt, subscribeQuadGestalt } from './quad-eightfold-client.js';
-import { publishWatercolorActivity } from './watercolor-bridge.js';
+import { publishWatercolorActivity,subscribeWatercolorActivity } from './watercolor-bridge.js';
+import {installMagicTelemetry} from './magic-telemetry-client.js';
+import {mountMagicLoom,mountMagicTelemetryPanel} from './surfaces/magic-loom.js';
+import {mountLawsmith} from './surfaces/lawsmith.js';
+import {mountNurseryResonance} from './surfaces/nursery-resonance.js';
+import {shipResonance} from './ship-resonance.mjs';
+import {mountShipResonance} from './surfaces/ship-resonance.js';
+import {mountUniversalEmbodiment} from './surfaces/universal-embodiment.js';
+import {installSomaticRunePalette} from './somatic-rune-palette.js';
+import './somatic-rune-palette.css';
 import {installWatercolorRouteActivity} from './watercolor-live-observer.js';
 import {createWatercolorVoyageWatcher} from './watercolor-voyage-watch.js';
 import { divineWayglassTensorKernel, dispatchWyrdruneTensorKernel } from './tensor-webgpu.js';
@@ -58,6 +67,7 @@ const root = document.querySelector('#app');
 // The local entry and other configured provider routes remain independently usable.
 installWayglassField({ host: document.body });
 installKeyboardControls({ root: document });
+installSomaticRunePalette({host:document.body});
 
 const embodiment = detectEmbodimentCapabilities(globalThis);
 const ar = await detectARSupport(globalThis);
@@ -67,6 +77,12 @@ document.documentElement.dataset.wayglassAr = ar.supported ? 'ready' : ar.reason
 
 FIRST_WAYGLASS_ORGANS.forEach(registerWayglassOrgan);
 const fullSpectrum = createWayglassSpectralField();
+async function mountWithMagicPanel(root,mount,options){const stop=await mount(root);const dispose=mountMagicTelemetryPanel(root.firstElementChild||root,options);return()=>{dispose();if(typeof stop==='function')stop();};}
+registerWayglassSurface({surface_id:'wayglass:magic-loom',label:'Wayglass · Wyrdrune Loom',mount:mountMagicLoom});
+registerWayglassSurface({surface_id:'wayglass:lawsmith',label:'Wayglass · Lawsmith / Kernel Becoming',mount:mountLawsmith});
+registerWayglassSurface({surface_id:'wayglass:nursery-resonance',label:'Wayglass · Nursery Resonance Laboratory',mount:mountNurseryResonance});
+registerWayglassSurface({surface_id:'wayglass:ship-resonance',label:'Wayglass · Whole-Ship Resonance Observatory',mount:mountShipResonance});
+registerWayglassSurface({surface_id:'wayglass:universal-embodiment',label:'Wayglass · Universal Embodiment / Two-World Body',mount:mountUniversalEmbodiment});
 
 registerWayglassSurface({surface_id:'wayglass:sound-composition',label:'Wayglass · Spatial Soundstage',mount:root=>mountWayglassSoundComposition(root,{composition:wayglassSomaticSound.composition,soundscape:wayglassSomaticSound,storyBinding:wayglassStoryScoreBinding})});
 registerWayglassSurface({surface_id:WAYGLASS_ENTRY_SURFACE,label:'Living Watercolor',mount:mountLivingWatercolorSurface});
@@ -85,7 +101,7 @@ registerWayglassSurface({
 registerWayglassSurfaceAlias('arcsweep:deck', 'wayglass:world-continuity');
 registerWayglassSurfaceAlias('arcsweep:writing-room', 'wayglass:writing-room');
 
-registerWayglassSurface({surface_id:'wayglass:universal-codex',label:'Wayglass · Universal Codex',mount:mountUniversalCodex});
+registerWayglassSurface({surface_id:'wayglass:universal-codex',label:'Wayglass · Universal Codex',mount:root=>mountWithMagicPanel(root,mountUniversalCodex,{codex:true})});
 
 
 
@@ -146,7 +162,7 @@ subscribeQuadGestalt(reading=>{
 registerWayglassSurface({
   surface_id: 'wayglass:living-observer',
   label: 'Wayglass · Living Observer',
-  mount: mountWayglassLivingObserver,
+  mount: root=>mountWithMagicPanel(root,mountWayglassLivingObserver),
 });
 
 registerWayglassSurface({
@@ -268,7 +284,7 @@ function updateFeatherButton(stopped){
   featherButton.textContent=stopped?'🪽 Held':'🪽 Feather';
 }
 updateFeatherButton(wayglassSomaticSound.snapshot().feather_stopped);
-featherButton.addEventListener('click',()=>wayglassSomaticSound.feather());
+featherButton.addEventListener('click',()=>{shipResonance.feather();wayglassSomaticSound.feather();});
 globalThis.addEventListener('wayglass:feather',event=>updateFeatherButton(event.detail?.stopped===true));
 const helmNav=document.createElement('button');helmNav.type='button';helmNav.className='glass-chip wg-helm-nav';
 helmNav.textContent='⌘  Ship map';helmNav.setAttribute('aria-controls',shell.id);helmNav.setAttribute('aria-expanded','false');
@@ -300,17 +316,35 @@ subscribeMythience(encounter=>{
 });
 // Always observe route activity across the ship, even when Watercolour is not mounted.
 installWatercolorRouteActivity();
+// Observe Watercolour activity as a ship instrument. Never publish back into the bridge.
+subscribeWatercolorActivity(event=>shipResonance.observe({organ:'wayglass:watercolour',kind:'pigment:'+event.kind,strength:event.intensity,provenance:'watercolour-presentation-event'}));
+const magicPigments=new Set(['genesis','correspondence','alchemy','sympatheia','probability','embodiment','mythience','worldsmith','withness']);
+installMagicTelemetry({onActivity:event=>{shipResonance.observe({organ:'wayglass:magic',kind:'telemetry:'+String(event.engine||'unknown').slice(0,50),strength:0.45,provenance:'authenticated-magic-telemetry'});const kind=event.status==='failed'||event.status==='feather'?'magic:failed':magicPigments.has(event.engine)?'magic:'+event.engine:null;if(!kind)return;publishWatercolorActivity({kind,actor:event.cell,receipt:{schema:event.schema,receipt_id:event.hash},observedAt:event.time,intensity:Math.min(.85,.22+Math.log1p(event.elapsedMs||0)/10)});}});
 // Read-only 30-second voyage-message watch. Old messages become baseline,
 // only new arrivals are painted. Failed/unauthorised hosts back off and stop.
 createWatercolorVoyageWatcher();
 subscribeWayglassObserver(record=>{
   if(!record||!['started','completed','failed'].includes(record.status))return;
+  shipResonance.observe({organ:'wayglass:routes',kind:'route:'+record.status,strength:record.status==='completed'?.7:.25,provenance:'local-route-observer'});
   routeLabel.textContent='ROUTE / '+record.status.toUpperCase()+(record.route_id?' · '+record.route_id:'');
   helm.dataset.routeState=record.status;
 });
+function shipOrganForRoom(id){
+  if(id.includes('nursery'))return 'wayglass:nursery';
+  if(id.includes('watercolor'))return 'wayglass:watercolour';
+  if(id.includes('codex'))return 'wayglass:codex';
+  if(id.includes('writing'))return 'wayglass:writing';
+  if(id.includes('sound')||id.includes('acoustic')||id.includes('voice'))return 'wayglass:sound';
+  if(id.includes('observer')||id.includes('spectral'))return 'wayglass:observer';
+  if(id.includes('magic')||id.includes('lawsmith'))return 'wayglass:magic';
+  if(id.includes('world')||id.includes('timeline')||id.includes('mythience'))return 'wayglass:worlds';
+  if(id.includes('journey'))return 'wayglass:continuity';
+  return 'wayglass:system';
+}
 function mountSurface(surfaceId){
   const request=mountQueue.then(async()=>{
     const result=await mountWayglassSurface(surfaceId,root);
+    shipResonance.observe({organ:shipOrganForRoom(surfaceId),kind:'room-entered',strength:0.35,provenance:'local-room-navigation'});
     fullSpectrum.setScope({room:surfaceId});
     fullSpectrum.capture({kind:'world',strength:.55,motion:.32,continuity:.82,intent:.65,
       source_ref:'wayglass:room-crossing'});
@@ -386,6 +420,8 @@ const wayglass = Object.freeze({
 });
 
 globalThis.__wayglassOS = wayglass;
+// Read-only inspectable shipwide resonance projection. The bus never controls routes.
+globalThis.__wayglassShipResonance=Object.freeze({snapshot:()=>shipResonance.snapshot(),subscribe:fn=>shipResonance.subscribe(fn)});
 
 const roomQuery=new URLSearchParams(globalThis.location?.search||'').get('room');
 const entry=resolveWayglassEntry({available:listWayglassSurfaces(),room:roomQuery});

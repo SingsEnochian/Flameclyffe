@@ -12,6 +12,9 @@ const {
 } = require('../wayglass-runtime/wayglass-route-registry.cjs');
 const { bootWayglassKernel, inspectWayglassCognitionPreflight } = require('../wayglass-runtime/wayglass-kernel.cjs');
 const { previewWyrdruneRitual } = require('../wayglass-runtime/wayglass-wyrdrune-ritual.cjs');
+const { createMagicHost } = require('../wayglass-runtime/wayglass-magic-host.cjs');
+const { createMagicWtlAdapter } = require('../wayglass-runtime/wayglass-magic-wtl.cjs');
+const { createKernelCustody } = require('../wayglass-runtime/wayglass-kernel-custody.cjs');
 const { scoreStoryWithWyrdrune } = require('../wayglass-runtime/wayglass-wyrdrune-soundscape.cjs');
 const { scoreSpectralBatch } = require('../wayglass-runtime/wayglass-wyrdrune-spectrum.cjs');
 const { scoreResonanceAtlas } = require('../wayglass-runtime/wayglass-wyrdrune-atlas.cjs');
@@ -531,7 +534,7 @@ async function readQuadSourcesFromSupabase(fetchImpl=globalThis.fetch){
   return {schema:SOURCE_SCHEMA,observed_at,channels};
 }
 
-function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThis.fetch, departureStore = createDepartureStore() } = {}) {
+function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThis.fetch, departureStore = createDepartureStore(), magicHost = createMagicHost(), kernelCustody = createKernelCustody() } = {}) {
   const router = express.Router();
   // Same authenticated House gateway as Wayglass route custody. No separate user identity.
   router.use('/timeline/altered',createAlteredTimelineRouter({authorise:griffStewardAuthorized}));
@@ -541,6 +544,68 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     res.setHeader('Cache-Control', 'no-store');
     return res.json({ schema: 'wayglass.host-health/v0.1', status: 'ready' });
   });
+
+  // Unified Magic: House-scoped host execution. Caller text never supplies a
+  // participant identity. The journal is private and not a physical measurement.
+  let executeMagic;
+  const magicPrincipal = Object.freeze({id:'house:steward',authorized:true});
+  async function magicAuthorized(req,res){
+    res.setHeader('Cache-Control','no-store');
+    if(await griffStewardAuthorized(req).catch(()=>false))return true;
+    res.status(401).json({error:'House Steward sign-in required for Unified Magic.'});return false;
+  }
+  function magicError(res,error){
+    if(error instanceof TypeError||error instanceof RangeError||error instanceof SyntaxError||error instanceof ReferenceError)
+      return res.status(400).json({error:cleanText(error.message,220)});
+    if(error.code==='ENOENT')return res.status(404).json({error:'Return receipt not found.'});
+    return res.status(503).json({error:'Magic execution/storage unavailable; inspect host evidence.'});
+  }
+  router.post('/magic/run',createRequestGate({maxRequests:12,maxConcurrent:1}),async(req,res)=>{
+    if(!await magicAuthorized(req,res))return;
+    if(req.body?.feather===true)return res.status(409).json({error:'Feather Stop active'});
+    const controller=new AbortController();
+    const abort=()=>{if(!res.writableEnded)controller.abort();};
+    res.once('close',abort);
+    try{
+      executeMagic??=createMagicWtlAdapter({host:magicHost,wtl:await kernelCustody.runtime()});
+      const returned=await executeMagic(req.body,{principal:magicPrincipal,signal:controller.signal});
+      if(!res.destroyed)return res.json(returned);
+    }catch(error){if(!res.destroyed)return magicError(res,error);}
+    finally{res.removeListener('close',abort);}
+  });
+  router.get('/magic/telemetry',createRequestGate({maxRequests:30,maxConcurrent:2}),async(req,res)=>{
+    if(!await magicAuthorized(req,res))return;
+    try{
+      return res.json(magicHost.telemetry(magicPrincipal,{
+        after:req.query.after===undefined?null:Number(req.query.after),
+        limit:req.query.limit===undefined?100:Number(req.query.limit)}));
+    }catch(error){return magicError(res,error);}
+  });
+  router.get('/magic/receipt/:runId',createRequestGate({maxRequests:24,maxConcurrent:2}),async(req,res)=>{
+    if(!await magicAuthorized(req,res))return;
+    try{return res.json(magicHost.readReceipt(req.params.runId,magicPrincipal));}
+    catch(error){return magicError(res,error);}
+  });
+
+
+  // Versioned kernel custody: proposals and adoption are deliberately separate.
+  router.get('/magic/kernel',createRequestGate({maxRequests:24,maxConcurrent:2}),async(req,res)=>{
+    if(!await magicAuthorized(req,res))return;
+    try{return res.json(await kernelCustody.inspect(magicPrincipal));}
+    catch(error){return magicError(res,error);}
+  });
+  for(const operation of ['propose','adopt','rollback','execute']){
+    router.post('/magic/kernel/'+operation,createRequestGate({maxRequests:12,maxConcurrent:1}),async(req,res)=>{
+      if(!await magicAuthorized(req,res))return;
+      try{return res.json(await kernelCustody[operation](req.body,magicPrincipal));}
+      catch(error){
+        if(/Explicit|Kernel version changed|Candidate not verified|Breaking extension|Replacement must be explicit/.test(error.message))
+          return res.status(409).json({error:cleanText(error.message,220)});
+        return magicError(res,error);
+      }
+    });
+  }
+
   // The Quad is a single ship-wide process, not an unprotected read-only probe.
   // Only authenticated House sessions may inspect source activity or run a fold.
   router.post('/quad/run',createRequestGate({maxRequests:12,maxConcurrent:2}),async(req,res)=>{

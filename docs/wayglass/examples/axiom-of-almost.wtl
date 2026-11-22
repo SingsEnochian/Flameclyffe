@@ -1,0 +1,34 @@
+// Wyrdrune Technomancy Language · AXIOM OF ALMOST
+// Pure WTL: no automatic adoption, sound playback or physical-energy claims.
+mobius scoped {
+  perceive {
+    let possibility = almost("Axiom of Almost",["spiral","crystal","unformed"]);
+    let writing = resonanceNode("wayglass:writing",0.30,0);
+    let watercolour = resonanceNode("wayglass:watercolour",0.35,1);
+    let nursery = resonanceNode("wayglass:nursery",0.50,-1);
+  }
+  compress {
+    let relations = relateAlmost(possibility,"spiral","crystal","coexisting");
+    let field = resonanceField([writing,watercolour,nursery],0.45,100);
+  }
+  release {
+    let held = holdAlmost(relations,"unformed");
+  }
+  verify {
+    require true else "The possible must remain open";
+  }
+  integrate {
+    let remembered = shadowAlmost(held,"spiral");
+  }
+  choose {
+    let proposed = proposeAlmost(remembered,"crystal");
+  }
+  @return {
+    emit proposed;
+    emit field;
+    emit singResonance(field);
+  }
+  @transcend {
+    carry question = "What might emerge without erasing the others?";
+  }
+}
