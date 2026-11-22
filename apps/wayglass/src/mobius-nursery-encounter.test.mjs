@@ -39,3 +39,18 @@ test('inherited consent never substitutes for either participant opt-in',()=>{
  inherited['mote:b']=true;
  assert.equal(encounter({left,right,signal,consent:inherited}).status,'proposal');
 });
+
+test('proposal lineage is immutable and cannot pollute inherited revision keys',()=>{
+ const p=encounter({left,right,signal,consent});
+ assert.equal(Object.isFrozen(p.participants),true);
+ assert.equal(Object.isFrozen(p.identity_spins),true);
+ assert.equal(Object.isFrozen(p.signal),true);
+ assert.equal(Object.isFrozen(p.proposed_revisions),true);
+ assert.equal(Object.getPrototypeOf(p.proposed_revisions),null);
+ assert.throws(()=>{p.proposed_revisions['mote:a']=999;},TypeError);
+ assert.equal(p.proposed_revisions['mote:a'],3);
+ const a={id:'__proto__',spin:0,revision:0},b={id:'mote:b',spin:0,revision:0};
+ const q=encounter({left:a,right:b,signal,consent:{'__proto__':true,'mote:b':true}});
+ assert.equal(Object.getPrototypeOf(q.proposed_revisions),null);
+ assert.equal(q.proposed_revisions['__proto__'],1);
+});
