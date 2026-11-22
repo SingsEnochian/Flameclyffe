@@ -20,6 +20,7 @@ import { createWayglassSpellingController } from './spelling-assistance.js';
 import { mountWayglassSurface, registerWayglassSurface, registerWayglassSurfaceAlias, listWayglassSurfaces } from './surface-registry.js';
 import { mountWayglassWorldContinuitySurface } from './surfaces/world-continuity.js';
 import { mountWayglassWritingRoom } from './surfaces/writing-room.js';
+import { mountWayglassProgramWorkbench } from './surfaces/program-workbench.js';
 import { mountWayglassSystemsSurface } from './surfaces/systems.js';
 import { mountWayglassSpectrumSurface } from './surfaces/spectral-field.js';
 import { mountWayglassNativeVoice } from './surfaces/native-voice.js';
@@ -87,6 +88,7 @@ registerWayglassSurfaceAlias('arcsweep:deck', 'wayglass:world-continuity');
 registerWayglassSurfaceAlias('arcsweep:writing-room', 'wayglass:writing-room');
 
 registerWayglassSurface({surface_id:'wayglass:universal-codex',label:'Wayglass · Universal Codex',mount:mountUniversalCodex});
+registerWayglassSurface({surface_id:'wayglass:program-workbench',label:'Wayglass · Program Workbench',mount:mountWayglassProgramWorkbench});
 
 
 
