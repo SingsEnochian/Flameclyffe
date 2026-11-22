@@ -107,7 +107,7 @@ export function publishWatercolorActivity({
     evidence,
     evidence_state:evidence?'referenced-not-independently-verified':'no-receipt',
     learning_verification:kind==='learning:verified'?'receipt-label-not-independent-verification':'not-applicable',
-    epistemic_register:'visual-expression-of-operational-events',
+    epistemic_register:kind==='nursery:resonance-simulation'?'declared-mathematical-simulation':'visual-expression-of-operational-events',
     experience_claimed:false,
     qualia_inferred:false,
     authority:'render-only',
