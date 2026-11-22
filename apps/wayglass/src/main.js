@@ -50,6 +50,7 @@ import { WAYGLASS_ENTRY_SURFACE, resolveWayglassEntry } from './wayglass-entry.j
 import { subscribeWayglassObserver } from './living-observer-model.js';
 import { recordRouteAsWonderLight } from './wonder-light.js';
 import { registerWayglassOrgan, listWayglassOrgans } from './organ-registry.js';
+import { createWayglassOSKernel } from './os-kernel.js';
 import { FIRST_WAYGLASS_ORGANS } from './organ-donors.js';
 
 const root = document.querySelector('#app');
@@ -161,6 +162,17 @@ registerWayglassSurface({
   surface_id: 'wayglass:toybox',
   label: 'Wayglass · Toybox',
   mount: mountWayglassToybox,
+});
+
+// One native vessel kernel composes the registered organs and every live deck surface.
+// The eight system lanes are inspected together rather than booted as disconnected demos.
+const vesselKernel = createWayglassOSKernel({
+  organs: listWayglassOrgans(),
+  surfaces: listWayglassSurfaces(),
+});
+const vesselBootReceipt = vesselKernel.boot();
+globalThis.addEventListener('wayglass:feather', event => {
+  if (event.detail?.stopped === true) vesselKernel.feather('sensory-feather');
 });
 
 const browserEmbodiment = Object.freeze({
@@ -344,7 +356,14 @@ locusNav.addEventListener('click',event=>{
 });
 
 const wayglass = Object.freeze({
-  schema: 'wayglass.os/v0.1',
+  schema: 'wayglass.os/v1',
+  kernel: Object.freeze({
+    boot: () => vesselBootReceipt,
+    inspect: () => vesselKernel.inspect(),
+    system: id => vesselKernel.system(id),
+    subscribe: listener => vesselKernel.subscribe(listener),
+    releaseFeather: actor => vesselKernel.releaseFeather({ actor, explicit: true }),
+  }),
   soundCompositionState:()=>{const s=wayglassSomaticSound.composition.snapshot();return Object.freeze({score_status:s.score_status,generating:s.generating,audio_enabled:s.audio_enabled,sequence:s.sequence,last_error:s.last_error,voice_count:s.layers.length,declared_context:wayglassStoryScoreBinding.getContext()!==null});},
   surfaces: listWayglassSurfaces,
   organs: listWayglassOrgans,
