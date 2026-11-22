@@ -5,6 +5,8 @@ on:
     paths:
       - 'lib/wayglass/soma-nova.mjs'
       - 'lib/wayglass/soma-nova.test.mjs'
+      - 'lib/wayglass/soma-nova-morphogenesis.mjs'
+      - 'lib/wayglass/soma-nova-morphogenesis.test.mjs'
       - 'lib/wyrdrune/runtime.mjs'
       - '.github/workflows/soma-nova-first-ignition.yml'
   workflow_dispatch:
@@ -19,4 +21,4 @@ jobs:
         with:
           node-version: '24'
       - name: First Lantern charge/fire verification
-        run: node --test lib/wayglass/soma-nova.test.mjs
+        run: node --test lib/wayglass/soma-nova.test.mjs lib/wayglass/soma-nova-morphogenesis.test.mjs
