@@ -43,6 +43,7 @@ import { publishWatercolorActivity } from './watercolor-bridge.js';
 import {installMagicTelemetry} from './magic-telemetry-client.js';
 import {mountMagicLoom,mountMagicTelemetryPanel} from './surfaces/magic-loom.js';
 import {mountLawsmith} from './surfaces/lawsmith.js';
+import {mountNurseryResonance} from './surfaces/nursery-resonance.js';
 import {installSomaticRunePalette} from './somatic-rune-palette.js';
 import './somatic-rune-palette.css';
 import {installWatercolorRouteActivity} from './watercolor-live-observer.js';
