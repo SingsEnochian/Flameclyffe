@@ -134,3 +134,14 @@ html,body{overflow-x:clip}
 
 /* One Ship · Writing Room finger targets: Send, Feather and Skip Cypher. */
 .wg-writing-room :is(#wg-send,#wg-score-feather,#wg-wtl-cypher-skip){min-height:44px;min-width:44px;box-sizing:border-box}
+
+/* Focused controls must scroll clear of the fixed locus dock and floating
+   ship chips. Scroll clearance is not a substitute for pointer-hit tests. */
+@media(max-width:900px){
+  html[data-wayglass-surface="wayglass:writing-room"]{
+    scroll-padding-bottom:calc(var(--fae-dock-h) + 150px);
+  }
+  .wg-writing-room :is(#wg-send,#wg-score-feather,#wg-wtl-cypher-skip){
+    scroll-margin-bottom:calc(var(--fae-dock-h) + 150px);
+  }
+}
