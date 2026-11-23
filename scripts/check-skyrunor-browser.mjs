@@ -42,6 +42,8 @@ try{
    const context=await browser.newContext({viewport:{width:820,height:1180},hasTouch:true,extraHTTPHeaders:{authorization:'Bearer '+token}});
    const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
    await page.goto(base+'/ipad');await page.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('Ready'));
+   const tabletColumns=await page.locator('.layout').evaluate(el=>getComputedStyle(el).gridTemplateColumns.trim().split(/\s+/).length);
+   assert.equal(tabletColumns,1,'iPad portrait must use readable single-column authoring');
    await context.setOffline(true);
    await page.locator('summary').filter({hasText:'Semantic Skýrunor'}).click();
    await page.click('#declaration-btn');

@@ -131,3 +131,6 @@ body{padding-bottom:calc(var(--fae-dock-h) + 76px)}
 /* Decorative glows and halos may bleed, but never widen the ship sideways.
    clip (not hidden) keeps the sticky helm working. */
 html,body{overflow-x:clip}
+
+/* One Ship · Writing Room finger target */
+.wg-writing-room #wg-send{min-height:44px;min-width:44px;box-sizing:border-box}

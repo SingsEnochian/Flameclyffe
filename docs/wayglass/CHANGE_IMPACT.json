@@ -502,6 +502,34 @@
         "No external API/device permissions, real doors, camera, video or image generation"
       ],
       "status": "source-candidate-pending exact-head CI; no release"
+    },
+    {
+      "change_id": "whole-pizza-tablet-reading-and-writing-tap-target-2026-11-23",
+      "changed_paths": [
+        "apps/wayglass/src/faeberpunk-ship.css",
+        "apps/wayglass/first-lantern-ipad-template.html",
+        "scripts/check-skyrunor-browser.mjs"
+      ],
+      "affected_organs": [
+        "Writing Room accessibility",
+        "FAEberpunk ship shell",
+        "iPad offline Wyrdrune",
+        "Living Fiction"
+      ],
+      "dependent_checks": [
+        "Living Cypher 44-pixel send target",
+        "Chromium/WebKit tablet viewport acceptance",
+        "Wayglass bundle build"
+      ],
+      "provenance": [
+        "One Ship PR #661 owner-authorised improvement",
+        "2026-11-23 exact-head Living Cypher browser test reported wg-send under 44px",
+        "iPad 820px WebKit screenshot showed cramped twin columns"
+      ],
+      "rollback": [
+        "Revert the scoped 44px touch target and tablet breakpoint together if accessibility checks regress"
+      ],
+      "status": "source candidate: exact-head verification pending"
     }
   ]
 }
