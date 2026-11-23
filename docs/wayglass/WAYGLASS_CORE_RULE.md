@@ -1,5 +1,7 @@
 # WAYGLASS CORE RULE
 
+> Governing cross-program change authority: [`ONE_SHIP_DIRECTIVE.md`](./ONE_SHIP_DIRECTIVE.md) and [`CHANGE_IMPACT.json`](./CHANGE_IMPACT.json). Read and update these alongside this core rule for every material change.
+
 **Read before working on Wayglass, every time.**
 
 ## Wayglass is the ship.
