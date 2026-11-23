@@ -32,3 +32,11 @@
 .wg-program-language-bridge label{display:grid;gap:.4rem;font-size:.84rem;margin-block:.7rem}
 .wg-program-language-bridge textarea{min-height:9rem;height:auto;white-space:pre-wrap;font-size:.8rem}
 .wg-program-language-bridge #wg-wtl-glyphs{min-height:6rem;font-family:ui-monospace,monospace}
+
+.wg-soma-nova-folio{display:grid;gap:.85rem;padding:1rem;border-radius:1.25rem;min-width:0}
+.wg-soma-nova-folio h2{margin:0;font-size:1.15rem}
+.wg-soma-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.85rem;min-width:0}
+.wg-soma-form-grid label{display:grid;gap:.45rem;min-width:0;font-size:.82rem}
+.wg-soma-form-grid textarea{width:100%;min-width:0;min-height:15rem;resize:vertical;padding:.85rem;border:1px solid var(--wg-glass-border,rgba(190,225,220,.2));border-radius:.8rem;background:rgba(4,10,13,.78);color:#e6eee9;font:.78rem/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre;overflow:auto}
+.wg-soma-receipt{margin:0;min-height:7rem;max-height:28rem;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;padding:.85rem;border-radius:.8rem;background:rgba(4,10,13,.72);color:#d5e6df;font:.76rem/1.5 ui-monospace,SFMono-Regular,Consolas,monospace}
+@media(max-width:760px){.wg-soma-form-grid{grid-template-columns:1fr}.wg-soma-form-grid textarea{min-height:12rem}}
