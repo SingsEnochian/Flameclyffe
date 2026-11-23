@@ -1,0 +1,24 @@
+name: Soma Nova First Ignition
+on:
+  pull_request:
+    branches: [wayglass/current]
+    paths:
+      - 'lib/wayglass/soma-nova.mjs'
+      - 'lib/wayglass/soma-nova.test.mjs'
+      - 'lib/wayglass/soma-nova-morphogenesis.mjs'
+      - 'lib/wayglass/soma-nova-morphogenesis.test.mjs'
+      - 'lib/wyrdrune/runtime.mjs'
+      - '.github/workflows/soma-nova-first-ignition.yml'
+  workflow_dispatch:
+jobs:
+  first-ignition:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: First Lantern charge/fire verification
+        run: node --test lib/wayglass/soma-nova.test.mjs lib/wayglass/soma-nova-morphogenesis.test.mjs
