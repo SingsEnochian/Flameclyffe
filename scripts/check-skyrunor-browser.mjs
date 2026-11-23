@@ -94,6 +94,14 @@ try{
    assert.match(await page.textContent('#fiction-door'),/closed/);
    await page.screenshot({path:resolve(out,name+'-ipad.png'),fullPage:true});
    await context.setOffline(false);
+   // Real reload: recover only the prior source-bound fictional DISPLAY, no audio or execution.
+   await page.reload();
+   await page.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('Ready'));
+   await page.click('#fiction-compose-btn');
+   await page.click('#restore-btn');
+   assert.match(await page.textContent('#fiction-door'),/open \(restored story view; not physical\)/);
+   assert.match(await page.textContent('#status'),/WTL did not run/);
+   assert.equal(await page.isDisabled('#fiction-project-btn'),true,'restored display must not renew execution authority');
    await page.goto(base+'/workbench');await page.waitForSelector('[data-language-bridge]');
    await page.locator('[data-language-bridge] summary').first().click();
    const before=executions;
@@ -127,10 +135,19 @@ try{
    assert.equal(executions,before+2,'User-approved fiction projection never invokes host WTL again');
    await page.click('[data-fiction-stop]');
    assert.equal(await page.isDisabled('[data-fiction-approve]'),true);
+   // Authenticated Writing Room/Workbench display survives reload without another host call.
+   await page.reload();
+   await page.waitForSelector('[data-fiction-authoring]');
+   await page.locator('[data-fiction-authoring] summary').click();
+   await page.click('[data-fiction-compose]');
+   await page.click('[data-fiction-restore]');
+   assert.match(await page.textContent('[data-fiction-door]'),/open \(restored story view; not physical\)/);
+   assert.equal(executions,before+2,'cold local view restore cannot invoke host WTL');
+   assert.equal(await page.isDisabled('[data-fiction-approve]'),true);
    await page.screenshot({path:resolve(out,name+'-workbench.png'),fullPage:true});
    assert.deepEqual(errors,[]);
    receipts.push({browser:name,status:'passed',offline_artifact_execution:result,authenticated_host_execution:hosted.execution.status,
-    no_execution_on_translation:true,feather_before_commit:true,unsupported_change_execution_blocked:true,fiction_cycles_verified:6,fiction_effects_proposed_only:true,approved_fiction_projections:true,physical_world_affected:false,page_errors:errors});
+    no_execution_on_translation:true,feather_before_commit:true,unsupported_change_execution_blocked:true,fiction_cycles_verified:6,fiction_effects_proposed_only:true,approved_fiction_projections:true,fiction_local_display_cold_return:true,physical_world_affected:false,page_errors:errors});
    await context.close();
   }finally{await browser.close();}
  }

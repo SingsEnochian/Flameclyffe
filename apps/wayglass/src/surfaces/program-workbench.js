@@ -1,6 +1,6 @@
 import {translateSemantic} from '../../../../lib/wyrdrune/skyrunor-bridge.mjs';
 import {FICTION_EXAMPLE,fictionToWtl,verifyFictionExecution} from '../../../../lib/wyrdrune/fiction-mobius.mjs';
-import {planFictionProjection,renderApprovedFiction} from '../../../../lib/wyrdrune/fiction-projection.mjs';
+import {planFictionProjection,renderApprovedFiction,restoreFictionDisplay} from '../../../../lib/wyrdrune/fiction-projection.mjs';
 import {shipSoundscape} from '../ship-soundscape.js';
 import {wayglassSomaticSound} from '../somatic-sound.js';
 import {sha256Hex} from '../../../../lib/wyrdrune/browser-canonical.mjs';
@@ -165,6 +165,7 @@ export async function mountWayglassProgramWorkbench(root) {
             <pre data-fiction-preview aria-live="polite">No execution or media generation yet.</pre>
             <div class="wg-program-actions">
               <button type="button" class="glass-chip" data-fiction-approve disabled>Render accepted fiction cues</button>
+              <button type="button" class="glass-chip" data-fiction-restore>Restore last fictional view</button>
               <button type="button" class="glass-chip" data-fiction-stop>🪽 Stop fiction cue</button>
             </div>
             <p class="tiny">Only the original glass-harmonics sound and a fictional door view can render. A fresh click is required after the WTL execution. Unknown image, video and world changes remain proposals.</p>
@@ -412,6 +413,7 @@ export async function mountWayglassProgramWorkbench(root) {
     stagedFiction=null;
     storyPreview.textContent='The fiction draft changed. Compose again before a new WTL run.';
   });
+  const FICTION_VIEW_STORE='wayglass:fiction-display-cache/v1';
   const fictionApproval=root.querySelector('[data-fiction-approve]');
   const fictionRender=root.querySelector('[data-fiction-render]');
   const fictionDoor=root.querySelector('[data-fiction-door]');
@@ -449,9 +451,28 @@ export async function mountWayglassProgramWorkbench(root) {
       });
       if(snapshot!==acceptedFiction||controller.signal.aborted)throw Error('Source changed or Feather held.');
       fictionRender.textContent=JSON.stringify(projected,null,2);
-      status.textContent='Only supported, separately confirmed fictional projections rendered.';
+      try{globalThis.localStorage?.setItem(FICTION_VIEW_STORE,JSON.stringify({
+        schema:'wayglass.fiction-display-cache/v1',source_hash:sha256Hex(editor.value),
+        fiction:snapshot,projection:projected
+      }));}catch{/* Storage optional: never grant a new capability to cache fiction. */}
+      status.textContent='Only supported, separately confirmed fictional projections rendered. Local view receipt saved where available.';
     }catch(error){fictionRender.textContent='Projection stopped: '+String(error?.message||error);}
     finally{if(projectionAbort===controller)projectionAbort=null;fictionApproval.disabled=!acceptedFiction;}
+  });
+  root.querySelector('[data-fiction-restore]').addEventListener('click',()=>{
+    try{
+      const stored=JSON.parse(globalThis.localStorage?.getItem(FICTION_VIEW_STORE)||'null');
+      if(!stored||stored.schema!=='wayglass.fiction-display-cache/v1')
+        throw Error('No local fictional view Return has been saved.');
+      if(stored.source_hash!==sha256Hex(editor.value))
+        throw Error('Stored fiction source differs. Compose that same authored story before restoring.');
+      // Local display only: no sound output, new WTL execution, model call or host bridge.
+      const recovered=restoreFictionDisplay(stored.fiction,stored.projection);
+      stopFictionProjection({clear:true});
+      fictionDoor.textContent='Fictional door: '+recovered.fictional_door+' (restored story view; not physical)';
+      fictionRender.textContent=JSON.stringify(recovered,null,2);
+      status.textContent='Local fictional view restored. No audio replay, WTL execution or physical effects.';
+    }catch(error){fictionRender.textContent='Restore refused: '+String(error?.message||error);}
   });
   root.querySelector('[data-fiction-stop]').addEventListener('click',()=>{
     stopFictionProjection({clear:true});

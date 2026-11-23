@@ -26,3 +26,17 @@ hardware test or an OS installation receipt.
 Next: editable typed fictional state transitions beyond the example, source-bound
 room persistence/cold Return, optional author-reviewed media adapters, and
 reversible semantic Skýrunor representation for authored fiction.
+
+## Browser-local scene Return (explicit restore)
+
+A freshly approved fictional projection may save a JSON scene-display receipt in
+browser local storage. After reopening the SAME origin/app, the author must
+recompose the same source and explicitly use **Restore last receipt** on iPad,
+or **Restore last fictional view** in the authenticated Program Workbench.
+The WTL SHA must match before the shared `restoreFictionDisplay` verifier
+recovers the displayed fictional door. **No sound is replayed**, no WTL is
+executed, and no external/host effects are triggered by restoring. Tampered
+projection results, unsupported meanings and mismatched source hashes refuse
+restoration. Browser storage is **not cryptographically signed host evidence**,
+may be cleared by Safari, and is not a true OS cold Return. The JSON export
+remains the portable fallback where local browser storage is unavailable.

@@ -1,6 +1,6 @@
 import {translateSemantic} from '../../../lib/wyrdrune/skyrunor-bridge.mjs';
 import {fictionToWtl,verifyFictionExecution} from '../../../lib/wyrdrune/fiction-mobius.mjs';
-import {planFictionProjection,renderApprovedFiction} from '../../../lib/wyrdrune/fiction-projection.mjs';
+import {planFictionProjection,renderApprovedFiction,restoreFictionDisplay} from '../../../lib/wyrdrune/fiction-projection.mjs';
 import {EXAMPLE_CHANGE} from '../../../lib/wyrdrune/skyrunor-change.mjs';
 import {englishToDeclaration,astToGlyphs,wtlToAst} from '../../../lib/wyrdrune/skyrunor.mjs';
 // Offline First Lantern: the existing canonical Wyrdrune parser/executor in Safari.
@@ -96,7 +96,11 @@ by('fiction-project-btn').addEventListener('click',async()=>{
   });
   if(controller.signal.aborted||current!==acceptedFiction)throw Error('Feather stopped the cue.');
   by('fiction-render').textContent=JSON.stringify(rendered,null,2);
-  report('Fictional cues rendered only after separate approval.','good');
+  if(last?.fiction?.fiction_source_hash===current.fiction_source_hash&&last.source_hash===rendered.wtl_source_hash){
+    last={...last,fiction_projection:rendered};
+    try{localStorage.setItem(STORE,JSON.stringify(last));}catch{/* Offline storage may be unavailable. Export JSON instead. */}
+  }
+  report('Fictional cues rendered after separate approval. Local display Return saved where supported.','good');
  }catch(error){by('fiction-render').textContent='Projection held: '+String(error?.message||error);fail(error);}
  finally{if(projectionAbort===controller)projectionAbort=null;by('fiction-project-btn').disabled=!acceptedFiction;}
 });
@@ -125,7 +129,22 @@ by('run-btn').addEventListener('click',async()=>{
  finally{active=null;by('run-btn').disabled=proposalOnly;}
 });
 by('feather-btn').addEventListener('click',()=>{stopCue({clear:true});active?.abort();report(active?'Feather held: stopping at the next checked boundary.':'Feather held: no active execution.');});
-by('restore-btn').addEventListener('click',()=>{try{const saved=JSON.parse(localStorage.getItem(STORE)||'null');if(!saved){report('No local Return receipt stored.');return;}if(saved.source_hash!==sha256Hex(source.value)){show(saved);report('Different source revision: old receipt preserved, not silently restored.','error');return;}last=saved;show(saved);report('Return receipt recovered from local storage.','good');}catch(e){fail(e);}});
+by('restore-btn').addEventListener('click',()=>{
+ try{
+  const saved=JSON.parse(localStorage.getItem(STORE)||'null');
+  if(!saved){report('No local Return receipt stored.');return;}
+  if(saved.source_hash!==sha256Hex(source.value)){
+   show(saved);report('Different source revision. The old receipt remains available but is not restored.','error');return;
+  }
+  stopCue({clear:true});last=saved;show(saved);
+  if(saved.fiction&&saved.fiction_projection){
+   const view=restoreFictionDisplay(saved.fiction,saved.fiction_projection);
+   by('fiction-door').textContent='Fictional door: '+view.fictional_door+' (restored story view; not physical)';
+   by('fiction-render').textContent=JSON.stringify(view,null,2);
+   report('Source-bound local scene restored. WTL did not run and no audio was replayed.','good');
+  }else report('Local Return receipt recovered with matching WTL source hash.','good');
+ }catch(e){fail(e);}
+});
 by('save-btn').addEventListener('click',()=>{if(!last){report('Run or restore a receipt first.');return;}const blob=new Blob([JSON.stringify(last,null,2)+'\n'],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='First-Lantern-Return.json';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);report('Download the Return receipt to Files.','good');});
 by('reset-btn').addEventListener('click',()=>{source.value=ORIGINAL;english.value='';runes.value='';by('semantic').value='';invalid();report('First Lantern reset. Saved local Return retained.','good');});
 report('Ready. Native Wyrdrune on iPad, fully local.','good');

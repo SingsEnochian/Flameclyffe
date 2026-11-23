@@ -487,14 +487,17 @@
         "WebKit and Chromium exact offline iPad acceptance",
         "Shared authenticated Wayglass workbench browser acceptance",
         "One Ship impact gate",
-        "Feather rejection and no auto-play"
+        "Feather rejection and no auto-play",
+        "Browser-local Return: WTL digest, no WTL execution or audio replay on restore"
       ],
       "provenance": [
         "owner said 'Proposal accepted' following verified six-cycle fiction receipt",
-        "source PR #661, earlier #676 example, mission #583"
+        "source PR #661, earlier #676 example, mission #583",
+        "Owner requested continued Whole Pizza Return development on 2026-11-23"
       ],
       "rollback": [
-        "Revert fiction-projection source/UI/CI integration together; retain immutable authored source and prior committed WTL returns"
+        "Revert fiction-projection source/UI/CI integration together; retain immutable authored source and prior committed WTL returns",
+        "Clear local fiction-display cache while preserving immutable WTL execution receipt"
       ],
       "consent_and_authority": [
         "Explicit new Render click required after confirmed WTL commit",
