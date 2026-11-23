@@ -1409,6 +1409,11 @@ function createWayglassRouter({
     if (typeof source !== 'string' || !source.trim() || source.length > 50000) {
       return res.status(400).json({ error: 'WTL source must be nonempty text of at most 50000 characters.' });
     }
+    const requireDurableReceipt = req.body?.require_durable_receipt === true;
+    if (req.body?.require_durable_receipt !== undefined &&
+        (typeof req.body.require_durable_receipt !== 'boolean' || mode !== 'execute')) {
+      return res.status(400).json({ error: 'Durable receipts may only be requested for native WTL execution.' });
+    }
     try {
       const ir = Wyrdrune.compile(source);
       const {translateSemantic}=await import('../wayglass-runtime/wyrdrune/skyrunor-bridge.mjs');
@@ -1523,6 +1528,18 @@ function createWayglassRouter({
         persistence = { status: 'saved', run_id: run?.run_id || null };
       } catch (error) {
         persistence = { status: 'unavailable', detail: cleanText(error?.message || 'Programme receipt storage unavailable.', 180) };
+      }
+      if (requireDurableReceipt && (persistence.status !== 'saved' || !persistence.run_id)) {
+        return res.status(503).json({
+          schema: 'wayglass.wyrdrune-durability-error/v1',
+          error: 'WTL execution completed without a durable storage receipt; commitment is not verified.',
+          execution_status: execution.status,
+          source_hash: ir.sourceHash,
+          persistence: { status: 'unavailable' },
+          dispatch: 'none',
+          external_effects: [],
+          world_mutation: false,
+        });
       }
       return res.json({
         schema: 'wayglass.wyrdrune-workbench/v1',

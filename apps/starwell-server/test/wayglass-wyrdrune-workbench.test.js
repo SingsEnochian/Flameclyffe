@@ -92,6 +92,18 @@ test('native Wyrdrune workbench requires an authenticated House Steward session'
     assert.equal(result.world_mutation, false);
     assert.equal(result.dispatch, 'none');
 
+    const strict = await send({ source, mode: 'execute', context, require_durable_receipt: true },
+      { authorization: 'Bearer ' + token });
+    assert.equal(strict.status, 503);
+    const durability = await strict.json();
+    assert.equal(durability.schema, 'wayglass.wyrdrune-durability-error/v1');
+    assert.equal(durability.execution_status, 'committed');
+    assert.equal(durability.persistence.status, 'unavailable');
+    assert.deepEqual(durability.external_effects, []);
+    assert.equal(durability.world_mutation, false);
+    assert.equal((await send({ source, mode: 'compile', require_durable_receipt: true },
+      { authorization: 'Bearer ' + token })).status, 400);
+
     const partial = await send({
       source, mode: 'execute',
       context: { ...context, assembled_systems: 6, system_ids: context.system_ids.slice(0, 6) },

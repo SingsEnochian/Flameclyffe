@@ -1061,6 +1061,39 @@
         "finish_line": "Exact-head tests and live Workbench/host integration before release",
         "return_marker": "Code and tests committed; verify then wire runtime invocation, owner-only access and ship delivery"
       }
+    },
+    {
+      "change_id": "soma-nova-durable-wtl-execution-gate-2026-11-23",
+      "changed_paths": [
+        "apps/starwell-server/wayglass/router.js",
+        "apps/starwell-server/test/wayglass-wyrdrune-workbench.test.js"
+      ],
+      "affected_organs": ["WTL workbench", "Soma Nova", "Return receipt durability", "House authority"],
+      "dependent_checks": ["Wayglass Check", "native Wyrdrune workbench HTTP test", "One Ship change-impact contract"],
+      "provenance": [
+        "owner-approved One Ship priorities 2026-11-23",
+        "selective port of prepared 6c09d460bae8fef3f59de92de5b1d087e28309a1 onto bc4440117102069f020c4c998c44e43a77026a87",
+        "existing Wyrdrune.execute and wayglass_program_runs; no new runtime or table"
+      ],
+      "rollback": ["revert opt-in durability gate and tests together"],
+      "status": "strict execution refuses an unverified durable commitment; charge/fire lifecycle remains outstanding",
+      "verification": [
+        "2026-11-23 local staged Wayglass frontend and host runtime build passed",
+        "native Wyrdrune authenticated workbench HTTP test passed, including strict missing-receipt refusal and invalid compile flag",
+        "16 focused Soma Nova preview, morphogenesis and Watercolour harness bridge tests passed",
+        "live Supabase receipt, authenticated devices, cold Return and exact-head CI remain held"
+      ],
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Compared prepared source, canonical 8be6abc3 and integration bc4440117; keep existing program store and runtime, preserve newer impact entries.",
+        "owner_outcome": "Owner-authorised execution must not report durable commitment without saved run ID.",
+        "finish_line": "Negative receipt test and exact-head CI; positive durable charge/fire, Feather and Return need separate evidence.",
+        "return_marker": "Resume Soma Nova charge/fire with the existing program store; confirm authenticated persistence and cold restoration."
+      }
     }
   ]
 }
