@@ -27,7 +27,7 @@ test('doctor requires valid connected tailnet DNS and avoids guessing a live URL
 });
 
 test('Windows discovers installed Tailscale without requiring CLI on PATH',()=>{
- assert.match(script,/Join-Path \$env:ProgramFiles 'Tailscale\\\\tailscale\.exe'/);
+ assert.ok(script.includes(String.raw`Join-Path $env:ProgramFiles 'Tailscale\tailscale.exe'`));
  assert.match(script,/WAYGLASS_TAILSCALE_CLI/);
  assert.match(script,/\& \$script:TailscaleExe serve status --json/);
 });
