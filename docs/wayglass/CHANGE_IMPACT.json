@@ -975,6 +975,49 @@
         "finish_line": "Exact-head world-crossing, native WTL, iPad, Workbench and One Ship checks pass; hardware effects remain unavailable until real device binding and consent.",
         "return_marker": "Review source-bound physical capability receipts, separately verify real-world effects, and do not claim physical manifestation from a preview."
       }
+    },
+    {
+      "change_id": "one-ship-native-wtl-pick-mod-cell-canon-20261123",
+      "changed_paths": [
+        "docs/wayglass/CHANGE_IMPACT.json",
+        "lib/wyrdrune/expression.mjs",
+        "apps/wayglass/src/wtl-cell-mobius.js",
+        "apps/wayglass/src/wtl-cell-worlds.js",
+        "apps/wayglass/test/wtl-cell-worlds.test.js",
+        "lib/wyrdrune/typed-ir.test.cjs"
+      ],
+      "affected_organs": [
+        "Canonical pure WTL operators",
+        "Möbius Nursery cell and world programmes",
+        "Typed IR and Wyrdrune tests",
+        "Wayglass installer and cloud"
+      ],
+      "dependent_checks": [
+        "Wayglass Check exact-head",
+        "Wyrdrune Two-Backend Parity",
+        "Windows installer boundary tests",
+        "One Ship impact gate"
+      ],
+      "provenance": [
+        "CI 45205858318: ten cell failure cases use legacy numeric wonder, when, modulo and pick",
+        "Shared interpreter remains lib/wyrdrune/runtime.mjs, pure builtins registered once in lib/wyrdrune/expression.mjs",
+        "Issue #583 and PR #661"
+      ],
+      "rollback": [
+        "Revert pure op registration, program source and tests together if validation fails"
+      ],
+      "status": "in-review-exact-head-ci-pending",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "No separate WTL parser, no second Nursery runtime",
+        "owner_outcome": "One executable language for cells and worlds",
+        "finish_line": "Cell/world tests and parity pass",
+        "return_marker": "Verify full CI and reconcile any new semantics"
+      }
     }
   ]
 }
