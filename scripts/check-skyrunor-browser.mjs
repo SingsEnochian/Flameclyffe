@@ -43,6 +43,7 @@ try{
    const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
    await page.goto(base+'/ipad');await page.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('Ready'));
    await context.setOffline(true);
+   await page.locator('summary').filter({hasText:'Semantic Skýrunor'}).click();
    await page.click('#declaration-btn');
    assert.equal(await page.inputValue('#semantic'),'ᛋᚴ:ᛗ/ᛖ/ᚲ=ᚺᚷ!ᛞ');
    assert.match(await page.textContent('#output'),/Not executed/);
