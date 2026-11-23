@@ -53,7 +53,9 @@ test('Wayglass programme library lists, saves and versions source through the au
   try {
     await once(server, 'listening');
     const base = `http://127.0.0.1:${server.address().port}/api/v1/wayglass/wyrdrune/programs`;
-    const send = (url, method = 'GET', body) => fetch(url, {
+    // Preserve the real loopback fetch while the service's Supabase calls are mocked.
+    // Using global.fetch here would route the HTTP test request into the storage mock.
+    const send = (url, method = 'GET', body) => old.fetch(url, {
       method,
       headers: { authorization: 'Bearer ' + token, ...(body ? { 'Content-Type': 'application/json' } : {}) },
       ...(body ? { body: JSON.stringify(body) } : {}),
