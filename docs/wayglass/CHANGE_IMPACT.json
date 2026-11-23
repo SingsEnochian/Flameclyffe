@@ -1019,6 +1019,43 @@
         "finish_line": "Single implementation of numeric wrap and pick; cell tests, Windows, backend parity and One Ship gates pass exact head",
         "return_marker": "Verify full CI and reconcile any new semantics"
       }
+    },
+    {
+      "change_id": "harness-world-bridge-2026-11-23",
+      "changed_paths": [
+        "apps/wayglass/src/harness-world-bridge.js",
+        "apps/wayglass/test/harness-world-bridge.test.js"
+      ],
+      "affected_organs": [
+        "existing resonance learning ledger",
+        "existing Watercolour event bus",
+        "Wayglass evaluation provenance and Feather"
+      ],
+      "dependent_checks": [
+        "node --test apps/wayglass/test/harness-world-bridge.test.js",
+        "Wayglass Check",
+        "One Ship impact validator"
+      ],
+      "provenance": [
+        "Owner direction 2026-11-23 to integrate harness adapters and reality-view research",
+        "Hugging Face harness adapters at scale and Tesla Reality View research comparison",
+        "Existing resonance-learning.js and watercolor-bridge.js are canonical owners"
+      ],
+      "rollback": [
+        "Revert harness-world bridge and test as a unit; the pre-existing learning ledger and Watercolour remain unchanged"
+      ],
+      "status": "implementation committed; integrated UI/deployment and exact-head verification pending",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Reuse the current resonance learning ledger and Watercolour subscriber; create no new interpreter, database or renderer.",
+        "owner_outcome": "Provenance-bound agent evaluation visible in the existing Watercolour system",
+        "finish_line": "Exact-head tests and live Workbench/host integration before release",
+        "return_marker": "Code and tests committed; verify then wire runtime invocation, owner-only access and ship delivery"
+      }
     }
   ]
 }
