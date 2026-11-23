@@ -1,0 +1,13 @@
+# Dedicated Wayglass site. Do not replace the Starwell deployment.
+[build]
+  command = "npm ci --ignore-scripts --no-audit --no-fund && npm run wayglass:build"
+  publish = "dist/wayglass"
+[build.environment]
+  NODE_VERSION = "24"
+  NPM_VERSION = "11"
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co https://api.openai.com; img-src 'self' data:; font-src 'self' data:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"

@@ -1,14 +1,20 @@
 import './styles.css';
+import { installWayglassCloudLogin } from './cloud-login.js';
 import { installWayglassField } from './glass-field.js';
 import { installMotionChoreography } from './motion-choreography.js';
+import { installWayglassMotion } from './motion-anything-adapter.js';
 import { installKeyboardControls } from './keyboard-controls.js';
 import { detectEmbodimentCapabilities, detectARSupport, publishEmbodiment } from './embodiment.js';
-import { enterWayglassWorld, leaveWayglassWorld } from './route-client.js';
+import { enterWayglassWorld, leaveWayglassWorld, requestWayglassCloudCirculation } from './route-client.js';
+import { inspectWayglassLantern } from './lantern-diagnostic.js';
+import { createQuantumQuad } from './quantum-quad.js';
+import { voyage04Departure, voyage04Return, VOYAGE_04 } from './voyage-04.js';
 import { mountWayglassSurface, registerWayglassSurface, listWayglassSurfaces } from './surface-registry.js';
 import { mountArcSweepWritingSurface } from './surfaces/arcsweep-writing.js';
 import { mountThoughtVibrationSurface } from './surfaces/thought-vibration.js';
 
 const root = document.querySelector('#app');
+installWayglassCloudLogin(document.body);
 
 installWayglassField({ host: document.body });
 installMotionChoreography({ root: document.documentElement });
@@ -54,6 +60,7 @@ surfaceNav.innerHTML = listWayglassSurfaces().map((surface) =>
   '</button>'
 ).join('');
 root.before(surfaceNav);
+installWayglassMotion({ root: document });
 
 async function mountSurface(surfaceId) {
   mountedSurface?.destroy?.();
@@ -74,6 +81,10 @@ surfaceNav.addEventListener('click', (event) => {
 
 const wayglass = Object.freeze({
   schema: 'wayglass.os/v0.1',
+  quantumQuad: createQuantumQuad(),
+  cloud: Object.freeze({ pulse: requestWayglassCloudCirculation }),
+  lantern: () => inspectWayglassLantern({ quad: wayglass.quantumQuad, surfaces: listWayglassSurfaces() }),
+  voyages: Object.freeze({ [VOYAGE_04]: Object.freeze({ leave: voyage04Departure, enter: voyage04Return }) }),
   surfaces: listWayglassSurfaces,
   mount: mountSurface,
   enter: ({ embodiment: entryEmbodiment = {}, ...entry } = {}) => enterWayglassWorld({
