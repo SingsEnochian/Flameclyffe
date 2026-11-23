@@ -100,7 +100,7 @@ function segmentPolygon(previous, point, startWidth, endWidth) {
 }
 
 function parseOutlineViewBox(value) {
-  const parts = String(value || '').trim().split(/[\\s,]+/).map(Number);
+  const parts = String(value || '').trim().split(/[\s,]+/).map(Number);
   if (parts.length !== 4 || parts.some((part) => !Number.isFinite(part)) || parts[2] <= 0 || parts[3] <= 0) {
     throw new Error('Invalid canonical SVG viewBox.');
   }
@@ -110,7 +110,7 @@ function parseOutlineViewBox(value) {
 function validateOutlinePath(value) {
   if (typeof value !== 'string' || !value.length || value.length > 100000
     || !/^M/i.test(value) || !/[hH]/.test(value) || !/[vV]/.test(value) || !/[zZ]$/.test(value)
-    || !/^[MmHhVvZz0-9+\\-.,\\s]+$/.test(value)) {
+    || !/^[MmHhVvZz0-9+\-.,\s]+$/.test(value)) {
     throw new Error('Canonical outline contains an unsafe SVG path.');
   }
   return value;

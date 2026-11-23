@@ -30,7 +30,7 @@ export function clamp(value, min, max) {
 }
 
 export function glyphOutlineTransform(viewBox, { baseline = 760, maxWidth = 840, maxHeight = 760 } = {}) {
-  const parts = String(viewBox || '').trim().split(/[\\s,]+/).map(Number);
+  const parts = String(viewBox || '').trim().split(/[\s,]+/).map(Number);
   if (parts.length !== 4 || parts.some(value => !Number.isFinite(value)) || parts[2] <= 0 || parts[3] <= 0) {
     throw new Error('Invalid glyph outline viewBox.');
   }
