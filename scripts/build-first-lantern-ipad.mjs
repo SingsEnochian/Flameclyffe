@@ -20,7 +20,7 @@ await build({
 const escapeHtml=x=>x.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
 const script=(await readFile(resolve(scratch,'runner.js'),'utf8')).replace(/<\/script/gi,'<\\/script');
 await rm(scratch,{recursive:true,force:true});
-const html=template.replace('__WTL_SOURCE__',escapeHtml(source)).replace('__BUNDLE__',script);
+const html=template.replace('__WTL_SOURCE__',()=>escapeHtml(source)).replace('__BUNDLE__',()=>script);
 if(html.includes('__BUNDLE__')||html.length<20000)throw new Error('Missing offline Wyrdrune bundle');
 await mkdir(dirname(target),{recursive:true});await writeFile(target,html,'utf8');
 console.log('Built standalone First Lantern iPad app:',target,html.length,'bytes');

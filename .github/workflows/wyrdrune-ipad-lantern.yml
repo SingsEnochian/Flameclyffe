@@ -9,6 +9,7 @@ on:
       - 'apps/wayglass/src/first-lantern-ipad.js'
       - 'apps/wayglass/first-lantern-ipad-template.html'
       - 'scripts/build-first-lantern-ipad.mjs'
+      - 'scripts/check-first-lantern-ipad.mjs'
       - '.github/workflows/wyrdrune-ipad-lantern.yml'
   workflow_dispatch:
 permissions:
@@ -32,6 +33,7 @@ jobs:
         run: |
           test -s dist/ipad/First-Lantern-iPad.html
           grep -q 'Run First Lantern' dist/ipad/First-Lantern-iPad.html
+          node scripts/check-first-lantern-ipad.mjs
           sha256sum dist/ipad/First-Lantern-iPad.html
       - uses: actions/upload-artifact@v4
         with:
