@@ -53,8 +53,8 @@ function face(label,{founders,shift}){
     withness {participants: [${participants}], field: grown, agreement: "a world we share", commitment: "it holds only what its members bring"};
   }
   choose {
-    let tone = if felt > 0 then (pulse * 1.5) % 660 + 110 else pulse;
-    let tex = if felt > 2 then (texture + 1) % 6 else texture;
+    let tone = if felt > 0 then mod(pulse * 1.5, 660) + 110 else pulse;
+    let tex = if felt > 2 then mod(texture + 1, 6) else texture;
     let feel = pick(${JSON.stringify([...TEXTURES])}, tex);
     let lull = if felt > 0 or many > 0 then 0 else quiet + 1;
     let syllables = ${JSON.stringify(founders.flatMap(f=>f.syllables))};
@@ -81,7 +81,7 @@ export function worldSource(founders){
   if(!Array.isArray(founders)||founders.length!==2)throw new TypeError('A world has two founders');
   const shift=lit(3+(Math.abs(founders[0].voice-founders[1].voice)*400)%17);
   return `// world of ${founders.map(f=>f.name).join(' & ')}
-operator drift(h, d) = (h + d) % 360;
+operator drift(h, d) = mod(h + d, 360);
 ${face('outer',{founders,shift})}
 ${face('inner',{founders,shift})}`;
 }
