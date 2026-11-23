@@ -6,10 +6,12 @@ on:
     paths:
       - "apps/starwell-server/**"
       - "apps/starwell/**"
+      - "apps/wayglass/**"
       - "apps/project-zero-companion/**"
       - "starwell/deep-observer/schemas/**"
       - "config/engine-name-authority.json"
       - "scripts/deny-stale-engine-contracts.mjs"
+      - "lib/wayglass-*.cjs"
       - "package.json"
       - "package-lock.json"
       - ".nvmrc"
@@ -22,10 +24,12 @@ on:
     paths:
       - "apps/starwell-server/**"
       - "apps/starwell/**"
+      - "apps/wayglass/**"
       - "apps/project-zero-companion/**"
       - "starwell/deep-observer/schemas/**"
       - "config/engine-name-authority.json"
       - "scripts/deny-stale-engine-contracts.mjs"
+      - "lib/wayglass-*.cjs"
       - "package.json"
       - "package-lock.json"
       - ".nvmrc"
@@ -99,6 +103,12 @@ jobs:
       - name: Install locked Hearthgate dependencies
         run: npm ci
 
+      - name: Test, build and stage Wayglass for Hearthgate
+        working-directory: ${{ github.workspace }}
+        run: |
+          npm run wayglass:test
+          npm run wayglass:deploy:server
+
       - name: Test local security boundary
         run: npm test
 
@@ -140,6 +150,7 @@ jobs:
           $unpackedRoot = "$resourcesRoot/app.asar.unpacked"
           $starwellRoot = "$unpackedRoot/public/starwell"
           $companionRoot = "$unpackedRoot/public/project-zero-companion"
+          $wayglassRoot = "$unpackedRoot/public/wayglass"
           $required = @(
             $asar,
             "$starwellRoot/index.html",
@@ -152,6 +163,8 @@ jobs:
             "$starwellRoot/schemas/world-tone-approval.schema.json",
             "$starwellRoot/schemas/ipad-somatic-haptic-receipt.schema.json",
             "$companionRoot/index.html",
+            "$wayglassRoot/index.html",
+            "$wayglassRoot/wayglass-host.js",
             "$unpackedRoot/server-secure.js",
             "$unpackedRoot/security/local-boundary.js",
             "$unpackedRoot/fontforge/server.js"
@@ -177,6 +190,20 @@ jobs:
           $companionHtml = Get-Content -Raw -Path "$companionRoot/index.html"
           if (-not $companionHtml.Contains('/project-zero-companion/')) {
             throw "Packaged Project Zero Companion entry does not use the Hearthgate /project-zero-companion/ asset base."
+          }
+
+          $wayglassHtml = Get-Content -Raw -Path "$wayglassRoot/index.html"
+          if (-not $wayglassHtml.Contains('wayglass-host.js')) {
+            throw "Packaged Wayglass entry is missing its CSP-compatible host marker."
+          }
+          $wayglassHostJs = Get-Content -Raw -Path "$wayglassRoot/wayglass-host.js"
+          if (-not $wayglassHostJs.Contains('__wayglassHost')) {
+            throw "Packaged Wayglass host context is invalid."
+          }
+          $wayglassAssets = @(Get-ChildItem -Path "$wayglassRoot/assets" -File -ErrorAction SilentlyContinue |
+            Where-Object { $_.Extension -eq '.js' })
+          if ($wayglassAssets.Count -lt 1) {
+            throw "Packaged Wayglass is missing JavaScript assets."
           }
 
           $somaticHtml = Get-Content -Raw -Path "$starwellRoot/world-tone-approval/index.html"
