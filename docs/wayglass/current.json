@@ -273,26 +273,26 @@
     {
       "source_pr": 674,
       "organ": "Unified Magic / Observer",
-      "status": "source-candidate",
+      "status": "unintegrated-source-candidate; shared-file-conflicts-mapped; architecture-reconciliation-required",
       "head_sha": "0b7c8c591de77c02858bdc40e3d0f1dfff267aac",
-      "conflict": "separate base; possible overlap with WTL runtime, host bridge, Return and Watercolour",
-      "next_action": "compare shared files and reuse single invocation/receipt model before port"
+      "conflict": "Its eight-engine numerical law simulator, separate Lawsmith DSL/parser, legacy wyrdrune.cjs adapter, filesystem journal/receipt host, magic routes, Magic Loom, Lawsmith and Universal Embodiment surfaces are absent from #661. It overlaps canonical WTL runtime, Program Workbench, Soma Nova Morphogenesis, program_runs store, Return ledger, Watercolour, Observer and current router/main/deck/Codex files. Its own docs scope the numerical law model to Dreaming simulation and distinguish it from Waking World measurements.",
+      "next_action": "Reconcile law/Metagenesis semantics into canonical WTL typed AST/IR and capability bridge; treat numerical integration as a domain engine invoked by WTL, not a second language/runtime. Fold Universal Embodiment into Soma Nova Form Atlas/Folio; fold Magic Loom/Lawsmith into the native program/ritual surfaces; replace separate filesystem receipts with the canonical program-run/Return ledger or prove a non-duplicative need. Preserve source branch and tests; no whole-branch merge."
     },
     {
       "source_pr": 673,
       "organ": "Watercolour SON-002 projection",
-      "status": "source-candidate",
+      "status": "unintegrated-source-candidate; overlaps-existing-watercolour-and-acoustic-organs",
       "head_sha": "47a9ac63248186ee1cbd9d94c3325cc8e71f8de7",
-      "conflict": "visual projection depends on current Watercolour body and score event bridge",
-      "next_action": "selectively reconcile with current body; retain visual projection as subscriber, not executor"
+      "conflict": "All four target files already exist in #661 but differ from candidate versions. It overlaps #649 layered Watercolour conversation playback and the current audio engine/soundscape; source branch is not identical to the integration train.",
+      "next_action": "Diff exact code and tests against current Watercolour/acoustic files; port only SON-002 spatial pigment projection without replacing whole files, preserve current audio and layered conversation behaviour, and keep Watercolour a subscriber rather than an executor."
     },
     {
       "source_pr": 651,
       "organ": "branch garden / inventory",
-      "status": "source-candidate",
+      "status": "audit-document-only-source-candidate",
       "head_sha": "18469dd8f7e49912d97f64db01e6a1392267765a",
-      "conflict": "audit candidate based on older base; no source branches may be retired by report alone",
-      "next_action": "adopt its graph inventory logic only after validating exact current branch and PR graph"
+      "conflict": "The branch adds a branch-garden audit document only; it does not yet provide the machine-readable exact-SHA graph or reconcile current PRs.",
+      "next_action": "Use as historical audit input, then refresh the graph against the current PR head and preserve every branch until adoption proof."
     },
     {
       "source_prs": [
@@ -339,6 +339,16 @@
       "organ": "Return / continuity",
       "status": "source-candidates",
       "next_action": "compare stop/return receipts, revocation, process-cold recovery and route custody; preserve one canonical ledger"
+    },
+    {
+      "source_prs": [
+        663,
+        669
+      ],
+      "organ": "Ollama completion diagnostics",
+      "status": "duplicate-source-candidates; no integration assumed",
+      "conflict": "Both PRs touch the same host router and the same wayglass-ollama-stop-reason test; #669 is stacked on an older #661 base while #663 targets wayglass/current.",
+      "next_action": "Compare exact patches; port the minimal provider-native done_reason preservation and synthetic tests once into #661, preserving Astra/provider attribution and existing response behaviour."
     }
   ],
   "reconciliation_checkpoint": {
