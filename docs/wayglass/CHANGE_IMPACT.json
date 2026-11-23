@@ -1024,25 +1024,30 @@
       "change_id": "harness-world-bridge-2026-11-23",
       "changed_paths": [
         "apps/wayglass/src/harness-world-bridge.js",
-        "apps/wayglass/test/harness-world-bridge.test.js"
+        "apps/wayglass/test/harness-world-bridge.test.js",
+        "apps/wayglass/src/spectral-field.js"
       ],
       "affected_organs": [
         "existing resonance learning ledger",
         "existing Watercolour event bus",
-        "Wayglass evaluation provenance and Feather"
+        "Wayglass evaluation provenance and Feather",
+        "existing full-spectrum instrument"
       ],
       "dependent_checks": [
         "node --test apps/wayglass/test/harness-world-bridge.test.js",
         "Wayglass Check",
-        "One Ship impact validator"
+        "One Ship impact validator",
+        "spectral-field existing suite"
       ],
       "provenance": [
         "Owner direction 2026-11-23 to integrate harness adapters and reality-view research",
         "Hugging Face harness adapters at scale and Tesla Reality View research comparison",
-        "Existing resonance-learning.js and watercolor-bridge.js are canonical owners"
+        "Existing resonance-learning.js and watercolor-bridge.js are canonical owners",
+        "Spectral instrument exposes harnessWorld and propagates the existing Feather event"
       ],
       "rollback": [
-        "Revert harness-world bridge and test as a unit; the pre-existing learning ledger and Watercolour remain unchanged"
+        "Revert harness-world bridge and test as a unit; the pre-existing learning ledger and Watercolour remain unchanged",
+        "Remove the spectral-field harnessWorld import and public property if reverting"
       ],
       "status": "implementation committed; integrated UI/deployment and exact-head verification pending",
       "focus_router": {
