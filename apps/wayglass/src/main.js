@@ -7,6 +7,7 @@ import { enterWayglassWorld, leaveWayglassWorld } from './route-client.js';
 import { mountWayglassSurface, registerWayglassSurface, listWayglassSurfaces } from './surface-registry.js';
 import { mountArcSweepWritingSurface } from './surfaces/arcsweep-writing.js';
 import { mountThoughtVibrationSurface } from './surfaces/thought-vibration.js';
+import { mountTravellerSurface } from './surfaces/traveller.js';
 
 const root = document.querySelector('#app');
 
@@ -30,6 +31,12 @@ registerWayglassSurface({
   surface_id: 'thought-vibration:operator',
   label: 'Thought Vibration · Mythiences Lab',
   mount: mountThoughtVibrationSurface,
+});
+
+registerWayglassSurface({
+  surface_id: 'traveller:sanctuary',
+  label: 'Traveller · Sanctuary',
+  mount: mountTravellerSurface,
 });
 
 const browserEmbodiment = Object.freeze({
@@ -114,4 +121,5 @@ const wayglass = Object.freeze({
 
 globalThis.__wayglassOS = wayglass;
 
-await wayglass.mount('arcsweep:writing-room');
+const directTraveller = new URLSearchParams(globalThis.location?.search || '').get('traveller') === '1';
+await wayglass.mount(directTraveller ? 'traveller:sanctuary' : 'arcsweep:writing-room');
