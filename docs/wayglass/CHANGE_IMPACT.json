@@ -861,6 +861,46 @@
         "finish_line": "The seven Nursery and eight Watercolour fixture failures reach their real behavioral assertions with no production safety downgrade.",
         "return_marker": "Inspect exact-head CI, fix remaining semantics only if proven."
       }
+    },
+    {
+      "change_id": "nursery-canonical-wtl-if-2026-11-23",
+      "changed_paths": [
+        "docs/wayglass/CHANGE_IMPACT.json",
+        "apps/wayglass/src/wtl-cell-fusion.js"
+      ],
+      "affected_organs": [
+        "Wyrdrune canonical if/then/else grammar",
+        "WTL cell fusion decision programme",
+        "Möbius Nursery ecology and semantic grounding",
+        "Cell fusion reversible effects and receipts"
+      ],
+      "dependent_checks": [
+        "node --test apps/wayglass/test/wtl-cell-ecology.test.js apps/wayglass/test/wtl-cell-mobius.test.js apps/wayglass/test/wtl-cell-semantic-grounding.test.js apps/wayglass/test/wtl-cell-worlds.test.js",
+        "Wayglass Check exact-head",
+        "Wyrdrune Two-Backend Parity",
+        "One Ship change-impact contract"
+      ],
+      "provenance": [
+        "Wayglass Check CI 45205471822, head 4a0e53d6b662c1ebcfa94cf43d91426bb982d8f6: four module-load failures",
+        "Canonical WTL parser accepts if/then/else, rejects when/then/else",
+        "No new language dialect, no environment or device effects",
+        "Mission #583 / integration PR #661"
+      ],
+      "rollback": [
+        "If changed semantics diverge, restore source and impact entry; never weaken canonical parser to rescue a stale emitted programme."
+      ],
+      "status": "source-committed-in-review; exact-head CI pending",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Use existing canonical if/then syntax, not alternate cell parser.",
+        "owner_outcome": "Native cell fusion decisions compile in the same Wyrdrune runtime as all other ship organs.",
+        "finish_line": "Four WTL cell test files load and execute behaviour assertions with canonical syntax.",
+        "return_marker": "Verify full CI and the actual cell phase receipts before promotion."
+      }
     }
   ]
 }
