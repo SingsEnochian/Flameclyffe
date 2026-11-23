@@ -1,0 +1,57 @@
+{
+  "schema": "wayglass.change-impact/v1",
+  "governing_contract": "docs/wayglass/ONE_SHIP_DIRECTIVE.md",
+  "canonical_development_branch": "wayglass/current",
+  "single_mission_issue": 583,
+  "reconciliation_train_pr": 661,
+  "policy": "Every implementation change must add/update an impact entry in this file in the same PR. Entries identify changed paths, affected organs, dependent checks, provenance and rollback. The validator rejects implementation changes without a matching entry.",
+  "entries": [
+    {
+      "change_id": "one-ship-governance-bootstrap-2026-11-23",
+      "changed_paths": [
+        "scripts/verify-one-ship-impact.mjs",
+        ".github/workflows/one-ship-change-impact.yml"
+      ],
+      "affected_organs": [
+        "shipwide governance",
+        "CI and integration train"
+      ],
+      "dependent_checks": [
+        "One Ship change-impact validator",
+        "pull-request gate on wayglass/current"
+      ],
+      "provenance": [
+        "owner direction 2026-11-23",
+        "source PR #677 exact head 537eab8b51a8171c3e155e9d1b7a4a41bdcd74ab"
+      ],
+      "rollback": [
+        "revert validator and workflow together; retain governing contract and impact register"
+      ]
+    },
+    {
+      "change_id": "faeberpunk-ship-frame-port-2026-11-23",
+      "changed_paths": [
+        "apps/wayglass/src/faeberpunk-ship.css",
+        "apps/wayglass/src/main.js"
+      ],
+      "affected_organs": [
+        "FAEberpunk shared shell",
+        "all Wayglass rooms",
+        "responsive navigation and accessibility"
+      ],
+      "dependent_checks": [
+        "Wayglass frontend build",
+        "desktop/tablet/phone browser layout checks",
+        "reduced-motion and forced-colour checks"
+      ],
+      "provenance": [
+        "source PR #667 head d9c4c58deddcb42b069ace204cb207244188f02c",
+        "source CSS blob eaa31f8618af494ecfa0c44b001835f91d6ccba5",
+        "integration commits d3a59a983f8b77f03c0f8e4bceb812a0c6bfa9b3 and d3c98d7a803f77aa4c40dc4fa92eb93adfaf0aa6"
+      ],
+      "rollback": [
+        "revert the FAEberpunk stylesheet import and copied stylesheet together; retain source PR and prior shell"
+      ]
+    }
+  ]
+}
