@@ -3,7 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 
 const base = process.env.GITHUB_BASE_REF || 'wayglass/current';
-const changed = execFileSync('git', ['diff', '--name-only', `origin/${base}...HEAD'], { encoding: 'utf8' })
+const changed = execFileSync('git', ['diff', '--name-only', 'origin/' + base + '...HEAD'], { encoding: 'utf8' })
   .split(/\r?\n/).filter(Boolean);
 const impactPath = 'docs/wayglass/CHANGE_IMPACT.json';
 const contractPath = 'docs/wayglass/ONE_SHIP_DIRECTIVE.md';
