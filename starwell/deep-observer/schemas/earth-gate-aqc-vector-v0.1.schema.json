@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flameclyffe.local/schemas/earth-gate-aqc-vector-v0.1.schema.json",
+  "title": "Earth Gate AQC Vector Experiment v0.1",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["schema", "model", "status", "canonical_premaqc", "physical_claim", "medical_claim", "observed_at", "vector_axes", "vector", "evaluation", "diagnostics", "semantics"],
+  "properties": {
+    "schema": { "const": "hearthgate.earth-gate-aqc-vector/v0.1" },
+    "model": { "const": "alternate-p-r-e-m-a-aqc" },
+    "status": { "const": "experimental" },
+    "canonical_premaqc": { "const": false },
+    "physical_claim": { "const": false },
+    "medical_claim": { "const": false },
+    "observed_at": { "type": "string", "format": "date-time" },
+    "vector_axes": { "const": ["P", "R", "E", "M", "A"] },
+    "vector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["P", "R", "E", "M", "A"],
+      "properties": {
+        "P": { "type": "number", "minimum": 0, "maximum": 1 },
+        "R": { "type": "number", "minimum": 0, "maximum": 1 },
+        "E": { "type": "number", "minimum": 0, "maximum": 1 },
+        "M": { "type": "number", "minimum": 0, "maximum": 1 },
+        "A": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "evaluation": {
+      "type": "object",
+      "required": ["AQC", "target_threshold_percent", "target_met", "formula"],
+      "properties": {
+        "AQC": { "type": "number", "minimum": 0, "maximum": 100 },
+        "target_threshold_percent": { "const": 75 },
+        "target_met": { "type": "boolean" },
+        "formula": { "const": "100 * mean(P, R, E, 1-M, A)" }
+      }
+    }
+  }
+}
