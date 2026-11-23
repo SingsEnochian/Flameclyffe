@@ -257,10 +257,10 @@
     {
       "source_pr": 678,
       "organ": "SomaNova.Morphogenesis",
-      "status": "source-candidate-not-yet-native",
+      "status": "pure-planner-and-authenticated-preview-integrated-on-pr-661; CI-pending; commit-and-Return-not-yet-wired",
       "head_sha": "8e3047744eaa9565c79c610fddd5d69e20f1a0fd",
-      "conflict": "candidate implements pure charge/fire and planner but no native Folio or authenticated host capability bridge",
-      "next_action": "bind MorphPlan/FormRef to canonical WTL runtime and existing program store; add native Folio, durable Return and capability-bound fire"
+      "conflict": "The source candidate chamber's caller-supplied principal.authorized boolean is not an authentication boundary and was not ported. The pure planner and tests are ported; native host preview uses griffStewardAuthorized and server-fixed preview capabilities. No persistence or commit/fire route yet.",
+      "next_action": "Add durable charge/commit/Return through the existing program/revision/run store, preserve the same identity and lineage invariants, and expose owner-consented fire through the canonical WTL runtime."
     },
     {
       "source_pr": 667,
@@ -348,7 +348,7 @@
     "impact_manifest": "docs/wayglass/CHANGE_IMPACT.json",
     "impact_manifest_status": "declares all 330 implementation/workflow paths in current PR diff",
     "faeberpunk": "shared ship stylesheet copied and imported after room styles; exact-head CI pending",
-    "soma_nova": "source candidate #678 not yet integrated; native Morphogenesis Folio and authenticated fire path remain outstanding",
+    "soma_nova": "Pure Morphogenesis planner and tests ported from #678; authenticated, effect-free preview route and native Folio added to existing Program Workbench. Preview does not persist or commit. Commit/Return and charge/fire persistence remain outstanding; exact-head CI pending.",
     "supabase_program_store": "existing owner-scoped program/revision/run tables reused; no anon/authenticated table grants; service_role only; RLS enabled with no policies by design of current migration; host/service boundary still requires exact route and credential custody verification",
     "deployment_sha": "unknown"
   }
