@@ -54,3 +54,52 @@ phase progression, authored scene events and carried state.
   Watercolour, audio, images and video; Feather stops adapters.
 * Semantic Skýrunor grammar for fiction events, and source-mapped
   round trips to British English without invented interpretation.
+
+
+## World-Crossing: fiction can become physical
+
+The old rule "fiction never affects the Waking World" was too restrictive.
+An authored origin does **not** prevent actual material outcomes. Language
+may describe a lamp, musical composition, robot, 3D-printed object, sensory
+installation, or other future medium; devices, workers and people may turn
+that description into physical reality.
+
+Use \`::embody <medium> <intention>\` inside authored fiction, for example:
+
+    ::scene The Green Lantern
+    The lantern casts hazel and golden light upon the walls.
+    ::embody light illuminate my real room with a soft lantern glow
+    ::embody fabrication make a tactile model of the lantern
+
+The existing compiler turns every directive into a WTL Möbius unit,
+preserves authored meaning and Return, and records a source-bound
+\`embodiment\` event. The shared \`planPhysicalEmbodiment\` interprets such
+events as **potentially physically realisable**, regardless of medium name.
+Unknown media are retained as explicit intentions, never silently discarded.
+
+A *trusted, authenticated host* may install a named medium capability
+and use \`createWorldCrossingHost\`. A real crossing requires all of:
+current host principal and explicit consent; an identified device and
+capability; exact bound programme hash and event ID; atomic durable
+at-most-once reservation; a trusted device driver; a report of whether
+dispatch occurred; optional independent observation; and Feather
+handling. The story itself grants no authority or device access.
+
+The result distinguishes *proposed*, *capability unavailable*,
+*device-reported*, *device outcome unknown* and *physically observed*.
+Sensor evidence is required before \`physically_verified=true\`.
+Nothing can be called physically manifested solely because a scene
+compiled or a device command was sent.
+
+**Not a ban on physical embodiment:** the gateway has an extensible
+capability registry. The first implemented code supplies the typed
+protocol and tests with a host test adapter, not a live lamp/robot/3D
+printer integration. The already implemented glass-harmonics sound path
+can produce physical acoustics when local speaker output succeeds;
+a started audio stream is *not* independent acoustic observation.
+Scientific physical outcomes, speculative hypotheses, metaphorical
+transformations and fictional phenomena retain separate evidence
+registers. Unavailable mechanisms are marked unavailable, not
+declared ontologically impossible.
+
+See \`docs/wayglass/WORLD_CROSSING_V0_1.md\`.

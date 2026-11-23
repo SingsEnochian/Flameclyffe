@@ -1,6 +1,7 @@
 import {translateSemantic} from '../../../lib/wyrdrune/skyrunor-bridge.mjs';
 import {fictionToWtl,verifyFictionExecution} from '../../../lib/wyrdrune/fiction-mobius.mjs';
 import {planFictionProjection,renderApprovedFiction,restoreFictionDisplay} from '../../../lib/wyrdrune/fiction-projection.mjs';
+import {planPhysicalEmbodiment} from '../../../lib/wyrdrune/world-crossing.mjs';
 import {EXAMPLE_CHANGE} from '../../../lib/wyrdrune/skyrunor-change.mjs';
 import {englishToDeclaration,astToGlyphs,wtlToAst} from '../../../lib/wyrdrune/skyrunor.mjs';
 // Offline First Lantern: the existing canonical Wyrdrune parser/executor in Safari.
@@ -121,8 +122,9 @@ by('run-btn').addEventListener('click',async()=>{
    by('fiction-project-btn').disabled=!plan.items.some(item=>item.kind!=='unsupported');
    by('fiction-render').textContent=JSON.stringify(plan,null,2);
   }
-  const saved={schema:'wayglass.first-lantern-ipad/v1',source_hash:ir.sourceHash,status:result.status??'committed',output:result.output,completed_cycles:result.withness?.completedCycles,checkpoint_count:result.checkpoints?.length??0,carry:result.continuity?.carry??null,lineage_root:result.lineage?.root??null,recorded_at:new Date().toISOString(),external_effects:[],model_invoked:false,declaration,fiction,physically_verified:false};
-  last=saved;output.textContent=JSON.stringify({status:saved.status,output:saved.output,cycles:saved.completed_cycles,carry:saved.carry,fiction:saved.fiction},null,2);show(saved);
+  const world_crossing=fiction?planPhysicalEmbodiment(fiction):null;
+  const saved={schema:'wayglass.first-lantern-ipad/v1',world_crossing,source_hash:ir.sourceHash,status:result.status??'committed',output:result.output,completed_cycles:result.withness?.completedCycles,checkpoint_count:result.checkpoints?.length??0,carry:result.continuity?.carry??null,lineage_root:result.lineage?.root??null,recorded_at:new Date().toISOString(),external_effects:[],model_invoked:false,declaration,fiction,physically_verified:false};
+  last=saved;output.textContent=JSON.stringify({status:saved.status,output:saved.output,cycles:saved.completed_cycles,carry:saved.carry,fiction:saved.fiction,world_crossing:saved.world_crossing},null,2);show(saved);
   if(saved.status==='committed'){try{localStorage.setItem(STORE,JSON.stringify(saved));}catch{}report('First Lantern committed. Return recorded.','good');}
   else report('Execution returned '+saved.status+'. Check the receipt.','error');
  }catch(e){output.textContent=String(e?.message||e);fail(e);}

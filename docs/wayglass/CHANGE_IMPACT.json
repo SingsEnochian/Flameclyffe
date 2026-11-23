@@ -901,6 +901,61 @@
         "finish_line": "Four WTL cell test files load and execute behaviour assertions with canonical syntax.",
         "return_marker": "Verify full CI and the actual cell phase receipts before promotion."
       }
+    },
+    {
+      "change_id": "world-crossing-physical-embodiment-2026-11-23",
+      "changed_paths": [
+        "lib/wyrdrune/fiction-mobius.mjs",
+        "lib/wyrdrune/world-crossing.mjs",
+        "lib/wyrdrune/world-crossing.test.cjs",
+        "lib/wyrdrune/fiction-projection.mjs",
+        "lib/wyrdrune/fiction-projection.test.cjs",
+        "apps/wayglass/src/surfaces/program-workbench.js",
+        "apps/wayglass/src/first-lantern-ipad.js",
+        "apps/wayglass/first-lantern-ipad-template.html",
+        "scripts/check-skyrunor-browser.mjs",
+        ".github/workflows/wyrdrune-ipad-lantern.yml",
+        "docs/wayglass/FICTION_MOBIUS_WHOLE_PIZZA_V0_1.md",
+        "docs/wayglass/FICTION_PROJECTION_APPROVAL_V0_1.md",
+        "docs/wayglass/WORLD_CROSSING_V0_1.md"
+      ],
+      "affected_organs": [
+        "WTL native compiler",
+        "Semantic Skýrunor / typed fiction meaning",
+        "Wayglass Workbench",
+        "Offline iPad Lantern",
+        "Owner authority and device capability boundary",
+        "Soma Nova potential physical manifestation",
+        "Return Engine / provenance"
+      ],
+      "dependent_checks": [
+        "Native fiction-to-WTL and world-crossing tests",
+        "Host-only physical capability protocol mock adapter/observation",
+        "WebKit and Chromium iPad and authenticated Workbench acceptance",
+        "Wyrdrune parity and One Ship impact contract",
+        "Owner review and physical-device attestation before deployment"
+      ],
+      "provenance": [
+        "Owner correction: 'You limited it. Fiction should be able to become real, physically'",
+        "Existing PR #661 source and local sound renderer",
+        "Existing source-bound fiction and at-most-once Return discipline"
+      ],
+      "consent_and_auth_impact": [
+        "Authored fiction never grants itself permission",
+        "Owner gesture, trusted host principal, named capability and device, durable reservation required",
+        "No physical adapter installed by this change; hardware operation unavailable until separately implemented and authorised"
+      ],
+      "physical_verification_impact": [
+        "Physically possible is not physically observed",
+        "Started sound playback is physically meaningful but not sensor-verified",
+        "Device ACK and sensor witness remain distinct provenance registers",
+        "Unknown-device outcomes and Feather-after-dispatch cannot claim rollback"
+      ],
+      "rollback": [
+        "Revert grammar and world-crossing planning/UI/CI together; preserve immutable source and Return receipts",
+        "No new hardware capability or deployment is enabled to undo"
+      ],
+      "status": "source candidate; exact-head CI pending and hardware tests not conducted"
     }
   ]
 }

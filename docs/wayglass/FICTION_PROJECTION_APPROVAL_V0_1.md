@@ -40,3 +40,25 @@ projection results, unsupported meanings and mismatched source hashes refuse
 restoration. Browser storage is **not cryptographically signed host evidence**,
 may be cleared by Safari, and is not a true OS cold Return. The JSON export
 remains the portable fallback where local browser storage is unavailable.
+
+
+## Correction: real acoustics are physical
+
+The original projection contract classified all effects as "not physical",
+but a Web Audio or shared sound-engine playback request **can** produce
+pressure waves through speakers. A successful audio-start acknowledgement
+means a physical output was *attempted*, not that somebody heard it.
+Current projection receipts therefore expose
+\`physical_output_attempted: true\`, \`physically_verified: false\`, and
+\`physical_world_affected: null\` (unknown until independently observed)
+when audio starts. When there is no started physical audio, the latter is
+\`false\`. Older receipt fields marked \`false\` are accepted for
+backward-compatible browser-local display restoration but must not be
+interpreted as proof that speakers never emitted sound.
+
+World-Crossing \`::embody\` proposals use a **separate authenticated
+physical capability gateway** and are **not** dispatched by the local
+\`Render accepted fiction cues\` button. This button still handles only
+its two specific, owner-reviewed example renderers. The new source-bound
+world-crossing plan is displayed as a potential physical outcome;
+device enrolment and host authorisation remain independently required.

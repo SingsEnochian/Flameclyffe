@@ -1,6 +1,7 @@
 import {translateSemantic} from '../../../../lib/wyrdrune/skyrunor-bridge.mjs';
 import {FICTION_EXAMPLE,fictionToWtl,verifyFictionExecution} from '../../../../lib/wyrdrune/fiction-mobius.mjs';
 import {planFictionProjection,renderApprovedFiction,restoreFictionDisplay} from '../../../../lib/wyrdrune/fiction-projection.mjs';
+import {planPhysicalEmbodiment} from '../../../../lib/wyrdrune/world-crossing.mjs';
 import {shipSoundscape} from '../ship-soundscape.js';
 import {wayglassSomaticSound} from '../somatic-sound.js';
 import {sha256Hex} from '../../../../lib/wyrdrune/browser-canonical.mjs';
@@ -163,6 +164,7 @@ export async function mountWayglassProgramWorkbench(root) {
             </label>
             <button type="button" class="glass-chip" data-fiction-compose>Compose living Möbius WTL</button>
             <pre data-fiction-preview aria-live="polite">No execution or media generation yet.</pre>
+            <p class="tiny">World Crossing: add <code>::embody light an amber lantern glow in the room</code> (or another medium) to propose real-world embodiment. It may be realised by an authorised device adapter once installed. A story, on its own, does not grant device access.</p>
             <div class="wg-program-actions">
               <button type="button" class="glass-chip" data-fiction-approve disabled>Render accepted fiction cues</button>
               <button type="button" class="glass-chip" data-fiction-restore>Restore last fictional view</button>
@@ -616,7 +618,8 @@ export async function mountWayglassProgramWorkbench(root) {
       }
       if(mode==='execute'&&stagedFiction&&editor.value===stagedFiction.wtl&&receipt.execution?.status==='committed'){
         const verified=verifyFictionExecution(stagedFiction,receipt.execution);
-        receipt={...receipt,fiction:verified};
+        const physicalPlan=planPhysicalEmbodiment(verified);
+        receipt={...receipt,fiction:verified,world_crossing:physicalPlan};
         acceptedFiction=verified;
         const plan=planFictionProjection(verified);
         fictionApproval.disabled=!plan.items.some(item=>item.kind!=='unsupported');
@@ -628,7 +631,7 @@ export async function mountWayglassProgramWorkbench(root) {
             intensity:0.42});
         }
         globalThis.dispatchEvent(new CustomEvent('wayglass:fiction:committed',{detail:verified}));
-        storyPreview.textContent=JSON.stringify(verified,null,2);
+        storyPreview.textContent=JSON.stringify({fiction:verified,world_crossing:physicalPlan},null,2);
       }
       irView.textContent = JSON.stringify(receipt.ir, null, 2);
       hashView.textContent = String(receipt.source_hash || receipt.ir?.sourceHash || 'unhashed').slice(0, 16) + '…';

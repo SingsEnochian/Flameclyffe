@@ -87,7 +87,9 @@ try{
    await page.click('#fiction-project-btn');
    await page.waitForFunction(()=>document.querySelector('#fiction-door').textContent.includes('open'));
    const ipadProjection=JSON.parse(await page.textContent('#fiction-render'));
-   assert.equal(ipadProjection.physical_world_affected,false);
+   assert.equal(ipadProjection.physical_output_attempted,true);
+   assert.equal(ipadProjection.physical_world_affected,null);
+   assert.equal(ipadProjection.physically_verified,false);
    assert.equal(ipadProjection.results.filter(e=>e.kind==='fictional-state'&&e.applied).length,1);
    await page.click('#fiction-stop-btn');
    assert.equal(await page.isDisabled('#fiction-project-btn'),true);
@@ -130,7 +132,9 @@ try{
    await page.click('[data-fiction-approve]');
    await page.waitForFunction(()=>document.querySelector('[data-fiction-door]').textContent.includes('open'));
    const hostedProjection=JSON.parse(await page.textContent('[data-fiction-render]'));
-   assert.equal(hostedProjection.physical_world_affected,false);
+   assert.equal(hostedProjection.physical_output_attempted,true);
+   assert.equal(hostedProjection.physical_world_affected,null);
+   assert.equal(hostedProjection.physically_verified,false);
    assert.equal(hostedProjection.results.filter(e=>e.kind==='fictional-state'&&e.applied).length,1);
    assert.equal(executions,before+2,'User-approved fiction projection never invokes host WTL again');
    await page.click('[data-fiction-stop]');
@@ -147,7 +151,7 @@ try{
    await page.screenshot({path:resolve(out,name+'-workbench.png'),fullPage:true});
    assert.deepEqual(errors,[]);
    receipts.push({browser:name,status:'passed',offline_artifact_execution:result,authenticated_host_execution:hosted.execution.status,
-    no_execution_on_translation:true,feather_before_commit:true,unsupported_change_execution_blocked:true,fiction_cycles_verified:6,fiction_effects_proposed_only:true,approved_fiction_projections:true,fiction_local_display_cold_return:true,physical_world_affected:false,page_errors:errors});
+    no_execution_on_translation:true,feather_before_commit:true,unsupported_change_execution_blocked:true,fiction_cycles_verified:6,fiction_effects_proposed_only:true,approved_fiction_projections:true,fiction_local_display_cold_return:true,physical_media_output_started_not_sensor_verified:true,page_errors:errors});
    await context.close();
   }finally{await browser.close();}
  }
