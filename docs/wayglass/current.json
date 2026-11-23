@@ -363,12 +363,33 @@
     "deployment_sha": "unknown",
     "last_verified_code_head": "df17731ebf24304beae21bc08dcc1f8114c42e0a",
     "one_ship_change_impact": {
-      "status": "passed",
-      "workflow_run": 45190029040,
-      "implementation_paths": 335,
-      "declared_paths": 335,
+      "status": "previous exact-head validator passed before scope expansion; expanded path coverage rerun pending",
+      "previous_pass_workflow": 45190029040,
+      "previous_pass_head": "df17731ebf24304beae21bc08dcc1f8114c42e0a",
+      "latest_expanded_run": 45190893527,
+      "implementation_paths": 366,
+      "declared_paths": 366,
       "missing_paths": 0,
-      "extra_paths": 0
+      "extra_paths": 0,
+      "coverage": [
+        "apps",
+        "api",
+        "lib",
+        "scripts",
+        "tests",
+        "packages",
+        "deploy",
+        "integrations",
+        "netlify",
+        "os",
+        "profiles",
+        "scores",
+        "supabase",
+        "training",
+        "root package manifests",
+        "AGENTS.md",
+        ".github workflows/actions"
+      ]
     },
     "wayglass_check": {
       "status": "failed",
@@ -391,6 +412,7 @@
     },
     "whole_pizza": "Program Workbench, workbench client, server program store, authenticated routes and program-library migration are already present; #676 is partially integrated and remains divergent pending selective diff review.",
     "unified_magic": "#674 not imported wholesale; separate runtime, parser and filesystem receipt host conflict with One Ship. Reconcile semantics into canonical WTL AST/IR and existing program/Return store.",
-    "watercolour": "#673 projection not yet imported; same files exist but differ, and #649 overlaps. Selective SON-002 subscriber port remains pending."
+    "watercolour": "#673 projection not yet imported; same files exist but differ, and #649 overlaps. Selective SON-002 subscriber port remains pending.",
+    "latest_code_head_before_register_update": "b1fb5671ebebf20d6ded77d3c0b6978db74558f6"
   }
 }
