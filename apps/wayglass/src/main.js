@@ -7,6 +7,7 @@ import { enterWayglassWorld, leaveWayglassWorld } from './route-client.js';
 import { mountWayglassSurface, registerWayglassSurface, listWayglassSurfaces } from './surface-registry.js';
 import { mountArcSweepWritingSurface } from './surfaces/arcsweep-writing.js';
 import { mountThoughtVibrationSurface } from './surfaces/thought-vibration.js';
+import { mountProjectCatalogSurface } from './surfaces/project-catalog.js';
 
 const root = document.querySelector('#app');
 
@@ -30,6 +31,12 @@ registerWayglassSurface({
   surface_id: 'thought-vibration:operator',
   label: 'Thought Vibration · Mythiences Lab',
   mount: mountThoughtVibrationSurface,
+});
+
+registerWayglassSurface({
+  surface_id: 'wayglass:project-catalog',
+  label: 'Wayglass · Project Constellation',
+  mount: mountProjectCatalogSurface,
 });
 
 const browserEmbodiment = Object.freeze({

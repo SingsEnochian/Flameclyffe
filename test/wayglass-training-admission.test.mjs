@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { inspectTrainingRecord, inspectDataset } from '../scripts/wayglass-training-admission.mjs';
+const base={schema:'wayglass.training-example/v1',id:'synthetic:1',modality:'text',synthetic:true,consent:{training:true},source:{license_ok:true,provenance_verified:true},privacy:'internal',contains_credentials:false,revoked:false,input:'Example',target:'Expected'};
+test('synthetic licensed example passes',()=>assert.deepEqual(inspectTrainingRecord(base),[]));
+test('unconsented human record denied',()=>assert.ok(inspectTrainingRecord({...base,synthetic:false,consent:{training:false}}).length));
+test('revoked record denied',()=>assert.ok(inspectTrainingRecord({...base,revoked:true}).length));
+test('credential patterns denied',()=>assert.ok(inspectTrainingRecord({...base,target:'ghp_abcdefghijklmnopqrstuvwx'}).some(e=>e.includes('credential'))));
+test('tool trajectory requires outcome',()=>assert.ok(inspectTrainingRecord({...base,modality:'tool'}).length));
+test('RSI requires evaluation lineage',()=>assert.ok(inspectTrainingRecord({...base,modality:'rsi'}).length));
+test('duplicate IDs denied',()=>assert.ok(inspectDataset([base,base]).some(e=>e.includes('duplicate'))));

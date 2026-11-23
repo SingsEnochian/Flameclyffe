@@ -1,0 +1,109 @@
+{
+  "schema": "wayglass.capability-registry/v1",
+  "status": "initial-review-required",
+  "policy": "default-deny",
+  "source_of_truth": "docs/architecture.md",
+  "entries": [
+    {
+      "id": "house-runtime",
+      "path": "House Runtime Broker / Braid",
+      "purpose": "Identity, session attestation, model and provider routing",
+      "execution": "runtime",
+      "network": "provider-dependent",
+      "data": [
+        "session",
+        "route",
+        "identity"
+      ],
+      "risk": "high",
+      "authority": "house-runtime",
+      "permissions": "explicit-session-attestation",
+      "review": "required",
+      "rollback": "disable route and restore last verified contract"
+    },
+    {
+      "id": "reaction",
+      "path": "React-ion",
+      "purpose": "Approved tool routes and semantic delivery receipts",
+      "execution": "tool-routing",
+      "network": "route-dependent",
+      "data": [
+        "request",
+        "receipt",
+        "route"
+      ],
+      "risk": "high",
+      "authority": "approved-registry-and-access-policy",
+      "permissions": "scoped-owner-authorization",
+      "review": "required",
+      "rollback": "revoke route; replay receipts without re-execution"
+    },
+    {
+      "id": "observer",
+      "path": "Observer / DEEP",
+      "purpose": "Evidence, interpretation, timeline and theory observations",
+      "execution": "observation",
+      "network": "source-dependent",
+      "data": [
+        "events",
+        "links",
+        "relations"
+      ],
+      "risk": "high",
+      "authority": "observer-policy-and-source-visibility",
+      "permissions": "inherit-source-visibility",
+      "review": "required",
+      "rollback": "disable ingestion; preserve immutable receipts"
+    },
+    {
+      "id": "supabase",
+      "path": "Supabase tables and Edge Functions",
+      "purpose": "Persistent data and service endpoints",
+      "execution": "service",
+      "network": "external",
+      "data": [
+        "database",
+        "auth",
+        "functions"
+      ],
+      "risk": "high",
+      "authority": "RLS-and-server-auth",
+      "permissions": "least-privilege",
+      "review": "required",
+      "rollback": "revert migration after policy and app-flow validation"
+    },
+    {
+      "id": "return-engine",
+      "path": "Return Engine / Continuity",
+      "purpose": "Versioned stop, return, provenance and replay",
+      "execution": "continuity",
+      "network": "none-required",
+      "data": [
+        "lineage",
+        "receipts",
+        "snapshots"
+      ],
+      "risk": "medium",
+      "authority": "continuity-contract",
+      "permissions": "owner-scoped",
+      "review": "required",
+      "rollback": "restore verified snapshot without rewriting history"
+    },
+    {
+      "id": "model-learning",
+      "path": "Eightfold training / RSI (proposed)",
+      "purpose": "Joint multimodal learning and bounded improvement experiments",
+      "execution": "training-proposed",
+      "network": "none-required",
+      "data": [
+        "authorized-training-data",
+        "evaluation-receipts"
+      ],
+      "risk": "high",
+      "authority": "owner-and-independent-evaluator",
+      "permissions": "no-live-weight-update-without-explicit-approval",
+      "review": "proposed-not-verified",
+      "rollback": "pin baseline checkpoint and reject candidate weights"
+    }
+  ]
+}
