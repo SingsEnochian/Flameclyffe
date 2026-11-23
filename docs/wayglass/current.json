@@ -249,10 +249,10 @@
     {
       "source_pr": 676,
       "organ": "native OS / WTL Workbench",
-      "status": "source-candidate-needs-selective-port",
+      "status": "partially-integrated-on-pr-661; source-diff-reconciliation-open",
       "head_sha": "614bb10abd8b4e09d42f573f77be57f4254b3ba5",
-      "conflict": "76 commits ahead and 205 behind current integration train; overlaps main.js, router.js, surface navigation, runtime and migrations",
-      "next_action": "selectively port missing Program Workbench and kernel capabilities after exact file and dependency review; preserve existing WTL parser/runtime"
+      "conflict": "The current integration branch already contains the native Program Workbench surface, Wyrdrune workbench client, Supabase program store, authenticated library/workbench routes, and the program-library migration. Several core files are identical to #676; main.js, router.js and program-workbench.js differ. #676 remains 76 commits ahead and 215 behind the current train, with 62 changed files; no whole-branch merge.",
+      "next_action": "Compare the remaining source diffs in main.js, router.js, program-workbench.js, OS kernel and whole-pizza boot/package paths; port only missing, compatible capabilities and keep the canonical WTL runtime/store."
     },
     {
       "source_pr": 678,
@@ -340,5 +340,16 @@
       "status": "source-candidates",
       "next_action": "compare stop/return receipts, revocation, process-cold recovery and route custody; preserve one canonical ledger"
     }
-  ]
+  ],
+  "reconciliation_checkpoint": {
+    "date": "2026-11-23",
+    "integration_pr": 661,
+    "observed_head_before_register_update": "826c7db512fbc77340973876e52ca9e3b9cd4703",
+    "impact_manifest": "docs/wayglass/CHANGE_IMPACT.json",
+    "impact_manifest_status": "declares all 330 implementation/workflow paths in current PR diff",
+    "faeberpunk": "shared ship stylesheet copied and imported after room styles; exact-head CI pending",
+    "soma_nova": "source candidate #678 not yet integrated; native Morphogenesis Folio and authenticated fire path remain outstanding",
+    "supabase_program_store": "existing owner-scoped program/revision/run tables reused; no anon/authenticated table grants; service_role only; RLS enabled with no policies by design of current migration; host/service boundary still requires exact route and credential custody verification",
+    "deployment_sha": "unknown"
+  }
 }
