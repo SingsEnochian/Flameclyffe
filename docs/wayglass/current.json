@@ -432,6 +432,16 @@
       "canonical_train_pr": 661,
       "change_id": "nursery-semantic-grounding-one-ship-2026-11-23",
       "notes": "Source-grounded signal explanations staged in existing Cell Garden and House host; poetry retained separately. Test and cold Return evidence pending. Do not mark fully integrated or deployed."
+    },
+    "private_tailnet_access": {
+      "change_id": "nursery-private-tailnet-access-repair-2026-11-23",
+      "source_status": "candidate-under-review-on-pr-661",
+      "route": "existing-port-32861-private-gateway-to-3000",
+      "browser_room": "/wayglass/?room=wayglass%3Acell-garden",
+      "access": "Tailscale Serve HTTPS plus existing House Steward sign-in; never Funnel",
+      "readiness": "requires owner Windows host execution and tailnet ACL review; not live-confirmed",
+      "deployment_sha": null,
+      "release_validation": "pending owner device access and authenticated runtime, do not infer from green CI"
     }
   }
 }

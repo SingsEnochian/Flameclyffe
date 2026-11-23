@@ -1068,14 +1068,25 @@
         "apps/starwell-server/wayglass/router.js",
         "apps/starwell-server/test/wayglass-wyrdrune-workbench.test.js"
       ],
-      "affected_organs": ["WTL workbench", "Soma Nova", "Return receipt durability", "House authority"],
-      "dependent_checks": ["Wayglass Check", "native Wyrdrune workbench HTTP test", "One Ship change-impact contract"],
+      "affected_organs": [
+        "WTL workbench",
+        "Soma Nova",
+        "Return receipt durability",
+        "House authority"
+      ],
+      "dependent_checks": [
+        "Wayglass Check",
+        "native Wyrdrune workbench HTTP test",
+        "One Ship change-impact contract"
+      ],
       "provenance": [
         "owner-approved One Ship priorities 2026-11-23",
         "selective port of prepared 6c09d460bae8fef3f59de92de5b1d087e28309a1 onto bc4440117102069f020c4c998c44e43a77026a87",
         "existing Wyrdrune.execute and wayglass_program_runs; no new runtime or table"
       ],
-      "rollback": ["revert opt-in durability gate and tests together"],
+      "rollback": [
+        "revert opt-in durability gate and tests together"
+      ],
       "status": "strict execution refuses an unverified durable commitment; charge/fire lifecycle remains outstanding",
       "verification": [
         "2026-11-23 local staged Wayglass frontend and host runtime build passed",
@@ -1093,6 +1104,53 @@
         "owner_outcome": "Owner-authorised execution must not report durable commitment without saved run ID.",
         "finish_line": "Negative receipt test and exact-head CI; positive durable charge/fire, Feather and Return need separate evidence.",
         "return_marker": "Resume Soma Nova charge/fire with the existing program store; confirm authenticated persistence and cold restoration."
+      }
+    },
+    {
+      "change_id": "nursery-private-tailnet-access-repair-2026-11-23",
+      "changed_paths": [
+        "apps/wayglass/src/surfaces/nursery-language.js",
+        "apps/wayglass/test/nursery-house-signin.test.js",
+        "scripts/Start-Wayglass-Tailnet.ps1",
+        "scripts/wayglass-tailnet-serve.mjs",
+        "apps/wayglass/test/tailscale-private-release.test.js",
+        "docs/wayglass/WAYGLASS_TAILSCALE_PRIVATE_RELEASE.md",
+        "docs/wayglass/CHANGE_IMPACT.json",
+        "docs/wayglass/current.json"
+      ],
+      "affected_organs": [
+        "Existing House authentication",
+        "Möbius Nursery language surface",
+        "Tailscale private gateway",
+        "Windows workstation startup",
+        "mobile/iPhone/iPad access verification",
+        "One Ship Return"
+      ],
+      "dependent_checks": [
+        "Wayglass Nursery House sign-in positive and refusal tests",
+        "Wayglass Tailscale launcher and route-boundary tests",
+        "One Ship Focus Router Law and change-impact validator",
+        "Exact-head Wayglass/host CI",
+        "Windows Tailscale and phone Safari acceptance still pending"
+      ],
+      "provenance": [
+        "Rowan reported 127.0.0.1 iPhone connection refusal and explicitly requested remote repair, 23 Nov 2026",
+        "Existing private-release contract docs/wayglass/WAYGLASS_TAILSCALE_PRIVATE_RELEASE.md and scripts/Start-Wayglass-Tailnet.ps1",
+        "Original #661 integration parent f17e438da331598f2b7789b765ab0b28b5b0aa22"
+      ],
+      "rollback": [
+        "Revert the Nursery sign-in UI and launcher/path resolution changes together; retain existing unmodified House session, Tailscale route gate, and source lineage."
+      ],
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Inspected #661 and wayglass/current for private Tailscale Serve, port-32861 gateway, Windows launcher, House session and Wayglass Nursery; reused these existing organs instead of adding a new public site, deployment engine or PR.",
+        "owner_outcome": "A single owner-private Wayglass Nursery link reachable from iPhone/iPad after the Windows host and Tailscale are actually running, with a local House sign-in interface.",
+        "finish_line": "Correct Windows and gate path verified in tests, no unauthorised nursery cycle; on-device Tailscale HTTPS, Steward sign-in, Feather and actual Nursery run must be verified before claiming live.",
+        "return_marker": "Built: House sign-in surface and Windows Tailscale executable discovery. Verified: pending exact-head CI. Held: user Windows activation, ACL owner-only review, iPhone/iPad acceptance, physical deployed SHA."
       }
     }
   ]

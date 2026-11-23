@@ -33,9 +33,9 @@ try{
     throw Error('Tailnet route gate cannot reach the staged Wayglass frontend');
   }
   process.stdout.write('[Wayglass] Tailnet-only gateway verified. Opening Tailscale Serve in foreground.\n');
-  process.stdout.write('[Wayglass] Intended URL (confirm from Tailscale output): '+origin+'/wayglass/\n');
+  process.stdout.write('[Wayglass] Intended Nursery URL (verify from iPhone or iPad on the tailnet): '+origin+'/wayglass/?room=wayglass%3Acell-garden\n');
   process.stdout.write('[Wayglass] Keep this terminal running. Ctrl+C closes this Serve session.\n');
-  child=spawn('tailscale',['serve',String(TAILNET_GATE_PORT)],{stdio:'inherit',shell:false});
+  child=spawn(process.env.WAYGLASS_TAILSCALE_CLI||'tailscale',['serve',String(TAILNET_GATE_PORT)],{stdio:'inherit',shell:false});
   const code=await new Promise((resolve,reject)=>{
     child.once('error',reject);
     child.once('exit',resolve);

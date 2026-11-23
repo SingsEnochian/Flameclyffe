@@ -25,3 +25,16 @@ test('doctor requires valid connected tailnet DNS and avoids guessing a live URL
  assert.match(script,/ts\\\.net/);
  assert.match(script,/Proposed tailnet URL \(not yet verified live\)/);
 });
+
+test('Windows discovers installed Tailscale without requiring CLI on PATH',()=>{
+ assert.match(script,/Join-Path \$env:ProgramFiles 'Tailscale\\\\tailscale\.exe'/);
+ assert.match(script,/WAYGLASS_TAILSCALE_CLI/);
+ assert.match(script,/\& \$script:TailscaleExe serve status --json/);
+});
+test('foreground Serve keeps the owner-private route and prints only an intended Nursery URL',()=>{
+ const serve=readFileSync(new URL('../../../scripts/wayglass-tailnet-serve.mjs',import.meta.url),'utf8');
+ assert.match(serve,/process\.env\.WAYGLASS_TAILSCALE_CLI\|\|'tailscale'/);
+ assert.match(serve,/room=wayglass%3Acell-garden/);
+ assert.match(serve,/Intended Nursery URL/);
+ assert.doesNotMatch(serve,/spawn\([^\n]*\['funnel'/);
+});

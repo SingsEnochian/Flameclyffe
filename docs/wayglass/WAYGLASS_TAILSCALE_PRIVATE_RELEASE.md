@@ -25,6 +25,25 @@ Source: Tailscale CLI reference https://tailscale.com/docs/reference/tailscale-c
 5. Open the printed `https://...ts.net/wayglass/` on the iPad. Verify Watercolour entry, five-locus helm, Codex, Mythience, sound opt-in, Feather, Wyrdrune receipts and Return.
 6. Keep the terminal open while using the private Wayglass route. **Ctrl+C** stops the foreground Serve session and its route-limited gateway. Do not run `tailscale serve reset` on a device hosting other services.
 
+## Current phone-access repair · 2026-11-23
+
+**Cause of failed iPhone link:** a `127.0.0.1:5186` URL points to the phone's own loopback interface and cannot reach the Windows workstation. The working access route must instead be the node's **verified HTTPS Tailscale Serve URL**, proxied through the existing dedicated port-32861 gate, with House Steward authentication.
+
+**Single existing route, not another deploy:** the Windows launcher now discovers Tailscale in PATH or `%ProgramFiles%\\Tailscale\\tailscale.exe` and passes that resolved executable to the foreground Serve process. It never starts Funnel or a second backend. The Nursery language panel provides its own House Steward sign-in using the existing `/api/v1/house/session` endpoint and clears the supplied code immediately after submission. A 401 does not confer a session or allow a cycle. Existing poetry and source-bound explanations remain distinct.
+
+### Exact owner-side activation
+
+1. On the **Windows computer**, use the checked-out #661 integration source and install its normal Node 24 dependencies if missing. No branch creation or force reset. If a local House Steward code is not configured, run `powershell -ExecutionPolicy Bypass -File scripts/Set-WayglassHouseSteward.ps1` **once**. Save the printed code in a private password manager, not in chat.
+2. With Tailscale signed in on Windows, run the read-only doctor:
+   `powershell -ExecutionPolicy Bypass -File scripts/Start-Wayglass-Tailnet.ps1`
+3. Review the device and port access rules in the Tailscale admin console. Only after confirming intended owner/device access, run:
+   `powershell -ExecutionPolicy Bypass -File scripts/Start-Wayglass-Tailnet.ps1 -Publish -OwnerOnlyAclReviewed`
+4. Keep that terminal and the Windows computer running. The script builds/stages Wayglass, verifies the loopback host, tests unauthenticated House refusal and route isolation, then runs **foreground** `tailscale serve 32861`.
+5. Connect the iPhone/iPad Tailscale app to the **same tailnet**. Open the printed `https://<verified-node>.<tailnet>.ts.net/wayglass/?room=wayglass%3Acell-garden` address in Safari. Enter the local House Steward code in the **Nursery panel**, not into ChatGPT.
+6. Verify *Observe → One WTL cycle → Grounded speech → Poetry → Feather* on the device. If an actual remote request fails, do **not** claim live acceptance. Check Windows process lifetime, Serve's displayed URL, ACL grants, and House sign-in. Ctrl+C closes foreground sharing.
+
+**No remote operation claim:** GitHub automation and chat tools cannot start a process on the owner's Windows computer, inspect private Tailscale ACLs, or establish that an iPhone reached the host. Code and CI can validate the gateway and sign-in contract; device acceptance remains an owner-side action and needs its own receipt.
+
 ## Remaining acceptance
 
 - Live owner-only ACL policy verified; House Steward sign-in returns 401 without credentials

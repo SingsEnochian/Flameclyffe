@@ -1,4 +1,5 @@
 import {WAYGLASS_FEATHER_EVENT} from '../somatic-sound.js';
+import {signInHouseSteward} from '../house-steward-session.js';
 
 const BASE='/api/v1/wayglass/cell-garden/nursery';
 const make=(doc,tag,text='',cls='')=>{
@@ -37,16 +38,31 @@ export function mountNurseryLanguagePanel(parent,{
   const feather=action(doc,'feather','🪽 Feather · Stop Nursery');
   const resume=action(doc,'resume','Release Feather');
   const mode=action(doc,'mode','Show poetry');
-  const buttons=[observe,step,run,feather,resume,mode];
+  const signin=action(doc,'signin','House Steward sign-in');
+  const buttons=[observe,step,run,feather,resume,mode,signin];
   actions.append(...buttons);
+  const signinForm=make(doc,'form','','wg-cell-steward-signin');
+  signinForm.hidden=true;
+  const signinLabel=make(doc,'label','House Steward code');
+  const signinField=make(doc,'input');
+  signinField.type='password';
+  signinField.name='credential';
+  signinField.autocomplete='off';
+  signinField.required=true;
+  signinField.maxLength=4096;
+  signinField.setAttribute('aria-label','House Steward code');
+  const signinSubmit=make(doc,'button','Sign in privately');
+  signinSubmit.type='submit';
+  signinLabel.append(signinField);
+  signinForm.append(signinLabel,signinSubmit);
   const status=make(doc,'p','The Nursery is not running in this room. Choose Observe to read host state.','wg-cell-note');
   status.setAttribute('role','status');
   const counts=make(doc,'p','','wg-cell-note');
   const items=make(doc,'ol','','wg-cell-list');
   items.setAttribute('aria-label','Nursery source-bound explanations');
-  panel.append(title,intro,actions,status,counts,items);
+  panel.append(title,intro,actions,signinForm,status,counts,items);
   parent.append(panel);
-  let disposed=false,loading=false,busy=false,current=null,timer=null,selected='grounded';
+  let disposed=false,loading=false,busy=false,current=null,timer=null,selected='grounded',signedIn=false;
   const clear=()=>{if(timer!==null){(scope.clearInterval||globalThis.clearInterval)(timer);timer=null;}};
   function render(){
     if(disposed)return;
@@ -58,6 +74,8 @@ export function mountNurseryLanguagePanel(parent,{
     resume.disabled=!known||!paused||busy;
     mode.disabled=!known;
     observe.disabled=loading;
+    signin.disabled=busy;
+    signin.hidden=signedIn;
     mode.textContent=selected==='grounded'?'Show poetry':'Show grounded meaning';
     counts.textContent=known
       ? `Generation ${current.generation} · Cells ${current.cells?.length??0} · Grounded receipts ${current.groundedUtterances?.length??0} · Poetic expressions ${current.utterances?.length??0} · ${paused?'Feather held':'Host ready'}`
@@ -98,6 +116,12 @@ export function mountNurseryLanguagePanel(parent,{
   async function act(kind){
     if(disposed||signal?.aborted)return;
     if(kind==='mode'){selected=selected==='grounded'?'poetic':'grounded';render();return;}
+    if(kind==='signin'){
+      signinForm.hidden=!signinForm.hidden;
+      if(!signinForm.hidden)signinField.focus?.();
+      render();
+      return;
+    }
     if(kind==='run'){
       if(timer!==null){clear();status.textContent='Automatic cycles stopped. Nursery state retained.';render();return;}
       if(!current||current.paused)return;
@@ -109,7 +133,7 @@ export function mountNurseryLanguagePanel(parent,{
     if(busy&&kind!=='feather')return;
     busy=true;loading=true;render();
     try{
-      if(kind==='observe')current=await request('');
+      if(kind==='observe'){current=await request('');signedIn=true;signinForm.hidden=true;}
       else if(kind==='step'){
         if(!current||current.paused)return;
         const result=await request('/step',{expected_generation:current.generation,owner_confirmed:true});
@@ -121,9 +145,40 @@ export function mountNurseryLanguagePanel(parent,{
         : kind==='feather'?'Nursery stopped. No new turns are authorised.'
         : kind==='resume'?'Owner released Feather. Nursery is ready.':'Nursery host state verified.';
     }catch(error){
-      if(!disposed&&!signal?.aborted){clear();status.textContent='Nursery unavailable: '+String(error?.message||error);}
+      if(!disposed&&!signal?.aborted){
+        clear();
+        const authRequired=/House session|Steward|sign.in|unauthoris|401/i.test(String(error?.message||error));
+        status.textContent=authRequired
+          ? 'House Steward sign-in required. Use the private sign-in button; do not share your credential in chat.'
+          : 'Nursery unavailable: '+String(error?.message||error);
+        if(authRequired){signedIn=false;signinForm.hidden=false;}
+      }
     }finally{busy=false;loading=false;render();}
   }
+  async function onSignin(event){
+    event.preventDefault();
+    if(disposed||busy||signal?.aborted)return;
+    const credential=String(signinField.value||'');
+    // Never retain the credential in project state, localStorage, URL or logs.
+    signinField.value='';
+    busy=true;signinSubmit.disabled=true;
+    try{
+      await signInHouseSteward(credential,fetchImpl);
+      if(disposed||signal?.aborted)return;
+      signedIn=true;
+      signinForm.hidden=true;
+      status.textContent='House Steward session verified. Loading the Nursery.';
+    }catch(error){
+      if(!disposed){
+        signedIn=false;
+        signinForm.hidden=false;
+        status.textContent='House sign-in refused: '+String(error?.message||error);
+      }
+      return;
+    }finally{busy=false;signinSubmit.disabled=false;render();}
+    await act('observe');
+  }
+  signinForm.addEventListener('submit',onSignin);
   const onClick=event=>{
     const kind=event.target?.closest?.('[data-nursery-action]')?.dataset.nurseryAction;
     if(kind)void act(kind);
@@ -137,6 +192,8 @@ export function mountNurseryLanguagePanel(parent,{
     if(disposed)return;
     disposed=true;clear();
     panel.removeEventListener('click',onClick);
+    signinForm.removeEventListener('submit',onSignin);
+    signinField.value='';
     scope.removeEventListener?.(WAYGLASS_FEATHER_EVENT,onFeather);
     signal?.removeEventListener?.('abort',dispose);
   }

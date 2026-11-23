@@ -14,10 +14,19 @@ $Root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $Origin = 'http://127.0.0.1:3000'
 $WayglassPath = '/wayglass/'
 $Tailscale = Get-Command tailscale -ErrorAction SilentlyContinue
-if (-not $Tailscale) { throw 'Tailscale CLI not found on this Windows computer.' }
+$TailscaleExe = if ($Tailscale) { $Tailscale.Source } else { $null }
+if (-not $TailscaleExe -and $env:ProgramFiles) {
+    $Candidate = Join-Path $env:ProgramFiles 'Tailscale\tailscale.exe'
+    if (Test-Path -LiteralPath $Candidate) { $TailscaleExe = $Candidate }
+}
+if (-not $TailscaleExe) {
+    throw 'Tailscale CLI not found. Install or connect Tailscale on the Windows host; no routes were published.'
+}
+# Export only the validated executable location to the foreground gate process.
+$env:WAYGLASS_TAILSCALE_CLI = $TailscaleExe
 
 function Read-TailscaleJson([string[]]$Arguments) {
-    $output = & tailscale @Arguments 2>&1 | Out-String
+    $output = & $script:TailscaleExe @Arguments 2>&1 | Out-String
     if ($LASTEXITCODE -ne 0) { throw ('Tailscale command failed: ' + ($Arguments -join ' ') + '. ' + $output.Trim()) }
     try { return ($output | ConvertFrom-Json) }
     catch { throw ('Tailscale returned unreadable JSON for ' + ($Arguments -join ' ')) }
@@ -74,7 +83,7 @@ function Assert-AllowedTailnetOrigin([string]$expectedOrigin) {
 function Get-ServeConfig {
     # Status JSON may have an empty TCP/Web map. Refuse to modify an existing
     # Serve/Funnel configuration rather than clobbering another application.
-    $raw = & tailscale serve status --json 2>&1 | Out-String
+    $raw = & $script:TailscaleExe serve status --json 2>&1 | Out-String
     if ($LASTEXITCODE -ne 0) {
         if ($raw -match 'No serve config|No serve configuration') { return $null }
         throw ('Cannot verify existing Tailscale Serve/Funnel configuration: ' + $raw.Trim())
