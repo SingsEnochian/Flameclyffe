@@ -389,7 +389,8 @@
         "root package manifests",
         "AGENTS.md",
         ".github workflows/actions"
-      ]
+      ],
+      "expanded_run_status": "pending"
     },
     "wayglass_check": {
       "status": "failed",
@@ -408,7 +409,10 @@
       "previous_failure": "Soma Nova broken-lineage input classified 422 rather than expected 400",
       "repair_commit": "df17731ebf24304beae21bc08dcc1f8114c42e0a",
       "current_run": "45190029567",
-      "status": "in-progress"
+      "status": "cancelled after a newer branch head superseded the run",
+      "last_run_id": 45190029567,
+      "latest_code_tested": "df17731ebf24304beae21bc08dcc1f8114c42e0a",
+      "next_action": "rerun on a subsequent code-bearing head; current latest change is register metadata only"
     },
     "whole_pizza": "Program Workbench, workbench client, server program store, authenticated routes and program-library migration are already present; #676 is partially integrated and remains divergent pending selective diff review.",
     "unified_magic": "#674 not imported wholesale; separate runtime, parser and filesystem receipt host conflict with One Ship. Reconcile semantics into canonical WTL AST/IR and existing program/Return store.",
