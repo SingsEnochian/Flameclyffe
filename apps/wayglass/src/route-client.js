@@ -174,3 +174,14 @@ export async function simulateThoughtVibrationQuantum({
   });
   return jsonOrThrow(response);
 }
+
+// Uses the existing authenticated Wayglass server boundary.
+export async function inspectConjunction(id = null, fetchImpl = fetch) {
+  const suffix = id === null ? '' : '/' + encodeURIComponent(id);
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/conjunctions' + suffix, { cache: 'no-store' }));
+}
+export async function updateConjunction(id, action, payload, fetchImpl = fetch) {
+  return jsonOrThrow(await fetchImpl('/api/v1/wayglass/conjunctions/' + encodeURIComponent(id) + '/' + encodeURIComponent(action), {
+    method: 'POST', headers: JSON_HEADERS, cache: 'no-store', body: JSON.stringify(payload),
+  }));
+}

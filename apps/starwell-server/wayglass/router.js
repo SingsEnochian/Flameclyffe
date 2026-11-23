@@ -23,6 +23,32 @@ const {
 } = require('../../../lib/wayglass-thought-vibration.cjs');
 
 const router = express.Router();
+const { ConjunctionLedger } = require('../../../lib/wayglass-conjunction.cjs');
+let conjunctionLedger;
+function conjunctions() {
+  if (!conjunctionLedger) conjunctionLedger = new ConjunctionLedger(join(
+    process.env.HEARTHGATE_DATA_DIR || join(__dirname, '../data'), 'wayglass-conjunctions.json'));
+  return conjunctionLedger;
+}
+router.get('/conjunctions', (req, res, next) => {
+  try { res.setHeader('Cache-Control', 'no-store'); res.json(conjunctions().list()); } catch (error) { next(error); }
+});
+router.get('/conjunctions/:id', (req, res, next) => {
+  try {
+    res.setHeader('Cache-Control', 'no-store');
+    const row = conjunctions().get(req.params.id);
+    res.status(row ? 200 : 404).json(row || { error: 'Unknown conjunction' });
+  } catch (error) { next(error); }
+});
+router.post('/conjunctions/:id/:action', (req, res, next) => {
+  try {
+    res.setHeader('Cache-Control', 'no-store');
+    res.json(conjunctions().apply(req.params.id, req.params.action, req.body));
+  } catch (error) {
+    if (error instanceof TypeError) return res.status(409).json({ error: error.message });
+    next(error);
+  }
+});
 const MAX_HISTORY = 16;
 const MAX_TEXT = 12000;
 
