@@ -20,17 +20,17 @@ if (!changed.includes(registerPath)) {
   if (register.governance?.one_ship_contract !== contractPath) throw new Error('current.json does not point to the canonical One Ship contract.');
 }
 if (implementation.length && !changed.includes(impactPath)) {
-  throw new Error(`Implementation/workflow changes require a same-PR One Ship impact entry in ${impactPath}. Changed: ${implementation.join(', ')}`);
+  throw new Error('Implementation/workflow changes require a same-PR One Ship impact entry in ' + impactPath + '. Changed: ' + implementation.join(', '));
 }
 if (changed.includes(impactPath)) {
   const impact = JSON.parse(readFileSync(impactPath, 'utf8'));
   if (impact.schema !== 'wayglass.change-impact/v1' || !Array.isArray(impact.entries)) throw new Error('Invalid One Ship change-impact manifest.');
   const declared = new Set(impact.entries.flatMap(entry => entry.changed_paths || []));
   const missing = implementation.filter(path => !declared.has(path));
-  if (missing.length) throw new Error(`Undeclared changed paths in One Ship impact manifest: ${missing.join(', ')}`);
+  if (missing.length) throw new Error('Undeclared changed paths in One Ship impact manifest: ' + missing.join(', '));
   for (const entry of impact.entries) {
     for (const field of ['affected_organs','dependent_checks','provenance','rollback']) {
-      if (!Array.isArray(entry[field]) || entry[field].length === 0) throw new Error(`Each impact entry needs non-empty ${field}.`);
+      if (!Array.isArray(entry[field]) || entry[field].length === 0) throw new Error('Each impact entry needs non-empty ' + field + '.');
     }
   }
 }
