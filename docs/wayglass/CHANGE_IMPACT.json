@@ -381,7 +381,15 @@
         "test/wayglass/first-contact-seat.test.cjs",
         "test/wayglass/integrated-voyage.test.cjs",
         "test/wayglass/surface-registry-async.test.cjs",
-        "test/wayglass/with-003-pause-audio.test.cjs"
+        "test/wayglass/with-003-pause-audio.test.cjs",
+        "lib/wayglass/soma-nova-morphogenesis.mjs",
+        "lib/wayglass/soma-nova-morphogenesis.test.mjs",
+        "apps/starwell-server/wayglass/router.js",
+        "apps/starwell-server/test/wayglass-soma-nova-morphogenesis.test.js",
+        "apps/wayglass/src/soma-nova-client.js",
+        "apps/wayglass/src/surfaces/program-workbench.js",
+        "apps/wayglass/src/surfaces/program-workbench.css",
+        "apps/wayglass/test/soma-nova-client.test.js"
       ],
       "affected_organs": [
         "owner authority and kernel",
@@ -392,7 +400,8 @@
         "Constellation agency",
         "Return and Universe continuity",
         "cloud/host/install",
-        "ArcSweep inherited instruments and interfaces"
+        "ArcSweep inherited instruments and interfaces",
+        "Soma Nova Morphogenesis Folio"
       ],
       "dependent_checks": [
         "Wayglass Check",
@@ -404,15 +413,21 @@
         "Wayglass Living Cypher Browser",
         "Wayglass Möbius Lift Browser",
         "Wayglass Six-Lane Induction Conductor",
-        "ArcSweep portable release and Windows installer where applicable"
+        "ArcSweep portable release and Windows installer where applicable",
+        "Soma Nova planner tests",
+        "Soma Nova authenticated preview route tests",
+        "Program Workbench browser/UI tests"
       ],
       "provenance": [
         "existing integration train PR #661 and its source-reconciliation history",
         "mission issue #583 reconciliation queue",
-        "candidate lineage and exact SHAs recorded in docs/wayglass/current.json and PR #661 body; unresolved source candidates remain unverified until exact-head adoption proof"
+        "candidate lineage and exact SHAs recorded in docs/wayglass/current.json and PR #661 body; unresolved source candidates remain unverified until exact-head adoption proof",
+        "source PR #678 planner SHA 7c81de2b8159d8d7dc1542f7f9489fc3aa567f0d",
+        "owner request to make Soma Nova usable in Wayglass; preview port reuses existing Program Workbench and authenticated House host"
       ],
       "rollback": [
-        "revert only the relevant integration commits from PR #661; preserve source branches, canonical WTL/runtime and durable user data; no destructive database migration rollback without a separate data-safety review"
+        "revert only the relevant integration commits from PR #661; preserve source branches, canonical WTL/runtime and durable user data; no destructive database migration rollback without a separate data-safety review",
+        "revert the Soma Nova planner, preview route, client and Folio UI together; leave existing WTL Workbench and program library intact"
       ]
     }
   ]
