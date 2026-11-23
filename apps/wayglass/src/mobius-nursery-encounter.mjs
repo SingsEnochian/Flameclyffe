@@ -7,7 +7,8 @@ export function encounter({left,right,signal,consent,feather=false}) {
     ? Object.getOwnPropertyDescriptor(obj,key)?.value : undefined;
   const snapshot = p => ({id:own(p,'id'),spin:own(p,'spin'),revision:own(p,'revision')});
   const L=snapshot(left),R=snapshot(right);
-  const valid = p => typeof p.id === 'string' && /^[\\w.:-]{1,128}$/.test(p.id) &&
+  // Share the same identifier grammar as the consent-bound WTL Nursery bridge.
+  const valid = p => typeof p.id === 'string' && /^[a-zA-Z0-9_.:-]{1,128}$/.test(p.id) &&
     Number.isFinite(p.spin) && p.spin >= -1 && p.spin <= 1 &&
     Number.isSafeInteger(p.revision) && p.revision >= 0 && p.revision < Number.MAX_SAFE_INTEGER;
   if (!valid(L) || !valid(R) || L.id === R.id) throw Error('Distinct valid participants required');
