@@ -1,6 +1,6 @@
 import {mountWayglassSoundComposition} from './surfaces/sound-composition.js';
 import {wayglassSomaticSound} from './somatic-sound.js';
-import {wayglassStoryScoreBinding,installWayglassStoryComposition} from './story-score-binding.js';
+import {wayglassStoryScoreBinding,installWayglassStoryComposition,runWayglassStoryScore} from './story-score-binding.js';
 import './styles.css';
 import './authorization.css';
 import './faeberpunk.css';
@@ -26,6 +26,7 @@ import { mountWayglassRuntimeSandbox } from './surfaces/runtime-sandbox.js';
 import './wtl-interface-atelier.css';
 import './surfaces/cell-garden.css';
 import { mountWayglassWritingRoom } from './surfaces/writing-room.js';
+import { mountWayglassProgramWorkbench } from './surfaces/program-workbench.js';
 import { mountWayglassSystemsSurface } from './surfaces/systems.js';
 import { mountWayglassSpectrumSurface } from './surfaces/spectral-field.js';
 import { mountWayglassNativeVoice } from './surfaces/native-voice.js';
@@ -56,9 +57,10 @@ import { WAYGLASS_ENTRY_SURFACE, resolveWayglassEntry } from './wayglass-entry.j
 import { subscribeWayglassObserver } from './living-observer-model.js';
 import { recordRouteAsWonderLight } from './wonder-light.js';
 import { registerWayglassOrgan, listWayglassOrgans } from './organ-registry.js';
+import { createWayglassOSKernel } from './os-kernel.js';
 import { FIRST_WAYGLASS_ORGANS } from './organ-donors.js';
 
-// Shipwide FAEberpunk material and interaction frame must load after every room stylesheet.
+// Shipwide FAEberpunk material and interaction frame loads after room stylesheets.
 import './faeberpunk-ship.css';
 
 const root = document.querySelector('#app');
@@ -99,6 +101,7 @@ registerWayglassSurfaceAlias('arcsweep:deck', 'wayglass:world-continuity');
 registerWayglassSurfaceAlias('arcsweep:writing-room', 'wayglass:writing-room');
 
 registerWayglassSurface({surface_id:'wayglass:universal-codex',label:'Wayglass · Universal Codex',mount:mountUniversalCodex});
+registerWayglassSurface({surface_id:'wayglass:program-workbench',label:'Wayglass · Program Workbench',mount:mountWayglassProgramWorkbench});
 
 
 
@@ -176,6 +179,17 @@ registerWayglassSurface({
   mount: mountWayglassToybox,
 });
 
+// Whole Pizza native kernel composes the current organ and surface registry once.
+const vesselKernel=createWayglassOSKernel({organs:listWayglassOrgans(),surfaces:listWayglassSurfaces()});
+const vesselBootReceipt=vesselKernel.boot();
+globalThis.addEventListener('wayglass:feather',event=>{
+  if(event.detail?.stopped===true)vesselKernel.feather('sensory-feather');
+  else if(event.detail?.stopped===false&&event.detail?.confirmed===true)
+    vesselKernel.releaseFeather({actor:'owner-confirmed',explicit:true});
+});
+globalThis.addEventListener('wayglass:os:feather',()=>{
+  try{globalThis.navigator?.vibrate?.(0);}catch{/* Device owns haptics. */}
+});
 const browserEmbodiment = Object.freeze({
   body_id: 'browser-host',
   body_class: 'host-os',
@@ -358,6 +372,18 @@ locusNav.addEventListener('click',event=>{
 
 const wayglass = Object.freeze({
   schema: 'wayglass.os/v0.1',
+  kernel: Object.freeze({
+    schema:vesselKernel.schema,boot:()=>vesselBootReceipt,
+    inspect:()=>vesselKernel.inspect(),system:id=>vesselKernel.system(id),
+    subscribe:listener=>vesselKernel.subscribe(listener),
+    releaseFeather:({actor,confirmed=false}={})=>vesselKernel.releaseFeather({actor,explicit:confirmed===true}),
+  }),
+  storyScore:Object.freeze({
+    inspect:()=>wayglassStoryScoreBinding.checkpoint(),
+    run:runWayglassStoryScore,
+    play:()=>wayglassSomaticSound.composition.startGeneration({confirmed:true}),
+    pause:()=>wayglassSomaticSound.composition.pauseGeneration(),
+  }),
   soundCompositionState:()=>{const s=wayglassSomaticSound.composition.snapshot();return Object.freeze({score_status:s.score_status,generating:s.generating,audio_enabled:s.audio_enabled,sequence:s.sequence,last_error:s.last_error,voice_count:s.layers.length,declared_context:wayglassStoryScoreBinding.getContext()!==null});},
   surfaces: listWayglassSurfaces,
   organs: listWayglassOrgans,

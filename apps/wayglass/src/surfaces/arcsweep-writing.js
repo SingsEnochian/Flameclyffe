@@ -160,7 +160,7 @@ export async function mountArcSweepWritingSurface(root) {
     '<div id="wg-revision-note" class="wg-revision-note" hidden><span>Revising a previous turn. Sending adds a correction; the original and receipts stay unchanged.</span><button id="wg-revision-cancel" type="button" class="glass-chip">Cancel revision</button></div>',
     "        <div class=\"composer-foot\">\n",
     "          <span id=\"wg-status\" class=\"tiny\">IC · Rowan has the turn</span>\n",
-    "          <button id=\"wg-send\" data-wg-static-control type=\"button\" class=\"send-jewel\"><span aria-hidden=\"true\">➤</span> Send to Writing Room</button>\n",
+    "          <button id=\"wg-send\" type=\"button\" class=\"send-jewel\"><span aria-hidden=\"true\">➤</span> Send to Writing Room</button>\n",
     "        </div>\n",
     "      </section>\n",
     '<section class="wg-wyrdrune-soundscape glass-panel" aria-label="Wyrdrune living story soundscape" style="border-radius:1.5rem;padding:1.1rem;margin-block:1rem;">',
@@ -174,7 +174,7 @@ export async function mountArcSweepWritingSurface(root) {
       '<div style="display:flex;gap:.65rem;flex-wrap:wrap;align-items:center;margin-block:.6rem;">',
         '<button type="button" class="glass-chip" id="wg-score-audio" aria-pressed="false">Enable sound</button>',
         '<label><input id="wg-score-mono" type="checkbox" checked> Mono-safe</label>',
-        '<button type="button" class="glass-chip" id="wg-score-feather" data-wg-static-control>🪽 Feather Stop</button>',
+        '<button type="button" class="glass-chip" id="wg-score-feather">🪽 Feather Stop</button>',
       '</div>',
       '<p id="wg-score-status" class="tiny" role="status">Quiet. Live scoring and audio are off.</p>',
       '<output id="wg-score-readout" class="tiny" aria-live="polite">No Wyrdrune harmonics yet.</output>',
@@ -182,11 +182,12 @@ export async function mountArcSweepWritingSurface(root) {
     '</section>',
     '<section class="wg-wtl-panel" aria-label="Wyrdrune ritual workbench">',
       '<button type="button" class="glass-chip fae-codex-door" data-wayglass-room="wayglass:universal-codex">◇ Open the Universal Codex</button>',
+      '<button type="button" id="wg-fiction-to-workbench" class="glass-chip">◇ Take draft to living Möbius Workbench</button>',
       '<details id="wg-wtl-details" class="glass-panel">',
         '<summary>Wyrdrune · Eightfold Ritual Workbench</summary>',
         '<p class="tiny">Preview the Eightfold locally. You decide whether to discuss it with your selected model or SpicyChat route; nothing sends automatically.</p>',
         '<textarea id="wg-wtl-source" data-wtl-code="true" spellcheck="false" rows="10" maxlength="16000" aria-label="Wyrdrune WTL source" placeholder="mobius { perceive { ... } ... }"></textarea>',
-        '<div class="wg-wtl-actions"><label class="wg-cypher-tempo">Glyph tempo <select id="wg-wtl-cypher-pace" aria-label="Writing Room Wyrdrune glyph tempo">'+CYPHER_PACE_OPTIONS+'</select></label><button type="button" class="glass-chip" id="wg-wtl-example">Insert example</button><button type="button" class="glass-chip" id="wg-wtl-preview">Preview Eightfold</button><button type="button" class="glass-chip" id="wg-wtl-discuss" disabled>Stage for model discussion</button><button type="button" class="glass-chip" id="wg-wtl-cypher" data-wg-static-control>Read in English</button><button type="button" class="glass-chip wg-cypher-skip" id="wg-wtl-cypher-skip" data-wg-static-control disabled>Reveal English now</button></div>',
+        '<div class="wg-wtl-actions"><label class="wg-cypher-tempo">Glyph tempo <select id="wg-wtl-cypher-pace" aria-label="Writing Room Wyrdrune glyph tempo">'+CYPHER_PACE_OPTIONS+'</select></label><button type="button" class="glass-chip" id="wg-wtl-example">Insert example</button><button type="button" class="glass-chip" id="wg-wtl-preview">Preview Eightfold</button><button type="button" class="glass-chip" id="wg-wtl-discuss" disabled>Stage for model discussion</button><button type="button" class="glass-chip" id="wg-wtl-cypher">Read in English</button><button type="button" class="glass-chip wg-cypher-skip" id="wg-wtl-cypher-skip" disabled>Reveal English now</button></div>',
         '<p id="wg-wtl-status" class="tiny" role="status">No Wyrdrune preview yet. Sign in as House Steward to use the compiler.</p>',
         '<pre id="wg-wtl-output" aria-label="Wyrdrune phase receipts" hidden></pre>',
         '<div id="wg-wtl-gloss" class="wg-wtl-gloss wg-cypher-veil" aria-label="Wyrdrune read in English" aria-live="off" hidden></div>',
@@ -267,6 +268,18 @@ export async function mountArcSweepWritingSurface(root) {
       input.dispatchEvent(new Event('input',{bubbles:true}));input.focus();},
   });
   const wtlSource=root.querySelector('#wg-wtl-source'),wtlStatus=root.querySelector('#wg-wtl-status');
+  root.querySelector('#wg-fiction-to-workbench')?.addEventListener('click',()=>{
+    const fiction=String(input.value||'').trim();
+    if(!fiction){wtlStatus.textContent='Write or paste fiction into the draft first.';return;}
+    if(fiction.length>12000){wtlStatus.textContent='Fiction exceeds 12000 characters.';return;}
+    try{
+      if(!globalThis.sessionStorage)throw new Error('Session draft handoff unavailable.');
+      globalThis.sessionStorage.setItem('wayglass:fiction-handoff/v1',fiction);
+      const mount=globalThis.__wayglassOS?.mount;
+      if(typeof mount!=='function')throw new Error('Native Workbench route unavailable.');
+      mount('wayglass:program-workbench');
+    }catch(error){wtlStatus.textContent='Draft remains here. Transfer unavailable: '+String(error?.message||error);}
+  });
   const wtlOutput=root.querySelector('#wg-wtl-output'),wtlDiscuss=root.querySelector('#wg-wtl-discuss');
   const WTL_EXAMPLE="mobius {\n perceive { let light = votive(\"Lantern\",\"An offered guiding light\"); }\n compress { let shape = star(8); }\n release { let letter = angelicLetter(1); }\n verify { emit light; }\n integrate { emit shape; }\n choose { emit letter; }\n return { emit \"held\"; }\n transcend { emit 1; }\n}";
   // Wyrdrune's compiled programme is translated without a model call.

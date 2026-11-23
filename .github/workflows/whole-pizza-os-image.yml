@@ -1,0 +1,80 @@
+name: Whole Pizza OS VM Image
+on:
+  pull_request:
+    paths:
+      - 'os/whole-pizza/**'
+      - '.github/workflows/whole-pizza-os-image.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm ci --prefix apps/starwell-server --omit=dev
+      - run: node --test os/whole-pizza/test/*.test.cjs
+      - run: npm run wayglass:deploy:server
+      - run: bash os/whole-pizza/package.sh
+      - name: Inspect packaged host and WTL source
+        run: |
+          test -f os/whole-pizza/.build/release/lib/wyrdrune/wayglass-vessel-plan.wtl
+          test -f os/whole-pizza/.build/release/apps/starwell-server/public/wayglass/index.html
+          test ! -e os/whole-pizza/.build/release/apps/starwell-server/.env
+          test ! -e os/whole-pizza/.build/release/apps/starwell-server/data
+          bash -n os/whole-pizza/rootfs/usr/libexec/wayglass/launch.sh
+          bash -n os/whole-pizza/rootfs/usr/libexec/wayglass/open.sh
+          node --check os/whole-pizza/rootfs/usr/libexec/wayglass/boot-wtl.cjs
+      - name: Save source image layer for the opt-in VM build
+        uses: actions/upload-artifact@v4
+        with:
+          name: whole-pizza-source
+          path: os/whole-pizza/.build/release/
+          include-hidden-files: true
+          retention-days: 2
+  qcow2:
+    needs: check
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: whole-pizza-source
+          path: os/whole-pizza/.build/release/
+      - name: Check exact source identity
+        run: test "$(cat os/whole-pizza/.build/release/.wayglass-source-sha)" = "$GITHUB_SHA"
+      - name: Install image tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y podman qemu-utils
+      - name: Assemble Fedora Kinoite Whole Pizza image
+        run: |
+          sudo podman build --format docker --build-arg "WAYGLASS_SOURCE_SHA=$GITHUB_SHA" -t localhost/wayglass-whole-pizza:"$GITHUB_SHA" -f os/whole-pizza/Containerfile .
+      - name: Convert bootable container to QCOW2
+        run: |
+          mkdir -p os/whole-pizza/out
+          sudo podman run --rm --privileged --security-opt label=disable \
+            -v /var/lib/containers/storage:/var/lib/containers/storage \
+            -v "$PWD/os/whole-pizza/out:/output" \
+            quay.io/centos-bootc/bootc-image-builder:latest \
+            --type qcow2 --rootfs btrfs localhost/wayglass-whole-pizza:"$GITHUB_SHA"
+          sudo chown -R "$(id -u):$(id -g)" os/whole-pizza/out
+          test -s os/whole-pizza/out/qcow2/disk.qcow2
+          qemu-img info os/whole-pizza/out/qcow2/disk.qcow2
+          sha256sum os/whole-pizza/out/qcow2/disk.qcow2 > os/whole-pizza/out/SHA256SUMS
+      - name: Save unbooted disk and checksum
+        uses: actions/upload-artifact@v4
+        with:
+          name: whole-pizza-kinoite45-qcow2
+          path: |
+            os/whole-pizza/out/qcow2/disk.qcow2
+            os/whole-pizza/out/SHA256SUMS
+          compression-level: 0
+          retention-days: 7

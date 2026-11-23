@@ -13,6 +13,7 @@ const DESTINATIONS=Object.freeze({
   'wayglass:cell-garden':'creation',
   'wayglass:wtl-interface-atelier':'creation',
   'wayglass:runtime-sandbox':'creation',
+  'wayglass:program-workbench':'creation',
   'wayglass:universal-codex':'creation',
   'wayglass:journey-before-destination':'contact',
   'wayglass:world-continuity':'creation',

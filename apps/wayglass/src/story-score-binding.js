@@ -1,4 +1,4 @@
-import {createStoryCompositionBinding} from '../../../lib/wayglass-story-score.mjs';
+import {createStoryCompositionBinding,executeStorySoundScore,measureStoryScoreText} from '../../../lib/wayglass-story-score.mjs';
 import {wayglassSomaticSound} from './somatic-sound.js';
 const KEY='wayglass.story-composition.return/v1';
 let text='',turns=0,installed=false;
@@ -13,4 +13,19 @@ export function installWayglassStoryComposition({scope=globalThis,document=scope
  // Rowan requested continuous composition. A fresh region evolves quietly;
  // recovered or stopped regions never restart themselves or enable output.
  if(!restored&&!wayglassSomaticSound.snapshot().feather_stopped)wayglassSomaticSound.composition.startGeneration({confirmed:true});
+}
+
+export async function runWayglassStoryScore({signal}={}){
+ const context=wayglassStoryScoreBinding.getContext();
+ if(!context)throw new Error('Declare two independent voices and their affinity in Sound Studio before running StorySoundscape.');
+ const continuity=wayglassStoryScoreBinding.checkpoint();
+ if(!continuity.anchor)throw new Error('The StorySoundscape return anchor has not been established.');
+ const metrics=measureStoryScoreText(text,{turns,source_ref:'wayglass:current-composer-input'});
+ return executeStorySoundScore({
+  metrics,
+  affinity:context.affinity,
+  anchor:continuity.anchor,
+  voices:context.voices,
+  signal,
+ });
 }
