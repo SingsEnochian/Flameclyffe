@@ -955,7 +955,18 @@
         "Revert grammar and world-crossing planning/UI/CI together; preserve immutable source and Return receipts",
         "No new hardware capability or deployment is enabled to undo"
       ],
-      "status": "source candidate; exact-head CI pending and hardware tests not conducted"
+      "status": "source candidate; exact-head CI pending and hardware tests not conducted",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Extend existing WTL fiction and Workbench with a capability-scoped projection; no alternate WTL runtime, projection registry or unauthorised device executor.",
+        "owner_outcome": "Owner-authored fiction can describe a physical intention, while actual physical execution stays separately authorised and evidenced.",
+        "finish_line": "Exact-head world-crossing, native WTL, iPad, Workbench and One Ship checks pass; hardware effects remain unavailable until real device binding and consent.",
+        "return_marker": "Review source-bound physical capability receipts, separately verify real-world effects, and do not claim physical manifestation from a preview."
+      }
     }
   ]
 }
