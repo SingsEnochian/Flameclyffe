@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { access, readFile } from 'node:fs/promises';
 import { SOUND_ORGANS } from '../src/sound-organ-registry.js';
 
-const REQUIRED = ['sound-room', 'runa', 'tone-lab', 'sound-banks', 'haptics'];
+const REQUIRED = ['sound-room', 'runa', 'harmonic-observatory', 'tone-lab', 'sound-banks', 'haptics'];
 
 test('sound organ registry carries every first-class sound instrument', () => {
   assert.deepEqual(SOUND_ORGANS.map((organ) => organ.id), REQUIRED);
@@ -38,6 +38,13 @@ test('native sound organs deliberately focus existing ArcSweep surfaces', () => 
     assert.ok(organ.focusSelector);
     assert.equal(organ.deployedPath, 'apps/arcsweep/index.html');
   });
+});
+
+test('Harmonic Observatory is a real independent acoustic laboratory route', () => {
+  const organ = SOUND_ORGANS.find((entry) => entry.id === 'harmonic-observatory');
+  assert.equal(organ.kind, 'external');
+  assert.match(organ.pagesHref, /harmonic-observatory\/$/);
+  assert.equal(organ.sourcePath, 'apps/arcsweep/src/harmonic-observatory/core.js');
 });
 
 test('Tone Lab preserves the existing somatic World-Tone Gate', () => {

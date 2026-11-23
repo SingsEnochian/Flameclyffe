@@ -1,0 +1,22 @@
+/* Extends the existing Wayglass mineral-glass visual vocabulary used by Harmonic Observatory. */
+.foundry-controls{display:flex;gap:14px;align-items:end;padding:16px 20px;border-radius:20px;flex-wrap:wrap;margin:14px 0}
+.foundry-controls label{flex:1 1 220px;min-width:160px}.foundry-controls label input,.foundry-controls label select{height:44px}
+.foundry-count{color:var(--teal);font-size:.8rem;letter-spacing:.08em;padding:0 7px 11px}
+.foundry-model-layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(320px,1fr);gap:14px;align-items:start}
+.foundry-catalogue{min-width:0}.foundry-model-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.foundry-model{position:relative;display:flex;flex-direction:column;gap:12px;min-width:0;min-height:222px;padding:19px;text-align:left;color:var(--text);border:1px solid var(--line);border-radius:20px;cursor:pointer;transition:background .16s,border-color .16s,transform .16s}
+.foundry-model:hover,.foundry-model[aria-pressed="true"]{border-color:var(--line-hot);background:linear-gradient(145deg,rgba(23,69,84,.46),rgba(17,21,42,.70));transform:translateY(-1px)}
+.model-class{font-size:.68rem;letter-spacing:.18em;color:var(--teal);font-weight:750}.model-label{font:1.48rem/1.18 Georgia,serif;color:var(--text)}
+.model-summary{line-height:1.56;color:var(--muted);font-size:.86rem;flex:1}.model-footer{color:#aeadca;letter-spacing:.04em;font-size:.72rem}
+.foundry-inspector{padding:26px;border-radius:24px;position:sticky;top:18px;min-height:450px}
+.foundry-inspector h2{font:2.25rem Georgia,serif;margin:.35rem 0 12px}.foundry-inspector h3,.foundry-route-bay h3{font:1.3rem Georgia,serif;margin:20px 0 10px}
+.foundry-inspector ol{color:var(--muted);font-size:.86rem;line-height:1.6;padding-left:22px}.foundry-inspector li{padding-bottom:10px}
+.inspect-field{padding:8px 12px;border-left:1px solid var(--line-hot);margin:5px 0;background:rgba(55,104,112,.07);color:var(--muted);font-size:.82rem;overflow-wrap:anywhere}
+.foundry-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}.foundry-link{color:var(--teal);font-weight:650;font-size:.85rem;text-decoration:none}.foundry-link:hover{text-decoration:underline}
+.foundry-route-bay{padding:22px;display:grid;grid-template-columns:1fr 1fr;gap:24px;border-radius:24px}.foundry-route{display:flex;flex-direction:column;gap:7px;padding:13px;margin:9px 0;border:1px solid var(--line);background:rgba(2,12,20,.5);border-radius:12px}.foundry-route strong{font-size:.86rem}.foundry-route span{color:var(--muted);font-size:.75rem;overflow-wrap:anywhere}
+#route-status,#plan-status{font-size:.8rem;line-height:1.5;color:var(--muted);margin-top:12px}
+.foundry-applets,.foundry-discovery{padding:24px;border-radius:24px}.foundry-applet-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.applet-tile{min-height:170px;display:flex;flex-direction:column;gap:12px;border:1px solid var(--line);padding:17px;border-radius:16px;background:rgba(0,7,14,.44)}.applet-tile strong{font:1.3rem Georgia,serif}.applet-tile p{margin:0;flex:1}.pending-link{color:#afa6cc;font-size:.72rem}.foundry-discovery{display:flex;flex-wrap:wrap;gap:15px}.discovery-card{display:flex;flex-direction:column;gap:9px;flex:1 1 250px}
+.empty-list{color:var(--muted)}
+@media(max-width:1050px){.foundry-model-layout{grid-template-columns:1fr}.foundry-inspector{position:static}.foundry-applet-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.foundry-model-grid,.foundry-route-bay,.foundry-applet-grid{grid-template-columns:1fr}.foundry-controls{flex-direction:column;align-items:stretch}.foundry-controls label{width:100%}.foundry-inspector{padding:19px}}
+@media(prefers-reduced-motion:reduce){.foundry-model{transition:none}.foundry-model:hover{transform:none}}

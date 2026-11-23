@@ -4,7 +4,7 @@ import { access, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { CREATIVE_ORGANS } from '../src/creative-organ-registry.js';
 
-const REQUIRED = ['glyph-lab', 'brush-foundry', 'living-glyph', 'font-foundry', 'continuity-gate'];
+const REQUIRED = ['glyph-lab', 'brush-foundry', 'living-glyph', 'font-foundry', 'media-foundry', 'continuity-gate'];
 
 test('creative organ registry carries every recovered first-class instrument', () => {
   assert.deepEqual(CREATIVE_ORGANS.map((organ) => organ.id), REQUIRED);
