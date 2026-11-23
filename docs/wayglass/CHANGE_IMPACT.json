@@ -670,6 +670,50 @@
         "finish_line": "Browser runs to its actual hit-target assertions and captures a screenshot if controls are obscured.",
         "return_marker": "Verify exact-head Living Cypher and repair any real control obstruction revealed."
       }
+    },
+    {
+      "change_id": "wtl-wonder-typed-contract-repair-2026-11-23",
+      "changed_paths": [
+        "docs/wayglass/CHANGE_IMPACT.json",
+        "lib/wyrdrune/runtime.mjs",
+        "lib/wyrdrune/typed-ir.test.cjs"
+      ],
+      "affected_organs": [
+        "Wyrdrune canonical runtime",
+        "Typed IR acceptance contracts",
+        "Wonder semantic record and evidence",
+        "Soma Nova native WTL dependency"
+      ],
+      "dependent_checks": [
+        "node --test lib/wyrdrune/typed-ir.test.cjs",
+        "node --test lib/wayglass-wyrdrune-ritual.test.cjs",
+        "Wayglass Check exact-head",
+        "Wayglass Cloud and Native ArcSweep matrix gate",
+        "Wyrdrune Two-Backend Parity",
+        "One Ship change-impact contract"
+      ],
+      "provenance": [
+        "Failed Wayglass Check #661 source-head c87e15dd723a59e9204a623099dfb873b1bba916 CI run 45203033076",
+        "Comparison with lib/wyrdrune/runtime.mjs parse grammar and typed-ir.cjs artifact contract",
+        "Existing Null-prototype WTL record security preserved; no runtime flattening",
+        "Mission #583 / existing integration PR #661"
+      ],
+      "rollback": [
+        "Revert runtime Wonder error-contract message and typed IR test assumptions together if conformance diverges",
+        "Preserve earlier source and fail-closed WTL behaviour; no production deployment"
+      ],
+      "status": "source-committed-in-review; exact-head CI pending",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Repair canonical WTL test contract rather than parallel parser or runtime; preserve original null-prototype record values.",
+        "owner_outcome": "Shared Wyrdrune language contract passes meaningful validation and preserves safe, source-attributed data.",
+        "finish_line": "5 focused failures no longer fail at exact integration head, without disabling tests.",
+        "return_marker": "Verify full integration CI, then resume Soma Nova durable Return and Watercolour/Nursery gates."
+      }
     }
   ]
 }
