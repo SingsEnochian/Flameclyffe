@@ -255,7 +255,7 @@ async function checkWriting(page,profile){
   return results;
  });
  if(controlTargets.some(target=>target.hits.some(hit=>!hit)))
-  await page.screenshot({path:resolve(out,profile+'-writing-hit-interception.png'),fullPage:true});
+  await page.screenshot({path:resolve(output,profile+'-writing-hit-interception.png'),fullPage:true});
  for(const target of controlTargets){
   assert.deepEqual(target.hits,[true,true,true],target.id+' must stay clickable across its width: '+JSON.stringify(target));
   assert.ok(target.height>=44,target.id+' needs a 44px tap target');
