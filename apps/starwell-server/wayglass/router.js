@@ -665,6 +665,64 @@ function createWayglassRouter({
     try { res.json(cellGarden.commit(req.body || {})); }
     catch (error) { gardenFailure(res, error); }
   });
+  // Native WTL Nursery shares the existing authenticated Cell Garden host.
+  // No additional port, public endpoint, timer, external model or duplicate WTL engine.
+  // Lazy state belongs to this single ship router, not to individual browser tabs.
+  let nurseryInstance=null,nurseryLoading=null,nurseryTurning=false;
+  function getNursery(){
+    if(nurseryInstance)return Promise.resolve(nurseryInstance);
+    if(!nurseryLoading){
+      nurseryLoading=import('../../wayglass/src/wtl-cell-ecology.js').then(({createCellEcology})=>{
+        const colony=createCellEcology({maxCells:24,seed:11,radius:3,mutationRate:0.2,autonomousFusion:false});
+        colony.plant('a','explorer',0,0);
+        colony.plant('b','explorer',1,0);
+        nurseryInstance=colony;
+        return colony;
+      }).catch(error=>{nurseryLoading=null;throw error;});
+    }
+    return nurseryLoading;
+  }
+  function nurseryError(res,error){
+    return gardenFailure(res,Object.assign(error instanceof Error?error:new Error(String(error)),{
+      status:[400,403,409].includes(error?.status)?error.status:503
+    }));
+  }
+  router.get('/cell-garden/nursery',async(_req,res)=>{
+    try{
+      const colony=await getNursery();
+      res.json({...colony.snapshot(),authority:'house-scoped-local-simulation',cold_return_verified:false,
+        language_contract:'wayglass.wtl.cell-grounding/v0.1'});
+    }catch(error){nurseryError(res,error);}
+  });
+  router.post('/cell-garden/nursery/step',async(req,res)=>{
+    try{
+      const colony=await getNursery();
+      if(req.body?.owner_confirmed!==true)return res.status(403).json({error:'Owner confirmation required to advance Nursery'});
+      if(nurseryTurning)return res.status(409).json({error:'A Nursery turn is already in progress'});
+      if(!Number.isSafeInteger(req.body?.expected_generation)||
+         req.body.expected_generation!==colony.snapshot().generation)
+        return res.status(409).json({error:'Nursery revision changed; refresh before stepping'});
+      if(colony.snapshot().paused)return res.status(409).json({error:'Nursery is Feather-stopped'});
+      nurseryTurning=true;
+      try{
+        const step=colony.step();
+        const turn=await colony.turn({turnEvery:6});
+        if(!res.destroyed)res.json({step,turn,culture:colony.snapshot()});
+      }finally{nurseryTurning=false;}
+    }catch(error){if(!res.destroyed)nurseryError(res,error);}
+  });
+  router.post('/cell-garden/nursery/feather',async(_req,res)=>{
+    try{const colony=await getNursery();colony.feather();res.json(colony.snapshot());}
+    catch(error){nurseryError(res,error);}
+  });
+  router.post('/cell-garden/nursery/resume',async(req,res)=>{
+    try{
+      if(req.body?.owner_confirmed!==true)return res.status(403).json({error:'Explicit Feather release required'});
+      const colony=await getNursery();
+      colony.resume();res.json(colony.snapshot());
+    }catch(error){nurseryError(res,error);}
+  });
+
   // Cell ecology stays inside the same authenticated House custody boundary.
   // All route calls are owner-authored deterministic simulations, not model turns.
   async function gardenTransition(req, res, work) {

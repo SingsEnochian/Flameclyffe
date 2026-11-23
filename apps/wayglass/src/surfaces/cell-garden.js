@@ -2,6 +2,7 @@ import {WAYGLASS_FEATHER_EVENT, wayglassSomaticSound} from '../somatic-sound.js'
 import {playCellReturn} from '../cell-ecology-audio.js';
 import {createCellListeningChannel} from '../cell-listening-channel.js';
 import {colonyTake} from '../cell-radio-recording.js';
+import {mountNurseryLanguagePanel} from './nursery-language.js';
 
 const BASE='/api/v1/wayglass/cell-garden';
 const actionButton=(doc,action,label)=>{
@@ -149,6 +150,7 @@ export function mountWayglassCellGarden(root,{
  ecology.append(ecologyTitle,explainer,roles,channels,signalBox,lastSignal,soundActions,audioNote,fusionActions,fusionNote);
 
  section.append(heading,shell,status,family,candidate,ecology);
+ const disposeNursery=mountNurseryLanguagePanel(section,{fetchImpl,scope,signal:roomSignal});
  root.replaceChildren(section);
  const urls=scope.URL??globalThis.URL;
  let recordingUrl=null;
@@ -464,5 +466,6 @@ export function mountWayglassCellGarden(root,{
   section.removeEventListener('input',onInput);
   section.removeEventListener('change',onInput);
   scope.removeEventListener?.(WAYGLASS_FEATHER_EVENT,onSharedFeather);
+  disposeNursery();
  };
 }

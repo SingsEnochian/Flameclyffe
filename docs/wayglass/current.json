@@ -423,6 +423,15 @@
     "whole_pizza": "Program Workbench, workbench client, server program store, authenticated routes and program-library migration are already present; #676 is partially integrated and remains divergent pending selective diff review.",
     "unified_magic": "#674 not imported wholesale; separate runtime, parser and filesystem receipt host conflict with One Ship. Reconcile semantics into canonical WTL AST/IR and existing program/Return store.",
     "watercolour": "#673 projection not yet imported; same files exist but differ, and #649 overlaps. Selective SON-002 subscriber port remains pending.",
-    "latest_code_head_before_register_update": "b1fb5671ebebf20d6ded77d3c0b6978db74558f6"
+    "latest_code_head_before_register_update": "b1fb5671ebebf20d6ded77d3c0b6978db74558f6",
+    "nursery_semantic_grounding": {
+      "status": "source-candidate-staged-in-pr-661",
+      "source_pr": 668,
+      "source_head": "c466d281979dbd4b73274a5ae88ee170770d7e9e",
+      "source_branch": "codex/wtl-cell-hybrids-20261119",
+      "canonical_train_pr": 661,
+      "change_id": "nursery-semantic-grounding-one-ship-2026-11-23",
+      "notes": "Source-grounded signal explanations staged in existing Cell Garden and House host; poetry retained separately. Test and cold Return evidence pending. Do not mark fully integrated or deployed."
+    }
   }
 }

@@ -756,6 +756,68 @@
         "finish_line": "All tested controls have at least 44px size, are stable and accept pointer hits in the accessible scroll area.",
         "return_marker": "Verify browser CI and inspect any further genuinely intercepted controls."
       }
+    },
+    {
+      "change_id": "nursery-semantic-grounding-one-ship-2026-11-23",
+      "changed_paths": [
+        "apps/wayglass/src/wtl-cell-digest.js",
+        "apps/wayglass/src/wtl-cell-fusion.js",
+        "apps/wayglass/src/wtl-cell-harmony.js",
+        "apps/wayglass/src/wtl-cell-mobius.js",
+        "apps/wayglass/src/wtl-cell-peer-tests.js",
+        "apps/wayglass/src/wtl-cell-program.js",
+        "apps/wayglass/src/wtl-cell-runtime.js",
+        "apps/wayglass/src/wtl-cell-sharing.js",
+        "apps/wayglass/src/wtl-cell-sonic-space.js",
+        "apps/wayglass/src/wtl-cell-tissue.js",
+        "apps/wayglass/src/wtl-cell-worlds.js",
+        "apps/wayglass/src/wtl-cell-ecology.js",
+        "apps/wayglass/src/wtl-cell-semantic-grounding.js",
+        "apps/wayglass/src/surfaces/nursery-language.js",
+        "apps/wayglass/src/surfaces/cell-garden.js",
+        "apps/starwell-server/wayglass/router.js",
+        "apps/starwell-server/test/wayglass-nursery-grounding-route.test.js",
+        "apps/wayglass/test/wtl-cell-semantic-grounding.test.js",
+        "apps/wayglass/test/wtl-cell-ecology.test.js",
+        "apps/wayglass/test/wtl-cell-mobius.test.js",
+        "apps/wayglass/test/wtl-cell-tissue.test.js",
+        "apps/wayglass/test/wtl-cell-worlds.test.js",
+        "docs/wayglass/NURSERY_SEMANTIC_GROUNDING_V0_1.md",
+        "docs/wayglass/current.json"
+      ],
+      "affected_organs": [
+        "Wyrdrune Nursery ecology",
+        "existing authenticated Cell Garden host",
+        "WTL event provenance",
+        "Feather and owner consent",
+        "Observer and language surface"
+      ],
+      "dependent_checks": [
+        "npm run wayglass:test",
+        "npm run wayglass:test:host",
+        "npm run wayglass:build",
+        "One Ship change-impact and Focus Router Law",
+        "source-bound event grounding and rejected forgery tests"
+      ],
+      "provenance": [
+        "Rowan / Mamma coherence observation; Rowan authorised implementation 2026-11-23",
+        "original source candidate PR #668 SHA c466d281979dbd4b73274a5ae88ee170770d7e9e",
+        "selective module port into single train PR #661; parent 6aad865415d44ebf7cc5f22431bce658984c446c"
+      ],
+      "rollback": [
+        "Revert Nursery module port, authenticated subroutes and Cell Garden panel together; preserve source PR #668 and existing Host Cell Garden."
+      ],
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Compared #661 Cell Garden with #662/#665/#668 nursery; port source modules into existing authenticated host, retain one WTL runtime, do not run source's separate server.",
+        "owner_outcome": "Babies explain what they sent, why selected recipient/channel and what counters changed, while preserving original poetic phrases.",
+        "finish_line": "Grounded WTL signal receipts, before/after, tamper and Feather tests and House route acceptance pass at exact SHA.",
+        "return_marker": "Built / Verified / Held in #583. Cold Return and non-signal semantic grounding remain unresolved."
+      }
     }
   ]
 }
