@@ -1,6 +1,6 @@
 import {mountWayglassSoundComposition} from './surfaces/sound-composition.js';
 import {wayglassSomaticSound} from './somatic-sound.js';
-import {wayglassStoryScoreBinding,installWayglassStoryComposition} from './story-score-binding.js';
+import {wayglassStoryScoreBinding,installWayglassStoryComposition,runWayglassStoryScore} from './story-score-binding.js';
 import './styles.css';
 import './authorization.css';
 import './faeberpunk.css';
@@ -20,6 +20,7 @@ import { createWayglassSpellingController } from './spelling-assistance.js';
 import { mountWayglassSurface, registerWayglassSurface, registerWayglassSurfaceAlias, listWayglassSurfaces } from './surface-registry.js';
 import { mountWayglassWorldContinuitySurface } from './surfaces/world-continuity.js';
 import { mountWayglassWritingRoom } from './surfaces/writing-room.js';
+import { mountWayglassProgramWorkbench } from './surfaces/program-workbench.js';
 import { mountWayglassSystemsSurface } from './surfaces/systems.js';
 import { mountWayglassSpectrumSurface } from './surfaces/spectral-field.js';
 import { mountWayglassNativeVoice } from './surfaces/native-voice.js';
@@ -50,6 +51,7 @@ import { WAYGLASS_ENTRY_SURFACE, resolveWayglassEntry } from './wayglass-entry.j
 import { subscribeWayglassObserver } from './living-observer-model.js';
 import { recordRouteAsWonderLight } from './wonder-light.js';
 import { registerWayglassOrgan, listWayglassOrgans } from './organ-registry.js';
+import { createWayglassOSKernel } from './os-kernel.js';
 import { FIRST_WAYGLASS_ORGANS } from './organ-donors.js';
 
 const root = document.querySelector('#app');
@@ -86,6 +88,7 @@ registerWayglassSurfaceAlias('arcsweep:deck', 'wayglass:world-continuity');
 registerWayglassSurfaceAlias('arcsweep:writing-room', 'wayglass:writing-room');
 
 registerWayglassSurface({surface_id:'wayglass:universal-codex',label:'Wayglass · Universal Codex',mount:mountUniversalCodex});
+registerWayglassSurface({surface_id:'wayglass:program-workbench',label:'Wayglass · Program Workbench',mount:mountWayglassProgramWorkbench});
 
 
 
@@ -161,6 +164,23 @@ registerWayglassSurface({
   surface_id: 'wayglass:toybox',
   label: 'Wayglass · Toybox',
   mount: mountWayglassToybox,
+});
+
+// One native vessel kernel composes the registered organs and every live deck surface.
+// The eight system lanes are inspected together rather than booted as disconnected demos.
+const vesselKernel = createWayglassOSKernel({
+  organs: listWayglassOrgans(),
+  surfaces: listWayglassSurfaces(),
+});
+const vesselBootReceipt = vesselKernel.boot();
+globalThis.addEventListener('wayglass:feather', event => {
+  if (event.detail?.stopped === true) vesselKernel.feather('sensory-feather');
+  else if (event.detail?.stopped === false && event.detail?.confirmed === true) {
+    vesselKernel.releaseFeather({ actor: 'owner-confirmed', explicit: true });
+  }
+});
+globalThis.addEventListener('wayglass:os:feather', () => {
+  try { globalThis.navigator?.vibrate?.(0); } catch { /* device adapter owns haptic availability */ }
 });
 
 const browserEmbodiment = Object.freeze({
@@ -345,7 +365,21 @@ locusNav.addEventListener('click',event=>{
 
 const wayglass = Object.freeze({
   schema: 'wayglass.os/v0.1',
+  kernel: Object.freeze({
+    schema: vesselKernel.schema,
+    boot: () => vesselBootReceipt,
+    inspect: () => vesselKernel.inspect(),
+    system: id => vesselKernel.system(id),
+    subscribe: listener => vesselKernel.subscribe(listener),
+    releaseFeather: ({ actor, confirmed = false } = {}) => vesselKernel.releaseFeather({ actor, explicit: confirmed === true }),
+  }),
   soundCompositionState:()=>{const s=wayglassSomaticSound.composition.snapshot();return Object.freeze({score_status:s.score_status,generating:s.generating,audio_enabled:s.audio_enabled,sequence:s.sequence,last_error:s.last_error,voice_count:s.layers.length,declared_context:wayglassStoryScoreBinding.getContext()!==null});},
+  storyScore: Object.freeze({
+    inspect: () => wayglassStoryScoreBinding.checkpoint(),
+    run: runWayglassStoryScore,
+    play: () => wayglassSomaticSound.composition.startGeneration({confirmed:true}),
+    pause: () => wayglassSomaticSound.composition.pauseGeneration(),
+  }),
   surfaces: listWayglassSurfaces,
   organs: listWayglassOrgans,
   quadGestalt: readLatestQuadGestalt,

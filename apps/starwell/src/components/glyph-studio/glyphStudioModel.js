@@ -29,6 +29,17 @@ export function clamp(value, min, max) {
   return Math.min(max, Math.max(min, Number(value)));
 }
 
+export function glyphOutlineTransform(viewBox, { baseline = 760, maxWidth = 840, maxHeight = 760 } = {}) {
+  const parts = String(viewBox || '').trim().split(/[\s,]+/).map(Number);
+  if (parts.length !== 4 || parts.some(value => !Number.isFinite(value)) || parts[2] <= 0 || parts[3] <= 0) {
+    throw new Error('Invalid glyph outline viewBox.');
+  }
+  const [x, y, width, height] = parts;
+  const scale = Math.min(maxHeight / height, maxWidth / width);
+  const offsetX = (VIEWBOX - width * scale) / 2;
+  return `translate(${offsetX.toFixed(6)} ${baseline}) scale(${scale.toFixed(6)} ${(-scale).toFixed(6)}) translate(${(-x).toFixed(6)} ${(-y).toFixed(6)})`;
+}
+
 export function safeFileName(value, fallback = 'starwell-asset') {
   return String(value || fallback)
     .trim()

@@ -1,0 +1,11 @@
+// First Lantern: canonical WTL, offline and capability-free.
+mobius scoped {
+  perceive { let spark = 3; }
+  compress { let lantern = spark * spark; }
+  release {}
+  verify { require lantern == 9 else "The lantern did not reach nine"; }
+  integrate {}
+  choose { emit lantern; }
+  return { emit "Held"; }
+  transcend { carry lantern = lantern; }
+}

@@ -4,6 +4,7 @@ import ColorPanel from './ColorPanel.jsx';
 import GlyphCanvas from './GlyphCanvas.jsx';
 import LayerPanel from './LayerPanel.jsx';
 import TextPanel, { makeTextLayer } from './TextPanel.jsx';
+import { mergeSomaticRuneRegistry } from './somaticGlyphImport.js';
 import {
   brushRuntime,
   downloadText,
@@ -331,6 +332,22 @@ export default function GlyphStudio() {
     }));
   }
 
+  function importSomaticCanon() {
+    try {
+      const result = mergeSomaticRuneRegistry(project);
+      if (!result.added.length) {
+        setStatus('All canonical somatic glyphs are already present. No duplicates created.');
+        return;
+      }
+      setUndoStack((stack) => [...stack.slice(-39), clone(project)]);
+      setRedoStack([]);
+      setProject(normaliseProject(result.project));
+      setStatus(`Imported ${result.added.length} canonical somatic glyphs. Original outlines are locked; PUA mappings are provisional.`);
+    } catch (error) {
+      setStatus(`Canonical import rejected: ${error.message}`);
+    }
+  }
+
   function exportProject() {
     const name = safeFileName(project.name, 'starwell-glyph-project');
     downloadText(`${name}.starwell-glyph.json`, 'application/json', JSON.stringify(project, null, 2));
@@ -408,6 +425,7 @@ export default function GlyphStudio() {
           <button onClick={undo} disabled={!undoStack.length}>Undo</button>
           <button onClick={redo} disabled={!redoStack.length}>Redo</button>
           <button onClick={() => projectImportRef.current?.click()}>Import</button>
+          <button onClick={importSomaticCanon}>Import Wyrdrune Canon</button>
           <input ref={projectImportRef} type="file" hidden accept=".json,.starwell-glyph.json" onChange={importProject} />
           <button onClick={exportProject}>Export Project</button>
           <button onClick={exportSvg}>Export SVG</button>

@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Wayglass Whole Pizza
+Exec=/usr/libexec/wayglass/open.sh
+Terminal=false
+X-KDE-autostart-phase=2

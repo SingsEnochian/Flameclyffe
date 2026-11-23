@@ -1,0 +1,28 @@
+.wg-program-workbench{display:grid;gap:1rem;min-width:0}
+.wg-program-vitals{display:flex;gap:.65rem;flex-wrap:wrap;align-items:center}
+.wg-program-vitals span{padding:.55rem .75rem;border:1px solid var(--wg-glass-border,rgba(190,225,220,.16));border-radius:999px;background:rgba(12,24,28,.62);font-size:.78rem}
+.wg-program-toolbar{display:flex;justify-content:space-between;gap:1rem;align-items:end;flex-wrap:wrap;padding:1rem;border-radius:1.25rem}
+.wg-program-select{display:grid;gap:.4rem;min-width:min(100%,19rem);font-size:.82rem}
+.wg-program-select select,.wg-spell-wizard input{width:100%;min-height:44px;padding:.65rem .8rem;border-radius:.7rem;border:1px solid rgba(180,220,215,.24);background:#101c20;color:inherit}
+.wg-program-actions{display:flex;gap:.5rem;flex-wrap:wrap}
+.wg-program-actions button{min-height:44px}
+.wg-program-actions .primary{border-color:rgba(205,180,120,.55);background:linear-gradient(135deg,rgba(112,87,47,.65),rgba(28,70,67,.75))}
+.wg-program-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:1rem;align-items:stretch}
+.wg-program-editor,.wg-program-inspector,.wg-program-ledger{min-width:0;padding:1rem;border-radius:1.25rem;display:flex;flex-direction:column;gap:.75rem}
+.wg-program-editor{grid-row:span 2}
+.wg-program-panel-head{display:flex;justify-content:space-between;gap:.75rem;align-items:center;flex-wrap:wrap;font-size:.75rem;color:var(--wg-muted,#a8b8b6)}
+.wg-program-editor textarea{width:100%;min-height:32rem;resize:vertical;padding:1rem;border-radius:.8rem;border:1px solid rgba(180,220,215,.2);background:#080f13;color:#e6eee9;font: .88rem/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;tab-size:2;white-space:pre;overflow:auto}
+.wg-program-inspector pre,.wg-program-ledger pre{margin:0;min-height:15rem;max-height:34rem;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;padding:.85rem;border-radius:.8rem;background:rgba(4,10,13,.72);color:#d5e6df;font:.78rem/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}
+.wg-program-status{min-height:2.5rem;font-size:.82rem;color:var(--wg-muted,#b2c2bd)}
+.wg-spell-wizard{width:min(42rem,calc(100vw - 2rem));max-height:min(90dvh,48rem);overflow:auto;padding:1.5rem;border:1px solid rgba(191,222,214,.25);border-radius:1.35rem;background:#10191d;color:#eaf0eb;box-shadow:0 2rem 6rem rgba(0,0,0,.55)}
+.wg-spell-wizard::backdrop{background:rgba(2,7,10,.72);backdrop-filter:blur(8px)}
+.wg-spell-wizard form{display:grid;gap:1rem}
+.wg-spell-wizard label{display:grid;gap:.4rem;font-size:.86rem}
+@media(max-width:850px){.wg-program-grid{grid-template-columns:1fr}.wg-program-editor{grid-row:auto}.wg-program-editor textarea{min-height:22rem}.wg-program-inspector pre,.wg-program-ledger pre{min-height:10rem}}
+
+.wg-program-language-bridge{border:1px solid rgba(180,220,215,.24);padding:.7rem;border-radius:1rem;background:rgba(3,12,17,.55)}
+.wg-program-language-bridge summary{cursor:pointer;min-height:44px;padding:.6rem;font-weight:600;letter-spacing:.02em}
+.wg-program-language-bridge p{margin:.5rem 0 .8rem}
+.wg-program-language-bridge label{display:grid;gap:.4rem;font-size:.84rem;margin-block:.7rem}
+.wg-program-language-bridge textarea{min-height:9rem;height:auto;white-space:pre-wrap;font-size:.8rem}
+.wg-program-language-bridge #wg-wtl-glyphs{min-height:6rem;font-family:ui-monospace,monospace}

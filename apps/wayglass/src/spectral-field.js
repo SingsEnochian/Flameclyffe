@@ -102,7 +102,7 @@ export function createWayglassSpectralField({
       error=null;
       for(const event of result.events) {
         const record=Object.freeze({event_id:event.event_id,kind:event.kind,source_ref:event.source_ref,
-          spectrum:event.spectrum,source_hash:event.source_hash});
+          spectrum:event.spectrum,source_hash:event.source_hash,phase_receipts:Object.freeze([...event.phases])});
         history.push(record);
         if(history.length>64)history.shift();
         lastFrame=record.spectrum;
@@ -132,7 +132,7 @@ export function createWayglassSpectralField({
           }
           atlasFrame=Object.freeze({spectrum:field.returned,source_hash:field.source_sha256,
             input_hash:field.input_sha256,event_id:atlasInput.event_id,
-            counts:field.counts,provenance:atlasInput.provenance});
+            counts:field.counts,provenance:atlasInput.provenance,phase_receipts:Object.freeze([...field.phase_receipts])});
           atlasError=null;
           // A single existing Observer instance receives native Wyrdrune,
           // never a JS-invented phase or interpretation of possible thoughts.

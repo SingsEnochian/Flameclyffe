@@ -220,7 +220,8 @@ async function checkCodex(page,profile){
   reduced_motion:true,original_source_preserved:true});
 }
 async function checkWriting(page,profile){
- await shipRoom(page,'arcsweep:writing-room');
+ // The legacy arcsweep:writing-room alias resolves routes, but the deck renders the canonical ID.
+ await shipRoom(page,'wayglass:writing-room');
  await page.locator('#wg-wtl-details').waitFor();
  await page.locator('#wg-wtl-details summary').click();
  await page.locator('#wg-wtl-example').click();

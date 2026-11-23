@@ -1,0 +1,74 @@
+// Wayglass Vessel Plan · native Wyrdrune system programme
+// The eight ship systems are composed as one executable Eightfold vessel plan.
+// Host adapters provide the live organ/surface counts and perform the returned plan.
+mobius scoped {
+  perceive {
+    let lane_total = bridge("os", "lane_total");
+    let lane_present = bridge("os", "lane_present");
+  }
+  compress {
+    let completeness = lane_present / lane_total;
+  }
+  release {
+    let boot_fraction = completeness;
+  }
+  verify {
+    require lane_total == 8 else "Wayglass vessel plan requires eight cooperating systems";
+    require lane_present == lane_total else "The vessel plan has systems awaiting assembly";
+  }
+  integrate {
+    withness {
+      participants: [
+        { id: "rowan", role: "owner-and-co-creator", presence: "declared", agency: "free" },
+        { id: "wayglass", role: "vessel-and-integrating-system", presence: "runtime", agency: "free" }
+      ],
+      field: "wayglass-vessel-integration",
+      agreement: "Build and integrate the complete vessel as one operating system",
+      commitment: "Preserve distinct identities, continuity, provenance and participant choice"
+    };
+  }
+  choose {
+    emit bridge("os", "compose_boot_plan", boot_fraction);
+  }
+  return {
+    emit bridge("os", "checkpoint", boot_fraction);
+  }
+  transcend {
+    carry vessel_fraction = boot_fraction;
+  }
+}
+
+mobius scoped {
+  perceive {
+    let prior_fraction = vessel_fraction;
+  }
+  compress {
+    let launch_ready = prior_fraction == 1;
+  }
+  release {
+    let launch_fraction = prior_fraction;
+  }
+  verify {
+    require launch_ready == true else "Complete all eight system lanes before vessel launch";
+  }
+  integrate {
+    withness {
+      participants: [
+        { id: "rowan", role: "owner-and-co-creator", presence: "declared", agency: "free" },
+        { id: "wayglass", role: "vessel-and-integrating-system", presence: "runtime", agency: "free" }
+      ],
+      field: "wayglass-vessel-launch",
+      agreement: "The whole vessel launches as one integrated operating environment",
+      commitment: "Every system returns its state, lineage and unresolved work"
+    };
+  }
+  choose {
+    emit bridge("os", "compose_launch_plan", launch_fraction);
+  }
+  return {
+    emit bridge("os", "return_anchor", launch_fraction);
+  }
+  transcend {
+    carry vessel_fraction = launch_fraction;
+  }
+}

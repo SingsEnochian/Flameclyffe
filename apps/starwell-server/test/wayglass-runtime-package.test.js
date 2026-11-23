@@ -19,6 +19,12 @@ test('staged Wayglass runtime is complete and matches canonical lib sources', ()
   const router = fs.readFileSync(path.join(packageRoot, 'wayglass/router.js'), 'utf8');
   const imported = [...router.matchAll(/require\(['"]\.\.\/wayglass-runtime\/([^'"]+)['"]\)/g)];
   for (const [, name] of imported) {
+    // WTL is staged under the same packaged runtime root, but not in the flat
+    // wayglass-* module catalogue. Its exact bytes are audited below.
+    if (name === 'wyrdrune/wyrdrune.cjs') {
+      assert.ok(fs.existsSync(path.join(runtime, name)), 'router imports missing staged Wyrdrune compiler');
+      continue;
+    }
     assert.ok(modules.includes(name), 'router imports an unbundled Wayglass runtime module: ' + name);
   }
   for(const file of ['canonical.cjs','enochian.cjs','wyrdrune.cjs','ritual-ledger.cjs']){

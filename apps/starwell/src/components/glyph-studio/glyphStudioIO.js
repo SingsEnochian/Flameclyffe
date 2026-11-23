@@ -1,4 +1,4 @@
-import { GLYPH_PROJECT_SCHEMA, VIEWBOX, makeId, makeProject } from './glyphStudioModel.js';
+import { GLYPH_PROJECT_SCHEMA, VIEWBOX, glyphOutlineTransform, makeId, makeProject } from './glyphStudioModel.js';
 
 export const PROJECT_STORAGE_KEY = 'starwell.glyphStudio.project.v0.1';
 export const BRUSH_STORAGE_KEY = 'starwell.glyphStudio.brushLibrary.v0.1';
@@ -59,6 +59,18 @@ export function normaliseGlyph(glyph = {}) {
     layers,
     activeLayerId: layers.some((layer) => layer.id === glyph.activeLayerId) ? glyph.activeLayerId : layers[0].id,
     strokes: Array.isArray(glyph.strokes) ? glyph.strokes : [],
+    ...(glyph.outlinePath ? {
+      outlinePath: String(glyph.outlinePath),
+      outlineViewBox: String(glyph.outlineViewBox || ''),
+      outlineLayerId: String(glyph.outlineLayerId || layers[0].id),
+      semanticId: String(glyph.semanticId || ''),
+      semanticKind: String(glyph.semanticKind || ''),
+      sourceArtifact: String(glyph.sourceArtifact || ''),
+      sourceImage: String(glyph.sourceImage || ''),
+      codepointStatus: String(glyph.codepointStatus || 'unspecified'),
+      glyphRegistrySchema: String(glyph.glyphRegistrySchema || ''),
+      provenance: glyph.provenance && typeof glyph.provenance === 'object' ? { ...glyph.provenance } : null,
+    } : {}),
   };
 }
 
@@ -146,6 +158,10 @@ export function glyphToSvg(glyph, colourProfile = 'srgb') {
       const transform = text.orientation === 'vertical' ? ` transform="rotate(90 ${text.x} ${text.y})"` : '';
       body.push(`<text x="${Number(text.x)}" y="${Number(text.y) + Number(text.baseline || 0)}" font-family="${escapeXml(text.family)}" font-size="${Number(text.size)}" font-style="${escapeXml(text.style)}" font-weight="${Number(text.weight)}" letter-spacing="${Number(text.tracking || 0)}" text-anchor="${text.alignment === 'center' ? 'middle' : text.alignment === 'right' ? 'end' : 'start'}" fill="${escapeXml(text.colour)}"${transform}>${escapeXml(content)}</text>`);
     }
+    if (safeGlyph.outlinePath && safeGlyph.outlineLayerId === layer.id) {
+      const transform = glyphOutlineTransform(safeGlyph.outlineViewBox, { baseline: 760, maxWidth: 840, maxHeight: 760 });
+      body.push(`<path d="${escapeXml(safeGlyph.outlinePath)}" transform="${transform}" fill="#000000" fill-rule="nonzero" />`);
+    }
     const strokes = safeGlyph.strokes.filter((stroke) => stroke.layerId === layer.id && stroke.points?.length);
     for (const stroke of strokes) {
       if (stroke.points.length === 1) {
@@ -163,7 +179,20 @@ export function glyphToSvg(glyph, colourProfile = 'srgb') {
     body.push('</g>');
   }
 
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${VIEWBOX} ${VIEWBOX}" width="${VIEWBOX}" height="${VIEWBOX}" data-starwell-schema="${GLYPH_PROJECT_SCHEMA}" data-colour-profile="${escapeXml(colourProfile)}">\n  <title>${escapeXml(safeGlyph.name)}</title>\n  <metadata>${escapeXml(JSON.stringify({ codepoint: safeGlyph.codepoint, character: safeGlyph.character, advanceWidth: safeGlyph.advanceWidth, leftBearing: safeGlyph.leftBearing, rightBearing: safeGlyph.rightBearing }))}</metadata>\n  ${body.join('\n  ')}\n</svg>\n`;
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${VIEWBOX} ${VIEWBOX}" width="${VIEWBOX}" height="${VIEWBOX}" data-starwell-schema="${GLYPH_PROJECT_SCHEMA}" data-colour-profile="${escapeXml(colourProfile)}">\n  <title>${escapeXml(safeGlyph.name)}</title>\n  <metadata>${escapeXml(JSON.stringify({
+    codepoint: safeGlyph.codepoint,
+    character: safeGlyph.character,
+    advanceWidth: safeGlyph.advanceWidth,
+    leftBearing: safeGlyph.leftBearing,
+    rightBearing: safeGlyph.rightBearing,
+    semanticId: safeGlyph.semanticId || null,
+    semanticKind: safeGlyph.semanticKind || null,
+    sourceArtifact: safeGlyph.sourceArtifact || null,
+    sourceImage: safeGlyph.sourceImage || null,
+    codepointStatus: safeGlyph.codepointStatus || 'unspecified',
+    glyphRegistrySchema: safeGlyph.glyphRegistrySchema || null,
+    provenance: safeGlyph.provenance || null
+  }))}</metadata>\n  ${body.join('\n  ')}\n</svg>\n`;
 }
 
 export function projectReceipt(project, library, colourState) {
