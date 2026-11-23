@@ -365,14 +365,15 @@ export async function mountWayglassProgramWorkbench(root) {
   somaPreviewButton.addEventListener('click', async () => {
     if (pending) { somaStatus.textContent = 'Finish or Feather the active Wyrdrune execution first.'; return; }
     somaController?.abort();
-    somaController = new AbortController();
+    const controller = new AbortController();
+    somaController = controller;
     somaPreviewButton.disabled = true;
     somaStatus.textContent = 'Charging and verifying the proposed form…';
     try {
       const base = JSON.parse(somaBaseArea.value);
       const target = JSON.parse(somaTargetArea.value);
-      const result = await previewSomaNovaMorphogenesis({ base, target, signal: somaController.signal });
-      if (somaController.signal.aborted) throw new DOMException('Feather stopped the preview.', 'AbortError');
+      const result = await previewSomaNovaMorphogenesis({ base, target, signal: controller.signal });
+      if (controller.signal.aborted) throw new DOMException('Feather stopped the preview.', 'AbortError');
       somaReceipt.textContent = JSON.stringify({
         plan: result.plan,
         compatibility: result.report,
@@ -386,8 +387,10 @@ export async function mountWayglassProgramWorkbench(root) {
       somaReceipt.textContent = String(error?.message || error);
       somaStatus.textContent = error?.name === 'AbortError' ? 'Feather stopped the staged preview.' : 'Morphogenesis preview refused.';
     } finally {
-      somaController = null;
-      somaPreviewButton.disabled = false;
+      if (somaController === controller) {
+        somaController = null;
+        somaPreviewButton.disabled = false;
+      }
     }
   });
 
