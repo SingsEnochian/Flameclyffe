@@ -714,6 +714,48 @@
         "finish_line": "5 focused failures no longer fail at exact integration head, without disabling tests.",
         "return_marker": "Verify full integration CI, then resume Soma Nova durable Return and Watercolour/Nursery gates."
       }
+    },
+    {
+      "change_id": "living-cypher-mobile-scroll-clearance-2026-11-23",
+      "changed_paths": [
+        "docs/wayglass/CHANGE_IMPACT.json",
+        "apps/wayglass/src/faeberpunk-ship.css",
+        "scripts/wayglass-cypher-browser.mjs"
+      ],
+      "affected_organs": [
+        "FAEberpunk five-locus ship navigation",
+        "Writing Room touch and keyboard focus",
+        "Living Cypher Chromium browser acceptance",
+        "One Ship shell accessibility"
+      ],
+      "dependent_checks": [
+        "Wayglass Living Cypher Browser exact-head Chromium",
+        "Hit test Send, Feather, Skip after scrolling above fixed dock and chips",
+        "Phone 390px and tablet browser acceptance",
+        "One Ship change-impact contract"
+      ],
+      "provenance": [
+        "Source-head c87e15dd723a59e9204a623099dfb873b1bba916 failure CI run 45203032998",
+        "DOM intersection: fixed Worktable locus intercepts Send at viewport y806 on 390x844 phone",
+        "Existing ship CSS body bottom padding, floating chip and dock geometry inspected",
+        "Mission #583 / PR #661"
+      ],
+      "rollback": [
+        "Revert the scoped scroll clearance and real-obstruction browser test positioning together if native accessibility regresses",
+        "Retain screenshots and existing pointer hit assertions"
+      ],
+      "status": "source candidate, exact-head browser CI pending",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Reuse existing helm, dock and Writing Room; no alternative nav or test harness.",
+        "owner_outcome": "Small-screen Writing Room Send, Feather and Skip remain reachable without covering ship navigation.",
+        "finish_line": "All tested controls have at least 44px size, are stable and accept pointer hits in the accessible scroll area.",
+        "return_marker": "Verify browser CI and inspect any further genuinely intercepted controls."
+      }
     }
   ]
 }
