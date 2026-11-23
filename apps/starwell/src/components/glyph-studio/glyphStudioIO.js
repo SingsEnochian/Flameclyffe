@@ -179,7 +179,20 @@ export function glyphToSvg(glyph, colourProfile = 'srgb') {
     body.push('</g>');
   }
 
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${VIEWBOX} ${VIEWBOX}" width="${VIEWBOX}" height="${VIEWBOX}" data-starwell-schema="${GLYPH_PROJECT_SCHEMA}" data-colour-profile="${escapeXml(colourProfile)}">\n  <title>${escapeXml(safeGlyph.name)}</title>\n  <metadata>${escapeXml(JSON.stringify({ codepoint: safeGlyph.codepoint, character: safeGlyph.character, advanceWidth: safeGlyph.advanceWidth, leftBearing: safeGlyph.leftBearing, rightBearing: safeGlyph.rightBearing }))}</metadata>\n  ${body.join('\n  ')}\n</svg>\n`;
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${VIEWBOX} ${VIEWBOX}" width="${VIEWBOX}" height="${VIEWBOX}" data-starwell-schema="${GLYPH_PROJECT_SCHEMA}" data-colour-profile="${escapeXml(colourProfile)}">\n  <title>${escapeXml(safeGlyph.name)}</title>\n  <metadata>${escapeXml(JSON.stringify({
+    codepoint: safeGlyph.codepoint,
+    character: safeGlyph.character,
+    advanceWidth: safeGlyph.advanceWidth,
+    leftBearing: safeGlyph.leftBearing,
+    rightBearing: safeGlyph.rightBearing,
+    semanticId: safeGlyph.semanticId || null,
+    semanticKind: safeGlyph.semanticKind || null,
+    sourceArtifact: safeGlyph.sourceArtifact || null,
+    sourceImage: safeGlyph.sourceImage || null,
+    codepointStatus: safeGlyph.codepointStatus || 'unspecified',
+    glyphRegistrySchema: safeGlyph.glyphRegistrySchema || null,
+    provenance: safeGlyph.provenance || null
+  }))}</metadata>\n  ${body.join('\n  ')}\n</svg>\n`;
 }
 
 export function projectReceipt(project, library, colourState) {

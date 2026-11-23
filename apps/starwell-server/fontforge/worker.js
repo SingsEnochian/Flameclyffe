@@ -152,7 +152,7 @@ function glyphOutlineSvg(glyph) {
     });
   }
 
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${EM_SIZE}" height="${EM_SIZE}" viewBox="0 -${DESCENT} ${EM_SIZE} ${EM_SIZE}">\n  <title>${escapeXml(glyph?.name || 'STARWELL glyph')}</title>\n  <metadata>${escapeXml(JSON.stringify({ schemaVersion: JOB_SCHEMA, glyphId: glyph?.id, codepoint: glyph?.codepoint, baseline: ASCENT }))}</metadata>\n  <g fill="#000000" fill-rule="nonzero" transform="translate(0 ${ASCENT}) scale(1 -1)">\n    ${shapes.join('\n    ')}\n  </g>\n</svg>\n`;
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${EM_SIZE}" height="${EM_SIZE}" viewBox="0 -${DESCENT} ${EM_SIZE} ${EM_SIZE}">\n  <title>${escapeXml(glyph?.name || 'STARWELL glyph')}</title>\n  <metadata>${escapeXml(JSON.stringify({ schemaVersion: JOB_SCHEMA, glyphId: glyph?.id, codepoint: glyph?.codepoint, semanticId: glyph?.semanticId || null, semanticKind: glyph?.semanticKind || null, sourceArtifact: glyph?.sourceArtifact || null, sourceImage: glyph?.sourceImage || null, codepointStatus: glyph?.codepointStatus || 'unspecified', baseline: ASCENT }))}</metadata>\n  <g fill="#000000" fill-rule="nonzero" transform="translate(0 ${ASCENT}) scale(1 -1)">\n    ${shapes.join('\n    ')}\n  </g>\n</svg>\n`;
 }
 
 function parseCodepoint(value) {
@@ -219,7 +219,10 @@ function buildFontJob(project, options = {}) {
       ...(outlinePath ? { hasOutlinePath: true, outlinePath, outlineViewBox: String(glyph.outlineViewBox) } : {}),
       semanticId: glyph.semanticId || null,
       semanticKind: glyph.semanticKind || null,
+      sourceArtifact: glyph.sourceArtifact || null,
+      sourceImage: glyph.sourceImage || null,
       codepointStatus: glyph.codepointStatus || 'unspecified',
+      glyphRegistrySchema: glyph.glyphRegistrySchema || null,
     };
   });
 
