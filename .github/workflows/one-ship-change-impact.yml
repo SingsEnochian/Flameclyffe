@@ -1,0 +1,21 @@
+name: One Ship change-impact contract
+on:
+  pull_request:
+    branches: [wayglass/current]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  one-ship-impact:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate One Ship impact declaration
+        env:
+          GITHUB_BASE_REF: ${{ github.base_ref || 'wayglass/current' }}
+        run: node scripts/verify-one-ship-impact.mjs
