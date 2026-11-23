@@ -818,6 +818,49 @@
         "finish_line": "Grounded WTL signal receipts, before/after, tamper and Feather tests and House route acceptance pass at exact SHA.",
         "return_marker": "Built / Verified / Held in #583. Cold Return and non-signal semantic grounding remain unresolved."
       }
+    },
+    {
+      "change_id": "nursery-canvas-contract-2026-11-23",
+      "changed_paths": [
+        "docs/wayglass/CHANGE_IMPACT.json",
+        "apps/wayglass/src/mobius-nursery-encounter.mjs",
+        "apps/wayglass/test/first-contact-ui.test.js"
+      ],
+      "affected_organs": [
+        "Möbius Nursery reciprocal proposal identity validation",
+        "WTL-to-Nursery bridge grammar",
+        "Living Watercolour First Contact Node acceptance",
+        "Canvas-only test fixture and provenance"
+      ],
+      "dependent_checks": [
+        "node --test apps/wayglass/src/mobius-nursery-encounter.test.mjs apps/wayglass/src/wtl-nursery-bridge.test.mjs",
+        "node --test apps/wayglass/test/first-contact-ui.test.js",
+        "Wayglass Check exact-head",
+        "Wayglass Cloud and Native ArcSweep exact-head",
+        "One Ship change-impact contract"
+      ],
+      "provenance": [
+        "Wayglass Check c87e15dd723a59e9204a623099dfb873b1bba916: seven Nursery invalid participants errors and eight 2D context errors",
+        "Compared valid IDs with apps/wayglass/src/wtl-nursery-bridge.mjs canonical identifier grammar",
+        "Canvas test uses a non-rendering 2D adapter; production resolver still requires real 2D context",
+        "Issue #583 / integration PR #661"
+      ],
+      "rollback": [
+        "Revert the Nursery identifier-class correction only if bridge semantics change; do not relax identity or consent boundaries",
+        "Revert only the test-local canvas adapter if a true browser canvas test replaces it; keep production guard"
+      ],
+      "status": "source-committed-in-review; exact-head CI pending",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Fix the actual encounter grammar and acceptance fixture instead of spinning out replacement Nursery or Watercolour subsystems.",
+        "owner_outcome": "Real bounded participant IDs and consent rules continue to work while First Contact browser I/O acceptance can execute.",
+        "finish_line": "The seven Nursery and eight Watercolour fixture failures reach their real behavioral assertions with no production safety downgrade.",
+        "return_marker": "Inspect exact-head CI, fix remaining semantics only if proven."
+      }
     }
   ]
 }
