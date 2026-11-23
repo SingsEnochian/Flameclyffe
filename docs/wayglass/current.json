@@ -233,5 +233,112 @@
     "seeded_programs": 4,
     "revisions_per_seed": 1,
     "source_hashes_verified": true
-  }
+  },
+  "governance": {
+    "one_ship_contract": "docs/wayglass/ONE_SHIP_DIRECTIVE.md",
+    "contract_version": "2026-11-22",
+    "status": "integrated-in-review-on-pr-661",
+    "change_impact_manifest": "docs/wayglass/CHANGE_IMPACT.json",
+    "change_impact_validator": "scripts/verify-one-ship-impact.mjs",
+    "single_mission_issue": 583,
+    "current_reconciliation_train_pr": 661,
+    "source_pr": 677,
+    "propagation_rule": "every meaningful implementation change updates the impact manifest in the same change set and passes exact-head validation"
+  },
+  "reconciliation_queue": [
+    {
+      "source_pr": 676,
+      "organ": "native OS / WTL Workbench",
+      "status": "source-candidate-needs-selective-port",
+      "head_sha": "614bb10abd8b4e09d42f573f77be57f4254b3ba5",
+      "conflict": "76 commits ahead and 205 behind current integration train; overlaps main.js, router.js, surface navigation, runtime and migrations",
+      "next_action": "selectively port missing Program Workbench and kernel capabilities after exact file and dependency review; preserve existing WTL parser/runtime"
+    },
+    {
+      "source_pr": 678,
+      "organ": "SomaNova.Morphogenesis",
+      "status": "source-candidate-not-yet-native",
+      "head_sha": "8e3047744eaa9565c79c610fddd5d69e20f1a0fd",
+      "conflict": "candidate implements pure charge/fire and planner but no native Folio or authenticated host capability bridge",
+      "next_action": "bind MorphPlan/FormRef to canonical WTL runtime and existing program store; add native Folio, durable Return and capability-bound fire"
+    },
+    {
+      "source_pr": 667,
+      "organ": "FAEberpunk shared shell",
+      "status": "selective-css-port-committed-awaiting-exact-head-ci",
+      "head_sha": "d9c4c58deddcb42b069ace204cb207244188f02c",
+      "conflict": "source branch is stacked on stale integration head; only shared shell stylesheet ported",
+      "next_action": "verify exact-head desktop/tablet/phone browser layout and reconcile remaining cell-garden visual changes"
+    },
+    {
+      "source_pr": 674,
+      "organ": "Unified Magic / Observer",
+      "status": "source-candidate",
+      "head_sha": "0b7c8c591de77c02858bdc40e3d0f1dfff267aac",
+      "conflict": "separate base; possible overlap with WTL runtime, host bridge, Return and Watercolour",
+      "next_action": "compare shared files and reuse single invocation/receipt model before port"
+    },
+    {
+      "source_pr": 673,
+      "organ": "Watercolour SON-002 projection",
+      "status": "source-candidate",
+      "head_sha": "47a9ac63248186ee1cbd9d94c3325cc8e71f8de7",
+      "conflict": "visual projection depends on current Watercolour body and score event bridge",
+      "next_action": "selectively reconcile with current body; retain visual projection as subscriber, not executor"
+    },
+    {
+      "source_pr": 651,
+      "organ": "branch garden / inventory",
+      "status": "source-candidate",
+      "head_sha": "18469dd8f7e49912d97f64db01e6a1392267765a",
+      "conflict": "audit candidate based on older base; no source branches may be retired by report alone",
+      "next_action": "adopt its graph inventory logic only after validating exact current branch and PR graph"
+    },
+    {
+      "source_prs": [
+        662,
+        665,
+        668,
+        670,
+        671,
+        672
+      ],
+      "organ": "WTL Nursery / cellular ecology",
+      "status": "stacked-candidates-preserve-lineage",
+      "next_action": "resolve stack order and mutual dependencies before selective integration; preserve consent, archive, Feather and cold Return"
+    },
+    {
+      "source_prs": [
+        663,
+        669
+      ],
+      "organ": "provider diagnostics",
+      "status": "duplicate-candidates",
+      "next_action": "compare exact diff; import once if compatible; preserve existing provider attribution and Astra changes"
+    },
+    {
+      "source_prs": [
+        664,
+        659,
+        657,
+        647,
+        600,
+        582
+      ],
+      "organ": "auth / model / cloud",
+      "status": "security-critical-candidates",
+      "next_action": "verify issuer, seat identity, owner authority, JWT, revocation and deployed route before integration"
+    },
+    {
+      "source_prs": [
+        658,
+        629,
+        648,
+        603
+      ],
+      "organ": "Return / continuity",
+      "status": "source-candidates",
+      "next_action": "compare stop/return receipts, revocation, process-cold recovery and route custody; preserve one canonical ledger"
+    }
+  ]
 }
