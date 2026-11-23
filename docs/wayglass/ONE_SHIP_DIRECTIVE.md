@@ -42,6 +42,12 @@ Before opening a PR, inspect the canonical head, PR #661, #583, and every releva
 
 A new PR is justified only when it has a genuinely independent review/acceptance boundary, cannot safely be incorporated into the existing train, and no existing PR already represents the same work. Its body must explain why a separate PR is necessary and link #583 and #661. Never create a PR solely because a subsystem has a separate name. Never open duplicate epics or parallel integration trains. Preserve source branches; do not blind-merge, force-push, or replace whole files from stale branches.
 
+## 4a. Mandatory Focus Router Law · WAYGLASS-LAW-FOCUS-001
+
+**Engineering prerequisite:** Every Wayglass worker, agent, CI change, code edit and PR must first follow [Focus Router and Return](./FOCUS_ROUTER_LAW_V0_1.md). Classify work in existing #583; compare existing candidates and canonical source; default to the one #661 train; document deduplication, finish line and Return marker in the impact manifest. Implement NOW work only. A separately justified PR requires owner-approved exception. New ideas themselves are never blocked.
+
+**Enforcement:** `scripts/verify-one-ship-impact.mjs` checks the declaration and refuses unclassified/parked changes, missing Return, and parallel-train routing. A passing check does not establish real-world review, installed OS, or production release.
+
 ## 5. Change-impact map
 
 | Organ | Primary source area | Minimum impact checks |

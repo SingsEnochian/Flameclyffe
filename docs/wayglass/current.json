@@ -243,7 +243,13 @@
     "single_mission_issue": 583,
     "current_reconciliation_train_pr": 661,
     "source_pr": 677,
-    "propagation_rule": "every meaningful implementation change updates the impact manifest in the same change set and passes exact-head validation"
+    "propagation_rule": "every meaningful implementation change updates the impact manifest in the same change set and passes exact-head validation",
+    "focus_router_law": "docs/wayglass/FOCUS_ROUTER_LAW_V0_1.md",
+    "focus_router_law_id": "WAYGLASS-LAW-FOCUS-001",
+    "focus_router_prerequisite": true,
+    "focus_router_queue_issue": 583,
+    "focus_router_integration_pr": 661,
+    "focus_router_status": "owner-adopted-candidate-in-review-on-pr-661"
   },
   "reconciliation_queue": [
     {

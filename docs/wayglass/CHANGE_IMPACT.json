@@ -26,7 +26,18 @@
       ],
       "rollback": [
         "revert validator and workflow together; retain governing contract and impact register"
-      ]
+      ],
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Compared #677 governance with #661 and #583; reuse one existing validator.",
+        "owner_outcome": "One usable Wayglass with owner authority and preserved provenance.",
+        "finish_line": "Relevant exact-head checks and change receipts before final reconciliation.",
+        "return_marker": "Built / Verified / Held in #583; preserve next owner, dependencies and rollback."
+      }
     },
     {
       "change_id": "faeberpunk-ship-frame-port-2026-11-23",
@@ -51,7 +62,18 @@
       ],
       "rollback": [
         "revert the FAEberpunk stylesheet import and copied stylesheet together; retain source PR and prior shell"
-      ]
+      ],
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Compared #667 with #661 shell; preserve current routes and accessibility.",
+        "owner_outcome": "One usable Wayglass with owner authority and preserved provenance.",
+        "finish_line": "Relevant exact-head checks and change receipts before final reconciliation.",
+        "return_marker": "Built / Verified / Held in #583; preserve next owner, dependencies and rollback."
+      }
     },
     {
       "change_id": "one-ship-reconciliation-batch-2026-11-23",
@@ -460,7 +482,18 @@
       "rollback": [
         "revert only the relevant integration commits from PR #661; preserve source branches, canonical WTL/runtime and durable user data; no destructive database migration rollback without a separate data-safety review",
         "revert the Soma Nova planner, preview route, client and Folio UI together; leave existing WTL Workbench and program library intact"
-      ]
+      ],
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Compared open source candidates in #583; selectively reconcile shared files on #661.",
+        "owner_outcome": "One usable Wayglass with owner authority and preserved provenance.",
+        "finish_line": "Relevant exact-head checks and change receipts before final reconciliation.",
+        "return_marker": "Built / Verified / Held in #583; preserve next owner, dependencies and rollback."
+      }
     },
     {
       "change_id": "fiction-projection-owner-approved-2026-11-23",
@@ -504,7 +537,18 @@
         "Only audio 'soft glass harmonics' and fictional display 'the fictional door opens' are allowlisted",
         "No external API/device permissions, real doors, camera, video or image generation"
       ],
-      "status": "source-candidate-pending exact-head CI; no release"
+      "status": "source-candidate-pending exact-head CI; no release",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Reuse canonical WTL and writing tools, not a second story executor.",
+        "owner_outcome": "One usable Wayglass with owner authority and preserved provenance.",
+        "finish_line": "Relevant exact-head checks and change receipts before final reconciliation.",
+        "return_marker": "Built / Verified / Held in #583; preserve next owner, dependencies and rollback."
+      }
     },
     {
       "change_id": "whole-pizza-tablet-reading-and-writing-tap-target-2026-11-23",
@@ -532,7 +576,63 @@
       "rollback": [
         "Revert the scoped 44px touch target and tablet breakpoint together if accessibility checks regress"
       ],
-      "status": "source candidate: exact-head verification pending"
+      "status": "source candidate: exact-head verification pending",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Compared #676 Whole Pizza with #661; reuse existing workbench and tablet interface.",
+        "owner_outcome": "One usable Wayglass with owner authority and preserved provenance.",
+        "finish_line": "Relevant exact-head checks and change receipts before final reconciliation.",
+        "return_marker": "Built / Verified / Held in #583; preserve next owner, dependencies and rollback."
+      }
+    },
+    {
+      "change_id": "mandatory-focus-router-law-2026-11-23",
+      "changed_paths": [
+        "AGENTS.md",
+        "docs/wayglass/FOCUS_ROUTER_LAW_V0_1.md",
+        "docs/wayglass/ONE_SHIP_DIRECTIVE.md",
+        "docs/wayglass/WAYGLASS_CORE_RULE.md",
+        "docs/wayglass/current.json",
+        "docs/wayglass/CHANGE_IMPACT.json",
+        "scripts/one-ship-focus-law.mjs",
+        "scripts/one-ship-focus-law.test.mjs",
+        "scripts/verify-one-ship-impact.mjs",
+        ".github/workflows/one-ship-change-impact.yml"
+      ],
+      "affected_organs": [
+        "One Ship governance",
+        "Focus Router queue",
+        "engineering/worker preflight",
+        "change-impact CI",
+        "Return continuity"
+      ],
+      "dependent_checks": [
+        "node --test scripts/one-ship-focus-law.test.mjs",
+        "One Ship change-impact check",
+        "exact-head #661 integration checks"
+      ],
+      "provenance": [
+        "Rowan explicitly authorised Focus Router as prerequisite and Law, 2026-11-23",
+        "single issue #583 and integration PR #661; source baseline 1001b6bf351231dc4557498cac503883d61694f3"
+      ],
+      "rollback": [
+        "Revert Focus Law and CI/manifest enforcement as one reversible change; retain captured ideas in #583"
+      ],
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Confirmed #583 queue and existing #661/#677 governance guard; extending the existing validator, no new PR.",
+        "owner_outcome": "Translate associative ideas into an ordered queue without requiring Rowan to manage it.",
+        "finish_line": "Mandatory gate validates declarations with passing negative-case tests, one source-head receipt.",
+        "return_marker": "Built / Verified / Held in #583; resume failing #661 WTL and Return reconciliation at exact head."
+      }
     }
   ]
 }

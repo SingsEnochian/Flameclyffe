@@ -58,6 +58,10 @@ Runtime instruction source: `apps/arcsweep/src/swarm/agent-verification-inherita
 
 Rowan clarified on 13 October 2026 that UH and Ezra Observer originals, source clones, code, configuration, state, memory and deployments must not be changed. Do not install our policies into their systems or invoke work that can write to them. Separately named experimental copies in our own workspace are allowed; preserve upstream provenance and license notices, and do not claim ownership of their architecture. Relevant material may be learned from or ingested as attributed references. Carry this boundary to every descendant agent/model. If ownership or side effects are uncertain, inspect first and hold the dependent action.
 
+## Mandatory Focus Router prerequisite · WAYGLASS-LAW-FOCUS-001
+
+Before implementing, changing CI, creating a PR, or delegating Wayglass engineering, read `docs/wayglass/FOCUS_ROUTER_LAW_V0_1.md`, the One Ship Directive and #583's single Focus Router queue. Check canonical `wayglass/current`, #661 and related source candidates; record duplicate review, NOW classification, finish line and Return marker in the same PR's change-impact declaration. Reconcile into #661 by default. Pass the Law to worker handoffs and descendants. Ideas may be explored and parked without coding or new branches. Never make Rowan maintain this queue manually.
+
 ## Wayglass canonical development home — 16 October 2026
 
 Read `WAYGLASS_CURRENT.md` and `docs/wayglass/current.json` before Wayglass work.

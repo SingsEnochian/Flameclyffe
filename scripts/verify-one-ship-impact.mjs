@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
+import { validateFocusLaw } from './one-ship-focus-law.mjs';
 
 const base = process.env.GITHUB_BASE_REF || 'wayglass/current';
 const changed = execFileSync('git', ['diff', '--name-only', 'origin/' + base + '...HEAD'], { encoding: 'utf8' })
@@ -35,4 +36,9 @@ if (changed.includes(impactPath)) {
     }
   }
 }
-console.log(JSON.stringify({ ok: true, base, changed_count: changed.length, implementation_paths: implementation, impact_manifest_updated: changed.includes(impactPath) }));
+const focus_router = validateFocusLaw(
+  JSON.parse(readFileSync(impactPath, 'utf8')),
+  JSON.parse(readFileSync(registerPath, 'utf8')),
+  readFileSync(contractPath, 'utf8'),
+);
+console.log(JSON.stringify({ ok: true, base, changed_count: changed.length, implementation_paths: implementation, impact_manifest_updated: changed.includes(impactPath), focus_router }));

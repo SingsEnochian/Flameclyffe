@@ -4,6 +4,9 @@
 
 **Read before working on Wayglass, every time.**
 
+**Prerequisite · WAYGLASS-LAW-FOCUS-001:** Before code, CI, engineering delegation, PRs or integration, obey [Focus Router and Return Law](./FOCUS_ROUTER_LAW_V0_1.md): Capture → Compare → Classify → Consolidate → Verify → Return. Only NOW work enters implementation; other ideas remain discoverable in #583. Builders organise the queue instead of assigning Rowan project-manager duties.
+
+
 ## Wayglass is the ship.
 
 Rowan clarified on 8 November 2026: **Wayglass is the upgraded ArcSweep once integrated.** ArcSweep's world, writing, continuity, acoustic and instrument capabilities become inherited Wayglass decks and organs. Preserved source paths and a compatibility container describe implementation lineage; they do not establish a second vessel or participant. Compositional regions on either side of an internal bridge remain addressed parts of the same vessel, while other worlds and participants retain their sovereignty.
