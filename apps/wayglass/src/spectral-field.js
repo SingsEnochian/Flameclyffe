@@ -1,3 +1,4 @@
+import {createHarnessWorldBridge} from './harness-world-bridge.js';
 import { scoreWyrdruneSpectrum, scoreWyrdruneAtlas, executeWyrdruneLearning } from './route-client.js';
 import { getSharedWayglassObserverInterior } from './living-observer-self.js';
 import { createResonanceScopeStore } from './resonance-scope-store.js';
@@ -38,6 +39,8 @@ export function createWayglassSpectralField({
   let active=false,disposed=false,heard=false,haptics=false,error=null,sequence=0,affinity=.5;
   let queue=[],pending=null,abort=null,timer=null,unsubscribeObserver=null,unsubscribeWatercolor=null,lastFrame=null;
   const audio=audioFactory();
+  // Shared Watercolour + resonance ledger: no second renderer or learner.
+  const harnessWorld=createHarnessWorldBridge();
   const status=()=>Object.freeze({
     schema:SPECTRAL_FIELD_SCHEMA,active,heard,haptics,disposed,error,affinity,
     pending:queue.length,processing:Boolean(pending),captured:sequence,
@@ -239,6 +242,7 @@ export function createWayglassSpectralField({
   function fromFeather(event){
     if(event?.detail?.stopped===true){
       // A Feather signal stops recording and playback immediately.
+      harnessWorld.feather();
       pause();
     }
   }
@@ -317,5 +321,5 @@ export function createWayglassSpectralField({
     audio.dispose();atlasStore.clear();notify();listeners.clear();
   }
   scope.addEventListener?.(WAYGLASS_FEATHER_EVENT,fromFeather);
-  return Object.freeze({observe,pause,hear,stopHearing,setAffinity,setScope,setHaptics,subscribe,capture,flush,status,dispose});
+  return Object.freeze({observe,pause,hear,stopHearing,setAffinity,setScope,setHaptics,subscribe,capture,flush,status,dispose,harnessWorld});
 }
