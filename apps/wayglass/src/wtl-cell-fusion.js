@@ -7,13 +7,13 @@ const runtime = createWyrdruneRuntime({
 });
 const ir = runtime.compile(`mobius scoped {
   perceive { let difference = voice - neighbour_voice; }
-  compress { let distance = when difference < 0 then 0 - difference else difference; }
+  compress { let distance = if difference < 0 then 0 - difference else difference; }
   release { let affinity = 0.16 + curiosity * 0.07; }
   verify { require initiator != partner else "a hybrid needs distinct parents"; }
   integrate { let ready = energy >= 0.25 and not resting; }
   choose {
-    let decision = when distance > affinity * 2 then "declined"
-      else when ready and distance <= affinity then "accept" else "open";
+    let decision = if distance > affinity * 2 then "declined"
+      else if ready and distance <= affinity then "accept" else "open";
   }
   return { emit {cell: initiator, neighbour: partner, exchange: exchange, decision: decision}; }
   transcend {}
