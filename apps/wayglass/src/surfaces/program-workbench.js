@@ -13,6 +13,7 @@ import { glossProgram } from '../../../../lib/wyrdrune/gloss.mjs';
 import { wtlToEnglish, englishToWtl, wtlToGlyphTransport, glyphTransportToWtl } from '../../../../lib/wyrdrune/bidirectional.mjs';
 import './program-workbench.css';
 import { runWyrdruneProgram, listWyrdrunePrograms, saveWyrdruneProgram, saveWyrdruneRun } from '../wyrdrune-workbench.js';
+import { previewSomaNovaMorphogenesis } from '../soma-nova-client.js';
 
 const PROGRAMS = Object.freeze([
   { id: 'owner-eye-colour', slug: null, label: 'Skýrunor · Owner eye-colour declaration', source: astToWtl(englishToDeclaration('Owner declaration: My eyes are hazel green.')) },
@@ -74,6 +75,7 @@ export async function mountWayglassProgramWorkbench(root) {
   let pending = false;
   let proposalOnly = false;
   let activeController = null;
+  let somaController = null;
   let stagedFiction = null;
   root.innerHTML = `
     <section class="wg-surface wg-program-workbench" data-surface="wayglass-program-workbench">
@@ -106,6 +108,44 @@ export async function mountWayglassProgramWorkbench(root) {
           <button type="button" class="glass-chip primary" data-program-run>Run Wyrdrune</button>
         </div>
       </div>
+      <section class="glass-panel wg-soma-nova-folio" aria-labelledby="wg-soma-title">
+        <div class="wg-program-panel-head"><span class="eyebrow">SOMA NOVA / MORPHOGENESIS</span><span>Native WTL organ · preview</span></div>
+        <h2 id="wg-soma-title">Morphogenesis Folio</h2>
+        <p class="tiny">Derive a versioned form while preserving its identity anchor and return lineage. The authenticated host verifies the plan. This first slice is preview-only: it does not persist a form or dispatch a physical, device, network or provider effect.</p>
+        <div class="wg-soma-form-grid">
+          <label>Base form · JSON
+            <textarea data-soma-base rows="10" spellcheck="false" aria-label="Soma Nova base form JSON">{
+  "identity_ref": "rowan",
+  "form_id": "rowan-base",
+  "domains": ["appearance", "structure", "function", "environment"],
+  "appearance": {},
+  "capabilities": [],
+  "sensory_profile": {"accessibility": ["keyboard", "touch", "screen-reader"]},
+  "environment_profile": {},
+  "return_anchor": "rowan-base"
+}</textarea>
+          </label>
+          <label>Derived form · JSON
+            <textarea data-soma-target rows="10" spellcheck="false" aria-label="Soma Nova derived form JSON">{
+  "identity_ref": "rowan",
+  "form_id": "rowan-form-01",
+  "parent_form_id": "rowan-base",
+  "domains": ["appearance", "structure", "function", "environment"],
+  "appearance": {"profile": "owner-authored"},
+  "capabilities": [],
+  "sensory_profile": {"accessibility": ["keyboard", "touch", "screen-reader"]},
+  "environment_profile": {},
+  "return_anchor": "rowan-base"
+}</textarea>
+          </label>
+        </div>
+        <div class="wg-program-actions">
+          <button type="button" class="glass-chip primary" data-soma-preview>Charge · Verify · Preview</button>
+          <button type="button" class="glass-chip" data-soma-reset>Reset example</button>
+          <span class="tiny" data-soma-status role="status" aria-live="polite">No MorphPlan charged.</span>
+        </div>
+        <pre class="wg-soma-receipt" data-soma-receipt aria-live="polite">The Folio is ready. A preview leaves the base form unchanged.</pre>
+      </section>
       <div class="wg-program-grid">
         <section class="glass-panel wg-program-editor">
           <div class="wg-program-panel-head"><span class="eyebrow">01 / SOURCE</span><span data-source-count>0 characters</span></div>
@@ -307,6 +347,50 @@ export async function mountWayglassProgramWorkbench(root) {
     } catch (error) { languageStatus.textContent = 'Rune decode refused: ' + String(error?.message || error); }
   });
 
+  const somaBaseArea = root.querySelector('[data-soma-base]');
+  const somaTargetArea = root.querySelector('[data-soma-target]');
+  const somaStatus = root.querySelector('[data-soma-status]');
+  const somaReceipt = root.querySelector('[data-soma-receipt]');
+  const somaPreviewButton = root.querySelector('[data-soma-preview]');
+  const somaResetButton = root.querySelector('[data-soma-reset]');
+  const somaBaseExample = somaBaseArea.value;
+  const somaTargetExample = somaTargetArea.value;
+  somaResetButton.addEventListener('click', () => {
+    somaController?.abort();
+    somaBaseArea.value = somaBaseExample;
+    somaTargetArea.value = somaTargetExample;
+    somaReceipt.textContent = 'Example restored. No MorphPlan charged.';
+    somaStatus.textContent = 'Ready for a new preview.';
+  });
+  somaPreviewButton.addEventListener('click', async () => {
+    if (pending) { somaStatus.textContent = 'Finish or Feather the active Wyrdrune execution first.'; return; }
+    somaController?.abort();
+    somaController = new AbortController();
+    somaPreviewButton.disabled = true;
+    somaStatus.textContent = 'Charging and verifying the proposed form…';
+    try {
+      const base = JSON.parse(somaBaseArea.value);
+      const target = JSON.parse(somaTargetArea.value);
+      const result = await previewSomaNovaMorphogenesis({ base, target, signal: somaController.signal });
+      if (somaController.signal.aborted) throw new DOMException('Feather stopped the preview.', 'AbortError');
+      somaReceipt.textContent = JSON.stringify({
+        plan: result.plan,
+        compatibility: result.report,
+        preview: result.preview,
+        persistence: result.persistence,
+        dispatch: result.dispatch,
+        external_effects: result.external_effects,
+      }, null, 2);
+      somaStatus.textContent = 'MorphPlan verified · ' + result.report.status + ' · preview only · no state committed.';
+    } catch (error) {
+      somaReceipt.textContent = String(error?.message || error);
+      somaStatus.textContent = error?.name === 'AbortError' ? 'Feather stopped the staged preview.' : 'Morphogenesis preview refused.';
+    } finally {
+      somaController = null;
+      somaPreviewButton.disabled = false;
+    }
+  });
+
   const storyInput=root.querySelector('#wg-fiction-text');
   const storyWorld=root.querySelector('#wg-fiction-world');
   const storyPreview=root.querySelector('[data-fiction-preview]');
@@ -498,6 +582,8 @@ export async function mountWayglassProgramWorkbench(root) {
 
   const onFeather = () => {
     if (activeController) activeController.abort();
+    if (somaController) somaController.abort();
+    somaStatus.textContent = 'Feather stopped staged Soma Nova work.';
   };
   globalThis.addEventListener('wayglass:os:feather', onFeather);
   editor.addEventListener('input', () => { updateCount(); invalidateLanguage(); });
@@ -600,6 +686,7 @@ export async function mountWayglassProgramWorkbench(root) {
   return () => {
     globalThis.removeEventListener('wayglass:os:feather', onFeather);
     activeController?.abort();
+    somaController?.abort();
     for (const button of [compileButton, runButton, loadButton]) button.disabled = true;
     if (dialog.open) dialog.close();
     if (saveDialog.open) saveDialog.close();
