@@ -240,7 +240,18 @@ async function checkWriting(page,profile){
   const results=buttons.map(id=>{
    const button=document.getElementById(id);
    const initial=button.getBoundingClientRect();
-   scrollTo(0,scrollY+initial.bottom-(innerHeight-16));
+   // A fixed dock is a real obstruction, so position the control above
+   // the dock and floating chips, then assert all three pointer samples.
+   const obstacleTop=[...document.querySelectorAll('.wg-helm-loci,.wg-ship-switch,.wg-voyage-inbox')]
+    .filter(node=>{
+      const style=getComputedStyle(node);
+      return style.position==='fixed'&&style.display!=='none'&&style.visibility!=='hidden';
+    })
+    .map(node=>node.getBoundingClientRect())
+    .filter(rect=>rect.width>0&&rect.height>0&&rect.top<innerHeight&&rect.bottom>0)
+    .reduce((min,rect)=>Math.min(min,rect.top),innerHeight);
+   const clearBottom=Math.min(innerHeight-16,obstacleTop-16);
+   scrollTo(0,scrollY+initial.bottom-clearBottom);
    const rect=button.getBoundingClientRect();
    const y=(rect.top+rect.bottom)/2;
    const hits=[rect.left+8,(rect.left+rect.right)/2,rect.right-8]
