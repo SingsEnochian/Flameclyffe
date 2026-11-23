@@ -99,12 +99,40 @@ function segmentPolygon(previous, point, startWidth, endWidth) {
   return `<polygon points="${[a, b, c, d].map((entry) => `${entry.x.toFixed(3)},${entry.y.toFixed(3)}`).join(' ')}" />`;
 }
 
+function parseOutlineViewBox(value) {
+  const parts = String(value || '').trim().split(/[\\s,]+/).map(Number);
+  if (parts.length !== 4 || parts.some((part) => !Number.isFinite(part)) || parts[2] <= 0 || parts[3] <= 0) {
+    throw new Error('Invalid canonical SVG viewBox.');
+  }
+  return parts;
+}
+
+function validateOutlinePath(value) {
+  if (typeof value !== 'string' || !value.length || value.length > 100000
+    || !/^M/i.test(value) || !/[hH]/.test(value) || !/[vV]/.test(value) || !/[zZ]$/.test(value)
+    || !/^[MmHhVvZz0-9+\\-.,\\s]+$/.test(value)) {
+    throw new Error('Canonical outline contains an unsafe SVG path.');
+  }
+  return value;
+}
+
+function outlinePathTransform(viewBox) {
+  const [x, y, width, height] = parseOutlineViewBox(viewBox);
+  const scale = Math.min(760 / height, 840 / width);
+  const offsetX = (EM_SIZE - width * scale) / 2;
+  return `translate(${offsetX.toFixed(6)} 0) scale(${scale.toFixed(6)} ${scale.toFixed(6)}) translate(${(-x).toFixed(6)} ${(-y).toFixed(6)})`;
+}
+
 function glyphOutlineSvg(glyph) {
   const layers = Array.isArray(glyph?.layers) ? glyph.layers : [];
   const eligibleIds = new Set(layers.filter(eligibleLayer).map((layer) => layer.id));
   const strokes = (Array.isArray(glyph?.strokes) ? glyph.strokes : [])
     .filter((stroke) => eligibleIds.has(stroke.layerId) && Array.isArray(stroke.points) && stroke.points.length);
   const shapes = [];
+  if (glyph?.outlinePath) {
+    const pathData = validateOutlinePath(glyph.outlinePath);
+    shapes.push(`<path d="${escapeXml(pathData)}" transform="${outlinePathTransform(glyph.outlineViewBox)}" />`);
+  }
 
   for (const stroke of strokes) {
     if (stroke.points.length === 1) {
@@ -161,6 +189,8 @@ function buildFontJob(project, options = {}) {
     const eligibleIds = new Set(layers.filter(eligibleLayer).map((layer) => layer.id));
     const strokes = (Array.isArray(glyph.strokes) ? glyph.strokes : []).filter((stroke) => eligibleIds.has(stroke.layerId));
     const pointCount = strokes.reduce((sum, stroke) => sum + (Array.isArray(stroke.points) ? stroke.points.length : 0), 0);
+    const outlinePath = glyph.outlinePath ? validateOutlinePath(glyph.outlinePath) : null;
+    if (outlinePath) parseOutlineViewBox(glyph.outlineViewBox);
     totalPoints += pointCount;
     const glyphName = codepoint.number <= 0xffff
       ? `uni${codepoint.hex.padStart(4, '0')}`
@@ -186,6 +216,10 @@ function buildFontJob(project, options = {}) {
       })),
       strokeCount: strokes.length,
       pointCount,
+      ...(outlinePath ? { hasOutlinePath: true, outlinePath, outlineViewBox: String(glyph.outlineViewBox) } : {}),
+      semanticId: glyph.semanticId || null,
+      semanticKind: glyph.semanticKind || null,
+      codepointStatus: glyph.codepointStatus || 'unspecified',
     };
   });
 
@@ -308,7 +342,7 @@ try:
         codepoints.add(codepoint)
         glyph = font.createChar(codepoint, record["glyphName"])
         outline_path = os.path.join(job_dir, record["outlineFile"])
-        if record.get("strokeCount", 0) > 0:
+        if record.get("hasOutlinePath") or record.get("strokeCount", 0) > 0:
             glyph.importOutlines(outline_path, scale=False, simplify=True, accuracy=0.25)
             glyph.removeOverlap()
             glyph.correctDirection()

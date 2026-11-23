@@ -202,9 +202,12 @@
         "whole-vessel-wyrdrune-two-cycle-programme",
         "authenticated-wyrdrune-compile-and-execute-workbench",
         "program-viewer-and-spell-wizard",
-        "feather-aware-vessel-lifecycle"
+        "feather-aware-vessel-lifecycle",
+        "canonical-14-glyph-somatic-rune-registry-with-original-manuscript-vector-paths",
+        "Glyph Studio idempotent canonical import and locked outline preview",
+        "FontForge SVG-path outline transport with provisional PUA preview mapping"
       ],
-      "note": "Integrates the current organ/surface registries into one vessel kernel and adds a source-verified Wyrdrune execution deck. Runtime acceptance is determined by exact-head CI."
+      "note": "Integrates the current organ/surface registries into one vessel kernel and adds a source-verified Wyrdrune execution deck. Runtime acceptance is determined by exact-head CI. Type Foundry v0.1 adds a provenance-preserving 14-glyph somatic registry, idempotent Glyph Studio import, outline preview/export and FontForge path import. Private Use Area codepoints remain provisional; final allocation and font/device acceptance remain open."
     }
   ],
   "native_storage": {

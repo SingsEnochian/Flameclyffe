@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { VIEWBOX, brushRuntime, clamp, makeId } from './glyphStudioModel.js';
+import { VIEWBOX, brushRuntime, clamp, glyphOutlineTransform, makeId } from './glyphStudioModel.js';
 
 const SOMATIC_PHASE_DETAIL = Object.freeze({
   start: Object.freeze({ phase: 'start' }),
@@ -251,6 +251,7 @@ export default function GlyphCanvas({ glyph, activeLayer, activeBrush, guides, o
         {visibleLayers.map((layer) => (
           <g key={layer.id} opacity={layer.opacity} style={{ mixBlendMode: layerBlend(layer.blendMode) }} data-layer-kind={layer.kind}>
             {layer.kind === 'text' && <TextLayerMark layer={layer} />}
+            {glyph.outlinePath && glyph.outlineLayerId === layer.id && <path d={glyph.outlinePath} transform={glyphOutlineTransform(glyph.outlineViewBox, { baseline: 880, maxWidth: 840, maxHeight: 760 })} fill="#101410" fillRule="nonzero" />}
             {glyph.strokes.filter((stroke) => stroke.layerId === layer.id).map((stroke) => <StrokeMarks key={stroke.id} stroke={stroke} />)}
           </g>
         ))}
