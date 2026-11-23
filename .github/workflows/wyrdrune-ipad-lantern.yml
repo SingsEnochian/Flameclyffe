@@ -1,0 +1,40 @@
+name: Wyrdrune iPad First Lantern
+on:
+  pull_request:
+    paths:
+      - 'lib/wyrdrune/browser-canonical.mjs'
+      - 'lib/wyrdrune/first-lantern.wtl'
+      - 'lib/wyrdrune/first-lantern-ipad.test.cjs'
+      - 'lib/wyrdrune/bidirectional.mjs'
+      - 'apps/wayglass/src/first-lantern-ipad.js'
+      - 'apps/wayglass/first-lantern-ipad-template.html'
+      - 'scripts/build-first-lantern-ipad.mjs'
+      - '.github/workflows/wyrdrune-ipad-lantern.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build-ipad-html:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Test browser WCE-1 against host and execute native WTL
+        run: node --test lib/wyrdrune/first-lantern-ipad.test.cjs
+      - name: Build self-contained offline Safari HTML
+        run: node scripts/build-first-lantern-ipad.mjs
+      - name: Audit single-file artifact
+        run: |
+          test -s dist/ipad/First-Lantern-iPad.html
+          grep -q 'Run First Lantern' dist/ipad/First-Lantern-iPad.html
+          sha256sum dist/ipad/First-Lantern-iPad.html
+      - uses: actions/upload-artifact@v4
+        with:
+          name: first-lantern-ipad-offline-html
+          path: dist/ipad/First-Lantern-iPad.html
+          retention-days: 30
