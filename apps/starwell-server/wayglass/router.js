@@ -1489,6 +1489,61 @@ function createWayglassRouter({
     }
   });
 
+  // Soma Nova preview is a native, owner-authenticated projection over the canonical form planner.
+  // It stages no persistent state and grants no physical/device/network effects.
+  router.post('/wyrdrune/morphogenesis/preview', createRequestGate({ maxRequests: 12, maxConcurrent: 2 }), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required to preview Soma Nova morphogenesis.' });
+    }
+    try {
+      const body = req.body || {};
+      const allowed = new Set(['base', 'target', 'environment_requirements', 'accessibility_requirements']);
+      if (Object.keys(body).some(key => !allowed.has(key))) {
+        throw new TypeError('Morphogenesis preview accepts base, target and declared compatibility requirements only.');
+      }
+      if (JSON.stringify(body).length > 40000) throw new TypeError('Morphogenesis preview exceeds its 40000-character budget.');
+      const requirements = (items, label) => {
+        if (items === undefined) return [];
+        if (!Array.isArray(items) || items.length > 32) throw new TypeError(label + ' must be an array of at most 32 entries.');
+        return items.map(item => {
+          if (!item || typeof item.name !== 'string' || !item.name.trim()) throw new TypeError(label + ' entries require a name.');
+          const status = item.status === 'unsupported' ? 'unsupported' : 'unknown';
+          return { name: cleanText(item.name, 100), status,
+            evidence: item.evidence == null ? 'No independent verifier evidence supplied.' : cleanText(item.evidence, 300) };
+        });
+      };
+      const { createMorphPlan, verifyMorphPlan, previewMorphPlan } = await import('../../../lib/wayglass/soma-nova-morphogenesis.mjs');
+      const timestamp = new Date().toISOString();
+      const plan = createMorphPlan(body.base, body.target, {
+        author: 'rowan',
+        source: 'wayglass:program-workbench/morphogenesis-folio',
+        timestamp,
+      });
+      // Preview authority is fixed by the authenticated host. Caller-supplied capability flags are ignored.
+      const report = verifyMorphPlan(plan, {
+        capabilities: ['morph:read', 'morph:derive', 'morph:preview'],
+        environmentRequirements: requirements(body.environment_requirements, 'environment_requirements'),
+        accessibilityRequirements: requirements(body.accessibility_requirements, 'accessibility_requirements'),
+      });
+      const preview = previewMorphPlan(plan, report);
+      return res.json({
+        schema: 'wayglass.soma-nova-morphogenesis-preview/v1',
+        plan, report, preview,
+        authority: 'authenticated-house-steward',
+        dispatch: 'none',
+        external_effects: [],
+        persistence: 'none',
+      });
+    } catch (error) {
+      const invalid = error instanceof TypeError || error instanceof SyntaxError || /integrity|mismatch|cannot change|lineage|protected/i.test(String(error?.message || ''));
+      return res.status(invalid ? 400 : 422).json({
+        schema: 'wayglass.soma-nova-morphogenesis-error/v1',
+        error: cleanText(error?.message || 'Soma Nova morphogenesis preview failed.', 300),
+      });
+    }
+  });
+
   router.post('/wyrdrune/preview', createRequestGate({ maxRequests: 15, maxConcurrent: 2 }), async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     if (!(await griffStewardAuthorized(req).catch(() => false))) {
