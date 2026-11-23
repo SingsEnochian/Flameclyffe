@@ -1536,7 +1536,7 @@ function createWayglassRouter({
         persistence: 'none',
       });
     } catch (error) {
-      const invalid = error instanceof TypeError || error instanceof SyntaxError || /integrity|mismatch|cannot change|lineage|protected/i.test(String(error?.message || ''));
+      const invalid = error instanceof TypeError || error instanceof SyntaxError || error instanceof RangeError || /integrity|mismatch|cannot change|lineage|parent_form_id|distinct form_id|protected/i.test(String(error?.message || ''));
       return res.status(invalid ? 400 : 422).json({
         schema: 'wayglass.soma-nova-morphogenesis-error/v1',
         error: cleanText(error?.message || 'Soma Nova morphogenesis preview failed.', 300),
