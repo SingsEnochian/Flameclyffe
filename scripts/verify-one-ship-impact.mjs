@@ -9,8 +9,9 @@ const impactPath = 'docs/wayglass/CHANGE_IMPACT.json';
 const contractPath = 'docs/wayglass/ONE_SHIP_DIRECTIVE.md';
 const registerPath = 'docs/wayglass/current.json';
 const implementation = changed.filter(path =>
-  /^(apps|lib|scripts|test|tests|src|packages)\//.test(path) ||
-  /^\.github\/workflows\//.test(path)
+  /^(apps|api|lib|scripts|test|tests|src|packages|deploy|integrations|netlify|os|profiles|scores|supabase|training)\//.test(path) ||
+  /^(AGENTS\.md|package\.json|package-lock\.json)$/.test(path) ||
+  /^\.github\/(workflows|actions)\//.test(path)
 );
 if (!changed.includes(contractPath) && !changed.includes(registerPath) && !readFileSync(contractPath, 'utf8').includes('## Automation and program rule')) {
   throw new Error('One Ship governing contract is missing or malformed.');
