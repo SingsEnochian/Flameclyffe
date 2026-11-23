@@ -245,13 +245,19 @@ async function checkWriting(page,profile){
    const y=(rect.top+rect.bottom)/2;
    const hits=[rect.left+8,(rect.left+rect.right)/2,rect.right-8]
     .map(x=>button.contains(document.elementFromPoint(x,y)));
-   return {id,hits,height:rect.height,translate:getComputedStyle(button).translate};
+   return {id,hits,height:rect.height,translate:getComputedStyle(button).translate,
+    rect:{top:rect.top,bottom:rect.bottom,left:rect.left,right:rect.right},
+    centre:{x:(rect.left+rect.right)/2,y},viewport:{height:innerHeight,width:innerWidth},
+    pageScroll:scrollY,maxScroll:document.documentElement.scrollHeight-innerHeight,
+    hitAtCentre:document.elementFromPoint((rect.left+rect.right)/2,y)?.outerHTML.slice(0,240)||null};
   });
   scrollTo(0,before);
   return results;
  });
+ if(controlTargets.some(target=>target.hits.some(hit=>!hit)))
+  await page.screenshot({path:resolve(out,profile+'-writing-hit-interception.png'),fullPage:true});
  for(const target of controlTargets){
-  assert.deepEqual(target.hits,[true,true,true],target.id+' must stay clickable across its width');
+  assert.deepEqual(target.hits,[true,true,true],target.id+' must stay clickable across its width: '+JSON.stringify(target));
   assert.ok(target.height>=44,target.id+' needs a 44px tap target');
   assert.equal(target.translate,'none',target.id+' must stay in place during motion');
  }
