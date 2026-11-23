@@ -987,10 +987,10 @@
         "lib/wyrdrune/typed-ir.test.cjs"
       ],
       "affected_organs": [
-        "Canonical pure WTL operators",
-        "Möbius Nursery cell and world programmes",
-        "Typed IR and Wyrdrune tests",
-        "Wayglass installer and cloud"
+        "Canonical Wyrdrune runtime percent wrapping and pick selection",
+        "Möbius Nursery cell and world WTL",
+        "Typed IR and backend parity",
+        "Wayglass installer and cloud verification"
       ],
       "dependent_checks": [
         "Wayglass Check exact-head",
@@ -999,23 +999,24 @@
         "One Ship impact gate"
       ],
       "provenance": [
-        "CI 45205858318: ten cell failure cases use legacy numeric wonder, when, modulo and pick",
-        "Shared interpreter remains lib/wyrdrune/runtime.mjs, pure builtins registered once in lib/wyrdrune/expression.mjs",
-        "Issue #583 and PR #661"
+        "Full Wayglass Check a33163c 1646/1646 passed; installer, parity and impact gates passed",
+        "Reconciliation audit found pick and modulo already implemented in lib/wyrdrune/runtime.mjs; new lib/wyrdrune/expression.mjs helpers duplicate existing semantics",
+        "Remove redundant pure expression registration; keep canonical wrapAround (%) and runtime pick, current identity/consent/Feather guards",
+        "Issue #583, same integration PR #661"
       ],
       "rollback": [
         "Revert pure op registration, program source and tests together if validation fails"
       ],
-      "status": "in-review-exact-head-ci-pending",
+      "status": "canonical-runtime-only-consolidation-in-review; exact-head CI pending",
       "focus_router": {
         "law": "WAYGLASS-LAW-FOCUS-001",
         "state": "NOW",
         "mission_issue": 583,
         "integration_pr": 661,
         "routing": "existing-train",
-        "duplicate_review": "No separate WTL parser, no second Nursery runtime",
+        "duplicate_review": "Remove duplicate pure operators from expression layer; reuse canonical WTL % and pick",
         "owner_outcome": "One executable language for cells and worlds",
-        "finish_line": "Cell/world tests and parity pass",
+        "finish_line": "Single implementation of numeric wrap and pick; cell tests, Windows, backend parity and One Ship gates pass exact head",
         "return_marker": "Verify full CI and reconcile any new semantics"
       }
     }
