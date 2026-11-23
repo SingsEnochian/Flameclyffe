@@ -25,7 +25,6 @@ import { mountWtlInterfaceAtelier } from './surfaces/wtl-interface-atelier.js';
 import { mountWayglassRuntimeSandbox } from './surfaces/runtime-sandbox.js';
 import './wtl-interface-atelier.css';
 import './surfaces/cell-garden.css';
-import './faeberpunk-ship.css';
 import { mountWayglassWritingRoom } from './surfaces/writing-room.js';
 import { mountWayglassSystemsSurface } from './surfaces/systems.js';
 import { mountWayglassSpectrumSurface } from './surfaces/spectral-field.js';
@@ -58,6 +57,9 @@ import { subscribeWayglassObserver } from './living-observer-model.js';
 import { recordRouteAsWonderLight } from './wonder-light.js';
 import { registerWayglassOrgan, listWayglassOrgans } from './organ-registry.js';
 import { FIRST_WAYGLASS_ORGANS } from './organ-donors.js';
+
+// Shipwide FAEberpunk material and interaction frame must load after every room stylesheet.
+import './faeberpunk-ship.css';
 
 const root = document.querySelector('#app');
 
