@@ -8,8 +8,9 @@ WTL-written hardware kernel.
 
 ## Build
 
-On PR #676's branch, use **Actions > Whole Pizza OS VM Image > Run workflow**.
-The image job is deliberately manual to prevent PR/email floods. It packages
+On PR #676, a **source change to this image workflow or its OS folder** starts
+one PR-scoped build. GitHub requires a new workflow to exist on the default
+branch before its manual Run workflow button is enabled. The PR check packages
 the existing authenticated Wayglass host, compiles WTL, builds a Kinoite-based
 bootable container, and calls bootc-image-builder to produce a QCOW2 disk.
 

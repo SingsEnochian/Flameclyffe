@@ -32,7 +32,6 @@ jobs:
           bash -n os/whole-pizza/rootfs/usr/libexec/wayglass/open.sh
           node --check os/whole-pizza/rootfs/usr/libexec/wayglass/boot-wtl.cjs
       - name: Save source image layer for the opt-in VM build
-        if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
           name: whole-pizza-source
@@ -40,7 +39,6 @@ jobs:
           include-hidden-files: true
           retention-days: 2
   qcow2:
-    if: github.event_name == 'workflow_dispatch'
     needs: check
     runs-on: ubuntu-24.04
     timeout-minutes: 120
