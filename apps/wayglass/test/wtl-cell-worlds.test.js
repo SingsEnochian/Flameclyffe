@@ -19,7 +19,7 @@ async function grow(cycles){
 test('a world is a two-faced scoped Möbius written from its two founders',async()=>{
   const source=worldSource([a,b]);
   assert.match(source,/world of Solsol & Elor/);
-  assert.match(source,/operator drift\(h, d\) = \(h \+ d\) % 360;/);
+  assert.match(source,/operator drift\(h, d\) = mod\(h \+ d, 360\);/);
   assert.equal((source.match(/mobius scoped/g)||[]).length,2);
   const {carry,receipt}=await turnWorld({founders:[a,b],carry:foundingCarry(a,b),members:2});
   assert.equal(receipt.status,'committed');
