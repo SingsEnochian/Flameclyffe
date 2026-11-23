@@ -132,5 +132,5 @@ body{padding-bottom:calc(var(--fae-dock-h) + 76px)}
    clip (not hidden) keeps the sticky helm working. */
 html,body{overflow-x:clip}
 
-/* One Ship · Writing Room finger target */
-.wg-writing-room #wg-send{min-height:44px;min-width:44px;box-sizing:border-box}
+/* One Ship · Writing Room finger targets: Send, Feather and Skip Cypher. */
+.wg-writing-room :is(#wg-send,#wg-score-feather,#wg-wtl-cypher-skip){min-height:44px;min-width:44px;box-sizing:border-box}
