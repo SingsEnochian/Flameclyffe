@@ -1,7 +1,9 @@
 'use strict';
 
 const { randomUUID } = require('node:crypto');
-const Wyrdrune = require('../../../lib/wyrdrune/wyrdrune.cjs');
+// Resolve the verified WTL runtime from the staged host bundle, including packaged Hearthgate.
+// A packaged installer cannot import repository-level siblings.
+const Wyrdrune = require('../wayglass-runtime/wyrdrune/wyrdrune.cjs');
 const { createWayglassProgramStore } = require('./program-store');
 const path = require('node:path');
 const { pathToFileURL } = require('node:url');
