@@ -2,6 +2,9 @@ import vesselPlanSource from '../../../../lib/wyrdrune/wayglass-vessel-plan.wtl?
 import storyScoreSource from '../../../../scores/wyrdrune/story-soundscape-v0.1.wtl?raw';
 import fullSpectrumSource from '../../../../lib/wyrdrune/full-spectrum.wtl?raw';
 import resonanceAtlasSource from '../../../../lib/wyrdrune/resonance-atlas.wtl?raw';
+import { createWyrdruneRuntime } from '../../../../lib/wyrdrune/runtime.mjs';
+import { glossProgram } from '../../../../lib/wyrdrune/gloss.mjs';
+import { wtlToEnglish, englishToWtl, wtlToGlyphTransport, glyphTransportToWtl } from '../../../../lib/wyrdrune/bidirectional.mjs';
 import './program-workbench.css';
 import { runWyrdruneProgram, listWyrdrunePrograms, saveWyrdruneProgram, saveWyrdruneRun } from '../wyrdrune-workbench.js';
 
@@ -99,6 +102,23 @@ export async function mountWayglassProgramWorkbench(root) {
           <div class="wg-program-panel-head"><span class="eyebrow">01 / SOURCE</span><span data-source-count>0 characters</span></div>
           <label class="sr-only" for="wg-wyrdrune-source">Wyrdrune source code</label>
           <textarea id="wg-wyrdrune-source" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Wyrdrune programme source"></textarea>
+          <details class="wg-program-language-bridge" data-language-bridge>
+            <summary>WTL ⇄ British English ⇄ Skýrunor</summary>
+            <p class="tiny">Core Wyrdrune translation. English is a controlled authoring dialect, not unrestricted prose. Rune transport is reversible encoding, not yet the full semantic script. No code executes during translation.</p>
+            <div class="wg-program-actions">
+              <button type="button" class="glass-chip" data-to-english>WTL → English</button>
+              <button type="button" class="glass-chip" data-from-english>English → WTL</button>
+              <button type="button" class="glass-chip" data-to-glyphs>WTL → Runes</button>
+              <button type="button" class="glass-chip" data-from-glyphs>Runes → WTL</button>
+            </div>
+            <label for="wg-wtl-english">Structured British English
+              <textarea id="wg-wtl-english" aria-label="Editable structured British English" rows="10" spellcheck="false" placeholder="Circuit 1 (shared):&#10;Perceive:&#10;  Let depth be 1."></textarea>
+            </label>
+            <label for="wg-wtl-glyphs">Skýrunor reversible rune transport
+              <textarea id="wg-wtl-glyphs" aria-label="Reversible Skýrunor rune transport" rows="5" spellcheck="false" placeholder="Versioned runic transport appears here."></textarea>
+            </label>
+            <p class="tiny" role="status" aria-live="polite" data-language-status>Translate to begin. Compile or run remains a separate owner action.</p>
+          </details>
           <div class="wg-program-status" role="status" aria-live="polite" data-program-status>Loading native programme…</div>
         </section>
         <section class="glass-panel wg-program-inspector">
@@ -139,6 +159,14 @@ export async function mountWayglassProgramWorkbench(root) {
       <footer class="wg-receipt tiny">Native WTL parser · typed IR · execution trace · source hash · return continuity. Host bridges are individually capability-bound.</footer>
     </section>`;
 
+  const languageCompiler = createWyrdruneRuntime({hashSource: () => 'local-translation-only'}).compile;
+  const englishArea = root.querySelector('#wg-wtl-english');
+  const glyphArea = root.querySelector('#wg-wtl-glyphs');
+  const languageStatus = root.querySelector('[data-language-status]');
+  const englishButton = root.querySelector('[data-to-english]');
+  const wtlButton = root.querySelector('[data-from-english]');
+  const glyphButton = root.querySelector('[data-to-glyphs]');
+  const unglyphButton = root.querySelector('[data-from-glyphs]');
   const editor = root.querySelector('#wg-wyrdrune-source');
   const status = root.querySelector('[data-program-status]');
   const irView = root.querySelector('[data-program-ir]');
@@ -157,6 +185,62 @@ export async function mountWayglassProgramWorkbench(root) {
   const saveButton = root.querySelector('[data-program-save]');
 
   const updateCount = () => { sourceCount.textContent = editor.value.length + ' characters'; };
+  const invalidateLanguage = () => {
+    englishArea.value = '';
+    glyphArea.value = '';
+    languageStatus.textContent = 'Source changed. Translate this revision again.';
+  };
+  const acceptTranslatedSource = (source, label) => {
+    if (pending) throw new Error('Wait until the current programme finishes.');
+    languageCompiler(source); // Compilation, not execution.
+    editor.value = source;
+    activeProgram = 'language-draft';
+    activeSlug = null;
+    updateCount();
+    irView.textContent = 'Translated source not executed. Compile to inspect host-verified IR.';
+    outputView.textContent = 'Translation only; no effects or external calls.';
+    hashView.textContent = 'Source not compiled';
+    stateView.textContent = 'Translated';
+    languageStatus.textContent = label + ' Compiled locally; no code executed.';
+    status.textContent = 'Translated Wyrdrune draft. Inspect before explicitly compiling or running.';
+  };
+  englishButton.addEventListener('click', () => {
+    try {
+      const result = wtlToEnglish(editor.value, {compile:languageCompiler});
+      englishArea.value = result.english;
+      languageStatus.textContent = 'Reversible structured English ready. No model contacted.';
+    } catch (error) {
+      try {
+        englishArea.value = glossProgram(languageCompiler(editor.value)).text;
+        languageStatus.textContent = 'Read-only English gloss. This source uses declarations not yet reversible in the controlled dialect: ' + error.message;
+      } catch (compileError) {
+        englishArea.value = '';
+        languageStatus.textContent = 'Not translated: ' + String(compileError?.message || compileError);
+      }
+    }
+  });
+  wtlButton.addEventListener('click', () => {
+    try {
+      const result = englishToWtl(englishArea.value, {compile:languageCompiler});
+      acceptTranslatedSource(result.source, 'English → WTL translation ready.');
+      glyphArea.value = ''; // Existing transport no longer refers to this source.
+    } catch (error) { languageStatus.textContent = 'English translation refused: ' + String(error?.message || error); }
+  });
+  glyphButton.addEventListener('click', () => {
+    try {
+      languageCompiler(editor.value);
+      glyphArea.value = wtlToGlyphTransport(editor.value);
+      languageStatus.textContent = 'Lossless rune transport ready for this WTL revision; not a semantic glyph translation.';
+    } catch (error) { languageStatus.textContent = 'Rune transport refused: ' + String(error?.message || error); }
+  });
+  unglyphButton.addEventListener('click', () => {
+    try {
+      const source = glyphTransportToWtl(glyphArea.value);
+      acceptTranslatedSource(source, 'Rune transport decoded.');
+      englishArea.value = '';
+    } catch (error) { languageStatus.textContent = 'Rune decode refused: ' + String(error?.message || error); }
+  });
+
   editor.value = vesselPlanSource;
   updateCount();
   status.textContent = 'Whole Vessel Plan loaded. Compile to inspect the native WTL program.';
@@ -169,6 +253,7 @@ export async function mountWayglassProgramWorkbench(root) {
     activeSlug = selected.slug || null;
     editor.value = selected.source;
     updateCount();
+    invalidateLanguage();
     irView.textContent = 'Programme loaded. Compile to inspect its typed IR.';
     outputView.textContent = 'No execution for this source revision.';
     hashView.textContent = 'Source not compiled';
@@ -313,7 +398,7 @@ export async function mountWayglassProgramWorkbench(root) {
     if (activeController) activeController.abort();
   };
   globalThis.addEventListener('wayglass:os:feather', onFeather);
-  editor.addEventListener('input', updateCount);
+  editor.addEventListener('input', () => { updateCount(); invalidateLanguage(); });
   loadButton.addEventListener('click', loadProgram);
   select.addEventListener('change', loadProgram);
   compileButton.addEventListener('click', () => void run('compile'));
@@ -369,6 +454,7 @@ export async function mountWayglassProgramWorkbench(root) {
     event.preventDefault();
     const values = Object.fromEntries(new FormData(form).entries());
     editor.value = wizardProgram(values);
+    invalidateLanguage();
     activeProgram = 'spell-wizard:' + Date.now().toString(36);
     activeSlug = null;
     updateCount();

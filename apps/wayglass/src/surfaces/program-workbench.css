@@ -19,3 +19,10 @@
 .wg-spell-wizard form{display:grid;gap:1rem}
 .wg-spell-wizard label{display:grid;gap:.4rem;font-size:.86rem}
 @media(max-width:850px){.wg-program-grid{grid-template-columns:1fr}.wg-program-editor{grid-row:auto}.wg-program-editor textarea{min-height:22rem}.wg-program-inspector pre,.wg-program-ledger pre{min-height:10rem}}
+
+.wg-program-language-bridge{border:1px solid rgba(180,220,215,.24);padding:.7rem;border-radius:1rem;background:rgba(3,12,17,.55)}
+.wg-program-language-bridge summary{cursor:pointer;min-height:44px;padding:.6rem;font-weight:600;letter-spacing:.02em}
+.wg-program-language-bridge p{margin:.5rem 0 .8rem}
+.wg-program-language-bridge label{display:grid;gap:.4rem;font-size:.84rem;margin-block:.7rem}
+.wg-program-language-bridge textarea{min-height:9rem;height:auto;white-space:pre-wrap;font-size:.8rem}
+.wg-program-language-bridge #wg-wtl-glyphs{min-height:6rem;font-family:ui-monospace,monospace}

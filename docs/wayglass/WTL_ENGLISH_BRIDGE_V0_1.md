@@ -53,9 +53,9 @@ not deceptively paraphrased. Unknown prose fails closed.
 
 ## Road to the full language
 
-This is a core library and conformance step, not yet a UI toggle in
-Whole Pizza's Workbench, a complete conversational English compiler, or
-full semantic Skýrunor. Next integration is an editable three-face
+This is a core library and a three-face **Workbench toggle** for WTL, structured
+English and rune transport. It is not a complete conversational English compiler
+or full semantic Skýrunor. Next integration is an editable three-face
 WTL / en-GB / glyph view, preserving authorship and handling source
 changes and explicit execution consent. Then extend typed-IR coverage
 and test multi-language source maps before calling it universal.
