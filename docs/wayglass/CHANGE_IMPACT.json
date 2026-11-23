@@ -633,6 +633,43 @@
         "finish_line": "Mandatory gate validates declarations with passing negative-case tests, one source-head receipt.",
         "return_marker": "Built / Verified / Held in #583; resume failing #661 WTL and Return reconciliation at exact head."
       }
+    },
+    {
+      "change_id": "cypher-browser-diagnostic-path-2026-11-23",
+      "changed_paths": [
+        "scripts/wayglass-cypher-browser.mjs",
+        "docs/wayglass/CHANGE_IMPACT.json"
+      ],
+      "affected_organs": [
+        "Wayglass Living Cypher browser acceptance",
+        "Writing Room keyboard/touch accessibility",
+        "One Ship CI reconciliation"
+      ],
+      "dependent_checks": [
+        "Wayglass Living Cypher Browser exact-head Chromium",
+        "Wayglass Writing Room 44px hit targets and screenshot failure receipts",
+        "One Ship change-impact gate"
+      ],
+      "provenance": [
+        "2026-11-23 head c8ecf6c7df5bf807693a0d3518f4c1f009c6e46f",
+        "Failed CI run 45198913934: ReferenceError out is not defined at scripts/wayglass-cypher-browser.mjs:258",
+        "Mission #583; integration train #661; no new PR"
+      ],
+      "rollback": [
+        "Revert this diagnostic variable correction and its impact entry together; leave UI hit-target assertions unchanged"
+      ],
+      "status": "in-review; awaiting exact-head browser CI",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Fix existing browser test harness; do not create a replacement check.",
+        "owner_outcome": "One usable, verifiable Wayglass Writing Room.",
+        "finish_line": "Browser runs to its actual hit-target assertions and captures a screenshot if controls are obscured.",
+        "return_marker": "Verify exact-head Living Cypher and repair any real control obstruction revealed."
+      }
     }
   ]
 }
