@@ -357,9 +357,40 @@
     "observed_head_before_register_update": "826c7db512fbc77340973876e52ca9e3b9cd4703",
     "impact_manifest": "docs/wayglass/CHANGE_IMPACT.json",
     "impact_manifest_status": "declares all 330 implementation/workflow paths in current PR diff",
-    "faeberpunk": "shared ship stylesheet copied and imported after room styles; exact-head CI pending",
-    "soma_nova": "Pure Morphogenesis planner and tests ported from #678; authenticated, effect-free preview route and native Folio added to existing Program Workbench. Preview does not persist or commit. Commit/Return and charge/fire persistence remain outstanding; exact-head CI pending.",
+    "faeberpunk": "Shared ship stylesheet ported and loaded after room styles; full design and responsive browser acceptance remain pending.",
+    "soma_nova": "Pure planner, tests, authenticated host preview route, responsive Folio in existing Program Workbench, and Feather cancellation are integrated on #661. Preview only; no durable charge, commit/fire, Form Atlas persistence or Return restoration yet.",
     "supabase_program_store": "existing owner-scoped program/revision/run tables reused; no anon/authenticated table grants; service_role only; RLS enabled with no policies by design of current migration; host/service boundary still requires exact route and credential custody verification",
-    "deployment_sha": "unknown"
+    "deployment_sha": "unknown",
+    "last_verified_code_head": "df17731ebf24304beae21bc08dcc1f8114c42e0a",
+    "one_ship_change_impact": {
+      "status": "passed",
+      "workflow_run": 45190029040,
+      "implementation_paths": 335,
+      "declared_paths": 335,
+      "missing_paths": 0,
+      "extra_paths": 0
+    },
+    "wayglass_check": {
+      "status": "failed",
+      "workflow_run": 45190029610,
+      "job_id": 137745618862,
+      "blockers": [
+        "Möbius Nursery encounter participant/attribution contract mismatch",
+        "First Contact/Watercolour tests require a 2D canvas context in the Node test environment",
+        "Wonder validation error wording differs from contract test",
+        "typed-IR Wonder/known operator purity and match-branch parsing tests fail",
+        "L1/L2 conformance cases are not claimed by current backend"
+      ]
+    },
+    "windows_installer": {
+      "previous_run": "45189390388",
+      "previous_failure": "Soma Nova broken-lineage input classified 422 rather than expected 400",
+      "repair_commit": "df17731ebf24304beae21bc08dcc1f8114c42e0a",
+      "current_run": "45190029567",
+      "status": "in-progress"
+    },
+    "whole_pizza": "Program Workbench, workbench client, server program store, authenticated routes and program-library migration are already present; #676 is partially integrated and remains divergent pending selective diff review.",
+    "unified_magic": "#674 not imported wholesale; separate runtime, parser and filesystem receipt host conflict with One Ship. Reconcile semantics into canonical WTL AST/IR and existing program/Return store.",
+    "watercolour": "#673 projection not yet imported; same files exist but differ, and #649 overlaps. Selective SON-002 subscriber port remains pending."
   }
 }
