@@ -25,6 +25,7 @@
 .wg-program-fiction label{display:grid;gap:.35rem;padding:.3rem 0;font-size:.85rem}
 .wg-program-fiction input{min-height:44px;border-radius:.65rem;background:#081416;border:1px solid #59756c;color:inherit;padding:.5rem}
 .wg-program-fiction textarea{min-height:14rem;height:auto;white-space:pre-wrap}
+.wg-program-fiction [data-fiction-door]{display:block;padding:.65rem;border:1px solid rgba(140,210,185,.3);border-radius:.65rem;color:#e8d7ac}
 .wg-program-fiction pre{white-space:pre-wrap;overflow:auto;max-height:14rem;color:#beddd3;font-size:.8rem}
 .wg-program-language-bridge{border:1px solid rgba(180,220,215,.24);padding:.7rem;border-radius:1rem;background:rgba(3,12,17,.55)}
 .wg-program-language-bridge summary{cursor:pointer;min-height:44px;padding:.6rem;font-weight:600;letter-spacing:.02em}

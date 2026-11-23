@@ -35,7 +35,7 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Test browser WCE-1 against host and execute native WTL
-        run: node --test lib/wyrdrune/first-lantern-ipad.test.cjs lib/wyrdrune/bidirectional.test.cjs lib/wyrdrune/skyrunor*.test.cjs lib/wyrdrune/fiction-mobius.test.cjs
+        run: node --test lib/wyrdrune/first-lantern-ipad.test.cjs lib/wyrdrune/bidirectional.test.cjs lib/wyrdrune/skyrunor*.test.cjs lib/wyrdrune/fiction-mobius.test.cjs lib/wyrdrune/fiction-projection.test.cjs
       - name: Build self-contained offline Safari HTML
         run: node scripts/build-first-lantern-ipad.mjs
       - name: Audit single-file artifact

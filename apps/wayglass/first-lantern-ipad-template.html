@@ -24,7 +24,7 @@ summary{padding:12px 0;font-weight:750;color:var(--gold);cursor:pointer;min-heig
 @media(prefers-reduced-motion:reduce){*{scroll-behaviour:auto!important}}
 </style></head>
 <body><main><header><p class="eyebrow">Wayglass · Whole Pizza · Native WTL</p><h1>First Lantern <span aria-hidden="true">ᚹ</span></h1>
-<p class="intro">One real Wyrdrune programme, running entirely on your iPad. Eightfold, verification, Return. No cloud connection, external model, microphone, camera or device effects.</p>
+<p class="intro">One real Wyrdrune programme, running entirely on your iPad. Eightfold, verification, Return. No cloud connection, model, microphone or camera. Local audio only after your separate gesture.</p>
 <span class="pill">OFFLINE · EXPLICIT EXECUTION · en-GB</span></header>
 <div id="status" role="status" aria-live="polite">Loading the Wyrdrune interpreter…</div>
 <div class="layout"><section class="panel"><h2>01 · Wyrdrune source</h2>
@@ -41,6 +41,10 @@ Falka: "The gate remembers our names."
 ::change the fictional door opens
 Beyond the threshold, another room began.</textarea>
 <div class="buttons"><button id="fiction-compose-btn">Compose living Möbius WTL</button></div>
+<div class="buttons"><button id="fiction-project-btn" disabled>Render accepted fiction cues</button><button id="fiction-stop-btn">🪽 Stop cue</button></div>
+<p class="note">Only an original glass tone and a fictional door display are supported after a separate gesture. Unknown audio, image, video and world changes remain proposals.</p>
+<output id="fiction-door" role="status" aria-live="polite">Fictional door: closed (not physical)</output>
+<pre id="fiction-render" aria-live="polite">Nothing rendered.</pre>
 <pre id="fiction-preview" aria-live="polite">Composition is not execution. Tap Run First Lantern separately.</pre>
 <p class="note">Each authored line becomes a native scoped cycle and Return. Cues remain proposals; no physical effects are authorised.</p>
 </details>

@@ -461,6 +461,47 @@
         "revert only the relevant integration commits from PR #661; preserve source branches, canonical WTL/runtime and durable user data; no destructive database migration rollback without a separate data-safety review",
         "revert the Soma Nova planner, preview route, client and Folio UI together; leave existing WTL Workbench and program library intact"
       ]
+    },
+    {
+      "change_id": "fiction-projection-owner-approved-2026-11-23",
+      "changed_paths": [
+        "lib/wyrdrune/fiction-projection.mjs",
+        "lib/wyrdrune/fiction-projection.test.cjs",
+        "docs/wayglass/FICTION_PROJECTION_APPROVAL_V0_1.md",
+        "apps/wayglass/src/surfaces/program-workbench.js",
+        "apps/wayglass/src/surfaces/program-workbench.css",
+        "apps/wayglass/src/first-lantern-ipad.js",
+        "apps/wayglass/first-lantern-ipad-template.html",
+        "scripts/check-skyrunor-browser.mjs",
+        ".github/workflows/wyrdrune-ipad-lantern.yml"
+      ],
+      "affected_organs": [
+        "Wyrdrune semantic fiction",
+        "Wayglass Program Workbench",
+        "Offline iPad First Lantern",
+        "One Ship sound engine",
+        "Fictional in-app state / Return"
+      ],
+      "dependent_checks": [
+        "Native fiction-projection test suite",
+        "WebKit and Chromium exact offline iPad acceptance",
+        "Shared authenticated Wayglass workbench browser acceptance",
+        "One Ship impact gate",
+        "Feather rejection and no auto-play"
+      ],
+      "provenance": [
+        "owner said 'Proposal accepted' following verified six-cycle fiction receipt",
+        "source PR #661, earlier #676 example, mission #583"
+      ],
+      "rollback": [
+        "Revert fiction-projection source/UI/CI integration together; retain immutable authored source and prior committed WTL returns"
+      ],
+      "consent_and_authority": [
+        "Explicit new Render click required after confirmed WTL commit",
+        "Only audio 'soft glass harmonics' and fictional display 'the fictional door opens' are allowlisted",
+        "No external API/device permissions, real doors, camera, video or image generation"
+      ],
+      "status": "source-candidate-pending exact-head CI; no release"
     }
   ]
 }

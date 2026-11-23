@@ -1,5 +1,8 @@
 import {translateSemantic} from '../../../../lib/wyrdrune/skyrunor-bridge.mjs';
 import {FICTION_EXAMPLE,fictionToWtl,verifyFictionExecution} from '../../../../lib/wyrdrune/fiction-mobius.mjs';
+import {planFictionProjection,renderApprovedFiction} from '../../../../lib/wyrdrune/fiction-projection.mjs';
+import {shipSoundscape} from '../ship-soundscape.js';
+import {wayglassSomaticSound} from '../somatic-sound.js';
 import {sha256Hex} from '../../../../lib/wyrdrune/browser-canonical.mjs';
 import {publishWatercolorActivity} from '../watercolor-bridge.js';
 import {EXAMPLE_CHANGE} from '../../../../lib/wyrdrune/skyrunor-change.mjs';
@@ -76,7 +79,7 @@ export async function mountWayglassProgramWorkbench(root) {
   let proposalOnly = false;
   let activeController = null;
   let somaController = null;
-  let stagedFiction = null;
+  let stagedFiction = null, acceptedFiction = null, projectionAbort = null, fictionAudioPlaying = false;
   root.innerHTML = `
     <section class="wg-surface wg-program-workbench" data-surface="wayglass-program-workbench">
       <header class="wg-surface-head glass-panel">
@@ -160,6 +163,13 @@ export async function mountWayglassProgramWorkbench(root) {
             </label>
             <button type="button" class="glass-chip" data-fiction-compose>Compose living Möbius WTL</button>
             <pre data-fiction-preview aria-live="polite">No execution or media generation yet.</pre>
+            <div class="wg-program-actions">
+              <button type="button" class="glass-chip" data-fiction-approve disabled>Render accepted fiction cues</button>
+              <button type="button" class="glass-chip" data-fiction-stop>🪽 Stop fiction cue</button>
+            </div>
+            <p class="tiny">Only the original glass-harmonics sound and a fictional door view can render. A fresh click is required after the WTL execution. Unknown image, video and world changes remain proposals.</p>
+            <output data-fiction-door role="status" aria-live="polite">Fictional door: closed (not physical)</output>
+            <pre data-fiction-render aria-live="polite">Nothing rendered. Proposed effects remain proposed.</pre>
           </details>
           <details class="wg-program-language-bridge" data-language-bridge>
             <summary>WTL ⇄ British English ⇄ Skýrunor</summary>
@@ -264,7 +274,7 @@ export async function mountWayglassProgramWorkbench(root) {
 
   const updateCount = () => { sourceCount.textContent = editor.value.length + ' characters'; };
   const invalidateLanguage = () => {
-    stagedFiction=null;proposalOnly=false;runButton.disabled=pending;compileButton.disabled=pending;
+    stopFictionProjection({clear:true});stagedFiction=null;proposalOnly=false;runButton.disabled=pending;compileButton.disabled=pending;
     englishArea.value = '';
     glyphArea.value = '';
     semanticArea.value = '';
@@ -272,7 +282,7 @@ export async function mountWayglassProgramWorkbench(root) {
   };
   const acceptTranslatedSource = (source, label) => {
     if (pending) throw new Error('Wait until the current programme finishes.');
-    stagedFiction=null;proposalOnly=false;runButton.disabled=false;compileButton.disabled=false;
+    stopFictionProjection({clear:true});stagedFiction=null;proposalOnly=false;runButton.disabled=false;compileButton.disabled=false;
     languageCompiler(source); // Compilation, not execution.
     editor.value = source;
     semanticArea.value = '';
@@ -397,6 +407,56 @@ export async function mountWayglassProgramWorkbench(root) {
   const storyInput=root.querySelector('#wg-fiction-text');
   const storyWorld=root.querySelector('#wg-fiction-world');
   const storyPreview=root.querySelector('[data-fiction-preview]');
+  for(const field of [storyInput,storyWorld])field.addEventListener('input',()=>{
+    stopFictionProjection({clear:true});
+    stagedFiction=null;
+    storyPreview.textContent='The fiction draft changed. Compose again before a new WTL run.';
+  });
+  const fictionApproval=root.querySelector('[data-fiction-approve]');
+  const fictionRender=root.querySelector('[data-fiction-render]');
+  const fictionDoor=root.querySelector('[data-fiction-door]');
+  function stopFictionProjection({clear=false}={}){
+    projectionAbort?.abort();projectionAbort=null;
+    if(fictionAudioPlaying){shipSoundscape.stop();fictionAudioPlaying=false;}
+    if(clear){
+      acceptedFiction=null;fictionApproval.disabled=true;
+      fictionDoor.textContent='Fictional door: closed (not physical)';
+      fictionRender.textContent='Nothing rendered. Re-run to review the latest fiction.';
+    }
+  }
+  fictionApproval.addEventListener('click',async()=>{
+    if(!acceptedFiction||pending||projectionAbort)return;
+    if(wayglassSomaticSound.snapshot().feather_stopped){
+      fictionRender.textContent='Feather held. No cue rendered.';return;
+    }
+    const snapshot=acceptedFiction,controller=projectionAbort=new AbortController();
+    fictionApproval.disabled=true;
+    fictionRender.textContent='Rendering only the accepted fictional cues…';
+    try{
+      const projected=await renderApprovedFiction(snapshot,{confirmed:true,signal:controller.signal,
+        playSound:async(score)=>{
+          if(wayglassSomaticSound.snapshot().feather_stopped||controller.signal.aborted)throw Error('Feather held.');
+          shipSoundscape.stop();
+          const started=await shipSoundscape.audio.playTimedScore(score,()=>{shipSoundscape.stop();fictionAudioPlaying=false;});
+          fictionAudioPlaying=started===true;
+          return started===true;
+        },
+        projectWorld:(state)=>{
+          if(controller.signal.aborted)return false;
+          fictionDoor.textContent='Fictional door: '+state.state+' (story view only, not physical)';
+          return true;
+        }
+      });
+      if(snapshot!==acceptedFiction||controller.signal.aborted)throw Error('Source changed or Feather held.');
+      fictionRender.textContent=JSON.stringify(projected,null,2);
+      status.textContent='Only supported, separately confirmed fictional projections rendered.';
+    }catch(error){fictionRender.textContent='Projection stopped: '+String(error?.message||error);}
+    finally{if(projectionAbort===controller)projectionAbort=null;fictionApproval.disabled=!acceptedFiction;}
+  });
+  root.querySelector('[data-fiction-stop]').addEventListener('click',()=>{
+    stopFictionProjection({clear:true});
+    fictionRender.textContent='Feather held the fiction cue. Re-run before any further rendering.';
+  });
   root.querySelector('[data-fiction-compose]').addEventListener('click',()=>{
     try {
       if(pending)throw new Error('Feather or finish the active execution first.');
@@ -440,6 +500,7 @@ export async function mountWayglassProgramWorkbench(root) {
 
   async function run(mode) {
     if (pending || proposalOnly) return;
+    if(mode==='execute')stopFictionProjection({clear:true});
     pending = true;
     activeController = new AbortController();
     compileButton.disabled = true;
@@ -535,6 +596,10 @@ export async function mountWayglassProgramWorkbench(root) {
       if(mode==='execute'&&stagedFiction&&editor.value===stagedFiction.wtl&&receipt.execution?.status==='committed'){
         const verified=verifyFictionExecution(stagedFiction,receipt.execution);
         receipt={...receipt,fiction:verified};
+        acceptedFiction=verified;
+        const plan=planFictionProjection(verified);
+        fictionApproval.disabled=!plan.items.some(item=>item.kind!=='unsupported');
+        fictionRender.textContent=JSON.stringify(plan,null,2);
         for(const event of verified.events){
           if(event.effect_status!=='text-committed')continue;
           publishWatercolorActivity({kind:'fiction:authored',actor:'wayglass:fiction-author',
@@ -586,9 +651,11 @@ export async function mountWayglassProgramWorkbench(root) {
   const onFeather = () => {
     if (activeController) activeController.abort();
     if (somaController) somaController.abort();
+    stopFictionProjection({clear:true});
     somaStatus.textContent = 'Feather stopped staged Soma Nova work.';
   };
   globalThis.addEventListener('wayglass:os:feather', onFeather);
+  globalThis.addEventListener('wayglass:feather',event=>{if(event.detail?.stopped===true)stopFictionProjection({clear:true});});
   editor.addEventListener('input', () => { updateCount(); invalidateLanguage(); });
   loadButton.addEventListener('click', loadProgram);
   select.addEventListener('change', loadProgram);
