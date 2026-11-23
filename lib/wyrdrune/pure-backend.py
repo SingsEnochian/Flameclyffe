@@ -421,6 +421,8 @@ class Execution:
             op = node["op"]
             if op == "/" and b == 0:
                 raise ValueError("Division by zero")
+            if op == "%" and b == 0:
+                raise ValueError("Wrap by zero")
             if op == "+":
                 result = a + b
             elif op == "-":
@@ -429,6 +431,8 @@ class Execution:
                 result = a * b
             elif op == "/":
                 result = a / b
+            elif op == "%":
+                result = a % b
             else:
                 raise TypeError("Invalid WTL expression")
             if not math.isfinite(result):
@@ -445,6 +449,12 @@ class Execution:
                 if len(args) != len(params):
                     raise TypeError("Operator " + name + " expects " + str(len(params)) + " arguments")
                 return self.expression(operator["body"], dict(zip(params, args)), depth + 1)
+            if name == "pick":
+                if (len(args) != 2 or not isinstance(args[0], list) or not args[0]
+                        or isinstance(args[1], bool) or not isinstance(args[1], (int, float))
+                        or not math.isfinite(args[1])):
+                    raise TypeError("pick(options,index) requires a non-empty list and finite number")
+                return args[0][math.floor(args[1]) % len(args[0])]
             if name in PURE_OPERATIONS:
                 arity, operation = PURE_OPERATIONS[name]
                 if len(args) != arity:

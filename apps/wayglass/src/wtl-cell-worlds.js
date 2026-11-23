@@ -53,10 +53,10 @@ function face(label,{founders,shift}){
     withness {participants: [${participants}], field: grown, agreement: "a world we share", commitment: "it holds only what its members bring"};
   }
   choose {
-    let tone = when felt > 0 then (pulse * 1.5) % 660 + 110 else pulse;
-    let tex = when felt > 2 then (texture + 1) % 6 else texture;
+    let tone = if felt > 0 then (pulse * 1.5) % 660 + 110 else pulse;
+    let tex = if felt > 2 then (texture + 1) % 6 else texture;
     let feel = pick(${JSON.stringify([...TEXTURES])}, tex);
-    let lull = when felt > 0 or many > 0 then 0 else quiet + 1;
+    let lull = if felt > 0 or many > 0 then 0 else quiet + 1;
     let syllables = ${JSON.stringify(founders.flatMap(f=>f.syllables))};
     let name = [pick(syllables, ${lit(founders[0].voice)} * 104729), pick(syllables, ${lit(founders[1].voice)} * 104729 + 3)];
   }

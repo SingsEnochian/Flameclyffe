@@ -20,6 +20,10 @@ The server owns the Nursery state; multiple browser tabs read the same instance.
 
 An undelivered/queue-full/blocked signal must not produce a grounded event. Acceptance of a queued signal does not prove a cell actually processed or understood the message. Because the sender's deterministic twist is not a human intention, `why` names the algorithmic selection rule rather than inventing motives.
 
+## Canonical WTL language reconciliation
+
+The earlier Nursery source #668 used WTL `when`, `%`, `pick`, and a numeric operator named `wonder`. The current #661 WTL runtime already owns `if ... then ... else` and reserves `wonder(question)` for semantic inquiry. Reconciliation therefore translates Nursery source `when` to canonical `if`, renames the unrelated numeric voice operator to `singVoice`, and extends the **one canonical runtime**, not a second interpreter, with bounded modulo `%` and deterministic `pick(list,index)`. The Python reference backend and typed-IR call preflight receive the same semantics. Divide-by-zero and empty-list selection fail closed. Dedicated portability tests guard these contracts.
+
 ## Nursery interface
 
 The existing native Living Cell Garden includes a Nursery Language panel. Observe is explicit; it never starts automatic ticking by merely opening a room. Controls: one cycle, Run/Stop, Feather/Release, Grounded/Poetry. All output is DOM `textContent` from a House-authenticated source. Source-bound receipts remain inspectable after mode changes.

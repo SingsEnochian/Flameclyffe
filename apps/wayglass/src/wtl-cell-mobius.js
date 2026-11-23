@@ -53,22 +53,22 @@ function face(label,{address,step,stillness,lived,syllables,sass,inscribed}){
     withness {participants: [{id: "${address}", role: "cell", presence: true, agency: "free"}, {id: "colony", role: "neighbours", presence: true, agency: "free"}], field: renewed, agreement: "listen, keep, return", commitment: "nothing leaves the cell but its carry"};
   }
   choose {
-    let sung = wonder(voice, turned, felt);
+    let sung = singVoice(voice, turned, felt);
     // On a Möbius strip the same face comes round every second pass, so a
     // settled song is compared with the voice from one full turn ago.
     let drift = sung - echo;
     let settled = drift * drift < ${stillness};
     let ready = settled and turn >= ${lived} and ear < 1${inscribed ? ' and sight == ""' : ""};
     // Name candidates, chosen here from the cell's own syllables by its own
-    // sung voice (RFC-0002 pick/when). The colony takes the first one free.
+    // sung voice (RFC-0002 pick/if). The colony takes the first one free.
     let own = ${JSON.stringify(syllables)};
     let k = sung * 104729;
     let third = ${sass>=2?'true':'false'};
     let names = [
-      [pick(own, k), pick(own, k / 7), when third then pick(own, k / 49) else ""],
-      [pick(own, k + 1), pick(own, k / 7 + 3), when third then pick(own, k / 49 + 2) else ""],
-      [pick(own, k + 2), pick(own, k / 11), when third then pick(own, k / 13) else ""],
-      [pick(own, k / 3), pick(own, k + 5), when third then pick(own, k / 17 + 1) else ""]
+      [pick(own, k), pick(own, k / 7), if third then pick(own, k / 49) else ""],
+      [pick(own, k + 1), pick(own, k / 7 + 3), if third then pick(own, k / 49 + 2) else ""],
+      [pick(own, k + 2), pick(own, k / 11), if third then pick(own, k / 13) else ""],
+      [pick(own, k / 3), pick(own, k + 5), if third then pick(own, k / 17 + 1) else ""]
     ];
   }
   return {
@@ -98,7 +98,7 @@ export function cellSource(address,genome,syllables=SYLLABLE_POOL.slice(0,6),{in
   const stillness=(0.000001/(1+g.curiosity*3)).toFixed(10), lived=16+8*g.curiosity; // WTL numbers have no exponent form
   const ops=`// ${address} · genome sass ${g.sass} · curiosity ${g.curiosity} · dialect ${g.dialectBias}
 operator settle(e) = e * ${settle};
-operator wonder(v, p, f) = v * 0.5 + p * ${lean} + f * 0.1;
+operator singVoice(v, p, f) = v * 0.5 + p * ${lean} + f * 0.1;
 `;
   const shared={address,step,stillness,lived,syllables:own,sass:g.sass,inscribed};
   return ops+face('outer',shared)+'\n'+face('inner',shared);

@@ -783,7 +783,11 @@
         "apps/wayglass/test/wtl-cell-tissue.test.js",
         "apps/wayglass/test/wtl-cell-worlds.test.js",
         "docs/wayglass/NURSERY_SEMANTIC_GROUNDING_V0_1.md",
-        "docs/wayglass/current.json"
+        "docs/wayglass/current.json",
+        "lib/wyrdrune/runtime.mjs",
+        "lib/wyrdrune/pure-backend.py",
+        "lib/wyrdrune/typed-ir.cjs",
+        "lib/wyrdrune/cell-nursery-portability.test.cjs"
       ],
       "affected_organs": [
         "Wyrdrune Nursery ecology",
@@ -797,12 +801,16 @@
         "npm run wayglass:test:host",
         "npm run wayglass:build",
         "One Ship change-impact and Focus Router Law",
-        "source-bound event grounding and rejected forgery tests"
+        "source-bound event grounding and rejected forgery tests",
+        "WTL JS/Python modulo and deterministic pick parity",
+        "typed IR pure-call validation",
+        "Nursery naming and world-turn expression compatibility"
       ],
       "provenance": [
         "Rowan / Mamma coherence observation; Rowan authorised implementation 2026-11-23",
         "original source candidate PR #668 SHA c466d281979dbd4b73274a5ae88ee170770d7e9e",
-        "selective module port into single train PR #661; parent 6aad865415d44ebf7cc5f22431bce658984c446c"
+        "selective module port into single train PR #661; parent 6aad865415d44ebf7cc5f22431bce658984c446c",
+        "Source #668 uses WTL when/%/pick and numeric wonder; source-normalised to canonical if and singVoice. One shared JS/Python runtime extended rather than a shadow interpreter."
       ],
       "rollback": [
         "Revert Nursery module port, authenticated subroutes and Cell Garden panel together; preserve source PR #668 and existing Host Cell Garden."
@@ -813,10 +821,10 @@
         "mission_issue": 583,
         "integration_pr": 661,
         "routing": "existing-train",
-        "duplicate_review": "Compared #661 Cell Garden with #662/#665/#668 nursery; port source modules into existing authenticated host, retain one WTL runtime, do not run source's separate server.",
+        "duplicate_review": "Compared #661 Cell Garden with #662/#665/#668 nursery; port source modules into existing authenticated host, retain one WTL runtime, do not run source's separate server. Reconciled old source grammar with canonical WTL tokens and the already-reserved wonder semantic operator.",
         "owner_outcome": "Babies explain what they sent, why selected recipient/channel and what counters changed, while preserving original poetic phrases.",
         "finish_line": "Grounded WTL signal receipts, before/after, tamper and Feather tests and House route acceptance pass at exact SHA.",
-        "return_marker": "Built / Verified / Held in #583. Cold Return and non-signal semantic grounding remain unresolved."
+        "return_marker": "Built: source-grounded speech, canonical WTL source compatibility. Verified: pending exact-head CI. Held: broader existing #661 test failures, cold Return."
       }
     },
     {
