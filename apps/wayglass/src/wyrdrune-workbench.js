@@ -1,3 +1,5 @@
+import {createWyrdruneRuntime} from '../../../lib/wyrdrune/runtime.mjs';
+import {translateSemantic} from '../../../lib/wyrdrune/skyrunor-bridge.mjs';
 async function sha256(source, cryptoImpl) {
   if (!cryptoImpl?.subtle?.digest) throw new Error('Web Crypto is required to verify the Wyrdrune source receipt.');
   const digest = await cryptoImpl.subtle.digest('SHA-256', new TextEncoder().encode(source));
@@ -35,6 +37,15 @@ export async function runWyrdruneProgram(source, {
   if (data.source_hash !== expected || data.ir?.sourceHash !== expected ||
       (mode === 'execute' && data.execution?.sourceHash !== expected)) {
     throw new TypeError('Wyrdrune source hash does not match the executed programme.');
+  }
+  if (data.semantic != null) {
+    const compile=createWyrdruneRuntime({hashSource:()=>expected}).compile;
+    const semantic=translateSemantic({format:'wtl',input:source},{compile});
+    if (data.semantic.source_hash!==expected || data.semantic.physically_verified!==false ||
+        data.semantic.schema!==semantic.schema || JSON.stringify(data.semantic.ast)!==JSON.stringify(semantic.ast) ||
+        data.semantic.glyphs!==semantic.glyphs || data.semantic.declaration!==semantic.declaration) {
+      throw new TypeError('Semantic receipt does not match the authored WTL meaning.');
+    }
   }
   return Object.freeze({ ...data, source_verified: true });
 }

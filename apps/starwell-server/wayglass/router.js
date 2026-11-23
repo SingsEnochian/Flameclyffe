@@ -1159,6 +1159,23 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     }
   });
 
+  // Shared semantic translation service: authenticated, read-only, no persistence/dispatch.
+  router.post('/wyrdrune/translate', createRequestGate({ maxRequests: 24, maxConcurrent: 2 }), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required to translate Wyrdrune declarations.' });
+    }
+    try {
+      if (!req.body || Object.keys(req.body).some(key => !['format','input'].includes(key)))
+        throw new TypeError('Translation accepts format and input only; execution is a separate action.');
+      const {translateSemantic}=await import('../wayglass-runtime/wyrdrune/skyrunor-bridge.mjs');
+      const result=translateSemantic(req.body,{compile:Wyrdrune.compile});
+      return res.json({...result,dispatch:'none',external_effects:[]});
+    } catch(error) {
+      return res.status(400).json({error:cleanText(error?.message||'Unsupported semantic declaration.',300)});
+    }
+  });
+
   router.post('/wyrdrune/workbench', createRequestGate({ maxRequests: 24, maxConcurrent: 2 }), async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     if (!(await griffStewardAuthorized(req).catch(() => false))) {
@@ -1172,6 +1189,12 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     }
     try {
       const ir = Wyrdrune.compile(source);
+      const {translateSemantic}=await import('../wayglass-runtime/wyrdrune/skyrunor-bridge.mjs');
+      let semantic=null;
+      try { semantic=translateSemantic({format:'wtl',input:source},{compile:Wyrdrune.compile}); } catch {}
+      // Metadata derives only from the complete recognised source, never request-supplied assertions.
+      if (semantic) semantic={schema:semantic.schema,ast:semantic.ast,glyphs:semantic.glyphs,
+        declaration:semantic.declaration,source_hash:ir.sourceHash,physically_verified:false};
       if (mode === 'compile') {
         let persistence = { status: 'not-saved' };
         try {
@@ -1181,7 +1204,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
             programId: program?.program_id || null,
             source,
             status: 'compiled',
-            executionReceipt: { schema: 'wayglass.wyrdrune-compile-receipt/v1', source_hash: ir.sourceHash, ir },
+            executionReceipt: { schema: 'wayglass.wyrdrune-compile-receipt/v1', source_hash: ir.sourceHash, ir, semantic },
             context: { mode, program_slug: cleanText(req.body?.program_slug || '', 80) },
           });
           persistence = { status: 'saved', run_id: run?.run_id || null };
@@ -1193,6 +1216,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
           mode,
           source_hash: ir.sourceHash,
           ir,
+          semantic,
           persistence,
           dispatch: 'none',
           external_effects: [],
@@ -1271,7 +1295,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
           programId: program?.program_id || null,
           source,
           status: execution.status === 'committed' ? 'committed' : 'rolled-back',
-          executionReceipt: execution,
+          executionReceipt: { ...execution, semantic },
           context: { ...context, program_slug: cleanText(req.body?.program_slug || '', 80) },
         });
         persistence = { status: 'saved', run_id: run?.run_id || null };
@@ -1284,6 +1308,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
         source_hash: ir.sourceHash,
         ir,
         execution,
+        semantic,
         context,
         persistence,
         dispatch: 'none',

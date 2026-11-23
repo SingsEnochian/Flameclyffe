@@ -136,3 +136,16 @@ test('workbench persists native execution receipts in the Wayglass run ledger', 
   });
   assert.equal(result.run_id, 'run-42');
 });
+
+test('source-verified execution also rejects forged semantic provenance', async () => {
+  const {translateSemantic}=await import('../../../lib/wyrdrune/skyrunor-bridge.mjs');
+  const {createWyrdruneRuntime}=await import('../../../lib/wyrdrune/runtime.mjs');
+  const compile=createWyrdruneRuntime({hashSource:()=> 'translation'}).compile;
+  const r=translateSemantic({format:'declaration',input:'Owner declaration: My eyes are hazel green.'},{compile});
+  const sourceHash=await hash(r.source);
+  const semantic={schema:r.schema,ast:r.ast,glyphs:r.glyphs,declaration:r.declaration,source_hash:sourceHash,physically_verified:false};
+  const receipt={schema:'wayglass.wyrdrune-workbench/v1',mode:'compile',source_hash:sourceHash,ir:{sourceHash},dispatch:'none',external_effects:[],semantic};
+  assert.equal((await runWyrdruneProgram(r.source,{mode:'compile',cryptoImpl:webcrypto,fetchImpl:async()=>response(200,receipt)})).source_verified,true);
+  for(const forged of [{...semantic,physically_verified:true},{...semantic,ast:{...r.ast,basis:'measured'}},{...semantic,glyphs:'ᛟᛟ'}])
+    await assert.rejects(runWyrdruneProgram(r.source,{mode:'compile',cryptoImpl:webcrypto,fetchImpl:async()=>response(200,{...receipt,semantic:forged})}),/Semantic receipt/);
+});

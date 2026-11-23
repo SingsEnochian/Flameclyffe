@@ -2,7 +2,15 @@ name: Wyrdrune iPad First Lantern
 on:
   pull_request:
     paths:
-      - 'lib/wyrdrune/browser-canonical.mjs'
+      - 'lib/wyrdrune/**'
+      - 'apps/wayglass/src/surfaces/program-workbench.js'
+      - 'apps/wayglass/src/wyrdrune-workbench.js'
+      - 'apps/wayglass/server-stage.cjs'
+      - 'apps/starwell-server/wayglass/router.js'
+      - 'apps/starwell-server/test/wayglass-wyrdrune-workbench.test.js'
+      - 'scripts/check-skyrunor-browser.mjs'
+      - 'package.json'
+      - 'package-lock.json'
       - 'lib/wyrdrune/first-lantern.wtl'
       - 'lib/wyrdrune/first-lantern-ipad.test.cjs'
       - 'lib/wyrdrune/bidirectional.mjs'
@@ -26,7 +34,7 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Test browser WCE-1 against host and execute native WTL
-        run: node --test lib/wyrdrune/first-lantern-ipad.test.cjs
+        run: node --test lib/wyrdrune/first-lantern-ipad.test.cjs lib/wyrdrune/bidirectional.test.cjs lib/wyrdrune/skyrunor*.test.cjs
       - name: Build self-contained offline Safari HTML
         run: node scripts/build-first-lantern-ipad.mjs
       - name: Audit single-file artifact
@@ -35,8 +43,19 @@ jobs:
           grep -q 'Run First Lantern' dist/ipad/First-Lantern-iPad.html
           node scripts/check-first-lantern-ipad.mjs
           sha256sum dist/ipad/First-Lantern-iPad.html
+      - name: Build and stage the shared Wayglass host
+        run: |
+          npm ci --prefix apps/starwell-server --omit=dev --ignore-scripts
+          npm run wayglass:deploy:server
+          node --test apps/starwell-server/test/wayglass-wyrdrune-workbench.test.js apps/wayglass/test/wyrdrune-workbench-client.test.js
+      - name: Execute exact HTML and shared workbench in Chromium and WebKit
+        run: |
+          npx playwright install --with-deps chromium webkit
+          node scripts/check-skyrunor-browser.mjs
       - uses: actions/upload-artifact@v4
         with:
           name: first-lantern-ipad-offline-html
-          path: dist/ipad/First-Lantern-iPad.html
+          path: |
+            dist/ipad/First-Lantern-iPad.html
+            artifacts/skyrunor/
           retention-days: 30

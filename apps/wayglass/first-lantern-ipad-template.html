@@ -31,14 +31,24 @@ summary{padding:12px 0;font-weight:750;color:var(--gold);cursor:pointer;min-heig
 <label for="wtl">Edit native WTL programme</label><textarea id="wtl" spellcheck="false" autocapitalize="off" autocomplete="off">__WTL_SOURCE__</textarea>
 <div class="buttons"><button class="primary" id="run-btn">✦ Run First Lantern</button><button id="feather-btn">🪽 Feather</button>
 <button id="check-btn">Verify translation</button><button id="reset-btn">Reset</button></div>
-<details><summary>English ⇄ WTL ⇄ Runes</summary>
+<details open><summary>Semantic Skýrunor v0.1</summary>
+<label for="declaration">Owner declaration (British English)</label><textarea id="declaration" class="small" spellcheck="false">Owner declaration: My eyes are hazel green.</textarea>
+<div class="buttons"><button id="declaration-btn">Declaration → Skýrunor + WTL</button></div>
+<label for="semantic">Meaning-bearing glyphs</label><textarea id="semantic" class="small" spellcheck="false" autocapitalize="off">ᛋᚴ:ᛗ/ᛖ/ᚲ=ᚺᚷ!ᛞ</textarea>
+<div class="buttons"><button id="from-semantic-btn">Skýrunor → WTL + English</button><button id="semantic-btn">WTL → Skýrunor</button></div>
+<p class="note">ᛋᚴ v0.1 · ᛗ owner · ᛖ eyes · ᚲ colour · ᚺᚷ hazel green · ᛞ owner-declared. The WTL → Skýrunor control also encodes complete programmes using operation glyphs and explicit names/text. Supported compact colours: hazel green, hazel, green, blue, brown, grey. This records your declaration; it does not measure your eyes or authenticate the author. Translation never runs the programme.</p></details>
+<details><summary>General change proposals</summary>
+<p class="note">Describe changes to values, identity, relationships, state, time, provenance, consent, structure, capabilities or environment. Uninterpreted meanings use extension. These are typed proposals: no change executor is registered, and consent fields do not grant authority.</p>
+<label for="change">Typed change record (JSON)</label><textarea id="change" class="small" spellcheck="false"></textarea>
+<div class="buttons"><button id="change-btn">Inspect change → Skýrunor</button></div></details>
+<details><summary>English ⇄ WTL ⇄ Rune bytes</summary>
 <label for="english">Structured British English</label><textarea id="english" class="small" spellcheck="false"></textarea>
 <div class="buttons"><button id="english-btn">Read English</button><button id="from-english-btn">English → WTL</button></div>
 <label for="runes">Reversible rune transport</label><textarea id="runes" class="small" spellcheck="false"></textarea>
 <div class="buttons"><button id="runes-btn">Encode runes</button><button id="from-runes-btn">Decode runes</button></div>
-<p class="note">Runes preserve the exact source text; they are not the finished semantic Skýrunor grammar. Unknown English fails closed.</p></details></section>
+<p class="note">The ᛟᛟ rune byte transport preserves exact source text independently of semantic Skýrunor. Unknown English fails closed.</p></details></section>
 <div class="stack"><section class="panel"><h2>02 · Execution output</h2><pre id="output">Tap Run First Lantern to execute local WTL.</pre>
-<p class="note">Expected: 9 and “Held”, one committed cycle and lantern=9 carried through Return.</p></section>
+<p class="note">The default lantern emits 9 and “Held”. A semantic eye-colour programme emits your declared sentence and “Held”, carrying its value and declaration basis through Return.</p></section>
 <section class="panel"><h2>03 · Return receipt</h2><div class="buttons"><button id="restore-btn">Restore last receipt</button><button id="save-btn">Save JSON</button></div>
 <details id="details" hidden open><summary>Inspect provenance</summary><pre id="receipt"></pre></details>
 <p class="note">A receipt may persist in this browser's local storage. Export the JSON to Files for a durable copy. This is not an OS-level cold-boot test.</p></section></div></div>

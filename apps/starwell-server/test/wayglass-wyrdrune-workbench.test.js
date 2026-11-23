@@ -46,6 +46,39 @@ test('native Wyrdrune workbench requires an authenticated House Steward session'
     assert.equal(compiled.dispatch, 'none');
     assert.deepEqual(compiled.external_effects, []);
 
+    const sky=await import('../../../lib/wyrdrune/skyrunor.mjs');
+    const glyphs='ᛋᚴ:ᛗ/ᛖ/ᚲ=ᚺᚷ!ᛞ';
+    const translate=(body,headers={})=>fetch(url.replace('/workbench','/translate'),{
+      method:'POST',headers:{'Content-Type':'application/json',...headers},body:JSON.stringify(body)
+    });
+    const auth={authorization:'Bearer '+token};
+    assert.equal((await translate({format:'skyrunor',input:glyphs})).status,401);
+    assert.equal((await translate({format:'skyrunor',input:glyphs},{'x-owner-authorized':'true'})).status,401);
+    const translated=await translate({format:'skyrunor',input:glyphs},auth);
+    assert.equal(translated.status,200);
+    const semantic=await translated.json();
+    assert.equal(semantic.executed,false);assert.equal(semantic.physically_verified,false);
+    assert.equal(semantic.requires_explicit_execution,true);assert.equal(semantic.dispatch,'none');
+    assert.deepEqual(semantic.external_effects,[]);
+    assert.equal(semantic.source,sky.astToWtl(sky.glyphsToAst(glyphs)));
+    assert.equal((await translate({format:'skyrunor',input:glyphs,mode:'execute'},auth)).status,400);
+    assert.equal((await translate({format:'declaration',input:'Measured eyes: green'},auth)).status,400);
+    assert.equal((await translate({format:'wtl',input:source},auth)).status,200);
+    const change=await import('../../../lib/wyrdrune/skyrunor-change.mjs');
+    const proposal=await (await translate({format:'change',input:change.EXAMPLE_CHANGE},auth)).json();
+    assert.equal(proposal.execution_supported,false);assert.equal(proposal.executed,false);
+    assert.equal(proposal.consent_verified,false);
+    const declarationCompile=await (await send({source:semantic.source,mode:'compile'},auth)).json();
+    assert.equal(declarationCompile.semantic.ast.basis,'owner-declared');
+    assert.equal(declarationCompile.execution,undefined);
+    assert.equal(declarationCompile.semantic.source_hash,declarationCompile.source_hash);
+    const declarationRun=await (await send({source:semantic.source,mode:'execute',context},auth)).json();
+    assert.equal(declarationRun.execution.status,'committed');
+    assert.deepEqual(declarationRun.execution.output,['My eyes are hazel green','Held']);
+    assert.equal(declarationRun.execution.continuity.carry.declaration_basis,'owner-declared');
+    assert.equal(declarationRun.semantic.physically_verified,false);
+    assert.equal(compiled.semantic.schema,'wyrdrune.skyrunor-program/v0.1');
+
     const run = await send({ source, mode: 'execute', context }, { authorization: 'Bearer ' + token });
     assert.equal(run.status, 200);
     const result = await run.json();

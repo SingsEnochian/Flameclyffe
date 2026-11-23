@@ -1,3 +1,6 @@
+import {translateSemantic} from '../../../../lib/wyrdrune/skyrunor-bridge.mjs';
+import {EXAMPLE_CHANGE} from '../../../../lib/wyrdrune/skyrunor-change.mjs';
+import {astToWtl,englishToDeclaration} from '../../../../lib/wyrdrune/skyrunor.mjs';
 import vesselPlanSource from '../../../../lib/wyrdrune/wayglass-vessel-plan.wtl?raw';
 import storyScoreSource from '../../../../scores/wyrdrune/story-soundscape-v0.1.wtl?raw';
 import fullSpectrumSource from '../../../../lib/wyrdrune/full-spectrum.wtl?raw';
@@ -9,6 +12,7 @@ import './program-workbench.css';
 import { runWyrdruneProgram, listWyrdrunePrograms, saveWyrdruneProgram, saveWyrdruneRun } from '../wyrdrune-workbench.js';
 
 const PROGRAMS = Object.freeze([
+  { id: 'owner-eye-colour', slug: null, label: 'Skýrunor · Owner eye-colour declaration', source: astToWtl(englishToDeclaration('Owner declaration: My eyes are hazel green.')) },
   { id: 'vessel-plan', slug: 'wayglass-vessel-plan', label: 'Wayglass · Whole Vessel Plan', source: vesselPlanSource },
   { id: 'story-soundscape', slug: 'story-soundscape', label: 'StorySoundscape · Double Möbius', source: storyScoreSource },
   { id: 'full-spectrum', slug: 'full-spectrum', label: 'Full Spectrum · Wyrdrune', source: fullSpectrumSource },
@@ -65,6 +69,7 @@ export async function mountWayglassProgramWorkbench(root) {
   let activeProgram = 'vessel-plan';
   let activeSlug = 'wayglass-vessel-plan';
   let pending = false;
+  let proposalOnly = false;
   let activeController = null;
   root.innerHTML = `
     <section class="wg-surface wg-program-workbench" data-surface="wayglass-program-workbench">
@@ -104,17 +109,34 @@ export async function mountWayglassProgramWorkbench(root) {
           <textarea id="wg-wyrdrune-source" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Wyrdrune programme source"></textarea>
           <details class="wg-program-language-bridge" data-language-bridge>
             <summary>WTL ⇄ British English ⇄ Skýrunor</summary>
-            <p class="tiny">Core Wyrdrune translation. English is a controlled authoring dialect, not unrestricted prose. Rune transport is reversible encoding, not yet the full semantic script. No code executes during translation.</p>
+            <p class="tiny">Core Wyrdrune translation. English is a controlled authoring dialect, not unrestricted prose. Semantic Skýrunor v0.1 represents owner-declared eye colour. Rune byte transport separately preserves any exact WTL source. No code executes during translation.</p>
+            <label for="wg-sky-declaration">Owner declaration
+              <textarea id="wg-sky-declaration" rows="2" spellcheck="false">Owner declaration: My eyes are hazel green.</textarea>
+            </label>
+            <label for="wg-sky-glyphs">Semantic Skýrunor v0.1
+              <textarea id="wg-sky-glyphs" rows="2" spellcheck="false" autocapitalize="off">ᛋᚴ:ᛗ/ᛖ/ᚲ=ᚺᚷ!ᛞ</textarea>
+            </label>
+            <p class="tiny">ᛗ owner · ᛖ eyes · ᚲ colour · ᛞ owner-declared. Colours: hazel green, hazel, green, blue, brown, grey. Records an assertion, not physical verification or author authentication.</p>
+            <div class="wg-program-actions">
+              <button type="button" class="glass-chip" data-sky-declaration>Declaration → Skýrunor + WTL</button>
+              <button type="button" class="glass-chip" data-sky-decode>Skýrunor → WTL + English</button>
+              <button type="button" class="glass-chip" data-sky-encode>WTL → Skýrunor</button>
+            </div>
             <div class="wg-program-actions">
               <button type="button" class="glass-chip" data-to-english>WTL → English</button>
               <button type="button" class="glass-chip" data-from-english>English → WTL</button>
               <button type="button" class="glass-chip" data-to-glyphs>WTL → Runes</button>
               <button type="button" class="glass-chip" data-from-glyphs>Runes → WTL</button>
             </div>
+            <details><summary>General change proposals</summary>
+            <p class="tiny">Values, identity, relationships, state, time, provenance, consent, structure, capabilities, environment and uninterpreted extensions. A typed proposal grants no authority. Domain execution is explicitly unsupported.</p>
+            <label for="wg-sky-change">Typed change record (JSON)<textarea id="wg-sky-change" rows="8" spellcheck="false">${escapeHtml(JSON.stringify(EXAMPLE_CHANGE,null,2))}</textarea></label>
+            <button type="button" class="glass-chip" data-sky-change>Inspect change → Skýrunor</button>
+            </details>
             <label for="wg-wtl-english">Structured British English
               <textarea id="wg-wtl-english" aria-label="Editable structured British English" rows="10" spellcheck="false" placeholder="Circuit 1 (shared):&#10;Perceive:&#10;  Let depth be 1."></textarea>
             </label>
-            <label for="wg-wtl-glyphs">Skýrunor reversible rune transport
+            <label for="wg-wtl-glyphs">Exact rune byte transport (ᛟᛟ)
               <textarea id="wg-wtl-glyphs" aria-label="Reversible Skýrunor rune transport" rows="5" spellcheck="false" placeholder="Versioned runic transport appears here."></textarea>
             </label>
             <p class="tiny" role="status" aria-live="polite" data-language-status>Translate to begin. Compile or run remains a separate owner action.</p>
@@ -160,6 +182,8 @@ export async function mountWayglassProgramWorkbench(root) {
     </section>`;
 
   const languageCompiler = createWyrdruneRuntime({hashSource: () => 'local-translation-only'}).compile;
+  const semanticArea = root.querySelector('#wg-sky-glyphs');
+  const declarationArea = root.querySelector('#wg-sky-declaration');
   const englishArea = root.querySelector('#wg-wtl-english');
   const glyphArea = root.querySelector('#wg-wtl-glyphs');
   const languageStatus = root.querySelector('[data-language-status]');
@@ -186,14 +210,18 @@ export async function mountWayglassProgramWorkbench(root) {
 
   const updateCount = () => { sourceCount.textContent = editor.value.length + ' characters'; };
   const invalidateLanguage = () => {
+    proposalOnly=false;runButton.disabled=pending;compileButton.disabled=pending;
     englishArea.value = '';
     glyphArea.value = '';
+    semanticArea.value = '';
     languageStatus.textContent = 'Source changed. Translate this revision again.';
   };
   const acceptTranslatedSource = (source, label) => {
     if (pending) throw new Error('Wait until the current programme finishes.');
+    proposalOnly=false;runButton.disabled=false;compileButton.disabled=false;
     languageCompiler(source); // Compilation, not execution.
     editor.value = source;
+    semanticArea.value = '';
     activeProgram = 'language-draft';
     activeSlug = null;
     updateCount();
@@ -204,6 +232,29 @@ export async function mountWayglassProgramWorkbench(root) {
     languageStatus.textContent = label + ' Compiled locally; no code executed.';
     status.textContent = 'Translated Wyrdrune draft. Inspect before explicitly compiling or running.';
   };
+  function showSemantic(format,input) {
+    try {
+      if(pending)throw new Error('Wait until the current programme finishes.');
+      const result=translateSemantic({format,input},{compile:languageCompiler});
+      if(!result.source){
+        proposalOnly=true;runButton.disabled=true;compileButton.disabled=true;
+        semanticArea.value=result.glyphs;englishArea.value=result.english;
+        root.querySelector('#wg-sky-change').value=JSON.stringify(result.ast,null,2);
+        irView.textContent=JSON.stringify(result.ast,null,2);outputView.textContent=JSON.stringify(result,null,2);
+        stateView.textContent='Proposal only';
+        languageStatus.textContent='No domain executor. No change applied. Edit or load WTL to enable execution.';
+        return;
+      }
+      acceptTranslatedSource(result.source,'Semantic round trip verified; owner declaration, not physical verification.');
+      semanticArea.value=result.glyphs;declarationArea.value=result.declaration||'';
+      englishArea.value=result.english;glyphArea.value='';
+      irView.textContent=JSON.stringify(result.ast,null,2);
+    } catch(error) { languageStatus.textContent='Semantic translation refused: '+String(error?.message||error); }
+  }
+  root.querySelector('[data-sky-change]').addEventListener('click',()=>{try{showSemantic('change',JSON.parse(root.querySelector('#wg-sky-change').value));}catch(error){languageStatus.textContent='Invalid change record: '+error.message;}});
+  root.querySelector('[data-sky-declaration]').addEventListener('click',()=>showSemantic('declaration',declarationArea.value));
+  root.querySelector('[data-sky-decode]').addEventListener('click',()=>showSemantic('skyrunor',semanticArea.value));
+  root.querySelector('[data-sky-encode]').addEventListener('click',()=>showSemantic('wtl',editor.value));
   englishButton.addEventListener('click', () => {
     try {
       const result = wtlToEnglish(editor.value, {compile:languageCompiler});
@@ -221,6 +272,7 @@ export async function mountWayglassProgramWorkbench(root) {
   });
   wtlButton.addEventListener('click', () => {
     try {
+      if(englishArea.value.startsWith('Proposed ')){showSemantic('change-en-GB',englishArea.value);return;}
       const result = englishToWtl(englishArea.value, {compile:languageCompiler});
       acceptTranslatedSource(result.source, 'English → WTL translation ready.');
       glyphArea.value = ''; // Existing transport no longer refers to this source.
@@ -262,7 +314,7 @@ export async function mountWayglassProgramWorkbench(root) {
   }
 
   async function run(mode) {
-    if (pending) return;
+    if (pending || proposalOnly) return;
     pending = true;
     activeController = new AbortController();
     compileButton.disabled = true;
@@ -368,7 +420,7 @@ export async function mountWayglassProgramWorkbench(root) {
         stateView.textContent = 'Compiled';
         status.textContent = 'WTL compiled and source hash verified.';
       } else {
-        outputView.textContent = JSON.stringify({ execution: receipt.execution, persistence: receipt.persistence }, null, 2);
+        outputView.textContent = JSON.stringify({ execution: receipt.execution, semantic: receipt.semantic, persistence: receipt.persistence }, null, 2);
         stateView.textContent = receipt.execution.status === 'committed' ? 'Committed' : 'Rolled back';
         status.textContent = receipt.execution.status === 'committed'
           ? (receipt.persistence?.status === 'saved' ? 'Wyrdrune execution and run receipt saved to the Wayglass library.' : 'Wyrdrune execution returned its phase receipts and continuity record.')
@@ -387,8 +439,8 @@ export async function mountWayglassProgramWorkbench(root) {
     } finally {
       activeController = null;
       pending = false;
-      compileButton.disabled = false;
-      runButton.disabled = false;
+      compileButton.disabled = proposalOnly;
+      runButton.disabled = proposalOnly;
       loadButton.disabled = false;
       saveButton.disabled = false;
     }
