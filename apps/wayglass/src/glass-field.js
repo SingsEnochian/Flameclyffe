@@ -175,6 +175,21 @@ const FRAGMENT = `
     float doubleFire = semanticEdge * max(0.0, -uCanonState) * (0.04 + uEnergy * 0.12);
     colour += labradorite(strata + 1.6, doubleFire);
 
+    // Atmospheric descendants of the mineral optical field.
+    // Artistic thin-film and ice-scattering approximations, not physical telemetry.
+    vec2 cloudP = p * vec2(1.5, 5.0);
+    cloudP.y += 0.55 * sin(p.x * 3.1 + uTime * 0.018);
+    float cloudDensity = smoothstep(0.42, 0.77, fbm(cloudP + vec2(uTime * 0.012, 0.0)));
+    float cloudDepth = cloudDensity * (0.35 + opticalThickness * 0.65);
+    float transmission = exp(-cloudDepth * 1.6);
+    float phase = strata + angle * 0.65 + cloudDepth * 8.0;
+    vec3 pearl = mix(vec3(0.78, 0.76, 0.69), labradorite(phase, 1.0), 0.42);
+    float nacre = (1.0 - transmission) * (0.025 + uEnergy * 0.12);
+    float iceWave = pow(0.5 + 0.5 * sin(cloudP.y * 13.0 + mineral * 8.0), 7.0);
+    float iceDensity = cloudDensity * iceWave * (0.035 + uEnergy * 0.11);
+    vec3 noctilucent = mix(vec3(0.09, 0.36, 0.75), vec3(0.65, 0.86, 1.0), iceWave);
+    colour += pearl * nacre + noctilucent * iceDensity;
+
     // Stone-black falloff gives the field architectural weight.
     float vignette = smoothstep(1.12, 0.12, length(p * vec2(0.78, 1.0)));
     colour *= 0.58 + vignette * 0.42;
