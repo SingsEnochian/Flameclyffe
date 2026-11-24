@@ -106,6 +106,20 @@ function Initialize-State {
     }
 }
 
+function Write-Receipt($details) {
+    $temporary = Join-Path $state ([Guid]::NewGuid().ToString('N') + '.tmp')
+    $backup = $temporary + '.bak'
+    try {
+        [IO.File]::WriteAllText($temporary, (ConvertTo-Json -InputObject $details -Depth 5))
+        if ([IO.File]::Exists($receipt)) { [IO.File]::Replace($temporary, $receipt, $backup) }
+        else { [IO.File]::Move($temporary, $receipt) }
+    } finally {
+        foreach ($file in @($temporary, $backup)) {
+            if ([IO.File]::Exists($file)) { [IO.File]::Delete($file) }
+        }
+    }
+}
+
 function Read-Apex {
     @(CloudflareList "$zonePath/dns_records?name=$domain" | Where-Object { $_.name -eq $domain })
 }
@@ -252,13 +266,15 @@ try {
     }
 
     if ($Rollback) {
-        Assert-Level ($saved -and $saved.dnsId) 'No launcher-owned DNS record is recorded for rollback.'
-        $record = @(Read-Apex | Where-Object { $_.id -eq $saved.dnsId })
+        Assert-Level ($saved -and $saved.dnsComment) 'No launcher-owned DNS configuration is recorded for rollback.'
+        $record = @(Read-Apex | Where-Object { $_.id -eq $saved.dnsId -or $_.comment -ceq $saved.dnsComment })
+        Assert-Level ($record.Count -le 1) 'Multiple DNS records match the local deployment receipt.'
         if ($record.Count) {
-            Assert-Level ($record[0].type -eq 'CNAME' -and $record[0].content -eq "$($saved.tunnelId).cfargotunnel.com" -and $record[0].comment -eq 'Wayglass Windows launcher') 'Recorded DNS entry has changed. Inspect it before making any changes.'
-            $null = Cloudflare DELETE "$zonePath/dns_records/$($saved.dnsId)"
+            Assert-Level ($record[0].type -eq 'CNAME' -and $record[0].content -eq "$($saved.tunnelId).cfargotunnel.com" -and
+                $record[0].comment -ceq $saved.dnsComment) 'Recorded DNS entry has changed. Inspect it before making any changes.'
+            $null = Cloudflare DELETE "$zonePath/dns_records/$($record[0].id)"
         }
-        Assert-Level (@(Read-Apex | Where-Object id -EQ $saved.dnsId).Count -eq 0) 'Rollback deletion could not be verified.'
+        Assert-Level (@(Read-Apex | Where-Object { $_.id -eq $saved.dnsId -or $_.comment -ceq $saved.dnsComment }).Count -eq 0) 'Rollback deletion could not be verified.'
         Write-Host 'Verified removal of the launcher-owned DNS route. Access and tunnel configuration remain staged for reuse.'
         return
     }
@@ -332,7 +348,14 @@ try {
             }
         }
     }
-    $env:HEARTHGATE_ALLOWED_ORIGINS = (@($env:HEARTHGATE_ALLOWED_ORIGINS -split ',') + @($public, $env:WAYGLASS_TAILNET_ORIGIN) |
+    $allowedOrigins = $env:HEARTHGATE_ALLOWED_ORIGINS
+    $localSettings = Join-Path $root 'apps/starwell-server/.env'
+    if (-not $allowedOrigins -and (Test-Path -LiteralPath $localSettings -PathType Leaf)) {
+        $configuredOrigin = Select-String -LiteralPath $localSettings -Pattern '^\s*HEARTHGATE_ALLOWED_ORIGINS\s*=(.*)$' |
+            Select-Object -First 1
+        if ($configuredOrigin) { $allowedOrigins = $configuredOrigin.Matches[0].Groups[1].Value.Trim() }
+    }
+    $env:HEARTHGATE_ALLOWED_ORIGINS = (@($allowedOrigins -split ',') + @($public, $env:WAYGLASS_TAILNET_ORIGIN) |
         Where-Object { $_ } | Select-Object -Unique) -join ','
     $node = (Get-Command node.exe).Source
     Assert-Level ([int]((& $node --version).TrimStart('v').Split('.')[0]) -ge 24) 'Node.js 24 or newer is required.'
@@ -409,9 +432,11 @@ try {
         Assert-Level ($saved.tunnelId -eq $tunnel.id) 'Local deployment state belongs to another tunnel.'
     } else {
         Assert-Level (-not (Test-Path -LiteralPath $tokenFile)) 'A connector token exists without verifiable local deployment state.'
-        @{ zoneId = $zone.id; accountId = $zone.account.id; tunnelId = $tunnel.id; dnsId = $null; ownerEmail = $ownerEmail } |
-            ConvertTo-Json | Set-Content -LiteralPath $receipt -Encoding UTF8
-        $saved = Get-Content -LiteralPath $receipt -Raw | ConvertFrom-Json
+        $saved = [pscustomobject]@{
+            zoneId = $zone.id; accountId = $zone.account.id; tunnelId = $tunnel.id; dnsId = $null; ownerEmail = $ownerEmail
+            dnsComment = 'Wayglass Windows launcher ' + [Guid]::NewGuid().ToString('N')
+        }
+        Write-Receipt $saved
     }
     $cloudflared = Install-Connector $accountPath $tunnel.id
     $connected = $false
@@ -427,10 +452,10 @@ try {
     $currentApex = @(Read-Apex | Where-Object { $_.type -in @('A', 'AAAA', 'CNAME') })
     if (-not $currentApex.Count -and -not $apex.Count) {
         $addedRecord = (Cloudflare POST "$zonePath/dns_records" @{
-            type = 'CNAME'; name = $domain; content = $target; proxied = $true; ttl = 1; comment = 'Wayglass Windows launcher'
+            type = 'CNAME'; name = $domain; content = $target; proxied = $true; ttl = 1; comment = $saved.dnsComment
         }).result
         $saved.dnsId = $addedRecord.id
-        $saved | ConvertTo-Json | Set-Content -LiteralPath $receipt -Encoding UTF8
+        Write-Receipt $saved
         $currentApex = @(Read-Apex | Where-Object { $_.type -in @('A', 'AAAA', 'CNAME') })
     }
     Assert-Level ($currentApex.Count -eq 1 -and $currentApex[0].type -eq 'CNAME' -and $currentApex[0].proxied -and
@@ -466,7 +491,8 @@ try {
     Assert-Level ($session.Status -eq 200 -and ($session.Body | ConvertFrom-Json).role -eq 'steward') 'House Steward session continuity failed.'
     $saved | Add-Member -NotePropertyName verifiedCommit -NotePropertyValue $verifiedCommit -Force
     $saved | Add-Member -NotePropertyName verifiedAt -NotePropertyValue ([DateTime]::UtcNow.ToString('o')) -Force
-    $saved | ConvertTo-Json | Set-Content -LiteralPath $receipt -Encoding UTF8
+    $saved.ownerEmail = $ownerEmail
+    Write-Receipt $saved
     $keepProcesses = $true
     Start-Process "$public/wayglass/" -ErrorAction SilentlyContinue
     Write-Host "Wayglass: $public/wayglass/"
@@ -477,7 +503,7 @@ try {
             $unchanged = @(Read-Apex | Where-Object id -EQ $addedRecord.id)
             if ($unchanged.Count) {
                 Assert-Level ($unchanged[0].type -eq 'CNAME' -and $unchanged[0].content -eq $target -and
-                    $unchanged[0].comment -eq 'Wayglass Windows launcher') 'DNS record changed after publication.'
+                    $unchanged[0].comment -ceq $saved.dnsComment) 'DNS record changed after publication.'
                 $null = Cloudflare DELETE "$zonePath/dns_records/$($addedRecord.id)"
             }
             Assert-Level (@(Read-Apex | Where-Object id -EQ $addedRecord.id).Count -eq 0) 'DNS record still present.'
