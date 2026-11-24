@@ -1,5 +1,6 @@
 import {WAYGLASS_FEATHER_EVENT} from '../somatic-sound.js';
 import {signInHouseSteward} from '../house-steward-session.js';
+import {observeNurseryMythogenesis} from '../living-observer-model.js';
 
 const BASE='/api/v1/wayglass/cell-garden/nursery';
 const make=(doc,tag,text='',cls='')=>{
@@ -58,9 +59,11 @@ export function mountNurseryLanguagePanel(parent,{
   const status=make(doc,'p','The Nursery is not running in this room. Choose Observe to read host state.','wg-cell-note');
   status.setAttribute('role','status');
   const counts=make(doc,'p','','wg-cell-note');
+  const mythogenesis=make(doc,'p','','wg-cell-note');
+  mythogenesis.setAttribute('aria-label','Living Mythogenesis observation');
   const items=make(doc,'ol','','wg-cell-list');
   items.setAttribute('aria-label','Nursery source-bound explanations');
-  panel.append(title,intro,actions,signinForm,status,counts,items);
+  panel.append(title,intro,actions,signinForm,status,counts,mythogenesis,items);
   parent.append(panel);
   let disposed=false,loading=false,busy=false,current=null,timer=null,selected='grounded',signedIn=false;
   const clear=()=>{if(timer!==null){(scope.clearInterval||globalThis.clearInterval)(timer);timer=null;}};
@@ -80,6 +83,13 @@ export function mountNurseryLanguagePanel(parent,{
     counts.textContent=known
       ? `Generation ${current.generation} · Cells ${current.cells?.length??0} · Grounded receipts ${current.groundedUtterances?.length??0} · Poetic expressions ${current.utterances?.length??0} · ${paused?'Feather held':'Host ready'}`
       : 'No host snapshot loaded.';
+    mythogenesis.textContent='';
+    if(known&&Array.isArray(current.utterances)&&Array.isArray(current.groundedUtterances)){
+      try{
+        const m=observeNurseryMythogenesis(current);
+        mythogenesis.textContent=`Living Mythogenesis · ${m.distinct_phrases} distinct phrases · ${m.recurrent_phrases} recurring · ${m.cross_speaker_phrases} shared across speakers. ${m.inherited_grammar_events} expressions from inherited grammar. Exact repetition is not proof of transmission; hypothesis open.`;
+      }catch{mythogenesis.textContent='Mythogenesis evidence unavailable: invalid snapshot.';}
+    }
     items.replaceChildren();
     const events=selected==='grounded'
       ? current?.groundedUtterances||[]

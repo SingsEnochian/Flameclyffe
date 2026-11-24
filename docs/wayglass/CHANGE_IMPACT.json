@@ -1241,6 +1241,50 @@
         "finish_line": "Verify cold Return, invalid lineage, refusal, Feather and exact-head CI; then reconcile Observer, Codex and sensory projections.",
         "return_marker": "Motif candidates are available through the existing exchange contract; no live deployment or autonomous mythogenesis claimed."
       }
+    },
+    {
+      "change_id": "living-mythogenesis-controlled-observer-2026-11-24",
+      "changed_paths": [
+        "apps/wayglass/src/living-observer-model.js",
+        "apps/wayglass/src/surfaces/nursery-language.js",
+        "apps/wayglass/src/wtl-cell-ecology.js",
+        "apps/wayglass/src/mythogenesis-experiment.js",
+        "apps/wayglass/test/mythogenesis-experiment.test.js",
+        "scripts/wayglass-mythogenesis-experiment.mjs",
+        "docs/wayglass/LIVING_MYTHOGENESIS_RESEARCH_V0_1.md"
+      ],
+      "affected_organs": [
+        "Living Observer",
+        "Möbius Nursery",
+        "WTL native inscription",
+        "One Ship research and provenance"
+      ],
+      "dependent_checks": [
+        "node --test apps/wayglass/test/mythogenesis-experiment.test.js",
+        "Wayglass Check",
+        "One Ship impact validator",
+        "existing Nursery UI tests"
+      ],
+      "provenance": [
+        "Owner approved investigation of mythogenesis and consciousness without predetermined conclusions 2026-11-24",
+        "Existing fixed grammar and native shareText inscription path on 53d25a3daf0458cac92407a8a747b2fc95c794c8",
+        "Existing #583/#661"
+      ],
+      "rollback": [
+        "Revert observation projection, corrected provenance, isolated protocol and tests together; no live state mutation"
+      ],
+      "status": "source candidate; CI and actual experiment receipts pending",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Reuse native WTL Cell Ecology, Living Observer model and Nursery surface; isolated test fixtures only, no second live colony/runtime.",
+        "owner_outcome": "A reproducible open-question research instrument with competing explanations and transparent null/positive results.",
+        "finish_line": "Exact-head tests, run receipts and on-device Observer verification; later controlled model comparison remains pending.",
+        "return_marker": "Run the existing script on the integrated checkout, review paired differences and design the semantic/sensory dissociation experiment."
+      }
     }
   ]
 }

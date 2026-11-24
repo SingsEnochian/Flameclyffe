@@ -173,3 +173,50 @@ export function consumeObserverContextForWriting() {
   pendingLLMContext = null;
   return text;
 }
+
+
+// Living Mythogenesis: descriptive evidence from the existing Nursery snapshot.
+// No state mutation, no canon promotion, no scalar consciousness inference.
+export function observeNurseryMythogenesis(snapshot) {
+  if (!snapshot || !Number.isSafeInteger(snapshot.generation) || snapshot.generation < 0 ||
+      !Array.isArray(snapshot.utterances) || !Array.isArray(snapshot.groundedUtterances))
+    throw new TypeError('A Nursery snapshot is required');
+  const phrases = new Map();
+  const byGeneration = new Map();
+  let inherited = 0, unknown = 0;
+  for (const event of snapshot.utterances) {
+    if (typeof event?.phrase !== 'string' || !event.phrase || typeof event.id !== 'string' ||
+        !Number.isSafeInteger(event.generation) || event.generation < 0 || event.generation > snapshot.generation)
+      throw new TypeError('Invalid attributed poetic event');
+    // Legacy composed entries used a misleading inherited_vocabulary:false flag.
+    // The existing fixed four-slot generator is a known source; flag is not independent evidence.
+    if (event.grammar_id === 'wayglass.nursery.four-slot/v1' || event.origin === 'composed') inherited++;
+    else unknown++;
+    const item = phrases.get(event.phrase) || {count:0,speakers:new Set(),first:event.generation,last:event.generation};
+    item.count++; item.speakers.add(event.id); item.first=Math.min(item.first,event.generation);
+    item.last=Math.max(item.last,event.generation); phrases.set(event.phrase,item);
+    byGeneration.set(event.generation,(byGeneration.get(event.generation)||0)+1);
+  }
+  const motifs = [...phrases.entries()].map(([phrase,v])=>({
+    phrase,count:v.count,speaker_count:v.speakers.size,first_generation:v.first,last_generation:v.last
+  }));
+  const grounded = new Set();
+  for (const event of snapshot.groundedUtterances) {
+    if (event?.source_receipt?.kind === 'tissue-signal-accepted' &&
+        event.provenance?.verified_against_before_after === true && typeof event.id === 'string') grounded.add(event.id);
+  }
+  return {
+    schema:'wayglass.observer.mythogenesis/v1', generation:snapshot.generation,
+    observation_register:'computational-snapshot-description',
+    poetic_events:snapshot.utterances.length, inherited_grammar_events:inherited, unknown_origin_events:unknown,
+    distinct_phrases:phrases.size, recurrent_phrases:motifs.filter(x=>x.count>1).length,
+    cross_speaker_phrases:motifs.filter(x=>x.speaker_count>1).length,
+    observed_generations:byGeneration.size, accepted_signal_receipts_in_retained_window:grounded.size,
+    motifs:motifs.sort((a,b)=>b.count-a.count||a.phrase.localeCompare(b.phrase)).slice(0,12),
+    limitations:['Exact phrase recurrence is not semantic equivalence or transmission.',
+      'Fixed vocabulary supports combinatorial novelty, not independent vocabulary invention.',
+      'Retained grounded receipts may be truncated; no cumulative rate inferred.',
+      'No independent model turn or subjective experience is established by this snapshot.'],
+    hypothesis_status:'open', canon_status:'unchanged',
+  };
+}

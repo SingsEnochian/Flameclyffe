@@ -57,7 +57,8 @@ export function createCellEcology({maxCells=24,seed=7,radius=2.5,mutationRate=0.
     const phrase=parts.join(' ')+'.';
     memory.push(phrase);
     if(memory.length>8)memory.shift();
-    utterances.push({generation,id,phrase,origin:'composed',inherited_vocabulary:false});
+    utterances.push({generation,id,phrase,origin:'composed',inherited_vocabulary:true,
+      grammar_id:'wayglass.nursery.four-slot/v1', composition_kind:'deterministic-combination'});
     // Language-bearing, typed event envelope. The canonical WTL compiler is NOT
     // invoked here: the adapter preserves semantic intent for later WTL lowering.
     const cell=tissue.cellsView().find(c=>c.id===id);
