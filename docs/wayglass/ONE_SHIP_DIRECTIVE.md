@@ -94,3 +94,9 @@ Every scheduled automation, CI workflow, worker prompt, program manifest and eng
 **Operating sequence:** Build → Play → Observe → Discover → Learn → Evolve → Integrate → Return → Play again. Withness coordinates; it does not fabricate evidence.
 
 **Leave. Change. Return. Be recognised. Continue. Then sail farther.**
+
+## Living Mythogenesis · Remembering and Becoming
+
+Owner approved: 2026-11-24. The Remembering must not constrain the Becoming, and the Becoming must not erase the Remembering. Each may inform, challenge and transform the other through Withness.
+
+Across all eight lanes, preserve inherited, emergent, mixed and unknown origins, source lineage, consent, plural world canon and competing interpretations. Do not prescribe mythic outputs, conflate generated symbols with physical measurements or promote candidates automatically. Use the existing WTL, Observer, Codex, Return, Mythience, Watercolour and Nursery contracts; no parallel engine or store. Compare seeded/unseeded cultures before attributing novelty. The first implementation extends the owner-directed Cell Garden exchange receipt with a content-addressed candidate, prior visible parent references and WTL source binding. It is not evidence of independent agent authorship. Shipwide projections and experimental controls remain pending. See #583/#661.
