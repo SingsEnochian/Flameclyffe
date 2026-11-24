@@ -58,7 +58,7 @@ function Request([string]$method, [string]$url, $body, [hashtable]$headers = @{}
 
 function Cloudflare([string]$method, [string]$path, $data = $null) {
     $response = Request $method "https://api.cloudflare.com/client/v4$path" $data @{
-        Authorization = "Bearer $($apiCredential.GetNetworkCredential().Password)"
+        Authorization = "Bearer $($apiCredential.Password)"
     }
     try { $parsed = $response.Body | ConvertFrom-Json }
     catch { throw "Cloudflare ${method} failed (HTTP $($response.Status)); check account and token permissions." }
