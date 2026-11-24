@@ -7,6 +7,51 @@
   "policy": "Every implementation change must add/update an impact entry in this file in the same PR. Entries identify changed paths, affected organs, dependent checks, provenance and rollback. The validator rejects implementation changes without a matching entry.",
   "entries": [
     {
+      "change_id": "wayglass-world-windows-launcher-2026-11-24",
+      "changed_paths": [
+        "scripts/Deploy-WayglassWorld.ps1",
+        "scripts/wayglass-tailnet-gate.mjs",
+        "scripts/wayglass-tailnet-serve.mjs",
+        "apps/wayglass/test/custom-domain-gate.test.js",
+        "apps/wayglass/server-stage.cjs",
+        "docs/wayglass/WAYGLASS_OWNER_ONLY_CLOUDFLARE_RELEASE.md",
+        "docs/wayglass/current.json"
+      ],
+      "affected_organs": [
+        "Hearthgate local host and staging",
+        "Wayglass restricted gateway",
+        "House Steward authentication",
+        "Cloudflare Access and Windows connector",
+        "Tailscale compatibility"
+      ],
+      "dependent_checks": [
+        "Wayglass Check",
+        "House Access JWT and session tests",
+        "Windows launcher parser and mocked Access policy checks",
+        "edge DNS and credentialed Windows acceptance pending"
+      ],
+      "provenance": [
+        "owner deployment preparation request on 2026-11-24",
+        "PR #661 source b9a5421edaf721b85ddb994c14f89a6f2d6ae028",
+        "wayglass/current reference 8be6abc3c8eed9eaca3e0a0f1bcf26559cc82914"
+      ],
+      "rollback": [
+        "remove only the verified launcher-created apex record with -Rollback",
+        "revert gateway and launcher changes together if source rollback is required"
+      ],
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Compared #583 owner/cloud lane, #661, and wayglass/current. Both branches already have the restricted gateway, House Access verifier and Cloudflare edge probe. Reuse those contracts on one port.",
+        "owner_outcome": "One Windows launcher to prepare and verify the existing ship behind owner-only Access at wayglass.world.",
+        "finish_line": "Verify exact-head source, mocked owner policy refusal, gateway isolation, and credentialed Windows and mobile receipts before declaring live acceptance.",
+        "return_marker": "docs/wayglass/WAYGLASS_OWNER_ONLY_CLOUDFLARE_RELEASE.md records Windows prerequisites, acceptance and rollback; owner runs the launcher on the existing laptop."
+      }
+    },
+    {
       "change_id": "one-ship-governance-bootstrap-2026-11-23",
       "changed_paths": [
         "scripts/verify-one-ship-impact.mjs",

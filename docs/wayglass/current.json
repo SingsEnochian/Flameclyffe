@@ -251,6 +251,13 @@
     "focus_router_integration_pr": 661,
     "focus_router_status": "owner-adopted-candidate-in-review-on-pr-661"
   },
+  "custom_domain_deployment": {
+    "hostname": "wayglass.world",
+    "launcher": "scripts/Deploy-WayglassWorld.ps1",
+    "gateway_loopback_port": 32861,
+    "runbook": "docs/wayglass/WAYGLASS_OWNER_ONLY_CLOUDFLARE_RELEASE.md",
+    "status": "integration-preparation; Windows and Cloudflare acceptance pending"
+  },
   "reconciliation_queue": [
     {
       "source_pr": 676,
