@@ -1263,17 +1263,19 @@
         "node --test apps/wayglass/test/mythogenesis-experiment.test.js",
         "Wayglass Check",
         "One Ship impact validator",
-        "existing Nursery UI tests"
+        "existing Nursery UI tests",
+        "MYTHOS-002 adaptive coupling, separation, opposing state reset, forgetting and zero-seed controls"
       ],
       "provenance": [
         "Owner approved investigation of mythogenesis and consciousness without predetermined conclusions 2026-11-24",
         "Existing fixed grammar and native shareText inscription path on 53d25a3daf0458cac92407a8a747b2fc95c794c8",
-        "Existing #583/#661"
+        "Existing #583/#661",
+        "Independent SciPy RK45 and JavaScript RK4 toy-model endpoint comparison, 2026-11-24; selected endpoints agree within 1e-5; not live Nursery evidence"
       ],
       "rollback": [
         "Revert observation projection, corrected provenance, isolated protocol and tests together; no live state mutation"
       ],
-      "status": "source candidate; CI and actual experiment receipts pending",
+      "status": "MYTHOS-001 source and MYTHOS-002 numerically cross-checked fixture; exact-head CI and live verification pending",
       "focus_router": {
         "law": "WAYGLASS-LAW-FOCUS-001",
         "state": "NOW",
@@ -1283,7 +1285,7 @@
         "duplicate_review": "Reuse native WTL Cell Ecology, Living Observer model and Nursery surface; isolated test fixtures only, no second live colony/runtime.",
         "owner_outcome": "A reproducible open-question research instrument with competing explanations and transparent null/positive results.",
         "finish_line": "Exact-head tests, run receipts and on-device Observer verification; later controlled model comparison remains pending.",
-        "return_marker": "Run the existing script on the integrated checkout, review paired differences and design the semantic/sensory dissociation experiment."
+        "return_marker": "Run the existing experiment script (including --withness), compare matched external drive and design semantic/sensory dissociation. Preserve numerical versus participant evidence registers."
       }
     }
   ]

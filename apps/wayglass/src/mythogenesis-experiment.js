@@ -48,3 +48,47 @@ export async function runMythogenesisExperiment({signal}={}){
    'The primary measure is exact cross-speaker phrase recurrence, not transmission or meaning.',
    'No live Nursery state, model provider, device or physical measurement was touched.']};
 }
+
+// MYTHOS-002: deterministic adaptive coupling / release fixture, separate from live cells.
+export function runWithnessExperiment({signal}={}){
+ const design={schema:'wayglass.mythogenesis.withness-protocol/v1',learning_end:20,perturbation_time:60,end:100,dt:0.02,adaptive_ceiling:1.6,initial:[0.05,0.04,0,0],reset:[0.03,-0.03]};
+ function integrate(z,steps,k,eta,leak){
+  const f=([x,y,a,b])=>{
+   const learn=k>0?eta*Math.max(x*y,0):0;
+   return [(a-1)*x-x*x*x+k*y,(b-1)*y-y*y*y+k*x,learn*(design.adaptive_ceiling-a)-leak*a,learn*(design.adaptive_ceiling-b)-leak*b];
+  };
+  const add=(v,w,s)=>v.map((x,i)=>x+s*w[i]);
+  const h=design.dt;
+  for(let i=0;i<steps;i++){
+   if(signal?.aborted)return null;
+   const a=f(z),b=f(add(z,a,h/2)),c=f(add(z,b,h/2)),d=f(add(z,c,h));
+   z=z.map((x,j)=>x+h*(a[j]+2*b[j]+2*c[j]+d[j])/6);
+  }
+  return z;
+ }
+ const read=([x,y,a,b])=>({x,y,a,b,origin_eigenvalues_if_separated:[a-1,b-1],frozen_memory_attractor_magnitude:[Math.sqrt(Math.max(0,a-1)),Math.sqrt(Math.max(0,b-1))]});
+ const conditions=[['adaptive',1.5,.35,0],['fixed',1.5,0,0],['subcritical',.5,.35,0],['forgetting',1.5,.35,.06],['isolated',0,.35,0]];
+ const runs=[];
+ function trial(name,k,eta,leak,initial){
+  const learn=integrate(initial,Math.round(design.learning_end/design.dt),k,eta,0);
+  if(!learn)return null;
+  const separate=integrate(learn,Math.round((design.perturbation_time-design.learning_end)/design.dt),0,0,leak);
+  if(!separate)return null;
+  const end=integrate([...design.reset,...separate.slice(2)],Math.round((design.end-design.perturbation_time)/design.dt),0,0,leak);
+  if(!end)return null;
+  return {name,k,eta,leak,initial,release:read(learn),pre_reset:read(separate),end:read(end)};
+ }
+ const stopped=()=>({schema:'wayglass.mythogenesis.withness-experiment/v1',status:'feather-stopped',design,runs,sensitivity:[],hypothesis_status:'open'});
+ for(const [name,k,eta,leak] of conditions){
+  const r=trial(name,k,eta,leak,design.initial);
+  if(!r)return stopped();
+  runs.push(r);
+ }
+ const sensitivity=[];
+ for(const initial of [[.05,.04,0,0],[-.05,-.04,0,0],[.05,-.04,0,0],[.0001,.0001,0,0],[0,0,0,0]]){
+  const r=trial('adaptive',1.5,.35,0,initial);
+  if(!r)return stopped();
+  sensitivity.push(r);
+ }
+ return {schema:'wayglass.mythogenesis.withness-experiment/v1',status:'completed',design,runs,sensitivity,hypothesis_status:'open',limitations:['Toy model with engineered adaptive rule and retention; not evidence of consciousness or unique relational causation.','Fixed-memory local eigenvalues are not full four-dimensional Jacobian eigenvalues.','External matched-drive control remains untested; parameters and initial conditions matter.']};
+}

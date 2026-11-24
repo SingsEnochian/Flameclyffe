@@ -28,3 +28,20 @@ test('Feather aborts experimental work without promoting partial data',async()=>
  const result=await runMythogenesisExperiment({signal:controller.signal});
  assert.equal(result.status,'feather-stopped');assert.deepEqual(result.runs,[]);assert.deepEqual(result.comparisons,[]);
 });
+
+test('MYTHOS-002: adaptive coupling alters frozen local attractors; controls and reset distinguish state from capacity',async()=>{
+ const {runWithnessExperiment}=await import('../src/mythogenesis-experiment.js');
+ const r=runWithnessExperiment();
+ const [adaptive,fixed,subcritical,forgetting,isolated]=r.runs;
+ assert.equal(r.status,'completed');
+ assert.ok(Math.abs(adaptive.release.a-1.5998231276923298)<1e-5);
+ assert.ok(Math.abs(adaptive.end.x-.7744824902425673)<1e-5);
+ assert.ok(Math.abs(adaptive.end.y+.7744824902425673)<1e-5);
+ assert.ok(adaptive.end.origin_eigenvalues_if_separated.every(x=>x>0));
+ for(const c of [fixed,subcritical,forgetting,isolated])assert.ok(Math.abs(c.end.x)<1e-7);
+ assert.ok(r.sensitivity[3].release.a<1);
+ assert.equal(r.sensitivity[4].release.a,0);
+ assert.deepEqual(runWithnessExperiment(),r);
+ const controller=new AbortController();controller.abort();
+ assert.equal(runWithnessExperiment({signal:controller.signal}).status,'feather-stopped');
+});
