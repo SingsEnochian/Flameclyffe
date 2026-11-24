@@ -36,3 +36,43 @@ test('mythic exchange remembers and becomes without canonising or losing lineage
  await assert.rejects(send(6,inherited),/Feather/i);
  assert.equal(open().snapshot().revision,6);
 });
+
+test('Remembering crosses mitosis only through actual carried memory, not ancestry alone',async t=>{
+ const dir=mkdtempSync(join(tmpdir(),'mythic-inheritance-'));
+ t.after(()=>rmSync(dir,{recursive:true,force:true}));
+ const open=()=>createCellGarden({store:createColonyCheckpointStore(dir)});
+ let g=open();
+ async function divide(cell_id){
+   const expected_revision=g.snapshot().revision;
+   const p=await g.propose({cell_id,expected_revision});
+   return g.commit({proposal_id:p.proposal_id,expected_revision,owner_confirmed:true}).receipt.daughter_ids;
+ }
+ async function role(cell_id,role){
+   await g.specialise({cell_id,role,expected_revision:g.snapshot().revision,owner_confirmed:true});
+ }
+ const [a,b]=await divide('cell:origin');
+ await role(a,'resonance'); await role(b,'observation');
+ const send=(from_id,to_id,myth,extra={})=>g.exchange({
+   from_id,to_id,myth,message:'Lantern',expected_revision:g.snapshot().revision,
+   owner_confirmed:true,receiver_route_approved:true,...extra
+ });
+ const first=(await send(a,b,{world:'garden',origin:'inherited',interpretation:'guide',
+   source_refs:['fixture:lantern'],parent_ids:[]})).receipt;
+ const [c,d]=await divide(b);
+ await role(c,'observation'); await role(d,'resonance');
+ const [e]=await divide(a);
+ await role(e,'resonance');
+ g=open();
+ const child={world:'garden',origin:'mixed',interpretation:'guide and warning',
+   source_refs:[],parent_ids:[first.myth.motif_id]};
+ const before=g.snapshot();
+ await assert.rejects(send(e,c,child),/provenance/i,'ancestry without memory is insufficient');
+ await assert.rejects(send(c,d,{...child,world:'other'}),/provenance/i,'no implicit world crossing');
+ assert.deepEqual(g.snapshot(),before);
+ const next=(await send(c,d,{...child,world:' garden '})).receipt;
+ assert.deepEqual(next.myth.parent_ids,[first.myth.motif_id]);
+ assert.equal(next.myth.canon_status,'candidate');
+ assert.equal(next.myth.world,'garden');
+ assert.equal(next.myth.author_kind,'owner-directed');
+ assert.deepEqual(open().snapshot(),g.snapshot());
+});

@@ -1216,18 +1216,20 @@
         "node --test apps/starwell-server/test/wayglass-mythogenesis.test.js",
         "existing cell ecology and router tests",
         "One Ship change-impact",
-        "exact-head CI"
+        "exact-head CI",
+        "Descendant motif lineage, unrelated sender refusal, cross-world refusal, whitespace-normalised world and cold Return"
       ],
       "provenance": [
         "Owner approval 2026-11-24",
         "Issue #583 comment 7123471880",
         "PR #661 comment 7123472422",
-        "Existing exchange and WCE-1 checkpoint; parent db3915737a01580cacd524a7c27494b17936c7a6"
+        "Existing exchange and WCE-1 checkpoint; parent db3915737a01580cacd524a7c27494b17936c7a6",
+        "GPT-6.2 adversarial review: direct-participant-only motif parent validation contradicted mitosis memory inheritance; preserve actual message reference, not ancestry alone."
       ],
       "rollback": [
         "Revert this change atomically; retain existing exchange receipts and private checkpoint data"
       ],
-      "status": "implementation candidate; exact-head tests pending; remaining shipwide projections pending",
+      "status": "Inherited memory lineage correction committed for review; exact-head CI pending; all other projections pending",
       "focus_router": {
         "law": "WAYGLASS-LAW-FOCUS-001",
         "state": "NOW",
