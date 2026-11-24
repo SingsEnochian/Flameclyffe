@@ -205,6 +205,20 @@
         "feather-aware-vessel-lifecycle"
       ],
       "note": "Integrates the current organ/surface registries into one vessel kernel and adds a source-verified Wyrdrune execution deck. Runtime acceptance is determined by exact-head CI."
+    },
+    {
+      "branch": "wayglass/return-trial-004-live-transport-20261117",
+      "target": "wayglass/unified-review-20261118",
+      "status": "selectively-staged-on-pr-661-pending-exact-head-and-live-host",
+      "source_pr": 648,
+      "source_commit": "e3463d7511fac4919ba7a6f096242bdc63584730",
+      "scope": [
+        "verified-work-return-selection-contract",
+        "authenticated-existing-route-host-runner",
+        "zero-model-call-corruption-gates",
+        "content-addressed-return-receipt"
+      ],
+      "note": "Selectively ports the verified-work evaluator into the One Ship train and reuses wayglass:ship to wayglass:crow. It does not import the proposed Amber room or a raw Ollama bypass. No live model response, deployment or integration acceptance is asserted."
     }
   ],
   "native_storage": {
@@ -350,8 +364,8 @@
         603
       ],
       "organ": "Return / continuity",
-      "status": "source-candidates",
-      "next_action": "compare stop/return receipts, revocation, process-cold recovery and route custody; preserve one canonical ledger"
+      "status": "pr-648-selection-contract-selectively-staged-on-pr-661; exact-head-and-live-host-pending",
+      "next_action": "verify the focused and exact-head checks, then run one attributable wayglass:ship to wayglass:crow return through the authenticated host; preserve one canonical ledger"
     },
     {
       "source_prs": [
@@ -373,6 +387,14 @@
     "faeberpunk": "Shared ship stylesheet ported and loaded after room styles; full design and responsive browser acceptance remain pending.",
     "soma_nova": "Pure planner, tests, authenticated host preview route, responsive Folio in existing Program Workbench, and Feather cancellation are integrated on #661. Preview only; no durable charge, commit/fire, Form Atlas persistence or Return restoration yet.",
     "supabase_program_store": "existing owner-scoped program/revision/run tables reused; no anon/authenticated table grants; service_role only; RLS enabled with no policies by design of current migration; host/service boundary still requires exact route and credential custody verification",
+    "return_engine_verified_work_selection": {
+      "status": "source-staged-in-pr-661-pending-verification",
+      "source_pr": 648,
+      "source_head": "e3463d7511fac4919ba7a6f096242bdc63584730",
+      "crossing": "wayglass:ship -> wayglass:crow",
+      "live_blocker": "On 2026-11-24, https://wayglass.world/api/v1/wayglass/routes returned HTTP 503 before application headers; no authorised House session or private loopback was available in this run.",
+      "deployment_sha": null
+    },
     "deployment_sha": "unknown",
     "last_verified_code_head": "df17731ebf24304beae21bc08dcc1f8114c42e0a",
     "one_ship_change_impact": {

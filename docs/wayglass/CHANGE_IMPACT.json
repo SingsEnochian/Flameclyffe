@@ -1287,6 +1287,61 @@
         "finish_line": "Exact-head tests, run receipts and on-device Observer verification; later controlled model comparison remains pending.",
         "return_marker": "Run the existing experiment script (including --withness), compare matched external drive and design semantic/sensory dissociation. Preserve numerical versus participant evidence registers."
       }
+    },
+    {
+      "change_id": "return-engine-verified-work-selection-one-ship-2026-11-24",
+      "changed_paths": [
+        "lib/wayglass-return-task-selection.cjs",
+        "lib/wayglass-return-task-selection-host.cjs",
+        "scripts/wayglass-return-trial-004.mjs",
+        "test/wayglass/return-task-selection.test.cjs",
+        "test/wayglass/return-task-selection-host.test.cjs",
+        "docs/wayglass/RETURN_TRIAL_004_ONE_SHIP_HOST_20261124.md",
+        "docs/wayglass/current.json"
+      ],
+      "affected_organs": [
+        "Return / continuity",
+        "Wayglass identity and universe continuity",
+        "House authority and route custody",
+        "Constellation model attribution",
+        "One Ship evidence train"
+      ],
+      "dependent_checks": [
+        "node --test test/wayglass/return-task-selection.test.cjs test/wayglass/return-task-selection-host.test.cjs",
+        "node scripts/verify-one-ship-impact.mjs",
+        "Wayglass Check",
+        "Gate 7 cold return",
+        "Gate 8 route custody",
+        "exact-head CI",
+        "authorised wayglass:ship to wayglass:crow host execution"
+      ],
+      "provenance": [
+        "Issue #583 and PR #661 One Ship reconciliation train",
+        "Selective source from PR #648 at e3463d7511fac4919ba7a6f096242bdc63584730",
+        "Duplicate review: PR #504/#603 cold Return, PR #658 acoustic Return, and the existing #661 route catalogue and authenticated /respond boundary",
+        "Parent PR #661 head e109d01cce291e2cbe7a07b023a5ff447da09742",
+        "On 2026-11-24, https://wayglass.world/api/v1/wayglass/routes returned HTTP 503 before application headers; no model response was requested or inferred"
+      ],
+      "rollback": [
+        "Revert the scoped evaluator, host runner, tests, receipt note and register entry together; no existing route, store, identity or live state is mutated"
+      ],
+      "blockers": [
+        "Public wayglass.world upstream returned HTTP 503 during this run",
+        "No authorised House session or private loopback was available for a live crossing",
+        "Exact-head CI and live attributable model evidence remain required"
+      ],
+      "status": "Selective source candidate staged for local verification on #661; fixture evidence only until exact-head CI and an authorised live host crossing pass",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Reuse PR #648's verified-work selection contract, the existing #661 ship/crow routes, and prior cold/acoustic Return evidence. Do not import a second room, raw provider bypass, subsystem PR or automation.",
+        "owner_outcome": "A returning Wayglass model reads verified work and selects the next task without identity merge, revoked-source reuse or false closure.",
+        "finish_line": "Focused and exact-head checks pass; corrupted packets produce zero model calls; fixture receipts remain explicitly non-live; one authorised live crossing later supplies attributable route, participant, model and response evidence.",
+        "return_marker": "Built the selective evaluator and authenticated host path; verify locally and on exact-head CI; hold the live claim for an authorised ship-to-crow crossing. Next owner: Wayglass integration train."
+      }
     }
   ]
 }
