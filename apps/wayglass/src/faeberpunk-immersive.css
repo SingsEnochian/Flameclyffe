@@ -604,3 +604,40 @@ html[data-wayglass-surface] .wg-hud-kicker{font-family:var(--fae-instrument-font
 html[data-wayglass-surface] .wg-deck-group-head strong{font-family:var(--fae-inscription-font)}
 /* Do not substitute decorative Latin fonts for actual Wyrdrune codepoints,
    editable text, numeric measurements or accessibility labels. */
+
+/* Instrument ergonomics: material is subordinate to interaction. */
+html[data-wayglass-surface] :is(.wg-helm,.wg-shell-nav,.wg-surface-head) {
+  --fae-edge-light: rgba(245,222,180,.32);
+  --fae-edge-shadow: rgba(0,8,15,.72);
+}
+html[data-wayglass-surface] :is(.wg-locus,.wg-helm-nav,.wg-helm-feather,.glass-chip,.send-jewel) {
+  touch-action: manipulation;
+  scroll-margin-block: 1rem;
+  text-wrap: pretty;
+}
+html[data-wayglass-surface] :is(.wg-locus,.wg-helm-nav,.wg-helm-feather):not(:disabled):active {
+  box-shadow: inset 0 2px 5px var(--fae-edge-shadow,#0009);
+}
+html[data-wayglass-surface] :is(.wg-helm,.wg-shell-nav) button[aria-pressed="true"] {
+  border-color:#e5c58d;
+  box-shadow:inset 0 0 0 1px #e5c58d;
+}
+html[data-wayglass-surface] :is(button,a,input,select,textarea,[tabindex]):focus-visible {
+  outline:2px solid #f6d39a;
+  outline-offset:3px;
+}
+@media(pointer:coarse) {
+  html[data-wayglass-surface] :is(.wg-locus,.wg-helm-nav,.wg-helm-feather,.glass-chip,.send-jewel) {
+    min-height:44px;min-width:44px;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  html[data-wayglass-surface] :is(.wg-locus,.wg-helm-nav,.wg-helm-feather,.glass-chip,.send-jewel) {
+    transition:none;animation:none;
+  }
+}
+@media(forced-colors:active) {
+  html[data-wayglass-surface] :is(button,a,input,select,textarea,[tabindex]):focus-visible {
+    outline-color:Highlight;
+  }
+}
