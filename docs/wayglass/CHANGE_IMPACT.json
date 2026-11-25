@@ -1412,6 +1412,49 @@
         "finish_line": "Exact-head One Ship validator and relevant visual/build tests pass.",
         "return_marker": "Repair manifest only; shader unchanged; verify fresh head."
       }
+    },
+    {
+      "change_id": "faeberpunk-initialisation-membrane-projection-2026-11-25",
+      "changed_paths": [
+        "apps/wayglass/src/glass-field.js",
+        "apps/wayglass/src/main.js",
+        "apps/wayglass/src/faeberpunk-ship.css",
+        "apps/wayglass/src/living-observer-model.js",
+        "apps/wayglass/src/surfaces/living-observer.js",
+        "apps/wayglass/test/epistemic-membrane.test.js"
+      ],
+      "affected_organs": [
+        "Shared FAEberpunk shell",
+        "Glass field",
+        "Living Observer",
+        "Feather"
+      ],
+      "dependent_checks": [
+        "Wayglass Check",
+        "Living Cypher browser",
+        "epistemic membrane test",
+        "manual mobile/desktop visual and WebGL fallback review"
+      ],
+      "provenance": [
+        "Owner requested exceptional FAEberpunk polish and working animations",
+        "Previous exact-head 23 successful workflows and one cancelled",
+        "Existing shared shader and Observer packet reused"
+      ],
+      "rollback": [
+        "Revert scoped shell, shader lifecycle and Observer projection together"
+      ],
+      "status": "Source candidate; exact-head CI and visual acceptance pending",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Reuse existing mineral shader and Living Observer; no second renderer, room or store.",
+        "owner_outcome": "Initialised FAEberpunk with graceful static fallback, Feather-safe field and source-bound membrane display.",
+        "finish_line": "Exact-head checks and actual mobile/desktop visual review; adaptive membrane and Watercolour integration remain open.",
+        "return_marker": "Inspect browser results and live host; no deployment claim."
+      }
     }
   ]
 }

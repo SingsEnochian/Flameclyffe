@@ -190,6 +190,7 @@ export async function mountWayglassLivingObserver(root) {
       '<span><i aria-hidden="true">✧</i> QUAD <strong data-fae-observer-quad>Not observed</strong></span>',
       '<span><i aria-hidden="true">◇</i> RETURN <strong data-fae-observer-return>Reading only · no canon change</strong></span>',
     '</div>',
+    '<section class="fae-membrane glass-panel" aria-label="Epistemic membrane"><h2>Epistemic membrane</h2><p>Observed channels, open gaps and withheld information. Coverage is not mathematical observability.</p><ul class="fae-membrane-grid" data-fae-membrane></ul></section>',
     '<section class="observer-deck" aria-label="Interactive Observer">',
     '<div class="glass-panel observer-stage"><canvas width="820" height="820" role="img" aria-label="Living astrolabe mapping observed application readings to geometric rings, nodes, and pulses. Select a reading using the buttons below."></canvas>',
     '<div class="observer-inputs" role="group" aria-label="Direct-reading channels">',
@@ -312,6 +313,19 @@ export async function mountWayglassLivingObserver(root) {
   function refresh() {
     if(disposed||!canvas.isConnected){cleanup();return;}
     packet=current();
+    const membrane=root.querySelector('[data-fae-membrane]');
+    if(membrane){
+      const signature=JSON.stringify(packet.membrane.channels);
+      if(membrane.dataset.signature!==signature){
+        membrane.dataset.signature=signature;
+        membrane.replaceChildren(...packet.membrane.channels.map(reading=>{
+          const li=document.createElement('li');li.dataset.state=reading.status;
+          const title=document.createElement('strong');title.textContent=reading.channel+' · '+reading.status;
+          const detail=document.createElement('small');detail.textContent=reading.basis;
+          li.append(title,detail);return li;
+        }));
+      }
+    }
     const routeSequence=packet.direct.last_route?.sequence ?? -1;
     const nowMs=Date.now();
     const shouldSense=(nowMs-lastInteriorSense>10000)||touches!==lastTouchSense||routeSequence!==lastRouteSense;

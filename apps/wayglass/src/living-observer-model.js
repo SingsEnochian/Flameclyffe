@@ -90,6 +90,12 @@ export function createWayglassObservation({
     source: 'browser-and-wayglass-application',
     authority: 'read-only-visualisation; no participant, mind, canon or relationship inference',
     direct,
+    membrane: describeEpistemicMembrane({channels:OBSERVER_CHANNELS.map(([id])=>id).concat('private-memory'),readings:[
+      ...['time','surface','organs','memory','touch','motion','sound'].map(channel=>({channel,status:'observed',basis:'Local application metadata only'})),
+      ...(direct.last_route?[{channel:'routes',status:'observed',basis:'Recorded route lifecycle metadata'}]:[]),
+      ...(direct.last_route?.receipt_time?[{channel:'receipt',status:'observed',basis:'Recorded receipt timestamp only'}]:[]),
+      {channel:'private-memory',status:'withheld',basis:'Private memory contents not sampled by this instrument'}
+    ]}),
     projection: {
       schema: PROJECTION_SCHEMA,
       source: 'explicit-wayglass-interface-mapping/v1',

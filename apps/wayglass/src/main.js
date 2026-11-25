@@ -67,7 +67,9 @@ const root = document.querySelector('#app');
 
 // Bluebird provider authorization is an explicit connection action.
 // The local entry and other configured provider routes remain independently usable.
-installWayglassField({ host: document.body });
+const faeMaterial = installWayglassField({ host: document.body });
+document.documentElement.dataset.faeberpunk = 'initialised';
+document.documentElement.dataset.faeMaterial = faeMaterial ? 'webgl' : 'opaline-fallback';
 installKeyboardControls({ root: document });
 
 const embodiment = detectEmbodimentCapabilities(globalThis);
