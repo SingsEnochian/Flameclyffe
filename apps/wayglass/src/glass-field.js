@@ -260,6 +260,27 @@ export function installWayglassField({ host = document.body } = {}) {
     render();
   }
 
+  // Reuse the GPU field as a bounded material sample for the active jewel.
+  // A small 2D canvas is decorative only and never receives pointer events.
+  let jewel = null;
+  let jewelCanvas = null;
+  function clearJewel() {
+    jewelCanvas?.remove();
+    jewelCanvas = null;
+    jewel = null;
+  }
+  function sampleJewel() {
+    if (!jewel?.isConnected || !jewelCanvas) { clearJewel(); return; }
+    const rect = jewel.getBoundingClientRect();
+    Object.assign(jewelCanvas.style,{left:rect.left+'px',top:rect.top+'px',width:rect.width+'px',height:rect.height+'px'});
+    if(uniforms.uEnergy.value<.035){clearJewel();return;}
+    const ratio = renderer.getPixelRatio();
+    const x = Math.max(0,rect.left*ratio), y = Math.max(0,rect.top*ratio);
+    const w = Math.min(rect.width*ratio,canvas.width-x), h = Math.min(rect.height*ratio,canvas.height-y);
+    if(w<=0 || h<=0)return;
+    const ctx = jewelCanvas.getContext('2d');
+    ctx?.drawImage(canvas,x,y,w,h,0,0,jewelCanvas.width,jewelCanvas.height);
+  }
   function render(time = 0) {
     const seconds = time * 0.001;
     uniforms.uTime.value = still() ? 0 : seconds;
@@ -280,6 +301,7 @@ export function installWayglassField({ host = document.body } = {}) {
     }
 
     renderer.render(scene, camera);
+    sampleJewel();
   }
 
   function animate(time) {
@@ -313,6 +335,15 @@ export function installWayglassField({ host = document.body } = {}) {
     const rect=control.getBoundingClientRect();
     pointerTarget.set((rect.left+rect.width/2)/Math.max(1,innerWidth),1-(rect.top+rect.height/2)/Math.max(1,innerHeight));
     if(still())return;
+    if(jewel!==control){
+      clearJewel();
+      jewel=control;
+      jewelCanvas=document.createElement('canvas');
+      jewelCanvas.width=128;jewelCanvas.height=64;
+      jewelCanvas.setAttribute('aria-hidden','true');
+      Object.assign(jewelCanvas.style,{position:'fixed',left:rect.left+'px',top:rect.top+'px',width:rect.width+'px',height:rect.height+'px',borderRadius:getComputedStyle(control).borderRadius,pointerEvents:'none',opacity:'.22',mixBlendMode:'screen',zIndex:'100'});
+      document.body.append(jewelCanvas);
+    }
     energyTarget=Math.max(energyTarget,event.type==='pointerdown'?.62:.22);
     velocityTarget=Math.max(velocityTarget,event.type==='pointerdown'?.35:0);
     lastPointerAt=performance.now();
@@ -344,7 +375,7 @@ export function installWayglassField({ host = document.body } = {}) {
   function onMotionPreference(event) { reduceMotion = event.matches === true; syncMotion(); }
   function onMotion(event) {
     motionEnabled = event.detail?.enabled === true;
-    if (!motionEnabled) { energyTarget = 0; velocityTarget = 0; }
+    if (!motionEnabled) { energyTarget = 0; velocityTarget = 0; clearJewel(); }
     syncMotion();
   }
   motionPreference?.addEventListener?.('change', onMotionPreference);
@@ -373,6 +404,7 @@ export function installWayglassField({ host = document.body } = {}) {
       globalThis.removeEventListener?.('wayglass:material-wake', wake);
       document.removeEventListener('pointerdown',instrumentWake);
       document.removeEventListener('focusin',instrumentWake);
+      clearJewel();
       geometry.dispose();
       material.dispose();
       renderer.dispose();
