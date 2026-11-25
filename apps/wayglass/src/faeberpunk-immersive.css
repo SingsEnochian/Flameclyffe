@@ -649,3 +649,23 @@ html[data-wayglass-surface] :is(.wg-locus,.wg-helm-nav,.glass-chip,.send-jewel):
 }
 html[data-wayglass-surface] :is(.wg-locus,.wg-helm-nav,.glass-chip,.send-jewel):not(:disabled):active{box-shadow:inset 0 2px 6px rgba(0,9,15,.65)}
 @media(forced-colors:active){html[data-wayglass-surface] :is(.wg-locus,.wg-helm-nav,.glass-chip,.send-jewel):not(:disabled){border-color:ButtonText;box-shadow:none}}
+
+/* FAEberpunk evolution: architectural stone, brass bezels and readable opal worktables. */
+html[data-wayglass-surface]:not([data-wayglass-surface="wayglass:living-watercolor"]) .wg-surface-head{
+ padding:clamp(24px,4vw,64px);border-radius:8px 32px 8px 32px;
+ border:1px solid #b99b65;border-inline-start:5px solid #d3b47c;
+ background-image:linear-gradient(110deg,#09151de8 12%,#173d40a8 65%,#172334d9),url('./materials/labradorite-sheen.svg');
+ background-size:cover;background-blend-mode:normal;
+}
+html[data-wayglass-surface]:not([data-wayglass-surface="wayglass:living-watercolor"]) .wg-surface h1{font-size:clamp(2rem,5vw,4.6rem);font-weight:400;color:#fff1d5}
+html[data-wayglass-surface]:not([data-wayglass-surface="wayglass:living-watercolor"]) .wg-surface .glass-panel{
+ border-radius:6px 24px 6px 24px;border:1px solid #8b8065;
+ background:linear-gradient(145deg,#19383ce8,#0b1925f5 65%);
+ box-shadow:inset 0 0 0 3px #09141b,inset 0 0 0 4px #b59a6240,0 12px 30px #0006;
+}
+html[data-wayglass-surface]:not([data-wayglass-surface="wayglass:living-watercolor"]) .wg-locus[aria-current="page"]{
+ background:linear-gradient(145deg,#c0e5d8,#77aaa6 45%,#365e70);color:#071c24;border-color:#e9c78d;
+}
+html[data-wayglass-surface]:not([data-wayglass-surface="wayglass:living-watercolor"]) .wg-locus[aria-current="page"] .wg-locus-glyph{color:#102c38}
+@media(max-width:640px){html[data-wayglass-surface]:not([data-wayglass-surface="wayglass:living-watercolor"]) .wg-surface-head{padding:20px;border-radius:6px 20px}}
+@media(forced-colors:active){html[data-wayglass-surface]:not([data-wayglass-surface="wayglass:living-watercolor"]) :is(.wg-surface-head,.wg-surface .glass-panel,.wg-locus[aria-current="page"]){background:Canvas;color:CanvasText;border-color:CanvasText;box-shadow:none}}
