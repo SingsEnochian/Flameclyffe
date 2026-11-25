@@ -267,6 +267,28 @@ export function installWayglassField({ host = document.body } = {}) {
   });
   scene.add(new THREE.Mesh(geometry, material));
 
+  // One renderer, a separate scene for an actual faceted optical instrument.
+  const jewelScene = new THREE.Scene();
+  const jewelCamera = new THREE.PerspectiveCamera(35,2,.1,20);
+  jewelCamera.position.set(0,0,4);
+  const jewelGeometry = new THREE.IcosahedronGeometry(.85,0);
+  const jewelMaterial = new THREE.MeshPhysicalMaterial({
+    color:0x679a9b, roughness:.22, metalness:0, ior:1.52,
+    clearcoat:.85, clearcoatRoughness:.12, iridescence:.75,
+    iridescenceIOR:1.35, iridescenceThicknessRange:[180,420],
+    flatShading:true
+  });
+  const crystal = new THREE.Mesh(jewelGeometry,jewelMaterial);
+  jewelScene.add(crystal,new THREE.HemisphereLight(0xd8f5ff,0x243040,1.7));
+  const key = new THREE.DirectionalLight(0xffe5bb,3);
+  key.position.set(-3,4,5);jewelScene.add(key);
+  const rim = new THREE.DirectionalLight(0x80bfff,2);
+  rim.position.set(3,-1,-2);jewelScene.add(rim);
+  const jewelTarget = new THREE.WebGLRenderTarget(128,64);
+  const jewelPixels = new Uint8Array(128*64*4);
+  const jewelImage = new Uint8ClampedArray(128*64*4);
+
+
   const motionPreference = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
   let reduceMotion = motionPreference?.matches === true;
   let motionEnabled = true;
@@ -312,7 +334,18 @@ export function installWayglassField({ host = document.body } = {}) {
     if(!ctx)return;
     ctx.clearRect(0,0,jewelCanvas.width,jewelCanvas.height);
     const sx=jewelCanvas.width/Math.max(1,rect.width*ratio), sy=jewelCanvas.height/Math.max(1,rect.height*ratio);
-    ctx.drawImage(canvas,x,y,w,h,(x-rect.left*ratio)*sx,(y-rect.top*ratio)*sy,w*sx,h*sy);
+    // Render the real mesh only while an instrument is active.
+    crystal.rotation.set(.28 + uniforms.uPointer.value.y*.55,uniforms.uPointer.value.x*1.5, .16);
+    jewelMaterial.roughness=Math.max(.08,uniforms.uRoughness.value);
+    jewelMaterial.iridescence=uniforms.uIridescence.value;
+    const prior=renderer.getRenderTarget();
+    try {
+      renderer.setRenderTarget(jewelTarget);
+      renderer.render(jewelScene,jewelCamera);
+      renderer.readRenderTargetPixels(jewelTarget,0,0,128,64,jewelPixels);
+    } finally { renderer.setRenderTarget(prior); }
+    for(let row=0;row<64;row++) jewelImage.set(jewelPixels.subarray(row*512,(row+1)*512),(63-row)*512);
+    ctx.putImageData(new ImageData(jewelImage,128,64),0,0);
   }
   let previousTime = null;
   let elapsed = 0;
@@ -453,6 +486,9 @@ export function installWayglassField({ host = document.body } = {}) {
       document.removeEventListener('pointerdown',instrumentWake);
       document.removeEventListener('focusin',instrumentWake);
       clearJewel();
+      jewelTarget.dispose();
+      jewelGeometry.dispose();
+      jewelMaterial.dispose();
       geometry.dispose();
       material.dispose();
       renderer.dispose();
