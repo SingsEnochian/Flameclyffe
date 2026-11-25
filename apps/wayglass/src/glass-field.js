@@ -57,7 +57,7 @@ const FRAGMENT = `
     float y = sin(p.x * (2.4 + seed) + seed * 5.0);
     y += 0.42 * sin(p.x * (5.7 - seed) - seed * 8.0);
     y *= 0.11;
-    return smoothstep(width, 0.0, abs(p.y - y));
+    return 1.0 - smoothstep(0.0, width, abs(p.y - y));
   }
 
   vec3 labradorite(float phase, float fire) {
@@ -156,7 +156,11 @@ const FRAGMENT = `
     float caustic = pow(max(0.0, sin(pointerDistance * 23.0 - uTime * 0.22 + mineral * 4.0)), 8.0);
     caustic *= well * (0.018 + uEnergy * 0.10);
 
-    vec3 colour = blackGlass;
+    // Nacreous cloud strata: thin-film inspired colour, not physical telemetry.
+    float cloud = fbm(refractedP * vec2(2.1, 5.4) + vec2(uTime * .006, 3.1));
+    float nacre = smoothstep(.43, .78, cloud);
+    vec3 pearl = mix(vec3(.08,.16,.24), vec3(.26,.22,.12), .5 + .5 * sin(cloud * 14.0 + angle));
+    vec3 colour = blackGlass + pearl * nacre * (.24 + .16 * uEnergy);
     colour += fire * 0.42;
     colour += inkLight;
     colour += vec3(0.22, 0.78, 0.80) * mote;
@@ -195,12 +199,18 @@ export function installWayglassField({ host = document.body } = {}) {
   canvas.setAttribute('aria-hidden', 'true');
   host.prepend(canvas);
 
-  const renderer = new THREE.WebGLRenderer({
+  let renderer;
+  try { renderer = new THREE.WebGLRenderer({
     canvas,
     antialias: true,
     alpha: false,
-    powerPreference: 'high-performance',
-  });
+    powerPreference: 'default',
+  }); } catch {
+    canvas.remove();
+    host.dataset.wayglassField = 'css-fallback';
+    return null;
+  }
+  host.dataset.wayglassField = 'webgl';
   renderer.setPixelRatio(Math.min(globalThis.devicePixelRatio || 1, 1.6));
 
   const scene = new THREE.Scene();
@@ -279,7 +289,7 @@ export function installWayglassField({ host = document.body } = {}) {
   }
 
   function pointer(event) {
-    if (still() || event.pointerType === 'touch') return;
+    if (still()) return;
     const width = Math.max(1, globalThis.innerWidth || 1);
     const height = Math.max(1, globalThis.innerHeight || 1);
     pointerTarget.set(event.clientX / width, 1 - (event.clientY / height));
@@ -346,6 +356,7 @@ export function installWayglassField({ host = document.body } = {}) {
       material.dispose();
       renderer.dispose();
       canvas.remove();
+      delete host.dataset.wayglassField;
     },
   });
 }
