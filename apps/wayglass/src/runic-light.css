@@ -1,0 +1,28 @@
+/* Shared optical material. Existing glyphs retain their actual semantic text. */
+html[data-wayglass-surface] {
+ --wg-rune-charge:0;
+ --wg-rune-light:#b9f5e1;
+ --wg-rune-metal:#c4ac7b;
+}
+html[data-wayglass-surface] :is(.wg-helm,.wg-shell-nav,.wg-surface-head,.glass-panel) {
+ background-color:#090d12;
+ border-color:#9b89665e;
+}
+html[data-wayglass-surface] :is(.wg-locus,.wg-helm-nav,.glass-chip,.send-jewel):not(:disabled) {
+ background-image:linear-gradient(165deg,#30383d 0%,#12181e 13%,#080c11 48%,#161e24 95%);
+ border:1px solid #9b8966;
+ color:#f1e9d7;
+ box-shadow:inset 0 0 0 2px #080c11,inset 0 0 0 3px #c4ac7b38,inset 0 1px 2px #ffffff35,0 3px 8px #0006;
+}
+html[data-wayglass-surface] :is(.wg-locus-glyph,.wyrdrune-cypher-runes) {
+ color:var(--wg-rune-light);
+ text-shadow:0 1px 0 #000,0 -1px 0 #000,0 0 calc(2px + 8px * var(--wg-rune-charge)) #83e8c9;
+ transition:text-shadow 420ms ease-out;
+}
+html[data-wayglass-surface] :is(.wg-locus[aria-current="page"],button[aria-pressed="true"]):not(.wg-helm-feather) {
+ border-color:#e5d1a2;
+ box-shadow:inset 0 0 0 2px #080c11,inset 0 0 0 3px #d5f4df99,0 0 8px #83e8c933;
+}
+html[data-rune-held="true"] :is(.wg-locus-glyph,.wyrdrune-cypher-runes){text-shadow:none;transition:none}
+@media(prefers-reduced-motion:reduce){html[data-wayglass-surface] :is(.wg-locus-glyph,.wyrdrune-cypher-runes){transition:none;text-shadow:none}}
+@media(forced-colors:active){html[data-wayglass-surface] :is(.wg-locus,.wg-helm-nav,.glass-chip,.send-jewel,.wg-locus-glyph,.wyrdrune-cypher-runes){background:ButtonFace;color:ButtonText;border-color:ButtonText;box-shadow:none;text-shadow:none}}
