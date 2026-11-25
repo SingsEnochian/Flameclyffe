@@ -8,6 +8,31 @@ import './faeberpunk-rooms.css';
 import './faeberpunk-immersive.css';
 import './watercolor-live-field.css';
 import './wyrdrune-cypher-material.css';
+import './runic-light.css';
+
+// Shared optical state, not an independent ritual executor.
+const opticalRoot=document.documentElement;
+let opticalHeld=false;
+let opticalTimer;
+function opticalRest(){
+  clearTimeout(opticalTimer);
+  opticalRoot.style.setProperty('--wg-rune-charge','0');
+}
+globalThis.addEventListener('wayglass:material-wake',event=>{
+  if(opticalHeld||opticalRoot.dataset.wgMotion==='off')return;
+  const strength=Number(event.detail?.strength);
+  if(!Number.isFinite(strength))return;
+  opticalRoot.style.setProperty('--wg-rune-charge',String(Math.max(0,Math.min(1,strength))));
+  clearTimeout(opticalTimer);
+  opticalTimer=setTimeout(opticalRest,850);
+});
+globalThis.addEventListener('wayglass:feather',event=>{
+  opticalHeld=event.detail?.stopped===true;
+  opticalRoot.dataset.runeHeld=String(opticalHeld);
+  opticalRest();
+});
+globalThis.addEventListener('wayglass:motion',event=>{if(event.detail?.enabled===false)opticalRest()});
+
 import { openWayglassAuthorization } from './authorization.js';
 import { installWayglassField } from './glass-field.js';
 import { installMotionChoreography } from './motion-choreography.js';
