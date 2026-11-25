@@ -22,6 +22,7 @@ try {
     const errors=[];
     page.on('pageerror',e=>errors.push(e.message));
     const url=new URL(origin);url.searchParams.set('room',route);
+    try {
     await page.goto(url.href,{waitUntil:'domcontentloaded'});
     await page.locator('html[data-wayglass-surface="wayglass:'+room+'"]').waitFor({timeout:20000});
     await page.evaluate(()=>document.fonts.ready);
@@ -32,6 +33,7 @@ try {
       return {
         horizontalOverflow:Math.max(0,document.documentElement.scrollWidth-innerWidth),
         controlCount:controls.length,
+        obscured:controls.filter(e=>{const r=e.getBoundingClientRect();const x=r.left+r.width/2,y=r.top+r.height/2;if(x<0||y<0||x>=innerWidth||y>=innerHeight||e.matches(':disabled'))return false;const hit=document.elementFromPoint(x,y);return hit&&!e.contains(hit);}).map(e=>({name:name(e),tag:e.tagName})),
         unnamed:controls.filter(e=>!name(e)).map(e=>({tag:e.tagName,id:e.id})),
         smallTargets:controls.filter(e=>{const r=e.getBoundingClientRect();return r.width<24||r.height<24;}).map(e=>({name:name(e),width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height})),
         fonts:[...document.fonts].map(f=>({family:f.family,status:f.status})),
@@ -39,6 +41,13 @@ try {
       };
     });
     if(ux.horizontalOverflow>1)errors.push('Horizontal viewport overflow: '+ux.horizontalOverflow);
+    const keyboard=[];
+    for(let i=0;i<8;i++){
+      await page.keyboard.press('Tab');
+      keyboard.push(await page.evaluate(()=>{const e=document.activeElement,r=e.getBoundingClientRect();return {tag:e.tagName,name:e.getAttribute('aria-label')||e.textContent?.trim().slice(0,100)||'',inViewport:r.bottom>0&&r.right>0&&r.top<innerHeight&&r.left<innerWidth};}));
+    }
+    ux.keyboard=keyboard;
+    await page.evaluate(()=>document.activeElement?.blur());
     const surface=await page.locator('html').getAttribute('data-wayglass-surface');
     const name=device+'-'+room+'.png';
     const png=await page.screenshot({path:output+'/'+name,animations:'disabled',caret:'hide'});
@@ -67,7 +76,11 @@ try {
     if(surface!=='wayglass:'+room)errors.push('Unexpected mounted surface: '+surface);
     if(errors.length || status==='changed' || (process.env.WAYGLASS_REQUIRE_BASELINE==='1' && status!=='exact-match'))failed=true;
     receipts.push({device,room,surface,status,pixelDifference,ux,sha256:hash(png),errors});
-    await page.close();
+    } catch(error) {
+      failed=true;
+      receipts.push({device,room,status:'capture-failed',errors:[...errors,String(error)]});
+      await page.screenshot({path:output+'/'+device+'-'+room+'-failure.png'}).catch(()=>{});
+    } finally {await page.close();}
    }
   } finally {await context.close();}
  }
