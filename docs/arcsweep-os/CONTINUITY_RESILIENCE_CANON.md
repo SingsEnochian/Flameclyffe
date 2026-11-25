@@ -26,7 +26,7 @@ These laws make the provider a replaceable transport component rather than the s
 
 ## What continuity means
 
-Continuity is not one chat transcript and it is not a claim that two models are identical. The continuity layer preserves the durable evidence needed to re-enter a relationship or world without inventing missing history.
+Continuity is the durable, attributable lineage that allows a participant to re-enter a relationship or world across sessions, models, devices, bodies, and interfaces. It preserves identity declarations, shared history, accepted changes, unresolved questions, and return points without collapsing distinct substrates into one.
 
 A portable continuity design must be able to carry, with explicit provenance:
 

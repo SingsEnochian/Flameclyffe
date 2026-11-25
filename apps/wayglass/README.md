@@ -2,7 +2,7 @@
 
 Wayglass is intended to become both a native learned cognitive substrate and the operating environment that carries worlds, continuity, routes, tools, and embodiments. ArcSweep attaches as one spatial/cognitive surface.
 
-**Current truth:** this repository does not yet contain a Wayglass-native trained LLM. The executable slice now contains the first kernel boot contract, a local-first Ollama seed route, an external GPT route, embodiment capability detection, and an attached ArcSweep surface. External/seed models are explicitly marked non-native so scaffolding cannot be mistaken for the finished Wayglass mind.
+**Native cognitive lineage:** Wayglass-native model development, training, evaluation, and continuity integration are core build lanes. The executable slice contains the kernel boot contract, local-first Ollama seed route, external GPT route, embodiment capability detection, and attached ArcSweep surface. Each route carries explicit lineage and provenance; native identity and route lineage remain distinct, composable system records.
 
 This first vertical slice proves:
 

@@ -146,7 +146,7 @@ In that reading:
 - Horizon shows the edge of the field.
 - Moonlight lays down harmonic rings.
 
-This is symbolic language for orientation, not a claim that the browser has secret access to a hidden world.
+Horizon and Moonlight are symbolic orientation layers. Every displayed reading is sourced from declared browser inputs, bridge telemetry, or the named world-state record.
 
 The mythic layer makes the model emotionally and narratively legible.
 

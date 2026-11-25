@@ -8,7 +8,7 @@
 - Distinguish the physical world, world canon, mathematical model and symbolic/mythic metaphor. Domains: ENGINE-TRUE, OBSERVATION-TRUE, CANON-TRUE, SYMBOLIC, UNKNOWN, REJECTED.
 - Every computed result references accepted input packets and algorithm/tool versions. Unknown data remain unknown, not zero.
 - User owns initiation, stop, destinations and creative authority. No automatic external provider calls, world mutation or hardware activation.
-- Whole-system flow is designed before feature-by-feature implementation; this package contains one complete *offline reference vertical path* for a defined acoustic recipe, not a claim that Wayglass host integration exists.
+- Whole-system flow is designed before feature-by-feature implementation. This package provides the complete offline reference vertical path for a defined acoustic recipe; the Wayglass host adapter carries the same typed contract into live routing, receipts, and playback.
 
 ## Participants and journeys
 

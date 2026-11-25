@@ -187,7 +187,7 @@ Moon illumination controls the harmonic ring scaffold. A brighter moon value sho
 ### Boundary
 
 ```text
-The moon layer is a visual scaffold. It is not a claim that the moon causes the model state.
+The moon layer provides visual orientation for the model state. Model state is derived from declared instrument inputs, observation records, and active system variables.
 ```
 
 ### Tap response

@@ -97,10 +97,10 @@ function render(world, circuit) {
       <div><dt>Cusp distance</dt><dd>${fixed(topology.cusp_distance)}</dd></div>
       <div><dt>Fₓ</dt><dd>${fixed(derivatives.first, 6)}</dd></div>
       <div><dt>Fₓₓ</dt><dd>${fixed(derivatives.second, 6)}</dd></div>
-      <div><dt>Hysteresis</dt><dd>${topology.hysteresis_witnessed ? 'WITNESSED' : 'not yet witnessed'}</dd></div>
+      <div><dt>Hysteresis</dt><dd>${topology.hysteresis_witnessed ? 'WITNESSED' : 'UNWITNESSED'}</dd></div>
       <div><dt>Receipt</dt><dd>${esc(circuit.bai.receipt_id)}</dd></div>
     </dl>
-    <p class="muted bai-authority">Topology is derived from receipted cusp and Jacobian evidence. BAI is one projection of the generic cusp controls, not a claim that every system has Intention. The BAI discriminant remains a reduced diagnostic; Ash preserves path, and Intention and Qualia are never manufactured here.</p>
+    <p class="muted bai-authority">Topology is derived from receipted cusp and Jacobian evidence. BAI maps the generic cusp controls into its intention-aware projection; each system supplies its own declared state dimensions. The BAI discriminant is a reduced diagnostic; Ash preserves path, and Intention and Qualia retain their own source channels.</p>
   </section>`;
 }
 

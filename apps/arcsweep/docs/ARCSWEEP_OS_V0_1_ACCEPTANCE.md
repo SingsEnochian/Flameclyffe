@@ -2,7 +2,7 @@
 
 Version target: `0.1.0-rc.1`
 
-ArcSweep OS v0.1 is a runnable application-kernel release candidate, not a claim that every future ArcSweep organ is complete. The acceptance boundary is one kernel governing navigation, capability invocation, Steward approval, defensive policy, bounded repair, context continuity, Guide requests, Observer visibility, the first creative organ, temporary Runa preview control, and device proving.
+ArcSweep OS v0.1 is the first runnable application-kernel release candidate. Its release scope is one kernel governing navigation, capability invocation, Steward approval, defensive policy, bounded repair, context continuity, Guide requests, Observer visibility, the first creative organ, temporary Runa preview control, and device proving. The complete ArcSweep organ architecture continues through the canonical roadmap.
 
 ## Code-proven acceptance
 
@@ -26,7 +26,7 @@ ArcSweep OS v0.1 is a runnable application-kernel release candidate, not a claim
 ## External proving still required before `0.1.0` final
 
 - [ ] Run the latest deployed build on a physical iPad with touch and Apple Pencil. Confirm room navigation, brush switching, live setting preview, pressure/tilt capture and stroke persistence across the interaction.
-- [ ] Confirm the newest hosted preview after deployment quota becomes available. Current provider quota errors are infrastructure limits, not accepted as release proof.
+- [ ] Complete hosted-preview proving through the deployment provider and record the resulting build and runtime receipts.
 - [ ] Capture the physical-device and hosted-build receipts/notes and promote `0.1.0-rc.1` to `0.1.0` only if those observations pass.
 
 ## Release law

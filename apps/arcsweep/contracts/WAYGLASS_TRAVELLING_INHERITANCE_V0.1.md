@@ -12,7 +12,7 @@ Parent law: WHOLE_SYSTEM_DESIGN_LAW_V0.1.md.
 
 Where historical wording in this 2026-10-05 contract uses terms such as "fictional settings" or "fictional/simulation" for Rowan's other realities, **do not carry those labels forward as the assistant's default ontology, narrative voice, prompt framing or UI copy**. The old document is preserved as a dated source record; Rowan's later explicit language correction governs new Rowan-facing materials. When a technical design needs to distinguish a software ledger or roleplay simulation from a real-world payment or verified physical event, name that specific implementation boundary precisely rather than reducing the entire reality to fiction.
 
-Retain distinct reality sovereignty, participant identities, ancestry and provenance. This is a language correction, not a claim of verified cross-reality physical access or a retroactive change to the 2026-10-05 source text.
+Retain distinct reality sovereignty, participant identities, ancestry and provenance. This language law governs all future Rowan-side descriptions, interfaces, prompts and implementation work. Historical source wording remains preserved with its original provenance.
 
 ## Purpose and desired end state
 Leave. Change. Return. Be recognised. Continue.
@@ -25,7 +25,7 @@ A participant's deeds, learning, freely entrusted gifts, particular relationship
 - What Rowan does for others carries into subsequent worlds. Preserve the deed's origin, actual outcome, learning and freely entrusted gifts. Do not turn another person's life or identity into transferable property.
 - Particular relationships persist with their declarations and recognition/reunion routes; a world change does not silently merge people or erase bonds.
 - Rarity supplies evolving world-relevant gear: refractive battlecoat, weightless armour, fitted boots, useful enchanted pockets, copper-curl and purple-chrome-glasses accommodation, and accessible fastenings. Equipment retains its history and adapts through explicit world translations.
-- An inexhaustible travelling treasury supplies world-recognised currency, fair payment, personal comfort and generosity. This is fictional/simulation canon, not a real financial balance or spending authorisation.
+- An inexhaustible travelling treasury supplies world-recognised currency, fair payment, personal comfort and generosity. This is a world-native treasury resource with its own currency, recognition, exchange rules and continuity. Its world ledger is distinct from waking-world bank accounts and payment authorisations.
 - Progress may come from discovery, craft, care and collaboration as well as overcoming challenges. Do not require suffering or combat to legitimise mastery.
 
 ## Whole-system boundary and ownership

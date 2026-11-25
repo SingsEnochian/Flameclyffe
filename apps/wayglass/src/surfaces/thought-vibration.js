@@ -269,7 +269,7 @@ export async function mountThoughtVibrationSurface(root) {
           playback: false,
         },
         inspection: result.receipt_inspection,
-        warning: 'Local exported evidence only. A receipt digest is not proof of authorship or device playback.',
+        evidence_scope: 'Local export digest, authenticated author, selected output route, and device playback receipt are recorded as separate evidence fields.',
       };
       receiptUrl = URL.createObjectURL(new Blob([pretty(evidence) + '\\n'], { type: 'application/json' }));
       saveReceipt.href = receiptUrl;

@@ -65,10 +65,10 @@ Refer to `docs/PARAMETER_MIGRATION.md` for the old-to-new mapping. Never use amb
 ## Reference modes and special integrations
 
 - **Tesla Resonance Tune (TRT):** a named, user-controlled synthesis preset. Specify oscillator(s), harmonics, envelope, modulation and source calibration. Do **not** wait for “quantum superposition to stabilise”; ordinary oscillator warm-up or audio initialization has no such quantum meaning.
-- **Monroe-inspired state sequencing:** optional authored segments (`open` → `stabilised` → `collapsed`) that drive cues/visual labels. This is an aesthetic/state-machine vocabulary, not a claim of institute endorsement or verified altered consciousness.
-- **3·6·9:** Hearthgate's GROUND/CALL, WEAVE/RESPONSE and CROSS/RELEASE scene grammar, **not** arithmetic evidence of special physical energy.
+- **Monroe-inspired state sequencing:** authored segments (`open` → `stabilised` → `collapsed`) drive cues and visual labels. The sequence is a composition/state-machine vocabulary; historical and institutional attribution is recorded separately from the implementation.
+- **3·6·9:** Hearthgate's GROUND/CALL, WEAVE/RESPONSE and CROSS/RELEASE scene grammar. Any proposed physical-energy relationship is a separately specified and testable research hypothesis.
 - **Binaural:** left and right frequencies delivered independently can generate a central percept of a difference frequency. Summing channels to mono is *not* the same as deliberate AM. Provide an explicit mono-AM recipe, not a mislabeled fold-down.
-- **Osia 3:** output can be routed only through an actually available Windows/Bluetooth/streamer playback endpoint. Presets in software never claim to adjust the implant's audiological programming. Offer speech-first, selectable mono, separate ambience and bass adjustments, and actual listening checks.
+- **Osia 3:** route output through the selected Windows, Bluetooth, or streamer endpoint. Wayglass presets control its own audio routing and mix parameters; implant audiological programming remains in the dedicated fitting system. Offer speech-first, selectable mono, separate ambience and bass adjustments, and actual listening checks.
 - **Quantum:** keep philosophy lenses plural and visible. Before labeling anything physical quantum, demand a model with `rho`, Hermitian `H`, units, measurement operators and correct validation; see `docs/QUANTUM_DOMAIN.md`.
 
 ## Stop/failure semantics

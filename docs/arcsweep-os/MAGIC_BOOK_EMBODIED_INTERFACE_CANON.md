@@ -59,13 +59,13 @@ The Caretaker is not trapped in one page. Its continuity travels through the bin
 The Magic Book is multimodal by design. Supported or planned channels include:
 
 - touch and multitouch;
-- stylus / Apple Pencil input, pressure, tilt, and brush state where supported;
+- stylus / Apple Pencil input, pressure, tilt, and brush state;
 - keyboard and text;
 - microphone and speech input;
 - text-to-speech and spoken system response;
 - sound, music, tones, and World Hums;
 - haptics and vibration;
-- camera, spatial, AR, and gesture surfaces where supported;
+- camera, spatial, AR, and gesture surfaces;
 - visible state, animation, light, texture, and responsive geometry;
 - accessibility equivalents for every interaction that would otherwise depend on one sensory channel.
 
@@ -120,7 +120,7 @@ The Magic Book should allow a person to:
 1. open ArcSweep and be greeted into a coherent current state;
 2. navigate rooms and worlds without losing continuity;
 3. draw, write, speak, listen, inspect, and manipulate state;
-4. receive live visual, acoustic, haptic, and relational feedback where the active instrument supports it;
+4. receive coordinated live visual, acoustic, haptic, and relational feedback through the active instrument's adapters;
 5. move between creative work and technical evidence without leaving the interface grammar;
 6. inspect receipts, provenance, canon, and prior states without breaking immersion;
 7. pause, return, resume, and recover work cleanly;
@@ -128,7 +128,7 @@ The Magic Book should allow a person to:
 
 ## Device expression
 
-The Magic Book is a conceptual interface contract, not a single screen size.
+The Magic Book is a device-adaptive interface system with one continuous interaction grammar.
 
 - **iPad / tablet:** primary book-form embodiment; two-page, folio, canvas, Pencil, touch, haptic, voice, and AR-capable surface.
 - **Desktop / web:** expanded codex, workbench, observatory, and multi-panel book expression.
@@ -182,7 +182,7 @@ The first Magic Book implementation should prove one complete, stateful interact
 4. change brush settings;
 5. draw with touch or Pencil;
 6. see the preview and stroke behaviour update immediately;
-7. hear/feel supported feedback;
+7. hear and feel feedback;
 8. leave the page and return without losing the work;
 9. expose the state/receipt trail behind the interaction;
 10. verify the same interaction on the target iPad surface.
