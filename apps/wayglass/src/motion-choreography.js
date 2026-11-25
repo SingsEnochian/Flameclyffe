@@ -96,7 +96,7 @@ export function installMotionChoreography({
     const now = scope.performance?.now?.() ?? Date.now();
     const speed = previous ? Math.hypot(event.clientX - previous.x, event.clientY - previous.y) / Math.max(8, now - previous.at) : 0;
     previous = { x: event.clientX, y: event.clientY, at: now };
-    let target = event.target?.closest?.('.glass-chip, .send-jewel');
+    let target = event.target?.closest?.('.glass-chip, .send-jewel, .wg-locus, .wg-helm-nav');
     if (target === toggle || target?.matches?.(':disabled, [aria-disabled="true"]')) target = null;
     pending = { material: pointerMaterialState({ x: event.clientX, y: event.clientY,
       width: scope.innerWidth, height: scope.innerHeight, velocity: speed }), target,
@@ -104,7 +104,7 @@ export function installMotionChoreography({
     if (frame === null) frame = scope.requestAnimationFrame?.(commit) ?? null;
   }
   function pointerOut(event) {
-    const target = event.target?.closest?.('.glass-chip, .send-jewel');
+    const target = event.target?.closest?.('.glass-chip, .send-jewel, .wg-locus, .wg-helm-nav');
     if (!target || (event.relatedTarget && target.contains?.(event.relatedTarget))) return;
     // A queued frame may otherwise restore an offset after pointerout.
     if (pending?.target === target) pending.target = null;
@@ -118,7 +118,14 @@ export function installMotionChoreography({
     const finish = () => { if (animations.get(target) === animation) animations.delete(target); };
     animation.finished?.then(finish, finish);
   }
+  function opticalArrival(target) {
+    if (!active() || !target || typeof scope.CustomEvent !== 'function') return;
+    scope.dispatchEvent?.(new scope.CustomEvent('wayglass:material-wake', {
+      detail: { strength: .38, source: 'room-arrival' }
+    }));
+  }
   function arrive(target = contentRoot) {
+    opticalArrival(target);
     // A successful mount owns the event; navigation does not predict its success.
     animate(target, [{ opacity: .86, transform: 'translateY(5px)' }, { opacity: 1, transform: 'translateY(0)' }], 240);
   }
@@ -127,6 +134,11 @@ export function installMotionChoreography({
     root.dataset.wgRouteStatus = sample.status;
     if (status) status.textContent = 'Route ' + sample.status + ' · ' + (sample.route_id || 'unidentified route')
       + (sample.provider ? ' · ' + sample.provider : '') + (sample.model ? ' · ' + sample.model : '');
+    if (active() && typeof scope.CustomEvent === 'function') {
+      scope.dispatchEvent?.(new scope.CustomEvent('wayglass:material-wake', {
+        detail: { strength: sample.status === 'started' ? .42 : .24, source: 'observed-route' }
+      }));
+    }
     animate(toggle, [{ opacity: .65 }, { opacity: 1 }], 180);
   }
   function setEnabled(next) {
