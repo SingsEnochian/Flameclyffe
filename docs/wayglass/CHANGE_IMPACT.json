@@ -1378,6 +1378,40 @@
         "finish_line": "Validate helper and exact-head CI; then wire evidence sources and Return.",
         "return_marker": "Declared channel coverage helper committed; actual runtime propagation and rank calculations pending."
       }
+    },
+    {
+      "change_id": "atmospheric-glass-field-impact-repair-2026-11-24",
+      "changed_paths": [
+        "apps/wayglass/src/glass-field.js"
+      ],
+      "affected_organs": [
+        "FAEberpunk shared mineral optics",
+        "Glass field visual projection"
+      ],
+      "dependent_checks": [
+        "One Ship change-impact validator",
+        "Wayglass Check",
+        "Living Cypher browser and visual accessibility"
+      ],
+      "provenance": [
+        "Exact-head failed job 138965797143 identified sole undeclared path",
+        "Compared base blob 9ede955ce4addcd9ac0f73177f60df6cb013b708 to current blob 19ea3b6cbcbdb0cc3f54db8ca854e2ea288766fa: additive nacre/noctilucent atmospheric shader approximation, not measured physical telemetry"
+      ],
+      "rollback": [
+        "Revert atmospheric shader change and its impact entry together if visual regression is found; retain validator"
+      ],
+      "status": "Metadata omission repaired; exact-head verification pending",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Existing glass-field shader and FAEberpunk material layer; no new renderer or PR.",
+        "owner_outcome": "Preserve atmospheric optics with complete accountable impact coverage.",
+        "finish_line": "Exact-head One Ship validator and relevant visual/build tests pass.",
+        "return_marker": "Repair manifest only; shader unchanged; verify fresh head."
+      }
     }
   ]
 }
