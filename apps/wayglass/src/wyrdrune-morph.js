@@ -16,7 +16,8 @@ export function morphFrame(source,target,progress){
   const from=String(source||''),to=String(target||'');
   if(p<=0)return from;
   if(p>=1)return to;
-  const turn=Math.floor(p*120);
+  // Stable glyphs during the crossing: no frame-to-frame random flicker.
+  const turn=0;
   if(p<.39){
     const chars=Array.from(from);
     const transformed=Math.floor(chars.length*Math.max(0,(p-.05)/.34));
@@ -56,6 +57,8 @@ export function animateWyrdruneTranslation(node,{
     if(ended)return;
     ended=true;detach();
     node.textContent=translation;
+    node.style?.removeProperty('--rune-progress');
+    node.removeAttribute?.('data-cypher-visual-phase');
     node.setAttribute?.('lang','en-GB');
     node.setAttribute?.('data-cypher-line','english');
     node.setAttribute?.('data-cypher-state','english');
@@ -66,6 +69,8 @@ export function animateWyrdruneTranslation(node,{
     ended=true;detach();
     // Feather leaves the original voice readable, not half-translated glyphs.
     node.textContent=source;
+    node.style?.removeProperty('--rune-progress');
+    node.removeAttribute?.('data-cypher-visual-phase');
     node.setAttribute?.('lang','zxx');
     node.setAttribute?.('data-cypher-line','source');
     node.setAttribute?.('data-cypher-state','stopped');
@@ -75,14 +80,17 @@ export function animateWyrdruneTranslation(node,{
   const onFeather=event=>{if(event?.detail?.stopped===true)cancel();};
   const stop=()=>cancel();
   stop.reveal=finish;
-  if(reducedMotion||media?.matches){finish();return stop;}
+  if(reducedMotion||media?.matches||node.ownerDocument?.documentElement?.dataset?.wgMotion==='off'){finish();return stop;}
   media?.addEventListener?.('change',onMedia);
   scope.addEventListener?.('wayglass:motion',onMotion);
   scope.addEventListener?.('wayglass:feather',onFeather);
   const tick=()=>{
     if(ended)return;
     frame++;
-    node.textContent=morphFrame(source,translation,frame/maxFrames);
+    const progress=frame/maxFrames;
+    node.textContent=morphFrame(source,translation,progress);
+    node.style?.setProperty('--rune-progress',`${Math.round(progress*100)}%`);
+    node.setAttribute?.('data-cypher-visual-phase',progress>=.39&&progress<.62?'full-runes':'crossing');
     node.setAttribute?.('data-cypher-line','runes');
     if(frame>=maxFrames)finish();
     else handle=scope.setTimeout(tick,tickMs);
