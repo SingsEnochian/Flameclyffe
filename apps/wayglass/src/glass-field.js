@@ -287,6 +287,15 @@ export function installWayglassField({ host = document.body } = {}) {
   const engraving = new THREE.LineSegments(engravingGeometry,engravingMaterial);
   engraving.scale.setScalar(1.002);
   crystal.add(engraving);
+  // A second, inset luminous lattice suggests light beneath the polished skin.
+  const innerGeometry = new THREE.IcosahedronGeometry(.79,0);
+  const innerMaterial = new THREE.MeshBasicMaterial({color:0x77e6d1,wireframe:true,transparent:true,opacity:0,depthWrite:false});
+  const innerLight = new THREE.Mesh(innerGeometry,innerMaterial);
+  crystal.add(innerLight);
+  const inscriptionLight = new THREE.PointLight(0x86ffe0,0,3,2);
+  inscriptionLight.position.set(.65,.35,1.1);
+  jewelScene.add(inscriptionLight);
+
 
   jewelScene.add(crystal,new THREE.HemisphereLight(0xd8f5ff,0x243040,1.7));
   const key = new THREE.DirectionalLight(0xffe5bb,3);
@@ -348,6 +357,10 @@ export function installWayglassField({ host = document.body } = {}) {
     jewelMaterial.roughness=Math.max(.08,uniforms.uRoughness.value);
     jewelMaterial.iridescence=uniforms.uIridescence.value*.35;
     engravingMaterial.opacity=.12+.78*uniforms.uEnergy.value;
+    innerMaterial.opacity=.15*uniforms.uEnergy.value;
+    inscriptionLight.intensity=1.8*uniforms.uEnergy.value;
+    jewelMaterial.emissive.setHex(0x16443d);
+    jewelMaterial.emissiveIntensity=.22*uniforms.uEnergy.value;
     const prior=renderer.getRenderTarget();
     try {
       renderer.setRenderTarget(jewelTarget);
@@ -497,6 +510,8 @@ export function installWayglassField({ host = document.body } = {}) {
       document.removeEventListener('focusin',instrumentWake);
       clearJewel();
       jewelTarget.dispose();
+      innerGeometry.dispose();
+      innerMaterial.dispose();
       engravingGeometry.dispose();
       engravingMaterial.dispose();
       jewelGeometry.dispose();
