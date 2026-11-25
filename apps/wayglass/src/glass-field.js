@@ -94,7 +94,7 @@ const FRAGMENT = `
     float bendAmount = bendEnvelope * opticalThickness * 0.045;
     vec2 refractedP = p + bendDirection * bendAmount;
     float refractedMineral = fbm(refractedP * 3.2 + vec2(uTime * 0.008, -uTime * 0.005));
-    float thicknessBand = smoothstep(0.76, 0.18, pointerDistance) * opticalThickness;
+    float thicknessBand = (1.0-smoothstep(0.18, 0.76, pointerDistance)) * opticalThickness;
     float internalRim = pow(clamp(pointerDistance / 0.62, 0.0, 1.0), 3.0) * bendEnvelope * opticalThickness;
 
     // Black glass body. Almost still at rest, slightly deeper when awake.
@@ -135,24 +135,24 @@ const FRAGMENT = `
     vec2 cell = floor((p + vec2(uTime * 0.006, 0.0)) * 19.0);
     vec2 local = fract((p + vec2(uTime * 0.006, 0.0)) * 19.0) - 0.5;
     float moteSeed = hash(cell);
-    float mote = smoothstep(0.075, 0.0, length(local - vec2(moteSeed - 0.5, hash(cell + 4.1) - 0.5) * 0.44));
+    float mote = (1.0-smoothstep(0.0, 0.075, length(local - vec2(moteSeed - 0.5, hash(cell + 4.1) - 0.5) * 0.44)));
     mote *= step(0.91, moteSeed) * (0.03 + uEnergy * 0.18);
 
     // Active information can loosen into a particulate ink-current.
     // The current is deliberately dormant at rest.
     float ribbonY = sin(p.x * 2.15 + uTime * 0.055) * 0.075;
     ribbonY += sin(p.x * 5.4 - uTime * 0.032) * 0.026;
-    float ribbonBand = smoothstep(0.16, 0.0, abs(p.y - ribbonY));
+    float ribbonBand = (1.0-smoothstep(0.0, 0.16, abs(p.y - ribbonY)));
     float ribbonSeed = hash(cell + vec2(37.0, 19.0));
     float ribbonParticle = mote * ribbonBand * step(0.72, ribbonSeed) * uEnergy * 0.82;
     // Handoff becomes a travelling filament rather than a generic glow.
     float handoffHead = fract(p.x * 0.34 + 0.5 + uTime * 0.075);
-    float handoffFilament = smoothstep(0.085, 0.0, abs(handoffHead - uHandoff));
+    float handoffFilament = (1.0-smoothstep(0.0, 0.085, abs(handoffHead - uHandoff)));
     handoffFilament *= ribbonBand * uHandoff;
 
     // A broad refractive well follows the hand/pointer. It reads as optical mass,
     // not a cursor halo.
-    float well = smoothstep(0.58, 0.0, pointerDistance);
+    float well = (1.0-smoothstep(0.0, 0.58, pointerDistance));
     float caustic = pow(max(0.0, sin(pointerDistance * 23.0 - uTime * 0.22 + mineral * 4.0)), 8.0);
     caustic *= well * (0.018 + uEnergy * 0.10);
 
@@ -175,12 +175,12 @@ const FRAGMENT = `
 
     // Canon state is deliberately subtle: verified settles; unresolved/conflicted
     // produces optical doubling instead of a louder colour wash.
-    float semanticEdge = smoothstep(0.42, 0.0, abs(mineralFine - 0.56));
+    float semanticEdge = (1.0-smoothstep(0.0, 0.42, abs(mineralFine - 0.56)));
     float doubleFire = semanticEdge * max(0.0, -uCanonState) * (0.04 + uEnergy * 0.12);
     colour += labradorite(strata + 1.6, doubleFire);
 
     // Stone-black falloff gives the field architectural weight.
-    float vignette = smoothstep(1.12, 0.12, length(p * vec2(0.78, 1.0)));
+    float vignette = (1.0-smoothstep(0.12, 1.12, length(p * vec2(0.78, 1.0))));
     colour *= 0.58 + vignette * 0.42;
 
     // Fine mineral grain, deliberately restrained.
@@ -305,6 +305,19 @@ export function installWayglassField({ host = document.body } = {}) {
     if (still()) render();
   }
 
+  // Instrument interaction feeds the existing shared optical field.
+  // No additional WebGL contexts or decorative telemetry.
+  function instrumentWake(event) {
+    const control=event.target?.closest?.('.wg-locus,.wg-helm-nav,.wg-helm-feather,.glass-chip,.send-jewel');
+    if(!control || control.matches(':disabled,[aria-disabled="true"]'))return;
+    const rect=control.getBoundingClientRect();
+    pointerTarget.set((rect.left+rect.width/2)/Math.max(1,innerWidth),1-(rect.top+rect.height/2)/Math.max(1,innerHeight));
+    if(still())return;
+    energyTarget=Math.max(energyTarget,event.type==='pointerdown'?.62:.22);
+    velocityTarget=Math.max(velocityTarget,event.type==='pointerdown'?.35:0);
+    lastPointerAt=performance.now();
+  }
+
   function wake(event) {
     const detail = event?.detail || {};
     const strength = Number(detail.strength);
@@ -336,6 +349,8 @@ export function installWayglassField({ host = document.body } = {}) {
   globalThis.addEventListener?.('resize', resize, { passive: true });
   globalThis.addEventListener?.('pointermove', pointer, { passive: true });
   globalThis.addEventListener?.('wayglass:material-wake', wake);
+  document.addEventListener('pointerdown',instrumentWake,{passive:true});
+  document.addEventListener('focusin',instrumentWake);
   resize();
   if (!still()) frame = requestAnimationFrame(animate);
 
@@ -352,6 +367,8 @@ export function installWayglassField({ host = document.body } = {}) {
       globalThis.removeEventListener?.('resize', resize);
       globalThis.removeEventListener?.('pointermove', pointer);
       globalThis.removeEventListener?.('wayglass:material-wake', wake);
+      document.removeEventListener('pointerdown',instrumentWake);
+      document.removeEventListener('focusin',instrumentWake);
       geometry.dispose();
       material.dispose();
       renderer.dispose();
