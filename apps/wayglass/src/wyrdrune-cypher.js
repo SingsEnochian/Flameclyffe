@@ -98,7 +98,7 @@ export function animateWyrdruneCypher(container,{
   scope.addEventListener?.(WAYGLASS_FEATHER_EVENT,onFeather);
   scope.addEventListener?.('wayglass:motion',onMotion);
   media?.addEventListener?.('change',onMedia);
-  if(reducedMotion||media?.matches||!lines.length){
+  if(reducedMotion||media?.matches||doc.documentElement?.dataset?.wgMotion==='off'||!lines.length){
     finishAll();return {gloss,stop:finishAll,done};
   }
   let remaining=lines.length;
@@ -117,7 +117,14 @@ export function animateWyrdruneCypher(container,{
       if(frame===0&&!startedPhases.has(item.phase)){
         startedPhases.add(item.phase);
         onPhase(item.phase);
+        // A visual reading wakes the shared mineral field, not the WTL executor.
+        if(!finished && typeof scope.CustomEvent==='function'){
+          scope.dispatchEvent?.(new scope.CustomEvent('wayglass:material-wake',{
+            detail:{source:'wyrdrune-reading',strength:.26,phase:item.phase}
+          }));
+        }
       }
+      if(finished)return;
       frame++;
       if(frame>=totalSteps){
         settle(item);
