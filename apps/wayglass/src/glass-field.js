@@ -273,12 +273,21 @@ export function installWayglassField({ host = document.body } = {}) {
   jewelCamera.position.set(0,0,4);
   const jewelGeometry = new THREE.IcosahedronGeometry(.85,0);
   const jewelMaterial = new THREE.MeshPhysicalMaterial({
-    color:0x679a9b, roughness:.22, metalness:0, ior:1.52,
+    color:0x090e15, roughness:.16, metalness:0, ior:1.52,
     clearcoat:.85, clearcoatRoughness:.12, iridescence:.75,
     iridescenceIOR:1.35, iridescenceThicknessRange:[180,420],
     flatShading:true
   });
   const crystal = new THREE.Mesh(jewelGeometry,jewelMaterial);
+  // Recessed luminous channels follow the actual faceted stone edges.
+  const engravingGeometry = new THREE.EdgesGeometry(jewelGeometry);
+  const engravingMaterial = new THREE.LineBasicMaterial({
+    color:0x9cebdc,transparent:true,opacity:.18,depthTest:true
+  });
+  const engraving = new THREE.LineSegments(engravingGeometry,engravingMaterial);
+  engraving.scale.setScalar(1.002);
+  crystal.add(engraving);
+
   jewelScene.add(crystal,new THREE.HemisphereLight(0xd8f5ff,0x243040,1.7));
   const key = new THREE.DirectionalLight(0xffe5bb,3);
   key.position.set(-3,4,5);jewelScene.add(key);
@@ -337,7 +346,8 @@ export function installWayglassField({ host = document.body } = {}) {
     // Render the real mesh only while an instrument is active.
     crystal.rotation.set(.28 + uniforms.uPointer.value.y*.55,uniforms.uPointer.value.x*1.5, .16);
     jewelMaterial.roughness=Math.max(.08,uniforms.uRoughness.value);
-    jewelMaterial.iridescence=uniforms.uIridescence.value;
+    jewelMaterial.iridescence=uniforms.uIridescence.value*.35;
+    engravingMaterial.opacity=.12+.78*uniforms.uEnergy.value;
     const prior=renderer.getRenderTarget();
     try {
       renderer.setRenderTarget(jewelTarget);
@@ -487,6 +497,8 @@ export function installWayglassField({ host = document.body } = {}) {
       document.removeEventListener('focusin',instrumentWake);
       clearJewel();
       jewelTarget.dispose();
+      engravingGeometry.dispose();
+      engravingMaterial.dispose();
       jewelGeometry.dispose();
       jewelMaterial.dispose();
       geometry.dispose();
