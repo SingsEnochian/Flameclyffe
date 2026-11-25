@@ -7,6 +7,47 @@
   "policy": "Every implementation change must add/update an impact entry in this file in the same PR. Entries identify changed paths, affected organs, dependent checks, provenance and rollback. The validator rejects implementation changes without a matching entry.",
   "entries": [
     {
+      "change_id": "one-ship-pr-reconciliation-2026-11-25",
+      "changed_paths": [
+        "docs/wayglass/ONE_SHIP_PR_RECONCILIATION_20261125.md",
+        "docs/wayglass/current.json"
+      ],
+      "affected_organs": [
+        "shipwide governance and source authority",
+        "Wyrdrune and Program Workbench",
+        "Soma Nova morphogenesis",
+        "Watercolour, FAEberpunk, Nursery and Constellation",
+        "CI integration and Return"
+      ],
+      "dependent_checks": [
+        "One Ship change-impact contract on final exact head",
+        "GitHub PR ancestry and changed-file overlap review",
+        "Wayglass Check and Wyrdrune parity on the referenced source SHA",
+        "source and release gate distinction"
+      ],
+      "provenance": [
+        "Rowan requested One Ship PR reconciliation on 2026-11-25",
+        "PR #661 pre-audit head 42d7e9bd0642ffd0b66c863e95c57ea7a31c9702",
+        "PR #676 source head 76aaba747dd5b087bd242c13befd311bcd4823a5",
+        "GitHub live inventory of 231 open PRs; 73 base main, 70 base wayglass/current, 88 stacked on other branches",
+        "docs/wayglass/ONE_SHIP_PR_RECONCILIATION_20261125.md"
+      ],
+      "rollback": [
+        "revert the dated reconciliation checkpoint and restore the prior current.json checkpoint; preserve source PR histories and code branches"
+      ],
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Compared #661 and #676 source ancestry, #677 governance, #678 Soma Nova, #675 capability-forward language, #674 magic, #673/#679 Watercolour, #667 FAEberpunk, Nursery stack, and duplicated #663/#669 provider patches. Consolidated findings in existing #661 instead of a parallel PR.",
+        "owner_outcome": "One reconciled Wayglass build path with one canonical Wyrdrune runtime, one owner-scoped programme/Return ledger and no competing PR trains.",
+        "finish_line": "Record exact-head sources, overlaps, missing candidates and CI; port capabilities once with tests; verify signed-off merge, authenticated deployed SHA and device cold Return before release.",
+        "return_marker": "docs/wayglass/ONE_SHIP_PR_RECONCILIATION_20261125.md · Built / Verified / Held; next owner remains PR #661."
+      }
+    },
+    {
       "change_id": "wayglass-world-windows-launcher-2026-11-24",
       "changed_paths": [
         "scripts/Deploy-WayglassWorld.ps1",
