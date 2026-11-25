@@ -73,6 +73,7 @@ export function animateWyrdruneCypher(container,{
   const settle=item=>{
     if(item.settled)return;
     item.node.textContent=item.to;
+    item.node.style.removeProperty('--rune-progress');
     item.node.setAttribute('lang','en-GB');
     item.node.setAttribute('data-cypher-line','english');
     item.node.setAttribute('data-cypher-visual-phase','english');
@@ -135,6 +136,7 @@ export function animateWyrdruneCypher(container,{
       const progress=frame/totalSteps;
       item.node.setAttribute('data-cypher-visual-phase',progress>=.39&&progress<.62?'full-runes':'crossing');
       item.node.textContent=morphFrame(item.from,item.to,progress);
+      item.node.style.setProperty('--rune-progress',`${Math.round(progress*100)}%`);
       later(tick,interval);
     };
     // A deliberately slower unfolding, with a bounded tail for long programmes.
