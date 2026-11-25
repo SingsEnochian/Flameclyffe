@@ -42,3 +42,29 @@ html[data-wayglass-surface] .wg-cypher-phase {
 @media(prefers-reduced-motion:reduce),(forced-colors:active){
  html[data-wayglass-surface] .wg-cypher-line[data-cypher-line="runes"]{background:none;color:inherit;filter:none}
 }
+
+/* Cypher inscriptions seen through polished smoky obsidian. */
+html[data-wayglass-surface] .wg-cypher-line {
+ padding:.65em .9em;
+ border-radius:5px;
+ border:1px solid #756c583d;
+ background:linear-gradient(165deg,#303940 0%,#11171d 12%,#080b10 48%,#141c23 100%);
+ box-shadow:inset 0 2px 3px #000b,inset 0 -1px 0 #b8c8c326;
+ color:#e4dfd1;
+ overflow-wrap:anywhere;
+}
+@supports (background-clip:text) {
+ html[data-wayglass-surface]:not([data-rune-held="true"]) .wg-cypher-line[data-cypher-line="runes"] {
+  background-image:linear-gradient(105deg,#a1c9bd 0%,#e1fff1 var(--rune-progress,0%),#718a86 var(--rune-progress,0%),#84918e 100%),linear-gradient(165deg,#303940,#080b10 48%,#141c23);
+  background-clip:text,padding-box;
+  color:transparent;
+  text-shadow:none;
+  filter:none;
+ }
+}
+html[data-wayglass-surface] .wg-cypher-line[data-cypher-line="english"]{
+ text-shadow:0 1px 1px #000;
+}
+@media(prefers-reduced-motion:reduce),(forced-colors:active){
+ html[data-wayglass-surface] .wg-cypher-line[data-cypher-line="runes"]{background:Canvas;color:CanvasText;filter:none}
+}
