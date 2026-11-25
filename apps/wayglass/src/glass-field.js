@@ -20,6 +20,8 @@ const FRAGMENT = `
   uniform float uCanonState;
   uniform float uVelocity;
   uniform float uThickness;
+  uniform float uRoughness;
+  uniform float uIridescence;
   uniform vec2 uPointer;
   uniform vec2 uResolution;
   varying vec2 vUv;
@@ -161,7 +163,15 @@ const FRAGMENT = `
     float nacre = smoothstep(.43, .78, cloud);
     vec3 pearl = mix(vec3(.08,.16,.24), vec3(.26,.22,.12), .5 + .5 * sin(cloud * 14.0 + angle));
     vec3 colour = blackGlass + pearl * nacre * (.24 + .16 * uEnergy);
-    colour += fire * 0.42;
+    // Schlick approximation for dielectric reflection; procedural surface normal.
+    vec3 normal = normalize(vec3((mineralFine-.5)*.7,(mineral-.5)*.7,1.0));
+    vec3 viewDir = normalize(vec3(pointer-p, .65));
+    float cosTheta = clamp(dot(normal,viewDir),0.0,1.0);
+    float f0 = pow((1.52-1.0)/(1.52+1.0),2.0);
+    float fresnel = f0 + (1.0-f0)*pow(1.0-cosTheta,5.0);
+    vec3 absorption = exp(-vec3(.75,.32,.18)*opticalThickness/max(.25,cosTheta));
+    colour *= absorption;
+    colour += fire * (.12 + .65*uIridescence) * mix(.35,1.0,fresnel) * (1.0-.65*uRoughness);
     colour += inkLight;
     colour += vec3(0.22, 0.78, 0.80) * mote;
     colour += labradorite(strata * 1.7 + angle, ribbonParticle * 1.35);
@@ -226,6 +236,8 @@ export function installWayglassField({ host = document.body } = {}) {
     uCanonState: { value: 0 },
     uVelocity: { value: 0 },
     uThickness: { value: 0.34 },
+    uRoughness: { value: .25 },
+    uIridescence: { value: .65 },
     uPointer: { value: new THREE.Vector2(0.68, 0.3) },
     uResolution: { value: new THREE.Vector2(1, 1) },
   };
@@ -281,23 +293,30 @@ export function installWayglassField({ host = document.body } = {}) {
     const ctx = jewelCanvas.getContext('2d');
     ctx?.drawImage(canvas,x,y,w,h,0,0,jewelCanvas.width,jewelCanvas.height);
   }
-  function render(time = 0) {
-    const seconds = time * 0.001;
-    uniforms.uTime.value = still() ? 0 : seconds;
+  let previousTime = null;
+  let elapsed = 0;
+  let authoredThickness = 0.34;
+  function render(time = performance.now()) {
+    const dt = previousTime === null ? 1/60 : Math.min(.05, Math.max(0,(time-previousTime)*.001));
+    previousTime = time;
+    const blend = rate => 1-Math.exp(-rate*dt);
+    if (!still()) elapsed += dt;
+    uniforms.uTime.value = elapsed;
 
     if (!still()) {
-      uniforms.uPointer.value.lerp(pointerTarget, 0.065);
+      uniforms.uPointer.value.lerp(pointerTarget, blend(4.03));
       const idleFor = performance.now() - lastPointerAt;
-      if (idleFor > 950) energyTarget *= 0.965;
-      uniforms.uEnergy.value += (energyTarget - uniforms.uEnergy.value) * 0.055;
-      uniforms.uVelocity.value += (velocityTarget - uniforms.uVelocity.value) * 0.12;
-      uniforms.uThickness.value += ((0.34 + uniforms.uVelocity.value * 0.46) - uniforms.uThickness.value) * 0.075;
-      energyTarget *= 0.992;
-      velocityTarget *= 0.90;
+      if (idleFor > 950) energyTarget *= Math.exp(-2.14*dt);
+      uniforms.uEnergy.value += (energyTarget - uniforms.uEnergy.value) * blend(3.39);
+      uniforms.uVelocity.value += (velocityTarget - uniforms.uVelocity.value) * blend(7.67);
+      uniforms.uThickness.value += (Math.min(1,authoredThickness + uniforms.uVelocity.value * 0.46) - uniforms.uThickness.value) * blend(4.68);
+      energyTarget *= Math.exp(-.482*dt);
+      velocityTarget *= Math.exp(-6.32*dt);
     } else {
+      clearJewel();
       uniforms.uEnergy.value = 0.08;
       uniforms.uVelocity.value = 0;
-      uniforms.uThickness.value = 0.34;
+      uniforms.uThickness.value = authoredThickness;
     }
 
     renderer.render(scene, camera);
@@ -351,6 +370,13 @@ export function installWayglassField({ host = document.body } = {}) {
 
   function wake(event) {
     const detail = event?.detail || {};
+    const descriptor=detail.material;
+    if(descriptor?.kind==='wayglass.material/v1' &&
+       [descriptor.thickness,descriptor.roughness,descriptor.iridescence].every(v=>typeof v==='number'&&Number.isFinite(v)&&v>=0&&v<=1)){
+      authoredThickness=descriptor.thickness;
+      uniforms.uRoughness.value=descriptor.roughness;
+      uniforms.uIridescence.value=descriptor.iridescence;
+    }
     const strength = Number(detail.strength);
     const intent = Number(detail.intent);
     const ownership = Number(detail.ownership);
@@ -368,6 +394,7 @@ export function installWayglassField({ host = document.body } = {}) {
   }
 
   function syncMotion() {
+    previousTime = null;
     if (frame) { cancelAnimationFrame(frame); frame = 0; }
     render();
     if (alive && !still()) frame = requestAnimationFrame(animate);
