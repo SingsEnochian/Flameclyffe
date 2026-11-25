@@ -1,5 +1,6 @@
 // Capture candidates only; never silently approve a baseline.
 import { chromium } from 'playwright';
+import { PNG } from 'pngjs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
@@ -29,9 +30,29 @@ try {
     const png=await page.screenshot({path:output+'/'+name,animations:'disabled',caret:'hide'});
     const approved=baseline+'/'+name;
     const hash=b=>createHash('sha256').update(b).digest('hex');
-    const status=!existsSync(approved)?'awaiting-approved-reference':hash(await readFile(approved))===hash(png)?'exact-match':'changed';
+    let status='awaiting-approved-reference', pixelDifference=null;
+    if(existsSync(approved)){
+      const a=PNG.sync.read(await readFile(approved)), b=PNG.sync.read(png);
+      if(a.width!==b.width||a.height!==b.height){status='changed';pixelDifference={dimensionMismatch:true};}
+      else {
+        const diff=new PNG({width:a.width,height:a.height});
+        let changed=0;
+        for(let i=0;i<a.data.length;i+=4){
+          const delta=Math.max(...[0,1,2,3].map(k=>Math.abs(a.data[i+k]-b.data[i+k])));
+          if(delta)changed++;
+          diff.data[i]=delta?255:Math.round(b.data[i]*.25);
+          diff.data[i+1]=delta?0:Math.round(b.data[i+1]*.25);
+          diff.data[i+2]=delta?180:Math.round(b.data[i+2]*.25);
+          diff.data[i+3]=255;
+        }
+        pixelDifference={changed,total:a.width*a.height,fraction:changed/(a.width*a.height)};
+        status=changed?'changed':'exact-match';
+        await writeFile(output+'/'+name.replace('.png','-diff.png'),PNG.sync.write(diff));
+      }
+    }
+    if(surface!=='wayglass:'+room)errors.push('Unexpected mounted surface: '+surface);
     if(errors.length || status==='changed' || (process.env.WAYGLASS_REQUIRE_BASELINE==='1' && status!=='exact-match'))failed=true;
-    receipts.push({device,room,surface,status,sha256:hash(png),errors});
+    receipts.push({device,room,surface,status,pixelDifference,sha256:hash(png),errors});
     await page.close();
    }
   } finally {await context.close();}
