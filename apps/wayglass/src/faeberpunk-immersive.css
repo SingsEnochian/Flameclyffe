@@ -555,3 +555,34 @@ html[data-wayglass-surface="wayglass:living-watercolor"] #app{
 @media(max-width:700px){
   .wc-surface .wc-faepunk-touch{bottom:clamp(100px,13svh,150px)}
 }
+
+
+/* Shipwide material inheritance: reuse the authored mineral asset beyond Watercolour.
+   Keep semantic controls and canvas layering intact; decoration is not telemetry. */
+html[data-wayglass-surface]:not([data-wayglass-surface="wayglass:living-watercolor"]) body {
+  background: radial-gradient(ellipse at 12% 18%, #26334b 0%, transparent 48%),
+    radial-gradient(ellipse at 88% 72%, #17463e 0%, transparent 46%), #050b14;
+  background-attachment: fixed;
+}
+html[data-wayglass-surface]:not([data-wayglass-surface="wayglass:living-watercolor"]) :is(.wg-surface-head,.wg-helm,.wg-shell-nav:not([hidden])) {
+  background-image: url('./materials/labradorite-sheen.svg'),
+    linear-gradient(132deg,#132c39,#101a30 54%,#233c36);
+  background-size: cover;
+  background-blend-mode: soft-light,normal;
+  border-color: #a98b60;
+  box-shadow: inset 0 1px #d6c7a45c,0 16px 48px #0008;
+}
+html[data-wayglass-surface] :is(.glass-chip,.send-jewel,.wg-locus):focus-visible {
+  outline: 3px solid #f6d39a;
+  outline-offset: 3px;
+}
+@media(prefers-reduced-transparency:reduce) {
+  html[data-wayglass-surface]:not([data-wayglass-surface="wayglass:living-watercolor"]) :is(.wg-surface-head,.wg-helm,.wg-shell-nav:not([hidden])) {
+    background: #142633; backdrop-filter:none; -webkit-backdrop-filter:none;
+  }
+}
+@media(forced-colors:active) {
+  html[data-wayglass-surface]:not([data-wayglass-surface="wayglass:living-watercolor"]) :is(.wg-surface-head,.wg-helm,.wg-shell-nav:not([hidden])) {
+    background:Canvas; border-color:CanvasText; box-shadow:none;
+  }
+}
