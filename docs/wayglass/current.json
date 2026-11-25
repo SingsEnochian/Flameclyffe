@@ -276,15 +276,15 @@
     {
       "source_pr": 676,
       "organ": "native OS / WTL Workbench",
-      "status": "partially-integrated-on-pr-661; source-diff-reconciliation-open",
-      "head_sha": "614bb10abd8b4e09d42f573f77be57f4254b3ba5",
+      "status": "partially-integrated-on-pr-661; 62-of-72-changed-paths-overlap; 10 exclusive glyph/type-foundry paths require review",
+      "head_sha": "76aaba747dd5b087bd242c13befd311bcd4823a5",
       "conflict": "The current integration branch already contains the native Program Workbench surface, Wyrdrune workbench client, Supabase program store, authenticated library/workbench routes, and the program-library migration. Several core files are identical to #676; main.js, router.js and program-workbench.js differ. #676 remains 76 commits ahead and 215 behind the current train, with 62 changed files; no whole-branch merge.",
-      "next_action": "Compare the remaining source diffs in main.js, router.js, program-workbench.js, OS kernel and whole-pizza boot/package paths; port only missing, compatible capabilities and keep the canonical WTL runtime/store."
+      "next_action": "Review ten #676-exclusive type-foundry/glyph files and divergent main/router/Workbench semantics; port validated missing functionality once on #661 and update impact map; then reconcile Soma Nova charge/fire and other source candidates."
     },
     {
       "source_pr": 678,
       "organ": "SomaNova.Morphogenesis",
-      "status": "pure-planner-and-authenticated-preview-integrated-on-pr-661; CI-pending; commit-and-Return-not-yet-wired",
+      "status": "morphogenesis planner and authenticated Folio preview integrated in #661; exact-head CI suite successful; durable fire/Return pending",
       "head_sha": "8e3047744eaa9565c79c610fddd5d69e20f1a0fd",
       "conflict": "The source candidate chamber's caller-supplied principal.authorized boolean is not an authentication boundary and was not ported. The pure planner and tests are ported; native host preview uses griffStewardAuthorized and server-fixed preview capabilities. No persistence or commit/fire route yet.",
       "next_action": "Add durable charge/commit/Return through the existing program/revision/run store, preserve the same identity and lineage invariants, and expose owner-consented fire through the canonical WTL runtime."
@@ -292,7 +292,7 @@
     {
       "source_pr": 667,
       "organ": "FAEberpunk shared shell",
-      "status": "selective-css-port-committed-awaiting-exact-head-ci",
+      "status": "shared-FAEberpunk-stylesheet-on-661; exact-head CI successful; physical-device acceptance pending",
       "head_sha": "d9c4c58deddcb42b069ace204cb207244188f02c",
       "conflict": "source branch is stacked on stale integration head; only shared shell stylesheet ported",
       "next_action": "verify exact-head desktop/tablet/phone browser layout and reconcile remaining cell-garden visual changes"
@@ -368,14 +368,25 @@
       "next_action": "verify the focused and exact-head checks, then run one attributable wayglass:ship to wayglass:crow return through the authenticated host; preserve one canonical ledger"
     },
     {
-      "source_prs": [
-        663,
-        669
-      ],
-      "organ": "Ollama completion diagnostics",
-      "status": "duplicate-source-candidates; no integration assumed",
-      "conflict": "Both PRs touch the same host router and the same wayglass-ollama-stop-reason test; #669 is stacked on an older #661 base while #663 targets wayglass/current.",
-      "next_action": "Compare exact patches; port the minimal provider-native done_reason preservation and synthetic tests once into #661, preserving Astra/provider attribution and existing response behaviour."
+      "source_pr": 675,
+      "organ": "capability-forward language law",
+      "head_sha": "9cb2bddf3eb7cd6dfe46143eba48d342f2fc1c04",
+      "status": "main-based-source-candidate; 3-of-22-changed-paths-overlap-19-exclusive",
+      "next_action": "Port forward-looking design language and paired code/test edits through #661; never send this directly into main."
+    },
+    {
+      "source_pr": 679,
+      "organ": "Watercolour holographic embodiment",
+      "head_sha": "80b62f0f7044495dc4eb148a642c37b62bab8ccc",
+      "status": "main-based-candidate-needs-current-sensory-body-reconciliation",
+      "next_action": "Inspect resource cleanup, Resolve/Release, Feather, accessibility and Soma Nova linkage; port as existing Watercolour body organ."
+    },
+    {
+      "source_pr": 677,
+      "organ": "One Ship governance",
+      "head_sha": "537eab8b51a8171c3e155e9d1b7a4a41bdcd74ab",
+      "status": "all-six-target-paths-represented-in-661-and-extended; provenance-only-source-candidate",
+      "next_action": "Keep one evolving directive, register and validator on #661; preserve #677 source as provenance."
     }
   ],
   "reconciliation_checkpoint": {
@@ -472,5 +483,65 @@
       "deployment_sha": null,
       "release_validation": "pending owner device access and authenticated runtime, do not infer from green CI"
     }
+  },
+  "reconciliation_checkpoint_20261125": {
+    "date": "2026-11-25",
+    "mission_issue": 583,
+    "integration_pr": 661,
+    "source_before_checkpoint": "42d7e9bd0642ffd0b66c863e95c57ea7a31c9702",
+    "report": "docs/wayglass/ONE_SHIP_PR_RECONCILIATION_20261125.md",
+    "canonical_development_branch": "wayglass/current",
+    "release_branch": "main",
+    "open_pr_inventory": {
+      "all_open": 231,
+      "base_main": 73,
+      "base_wayglass_current": 70,
+      "base_stacked_or_other": 88,
+      "note": "Repository-wide inventory; not all proposals represent Wayglass work."
+    },
+    "one_ship_source_status": "single-train-active-unmerged",
+    "main_train": {
+      "pr": 661,
+      "commits_vs_current": 294,
+      "changed_paths": 440,
+      "mergeable": true,
+      "mergeable_state": "unstable",
+      "exact_head_workflow_runs": {
+        "successful": 23,
+        "cancelled": 1,
+        "failed": 0,
+        "head": "42d7e9bd0642ffd0b66c863e95c57ea7a31c9702",
+        "cancelled_name": "Wayglass Nikola Eightfold Return Gate"
+      },
+      "deployment_sha": null,
+      "owner_device_accepted": false
+    },
+    "whole_pizza_source": {
+      "pr": 676,
+      "sha": "76aaba747dd5b087bd242c13befd311bcd4823a5",
+      "changed_paths": 72,
+      "paths_also_changed_in_train": 62,
+      "distinct_new_paths": 10,
+      "cross_branch_compare": {
+        "ahead": 79,
+        "behind": 294
+      },
+      "status": "selective-diff-review-required-no-whole-branch-merge"
+    },
+    "status_by_pr": {
+      "667": "shared FAEberpunk stylesheet staged; exact-head browser suite passed",
+      "673": "SON-002 sound-to-pigment subscriber pending",
+      "674": "separate numerical runtime/DSL/journal conflicts with one WTL compiler; semantic adoption pending",
+      "675": "19 exclusive code/doc paths need selective language-law port; main-based source candidate",
+      "676": "workbench/OS partially integrated; 10 type-foundry/glyph paths exclusive to source",
+      "677": "governance source represented and evolved on #661; no whole-branch merge",
+      "678": "pure planner + authenticated Folio preview integrated; charge/fire/Return pending",
+      "679": "Watercolour embodiment source targets main; must be reconciled into existing sensory body",
+      "662-665-668-670-671-672": "Nursery stack preserved; harmonise WTL, persistence and identity before selective port",
+      "663-669": "duplicate Ollama stop-reason patches; select one"
+    },
+    "next_owner": "One Ship #661 integration",
+    "next_action": "Review ten #676-exclusive type-foundry/glyph files and divergent main/router/Workbench semantics; port validated missing functionality once on #661 and update impact map; then reconcile Soma Nova charge/fire and other source candidates.",
+    "release_gate": "no merge, owner-only production promotion or PR source deletion from this checkpoint"
   }
 }
