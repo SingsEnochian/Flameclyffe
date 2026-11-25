@@ -25,6 +25,20 @@ try {
     await page.goto(url.href,{waitUntil:'domcontentloaded'});
     await page.locator('html[data-wayglass-surface="wayglass:'+room+'"]').waitFor({timeout:20000});
     await page.evaluate(()=>document.fonts.ready);
+    const ux=await page.evaluate(()=>{
+      const visible=e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return r.width>0&&r.height>0&&s.visibility!=='hidden'&&s.display!=='none';};
+      const controls=[...document.querySelectorAll('button,a[href],input,select,textarea,[role="button"]')].filter(visible);
+      const name=e=>e.getAttribute('aria-label')||e.getAttribute('aria-labelledby')||e.labels?.[0]?.textContent||e.textContent?.trim()||e.getAttribute('title')||e.getAttribute('alt')||'';
+      return {
+        horizontalOverflow:Math.max(0,document.documentElement.scrollWidth-innerWidth),
+        controlCount:controls.length,
+        unnamed:controls.filter(e=>!name(e)).map(e=>({tag:e.tagName,id:e.id})),
+        smallTargets:controls.filter(e=>{const r=e.getBoundingClientRect();return r.width<24||r.height<24;}).map(e=>({name:name(e),width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height})),
+        fonts:[...document.fonts].map(f=>({family:f.family,status:f.status})),
+        rendering:document.body.dataset.wayglassField||'unspecified'
+      };
+    });
+    if(ux.horizontalOverflow>1)errors.push('Horizontal viewport overflow: '+ux.horizontalOverflow);
     const surface=await page.locator('html').getAttribute('data-wayglass-surface');
     const name=device+'-'+room+'.png';
     const png=await page.screenshot({path:output+'/'+name,animations:'disabled',caret:'hide'});
@@ -52,7 +66,7 @@ try {
     }
     if(surface!=='wayglass:'+room)errors.push('Unexpected mounted surface: '+surface);
     if(errors.length || status==='changed' || (process.env.WAYGLASS_REQUIRE_BASELINE==='1' && status!=='exact-match'))failed=true;
-    receipts.push({device,room,surface,status,pixelDifference,sha256:hash(png),errors});
+    receipts.push({device,room,surface,status,pixelDifference,ux,sha256:hash(png),errors});
     await page.close();
    }
   } finally {await context.close();}
