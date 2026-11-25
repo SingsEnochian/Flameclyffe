@@ -172,6 +172,23 @@ const FRAGMENT = `
     vec3 absorption = exp(-vec3(.75,.32,.18)*opticalThickness/max(.25,cosTheta));
     colour *= absorption;
     colour += fire * (.12 + .65*uIridescence) * mix(.35,1.0,fresnel) * (1.0-.65*uRoughness);
+    // Energy-bounded GGX microfacet highlight, using a procedural studio light.
+    vec3 lightDir = normalize(vec3(-.45,.65,1.0));
+    vec3 halfDir = normalize(lightDir + viewDir);
+    float NoL = max(dot(normal,lightDir),0.0);
+    float NoV = max(cosTheta,.001);
+    float NoH = max(dot(normal,halfDir),0.0);
+    float VoH = max(dot(viewDir,halfDir),0.0);
+    float a = max(.08,uRoughness);
+    float a2 = a*a;
+    float denom = NoH*NoH*(a2-1.0)+1.0;
+    float D = a2/(PI*denom*denom);
+    float k = (a+1.0)*(a+1.0)/8.0;
+    float G = (NoV/(NoV*(1.0-k)+k))*(NoL/(NoL*(1.0-k)+k));
+    float F = f0+(1.0-f0)*pow(1.0-VoH,5.0);
+    float specular = D*G*F/max(.004,4.0*NoV*NoL);
+    colour += vec3(.86,.94,1.0)*min(specular*NoL,.35)*(.08+.32*uEnergy);
+
     colour += inkLight;
     colour += vec3(0.22, 0.78, 0.80) * mote;
     colour += labradorite(strata * 1.7 + angle, ribbonParticle * 1.35);
@@ -285,13 +302,17 @@ export function installWayglassField({ host = document.body } = {}) {
     if (!jewel?.isConnected || !jewelCanvas) { clearJewel(); return; }
     const rect = jewel.getBoundingClientRect();
     Object.assign(jewelCanvas.style,{left:rect.left+'px',top:rect.top+'px',width:rect.width+'px',height:rect.height+'px'});
-    if(uniforms.uEnergy.value<.035){clearJewel();return;}
+    if(uniforms.uEnergy.value<.035 && energyTarget<.035){clearJewel();return;}
+    jewelCanvas.style.opacity=String(Math.min(.22,uniforms.uEnergy.value*.35));
     const ratio = renderer.getPixelRatio();
     const x = Math.max(0,rect.left*ratio), y = Math.max(0,rect.top*ratio);
-    const w = Math.min(rect.width*ratio,canvas.width-x), h = Math.min(rect.height*ratio,canvas.height-y);
+    const w = Math.min(rect.right*ratio,canvas.width)-x, h = Math.min(rect.bottom*ratio,canvas.height)-y;
     if(w<=0 || h<=0)return;
     const ctx = jewelCanvas.getContext('2d');
-    ctx?.drawImage(canvas,x,y,w,h,0,0,jewelCanvas.width,jewelCanvas.height);
+    if(!ctx)return;
+    ctx.clearRect(0,0,jewelCanvas.width,jewelCanvas.height);
+    const sx=jewelCanvas.width/Math.max(1,rect.width*ratio), sy=jewelCanvas.height/Math.max(1,rect.height*ratio);
+    ctx.drawImage(canvas,x,y,w,h,(x-rect.left*ratio)*sx,(y-rect.top*ratio)*sy,w*sx,h*sy);
   }
   let previousTime = null;
   let elapsed = 0;
