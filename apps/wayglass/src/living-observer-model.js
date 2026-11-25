@@ -220,3 +220,21 @@ export function observeNurseryMythogenesis(snapshot) {
     hypothesis_status:'open', canon_status:'unchanged',
   };
 }
+
+// Model-relative membrane: coverage is declared, not a claim of mathematical observability.
+export function describeEpistemicMembrane({channels,readings}={}) {
+  if(!Array.isArray(channels)||!channels.length||channels.length>128||
+     channels.some(id=>typeof id!=='string'||!id.trim()||id.length>128)||new Set(channels).size!==channels.length||
+     !Array.isArray(readings)||readings.length>channels.length)throw new TypeError('Invalid observation boundary');
+  const known=new Map();
+  for(const r of readings){
+    if(!r||!channels.includes(r.channel)||known.has(r.channel)||
+      !['observed','bounded-negative','unresolved','unobservable','withheld'].includes(r.status)||
+      typeof r.basis!=='string'||!r.basis.trim()||r.basis.length>256)throw new TypeError('Invalid observation evidence');
+    known.set(r.channel,{channel:r.channel,status:r.status,basis:r.basis});
+  }
+  return {schema:'wayglass.observer.epistemic-membrane/v1',
+    channels:channels.map(channel=>known.get(channel)||{channel,status:'unknown',basis:'No reading supplied'}),
+    model_completeness:'unresolved',mathematical_observability_rank:null,
+    permissions_changed:false,unknown_is_absence:false};
+}

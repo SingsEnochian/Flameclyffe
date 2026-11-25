@@ -1342,6 +1342,42 @@
         "finish_line": "Focused and exact-head checks pass; corrupted packets produce zero model calls; fixture receipts remain explicitly non-live; one authorised live crossing later supplies attributable route, participant, model and response evidence.",
         "return_marker": "Built the selective evaluator and authenticated host path; verify locally and on exact-head CI; hold the live claim for an authorised ship-to-crow crossing. Next owner: Wayglass integration train."
       }
+    },
+    {
+      "change_id": "epistemic-space-membrane-2026-11-24",
+      "changed_paths": [
+        "docs/wayglass/ONE_SHIP_DIRECTIVE.md",
+        "apps/wayglass/src/living-observer-model.js",
+        "apps/wayglass/test/epistemic-membrane.test.js"
+      ],
+      "affected_organs": [
+        "Living Observer",
+        "One Ship governance",
+        "Return and cell membrane research"
+      ],
+      "dependent_checks": [
+        "node --test apps/wayglass/test/epistemic-membrane.test.js",
+        "One Ship change-impact",
+        "exact-head CI"
+      ],
+      "provenance": [
+        "Owner approved Law of Epistemic Space and identified permeable membrane analogy 2026-11-24"
+      ],
+      "rollback": [
+        "Revert scoped law, helper and tests; no live state modified"
+      ],
+      "status": "Source candidate; integration and CI pending",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Extend existing Observer model and directive, no parallel engine.",
+        "owner_outcome": "Preserve evidence boundaries without inventing hidden contents or widening permissions.",
+        "finish_line": "Validate helper and exact-head CI; then wire evidence sources and Return.",
+        "return_marker": "Declared channel coverage helper committed; actual runtime propagation and rank calculations pending."
+      }
     }
   ]
 }
