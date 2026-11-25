@@ -26,3 +26,19 @@ html[data-wayglass-surface] :is(.wg-locus[aria-current="page"],button[aria-press
 html[data-rune-held="true"] :is(.wg-locus-glyph,.wyrdrune-cypher-runes){text-shadow:none;transition:none}
 @media(prefers-reduced-motion:reduce){html[data-wayglass-surface] :is(.wg-locus-glyph,.wyrdrune-cypher-runes){transition:none;text-shadow:none}}
 @media(forced-colors:active){html[data-wayglass-surface] :is(.wg-locus,.wg-helm-nav,.glass-chip,.send-jewel,.wg-locus-glyph,.wyrdrune-cypher-runes){background:ButtonFace;color:ButtonText;border-color:ButtonText;box-shadow:none;text-shadow:none}}
+
+/* Light front follows the existing cypher clock, never a fabricated execution clock. */
+@supports (background-clip:text) {
+ html[data-wayglass-surface]:not([data-rune-held="true"]) .wg-cypher-line[data-cypher-line="runes"] {
+  background-image:linear-gradient(90deg,#a7e9d4 0%,#d9fff2 var(--rune-progress,0%),#819f9b var(--rune-progress,0%),#819f9b 100%);
+  background-clip:text;color:transparent;
+  filter:drop-shadow(0 1px 0 #020406);
+ }
+}
+html[data-wayglass-surface] .wg-cypher-phase {
+ border-inline-start:1px solid #bba47780;
+ box-shadow:inset 2px 0 0 #05080b;
+}
+@media(prefers-reduced-motion:reduce),(forced-colors:active){
+ html[data-wayglass-surface] .wg-cypher-line[data-cypher-line="runes"]{background:none;color:inherit;filter:none}
+}
