@@ -5,7 +5,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 const origin=process.env.WAYGLASS_VISUAL_URL || 'http://127.0.0.1:4173';
-const rooms=['writing-room','universal-codex','living-observer'];
+const rooms=[['living-watercolor','watercolor'],['writing-room','writing'],['universal-codex','codex'],['living-observer','observer'],['systems','organs'],['world-continuity','worlds']];
 const devices=[['desktop',1440,900],['ipad',1024,1366],['iphone',390,844]];
 const output='artifacts/wayglass-visual';
 const baseline='apps/wayglass/visual-canon/approved';
@@ -17,13 +17,13 @@ try {
  for(const [device,width,height] of devices){
   const context=await browser.newContext({viewport:{width,height},deviceScaleFactor:1,reducedMotion:'reduce',locale:'en-GB',isMobile:device==='iphone',hasTouch:device!=='desktop'});
   try {
-   for(const room of rooms){
+   for(const [room,route] of rooms){
     const page=await context.newPage();
     const errors=[];
     page.on('pageerror',e=>errors.push(e.message));
-    const url=new URL(origin);url.searchParams.set('room','wayglass:'+room);
+    const url=new URL(origin);url.searchParams.set('room',route);
     await page.goto(url.href,{waitUntil:'domcontentloaded'});
-    await page.locator('html[data-wayglass-surface]').waitFor({timeout:20000});
+    await page.locator('html[data-wayglass-surface="wayglass:'+room+'"]').waitFor({timeout:20000});
     await page.evaluate(()=>document.fonts.ready);
     const surface=await page.locator('html').getAttribute('data-wayglass-surface');
     const name=device+'-'+room+'.png';
