@@ -175,6 +175,21 @@ const FRAGMENT = `
     float doubleFire = semanticEdge * max(0.0, -uCanonState) * (0.04 + uEnergy * 0.12);
     colour += labradorite(strata + 1.6, doubleFire);
 
+    // Atmospheric descendants of the mineral optical field.
+    // Artistic thin-film and ice-scattering approximations, not physical telemetry.
+    vec2 cloudP = p * vec2(1.5, 5.0);
+    cloudP.y += 0.55 * sin(p.x * 3.1 + uTime * 0.018);
+    float cloudDensity = smoothstep(0.42, 0.77, fbm(cloudP + vec2(uTime * 0.012, 0.0)));
+    float cloudDepth = cloudDensity * (0.35 + opticalThickness * 0.65);
+    float transmission = exp(-cloudDepth * 1.6);
+    float phase = strata + angle * 0.65 + cloudDepth * 8.0;
+    vec3 pearl = mix(vec3(0.78, 0.76, 0.69), labradorite(phase, 1.0), 0.42);
+    float nacre = (1.0 - transmission) * (0.025 + uEnergy * 0.12);
+    float iceWave = pow(0.5 + 0.5 * sin(cloudP.y * 13.0 + mineral * 8.0), 7.0);
+    float iceDensity = cloudDensity * iceWave * (0.035 + uEnergy * 0.11);
+    vec3 noctilucent = mix(vec3(0.09, 0.36, 0.75), vec3(0.65, 0.86, 1.0), iceWave);
+    colour += pearl * nacre + noctilucent * iceDensity;
+
     // Stone-black falloff gives the field architectural weight.
     float vignette = smoothstep(1.12, 0.12, length(p * vec2(0.78, 1.0)));
     colour *= 0.58 + vignette * 0.42;
@@ -195,12 +210,13 @@ export function installWayglassField({ host = document.body } = {}) {
   canvas.setAttribute('aria-hidden', 'true');
   host.prepend(canvas);
 
-  const renderer = new THREE.WebGLRenderer({
-    canvas,
-    antialias: true,
-    alpha: false,
-    powerPreference: 'high-performance',
-  });
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({canvas, antialias: true, alpha: false, powerPreference: 'high-performance'});
+  } catch {
+    canvas.remove();
+    return null; // CSS opaline fallback keeps the entire ship navigable.
+  }
   renderer.setPixelRatio(Math.min(globalThis.devicePixelRatio || 1, 1.6));
 
   const scene = new THREE.Scene();
@@ -231,7 +247,8 @@ export function installWayglassField({ host = document.body } = {}) {
   const motionPreference = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
   let reduceMotion = motionPreference?.matches === true;
   let motionEnabled = true;
-  const still = () => reduceMotion || !motionEnabled || document.hidden;
+  let featherHeld = false, contextLost = false;
+  const still = () => reduceMotion || !motionEnabled || featherHeld || contextLost || document.hidden;
   const pointerTarget = new THREE.Vector2(0.68, 0.3);
   let frame = 0;
   let alive = true;
@@ -269,7 +286,7 @@ export function installWayglassField({ host = document.body } = {}) {
       uniforms.uThickness.value = 0.34;
     }
 
-    renderer.render(scene, camera);
+    if (!contextLost) renderer.render(scene, camera);
   }
 
   function animate(time) {
@@ -318,6 +335,12 @@ export function installWayglassField({ host = document.body } = {}) {
     render();
     if (alive && !still()) frame = requestAnimationFrame(animate);
   }
+  function onFeather(event) { featherHeld = event.detail?.stopped === true; energyTarget = 0; velocityTarget = 0; syncMotion(); }
+  function onLost(event) { event.preventDefault(); contextLost = true; syncMotion(); }
+  function onRestored() { contextLost = false; syncMotion(); }
+  canvas.addEventListener('webglcontextlost', onLost);
+  canvas.addEventListener('webglcontextrestored', onRestored);
+  globalThis.addEventListener?.('wayglass:feather', onFeather);
   function onMotionPreference(event) { reduceMotion = event.matches === true; syncMotion(); }
   function onMotion(event) { motionEnabled = event.detail?.enabled === true; syncMotion(); }
   motionPreference?.addEventListener?.('change', onMotionPreference);
@@ -335,6 +358,9 @@ export function installWayglassField({ host = document.body } = {}) {
     },
     destroy() {
       alive = false;
+      canvas.removeEventListener('webglcontextlost', onLost);
+      canvas.removeEventListener('webglcontextrestored', onRestored);
+      globalThis.removeEventListener?.('wayglass:feather', onFeather);
       cancelAnimationFrame(frame);
       motionPreference?.removeEventListener?.('change', onMotionPreference);
       globalThis.removeEventListener?.('wayglass:motion', onMotion);

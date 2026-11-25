@@ -28,7 +28,22 @@ class Element{
  querySelector(selector){return this.querySelectorAll(selector)[0]??null;}
  querySelectorAll(selector){return this.children.flatMap(child=>[...(child.matches(selector)?[child]:[]),...child.querySelectorAll(selector)]);}
  getBoundingClientRect(){return {left:0,top:0,width:960,height:540};}
- getContext(){return null;}
+ // Capture-only 2D adapter for tests. Production still requires an actual canvas.
+ getContext(kind){
+  if(this.tagName!=='CANVAS'||kind!=='2d')return null;
+  if(!this._context2d){
+   const noop=()=>{};
+   this._context2d={
+    canvas:this,save:noop,restore:noop,clearRect:noop,fillRect:noop,drawImage:noop,
+    beginPath:noop,arc:noop,ellipse:noop,clip:noop,fill:noop,closePath:noop,
+    moveTo:noop,lineTo:noop,stroke:noop,putImageData:noop,
+    createLinearGradient:()=>({addColorStop:noop}),
+    createRadialGradient:()=>({addColorStop:noop}),
+    createImageData:(width,height)=>({width,height,data:new Uint8ClampedArray(width*height*4)}),
+   };
+  }
+  return this._context2d;
+ }
  focus(){this.focused=true;}
  setPointerCapture(){}
  releasePointerCapture(){}
@@ -134,7 +149,8 @@ test('First Contact requests an actual ship route contribution and preserves aut
   await f.q('wc-first-contact').dispatch('click');await flush();
   const calls=f.calls.filter(call=>call.url==='/api/v1/wayglass/respond');assert.equal(calls.length,1);
   const body=JSON.parse(calls[0].options.body);
-  assert.match(body.input,/choose|decline/i);assert.match(body.input,/A warm measured cadence/);assert.match(body.input,/Rowan/);
+  assert.match(body.input,/choose|decline/i);
+  assert.match(body.surface_context,/Participant-authored voice preferences \(Rowan\): A warm measured cadence/);
   assert.match(f.q('wc-voice').textContent,/Captured transport fixture/);
  }finally{f.restore();}
 });

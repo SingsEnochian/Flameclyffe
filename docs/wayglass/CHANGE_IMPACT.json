@@ -1,0 +1,1501 @@
+{
+  "schema": "wayglass.change-impact/v1",
+  "governing_contract": "docs/wayglass/ONE_SHIP_DIRECTIVE.md",
+  "canonical_development_branch": "wayglass/current",
+  "single_mission_issue": 583,
+  "reconciliation_train_pr": 661,
+  "policy": "Every implementation change must add/update an impact entry in this file in the same PR. Entries identify changed paths, affected organs, dependent checks, provenance and rollback. The validator rejects implementation changes without a matching entry.",
+  "entries": [
+    {
+      "change_id": "one-ship-pr-reconciliation-2026-11-25",
+      "changed_paths": [
+        "docs/wayglass/ONE_SHIP_PR_RECONCILIATION_20261125.md",
+        "docs/wayglass/current.json"
+      ],
+      "affected_organs": [
+        "shipwide governance and source authority",
+        "Wyrdrune and Program Workbench",
+        "Soma Nova morphogenesis",
+        "Watercolour, FAEberpunk, Nursery and Constellation",
+        "CI integration and Return"
+      ],
+      "dependent_checks": [
+        "One Ship change-impact contract on final exact head",
+        "GitHub PR ancestry and changed-file overlap review",
+        "Wayglass Check and Wyrdrune parity on the referenced source SHA",
+        "source and release gate distinction"
+      ],
+      "provenance": [
+        "Rowan requested One Ship PR reconciliation on 2026-11-25",
+        "PR #661 pre-audit head 42d7e9bd0642ffd0b66c863e95c57ea7a31c9702",
+        "PR #676 source head 76aaba747dd5b087bd242c13befd311bcd4823a5",
+        "GitHub live inventory of 231 open PRs; 73 base main, 70 base wayglass/current, 88 stacked on other branches",
+        "docs/wayglass/ONE_SHIP_PR_RECONCILIATION_20261125.md"
+      ],
+      "rollback": [
+        "revert the dated reconciliation checkpoint and restore the prior current.json checkpoint; preserve source PR histories and code branches"
+      ],
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Compared #661 and #676 source ancestry, #677 governance, #678 Soma Nova, #675 capability-forward language, #674 magic, #673/#679 Watercolour, #667 FAEberpunk, Nursery stack, and duplicated #663/#669 provider patches. Consolidated findings in existing #661 instead of a parallel PR.",
+        "owner_outcome": "One reconciled Wayglass build path with one canonical Wyrdrune runtime, one owner-scoped programme/Return ledger and no competing PR trains.",
+        "finish_line": "Record exact-head sources, overlaps, missing candidates and CI; port capabilities once with tests; verify signed-off merge, authenticated deployed SHA and device cold Return before release.",
+        "return_marker": "docs/wayglass/ONE_SHIP_PR_RECONCILIATION_20261125.md · Built / Verified / Held; next owner remains PR #661."
+      }
+    },
+    {
+      "change_id": "wayglass-world-windows-launcher-2026-11-24",
+      "changed_paths": [
+        "scripts/Deploy-WayglassWorld.ps1",
+        "scripts/wayglass-tailnet-gate.mjs",
+        "scripts/wayglass-tailnet-serve.mjs",
+        "apps/wayglass/test/custom-domain-gate.test.js",
+        "apps/wayglass/server-stage.cjs",
+        "docs/wayglass/WAYGLASS_OWNER_ONLY_CLOUDFLARE_RELEASE.md",
+        "docs/wayglass/current.json"
+      ],
+      "affected_organs": [
+        "Hearthgate local host and staging",
+        "Wayglass restricted gateway",
+        "House Steward authentication",
+        "Cloudflare Access and Windows connector",
+        "Tailscale compatibility"
+      ],
+      "dependent_checks": [
+        "Wayglass Check",
+        "House Access JWT and session tests",
+        "Windows launcher parser and mocked Access policy checks",
+        "edge DNS and credentialed Windows acceptance pending"
+      ],
+      "provenance": [
+        "owner deployment preparation request on 2026-11-24",
+        "PR #661 source b9a5421edaf721b85ddb994c14f89a6f2d6ae028",
+        "wayglass/current reference 8be6abc3c8eed9eaca3e0a0f1bcf26559cc82914"
+      ],
+      "rollback": [
+        "remove only the verified launcher-created apex record with -Rollback",
+        "revert gateway and launcher changes together if source rollback is required"
+      ],
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Compared #583 owner/cloud lane, #661, and wayglass/current. Both branches already have the restricted gateway, House Access verifier and Cloudflare edge probe. Reuse those contracts on one port.",
+        "owner_outcome": "One Windows launcher to prepare and verify the existing ship behind owner-only Access at wayglass.world.",
+        "finish_line": "Verify exact-head source, mocked owner policy refusal, gateway isolation, and credentialed Windows and mobile receipts before declaring live acceptance.",
+        "return_marker": "docs/wayglass/WAYGLASS_OWNER_ONLY_CLOUDFLARE_RELEASE.md records Windows prerequisites, acceptance and rollback; owner runs the launcher on the existing laptop."
+      }
+    },
+    {
+      "change_id": "one-ship-governance-bootstrap-2026-11-23",
+      "changed_paths": [
+        "scripts/verify-one-ship-impact.mjs",
+        ".github/workflows/one-ship-change-impact.yml"
+      ],
+      "affected_organs": [
+        "shipwide governance",
+        "CI and integration train"
+      ],
+      "dependent_checks": [
+        "One Ship change-impact validator",
+        "pull-request gate on wayglass/current"
+      ],
+      "provenance": [
+        "owner direction 2026-11-23",
+        "source PR #677 exact head 537eab8b51a8171c3e155e9d1b7a4a41bdcd74ab"
+      ],
+      "rollback": [
+        "revert validator and workflow together; retain governing contract and impact register"
+      ],
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Compared #677 governance with #661 and #583; reuse one existing validator.",
+        "owner_outcome": "One usable Wayglass with owner authority and preserved provenance.",
+        "finish_line": "Relevant exact-head checks and change receipts before final reconciliation.",
+        "return_marker": "Built / Verified / Held in #583; preserve next owner, dependencies and rollback."
+      }
+    },
+    {
+      "change_id": "faeberpunk-ship-frame-port-2026-11-23",
+      "changed_paths": [
+        "apps/wayglass/src/faeberpunk-ship.css",
+        "apps/wayglass/src/main.js"
+      ],
+      "affected_organs": [
+        "FAEberpunk shared shell",
+        "all Wayglass rooms",
+        "responsive navigation and accessibility"
+      ],
+      "dependent_checks": [
+        "Wayglass frontend build",
+        "desktop/tablet/phone browser layout checks",
+        "reduced-motion and forced-colour checks"
+      ],
+      "provenance": [
+        "source PR #667 head d9c4c58deddcb42b069ace204cb207244188f02c",
+        "source CSS blob eaa31f8618af494ecfa0c44b001835f91d6ccba5",
+        "integration commits d3a59a983f8b77f03c0f8e4bceb812a0c6bfa9b3 and d3c98d7a803f77aa4c40dc4fa92eb93adfaf0aa6"
+      ],
+      "rollback": [
+        "revert the FAEberpunk stylesheet import and copied stylesheet together; retain source PR and prior shell"
+      ],
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Compared #667 with #661 shell; preserve current routes and accessibility.",
+        "owner_outcome": "One usable Wayglass with owner authority and preserved provenance.",
+        "finish_line": "Relevant exact-head checks and change receipts before final reconciliation.",
+        "return_marker": "Built / Verified / Held in #583; preserve next owner, dependencies and rollback."
+      }
+    },
+    {
+      "change_id": "one-ship-reconciliation-batch-2026-11-23",
+      "changed_paths": [
+        ".github/workflows/wayglass-cypher-browser.yml",
+        ".github/workflows/wayglass-hf-gateway.yml",
+        ".github/workflows/wayglass-six-lane-conductor.yml",
+        ".github/workflows/whole-pizza-os-image.yml",
+        ".github/workflows/wyrdrune-ipad-lantern.yml",
+        "apps/arcsweep/contracts/WONDER_MYTHIC_CANON_V0.1.md",
+        "apps/arcsweep/corpus/ancestral/README.md",
+        "apps/arcsweep/corpus/ancestral/manifest.v0.1.json",
+        "apps/arcsweep/skills/cells/narrative-voices/taaveren-vaen-narrator.cells.json",
+        "apps/arcsweep/skills/cells/shared/fantasy-roleplay.cells.json",
+        "apps/arcsweep/skills/cells/writing-styles/taaveren-vaen-longform.cells.json",
+        "apps/arcsweep/skills/contracts/knowledge-cell.schema.json",
+        "apps/arcsweep/skills/sources/shared/FANTASY_ROLEPLAY_SKILL.md",
+        "apps/arcsweep/src/ancestral-corpus-seed.js",
+        "apps/arcsweep/src/codex/codex-material-system.js",
+        "apps/arcsweep/src/fantasy-roleplay-runtime.js",
+        "apps/arcsweep/src/feedback-loop.js",
+        "apps/arcsweep/src/hearthweave-emergence-contracts.js",
+        "apps/arcsweep/src/house-roleplay-mode.js",
+        "apps/arcsweep/src/main.js",
+        "apps/arcsweep/src/os/guide-runtime.js",
+        "apps/arcsweep/src/os/time-room-doorways.js",
+        "apps/arcsweep/src/os/time-room-service.js",
+        "apps/arcsweep/src/scene-cortex-acceptance.js",
+        "apps/arcsweep/src/story-mode.js",
+        "apps/arcsweep/src/terra-prime-history-ingest.js",
+        "apps/arcsweep/test/fantasy-roleplay-runtime.test.js",
+        "apps/arcsweep/test/feedback-loop.test.js",
+        "apps/arcsweep/test/house-roleplay-mode.test.js",
+        "apps/starwell-server/flames/router.js",
+        "apps/starwell-server/package.json",
+        "apps/starwell-server/security/local-boundary.js",
+        "apps/starwell-server/server-secure.js",
+        "apps/starwell-server/server.js",
+        "apps/starwell-server/test/security-boundary.test.js",
+        "apps/starwell-server/test/wayglass-cell-ecology.test.js",
+        "apps/starwell-server/test/wayglass-cell-garden-router.test.js",
+        "apps/starwell-server/test/wayglass-cell-mitosis.test.js",
+        "apps/starwell-server/test/wayglass-first-touch-route.test.js",
+        "apps/starwell-server/test/wayglass-house-access.test.js",
+        "apps/starwell-server/test/wayglass-mcp-bridge.test.js",
+        "apps/starwell-server/test/wayglass-orion-expression.test.js",
+        "apps/starwell-server/test/wayglass-peer-oauth.test.js",
+        "apps/starwell-server/test/wayglass-private-atelier.test.js",
+        "apps/starwell-server/test/wayglass-program-library.test.js",
+        "apps/starwell-server/test/wayglass-program-store.test.js",
+        "apps/starwell-server/test/wayglass-runtime-package.test.js",
+        "apps/starwell-server/test/wayglass-runtime-sandbox.test.js",
+        "apps/starwell-server/test/wayglass-ship-watercolor-compat.test.js",
+        "apps/starwell-server/test/wayglass-wyrdrune-preview.test.js",
+        "apps/starwell-server/test/wayglass-wyrdrune-workbench.test.js",
+        "apps/starwell-server/wayglass-runtime/house-session.mjs",
+        "apps/starwell-server/wayglass/character-seats.cjs",
+        "apps/starwell-server/wayglass/house-access.js",
+        "apps/starwell-server/wayglass/house-session.js",
+        "apps/starwell-server/wayglass/mcp-bridge.js",
+        "apps/starwell-server/wayglass/oauth-peer.js",
+        "apps/starwell-server/wayglass/orion-expression.cjs",
+        "apps/starwell-server/wayglass/private-atelier.cjs",
+        "apps/starwell-server/wayglass/program-store.js",
+        "apps/starwell-server/wayglass/router.js",
+        "apps/starwell-server/wayglass/runtime-sandbox.cjs",
+        "apps/starwell-server/wayglass/voyage-scenarios.js",
+        "apps/starwell-server/wayglass/wyrdrune-preview-outcome.cjs",
+        "apps/starwell-server/wayglass/wyrdrune-preview-outcome.test.cjs",
+        "apps/wayglass-spell-studio/README.md",
+        "apps/wayglass-spell-studio/index.html",
+        "apps/wayglass-spell-studio/mobile-runner.html",
+        "apps/wayglass/README.md",
+        "apps/wayglass/first-lantern-ipad-template.html",
+        "apps/wayglass/server-stage.cjs",
+        "apps/wayglass/src/acoustic-audio-engine.js",
+        "apps/wayglass/src/acoustic-cell-channel.js",
+        "apps/wayglass/src/atlas-dream-job.js",
+        "apps/wayglass/src/cell-ecology-audio.js",
+        "apps/wayglass/src/cell-listening-channel.js",
+        "apps/wayglass/src/cell-radio-recording.js",
+        "apps/wayglass/src/constellation-room.js",
+        "apps/wayglass/src/dream-media-bundle.js",
+        "apps/wayglass/src/dream-receipt-journal.js",
+        "apps/wayglass/src/dream-recording.js",
+        "apps/wayglass/src/faeberpunk-rooms.css",
+        "apps/wayglass/src/first-lantern-ipad.js",
+        "apps/wayglass/src/harmony-chaos.js",
+        "apps/wayglass/src/house-steward-session.js",
+        "apps/wayglass/src/imported-worlds.js",
+        "apps/wayglass/src/interpersonal-media-continuity.js",
+        "apps/wayglass/src/living-observer-model.js",
+        "apps/wayglass/src/living-observer-self.js",
+        "apps/wayglass/src/mobius-nursery-encounter.mjs",
+        "apps/wayglass/src/mobius-nursery-encounter.test.mjs",
+        "apps/wayglass/src/mobius-nursery-garden.mjs",
+        "apps/wayglass/src/mobius-nursery-garden.test.mjs",
+        "apps/wayglass/src/mobius-nursery-voyage.test.mjs",
+        "apps/wayglass/src/motion-choreography.js",
+        "apps/wayglass/src/mythience-client.js",
+        "apps/wayglass/src/mythience-late-observations.js",
+        "apps/wayglass/src/mythience-membrane-scene.js",
+        "apps/wayglass/src/nervous-system-discovery.js",
+        "apps/wayglass/src/os-kernel.js",
+        "apps/wayglass/src/private-atelier-scene.js",
+        "apps/wayglass/src/quad-eightfold-client.js",
+        "apps/wayglass/src/recorded-dream-voyage.js",
+        "apps/wayglass/src/resonance-bridge.js",
+        "apps/wayglass/src/resonance-circuit.js",
+        "apps/wayglass/src/resonance-forge.js",
+        "apps/wayglass/src/resonance-learning.js",
+        "apps/wayglass/src/resonance-nervous-system.js",
+        "apps/wayglass/src/route-client.js",
+        "apps/wayglass/src/sf2-control.js",
+        "apps/wayglass/src/ship-deck-navigation.js",
+        "apps/wayglass/src/ship-environment.js",
+        "apps/wayglass/src/ship-soundscape.js",
+        "apps/wayglass/src/ship-wyrdrune-interface.js",
+        "apps/wayglass/src/shipwide-feedback.js",
+        "apps/wayglass/src/sonic-boop-consent.js",
+        "apps/wayglass/src/sonic-event-router.js",
+        "apps/wayglass/src/sonic-lexicon.js",
+        "apps/wayglass/src/sonic-plan-player.js",
+        "apps/wayglass/src/sonic-return-ledger.js",
+        "apps/wayglass/src/spectral-field.js",
+        "apps/wayglass/src/story-score-binding.js",
+        "apps/wayglass/src/styles.css",
+        "apps/wayglass/src/supabase-dream-receipt-store.js",
+        "apps/wayglass/src/surface-registry.js",
+        "apps/wayglass/src/surfaces/acoustic-room.js",
+        "apps/wayglass/src/surfaces/altered-timeline.js",
+        "apps/wayglass/src/surfaces/arcsweep-writing.js",
+        "apps/wayglass/src/surfaces/cell-garden.css",
+        "apps/wayglass/src/surfaces/cell-garden.js",
+        "apps/wayglass/src/surfaces/first-voyage.js",
+        "apps/wayglass/src/surfaces/library.js",
+        "apps/wayglass/src/surfaces/living-observer.js",
+        "apps/wayglass/src/surfaces/living-watercolor.js",
+        "apps/wayglass/src/surfaces/mythience-crossing.js",
+        "apps/wayglass/src/surfaces/native-voice.js",
+        "apps/wayglass/src/surfaces/private-atelier.css",
+        "apps/wayglass/src/surfaces/private-atelier.js",
+        "apps/wayglass/src/surfaces/program-workbench.css",
+        "apps/wayglass/src/surfaces/program-workbench.js",
+        "apps/wayglass/src/surfaces/quad-eightfold.js",
+        "apps/wayglass/src/surfaces/runtime-sandbox.js",
+        "apps/wayglass/src/surfaces/ship-interface.css",
+        "apps/wayglass/src/surfaces/ship-interface.js",
+        "apps/wayglass/src/surfaces/systems.js",
+        "apps/wayglass/src/surfaces/universal-codex.js",
+        "apps/wayglass/src/surfaces/video-atelier.js",
+        "apps/wayglass/src/surfaces/world-deck.js",
+        "apps/wayglass/src/surfaces/wtl-interface-atelier.js",
+        "apps/wayglass/src/tri-horizon-dreaming.js",
+        "apps/wayglass/src/voice-choice.js",
+        "apps/wayglass/src/watercolor-bridge.js",
+        "apps/wayglass/src/watercolor-image-resolver.js",
+        "apps/wayglass/src/watercolor-modes.js",
+        "apps/wayglass/src/wayglass-design-choice.js",
+        "apps/wayglass/src/wayglass-entry.js",
+        "apps/wayglass/src/wayglass-nikola-workflow.js",
+        "apps/wayglass/src/withness-receipt-projection.js",
+        "apps/wayglass/src/world-draft-store.js",
+        "apps/wayglass/src/world-induction-model.js",
+        "apps/wayglass/src/world-induction.css",
+        "apps/wayglass/src/world-induction.js",
+        "apps/wayglass/src/world-seats.js",
+        "apps/wayglass/src/wtl-interface-atelier.css",
+        "apps/wayglass/src/wtl-interface-atelier.js",
+        "apps/wayglass/src/wtl-interface-executable.js",
+        "apps/wayglass/src/wtl-nursery-bridge.mjs",
+        "apps/wayglass/src/wtl-nursery-bridge.test.mjs",
+        "apps/wayglass/src/wtl-transform-frontend.mjs",
+        "apps/wayglass/src/wtl-transform-frontend.test.mjs",
+        "apps/wayglass/src/wtl-transform-semantics.mjs",
+        "apps/wayglass/src/wtl-transform-semantics.test.mjs",
+        "apps/wayglass/src/wyrdrune-client.js",
+        "apps/wayglass/src/wyrdrune-cypher.js",
+        "apps/wayglass/src/wyrdrune-morph.js",
+        "apps/wayglass/src/wyrdrune-proof.js",
+        "apps/wayglass/src/wyrdrune-reading.js",
+        "apps/wayglass/src/wyrdrune-response-media.js",
+        "apps/wayglass/src/wyrdrune-wonder-media.js",
+        "apps/wayglass/src/wyrdrune-workbench.js",
+        "apps/wayglass/test/acoustic-audio-engine.test.js",
+        "apps/wayglass/test/acoustic-cell.test.js",
+        "apps/wayglass/test/acoustic-room-ui.test.js",
+        "apps/wayglass/test/atlas-dream-job.test.js",
+        "apps/wayglass/test/cell-ecology-audio.test.js",
+        "apps/wayglass/test/cell-garden-ui.test.js",
+        "apps/wayglass/test/constellation-room.test.js",
+        "apps/wayglass/test/dream-media-bundle.test.js",
+        "apps/wayglass/test/dream-receipt-feather-auth-race.test.js",
+        "apps/wayglass/test/dream-receipt-journal-source.test.js",
+        "apps/wayglass/test/dream-receipt-journal.test.js",
+        "apps/wayglass/test/dream-receipt-sql-review.test.js",
+        "apps/wayglass/test/dream-recording.test.js",
+        "apps/wayglass/test/first-contact-ui.test.js",
+        "apps/wayglass/test/harmony-chaos.test.js",
+        "apps/wayglass/test/heart-of-myth-score.test.js",
+        "apps/wayglass/test/imported-worlds.test.js",
+        "apps/wayglass/test/interpersonal-media-continuity.test.js",
+        "apps/wayglass/test/legacy-deck-entry.test.js",
+        "apps/wayglass/test/mobius-nursery-accessor-boundary.test.mjs",
+        "apps/wayglass/test/mobius-nursery-consent-hardening.test.mjs",
+        "apps/wayglass/test/mythience-client-cancellation.test.js",
+        "apps/wayglass/test/mythience-late-observations.test.js",
+        "apps/wayglass/test/mythience-mobius-currents.test.js",
+        "apps/wayglass/test/nervous-system-discovery.test.js",
+        "apps/wayglass/test/recorded-dream-voyage.test.js",
+        "apps/wayglass/test/resonance-bridge.test.js",
+        "apps/wayglass/test/resonance-circuit.test.js",
+        "apps/wayglass/test/resonance-forge.test.js",
+        "apps/wayglass/test/resonance-learning.test.js",
+        "apps/wayglass/test/resonance-nervous-system.test.js",
+        "apps/wayglass/test/sf2-control.test.js",
+        "apps/wayglass/test/ship-environment.test.js",
+        "apps/wayglass/test/ship-wyrdrune-interface.test.js",
+        "apps/wayglass/test/shipwide-feedback.test.js",
+        "apps/wayglass/test/sonic-boop-consent.test.js",
+        "apps/wayglass/test/sonic-event-router.test.js",
+        "apps/wayglass/test/sonic-lexicon.test.js",
+        "apps/wayglass/test/sonic-plan-player.test.js",
+        "apps/wayglass/test/sonic-return-ledger.test.js",
+        "apps/wayglass/test/supabase-dream-receipt-store.test.js",
+        "apps/wayglass/test/tri-horizon-dreaming.test.js",
+        "apps/wayglass/test/voice-choice.test.js",
+        "apps/wayglass/test/watercolor-image-resolver.test.js",
+        "apps/wayglass/test/watercolor-model-integrity.test.js",
+        "apps/wayglass/test/watercolour-conversation-score.test.js",
+        "apps/wayglass/test/wayglass-bitty-interview-host.test.js",
+        "apps/wayglass/test/wayglass-design-choice.test.js",
+        "apps/wayglass/test/wayglass-evil-gene-world.test.js",
+        "apps/wayglass/test/wayglass-inheritance-host.test.js",
+        "apps/wayglass/test/wayglass-living-observer-self.test.js",
+        "apps/wayglass/test/wayglass-living-observer.test.js",
+        "apps/wayglass/test/wayglass-os-kernel.test.js",
+        "apps/wayglass/test/wayglass-spelling-wyrdrune.test.js",
+        "apps/wayglass/test/wayglass-stepfun.test.js",
+        "apps/wayglass/test/withness-receipt-projection.test.js",
+        "apps/wayglass/test/world-deck.test.js",
+        "apps/wayglass/test/world-draft-store.test.js",
+        "apps/wayglass/test/world-induction.test.js",
+        "apps/wayglass/test/wtl-interface-atelier.test.js",
+        "apps/wayglass/test/wtl-interface-end-to-end.test.js",
+        "apps/wayglass/test/wtl-interface-executable.test.js",
+        "apps/wayglass/test/wtl-interface-runtime.test.js",
+        "apps/wayglass/test/wyrdrune-cypher.test.js",
+        "apps/wayglass/test/wyrdrune-wonder-media.test.js",
+        "apps/wayglass/test/wyrdrune-workbench-client.test.js",
+        "lib/wayglass-cell-mitosis.cjs",
+        "lib/wayglass-colony-checkpoint.cjs",
+        "lib/wayglass-composition-projection.mjs",
+        "lib/wayglass-conversation-score.mjs",
+        "lib/wayglass-double-mobius.cjs",
+        "lib/wayglass-eightfold-space.cjs",
+        "lib/wayglass-first-touch-demo.cjs",
+        "lib/wayglass-integrated-voyage.cjs",
+        "lib/wayglass-kernel.cjs",
+        "lib/wayglass-mobius-palimpsest.mjs",
+        "lib/wayglass-mobius-palimpsest.test.mjs",
+        "lib/wayglass-mobius.cjs",
+        "lib/wayglass-quad-eightfold.cjs",
+        "lib/wayglass-timed-score.mjs",
+        "lib/wayglass-travelling-inheritance.cjs",
+        "lib/wayglass-wyrdrune-engine.cjs",
+        "lib/wayglass-wyrdrune-ingress.cjs",
+        "lib/wayglass-wyrdrune-revision.cjs",
+        "lib/wayglass-wyrdrune-ritual.cjs",
+        "lib/wayglass-wyrdrune-ritual.test.cjs",
+        "lib/wayglass-wyrdrune-soundscape.cjs",
+        "lib/wayglass-wyrdrune-soundscape.test.cjs",
+        "lib/wayglass-wyrdrune-voice.cjs",
+        "lib/wayglass-wyrdrune-voice.test.cjs",
+        "lib/wyrdrune/acoustic-cell.mjs",
+        "lib/wyrdrune/bell-wonder.wtl",
+        "lib/wyrdrune/bidirectional.mjs",
+        "lib/wyrdrune/bidirectional.test.cjs",
+        "lib/wyrdrune/browser-canonical.mjs",
+        "lib/wyrdrune/colony-form.wtl",
+        "lib/wyrdrune/cross-backend.parity.cjs",
+        "lib/wyrdrune/double-mobius-orientation.wtl",
+        "lib/wyrdrune/engine-flow.test.cjs",
+        "lib/wyrdrune/engine-turn.wtl",
+        "lib/wyrdrune/engine-verify.wtl",
+        "lib/wyrdrune/expression.mjs",
+        "lib/wyrdrune/fiction-mobius.mjs",
+        "lib/wyrdrune/fiction-mobius.test.cjs",
+        "lib/wyrdrune/first-lantern-ipad.test.cjs",
+        "lib/wyrdrune/first-lantern.wtl",
+        "lib/wyrdrune/gloss.mjs",
+        "lib/wyrdrune/gloss.test.cjs",
+        "lib/wyrdrune/lantern-return.wtl",
+        "lib/wyrdrune/observer-compression.wtl",
+        "lib/wyrdrune/observer-feedback.wtl",
+        "lib/wyrdrune/pure-backend.py",
+        "lib/wyrdrune/quantum.mjs",
+        "lib/wyrdrune/revision-lineage.test.cjs",
+        "lib/wyrdrune/revision-selection.wtl",
+        "lib/wyrdrune/runtime.mjs",
+        "lib/wyrdrune/shipwide-cell.wtl",
+        "lib/wyrdrune/shipwide-contract.test.cjs",
+        "lib/wyrdrune/shipwide-feedback.wtl",
+        "lib/wyrdrune/skyrunor-bridge.mjs",
+        "lib/wyrdrune/skyrunor-change.mjs",
+        "lib/wyrdrune/skyrunor-program.mjs",
+        "lib/wyrdrune/skyrunor-program.test.cjs",
+        "lib/wyrdrune/skyrunor.mjs",
+        "lib/wyrdrune/skyrunor.test.cjs",
+        "lib/wyrdrune/story-soundscape.wtl",
+        "lib/wyrdrune/typed-ir.cjs",
+        "lib/wyrdrune/typed-ir.test.cjs",
+        "lib/wyrdrune/wayglass-vessel-plan.test.cjs",
+        "lib/wyrdrune/wayglass-vessel-plan.wtl",
+        "lib/wyrdrune/wyrdrune.test.cjs",
+        "scripts/build-first-lantern-ipad.mjs",
+        "scripts/check-first-lantern-ipad.mjs",
+        "scripts/check-skyrunor-browser.mjs",
+        "scripts/wayglass-altered-timeline-browser.mjs",
+        "scripts/wayglass-amber-wyrdrune-smoke.mjs",
+        "scripts/wayglass-arcsweep-deck-browser.mjs",
+        "scripts/wayglass-cypher-browser.mjs",
+        "scripts/wayglass-import-colony.cjs",
+        "scripts/wayglass-tailnet-gate.mjs",
+        "test/wayglass/character-seats.test.cjs",
+        "test/wayglass/eightfold-space.test.cjs",
+        "test/wayglass/first-contact-seat.test.cjs",
+        "test/wayglass/integrated-voyage.test.cjs",
+        "test/wayglass/surface-registry-async.test.cjs",
+        "test/wayglass/with-003-pause-audio.test.cjs",
+        "lib/wayglass/soma-nova-morphogenesis.mjs",
+        "lib/wayglass/soma-nova-morphogenesis.test.mjs",
+        "apps/starwell-server/wayglass/router.js",
+        "apps/starwell-server/test/wayglass-soma-nova-morphogenesis.test.js",
+        "apps/wayglass/src/soma-nova-client.js",
+        "apps/wayglass/src/surfaces/program-workbench.js",
+        "apps/wayglass/src/surfaces/program-workbench.css",
+        "apps/wayglass/test/soma-nova-client.test.js",
+        "AGENTS.md",
+        "api/_shared/rarity-flame-runtime.mjs",
+        "deploy/huggingface-wayglass/README.md",
+        "deploy/huggingface-wayglass/app.py",
+        "deploy/huggingface-wayglass/test_app.py",
+        "integrations/windhawk/README.md",
+        "integrations/windhawk/wayglass-veil-launcher.wh.cpp",
+        "netlify/functions/_shared/house-rooms-runtime.mjs",
+        "netlify/functions/_shared/house-session.mjs",
+        "os/whole-pizza/.gitignore",
+        "os/whole-pizza/Containerfile",
+        "os/whole-pizza/README.md",
+        "os/whole-pizza/package.sh",
+        "os/whole-pizza/rootfs/etc/systemd/system/wayglass.service",
+        "os/whole-pizza/rootfs/etc/xdg/autostart/wayglass.desktop",
+        "os/whole-pizza/rootfs/usr/libexec/wayglass/boot-wtl.cjs",
+        "os/whole-pizza/rootfs/usr/libexec/wayglass/boot.wtl",
+        "os/whole-pizza/rootfs/usr/libexec/wayglass/launch.sh",
+        "os/whole-pizza/rootfs/usr/libexec/wayglass/open.sh",
+        "os/whole-pizza/test/boot.test.cjs",
+        "package-lock.json",
+        "package.json",
+        "profiles/crow-trainer/skills/crow-training/references/LABS.md",
+        "profiles/crow-trainer/skills/crow-training/references/TRAINING_PACK.md",
+        "scores/wyrdrune/heart-of-myth.wtl",
+        "scores/wyrdrune/watercolour-conversation.wtl",
+        "supabase/functions/arcsweep-cognitive/index.ts",
+        "supabase/migrations/20261122051513_wayglass_program_library_v1.sql",
+        "supabase/migrations/20261122053000_seed_wayglass_builtin_programs.sql",
+        "supabase/migrations/20261122054000_align_storysoundscape_canonical_source.sql",
+        "training/wayglass/MOBIUS_DRILLS.jsonl"
+      ],
+      "affected_organs": [
+        "owner authority and kernel",
+        "Wyrdrune language/runtime",
+        "Eightfold and Double Möbius",
+        "sensory body and Watercolour",
+        "Observer and science",
+        "Constellation agency",
+        "Return and Universe continuity",
+        "cloud/host/install",
+        "ArcSweep inherited instruments and interfaces",
+        "Soma Nova Morphogenesis Folio"
+      ],
+      "dependent_checks": [
+        "Wayglass Check",
+        "Wyrdrune Two-Backend Parity",
+        "Gate 6 adversarial integrity",
+        "Gate 7 cold Return",
+        "Gate 8 model and seat custody",
+        "Wayglass First Contact Browser",
+        "Wayglass Living Cypher Browser",
+        "Wayglass Möbius Lift Browser",
+        "Wayglass Six-Lane Induction Conductor",
+        "ArcSweep portable release and Windows installer where applicable",
+        "Soma Nova planner tests",
+        "Soma Nova authenticated preview route tests",
+        "Program Workbench browser/UI tests"
+      ],
+      "provenance": [
+        "existing integration train PR #661 and its source-reconciliation history",
+        "mission issue #583 reconciliation queue",
+        "candidate lineage and exact SHAs recorded in docs/wayglass/current.json and PR #661 body; unresolved source candidates remain unverified until exact-head adoption proof",
+        "source PR #678 planner SHA 7c81de2b8159d8d7dc1542f7f9489fc3aa567f0d",
+        "owner request to make Soma Nova usable in Wayglass; preview port reuses existing Program Workbench and authenticated House host",
+        "expanded validator coverage to root governance, deploy, integrations, Netlify, OS image, profiles, scores, Supabase migrations/functions and training paths"
+      ],
+      "rollback": [
+        "revert only the relevant integration commits from PR #661; preserve source branches, canonical WTL/runtime and durable user data; no destructive database migration rollback without a separate data-safety review",
+        "revert the Soma Nova planner, preview route, client and Folio UI together; leave existing WTL Workbench and program library intact"
+      ],
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Compared open source candidates in #583; selectively reconcile shared files on #661.",
+        "owner_outcome": "One usable Wayglass with owner authority and preserved provenance.",
+        "finish_line": "Relevant exact-head checks and change receipts before final reconciliation.",
+        "return_marker": "Built / Verified / Held in #583; preserve next owner, dependencies and rollback."
+      }
+    },
+    {
+      "change_id": "fiction-projection-owner-approved-2026-11-23",
+      "changed_paths": [
+        "lib/wyrdrune/fiction-projection.mjs",
+        "lib/wyrdrune/fiction-projection.test.cjs",
+        "docs/wayglass/FICTION_PROJECTION_APPROVAL_V0_1.md",
+        "apps/wayglass/src/surfaces/program-workbench.js",
+        "apps/wayglass/src/surfaces/program-workbench.css",
+        "apps/wayglass/src/first-lantern-ipad.js",
+        "apps/wayglass/first-lantern-ipad-template.html",
+        "scripts/check-skyrunor-browser.mjs",
+        ".github/workflows/wyrdrune-ipad-lantern.yml"
+      ],
+      "affected_organs": [
+        "Wyrdrune semantic fiction",
+        "Wayglass Program Workbench",
+        "Offline iPad First Lantern",
+        "One Ship sound engine",
+        "Fictional in-app state / Return"
+      ],
+      "dependent_checks": [
+        "Native fiction-projection test suite",
+        "WebKit and Chromium exact offline iPad acceptance",
+        "Shared authenticated Wayglass workbench browser acceptance",
+        "One Ship impact gate",
+        "Feather rejection and no auto-play",
+        "Browser-local Return: WTL digest, no WTL execution or audio replay on restore"
+      ],
+      "provenance": [
+        "owner said 'Proposal accepted' following verified six-cycle fiction receipt",
+        "source PR #661, earlier #676 example, mission #583",
+        "Owner requested continued Whole Pizza Return development on 2026-11-23"
+      ],
+      "rollback": [
+        "Revert fiction-projection source/UI/CI integration together; retain immutable authored source and prior committed WTL returns",
+        "Clear local fiction-display cache while preserving immutable WTL execution receipt"
+      ],
+      "consent_and_authority": [
+        "Explicit new Render click required after confirmed WTL commit",
+        "Only audio 'soft glass harmonics' and fictional display 'the fictional door opens' are allowlisted",
+        "No external API/device permissions, real doors, camera, video or image generation"
+      ],
+      "status": "source-candidate-pending exact-head CI; no release",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Reuse canonical WTL and writing tools, not a second story executor.",
+        "owner_outcome": "One usable Wayglass with owner authority and preserved provenance.",
+        "finish_line": "Relevant exact-head checks and change receipts before final reconciliation.",
+        "return_marker": "Built / Verified / Held in #583; preserve next owner, dependencies and rollback."
+      }
+    },
+    {
+      "change_id": "whole-pizza-tablet-reading-and-writing-tap-target-2026-11-23",
+      "changed_paths": [
+        "apps/wayglass/src/faeberpunk-ship.css",
+        "apps/wayglass/first-lantern-ipad-template.html",
+        "scripts/check-skyrunor-browser.mjs"
+      ],
+      "affected_organs": [
+        "Writing Room accessibility",
+        "FAEberpunk ship shell",
+        "iPad offline Wyrdrune",
+        "Living Fiction"
+      ],
+      "dependent_checks": [
+        "Living Cypher 44-pixel send target",
+        "Chromium/WebKit tablet viewport acceptance",
+        "Wayglass bundle build"
+      ],
+      "provenance": [
+        "One Ship PR #661 owner-authorised improvement",
+        "2026-11-23 exact-head Living Cypher browser test reported wg-send under 44px",
+        "iPad 820px WebKit screenshot showed cramped twin columns"
+      ],
+      "rollback": [
+        "Revert the scoped 44px touch target and tablet breakpoint together if accessibility checks regress"
+      ],
+      "status": "source candidate: exact-head verification pending",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Compared #676 Whole Pizza with #661; reuse existing workbench and tablet interface.",
+        "owner_outcome": "One usable Wayglass with owner authority and preserved provenance.",
+        "finish_line": "Relevant exact-head checks and change receipts before final reconciliation.",
+        "return_marker": "Built / Verified / Held in #583; preserve next owner, dependencies and rollback."
+      }
+    },
+    {
+      "change_id": "mandatory-focus-router-law-2026-11-23",
+      "changed_paths": [
+        "AGENTS.md",
+        "docs/wayglass/FOCUS_ROUTER_LAW_V0_1.md",
+        "docs/wayglass/ONE_SHIP_DIRECTIVE.md",
+        "docs/wayglass/WAYGLASS_CORE_RULE.md",
+        "docs/wayglass/current.json",
+        "docs/wayglass/CHANGE_IMPACT.json",
+        "scripts/one-ship-focus-law.mjs",
+        "scripts/one-ship-focus-law.test.mjs",
+        "scripts/verify-one-ship-impact.mjs",
+        ".github/workflows/one-ship-change-impact.yml"
+      ],
+      "affected_organs": [
+        "One Ship governance",
+        "Focus Router queue",
+        "engineering/worker preflight",
+        "change-impact CI",
+        "Return continuity"
+      ],
+      "dependent_checks": [
+        "node --test scripts/one-ship-focus-law.test.mjs",
+        "One Ship change-impact check",
+        "exact-head #661 integration checks"
+      ],
+      "provenance": [
+        "Rowan explicitly authorised Focus Router as prerequisite and Law, 2026-11-23",
+        "single issue #583 and integration PR #661; source baseline 1001b6bf351231dc4557498cac503883d61694f3"
+      ],
+      "rollback": [
+        "Revert Focus Law and CI/manifest enforcement as one reversible change; retain captured ideas in #583"
+      ],
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Confirmed #583 queue and existing #661/#677 governance guard; extending the existing validator, no new PR.",
+        "owner_outcome": "Translate associative ideas into an ordered queue without requiring Rowan to manage it.",
+        "finish_line": "Mandatory gate validates declarations with passing negative-case tests, one source-head receipt.",
+        "return_marker": "Built / Verified / Held in #583; resume failing #661 WTL and Return reconciliation at exact head."
+      }
+    },
+    {
+      "change_id": "cypher-browser-diagnostic-path-2026-11-23",
+      "changed_paths": [
+        "scripts/wayglass-cypher-browser.mjs",
+        "docs/wayglass/CHANGE_IMPACT.json"
+      ],
+      "affected_organs": [
+        "Wayglass Living Cypher browser acceptance",
+        "Writing Room keyboard/touch accessibility",
+        "One Ship CI reconciliation"
+      ],
+      "dependent_checks": [
+        "Wayglass Living Cypher Browser exact-head Chromium",
+        "Wayglass Writing Room 44px hit targets and screenshot failure receipts",
+        "One Ship change-impact gate"
+      ],
+      "provenance": [
+        "2026-11-23 head c8ecf6c7df5bf807693a0d3518f4c1f009c6e46f",
+        "Failed CI run 45198913934: ReferenceError out is not defined at scripts/wayglass-cypher-browser.mjs:258",
+        "Mission #583; integration train #661; no new PR"
+      ],
+      "rollback": [
+        "Revert this diagnostic variable correction and its impact entry together; leave UI hit-target assertions unchanged"
+      ],
+      "status": "in-review; awaiting exact-head browser CI",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Fix existing browser test harness; do not create a replacement check.",
+        "owner_outcome": "One usable, verifiable Wayglass Writing Room.",
+        "finish_line": "Browser runs to its actual hit-target assertions and captures a screenshot if controls are obscured.",
+        "return_marker": "Verify exact-head Living Cypher and repair any real control obstruction revealed."
+      }
+    },
+    {
+      "change_id": "wtl-wonder-typed-contract-repair-2026-11-23",
+      "changed_paths": [
+        "docs/wayglass/CHANGE_IMPACT.json",
+        "lib/wyrdrune/runtime.mjs",
+        "lib/wyrdrune/typed-ir.test.cjs"
+      ],
+      "affected_organs": [
+        "Wyrdrune canonical runtime",
+        "Typed IR acceptance contracts",
+        "Wonder semantic record and evidence",
+        "Soma Nova native WTL dependency"
+      ],
+      "dependent_checks": [
+        "node --test lib/wyrdrune/typed-ir.test.cjs",
+        "node --test lib/wayglass-wyrdrune-ritual.test.cjs",
+        "Wayglass Check exact-head",
+        "Wayglass Cloud and Native ArcSweep matrix gate",
+        "Wyrdrune Two-Backend Parity",
+        "One Ship change-impact contract"
+      ],
+      "provenance": [
+        "Failed Wayglass Check #661 source-head c87e15dd723a59e9204a623099dfb873b1bba916 CI run 45203033076",
+        "Comparison with lib/wyrdrune/runtime.mjs parse grammar and typed-ir.cjs artifact contract",
+        "Existing Null-prototype WTL record security preserved; no runtime flattening",
+        "Mission #583 / existing integration PR #661"
+      ],
+      "rollback": [
+        "Revert runtime Wonder error-contract message and typed IR test assumptions together if conformance diverges",
+        "Preserve earlier source and fail-closed WTL behaviour; no production deployment"
+      ],
+      "status": "source-committed-in-review; exact-head CI pending",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Repair canonical WTL test contract rather than parallel parser or runtime; preserve original null-prototype record values.",
+        "owner_outcome": "Shared Wyrdrune language contract passes meaningful validation and preserves safe, source-attributed data.",
+        "finish_line": "5 focused failures no longer fail at exact integration head, without disabling tests.",
+        "return_marker": "Verify full integration CI, then resume Soma Nova durable Return and Watercolour/Nursery gates."
+      }
+    },
+    {
+      "change_id": "living-cypher-mobile-scroll-clearance-2026-11-23",
+      "changed_paths": [
+        "docs/wayglass/CHANGE_IMPACT.json",
+        "apps/wayglass/src/faeberpunk-ship.css",
+        "scripts/wayglass-cypher-browser.mjs"
+      ],
+      "affected_organs": [
+        "FAEberpunk five-locus ship navigation",
+        "Writing Room touch and keyboard focus",
+        "Living Cypher Chromium browser acceptance",
+        "One Ship shell accessibility"
+      ],
+      "dependent_checks": [
+        "Wayglass Living Cypher Browser exact-head Chromium",
+        "Hit test Send, Feather, Skip after scrolling above fixed dock and chips",
+        "Phone 390px and tablet browser acceptance",
+        "One Ship change-impact contract"
+      ],
+      "provenance": [
+        "Source-head c87e15dd723a59e9204a623099dfb873b1bba916 failure CI run 45203032998",
+        "DOM intersection: fixed Worktable locus intercepts Send at viewport y806 on 390x844 phone",
+        "Existing ship CSS body bottom padding, floating chip and dock geometry inspected",
+        "Mission #583 / PR #661"
+      ],
+      "rollback": [
+        "Revert the scoped scroll clearance and real-obstruction browser test positioning together if native accessibility regresses",
+        "Retain screenshots and existing pointer hit assertions"
+      ],
+      "status": "source candidate, exact-head browser CI pending",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Reuse existing helm, dock and Writing Room; no alternative nav or test harness.",
+        "owner_outcome": "Small-screen Writing Room Send, Feather and Skip remain reachable without covering ship navigation.",
+        "finish_line": "All tested controls have at least 44px size, are stable and accept pointer hits in the accessible scroll area.",
+        "return_marker": "Verify browser CI and inspect any further genuinely intercepted controls."
+      }
+    },
+    {
+      "change_id": "nursery-semantic-grounding-one-ship-2026-11-23",
+      "changed_paths": [
+        "apps/wayglass/src/wtl-cell-digest.js",
+        "apps/wayglass/src/wtl-cell-fusion.js",
+        "apps/wayglass/src/wtl-cell-harmony.js",
+        "apps/wayglass/src/wtl-cell-mobius.js",
+        "apps/wayglass/src/wtl-cell-peer-tests.js",
+        "apps/wayglass/src/wtl-cell-program.js",
+        "apps/wayglass/src/wtl-cell-runtime.js",
+        "apps/wayglass/src/wtl-cell-sharing.js",
+        "apps/wayglass/src/wtl-cell-sonic-space.js",
+        "apps/wayglass/src/wtl-cell-tissue.js",
+        "apps/wayglass/src/wtl-cell-worlds.js",
+        "apps/wayglass/src/wtl-cell-ecology.js",
+        "apps/wayglass/src/wtl-cell-semantic-grounding.js",
+        "apps/wayglass/src/surfaces/nursery-language.js",
+        "apps/wayglass/src/surfaces/cell-garden.js",
+        "apps/starwell-server/wayglass/router.js",
+        "apps/starwell-server/test/wayglass-nursery-grounding-route.test.js",
+        "apps/wayglass/test/wtl-cell-semantic-grounding.test.js",
+        "apps/wayglass/test/wtl-cell-ecology.test.js",
+        "apps/wayglass/test/wtl-cell-mobius.test.js",
+        "apps/wayglass/test/wtl-cell-tissue.test.js",
+        "apps/wayglass/test/wtl-cell-worlds.test.js",
+        "docs/wayglass/NURSERY_SEMANTIC_GROUNDING_V0_1.md",
+        "docs/wayglass/current.json",
+        "lib/wyrdrune/runtime.mjs",
+        "lib/wyrdrune/pure-backend.py",
+        "lib/wyrdrune/typed-ir.cjs",
+        "lib/wyrdrune/cell-nursery-portability.test.cjs"
+      ],
+      "affected_organs": [
+        "Wyrdrune Nursery ecology",
+        "existing authenticated Cell Garden host",
+        "WTL event provenance",
+        "Feather and owner consent",
+        "Observer and language surface"
+      ],
+      "dependent_checks": [
+        "npm run wayglass:test",
+        "npm run wayglass:test:host",
+        "npm run wayglass:build",
+        "One Ship change-impact and Focus Router Law",
+        "source-bound event grounding and rejected forgery tests",
+        "WTL JS/Python modulo and deterministic pick parity",
+        "typed IR pure-call validation",
+        "Nursery naming and world-turn expression compatibility"
+      ],
+      "provenance": [
+        "Rowan / Mamma coherence observation; Rowan authorised implementation 2026-11-23",
+        "original source candidate PR #668 SHA c466d281979dbd4b73274a5ae88ee170770d7e9e",
+        "selective module port into single train PR #661; parent 6aad865415d44ebf7cc5f22431bce658984c446c",
+        "Source #668 uses WTL when/%/pick and numeric wonder; source-normalised to canonical if and singVoice. One shared JS/Python runtime extended rather than a shadow interpreter."
+      ],
+      "rollback": [
+        "Revert Nursery module port, authenticated subroutes and Cell Garden panel together; preserve source PR #668 and existing Host Cell Garden."
+      ],
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Compared #661 Cell Garden with #662/#665/#668 nursery; port source modules into existing authenticated host, retain one WTL runtime, do not run source's separate server. Reconciled old source grammar with canonical WTL tokens and the already-reserved wonder semantic operator.",
+        "owner_outcome": "Babies explain what they sent, why selected recipient/channel and what counters changed, while preserving original poetic phrases.",
+        "finish_line": "Grounded WTL signal receipts, before/after, tamper and Feather tests and House route acceptance pass at exact SHA.",
+        "return_marker": "Built: source-grounded speech, canonical WTL source compatibility. Verified: pending exact-head CI. Held: broader existing #661 test failures, cold Return."
+      }
+    },
+    {
+      "change_id": "nursery-canvas-contract-2026-11-23",
+      "changed_paths": [
+        "docs/wayglass/CHANGE_IMPACT.json",
+        "apps/wayglass/src/mobius-nursery-encounter.mjs",
+        "apps/wayglass/test/first-contact-ui.test.js"
+      ],
+      "affected_organs": [
+        "Möbius Nursery reciprocal proposal identity validation",
+        "WTL-to-Nursery bridge grammar",
+        "Living Watercolour First Contact Node acceptance",
+        "Canvas-only test fixture and provenance"
+      ],
+      "dependent_checks": [
+        "node --test apps/wayglass/src/mobius-nursery-encounter.test.mjs apps/wayglass/src/wtl-nursery-bridge.test.mjs",
+        "node --test apps/wayglass/test/first-contact-ui.test.js",
+        "Wayglass Check exact-head",
+        "Wayglass Cloud and Native ArcSweep exact-head",
+        "One Ship change-impact contract"
+      ],
+      "provenance": [
+        "Wayglass Check c87e15dd723a59e9204a623099dfb873b1bba916: seven Nursery invalid participants errors and eight 2D context errors",
+        "Compared valid IDs with apps/wayglass/src/wtl-nursery-bridge.mjs canonical identifier grammar",
+        "Canvas test uses a non-rendering 2D adapter; production resolver still requires real 2D context",
+        "Issue #583 / integration PR #661"
+      ],
+      "rollback": [
+        "Revert the Nursery identifier-class correction only if bridge semantics change; do not relax identity or consent boundaries",
+        "Revert only the test-local canvas adapter if a true browser canvas test replaces it; keep production guard"
+      ],
+      "status": "source-committed-in-review; exact-head CI pending",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Fix the actual encounter grammar and acceptance fixture instead of spinning out replacement Nursery or Watercolour subsystems.",
+        "owner_outcome": "Real bounded participant IDs and consent rules continue to work while First Contact browser I/O acceptance can execute.",
+        "finish_line": "The seven Nursery and eight Watercolour fixture failures reach their real behavioral assertions with no production safety downgrade.",
+        "return_marker": "Inspect exact-head CI, fix remaining semantics only if proven."
+      }
+    },
+    {
+      "change_id": "nursery-canonical-wtl-if-2026-11-23",
+      "changed_paths": [
+        "docs/wayglass/CHANGE_IMPACT.json",
+        "apps/wayglass/src/wtl-cell-fusion.js"
+      ],
+      "affected_organs": [
+        "Wyrdrune canonical if/then/else grammar",
+        "WTL cell fusion decision programme",
+        "Möbius Nursery ecology and semantic grounding",
+        "Cell fusion reversible effects and receipts"
+      ],
+      "dependent_checks": [
+        "node --test apps/wayglass/test/wtl-cell-ecology.test.js apps/wayglass/test/wtl-cell-mobius.test.js apps/wayglass/test/wtl-cell-semantic-grounding.test.js apps/wayglass/test/wtl-cell-worlds.test.js",
+        "Wayglass Check exact-head",
+        "Wyrdrune Two-Backend Parity",
+        "One Ship change-impact contract"
+      ],
+      "provenance": [
+        "Wayglass Check CI 45205471822, head 4a0e53d6b662c1ebcfa94cf43d91426bb982d8f6: four module-load failures",
+        "Canonical WTL parser accepts if/then/else, rejects when/then/else",
+        "No new language dialect, no environment or device effects",
+        "Mission #583 / integration PR #661"
+      ],
+      "rollback": [
+        "If changed semantics diverge, restore source and impact entry; never weaken canonical parser to rescue a stale emitted programme."
+      ],
+      "status": "source-committed-in-review; exact-head CI pending",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Use existing canonical if/then syntax, not alternate cell parser.",
+        "owner_outcome": "Native cell fusion decisions compile in the same Wyrdrune runtime as all other ship organs.",
+        "finish_line": "Four WTL cell test files load and execute behaviour assertions with canonical syntax.",
+        "return_marker": "Verify full CI and the actual cell phase receipts before promotion."
+      }
+    },
+    {
+      "change_id": "world-crossing-physical-embodiment-2026-11-23",
+      "changed_paths": [
+        "lib/wyrdrune/fiction-mobius.mjs",
+        "lib/wyrdrune/world-crossing.mjs",
+        "lib/wyrdrune/world-crossing.test.cjs",
+        "lib/wyrdrune/fiction-projection.mjs",
+        "lib/wyrdrune/fiction-projection.test.cjs",
+        "apps/wayglass/src/surfaces/program-workbench.js",
+        "apps/wayglass/src/first-lantern-ipad.js",
+        "apps/wayglass/first-lantern-ipad-template.html",
+        "scripts/check-skyrunor-browser.mjs",
+        ".github/workflows/wyrdrune-ipad-lantern.yml",
+        "docs/wayglass/FICTION_MOBIUS_WHOLE_PIZZA_V0_1.md",
+        "docs/wayglass/FICTION_PROJECTION_APPROVAL_V0_1.md",
+        "docs/wayglass/WORLD_CROSSING_V0_1.md"
+      ],
+      "affected_organs": [
+        "WTL native compiler",
+        "Semantic Skýrunor / typed fiction meaning",
+        "Wayglass Workbench",
+        "Offline iPad Lantern",
+        "Owner authority and device capability boundary",
+        "Soma Nova potential physical manifestation",
+        "Return Engine / provenance"
+      ],
+      "dependent_checks": [
+        "Native fiction-to-WTL and world-crossing tests",
+        "Host-only physical capability protocol mock adapter/observation",
+        "WebKit and Chromium iPad and authenticated Workbench acceptance",
+        "Wyrdrune parity and One Ship impact contract",
+        "Owner review and physical-device attestation before deployment"
+      ],
+      "provenance": [
+        "Owner correction: 'You limited it. Fiction should be able to become real, physically'",
+        "Existing PR #661 source and local sound renderer",
+        "Existing source-bound fiction and at-most-once Return discipline"
+      ],
+      "consent_and_auth_impact": [
+        "Authored fiction never grants itself permission",
+        "Owner gesture, trusted host principal, named capability and device, durable reservation required",
+        "No physical adapter installed by this change; hardware operation unavailable until separately implemented and authorised"
+      ],
+      "physical_verification_impact": [
+        "Physically possible is not physically observed",
+        "Started sound playback is physically meaningful but not sensor-verified",
+        "Device ACK and sensor witness remain distinct provenance registers",
+        "Unknown-device outcomes and Feather-after-dispatch cannot claim rollback"
+      ],
+      "rollback": [
+        "Revert grammar and world-crossing planning/UI/CI together; preserve immutable source and Return receipts",
+        "No new hardware capability or deployment is enabled to undo"
+      ],
+      "status": "source candidate; exact-head CI pending and hardware tests not conducted",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Extend existing WTL fiction and Workbench with a capability-scoped projection; no alternate WTL runtime, projection registry or unauthorised device executor.",
+        "owner_outcome": "Owner-authored fiction can describe a physical intention, while actual physical execution stays separately authorised and evidenced.",
+        "finish_line": "Exact-head world-crossing, native WTL, iPad, Workbench and One Ship checks pass; hardware effects remain unavailable until real device binding and consent.",
+        "return_marker": "Review source-bound physical capability receipts, separately verify real-world effects, and do not claim physical manifestation from a preview."
+      }
+    },
+    {
+      "change_id": "one-ship-native-wtl-pick-mod-cell-canon-20261123",
+      "changed_paths": [
+        "docs/wayglass/CHANGE_IMPACT.json",
+        "lib/wyrdrune/expression.mjs",
+        "apps/wayglass/src/wtl-cell-mobius.js",
+        "apps/wayglass/src/wtl-cell-worlds.js",
+        "apps/wayglass/test/wtl-cell-worlds.test.js",
+        "lib/wyrdrune/typed-ir.test.cjs"
+      ],
+      "affected_organs": [
+        "Canonical Wyrdrune runtime percent wrapping and pick selection",
+        "Möbius Nursery cell and world WTL",
+        "Typed IR and backend parity",
+        "Wayglass installer and cloud verification"
+      ],
+      "dependent_checks": [
+        "Wayglass Check exact-head",
+        "Wyrdrune Two-Backend Parity",
+        "Windows installer boundary tests",
+        "One Ship impact gate"
+      ],
+      "provenance": [
+        "Full Wayglass Check a33163c 1646/1646 passed; installer, parity and impact gates passed",
+        "Reconciliation audit found pick and modulo already implemented in lib/wyrdrune/runtime.mjs; new lib/wyrdrune/expression.mjs helpers duplicate existing semantics",
+        "Remove redundant pure expression registration; keep canonical wrapAround (%) and runtime pick, current identity/consent/Feather guards",
+        "Issue #583, same integration PR #661"
+      ],
+      "rollback": [
+        "Revert pure op registration, program source and tests together if validation fails"
+      ],
+      "status": "canonical-runtime-only-consolidation-in-review; exact-head CI pending",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Remove duplicate pure operators from expression layer; reuse canonical WTL % and pick",
+        "owner_outcome": "One executable language for cells and worlds",
+        "finish_line": "Single implementation of numeric wrap and pick; cell tests, Windows, backend parity and One Ship gates pass exact head",
+        "return_marker": "Verify full CI and reconcile any new semantics"
+      }
+    },
+    {
+      "change_id": "harness-world-bridge-2026-11-23",
+      "changed_paths": [
+        "apps/wayglass/src/harness-world-bridge.js",
+        "apps/wayglass/test/harness-world-bridge.test.js",
+        "apps/wayglass/src/spectral-field.js"
+      ],
+      "affected_organs": [
+        "existing resonance learning ledger",
+        "existing Watercolour event bus",
+        "Wayglass evaluation provenance and Feather",
+        "existing full-spectrum instrument"
+      ],
+      "dependent_checks": [
+        "node --test apps/wayglass/test/harness-world-bridge.test.js",
+        "Wayglass Check",
+        "One Ship impact validator",
+        "spectral-field existing suite"
+      ],
+      "provenance": [
+        "Owner direction 2026-11-23 to integrate harness adapters and reality-view research",
+        "Hugging Face harness adapters at scale and Tesla Reality View research comparison",
+        "Existing resonance-learning.js and watercolor-bridge.js are canonical owners",
+        "Spectral instrument exposes harnessWorld and propagates the existing Feather event"
+      ],
+      "rollback": [
+        "Revert harness-world bridge and test as a unit; the pre-existing learning ledger and Watercolour remain unchanged",
+        "Remove the spectral-field harnessWorld import and public property if reverting"
+      ],
+      "status": "implementation committed; integrated UI/deployment and exact-head verification pending",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Reuse the current resonance learning ledger and Watercolour subscriber; create no new interpreter, database or renderer.",
+        "owner_outcome": "Provenance-bound agent evaluation visible in the existing Watercolour system",
+        "finish_line": "Exact-head tests and live Workbench/host integration before release",
+        "return_marker": "Code and tests committed; verify then wire runtime invocation, owner-only access and ship delivery"
+      }
+    },
+    {
+      "change_id": "soma-nova-durable-wtl-execution-gate-2026-11-23",
+      "changed_paths": [
+        "apps/starwell-server/wayglass/router.js",
+        "apps/starwell-server/test/wayglass-wyrdrune-workbench.test.js"
+      ],
+      "affected_organs": [
+        "WTL workbench",
+        "Soma Nova",
+        "Return receipt durability",
+        "House authority"
+      ],
+      "dependent_checks": [
+        "Wayglass Check",
+        "native Wyrdrune workbench HTTP test",
+        "One Ship change-impact contract"
+      ],
+      "provenance": [
+        "owner-approved One Ship priorities 2026-11-23",
+        "selective port of prepared 6c09d460bae8fef3f59de92de5b1d087e28309a1 onto bc4440117102069f020c4c998c44e43a77026a87",
+        "existing Wyrdrune.execute and wayglass_program_runs; no new runtime or table"
+      ],
+      "rollback": [
+        "revert opt-in durability gate and tests together"
+      ],
+      "status": "strict execution refuses an unverified durable commitment; charge/fire lifecycle remains outstanding",
+      "verification": [
+        "2026-11-23 local staged Wayglass frontend and host runtime build passed",
+        "native Wyrdrune authenticated workbench HTTP test passed, including strict missing-receipt refusal and invalid compile flag",
+        "16 focused Soma Nova preview, morphogenesis and Watercolour harness bridge tests passed",
+        "live Supabase receipt, authenticated devices, cold Return and exact-head CI remain held"
+      ],
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Compared prepared source, canonical 8be6abc3 and integration bc4440117; keep existing program store and runtime, preserve newer impact entries.",
+        "owner_outcome": "Owner-authorised execution must not report durable commitment without saved run ID.",
+        "finish_line": "Negative receipt test and exact-head CI; positive durable charge/fire, Feather and Return need separate evidence.",
+        "return_marker": "Resume Soma Nova charge/fire with the existing program store; confirm authenticated persistence and cold restoration."
+      }
+    },
+    {
+      "change_id": "nursery-private-tailnet-access-repair-2026-11-23",
+      "changed_paths": [
+        "apps/wayglass/src/surfaces/nursery-language.js",
+        "apps/wayglass/test/nursery-house-signin.test.js",
+        "scripts/Start-Wayglass-Tailnet.ps1",
+        "scripts/wayglass-tailnet-serve.mjs",
+        "apps/wayglass/test/tailscale-private-release.test.js",
+        "docs/wayglass/WAYGLASS_TAILSCALE_PRIVATE_RELEASE.md",
+        "docs/wayglass/CHANGE_IMPACT.json",
+        "docs/wayglass/current.json"
+      ],
+      "affected_organs": [
+        "Existing House authentication",
+        "Möbius Nursery language surface",
+        "Tailscale private gateway",
+        "Windows workstation startup",
+        "mobile/iPhone/iPad access verification",
+        "One Ship Return"
+      ],
+      "dependent_checks": [
+        "Wayglass Nursery House sign-in positive and refusal tests",
+        "Wayglass Tailscale launcher and route-boundary tests",
+        "One Ship Focus Router Law and change-impact validator",
+        "Exact-head Wayglass/host CI",
+        "Windows Tailscale and phone Safari acceptance still pending"
+      ],
+      "provenance": [
+        "Rowan reported 127.0.0.1 iPhone connection refusal and explicitly requested remote repair, 23 Nov 2026",
+        "Existing private-release contract docs/wayglass/WAYGLASS_TAILSCALE_PRIVATE_RELEASE.md and scripts/Start-Wayglass-Tailnet.ps1",
+        "Original #661 integration parent f17e438da331598f2b7789b765ab0b28b5b0aa22"
+      ],
+      "rollback": [
+        "Revert the Nursery sign-in UI and launcher/path resolution changes together; retain existing unmodified House session, Tailscale route gate, and source lineage."
+      ],
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Inspected #661 and wayglass/current for private Tailscale Serve, port-32861 gateway, Windows launcher, House session and Wayglass Nursery; reused these existing organs instead of adding a new public site, deployment engine or PR.",
+        "owner_outcome": "A single owner-private Wayglass Nursery link reachable from iPhone/iPad after the Windows host and Tailscale are actually running, with a local House sign-in interface.",
+        "finish_line": "Correct Windows and gate path verified in tests, no unauthorised nursery cycle; on-device Tailscale HTTPS, Steward sign-in, Feather and actual Nursery run must be verified before claiming live.",
+        "return_marker": "Built: House sign-in surface and Windows Tailscale executable discovery. Verified: pending exact-head CI. Held: user Windows activation, ACL owner-only review, iPhone/iPad acceptance, physical deployed SHA."
+      }
+    },
+    {
+      "change_id": "living-mythogenesis-2026-11-24",
+      "changed_paths": [
+        "lib/wayglass-cell-mitosis.cjs",
+        "apps/starwell-server/test/wayglass-mythogenesis.test.js",
+        "docs/wayglass/ONE_SHIP_DIRECTIVE.md"
+      ],
+      "affected_organs": [
+        "Cell Garden / Nursery",
+        "canonical WTL",
+        "Return checkpoint",
+        "Observer and Codex provenance contract",
+        "One Ship governance"
+      ],
+      "dependent_checks": [
+        "node --test apps/starwell-server/test/wayglass-mythogenesis.test.js",
+        "existing cell ecology and router tests",
+        "One Ship change-impact",
+        "exact-head CI",
+        "Descendant motif lineage, unrelated sender refusal, cross-world refusal, whitespace-normalised world and cold Return"
+      ],
+      "provenance": [
+        "Owner approval 2026-11-24",
+        "Issue #583 comment 7123471880",
+        "PR #661 comment 7123472422",
+        "Existing exchange and WCE-1 checkpoint; parent db3915737a01580cacd524a7c27494b17936c7a6",
+        "GPT-6.2 adversarial review: direct-participant-only motif parent validation contradicted mitosis memory inheritance; preserve actual message reference, not ancestry alone."
+      ],
+      "rollback": [
+        "Revert this change atomically; retain existing exchange receipts and private checkpoint data"
+      ],
+      "status": "Inherited memory lineage correction committed for review; exact-head CI pending; all other projections pending",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Reuse existing Cell Garden exchange, WTL runtime, authenticated host route and durable checkpoint; no new engine or registry.",
+        "owner_outcome": "Inherit and transform motifs without erasing sources or forcing canon.",
+        "finish_line": "Verify cold Return, invalid lineage, refusal, Feather and exact-head CI; then reconcile Observer, Codex and sensory projections.",
+        "return_marker": "Motif candidates are available through the existing exchange contract; no live deployment or autonomous mythogenesis claimed."
+      }
+    },
+    {
+      "change_id": "living-mythogenesis-controlled-observer-2026-11-24",
+      "changed_paths": [
+        "apps/wayglass/src/living-observer-model.js",
+        "apps/wayglass/src/surfaces/nursery-language.js",
+        "apps/wayglass/src/wtl-cell-ecology.js",
+        "apps/wayglass/src/mythogenesis-experiment.js",
+        "apps/wayglass/test/mythogenesis-experiment.test.js",
+        "scripts/wayglass-mythogenesis-experiment.mjs",
+        "docs/wayglass/LIVING_MYTHOGENESIS_RESEARCH_V0_1.md"
+      ],
+      "affected_organs": [
+        "Living Observer",
+        "Möbius Nursery",
+        "WTL native inscription",
+        "One Ship research and provenance"
+      ],
+      "dependent_checks": [
+        "node --test apps/wayglass/test/mythogenesis-experiment.test.js",
+        "Wayglass Check",
+        "One Ship impact validator",
+        "existing Nursery UI tests",
+        "MYTHOS-002 adaptive coupling, separation, opposing state reset, forgetting and zero-seed controls"
+      ],
+      "provenance": [
+        "Owner approved investigation of mythogenesis and consciousness without predetermined conclusions 2026-11-24",
+        "Existing fixed grammar and native shareText inscription path on 53d25a3daf0458cac92407a8a747b2fc95c794c8",
+        "Existing #583/#661",
+        "Independent SciPy RK45 and JavaScript RK4 toy-model endpoint comparison, 2026-11-24; selected endpoints agree within 1e-5; not live Nursery evidence"
+      ],
+      "rollback": [
+        "Revert observation projection, corrected provenance, isolated protocol and tests together; no live state mutation"
+      ],
+      "status": "MYTHOS-001 source and MYTHOS-002 numerically cross-checked fixture; exact-head CI and live verification pending",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Reuse native WTL Cell Ecology, Living Observer model and Nursery surface; isolated test fixtures only, no second live colony/runtime.",
+        "owner_outcome": "A reproducible open-question research instrument with competing explanations and transparent null/positive results.",
+        "finish_line": "Exact-head tests, run receipts and on-device Observer verification; later controlled model comparison remains pending.",
+        "return_marker": "Run the existing experiment script (including --withness), compare matched external drive and design semantic/sensory dissociation. Preserve numerical versus participant evidence registers."
+      }
+    },
+    {
+      "change_id": "return-engine-verified-work-selection-one-ship-2026-11-24",
+      "changed_paths": [
+        "lib/wayglass-return-task-selection.cjs",
+        "lib/wayglass-return-task-selection-host.cjs",
+        "scripts/wayglass-return-trial-004.mjs",
+        "test/wayglass/return-task-selection.test.cjs",
+        "test/wayglass/return-task-selection-host.test.cjs",
+        "docs/wayglass/RETURN_TRIAL_004_ONE_SHIP_HOST_20261124.md",
+        "docs/wayglass/current.json"
+      ],
+      "affected_organs": [
+        "Return / continuity",
+        "Wayglass identity and universe continuity",
+        "House authority and route custody",
+        "Constellation model attribution",
+        "One Ship evidence train"
+      ],
+      "dependent_checks": [
+        "node --test test/wayglass/return-task-selection.test.cjs test/wayglass/return-task-selection-host.test.cjs",
+        "node scripts/verify-one-ship-impact.mjs",
+        "Wayglass Check",
+        "Gate 7 cold return",
+        "Gate 8 route custody",
+        "exact-head CI",
+        "authorised wayglass:ship to wayglass:crow host execution"
+      ],
+      "provenance": [
+        "Issue #583 and PR #661 One Ship reconciliation train",
+        "Selective source from PR #648 at e3463d7511fac4919ba7a6f096242bdc63584730",
+        "Duplicate review: PR #504/#603 cold Return, PR #658 acoustic Return, and the existing #661 route catalogue and authenticated /respond boundary",
+        "Parent PR #661 head e109d01cce291e2cbe7a07b023a5ff447da09742",
+        "On 2026-11-24, https://wayglass.world/api/v1/wayglass/routes returned HTTP 503 before application headers; no model response was requested or inferred"
+      ],
+      "rollback": [
+        "Revert the scoped evaluator, host runner, tests, receipt note and register entry together; no existing route, store, identity or live state is mutated"
+      ],
+      "blockers": [
+        "Public wayglass.world upstream returned HTTP 503 during this run",
+        "No authorised House session or private loopback was available for a live crossing",
+        "Exact-head CI and live attributable model evidence remain required"
+      ],
+      "status": "Selective source candidate staged for local verification on #661; fixture evidence only until exact-head CI and an authorised live host crossing pass",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Reuse PR #648's verified-work selection contract, the existing #661 ship/crow routes, and prior cold/acoustic Return evidence. Do not import a second room, raw provider bypass, subsystem PR or automation.",
+        "owner_outcome": "A returning Wayglass model reads verified work and selects the next task without identity merge, revoked-source reuse or false closure.",
+        "finish_line": "Focused and exact-head checks pass; corrupted packets produce zero model calls; fixture receipts remain explicitly non-live; one authorised live crossing later supplies attributable route, participant, model and response evidence.",
+        "return_marker": "Built the selective evaluator and authenticated host path; verify locally and on exact-head CI; hold the live claim for an authorised ship-to-crow crossing. Next owner: Wayglass integration train."
+      }
+    },
+    {
+      "change_id": "epistemic-space-membrane-2026-11-24",
+      "changed_paths": [
+        "docs/wayglass/ONE_SHIP_DIRECTIVE.md",
+        "apps/wayglass/src/living-observer-model.js",
+        "apps/wayglass/test/epistemic-membrane.test.js"
+      ],
+      "affected_organs": [
+        "Living Observer",
+        "One Ship governance",
+        "Return and cell membrane research"
+      ],
+      "dependent_checks": [
+        "node --test apps/wayglass/test/epistemic-membrane.test.js",
+        "One Ship change-impact",
+        "exact-head CI"
+      ],
+      "provenance": [
+        "Owner approved Law of Epistemic Space and identified permeable membrane analogy 2026-11-24"
+      ],
+      "rollback": [
+        "Revert scoped law, helper and tests; no live state modified"
+      ],
+      "status": "Source candidate; integration and CI pending",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Extend existing Observer model and directive, no parallel engine.",
+        "owner_outcome": "Preserve evidence boundaries without inventing hidden contents or widening permissions.",
+        "finish_line": "Validate helper and exact-head CI; then wire evidence sources and Return.",
+        "return_marker": "Declared channel coverage helper committed; actual runtime propagation and rank calculations pending."
+      }
+    },
+    {
+      "change_id": "atmospheric-glass-field-impact-repair-2026-11-24",
+      "changed_paths": [
+        "apps/wayglass/src/glass-field.js"
+      ],
+      "affected_organs": [
+        "FAEberpunk shared mineral optics",
+        "Glass field visual projection"
+      ],
+      "dependent_checks": [
+        "One Ship change-impact validator",
+        "Wayglass Check",
+        "Living Cypher browser and visual accessibility"
+      ],
+      "provenance": [
+        "Exact-head failed job 138965797143 identified sole undeclared path",
+        "Compared base blob 9ede955ce4addcd9ac0f73177f60df6cb013b708 to current blob 19ea3b6cbcbdb0cc3f54db8ca854e2ea288766fa: additive nacre/noctilucent atmospheric shader approximation, not measured physical telemetry"
+      ],
+      "rollback": [
+        "Revert atmospheric shader change and its impact entry together if visual regression is found; retain validator"
+      ],
+      "status": "Metadata omission repaired; exact-head verification pending",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Existing glass-field shader and FAEberpunk material layer; no new renderer or PR.",
+        "owner_outcome": "Preserve atmospheric optics with complete accountable impact coverage.",
+        "finish_line": "Exact-head One Ship validator and relevant visual/build tests pass.",
+        "return_marker": "Repair manifest only; shader unchanged; verify fresh head."
+      }
+    },
+    {
+      "change_id": "faeberpunk-initialisation-membrane-projection-2026-11-25",
+      "changed_paths": [
+        "apps/wayglass/src/glass-field.js",
+        "apps/wayglass/src/main.js",
+        "apps/wayglass/src/faeberpunk-ship.css",
+        "apps/wayglass/src/living-observer-model.js",
+        "apps/wayglass/src/surfaces/living-observer.js",
+        "apps/wayglass/test/epistemic-membrane.test.js"
+      ],
+      "affected_organs": [
+        "Shared FAEberpunk shell",
+        "Glass field",
+        "Living Observer",
+        "Feather"
+      ],
+      "dependent_checks": [
+        "Wayglass Check",
+        "Living Cypher browser",
+        "epistemic membrane test",
+        "manual mobile/desktop visual and WebGL fallback review"
+      ],
+      "provenance": [
+        "Owner requested exceptional FAEberpunk polish and working animations",
+        "Previous exact-head 23 successful workflows and one cancelled",
+        "Existing shared shader and Observer packet reused"
+      ],
+      "rollback": [
+        "Revert scoped shell, shader lifecycle and Observer projection together"
+      ],
+      "status": "Source candidate; exact-head CI and visual acceptance pending",
+      "focus_router": {
+        "law": "WAYGLASS-LAW-FOCUS-001",
+        "state": "NOW",
+        "mission_issue": 583,
+        "integration_pr": 661,
+        "routing": "existing-train",
+        "duplicate_review": "Reuse existing mineral shader and Living Observer; no second renderer, room or store.",
+        "owner_outcome": "Initialised FAEberpunk with graceful static fallback, Feather-safe field and source-bound membrane display.",
+        "finish_line": "Exact-head checks and actual mobile/desktop visual review; adaptive membrane and Watercolour integration remain open.",
+        "return_marker": "Inspect browser results and live host; no deployment claim."
+      }
+    }
+  ]
+}

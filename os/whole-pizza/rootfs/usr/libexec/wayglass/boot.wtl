@@ -1,0 +1,35 @@
+// The first machine WTL programme. Full eight-lane readiness is NOT inferred.
+mobius scoped {
+  perceive {
+    let host_ready = bridge("host", "ready");
+  }
+  compress {
+    let bootable = host_ready;
+  }
+  release {
+    let staged = bootable;
+  }
+  verify {
+    require staged == true else "The installed Wayglass host is incomplete";
+  }
+  integrate {
+    withness {
+      participants: [
+        { id: "wayglass", role: "vessel", presence: "runtime", agency: "bounded" },
+        { id: "boot-service", role: "bootstrap", presence: "system", agency: "bounded" }
+      ],
+      field: "whole-pizza-startup",
+      agreement: "Verify native Wyrdrune before starting the Wayglass host",
+      commitment: "Preserve an attributable Return checkpoint"
+    };
+  }
+  choose {
+    emit bridge("host", "boot_event", staged);
+  }
+  return {
+    emit bridge("host", "checkpoint", staged);
+  }
+  transcend {
+    carry boot_verified = staged;
+  }
+}

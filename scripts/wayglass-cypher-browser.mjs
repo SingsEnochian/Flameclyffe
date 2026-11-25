@@ -99,11 +99,11 @@ async function checkWatercolourChat(page,profile){
  await openWatercolourChat(page);
  assert.ok((await pigmentPixel(page))[0]>originalPixel[0]+40,'Settled Ship Voice pigment survives reload');
  assert.equal(await display.getAttribute('data-cypher-state'),'english');
- await turn.getByRole('button',{name:'Replay Wyrdrune'}).click();
+ await turn.getByRole('button',{name:/^(Replay Wyrdrune|Return to Wyrdrune)$/}).click();
  assert.equal(await display.getAttribute('data-cypher-state'),'reading');
  await page.emulateMedia({reducedMotion:'reduce'});
- await page.waitForFunction(()=>document.querySelector('.wc-dialogue-response .wg-cypher-veil')?.dataset.cypherState==='english');
- await turn.getByRole('button',{name:'Replay Wyrdrune'}).click();
+ await page.waitForFunction(()=>document.querySelector('.wc-dialogue-response .wg-cypher-veil')?.dataset.cypherState==='wyrdrune');
+ await turn.getByRole('button',{name:'Read in British English'}).click();
  assert.equal(await display.getAttribute('data-cypher-state'),'english');
  await page.emulateMedia({reducedMotion:'no-preference'});
  const instruments=page.locator('#wc-instruments-toggle');
@@ -220,7 +220,7 @@ async function checkCodex(page,profile){
   reduced_motion:true,original_source_preserved:true});
 }
 async function checkWriting(page,profile){
- await shipRoom(page,'arcsweep:writing-room');
+ await shipRoom(page,'wayglass:writing-room');
  await page.locator('#wg-wtl-details').waitFor();
  await page.locator('#wg-wtl-details summary').click();
  await page.locator('#wg-wtl-example').click();
@@ -234,14 +234,76 @@ async function checkWriting(page,profile){
  assert.equal(await reading.isVisible(),true);
  assert.equal(await reading.getAttribute('aria-live'),'off');
  await page.waitForFunction(()=>document.querySelector('#wg-wtl-gloss')?.getAttribute('data-cypher-state')==='reading');
+ const controlTargets=await page.evaluate(()=>{
+  const before=scrollY;
+  const buttons=['wg-send','wg-score-feather','wg-wtl-cypher-skip'];
+  const results=buttons.map(id=>{
+   const button=document.getElementById(id);
+   const initial=button.getBoundingClientRect();
+   // A fixed dock is a real obstruction, so position the control above
+   // the dock and floating chips, then assert all three pointer samples.
+   const obstacleTop=[...document.querySelectorAll('.wg-helm-loci,.wg-ship-switch,.wg-voyage-inbox')]
+    .filter(node=>{
+      const style=getComputedStyle(node);
+      return style.position==='fixed'&&style.display!=='none'&&style.visibility!=='hidden';
+    })
+    .map(node=>node.getBoundingClientRect())
+    .filter(rect=>rect.width>0&&rect.height>0&&rect.top<innerHeight&&rect.bottom>0)
+    .reduce((min,rect)=>Math.min(min,rect.top),innerHeight);
+   const clearBottom=Math.min(innerHeight-16,obstacleTop-16);
+   scrollTo(0,scrollY+initial.bottom-clearBottom);
+   const rect=button.getBoundingClientRect();
+   const y=(rect.top+rect.bottom)/2;
+   const hits=[rect.left+8,(rect.left+rect.right)/2,rect.right-8]
+    .map(x=>button.contains(document.elementFromPoint(x,y)));
+   return {id,hits,height:rect.height,translate:getComputedStyle(button).translate,
+    rect:{top:rect.top,bottom:rect.bottom,left:rect.left,right:rect.right},
+    centre:{x:(rect.left+rect.right)/2,y},viewport:{height:innerHeight,width:innerWidth},
+    pageScroll:scrollY,maxScroll:document.documentElement.scrollHeight-innerHeight,
+    hitAtCentre:document.elementFromPoint((rect.left+rect.right)/2,y)?.outerHTML.slice(0,240)||null};
+  });
+  scrollTo(0,before);
+  return results;
+ });
+ if(controlTargets.some(target=>target.hits.some(hit=>!hit)))
+  await page.screenshot({path:resolve(output,profile+'-writing-hit-interception.png'),fullPage:true});
+ for(const target of controlTargets){
+  assert.deepEqual(target.hits,[true,true,true],target.id+' must stay clickable across its width: '+JSON.stringify(target));
+  assert.ok(target.height>=44,target.id+' needs a 44px tap target');
+  assert.equal(target.translate,'none',target.id+' must stay in place during motion');
+ }
  await page.locator('#wg-wtl-cypher-skip').click();
  assert.equal(await reading.getAttribute('data-cypher-state'),'english');
  assert.equal(await reading.locator('.wg-cypher-line').first().getAttribute('lang'),'en-GB');
  await source.fill(original+'\n');
  assert.equal(await reading.isVisible(),false,'Source changes invalidate stale translation');
  assert.equal(await source.inputValue(),original+'\n');
- receipt.scenarios.push({profile,room:'Writing Room',status:'passed',skip:true,source_invalidation:true});
+ receipt.scenarios.push({profile,room:'Writing Room',status:'passed',skip:true,source_invalidation:true,
+  reachable_controls:controlTargets.map(target=>target.id)});
 }
+async function checkCellGarden(page,profile){
+ // A mounted native room is evidence, not a model call or public production host.
+ // This fixture intentionally denies House ownership on all /api requests.
+ await page.goto(origin+'/?room=cellGarden',{waitUntil:'networkidle'});
+ const garden=page.locator('[data-surface="wayglass-cell-garden"]');
+ await garden.waitFor({state:'visible'});
+ assert.equal(await page.locator('h1').filter({hasText:'The Living Cell Garden'}).isVisible(),true);
+ assert.equal(await page.getByRole('button',{name:'Propose mitosis'}).isDisabled(),true,
+  'Unsigned browser never initiates a daughter proposal');
+ assert.equal(await page.getByRole('button',{name:'Commit hybrid · keep both parents'}).isDisabled(),true);
+ assert.equal(await page.getByRole('button',{name:/Hear the Return marker/}).isDisabled(),true,
+  'Acoustic playback requires a local consented exchange');
+ assert.equal(await garden.getByRole('button',{name:'Listen to colony',exact:true}).isDisabled(),true,
+  'Live listening requires House sign-in');
+ assert.match(await garden.locator('.wg-cell-status').innerText(),/Browser fixture|sign-in|unavailable/i);
+ await page.emulateMedia({reducedMotion:'reduce'});
+ const motion=await garden.evaluate(el=>getComputedStyle(el.querySelector('.wg-cell-ecology')).animationName);
+ assert.equal(motion,'none','Reduced motion stays available in the cell ecology');
+ await page.screenshot({path:resolve(output,profile+'-cell-garden-unauthorised.png'),fullPage:true});
+ receipt.scenarios.push({profile,room:'Cell Garden',status:'passed',authorisation:'denied',
+  autonomous_replication:false,acoustic_playback_started:false,reduced_motion:true});
+}
+
 try{
  browser=await chromium.launch({headless:true});
  for(const profile of ['desktop','mobile']){
@@ -259,8 +321,9 @@ try{
     const request=route.request().postDataJSON();
     assert.equal(request.surface_id,'wayglass:living-watercolor');
     assert.equal(request.route_id,'wayglass:ship');
-    assert.match(request.input,/fenced wyrdrune block/);
-    const interrupted=request.input.includes('Continue the interrupted Dream.');
+    const interrupted=request.input==='Continue the interrupted Dream.';
+    assert.equal(request.input,interrupted?'Continue the interrupted Dream.':'Greet the eighth station.',
+      'Both user prompts must survive the route intact');
     const output=interrupted?'```wtl\n'+interruptedDream:chatReply;
     await route.fulfill({json:{schema:'wayglass.route-turn/v0.1',route_id:'wayglass:ship',
       participant_id:'wayglass',provider:'fixture',model:'fixture',output,
@@ -278,6 +341,7 @@ try{
   await checkWatercolourChat(page,profile);
   await checkCodex(page,profile);
   await checkWriting(page,profile);
+  await checkCellGarden(page,profile);
   await context.close();
  }
  assert.deepEqual(receipt.page_errors,[],'No unhandled browser errors');

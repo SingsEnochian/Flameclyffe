@@ -6,15 +6,34 @@ const express = require('express');
 const { createHash, timingSafeEqual } = require('node:crypto');
 const path = require('node:path');
 const { pathToFileURL } = require('node:url');
+const { accessConfiguration, createAccessVerifier } = require('./house-access');
 const { createRequestGate } = require('../security/wayglass-request-gate');
 
 function createHouseSessionRouter({ environment = process.env, loadSession } = {}) {
   const router = express.Router();
   const env = { get: name => environment[name] };
   const load = loadSession || (() => import(pathToFileURL(path.join(__dirname, '../wayglass-runtime/house-session.mjs')).href));
-  const configured = () => Boolean(environment.ARCSWEEP_RUNTIME_TOKEN ||
+  const access = accessConfiguration(environment);
+  const verifyAccess = access && createAccessVerifier(access);
+  const configured = () => Boolean((access && environment.HOUSE_SESSION_SECRET) || environment.ARCSWEEP_RUNTIME_TOKEN ||
     (environment.ARCSWEEP_STEWARD_KEY && environment.HOUSE_SESSION_SECRET));
   router.use((_req, res, next) => { res.setHeader('Cache-Control', 'no-store'); next(); });
+  router.post('/access', createRequestGate({ maxRequests: 18, maxConcurrent: 3 }), async (req, res, next) => {
+    if (!verifyAccess || !environment.HOUSE_SESSION_SECRET) return res.status(404).json({ connected: false });
+    if (req.get('origin') !== access.origin || req.get('host') !== new URL(access.origin).host)
+      return res.status(403).json({ connected: false });
+    try {
+      const owner = await verifyAccess(req.get('cf-access-jwt-assertion'));
+      if (!owner) return res.status(401).json({ connected: false });
+      const api = await load();
+      const now = Date.now();
+      if (owner.expiresAt <= Math.floor(now / 1000)) return res.status(401).json({ connected: false });
+      const session = api.issueHouseSession(env, now, { expiresAt: owner.expiresAt });
+      const request = new Request(access.origin + '/api/v1/house/session');
+      res.setHeader('Set-Cookie', api.houseSessionCookie(request, session.token, session.ttl));
+      return res.status(201).json({ connected: true, role: 'steward', mode: 'cloudflare-access' });
+    } catch (error) { next(error); }
+  });
   router.post('/', createRequestGate({ maxRequests: 10, maxConcurrent: 2 }), async (req, res, next) => {
     try {
       if (!configured()) return res.status(503).json({ connected: false, error: 'Local House sign-in is not configured. Set a private ARCSWEEP_RUNTIME_TOKEN on Hearthgate and restart it.' });

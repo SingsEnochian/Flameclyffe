@@ -15,7 +15,7 @@
     "stage:starwell": "node scripts/stage-starwell.js",
     "stage:project-zero-companion": "node scripts/stage-project-zero-companion.js",
     "prepare:assets": "node scripts/prepare-assets.js",
-    "test": "node --test test/*.test.js",
+    "test": "node --test test/*.test.js wayglass/wyrdrune-preview-outcome.test.cjs",
     "electron:dev": "npm run prepare:wayglass && npm run prepare:assets && electron .",
     "electron:pack:win": "npm run prepare:wayglass && npm run prepare:assets && electron-builder --win dir --x64 --publish never && npm run verify:dual-aspect-package",
     "electron:build": "npm run prepare:wayglass && npm run prepare:assets && electron-builder",

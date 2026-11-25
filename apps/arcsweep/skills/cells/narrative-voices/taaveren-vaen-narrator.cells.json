@@ -129,7 +129,7 @@
       "cellType": "preference",
       "subject": { "kind": "narrative_voice", "id": "taaveren-vaen-narrator", "worldId": "taaveren-vaen" },
       "predicate": "renders_world_ontology_as",
-      "value": "directly real within the fiction when the POV has access, including the One Power, Tel’aran’rhiod, the Pattern, and place-memory",
+      "value": "part of Ta’veren Vaen when the viewpoint has access, including the One Power, Tel’aran’rhiod, the Pattern, and place-memory",
       "status": "provisional",
       "authority": { "kind": "derived", "speakerOrAuthor": "Arcsweep synthesis", "confidence": 0.95 },
       "source": { "surface": "github", "repository": "SingsEnochian/Flameclyffe", "locator": "apps/arcsweep/skills/sources/taaveren-vaen/NARRATIVE_VOICE_FOUNDING.md" },

@@ -15,8 +15,8 @@ test('FAEpank First Touch HTTP crosses authentic steward gate into native Wyrdru
   const server=app.listen(0,'127.0.0.1');
   try{
     await once(server,'listening');
-    const url='http://127.0.0.1:'+server.address().port+'/api/v1/wayglass/wyrdrune/first-touch';
-    const send=(body={},headers={})=>fetch(url,{method:'POST',
+    const url='http://127.0.0.1:'+server.address().port+'/api/v1/wayglass/wyrdrune/';
+    const send=(body={},headers={},surface='first-touch')=>fetch(url+surface,{method:'POST',
       headers:{'Content-Type':'application/json',...headers},body:JSON.stringify(body)});
     const refused=await send({mode:'repair',touch:.65});
     assert.equal(refused.status,401);
@@ -45,6 +45,16 @@ test('FAEpank First Touch HTTP crosses authentic steward gate into native Wyrdru
     assert.equal(invalid.status,400);
     const excessive=await send({mode:'repair',touch:1e300},approved);
     assert.equal(excessive.status,400);
+
+    const current=await send({mode:'repair',crossingConsent:true},approved,'first-voyage');
+    const legacy=await send({mode:'repair',fictionConsent:true},approved,'first-voyage');
+    assert.equal(current.status,200);
+    assert.equal(legacy.status,200);
+    const latest=await current.json(), earlier=await legacy.json();
+    assert.equal(latest.schema,'wayglass.first-voyage-response/v0.1');
+    assert.equal(latest.receipt.status,earlier.receipt.status);
+    const ambiguous=await send({mode:'repair',crossingConsent:false,fictionConsent:true},approved,'first-voyage');
+    assert.equal(ambiguous.status,400);
   }finally{
     server.closeAllConnections();
     await new Promise(resolve=>server.close(resolve));

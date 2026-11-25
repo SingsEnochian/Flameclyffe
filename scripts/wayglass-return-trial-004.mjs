@@ -1,0 +1,37 @@
+#!/usr/bin/env node
+
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
+const { runReturnTaskSelectionViaHost } = require('../lib/wayglass-return-task-selection-host.cjs');
+
+const inputPath = process.argv[2];
+const receiptFlag = process.argv.indexOf('--receipt');
+const receiptPath = receiptFlag >= 0 ? process.argv[receiptFlag + 1] : null;
+
+if (!inputPath || inputPath.startsWith('--')) {
+  console.error('Usage: node scripts/wayglass-return-trial-004.mjs INPUT.json [--receipt RECEIPT.json]');
+  process.exit(64);
+}
+
+const input = JSON.parse(await fs.readFile(inputPath, 'utf8'));
+const result = await runReturnTaskSelectionViaHost({
+  attempt_id: input.attempt_id || 'return-trial-004',
+  stop_receipt: input.stop_receipt,
+  continuation_packet: input.continuation_packet,
+  departure_route_id: input.departure_route_id,
+  return_route_id: input.return_route_id,
+  evidence_scope: 'live',
+});
+
+const serialised = JSON.stringify(result, null, 2) + '\n';
+if (receiptPath) {
+  await fs.mkdir(path.dirname(path.resolve(receiptPath)), { recursive: true });
+  const temporary = path.resolve(receiptPath) + '.tmp-' + process.pid;
+  await fs.writeFile(temporary, serialised, { mode: 0o600 });
+  await fs.rename(temporary, path.resolve(receiptPath));
+}
+process.stdout.write(serialised);
+process.exitCode = result.live_model_verified ? 0 : 2;

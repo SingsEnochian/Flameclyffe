@@ -1,0 +1,162 @@
+/* Wayglass FAEberpunk · shipwide layer (loaded last).
+   One material grammar for every room: stone structure, opal state, copper
+   touch, parchment authorship, labradorite exploration. This layer fixes the
+   shell (helm, dock, floating chips) and the room frame (width, rhythm,
+   touch targets) once, so individual rooms inherit it instead of each
+   re-solving it. It never changes behaviour, routes, receipts or consent.
+   Tokens: docs/wayglass/FAEBERPUNK_LIVING_SHIP_EXPERIENCE_V2.md. */
+:root{
+  --fae-stone:#050c12;--fae-stone-2:#061824;
+  --fae-opal-live:#bcefe0;--fae-opal-deep:#76b7a4;
+  --fae-labradorite:#80bec4;--fae-copper:#e4c38e;--fae-parchment:#f3eedf;
+  --fae-focus-ring:#f6d39a;
+  --fae-hairline:rgba(173,226,215,.2);
+  --fae-hairline-copper:rgba(228,195,142,.32);
+  --fae-panel:linear-gradient(150deg,rgba(13,36,42,.9),rgba(5,14,22,.94) 62%,rgba(17,30,36,.92));
+  --fae-recess-2:linear-gradient(170deg,rgba(3,10,16,.72),rgba(7,20,27,.6));
+  --fae-radius:20px;--fae-radius-s:12px;
+  --fae-touch:44px;
+  --fae-gap:clamp(12px,1.6vw,20px);
+  --fae-dock-h:0px;
+}
+
+/* ── Helm ──────────────────────────────────────────────────────────────
+   .glass-panel sets transform-style:preserve-3d, which makes the helm a
+   containing block for position:fixed children. That trapped the five-locus
+   dock inside the header on tablets and phones, on top of the brand and the
+   Ship map button. The helm is flat; its dock is free to sit at the bottom. */
+.wg-helm{transform-style:flat}
+
+@media(max-width:900px){
+  :root{--fae-dock-h:calc(70px + env(safe-area-inset-bottom,0px))}
+  .wg-helm{flex-wrap:nowrap}
+  .wg-helm-readout{flex:1 1 auto;min-width:0}
+  .wg-helm-nav{margin-left:0}
+}
+
+/* ── Room frame ────────────────────────────────────────────────────────
+   A grid track of 1fr has an automatic minimum of its content width, so one
+   wide child pushed whole rooms past the screen edge (Writing Room was 1325px
+   inside an 820px iPad). Every room frame shrinks to the viewport instead. */
+.wg-surface{grid-template-columns:minmax(0,1fr)}
+.wg-surface>*{min-width:0;max-width:100%}
+.wg-surface :is(pre,code,table){max-width:100%}
+.wg-surface pre{overflow-x:auto}
+.wg-surface :is(p,li,dd,td,span,label,summary){overflow-wrap:anywhere}
+
+@media(max-width:1100px){
+  .wg-writing-workspace{grid-template-columns:minmax(0,1fr)}
+}
+
+/* ── Floating chips (Explore Wayglass, Voyage messages) ────────────────
+   They stay, compact, in one column at the lower right and never sit on top
+   of the locus dock. The room reserves a gutter so its last controls can
+   always scroll clear of them. */
+body{padding-bottom:calc(var(--fae-dock-h) + 76px)}
+.wg-ship-switch{
+  bottom:calc(var(--fae-dock-h) + 12px + env(safe-area-inset-bottom,0px));
+  right:max(14px,env(safe-area-inset-right,0px));
+  min-height:var(--fae-touch);padding:9px 15px;border-radius:999px;
+  border-color:var(--fae-hairline-copper);
+  background:linear-gradient(160deg,rgba(14,42,47,.95),rgba(5,15,23,.96));
+  color:var(--fae-copper);font-size:.78rem;letter-spacing:.06em;
+}
+.wg-voyage-inbox{
+  bottom:calc(var(--fae-dock-h) + 66px + env(safe-area-inset-bottom,0px));
+  right:max(14px,env(safe-area-inset-right,0px));
+}
+.wg-voyage-inbox:not([open]){width:auto;max-width:calc(100vw - 28px)}
+.wg-voyage-inbox:not([open]) summary{min-height:var(--fae-touch);display:flex;align-items:center}
+@media(max-width:900px){
+  .wg-ship-switch{font-size:.72rem;padding:8px 13px}
+}
+/* Phones: both chips become 46px glyph buttons stacked at the right edge,
+   above the dock. Their text stays in the DOM as the accessible name. */
+@media(max-width:640px){
+  .wg-ship-switch{width:46px;height:46px;min-height:46px;padding:0;font-size:0;letter-spacing:0;
+    display:grid;place-items:center;right:max(10px,env(safe-area-inset-right,0px))}
+  .wg-ship-switch::before{content:"⌘";font-size:1.15rem;color:var(--fae-copper)}
+  .wg-ship-switch[aria-expanded="true"]::before{content:"✕"}
+  .wg-voyage-inbox{right:max(10px,env(safe-area-inset-right,0px));bottom:calc(var(--fae-dock-h) + 66px + env(safe-area-inset-bottom,0px))}
+  .wg-voyage-inbox:not([open]) summary{width:46px;height:46px;min-height:46px;padding:0;font-size:0;
+    list-style:none;display:grid;place-items:center}
+  .wg-voyage-inbox:not([open]) summary::-webkit-details-marker{display:none}
+  .wg-voyage-inbox:not([open]) summary::before{content:"✉";font-size:1.05rem;color:var(--fae-opal-live)}
+  /* Helm: the room name gets the space; Feather and Ship map become glyphs. */
+  .wg-helm{gap:6px;padding:6px 8px}
+  .wg-helm-title span{display:none}
+  .wg-helm-title strong{font-size:.7rem;letter-spacing:.14em}
+  .wg-helm-feather,.wg-helm-nav{width:44px;min-width:44px;height:44px;padding:0;font-size:0;
+    display:grid;place-items:center;flex:none}
+  .wg-helm-feather::before{content:"🪽";font-size:1rem}
+  .wg-helm-nav::before{content:"⌘";font-size:1.05rem;color:var(--fae-copper)}
+  .wg-helm-feather[data-held="true"]::after{content:"";position:absolute;inset:5px;border-radius:inherit;border:2px solid #f1b7a0}
+}
+
+/* ── Touch ─────────────────────────────────────────────────────────────
+   Everything a finger or Pencil can press is at least 44px on touch screens.
+   Checkboxes and radios grow their label, not the box. */
+@media(pointer:coarse){
+  .wg-surface :is(button,select,summary,a.glass-chip,[role=button]),
+  .wg-surface input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=hidden]){
+    min-height:var(--fae-touch)}
+  .wg-surface button{min-width:var(--fae-touch)}
+  .wg-surface label:has(>input:is([type=checkbox],[type=radio])){
+    min-height:var(--fae-touch);display:inline-flex;align-items:center;gap:8px}
+  .wg-surface input:is([type=checkbox],[type=radio]){width:22px;height:22px;flex:none}
+  .wg-surface input[type=range]{min-height:var(--fae-touch)}
+}
+
+/* ── Shared material for room panels ───────────────────────────────────
+   Panels read as etched opaline glass over stone; inner wells are recessed.
+   Labels stay visible with colour, never colour alone. */
+.wg-surface>.glass-panel{border-radius:var(--fae-radius);border-color:var(--fae-hairline)}
+.wg-surface :is(fieldset){border:1px solid var(--fae-hairline);border-radius:var(--fae-radius-s)}
+.wg-surface :is(select,input:not([type=checkbox]):not([type=radio]):not([type=range]),textarea){
+  border-radius:10px;border:1px solid var(--fae-hairline);background:rgba(3,11,17,.72);color:var(--fae-ink,#e9f4ee)}
+.wg-surface :is(select,input,textarea):hover{border-color:rgba(173,226,215,.38)}
+.wg-surface input[type=range]{accent-color:var(--fae-opal-deep)}
+.wg-surface input:is([type=checkbox],[type=radio]){accent-color:var(--fae-copper)}
+
+@media(prefers-reduced-transparency:reduce){
+  .wg-ship-switch{backdrop-filter:none;-webkit-backdrop-filter:none;background:#0b1d24}
+}
+@media(forced-colors:active){
+  .wg-ship-switch,.wg-surface>.glass-panel{border:1px solid CanvasText}
+}
+
+/* A closed message fold shows only its summary, whatever a room does to
+   details content elsewhere (the Observer opened it, widening phones). */
+.wg-voyage-inbox:not([open])>:not(summary){display:none}
+/* Decorative glows and halos may bleed, but never widen the ship sideways.
+   clip (not hidden) keeps the sticky helm working. */
+html,body{overflow-x:clip}
+
+/* One Ship · Writing Room finger targets: Send, Feather and Skip Cypher. */
+.wg-writing-room :is(#wg-send,#wg-score-feather,#wg-wtl-cypher-skip){min-height:44px;min-width:44px;box-sizing:border-box}
+
+/* Focused controls must scroll clear of the fixed locus dock and floating
+   ship chips. Scroll clearance is not a substitute for pointer-hit tests. */
+@media(max-width:900px){
+  html[data-wayglass-surface="wayglass:writing-room"]{
+    scroll-padding-bottom:calc(var(--fae-dock-h) + 150px);
+  }
+  .wg-writing-room :is(#wg-send,#wg-score-feather,#wg-wtl-cypher-skip){
+    scroll-margin-bottom:calc(var(--fae-dock-h) + 150px);
+  }
+}
+
+/* FAEberpunk initialisation: static opaline substrate is also the no-WebGL fallback. */
+html[data-faeberpunk="initialised"] body{background-color:var(--fae-stone);background-image:radial-gradient(ellipse at 78% 12%,#14363c 0%,transparent 48%),radial-gradient(ellipse at 15% 80%,#111e35 0%,transparent 54%);background-attachment:fixed}
+.wg-living-observer .fae-membrane{display:grid;gap:14px;padding:clamp(16px,2.4vw,26px);background:var(--fae-panel);border:1px solid var(--fae-hairline);border-radius:var(--fae-radius);min-width:0}
+.fae-membrane h2{font-size:clamp(1.2rem,2.2vw,1.65rem);margin:0;color:var(--fae-opal-live);font-weight:500;letter-spacing:.02em}
+.fae-membrane p{margin:0;color:#c6ddd9;line-height:1.55;font-size:.88rem}
+.fae-membrane-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:8px;list-style:none;margin:0;padding:0}
+.fae-membrane-grid li{display:grid;grid-template-columns:10px minmax(0,1fr);gap:4px 9px;align-items:center;padding:10px 12px;background:#07141d;border:1px solid var(--fae-hairline);border-radius:10px;min-width:0}
+.fae-membrane-grid li::before{content:'';width:8px;height:8px;border-radius:50%;border:1px dashed #a5b9d4;grid-row:1 / span 2}
+.fae-membrane-grid li[data-state="observed"]::before{background:var(--fae-opal-live);border-style:solid;box-shadow:0 0 10px #76b7a466}
+.fae-membrane-grid li[data-state="withheld"]::before{background:var(--fae-copper);border-style:solid}
+.fae-membrane-grid strong{font-size:.82rem;color:#e5f4ef;font-weight:550;overflow-wrap:anywhere}
+.fae-membrane-grid small{grid-column:2;color:#b9ccd6;font-size:.72rem;overflow-wrap:anywhere}
+@media(prefers-reduced-motion:no-preference){.fae-membrane-grid li{transition:border-color .24s ease,background-color .24s ease}}
+@media(forced-colors:active){.fae-membrane-grid li,.fae-membrane{border:1px solid CanvasText}.fae-membrane-grid li::before{forced-color-adjust:auto}}

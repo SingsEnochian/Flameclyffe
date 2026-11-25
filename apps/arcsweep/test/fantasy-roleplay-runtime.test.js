@@ -50,7 +50,7 @@ test('chat stays plain while roleplay compiles a bounded shared contract for OA'
   assert.equal(roleplay.worldId, 'taaveren-vaen');
   assert.ok(roleplay.skillCellCount > 5);
   assert.ok(roleplay.skillChars <= 12_000);
-  assert.match(roleplay.message, /FANTASY ROLEPLAY/);
+  assert.match(roleplay.message, /IN-WORLD DIALOGUE/);
   assert.match(roleplay.message, /participant-controlled characters|participant/i);
   assert.match(roleplay.message, /The door opens\./);
 

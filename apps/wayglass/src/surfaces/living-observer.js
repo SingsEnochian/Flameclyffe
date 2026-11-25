@@ -64,8 +64,7 @@ function drawAstrolabe(canvas, packet, time, focus, lowStim, {rotation = 0, lens
       g.fillRect(x-1,y-1,2,2);g.globalAlpha=1;
     }
   }
-  // Four read-only Quad evidence arcs. Empty sources render darker; counts never
-  // become a fictional emotional or cognitive measurement.
+  // Four Quad arcs show the availability of their respective sources.
   if (quad?.schema === 'wayglass.quad-ship-observation/v1') {
     const ids=['deep_observer_events','observer_measurements','wayglass_route_receipts','house_runtime_events'];
     ids.forEach((id,i)=>{
@@ -191,6 +190,7 @@ export async function mountWayglassLivingObserver(root) {
       '<span><i aria-hidden="true">✧</i> QUAD <strong data-fae-observer-quad>Not observed</strong></span>',
       '<span><i aria-hidden="true">◇</i> RETURN <strong data-fae-observer-return>Reading only · no canon change</strong></span>',
     '</div>',
+    '<section class="fae-membrane glass-panel" aria-label="Epistemic membrane"><h2>Epistemic membrane</h2><p>Observed channels, open gaps and withheld information. Coverage is not mathematical observability.</p><ul class="fae-membrane-grid" data-fae-membrane></ul></section>',
     '<section class="observer-deck" aria-label="Interactive Observer">',
     '<div class="glass-panel observer-stage"><canvas width="820" height="820" role="img" aria-label="Living astrolabe mapping observed application readings to geometric rings, nodes, and pulses. Select a reading using the buttons below."></canvas>',
     '<div class="observer-inputs" role="group" aria-label="Direct-reading channels">',
@@ -235,7 +235,7 @@ export async function mountWayglassLivingObserver(root) {
     '</section>',
     '<section class="observer-wonder glass-panel" aria-label="Wonder light and continuity">',
     '<div class="observer-wonder-head"><div><p class="eyebrow">The Glass That Remembers · Wonder #447</p>',
-    '<h2>Provenance in light</h2><p class="tiny">Route and Commons activity can illuminate the glass. A ripple is not proof of truth, identity, consciousness or restored memory.</p></div>',
+    '<h2>Provenance in light</h2><p class="tiny">Route and Commons activity can illuminate the glass. Each ripple traces activity on its recorded route or in Commons.</p></div>',
     '<button type="button" class="glass-chip" data-wonder-demo>Try a synthetic ripple</button></div>',
     '<p class="observer-wonder-empty" data-wonder-state role="status">No light events observed yet. Continuity unknown until a verified receipt is available.</p>',
     '<ol class="observer-wonder-events" data-wonder-events aria-label="Latest light events"></ol>',
@@ -313,6 +313,19 @@ export async function mountWayglassLivingObserver(root) {
   function refresh() {
     if(disposed||!canvas.isConnected){cleanup();return;}
     packet=current();
+    const membrane=root.querySelector('[data-fae-membrane]');
+    if(membrane){
+      const signature=JSON.stringify(packet.membrane.channels);
+      if(membrane.dataset.signature!==signature){
+        membrane.dataset.signature=signature;
+        membrane.replaceChildren(...packet.membrane.channels.map(reading=>{
+          const li=document.createElement('li');li.dataset.state=reading.status;
+          const title=document.createElement('strong');title.textContent=reading.channel+' · '+reading.status;
+          const detail=document.createElement('small');detail.textContent=reading.basis;
+          li.append(title,detail);return li;
+        }));
+      }
+    }
     const routeSequence=packet.direct.last_route?.sequence ?? -1;
     const nowMs=Date.now();
     const shouldSense=(nowMs-lastInteriorSense>10000)||touches!==lastTouchSense||routeSequence!==lastRouteSense;

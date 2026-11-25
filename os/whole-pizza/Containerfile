@@ -1,0 +1,12 @@
+# Whole Pizza: Fedora Kinoite machine layer + native Wyrdrune bootstrap.
+FROM docker.io/library/node:24-bookworm-slim AS node
+FROM quay.io/fedora/fedora-kinoite:45
+ARG WAYGLASS_SOURCE_SHA=unknown
+LABEL org.opencontainers.image.title="Wayglass Whole Pizza OS"
+LABEL org.opencontainers.image.revision="$WAYGLASS_SOURCE_SHA"
+COPY --from=node /usr/local/bin/node /usr/libexec/wayglass/node
+COPY os/whole-pizza/rootfs/usr/libexec/wayglass/ /usr/libexec/wayglass/
+COPY os/whole-pizza/rootfs/etc/systemd/system/wayglass.service /etc/systemd/system/wayglass.service
+COPY os/whole-pizza/rootfs/etc/xdg/autostart/wayglass.desktop /etc/xdg/autostart/wayglass.desktop
+COPY os/whole-pizza/.build/release/ /usr/lib/wayglass/release/
+RUN chmod 0755 /usr/libexec/wayglass/node /usr/libexec/wayglass/launch.sh /usr/libexec/wayglass/open.sh && systemctl enable wayglass.service

@@ -105,7 +105,7 @@ test('syncs a receipted cycle through the authenticated relational endpoint', as
 
 test('voice prompt binds world, canon, PREMAQC, register, authority, and refusal', () => {
   const prompt = buildVoicePromptEnvelope({ world, mode: 'roleplay', work: 'Falka: “Come in.”', premaqc: createInitialPremaqc(world.id), canon: [{ name: 'Third City', content: 'Stonewood by the sea.' }] });
-  assert.match(prompt, /IC roleplay/);
+  assert.match(prompt, /In-world dialogue/);
   assert.match(prompt, /Terra Aeterna/);
   assert.match(prompt, /P=0\.780/);
   assert.match(prompt, /Stonewood by the sea/);

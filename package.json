@@ -51,7 +51,7 @@
     "wayglass:dev": "vite --config apps/wayglass/vite.config.js",
     "wayglass:build": "vite build --config apps/wayglass/vite.config.js",
     "wayglass:preview": "vite preview --config apps/wayglass/vite.config.js",
-    "wayglass:test": "node --test apps/wayglass/test/*.test.js test/wayglass/*.test.cjs test/wayglass-mobius*.test.mjs lib/wyrdrune/*.test.cjs lib/wayglass-wyrdrune-ritual.test.cjs lib/wayglass-wyrdrune-soundscape.test.cjs lib/wayglass-wyrdrune-spectrum.test.cjs lib/wayglass-wyrdrune-atlas.test.cjs lib/wayglass-wyrdrune-learning.test.cjs lib/wayglass-wyrdrune-voice.test.cjs lib/wayglass-route-models.test.cjs",
+    "wayglass:test": "node --test apps/wayglass/test/*.test.js test/wayglass/*.test.cjs test/wayglass-mobius*.test.mjs lib/wyrdrune/*.test.cjs lib/wayglass-wyrdrune-ritual.test.cjs lib/wayglass-wyrdrune-soundscape.test.cjs lib/wayglass-wyrdrune-spectrum.test.cjs lib/wayglass-wyrdrune-atlas.test.cjs lib/wayglass-wyrdrune-learning.test.cjs lib/wayglass-wyrdrune-voice.test.cjs lib/wayglass-route-models.test.cjs apps/wayglass/src/mobius-nursery-garden.test.mjs apps/wayglass/src/mobius-nursery-voyage.test.mjs apps/wayglass/src/wtl-transform-semantics.test.mjs apps/wayglass/src/wtl-transform-frontend.test.mjs apps/wayglass/src/wtl-nursery-bridge.test.mjs apps/wayglass/src/mobius-nursery-encounter.test.mjs",
     "wayglass:eightfold": "node scripts/wayglass-eightfold-space.mjs",
     "wayglass:test:host": "node --test apps/starwell-server/test/wayglass-*.test.js apps/starwell-server/test/security-boundary.test.js apps/starwell-server/test/bluebird-bridge-trial.test.js",
     "wayglass:stage:server": "node apps/wayglass/server-stage.cjs",
@@ -81,5 +81,6 @@
     "spessasynth_lib": "^4.3.13",
     "three": "latest",
     "vite": "8.3.6"
-  }
+  },
+  "devDependencies": {"playwright": "1.65.1"}
 }

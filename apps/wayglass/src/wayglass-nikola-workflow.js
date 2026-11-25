@@ -50,7 +50,7 @@ export function prepareReviewEnvelope(reading){
         epistemic_guard:hinge.summary.observation};
     }),
     design:designThroughEightfold(reading,{lens:'wonder'}),
-    confidence:'source availability only, not observed consciousness or temporal branching',
+    confidence:'availability of the recorded sources',
     private_continuity_excluded:true,source_rows_excluded:true,
     model_weight_training:false});
 }

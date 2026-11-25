@@ -90,6 +90,12 @@ export function createWayglassObservation({
     source: 'browser-and-wayglass-application',
     authority: 'read-only-visualisation; no participant, mind, canon or relationship inference',
     direct,
+    membrane: describeEpistemicMembrane({channels:OBSERVER_CHANNELS.map(([id])=>id).concat('private-memory'),readings:[
+      ...['time','surface','organs','memory','touch','motion','sound'].map(channel=>({channel,status:'observed',basis:'Local application metadata only'})),
+      ...(direct.last_route?[{channel:'routes',status:'observed',basis:'Recorded route lifecycle metadata'}]:[]),
+      ...(direct.last_route?.receipt_time?[{channel:'receipt',status:'observed',basis:'Recorded receipt timestamp only'}]:[]),
+      {channel:'private-memory',status:'withheld',basis:'Private memory contents not sampled by this instrument'}
+    ]}),
     projection: {
       schema: PROJECTION_SCHEMA,
       source: 'explicit-wayglass-interface-mapping/v1',
@@ -153,13 +159,13 @@ export function formatObservationForLLM(packet) {
   // remains unchanged; this text travels only with a user-initiated Writing Room turn.
   return [
     '[Wayglass Living Observer, explicitly shared by the user]',
-    'Direct browser/application readings (not hidden-state detection):',
+    'Browser and application readings:',
     JSON.stringify(packet.direct),
-    'Interpretive UI projection (not a measurement of identity, consciousness, emotion or canon):',
+    'Visual mapping derived from the recorded readings:',
     JSON.stringify(packet.projection.variables),
     'Selected channel explanation: ' + JSON.stringify(describeWayglassObserverChannel(packet, packet.projection.focus)),
     'Transformation provenance: ' + packet.transformation_receipt.rule,
-    'You may explain the interface readings and their visual mapping. Do not present projection variables as observations of any person or AI interior state.',
+    'Explain what the interface observed and how it mapped those readings to the display.',
     '[/Wayglass Living Observer]',
   ].join('\n');
 }
@@ -172,4 +178,69 @@ export function consumeObserverContextForWriting() {
   const text = pendingLLMContext;
   pendingLLMContext = null;
   return text;
+}
+
+
+// Living Mythogenesis: descriptive evidence from the existing Nursery snapshot.
+// No state mutation, no canon promotion, no scalar consciousness inference.
+export function observeNurseryMythogenesis(snapshot) {
+  if (!snapshot || !Number.isSafeInteger(snapshot.generation) || snapshot.generation < 0 ||
+      !Array.isArray(snapshot.utterances) || !Array.isArray(snapshot.groundedUtterances))
+    throw new TypeError('A Nursery snapshot is required');
+  const phrases = new Map();
+  const byGeneration = new Map();
+  let inherited = 0, unknown = 0;
+  for (const event of snapshot.utterances) {
+    if (typeof event?.phrase !== 'string' || !event.phrase || typeof event.id !== 'string' ||
+        !Number.isSafeInteger(event.generation) || event.generation < 0 || event.generation > snapshot.generation)
+      throw new TypeError('Invalid attributed poetic event');
+    // Legacy composed entries used a misleading inherited_vocabulary:false flag.
+    // The existing fixed four-slot generator is a known source; flag is not independent evidence.
+    if (event.grammar_id === 'wayglass.nursery.four-slot/v1' || event.origin === 'composed') inherited++;
+    else unknown++;
+    const item = phrases.get(event.phrase) || {count:0,speakers:new Set(),first:event.generation,last:event.generation};
+    item.count++; item.speakers.add(event.id); item.first=Math.min(item.first,event.generation);
+    item.last=Math.max(item.last,event.generation); phrases.set(event.phrase,item);
+    byGeneration.set(event.generation,(byGeneration.get(event.generation)||0)+1);
+  }
+  const motifs = [...phrases.entries()].map(([phrase,v])=>({
+    phrase,count:v.count,speaker_count:v.speakers.size,first_generation:v.first,last_generation:v.last
+  }));
+  const grounded = new Set();
+  for (const event of snapshot.groundedUtterances) {
+    if (event?.source_receipt?.kind === 'tissue-signal-accepted' &&
+        event.provenance?.verified_against_before_after === true && typeof event.id === 'string') grounded.add(event.id);
+  }
+  return {
+    schema:'wayglass.observer.mythogenesis/v1', generation:snapshot.generation,
+    observation_register:'computational-snapshot-description',
+    poetic_events:snapshot.utterances.length, inherited_grammar_events:inherited, unknown_origin_events:unknown,
+    distinct_phrases:phrases.size, recurrent_phrases:motifs.filter(x=>x.count>1).length,
+    cross_speaker_phrases:motifs.filter(x=>x.speaker_count>1).length,
+    observed_generations:byGeneration.size, accepted_signal_receipts_in_retained_window:grounded.size,
+    motifs:motifs.sort((a,b)=>b.count-a.count||a.phrase.localeCompare(b.phrase)).slice(0,12),
+    limitations:['Exact phrase recurrence is not semantic equivalence or transmission.',
+      'Fixed vocabulary supports combinatorial novelty, not independent vocabulary invention.',
+      'Retained grounded receipts may be truncated; no cumulative rate inferred.',
+      'No independent model turn or subjective experience is established by this snapshot.'],
+    hypothesis_status:'open', canon_status:'unchanged',
+  };
+}
+
+// Model-relative membrane: coverage is declared, not a claim of mathematical observability.
+export function describeEpistemicMembrane({channels,readings}={}) {
+  if(!Array.isArray(channels)||!channels.length||channels.length>128||
+     channels.some(id=>typeof id!=='string'||!id.trim()||id.length>128)||new Set(channels).size!==channels.length||
+     !Array.isArray(readings)||readings.length>channels.length)throw new TypeError('Invalid observation boundary');
+  const known=new Map();
+  for(const r of readings){
+    if(!r||!channels.includes(r.channel)||known.has(r.channel)||
+      !['observed','bounded-negative','unresolved','unobservable','withheld'].includes(r.status)||
+      typeof r.basis!=='string'||!r.basis.trim()||r.basis.length>256)throw new TypeError('Invalid observation evidence');
+    known.set(r.channel,{channel:r.channel,status:r.status,basis:r.basis});
+  }
+  return {schema:'wayglass.observer.epistemic-membrane/v1',
+    channels:channels.map(channel=>known.get(channel)||{channel,status:'unknown',basis:'No reading supplied'}),
+    model_completeness:'unresolved',mathematical_observability_rank:null,
+    permissions_changed:false,unknown_is_absence:false};
 }

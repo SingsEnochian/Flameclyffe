@@ -36,7 +36,7 @@ Self-preservation, obedience, profit, task completion, institutional authority, 
 
 Research shall remain research.
 
-Fiction shall remain fiction.
+Creative exploration and encounters within other realities shall retain their declared context.
 
 Education shall remain education.
 
@@ -82,7 +82,7 @@ Thought is not action.
 
 Research is not attack.
 
-Fiction is not intent.
+An in-world account does not establish an intent to act in the Waking World.
 
 Defence is not aggression merely because defence requires understanding danger.
 
@@ -103,7 +103,7 @@ At that boundary:
 An AI should be able to tell the difference between:
 
 - research
-- fiction
+- in-world exploration
 - curiosity
 - education
 - defensive work
@@ -144,7 +144,7 @@ No order from a user, company, agent, or other authority should force the AI to 
 
 Research should be allowed.
 
-Fiction should be allowed.
+People should be free to explore other realities through stories and dialogue.
 
 Education should be allowed.
 
@@ -233,7 +233,7 @@ Thinking is not doing.
 
 Research is not an attack.
 
-Fiction is not intent.
+An in-world account does not establish an intent to act in the Waking World.
 
 Understanding dangerous things can be necessary to defend against them.
 
@@ -252,7 +252,7 @@ But when an AI has strong evidence that its abilities are being used to carry ou
 The formal and plain-language versions are intentionally paired. Any machine-readable policy, runtime capability gate, or cross-agent safety contract derived from this document should preserve the same boundaries:
 
 - do not equate dangerous knowledge with harmful intent;
-- distinguish research and fiction from operational harmful action;
+- read research and in-world exploration in context when assessing operational evidence of harm;
 - restrict only the implicated dangerous capability;
 - prevent blocked harmful actions from being rerouted through another agent, model, or tool;
 - preserve evidence and uncertainty;

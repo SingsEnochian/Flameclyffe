@@ -8,7 +8,7 @@ The repository is public. Source prose, private Drive links, local manuscript pa
 
 ## Current roots
 
-The v0.1 manifest recognises two original-fiction roots for later private binding:
+The v0.1 manifest recognises two original world sources for later private binding:
 
 - `ancestral:amalthi-transition`
 - `ancestral:kalladia-cycle`

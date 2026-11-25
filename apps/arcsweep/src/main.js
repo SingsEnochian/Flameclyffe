@@ -527,7 +527,7 @@ function renderFeedback() {
     <section class="grid two feedback-layout">
       <article class="panel"><form id="feedback-form" class="stack">
         <div class="feedback-state"><strong>PREMAQC ${current ? `#${current.sequence}` : 'origin'}</strong>${['P','C','R','E','M','A','Q'].map((name) => `<span><b>${name}</b> ${axis(name)}</span>`).join('')}</div>
-        <label>Practice<select name="mode"><option value="writing">Writing</option><option value="roleplay">Roleplaying</option><option value="observation">Observation</option><option value="reflection">Reflection</option></select></label>
+        <label>Practice<select name="mode"><option value="writing">Writing</option><option value="roleplay">In-world dialogue</option><option value="observation">Observation</option><option value="reflection">Reflection</option></select></label>
         <fieldset><legend>Constellation voices</legend><div class="voice-grid">${CONSTELLATION_VOICES.map((voice) => `<label class="checkbox"><input type="checkbox" name="voiceIds" value="${attr(voice.id)}" /> <span><b>${escapeHtml(voice.name)}</b><small>${escapeHtml(voice.route)} · ${escapeHtml(voice.model)}</small></span></label>`).join('')}</div></fieldset>
         <fieldset><legend>Canon context</legend>${canon.length ? canon.map((item) => `<label class="checkbox"><input type="checkbox" name="canonRefs" value="${attr(item.id)}" /> ${escapeHtml(item.name)}</label>`).join('') : '<p class="muted">No committed canon scripts for this world yet. The world profile still travels with the cycle.</p>'}</fieldset>
         <label>Your turn<textarea name="work" rows="10" required placeholder="Write the world as it happens. The sound engine answers recognised events without editorialising the text."></textarea></label>
@@ -952,7 +952,7 @@ function renderDeepObserver() {
     <form id="field-feedback-form" class="stack" style="margin-top:1rem">
       <h3>${packet ? 'Run next Field feedback cycle' : 'Run Field feedback cycle'}</h3>
       <p class="muted">Six ambient projections enter through Observer. Qualia enters only through your firsthand report. The resulting PREMAQC packet is then compiled and replay-verified by the Math Spine.</p>
-      <label>Practice<select name="mode"><option value="writing">Writing</option><option value="roleplay">Roleplaying</option></select></label>
+      <label>Practice<select name="mode"><option value="writing">Writing</option><option value="roleplay">In-world dialogue</option></select></label>
       <label>What is entering from the world now?<textarea name="work" rows="5" required placeholder="Write the event without sanding its teeth off."></textarea></label>
       <label>Firsthand Qualia · Q (0–1)<input name="qualia" type="number" min="0" max="1" step="0.01" placeholder="Unmeasured — enter your observation" required /></label>
       <fieldset><legend>Constellation voices</legend><div class="voice-grid">${CONSTELLATION_VOICES.map((voice) => `<label class="checkbox"><input type="checkbox" name="voiceIds" value="${attr(voice.id)}" ${voice.id === 'boxfire' ? 'checked' : ''} /> <span><b>${escapeHtml(voice.name)}</b><small>${escapeHtml(voice.model)}</small></span></label>`).join('')}</div></fieldset>

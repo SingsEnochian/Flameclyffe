@@ -196,7 +196,7 @@ const VALID_MODES = [...ARCSWEEP_INTERACTION_MODES];
 export async function runFeedbackCycle({ world, premaqc, mode, work, response = '', voiceIds = [], canonRefs = [], voiceInvocations = [], soundEvents = [], evidence = [], observedAt = new Date().toISOString(), exploration = false }) {
   if (!world?.id || !world?.name) throw new Error('Feedback cycle requires a world.');
   if (!VALID_MODES.includes(mode)) throw new Error(`Feedback mode must be one of: ${VALID_MODES.join(', ')}.`);
-  if (!String(work || '').trim()) throw new Error('A Story, writing, roleplay, observation, or reflection turn is required.');
+  if (!String(work || '').trim()) throw new Error('A turn is required for Story, writing, in-world dialogue, observation, or reflection.');
   const voices = voiceIds.map((id) => CONSTELLATION_VOICES.find((voice) => voice.id === id)).filter(Boolean);
   if (!voices.length) throw new Error('Select at least one Constellation voice.');
   const current = premaqc || createInitialPremaqc(world.id, world.premaqc);
@@ -265,8 +265,8 @@ export async function runFeedbackCycle({ world, premaqc, mode, work, response = 
 }
 
 const MODE_REGISTERS = {
-  story: "Story Mode; continue the scene as narrative rather than discussing it. Preserve established POV, tense, scene chronology, character knowledge gates, canon boundaries, distinct voices, and unresolved values. Treat participant belief, witness account, institutional doctrine, folklore, narrator statement, and committed canon as different layers. Do not force convergence merely to maximise coherence; viable polyphony is the target. Do not choose actions or invent inner experience for the user’s character. Do not switch OOC unless explicitly asked.",
-  roleplay: "IC roleplay turn; preserve explicit OOC/IC separation",
+  story: "Story Mode; continue the scene as narrative rather than discussing it. Preserve established POV, tense, scene chronology, character knowledge gates, canon boundaries, distinct voices, and unresolved values. Treat participant belief, witness account, institutional doctrine, folklore, narrator statement, and committed canon as different layers. Do not force convergence merely to maximise coherence; viable polyphony is the target. Do not choose actions or invent inner experience for the user’s character. Any participant may speak directly, ask for clarification, or call Feather.",
+  roleplay: "In-world dialogue. Attribute the turn to its world and participant.",
   writing: "writing collaboration; do not seize authorship",
   observation: "witness turn; observe and reflect without authoring or directing",
   reflection: "reflection turn; review prior events, do not rewrite them",
@@ -295,7 +295,7 @@ export function buildVoicePromptEnvelope({ world, mode, work, premaqc, canon = [
     "Agency: you may answer, negotiate, pause, or refuse. For refusal begin with [REFUSAL].",
     "Continuity: respond only as yourself; do not speak for another Constellation member.",
     "Canon context:\n" + canonItems,
-    "Rowan’s " + mode + " turn:\n" + String(work).trim(),
+    "Rowan’s " + (mode === "roleplay" ? "in-world" : mode) + " turn:\n" + String(work).trim(),
   ].filter(Boolean).join("\n\n");
 }
 

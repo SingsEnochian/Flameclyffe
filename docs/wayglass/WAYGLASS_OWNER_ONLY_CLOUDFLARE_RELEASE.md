@@ -1,51 +1,32 @@
-# Wayglass full-ship Cloudflare Access deployment gate
+# Wayglass owner-only Cloudflare release
 
-**State:** owner-only release procedure, not a deployed host. This is a reviewable plan and executable unauthenticated edge probe. The full Wayglass interface is served by the existing Hearthgate / STARWELL origin, not a public static copy.
+Run this command in elevated Windows PowerShell from the existing Flameclyffe checkout at the published head of PR #661.
 
-## Architecture
-
-```
-iPad Safari / Pencil / keyboard / VoiceOver
-       |
-       v
-HTTPS hostname (owner-only Cloudflare Access self-hosted application)
-       |
-       v
-Cloudflare Tunnel, authenticated connector on the owner's Windows machine
-       |
-       v
-127.0.0.1:3000 (server-secure.js; Wayglass at /wayglass/; APIs same origin)
-       |
-       +--> Wyrdrune runtime, receipts, local model routes and other organs
+```powershell
+.\scripts\Deploy-WayglassWorld.ps1
 ```
 
-Cloudflare Access controls remote entry. The origin is loopback-only, but local access still exists and is not Cloudflare-authenticated. Do not claim an Access edge policy authenticates direct localhost clients. No public GitHub Pages, Vercel or Netlify publication of the owner-only runtime.
+The launcher checks the exact commit’s GitHub Actions results before prompting for the Cloudflare API token with masked input. It reuses the existing Hearthgate host on loopback port 3000 and the same restricted Wayglass gateway used by Tailscale Serve on port 32861.
 
-## Owner-controlled account steps
+## First-run prerequisites
 
-1. Sign in to the **Cloudflare dashboard** using the connected browser profile. Select the correct account and domain. The owner chooses and approves the hostname; do not guess a domain.
-2. In **Zero Trust / Access**, create a **Self-hosted** application for the exact full hostname, including all paths. Apply an **Allow** policy for only the owner's verified identity. Do not use a public Bypass policy, an allow-all rule, or a shared service token as the owner's browser identity. Check identity provider MFA if available.
-3. In **Networks / Tunnels**, create or select a named Cloudflare Tunnel. Install its connector on the owner's machine using the dashboard's authenticated installation instructions. Keep the connector credential on that machine, never in GitHub, logs, screenshots, or chat.
-4. Route the selected hostname to **HTTP `127.0.0.1:3000`** through that tunnel. Do not open router ports or change Hearthgate to `0.0.0.0`. Do not use unauthenticated Quick Tunnels or publish the dev Vite port.
-5. Locally, with Node dependencies already installed, run `npm run wayglass:deploy:server` from the repo root to build and stage `dist/wayglass` into `apps/starwell-server/public/wayglass`, then `npm --prefix apps/starwell-server run start:core`. Confirm `http://127.0.0.1:3000/wayglass/` is the staged UI. Keep the origin running for the remote session. Local model providers are separately configured and must be checked with attributable route receipts.
-6. From an **unauthenticated** network context, run `npm run wayglass:cloudflare:preflight -- --url https://YOUR-OWNER-HOSTNAME`. It must report **PASS** for `/`, `/wayglass/`, `/api/v1/wayglass/healthz`, and `/api/v1/wayglass/respond`. The probe refuses to count a 200 response, a generic 403 or an unrelated redirect as proof of Access.
-7. Sign in as the owner on iPad Safari, open `https://YOUR-OWNER-HOSTNAME/wayglass/`, and complete a real device smoke test. Check Living Watercolour entry, five-locus helm, Codex, Mythience, Observer, Toybox, Feather, reduced motion, touch/Pencil, keyboard, VoiceOver, session continuity, Wyrdrune results and **actual provider route attribution**. Test the protected API paths as the owner. Capture a redacted deployment receipt and any failures before declaring live acceptance.
+- Keep the existing House Steward secret and Wayglass data configuration available to Hearthgate. Install Git and Node.js 24 or newer. The launcher builds and stages the existing app if it starts Hearthgate itself. An already running Hearthgate or gateway is reused only if its local checks pass. If an older process occupies either port, stop it through the launcher that started it and rerun. The deployment launcher never kills an existing origin or rewrites Tailscale configuration.
+- The Cloudflare account needs the active `wayglass.world` zone, a Zero Trust team domain, and one configured GitHub Access identity provider. Use the verified GitHub email of the owner account with 2FA enabled. The launcher asks for the exact email on first setup unless `WAYGLASS_ACCESS_OWNER_EMAIL` is configured. GitHub manages the account’s 2FA.
+- Use a Cloudflare user API token scoped to the zone and account, with zone read, DNS edit, Cloudflare Tunnel edit, Access apps and policies edit, identity-provider read, and Zero Trust organization read. The launcher verifies the token status, checks resource access through API reads, and verifies write access through the required mutations and readback.
+- An administrator can install Cloudflared through Windows Package Manager. If the local package install cannot provide a machine-wide copy under Program Files, install Cloudflared there before rerunning. The service uses a connector credential in a Windows ACL-protected directory under ProgramData. The separate API token stays in memory.
 
-## Preflight is not deployment
+## Publication and checks
 
-`scripts/wayglass-cloudflare-preflight.mjs` deliberately does not sign in, send credentials, upload files, configure DNS, modify Access policies, launch a tunnel or declare production readiness. Its success establishes only that unauthenticated requests encountered a Cloudflare Access login challenge on all tested paths. It is a fail-closed first gate; **authenticated browser and model-route verification remain mandatory**.
+The launcher refuses conflicting DNS, Access, tunnel, and service configurations. It verifies that the Access application covers the entire hostname with a single GitHub provider and an exact-email Allow policy. It configures Protect with Access using the application audience and team name. The tunnel sends only `wayglass.world` traffic to port 32861 and returns 404 for unmatched requests. The gateway independently verifies the owner’s Access JWT and passes it to the existing House Steward exchange. The Tailscale path still uses its existing House authentication.
 
-Do not copy the full host into `_site` or merge a draft PR merely to create a live URL. The existing public `/wayglass-play/` is an older, separate preview.
+After readback of those controls, the launcher can publish the proxied apex CNAME. It checks public DNS, trusted HTTPS, and the existing anonymous Access probe. Complete the GitHub sign-in in the browser opened by Cloudflared. The launcher uses that session to verify the full UI, runtime health, unrelated route rejection, and a House Steward cookie round trip. Cloudflared manages the CLI login cache outside the repository.
 
-## Release receipt checklist
+A successful run prints `https://wayglass.world/wayglass/`. Keep the Windows host online with Hearthgate and the gateway running. Cloudflared itself is registered for automatic Windows startup. On a phone or iPad, test browser sign-in, room navigation, touch controls, and a real Return operation. Local tests and the automated HTTP checks do not verify physical-device behavior, non-owner GitHub sign-in, or model-provider response attribution.
 
-- [ ] Owner-approved hostname and Cloudflare account selected
-- [ ] Cloudflare Access policy limited to owner, MFA reviewed
-- [ ] Named tunnel connected to loopback `127.0.0.1:3000`
-- [ ] All four unauthenticated boundary probes PASS
-- [ ] Staged full-ship UI opens after owner authentication
-- [ ] Real route/model response receipt observed and attributed
-- [ ] Feather interrupts an in-flight request and optional audio
-- [ ] iPad portrait/landscape, touch/Pencil, VoiceOver, keyboard and reduced-motion checked
-- [ ] Return receipt survives the intended stop/restart scope, or limitation documented
-- [ ] Final deployment URL and tested commit recorded privately without secrets
+## Rollback
+
+```powershell
+.\scripts\Deploy-WayglassWorld.ps1 -Rollback
+```
+
+Rollback removes only the DNS record created by this launcher, checks its ID and destination, and verifies removal. A failed run also attempts rollback of a record it created. The Access app, restricted tunnel, and connector stay staged for a later retry. An existing DNS record adopted by the launcher needs separate operator rollback. Record verification and mobile receipts in the existing deployment records after running on the Windows host.

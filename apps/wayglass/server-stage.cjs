@@ -31,7 +31,8 @@ async function copyTree(from, to) {
 
   const runtime = path.join(repoRoot, 'apps', 'starwell-server', 'wayglass-runtime');
   await fsp.mkdir(runtime, { recursive: true });
-  await fsp.copyFile(path.join(repoRoot, 'netlify/functions/_shared/house-session.mjs'), path.join(runtime, 'house-session.mjs'));
+  // The checked-in local House session module keeps Hearthgate's credential policy.
+  await fsp.access(path.join(runtime, 'house-session.mjs'));
   for (const name of await fsp.readdir(path.join(repoRoot, 'lib'))) {
     if (name.startsWith('wayglass-') && name.endsWith('.cjs')) {
       await fsp.copyFile(path.join(repoRoot, 'lib', name), path.join(runtime, name));
@@ -46,7 +47,7 @@ async function copyTree(from, to) {
   for (const file of ['tensor-engine.cjs','tensor-ir.cjs']) {
     await fsp.copyFile(path.join(repoRoot,'lib','wyrdrune',file),path.join(wtlDir,file));
   }
-  for(const file of ['canonical.cjs','enochian.cjs','wyrdrune.cjs','ritual-ledger.cjs','runtime.mjs','story-soundscape.wtl','full-spectrum.wtl','resonance-atlas.wtl','living-learning.wtl','with-001.wtl','with-002-amber.wtl','with-003-refrain.wtl','with-004-enochian-369.wtl','tensor-ir.cjs','tensor-engine.cjs','tensor-autodiff.cjs','tensor-lowering.cjs','tensor-assurance.cjs','tensor-wtl-bridge.cjs','kernel-divination.cjs','tensor-engine.wtl','coevolution-repair.wtl','coevolution-expand.wtl','mythience-crossing.wtl','mythience-hybrid.wtl','altered-timeline.wtl']){
+  for(const file of ['skyrunor-program.mjs','skyrunor-change.mjs','skyrunor-bridge.mjs','skyrunor.mjs','bidirectional.mjs','gloss.mjs','browser-canonical.mjs','fiction-mobius.mjs','canonical.cjs','enochian.cjs','wyrdrune.cjs','typed-ir.cjs','revision-selection.wtl','engine-verify.wtl','engine-turn.wtl','double-mobius-orientation.wtl','observer-compression.wtl','observer-feedback.wtl','shipwide-feedback.wtl','ritual-ledger.cjs','runtime.mjs','quantum.mjs','expression.mjs','lantern-return.wtl','bell-wonder.wtl','story-soundscape.wtl','full-spectrum.wtl','resonance-atlas.wtl','living-learning.wtl','with-001.wtl','with-002-amber.wtl','with-003-refrain.wtl','with-004-enochian-369.wtl','tensor-ir.cjs','tensor-engine.cjs','tensor-autodiff.cjs','tensor-lowering.cjs','tensor-assurance.cjs','tensor-wtl-bridge.cjs','kernel-divination.cjs','tensor-engine.wtl','coevolution-repair.wtl','coevolution-expand.wtl','mythience-crossing.wtl','mythience-hybrid.wtl','altered-timeline.wtl','colony-form.wtl']){
     await fsp.copyFile(path.join(repoRoot,'lib','wyrdrune',file),path.join(wtlDir,file));
   }
 

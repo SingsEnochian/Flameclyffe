@@ -79,7 +79,7 @@ test('LLM observation uses deliberate single-consumption handoff; no hidden auto
   queueObserverContextForWriting(packet);
   const message=consumeObserverContextForWriting();
   assert.match(message,/explicitly shared by the user/);
-  assert.match(message,/not a measurement of identity/);
+  assert.match(message,/Visual mapping derived from the recorded readings/);
   assert.equal(consumeObserverContextForWriting(),null);
 });
 test('Wiring includes registered room and user-mediated LLM composer route',()=>{

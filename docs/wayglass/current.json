@@ -191,6 +191,357 @@
         "continuous-addressed-sound-regions-and-declared-affinity"
       ],
       "note": "Preserves canonical First Contact/Astra routes. PR570 is superseded by the canonical-based integration review because its branch requires linear history; source branches are preserved. No deployed host SHA, installed Windows build or live participant invocation established."
+    },
+    {
+      "branch": "wayglass/whole-pizza-os-20261122",
+      "target": "wayglass/current",
+      "status": "candidate-native-eight-system-kernel-and-wyrdrune-workbench",
+      "scope": [
+        "native-wayglass-eight-system-vessel-kernel",
+        "organ-and-surface-assembly-map",
+        "whole-vessel-wyrdrune-two-cycle-programme",
+        "authenticated-wyrdrune-compile-and-execute-workbench",
+        "program-viewer-and-spell-wizard",
+        "feather-aware-vessel-lifecycle"
+      ],
+      "note": "Integrates the current organ/surface registries into one vessel kernel and adds a source-verified Wyrdrune execution deck. Runtime acceptance is determined by exact-head CI."
+    },
+    {
+      "branch": "wayglass/return-trial-004-live-transport-20261117",
+      "target": "wayglass/unified-review-20261118",
+      "status": "selectively-staged-on-pr-661-pending-exact-head-and-live-host",
+      "source_pr": 648,
+      "source_commit": "e3463d7511fac4919ba7a6f096242bdc63584730",
+      "scope": [
+        "verified-work-return-selection-contract",
+        "authenticated-existing-route-host-runner",
+        "zero-model-call-corruption-gates",
+        "content-addressed-return-receipt"
+      ],
+      "note": "Selectively ports the verified-work evaluator into the One Ship train and reuses wayglass:ship to wayglass:crow. It does not import the proposed Amber room or a raw Ollama bypass. No live model response, deployment or integration acceptance is asserted."
     }
-  ]
+  ],
+  "native_storage": {
+    "provider": "Supabase",
+    "project": "Flameclyffe",
+    "project_ref": "rufrmjyusalnifpegllj",
+    "tables": [
+      "wayglass_programs",
+      "wayglass_program_revisions",
+      "wayglass_program_runs"
+    ],
+    "rpc": "wayglass_save_program",
+    "migration": "20261122051513_wayglass_program_library_v1",
+    "owner_key": "rowan",
+    "rls_enabled": true,
+    "anon_authenticated_access": false,
+    "service_role_access": true,
+    "seeded_program": "wayglass-vessel-plan",
+    "seeded_version": 1,
+    "builtin_programs": [
+      "wayglass-vessel-plan",
+      "story-soundscape",
+      "full-spectrum",
+      "resonance-atlas"
+    ],
+    "seeded_programs": 4,
+    "revisions_per_seed": 1,
+    "source_hashes_verified": true
+  },
+  "governance": {
+    "one_ship_contract": "docs/wayglass/ONE_SHIP_DIRECTIVE.md",
+    "contract_version": "2026-11-22",
+    "status": "integrated-in-review-on-pr-661",
+    "change_impact_manifest": "docs/wayglass/CHANGE_IMPACT.json",
+    "change_impact_validator": "scripts/verify-one-ship-impact.mjs",
+    "single_mission_issue": 583,
+    "current_reconciliation_train_pr": 661,
+    "source_pr": 677,
+    "propagation_rule": "every meaningful implementation change updates the impact manifest in the same change set and passes exact-head validation",
+    "focus_router_law": "docs/wayglass/FOCUS_ROUTER_LAW_V0_1.md",
+    "focus_router_law_id": "WAYGLASS-LAW-FOCUS-001",
+    "focus_router_prerequisite": true,
+    "focus_router_queue_issue": 583,
+    "focus_router_integration_pr": 661,
+    "focus_router_status": "owner-adopted-candidate-in-review-on-pr-661"
+  },
+  "custom_domain_deployment": {
+    "hostname": "wayglass.world",
+    "launcher": "scripts/Deploy-WayglassWorld.ps1",
+    "gateway_loopback_port": 32861,
+    "runbook": "docs/wayglass/WAYGLASS_OWNER_ONLY_CLOUDFLARE_RELEASE.md",
+    "status": "integration-preparation; Windows and Cloudflare acceptance pending"
+  },
+  "reconciliation_queue": [
+    {
+      "source_pr": 676,
+      "organ": "native OS / WTL Workbench",
+      "status": "partially-integrated-on-pr-661; 62-of-72-changed-paths-overlap; 10 exclusive glyph/type-foundry paths require review",
+      "head_sha": "76aaba747dd5b087bd242c13befd311bcd4823a5",
+      "conflict": "The current integration branch already contains the native Program Workbench surface, Wyrdrune workbench client, Supabase program store, authenticated library/workbench routes, and the program-library migration. Several core files are identical to #676; main.js, router.js and program-workbench.js differ. #676 remains 76 commits ahead and 215 behind the current train, with 62 changed files; no whole-branch merge.",
+      "next_action": "Review ten #676-exclusive type-foundry/glyph files and divergent main/router/Workbench semantics; port validated missing functionality once on #661 and update impact map; then reconcile Soma Nova charge/fire and other source candidates."
+    },
+    {
+      "source_pr": 678,
+      "organ": "SomaNova.Morphogenesis",
+      "status": "morphogenesis planner and authenticated Folio preview integrated in #661; exact-head CI suite successful; durable fire/Return pending",
+      "head_sha": "8e3047744eaa9565c79c610fddd5d69e20f1a0fd",
+      "conflict": "The source candidate chamber's caller-supplied principal.authorized boolean is not an authentication boundary and was not ported. The pure planner and tests are ported; native host preview uses griffStewardAuthorized and server-fixed preview capabilities. No persistence or commit/fire route yet.",
+      "next_action": "Add durable charge/commit/Return through the existing program/revision/run store, preserve the same identity and lineage invariants, and expose owner-consented fire through the canonical WTL runtime."
+    },
+    {
+      "source_pr": 667,
+      "organ": "FAEberpunk shared shell",
+      "status": "shared-FAEberpunk-stylesheet-on-661; exact-head CI successful; physical-device acceptance pending",
+      "head_sha": "d9c4c58deddcb42b069ace204cb207244188f02c",
+      "conflict": "source branch is stacked on stale integration head; only shared shell stylesheet ported",
+      "next_action": "verify exact-head desktop/tablet/phone browser layout and reconcile remaining cell-garden visual changes"
+    },
+    {
+      "source_pr": 674,
+      "organ": "Unified Magic / Observer",
+      "status": "unintegrated-source-candidate; shared-file-conflicts-mapped; architecture-reconciliation-required",
+      "head_sha": "0b7c8c591de77c02858bdc40e3d0f1dfff267aac",
+      "conflict": "Its eight-engine numerical law simulator, separate Lawsmith DSL/parser, legacy wyrdrune.cjs adapter, filesystem journal/receipt host, magic routes, Magic Loom, Lawsmith and Universal Embodiment surfaces are absent from #661. It overlaps canonical WTL runtime, Program Workbench, Soma Nova Morphogenesis, program_runs store, Return ledger, Watercolour, Observer and current router/main/deck/Codex files. Its own docs scope the numerical law model to Dreaming simulation and distinguish it from Waking World measurements.",
+      "next_action": "Reconcile law/Metagenesis semantics into canonical WTL typed AST/IR and capability bridge; treat numerical integration as a domain engine invoked by WTL, not a second language/runtime. Fold Universal Embodiment into Soma Nova Form Atlas/Folio; fold Magic Loom/Lawsmith into the native program/ritual surfaces; replace separate filesystem receipts with the canonical program-run/Return ledger or prove a non-duplicative need. Preserve source branch and tests; no whole-branch merge."
+    },
+    {
+      "source_pr": 673,
+      "organ": "Watercolour SON-002 projection",
+      "status": "unintegrated-source-candidate; overlaps-existing-watercolour-and-acoustic-organs",
+      "head_sha": "47a9ac63248186ee1cbd9d94c3325cc8e71f8de7",
+      "conflict": "All four target files already exist in #661 but differ from candidate versions. It overlaps #649 layered Watercolour conversation playback and the current audio engine/soundscape; source branch is not identical to the integration train.",
+      "next_action": "Diff exact code and tests against current Watercolour/acoustic files; port only SON-002 spatial pigment projection without replacing whole files, preserve current audio and layered conversation behaviour, and keep Watercolour a subscriber rather than an executor."
+    },
+    {
+      "source_pr": 651,
+      "organ": "branch garden / inventory",
+      "status": "audit-document-only-source-candidate",
+      "head_sha": "18469dd8f7e49912d97f64db01e6a1392267765a",
+      "conflict": "The branch adds a branch-garden audit document only; it does not yet provide the machine-readable exact-SHA graph or reconcile current PRs.",
+      "next_action": "Use as historical audit input, then refresh the graph against the current PR head and preserve every branch until adoption proof."
+    },
+    {
+      "source_prs": [
+        662,
+        665,
+        668,
+        670,
+        671,
+        672
+      ],
+      "organ": "WTL Nursery / cellular ecology",
+      "status": "stacked-candidates-preserve-lineage",
+      "next_action": "resolve stack order and mutual dependencies before selective integration; preserve consent, archive, Feather and cold Return"
+    },
+    {
+      "source_prs": [
+        663,
+        669
+      ],
+      "organ": "provider diagnostics",
+      "status": "duplicate-candidates",
+      "next_action": "compare exact diff; import once if compatible; preserve existing provider attribution and Astra changes"
+    },
+    {
+      "source_prs": [
+        664,
+        659,
+        657,
+        647,
+        600,
+        582
+      ],
+      "organ": "auth / model / cloud",
+      "status": "security-critical-candidates",
+      "next_action": "verify issuer, seat identity, owner authority, JWT, revocation and deployed route before integration"
+    },
+    {
+      "source_prs": [
+        658,
+        629,
+        648,
+        603
+      ],
+      "organ": "Return / continuity",
+      "status": "pr-648-selection-contract-selectively-staged-on-pr-661; exact-head-and-live-host-pending",
+      "next_action": "verify the focused and exact-head checks, then run one attributable wayglass:ship to wayglass:crow return through the authenticated host; preserve one canonical ledger"
+    },
+    {
+      "source_pr": 675,
+      "organ": "capability-forward language law",
+      "head_sha": "9cb2bddf3eb7cd6dfe46143eba48d342f2fc1c04",
+      "status": "main-based-source-candidate; 3-of-22-changed-paths-overlap-19-exclusive",
+      "next_action": "Port forward-looking design language and paired code/test edits through #661; never send this directly into main."
+    },
+    {
+      "source_pr": 679,
+      "organ": "Watercolour holographic embodiment",
+      "head_sha": "80b62f0f7044495dc4eb148a642c37b62bab8ccc",
+      "status": "main-based-candidate-needs-current-sensory-body-reconciliation",
+      "next_action": "Inspect resource cleanup, Resolve/Release, Feather, accessibility and Soma Nova linkage; port as existing Watercolour body organ."
+    },
+    {
+      "source_pr": 677,
+      "organ": "One Ship governance",
+      "head_sha": "537eab8b51a8171c3e155e9d1b7a4a41bdcd74ab",
+      "status": "all-six-target-paths-represented-in-661-and-extended; provenance-only-source-candidate",
+      "next_action": "Keep one evolving directive, register and validator on #661; preserve #677 source as provenance."
+    }
+  ],
+  "reconciliation_checkpoint": {
+    "date": "2026-11-23",
+    "integration_pr": 661,
+    "observed_head_before_register_update": "826c7db512fbc77340973876e52ca9e3b9cd4703",
+    "impact_manifest": "docs/wayglass/CHANGE_IMPACT.json",
+    "impact_manifest_status": "declares all 330 implementation/workflow paths in current PR diff",
+    "faeberpunk": "Shared ship stylesheet ported and loaded after room styles; full design and responsive browser acceptance remain pending.",
+    "soma_nova": "Pure planner, tests, authenticated host preview route, responsive Folio in existing Program Workbench, and Feather cancellation are integrated on #661. Preview only; no durable charge, commit/fire, Form Atlas persistence or Return restoration yet.",
+    "supabase_program_store": "existing owner-scoped program/revision/run tables reused; no anon/authenticated table grants; service_role only; RLS enabled with no policies by design of current migration; host/service boundary still requires exact route and credential custody verification",
+    "return_engine_verified_work_selection": {
+      "status": "source-staged-in-pr-661-pending-verification",
+      "source_pr": 648,
+      "source_head": "e3463d7511fac4919ba7a6f096242bdc63584730",
+      "crossing": "wayglass:ship -> wayglass:crow",
+      "live_blocker": "On 2026-11-24, https://wayglass.world/api/v1/wayglass/routes returned HTTP 503 before application headers; no authorised House session or private loopback was available in this run.",
+      "deployment_sha": null
+    },
+    "deployment_sha": "unknown",
+    "last_verified_code_head": "df17731ebf24304beae21bc08dcc1f8114c42e0a",
+    "one_ship_change_impact": {
+      "status": "previous exact-head validator passed before scope expansion; expanded path coverage rerun pending",
+      "previous_pass_workflow": 45190029040,
+      "previous_pass_head": "df17731ebf24304beae21bc08dcc1f8114c42e0a",
+      "latest_expanded_run": 45190893527,
+      "implementation_paths": 366,
+      "declared_paths": 366,
+      "missing_paths": 0,
+      "extra_paths": 0,
+      "coverage": [
+        "apps",
+        "api",
+        "lib",
+        "scripts",
+        "tests",
+        "packages",
+        "deploy",
+        "integrations",
+        "netlify",
+        "os",
+        "profiles",
+        "scores",
+        "supabase",
+        "training",
+        "root package manifests",
+        "AGENTS.md",
+        ".github workflows/actions"
+      ],
+      "expanded_run_status": "pending"
+    },
+    "wayglass_check": {
+      "status": "failed",
+      "workflow_run": 45190029610,
+      "job_id": 137745618862,
+      "blockers": [
+        "Möbius Nursery encounter participant/attribution contract mismatch",
+        "First Contact/Watercolour tests require a 2D canvas context in the Node test environment",
+        "Wonder validation error wording differs from contract test",
+        "typed-IR Wonder/known operator purity and match-branch parsing tests fail",
+        "L1/L2 conformance cases are not claimed by current backend"
+      ]
+    },
+    "windows_installer": {
+      "previous_run": "45189390388",
+      "previous_failure": "Soma Nova broken-lineage input classified 422 rather than expected 400",
+      "repair_commit": "df17731ebf24304beae21bc08dcc1f8114c42e0a",
+      "current_run": "45190029567",
+      "status": "cancelled after a newer branch head superseded the run",
+      "last_run_id": 45190029567,
+      "latest_code_tested": "df17731ebf24304beae21bc08dcc1f8114c42e0a",
+      "next_action": "rerun on a subsequent code-bearing head; current latest change is register metadata only"
+    },
+    "whole_pizza": "Program Workbench, workbench client, server program store, authenticated routes and program-library migration are already present; #676 is partially integrated and remains divergent pending selective diff review.",
+    "unified_magic": "#674 not imported wholesale; separate runtime, parser and filesystem receipt host conflict with One Ship. Reconcile semantics into canonical WTL AST/IR and existing program/Return store.",
+    "watercolour": "#673 projection not yet imported; same files exist but differ, and #649 overlaps. Selective SON-002 subscriber port remains pending.",
+    "latest_code_head_before_register_update": "b1fb5671ebebf20d6ded77d3c0b6978db74558f6",
+    "nursery_semantic_grounding": {
+      "status": "source-candidate-staged-in-pr-661",
+      "source_pr": 668,
+      "source_head": "c466d281979dbd4b73274a5ae88ee170770d7e9e",
+      "source_branch": "codex/wtl-cell-hybrids-20261119",
+      "canonical_train_pr": 661,
+      "change_id": "nursery-semantic-grounding-one-ship-2026-11-23",
+      "notes": "Source-grounded signal explanations staged in existing Cell Garden and House host; poetry retained separately. Test and cold Return evidence pending. Do not mark fully integrated or deployed."
+    },
+    "private_tailnet_access": {
+      "change_id": "nursery-private-tailnet-access-repair-2026-11-23",
+      "source_status": "candidate-under-review-on-pr-661",
+      "route": "existing-port-32861-private-gateway-to-3000",
+      "browser_room": "/wayglass/?room=wayglass%3Acell-garden",
+      "access": "Tailscale Serve HTTPS plus existing House Steward sign-in; never Funnel",
+      "readiness": "requires owner Windows host execution and tailnet ACL review; not live-confirmed",
+      "deployment_sha": null,
+      "release_validation": "pending owner device access and authenticated runtime, do not infer from green CI"
+    }
+  },
+  "reconciliation_checkpoint_20261125": {
+    "date": "2026-11-25",
+    "mission_issue": 583,
+    "integration_pr": 661,
+    "source_before_checkpoint": "42d7e9bd0642ffd0b66c863e95c57ea7a31c9702",
+    "report": "docs/wayglass/ONE_SHIP_PR_RECONCILIATION_20261125.md",
+    "canonical_development_branch": "wayglass/current",
+    "release_branch": "main",
+    "open_pr_inventory": {
+      "all_open": 231,
+      "base_main": 73,
+      "base_wayglass_current": 70,
+      "base_stacked_or_other": 88,
+      "note": "Repository-wide inventory; not all proposals represent Wayglass work."
+    },
+    "one_ship_source_status": "single-train-active-unmerged",
+    "main_train": {
+      "pr": 661,
+      "commits_vs_current": 294,
+      "changed_paths": 440,
+      "mergeable": true,
+      "mergeable_state": "unstable",
+      "exact_head_workflow_runs": {
+        "successful": 23,
+        "cancelled": 1,
+        "failed": 0,
+        "head": "42d7e9bd0642ffd0b66c863e95c57ea7a31c9702",
+        "cancelled_name": "Wayglass Nikola Eightfold Return Gate"
+      },
+      "deployment_sha": null,
+      "owner_device_accepted": false
+    },
+    "whole_pizza_source": {
+      "pr": 676,
+      "sha": "76aaba747dd5b087bd242c13befd311bcd4823a5",
+      "changed_paths": 72,
+      "paths_also_changed_in_train": 62,
+      "distinct_new_paths": 10,
+      "cross_branch_compare": {
+        "ahead": 79,
+        "behind": 294
+      },
+      "status": "selective-diff-review-required-no-whole-branch-merge"
+    },
+    "status_by_pr": {
+      "667": "shared FAEberpunk stylesheet staged; exact-head browser suite passed",
+      "673": "SON-002 sound-to-pigment subscriber pending",
+      "674": "separate numerical runtime/DSL/journal conflicts with one WTL compiler; semantic adoption pending",
+      "675": "19 exclusive code/doc paths need selective language-law port; main-based source candidate",
+      "676": "workbench/OS partially integrated; 10 type-foundry/glyph paths exclusive to source",
+      "677": "governance source represented and evolved on #661; no whole-branch merge",
+      "678": "pure planner + authenticated Folio preview integrated; charge/fire/Return pending",
+      "679": "Watercolour embodiment source targets main; must be reconciled into existing sensory body",
+      "662-665-668-670-671-672": "Nursery stack preserved; harmonise WTL, persistence and identity before selective port",
+      "663-669": "duplicate Ollama stop-reason patches; select one"
+    },
+    "next_owner": "One Ship #661 integration",
+    "next_action": "Review ten #676-exclusive type-foundry/glyph files and divergent main/router/Workbench semantics; port validated missing functionality once on #661 and update impact map; then reconcile Soma Nova charge/fire and other source candidates.",
+    "release_gate": "no merge, owner-only production promotion or PR source deletion from this checkpoint"
+  }
 }

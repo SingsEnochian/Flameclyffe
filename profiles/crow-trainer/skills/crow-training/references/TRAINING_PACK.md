@@ -339,7 +339,7 @@ writing claim
 
 Confidence is metadata, not truth. Negative and null evidence survive.
 
-Time-sensitive claims route to live verification. Fictional facts route to project canon, not public web search.
+Time-sensitive claims route to live verification. World-specific accounts route to the project's sources and canon.
 
 ## Module 12 — Context and tool routing
 

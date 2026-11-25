@@ -33,17 +33,20 @@ export function morphFrame(source,target,progress){
 }
 export function animateWyrdruneTranslation(node,{
   source,translation,reducedMotion=false,scope=globalThis,
-  lingerMs=1500,frameMs=95,steps=40,onComplete=()=>{},
+  lingerMs=1500,frameMs=95,steps=40,onComplete=()=>{},direction="english",
 }={}){
   if(!node||typeof source!=='string'||typeof translation!=='string')
     throw new TypeError('A native source, model translation and display are required.');
+  if(!['english','wyrdrune'].includes(direction))throw new TypeError('Unknown cypher direction.');
+  const returning=direction==='wyrdrune';
+  const from=returning?translation:source,to=returning?source:translation;
   const media=scope.matchMedia?.('(prefers-reduced-motion: reduce)');
   let ended=false,handle=null,frame=0;
   const maxFrames=Math.max(2,Math.min(48,Math.trunc(Number(steps)||40)));
   const tickMs=Math.max(16,Math.min(180,Number(frameMs)||95));
-  node.textContent=source;
-  node.setAttribute?.('lang','zxx');
-  node.setAttribute?.('data-cypher-line','source');
+  node.textContent=from;
+  node.setAttribute?.('lang',returning?'en-GB':'zxx');
+  node.setAttribute?.('data-cypher-line',returning?'english':'source');
   node.setAttribute?.('data-cypher-state','reading');
   function detach(){
     if(handle!=null)scope.clearTimeout?.(handle);
@@ -55,10 +58,10 @@ export function animateWyrdruneTranslation(node,{
   function finish(){
     if(ended)return;
     ended=true;detach();
-    node.textContent=translation;
-    node.setAttribute?.('lang','en-GB');
-    node.setAttribute?.('data-cypher-line','english');
-    node.setAttribute?.('data-cypher-state','english');
+    node.textContent=to;
+    node.setAttribute?.('lang',returning?'zxx':'en-GB');
+    node.setAttribute?.('data-cypher-line',returning?'source':'english');
+    node.setAttribute?.('data-cypher-state',direction);
     onComplete();
   }
   function cancel(){
@@ -72,7 +75,7 @@ export function animateWyrdruneTranslation(node,{
   }
   const onMedia=event=>{if(event?.matches===true)finish();};
   const onMotion=event=>{if(event?.detail?.enabled===false)finish();};
-  const onFeather=event=>{if(event?.detail?.stopped===true)cancel();};
+  const onFeather=event=>{if(event?.detail?.stopped===true)(returning?finish:cancel)();};
   const stop=()=>cancel();
   stop.reveal=finish;
   if(reducedMotion||media?.matches){finish();return stop;}
@@ -82,7 +85,7 @@ export function animateWyrdruneTranslation(node,{
   const tick=()=>{
     if(ended)return;
     frame++;
-    node.textContent=morphFrame(source,translation,frame/maxFrames);
+    node.textContent=morphFrame(from,to,frame/maxFrames);
     node.setAttribute?.('data-cypher-line','runes');
     if(frame>=maxFrames)finish();
     else handle=scope.setTimeout(tick,tickMs);

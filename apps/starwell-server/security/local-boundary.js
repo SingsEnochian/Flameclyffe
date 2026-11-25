@@ -156,7 +156,16 @@ function redactHearthgateConfig(input) {
   };
 }
 
+// This policy governs the HTML document. Browser microphone permission is
+// still requested by the Acoustic Room when the user chooses a live exchange.
+function localDevicePermissions(pathname) {
+  const wayglassDocument = pathname === '/wayglass/' || pathname === '/wayglass/index.html';
+  const microphone = wayglassDocument ? '(self)' : '()';
+  return `camera=(), microphone=${microphone}, geolocation=(), usb=(), serial=()`;
+}
+
 module.exports = {
+  localDevicePermissions,
   DEFAULT_ALLOWED_ORIGINS,
   PROTECTED_ENV_NAMES,
   configuredAllowedOrigins,

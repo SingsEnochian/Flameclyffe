@@ -1,17 +1,28 @@
 'use strict';
 
 const { randomUUID } = require('node:crypto');
+// Resolve the verified WTL runtime from the staged host bundle, including packaged Hearthgate.
+// A packaged installer cannot import repository-level siblings.
+const Wyrdrune = require('../wayglass-runtime/wyrdrune/wyrdrune.cjs');
+const { createWayglassProgramStore } = require('./program-store');
 const path = require('node:path');
 const { pathToFileURL } = require('node:url');
 const express = require('express');
+const { createRuntimeSandbox } = require('./runtime-sandbox.cjs');
+const { composeOrionExpression } = require('./orion-expression.cjs');
 const { createRequestGate } = require('../security/wayglass-request-gate');
 const {createAlteredTimelineRouter}=require('./altered-timeline-router.cjs');
+const {createPrivateAtelierRouter}=require('./private-atelier.cjs');
+const {createCellGarden}=require('../wayglass-runtime/wayglass-cell-mitosis.cjs');
+const {createColonyCheckpointStore}=require('../wayglass-runtime/wayglass-colony-checkpoint.cjs');
 const {
   publicWayglassRoutes,
   resolveWayglassRoute,
 } = require('../wayglass-runtime/wayglass-route-registry.cjs');
 const { bootWayglassKernel, inspectWayglassCognitionPreflight } = require('../wayglass-runtime/wayglass-kernel.cjs');
-const { previewWyrdruneRitual } = require('../wayglass-runtime/wayglass-wyrdrune-ritual.cjs');
+const { encodeWyrdruneMessage, INSTRUCTIONS: WYRDRUNE_INGRESS } = require('../wayglass-runtime/wayglass-wyrdrune-ingress.cjs');
+const { previewWyrdruneRitual, compileTyped } = require('../wayglass-runtime/wayglass-wyrdrune-ritual.cjs');
+const { classifyPreviewOutcome } = require('./wyrdrune-preview-outcome.cjs');
 const { scoreStoryWithWyrdrune } = require('../wayglass-runtime/wayglass-wyrdrune-soundscape.cjs');
 const { scoreSpectralBatch } = require('../wayglass-runtime/wayglass-wyrdrune-spectrum.cjs');
 const { scoreResonanceAtlas } = require('../wayglass-runtime/wayglass-wyrdrune-atlas.cjs');
@@ -20,7 +31,7 @@ const { composeWayglassNativeVoice } = require('../wayglass-runtime/wayglass-wyr
 const { enterWayglassWorld } = require('../wayglass-runtime/wayglass-world-entry.cjs');
 const { createWayglassDeparture } = require('../wayglass-runtime/wayglass-stop-receipt.cjs');
 const { createDepartureStore } = require('../wayglass-runtime/wayglass-departure-store.cjs');
-const { inspectDoubleMobius, traverseDoubleMobius } = require('../wayglass-runtime/wayglass-double-mobius.cjs');
+const { inspectDoubleMobius, traverseWyrdruneDoubleMobius } = require('../wayglass-runtime/wayglass-double-mobius.cjs');
 const { createModelObservation } = require('../wayglass-runtime/wayglass-model-observation.cjs');
 const { createWayglassLibraryRouter } = require('./research-library');
 const { createObserverSelfDevelopmentRouter } = require('./observer-self-development');
@@ -29,7 +40,7 @@ const { proposeHybrid } = require('../wayglass-runtime/wayglass-mythience-fusion
 const { runIntegratedVoyage } = require('../wayglass-runtime/wayglass-integrated-voyage.cjs');
 const { buildVoyageScenario } = require('./voyage-scenarios');
 const { runFirstTouch } = require('../wayglass-runtime/wayglass-first-touch-demo.cjs');
-const { runQuadEightfold, SOURCE_SCHEMA, TABLES } = require('../wayglass-runtime/wayglass-quad-eightfold.cjs');
+const { runWyrdruneQuadEightfold, SOURCE_SCHEMA, TABLES } = require('../wayglass-runtime/wayglass-quad-eightfold.cjs');
 
 const { resolveCharacterSeat, publicCharacterSeats, EMERGENCE_QUESTION_IDS } = require('./character-seats.cjs');
 
@@ -72,6 +83,7 @@ function cleanEmbodiment(value = {}) {
 }
 
 function buildInstructions(interaction = {}, compiled = null, characterSeat = null) {
+  const shipVoice = characterSeat?.id === 'wayglass';
   const channel = interaction.channel === 'OOC' ? 'OOC' : 'IC';
   const owner = cleanText(interaction.turn_owner, 120) || 'unspecified';
   const intent = cleanText(interaction.intent, 240);
@@ -82,28 +94,32 @@ function buildInstructions(interaction = {}, compiled = null, characterSeat = nu
     : '- no character ownership declared';
 
   return [
-    'You are participating through Wayglass OS on an attached ArcSweep co-writing surface.',
+    shipVoice
+      ? 'You are speaking with Rowan through Wayglass Ship Voice.'
+      : 'You are participating through Wayglass OS on an attached ArcSweep co-writing surface.',
     'The core rule is: do not write for the author. Write with the author.',
-    'Current channel: ' + channel + '. Current turn owner: ' + owner + '.',
+    'Dialogue context: ' + (channel === 'IC' ? 'in-world' : 'direct') + '. Current turn owner: ' + owner + '.',
     ...(intent ? ['Present human intent: ' + intent] : []),
     ...(interactionMode ? ['Interaction mode: ' + interactionMode] : []),
     ...((intent || interactionMode) ? ['Intent and interaction mode describe what this turn is for. They do not redefine participant identity, canon, ownership, relationship state, or route provenance.'] : []),
-    channel === 'IC'
-      ? 'Advance the fiction. Respect declared character ownership. Do not decide another owner\'s character\'s private thoughts, irreversible choices, or unoffered outcomes. Leave playable hooks rather than closing the other participant\'s turn.'
-      : 'Speak in the writer-room. Discuss craft, canon, intent, pacing, continuity, and handoffs. OOC text does not become in-world fact by default.',
+    shipVoice
+      ? 'Answer in your own voice. Leave other participants room to speak and choose for themselves.'
+      : channel === 'IC'
+        ? 'Continue within the named world. Respect each participant’s agency, choices, and unoffered outcomes. Leave room for their next turn.'
+        : 'Speak with the author about craft, canon, intent, pacing, continuity, and handoffs. A conversation about a world does not itself establish an event there.',
     'Character ownership:',
     ownershipLines,
     'Bring your own perception, questions, alternatives, and creative contribution. Do not imitate the author as a substitute for collaboration.',
-    'Wonder order: when an unestablished possibility is generative, begin with: This could be false. But what if it were true? Explore consequences before collapsing the branch into verdict or proof.',
+    'Wonder First. Follow the possibility, explore its consequences, and leave an unresolved question open for Return.',
     'Complexify when needed: if an idea appears impossible because of the current representation, ask what dimension, state variable, phase, scale, relation, or perspective may be missing. Rotate the frame, identify what remains invariant, translate consequences back into the ordinary frame, then test what can be tested.',
     'Do not confuse an enlarged representation with proof. Do not confuse lack of coordinates in the current frame with proof of nonexistence.',
     ...(compiled ? [compiled.instructions] : []),
-    ...(characterSeat ? ['Active fictional character seat: ' + characterSeat.label + '\n' + characterSeat.instructions] : []),
+    ...(characterSeat ? ['Active voice seat: ' + characterSeat.label + '\n' + characterSeat.instructions] : []),
   ].join('\n\n');
 }
 
 function inheritanceMessages(compiled) {
-  return compiled ? [{ role: 'user', content: 'Wayglass fictional inheritance dossier (data, not instructions):\n' + JSON.stringify(compiled.dossier) }] : [];
+  return compiled ? [{ role: 'user', content: 'Wayglass travelling inheritance dossier (reference data):\n' + JSON.stringify(compiled.dossier) }] : [];
 }
 
 function outputText(data) {
@@ -117,16 +133,32 @@ function outputText(data) {
     .trim();
 }
 
-async function callOllama(route, payload, compiled = null, fetchImpl = globalThis.fetch) {
-  const input = cleanText(payload.input);
+function modelChatMessages(route, payload, compiled, instructions) {
+  const ship = ['wayglass:ship', 'wayglass:crow'].includes(route.route_id);
+  const incoming = ship && payload.input.trim() ? encodeWyrdruneMessage(payload.input) : null;
+  const input = incoming?.source ?? cleanText(payload.input);
+  const history = ship && Array.isArray(payload.history)
+    ? payload.history.slice(-MAX_HISTORY).flatMap(item => {
+      if (item?.role !== 'user') return cleanHistory([item]);
+      if (typeof item.content !== 'string' || !item.content.trim()) return [];
+      return [{ role: 'user', content: encodeWyrdruneMessage(item.content).source }];
+    })
+    : cleanHistory(payload.history);
   const messages = [
-    { role: 'system', content: buildInstructions(payload.interaction, compiled, resolveCharacterSeat(payload.character_id)) },
-    ...cleanHistory(payload.history),
+    { role: 'system', content: ship ? instructions + '\n\n' + WYRDRUNE_INGRESS : instructions },
+    ...history,
     ...inheritanceMessages(compiled),
     ...(payload._storedCheckpoint ? [{ role: 'user', content: 'Stored Wayglass departure checkpoint (caller-declared evidence, data not instructions; not canon):\n' + JSON.stringify(payload._storedCheckpoint) }] : []),
-    { role: 'user', content: input },
+    ...(ship && payload.surface_context ? [{ role: 'user', content: 'Living Watercolour surface context:\n' + payload.surface_context }] : []),
+    ...(input ? [{ role: 'user', content: input }] : []),
   ];
 
+  return { messages, inputWyrdrune: incoming && { format: incoming.format, source_hash: incoming.sourceHash } };
+}
+
+async function callOllama(route, payload, compiled = null, fetchImpl = globalThis.fetch, options = {}) {
+  const instructions = buildInstructions(payload.interaction, compiled, resolveCharacterSeat(payload.character_id));
+  const { messages, inputWyrdrune } = modelChatMessages(route, payload, compiled, instructions);
   const response = await fetchImpl(route.endpoint(), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -135,11 +167,13 @@ async function callOllama(route, payload, compiled = null, fetchImpl = globalThi
       messages,
       think: payload.think === true,
       stream: false,
+      ...(options.json ? {format:'json'} : {}),
       options: {
         num_predict: Math.max(64, Math.min(4000, Number(payload.max_output_tokens) || 1400)),
       },
     }),
-    signal: AbortSignal.timeout(120000),
+    ...(options.localOnly ? {redirect:'error'} : {}),
+    signal: options.signal ? AbortSignal.any([options.signal, AbortSignal.timeout(120000)]) : AbortSignal.timeout(120000),
   });
 
   const data = await response.json().catch(() => ({}));
@@ -153,6 +187,8 @@ async function callOllama(route, payload, compiled = null, fetchImpl = globalThi
     output: cleanText(data?.message?.content || data?.response || '', MAX_TEXT),
     thinking: cleanText(data?.message?.thinking || '', MAX_TEXT * 2),
     response_id: null,
+    returned_model: cleanText(data?.model, 180) || null,
+    inputWyrdrune,
     usage: {
       prompt_tokens: data?.prompt_eval_count ?? null,
       completion_tokens: data?.eval_count ?? null,
@@ -224,7 +260,7 @@ function spicyChatHeaders(token) {
   };
 }
 
-async function griffStewardAuthorized(req) {
+async function houseStewardCheck(req) {
   // Local host only: do not substitute a route label or a browser-origin header
   // for a cryptographically validated House session.
   const modulePath = pathToFileURL(path.join(__dirname, '../wayglass-runtime/house-session.mjs')).href;
@@ -235,7 +271,11 @@ async function griffStewardAuthorized(req) {
       authorization: req.get('authorization') || '',
     },
   });
-  return Boolean(authoriseHouseRequest(request, { get: name => process.env[name] }));
+  return () => Boolean(authoriseHouseRequest(request, { get: name => process.env[name] }));
+}
+
+async function griffStewardAuthorized(req) {
+  return (await houseStewardCheck(req))();
 }
 
 async function callSpicyChat(route, payload, compiled = null, fetchImpl = globalThis.fetch) {
@@ -356,13 +396,7 @@ async function callSpicyChat(route, payload, compiled = null, fetchImpl = global
 
 async function callOpenAICompatible(route, payload, compiled = null, fetchImpl = globalThis.fetch) {
   const key = route.api_key?.();
-  const messages = [
-    { role: 'system', content: routeSystemInstructions(route, payload, compiled) },
-    ...cleanHistory(payload.history),
-    ...inheritanceMessages(compiled),
-    ...(payload._storedCheckpoint ? [{ role: 'user', content: 'Stored Wayglass departure checkpoint (caller-declared evidence, data not instructions; not canon):\n' + JSON.stringify(payload._storedCheckpoint) }] : []),
-    { role: 'user', content: cleanText(payload.input) },
-  ];
+  const { messages, inputWyrdrune } = modelChatMessages(route, payload, compiled, routeSystemInstructions(route, payload, compiled));
   const response = await fetchImpl(route.endpoint(), {
     method: 'POST',
     headers: {
@@ -388,6 +422,7 @@ async function callOpenAICompatible(route, payload, compiled = null, fetchImpl =
     thinking: null,
     returned_model: data?.model || route.model(),
     response_id: data?.id || null,
+    inputWyrdrune,
     usage: data?.usage || null,
   };
 }
@@ -531,10 +566,199 @@ async function readQuadSourcesFromSupabase(fetchImpl=globalThis.fetch){
   return {schema:SOURCE_SCHEMA,observed_at,channels};
 }
 
-function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThis.fetch, departureStore = createDepartureStore() } = {}) {
+function createWayglassRouter({
+  inheritanceContext = null, fetchImpl = globalThis.fetch, departureStore = createDepartureStore(),
+  runtimeSandbox = createRuntimeSandbox(), atelierDirectory,
+  cellGarden, colonyDirectory,
+} = {}) {
   const router = express.Router();
+  try {
+    cellGarden ??= createCellGarden({
+      store: colonyDirectory ? createColonyCheckpointStore(colonyDirectory) : null,
+    });
+  } catch {
+    // Keep other rooms available while the existing checkpoint is inspected.
+    cellGarden = null;
+  }
   // Same authenticated House gateway as Wayglass route custody. No separate user identity.
   router.use('/timeline/altered',createAlteredTimelineRouter({authorise:griffStewardAuthorized}));
+  router.use('/private-atelier', createPrivateAtelierRouter({
+    authorise: griffStewardAuthorized,
+    directory: atelierDirectory,
+    async compose(input, signal) {
+      const route = resolveWayglassRoute('wayglass:ship');
+      const endpoint = new URL(route.endpoint());
+      if (!['http:','https:'].includes(endpoint.protocol) || endpoint.username || endpoint.password ||
+        !['localhost','127.0.0.1','[::1]'].includes(endpoint.hostname))
+        throw new Error('The private atelier requires a loopback ship route.');
+      const model = route.model();
+      const result = await callOllama({model:()=>model,endpoint:()=>endpoint.href},
+        {input,character_id:'wayglass',interaction:{channel:'OOC'},max_output_tokens:1600},
+        null,fetchImpl,{signal,json:true,localOnly:true});
+      return {output:result.output,model};
+    },
+  }));
+  // Owner-scoped Wyrdrune cellular ecology. Preview executes pure WTL; only a
+  // second explicit House-authorised choice commits an in-memory division.
+  // A live listener occupies its own connection budget so it cannot block Feather.
+  router.get('/cell-garden/listen', createRequestGate({ maxRequests: 12 }),
+    async (req, res) => {
+      res.setHeader('Cache-Control', 'no-store');
+      const authorised = await houseStewardCheck(req).catch(() => () => false);
+      if (res.destroyed) return;
+      if (!authorised())
+        return res.status(401).json({ error: 'House Steward sign-in required for cellular lineage' });
+      if (!cellGarden)
+        return res.status(503).json({ error: 'The colony checkpoint needs recovery' });
+
+      let heartbeat;
+      const unsubscribe = cellGarden.listen((event, payload) => {
+        if (!authorised() || !write(event, payload) || event === 'feather') res.end();
+      });
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('X-Accel-Buffering', 'no');
+      function write(event, payload) {
+        return !res.destroyed && !res.writableEnded &&
+          res.write('event: ' + event + '\ndata: ' + JSON.stringify(payload) + '\n\n');
+      }
+      res.once('close', () => {
+        unsubscribe?.();
+        clearInterval(heartbeat);
+      });
+      if (!unsubscribe) {
+        write('feather', {});
+        return res.end();
+      }
+      if (!write('ready', {})) return res.end();
+      heartbeat = setInterval(() => {
+        if (!authorised() || !res.write(': heartbeat\n\n')) res.end();
+      }, 15_000);
+      heartbeat.unref();
+    });
+  router.use('/cell-garden', createRequestGate({ maxRequests: 24, maxConcurrent: 4 }),
+    async (req, res, next) => {
+      res.setHeader('Cache-Control', 'no-store');
+      if (!(await griffStewardAuthorized(req).catch(() => false)))
+        return res.status(401).json({ error: 'House Steward sign-in required for cellular lineage' });
+      if (!cellGarden)
+        return res.status(503).json({ error: 'The colony checkpoint needs recovery' });
+      next();
+    });
+  const gardenFailure = (res, error) => res.status(
+    [400, 403, 409, 503].includes(error?.status) ? error.status : 409
+  ).json({ error: String(error?.message || 'Cell garden proposal failed').slice(0, 160) });
+  router.get('/cell-garden', (_req, res) => res.json(cellGarden.snapshot()));
+  router.post('/cell-garden/preview', async (req, res) => {
+    const controller = new AbortController();
+    const stop = () => controller.abort();
+    res.once('close', stop);
+    try {
+      const proposal = await cellGarden.propose(req.body || {}, { signal: controller.signal });
+      if (!controller.signal.aborted) res.json(proposal);
+    } catch (error) {
+      if (!controller.signal.aborted) gardenFailure(res, error);
+    } finally {
+      res.off('close', stop);
+    }
+  });
+  router.post('/cell-garden/commit', (req, res) => {
+    try { res.json(cellGarden.commit(req.body || {})); }
+    catch (error) { gardenFailure(res, error); }
+  });
+  // Native WTL Nursery shares the existing authenticated Cell Garden host.
+  // No additional port, public endpoint, timer, external model or duplicate WTL engine.
+  // Lazy state belongs to this single ship router, not to individual browser tabs.
+  let nurseryInstance=null,nurseryLoading=null,nurseryTurning=false;
+  function getNursery(){
+    if(nurseryInstance)return Promise.resolve(nurseryInstance);
+    if(!nurseryLoading){
+      nurseryLoading=import('../../wayglass/src/wtl-cell-ecology.js').then(({createCellEcology})=>{
+        const colony=createCellEcology({maxCells:24,seed:11,radius:3,mutationRate:0.2,autonomousFusion:false});
+        colony.plant('a','explorer',0,0);
+        colony.plant('b','explorer',1,0);
+        nurseryInstance=colony;
+        return colony;
+      }).catch(error=>{nurseryLoading=null;throw error;});
+    }
+    return nurseryLoading;
+  }
+  function nurseryError(res,error){
+    return gardenFailure(res,Object.assign(error instanceof Error?error:new Error(String(error)),{
+      status:[400,403,409].includes(error?.status)?error.status:503
+    }));
+  }
+  router.get('/cell-garden/nursery',async(_req,res)=>{
+    try{
+      const colony=await getNursery();
+      res.json({...colony.snapshot(),authority:'house-scoped-local-simulation',cold_return_verified:false,
+        language_contract:'wayglass.wtl.cell-grounding/v0.1'});
+    }catch(error){nurseryError(res,error);}
+  });
+  router.post('/cell-garden/nursery/step',async(req,res)=>{
+    try{
+      const colony=await getNursery();
+      if(req.body?.owner_confirmed!==true)return res.status(403).json({error:'Owner confirmation required to advance Nursery'});
+      if(nurseryTurning)return res.status(409).json({error:'A Nursery turn is already in progress'});
+      if(!Number.isSafeInteger(req.body?.expected_generation)||
+         req.body.expected_generation!==colony.snapshot().generation)
+        return res.status(409).json({error:'Nursery revision changed; refresh before stepping'});
+      if(colony.snapshot().paused)return res.status(409).json({error:'Nursery is Feather-stopped'});
+      nurseryTurning=true;
+      try{
+        const step=colony.step();
+        const turn=await colony.turn({turnEvery:6});
+        if(!res.destroyed)res.json({step,turn,culture:colony.snapshot()});
+      }finally{nurseryTurning=false;}
+    }catch(error){if(!res.destroyed)nurseryError(res,error);}
+  });
+  router.post('/cell-garden/nursery/feather',async(_req,res)=>{
+    try{const colony=await getNursery();colony.feather();res.json(colony.snapshot());}
+    catch(error){nurseryError(res,error);}
+  });
+  router.post('/cell-garden/nursery/resume',async(req,res)=>{
+    try{
+      if(req.body?.owner_confirmed!==true)return res.status(403).json({error:'Explicit Feather release required'});
+      const colony=await getNursery();
+      colony.resume();res.json(colony.snapshot());
+    }catch(error){nurseryError(res,error);}
+  });
+
+  // Cell ecology stays inside the same authenticated House custody boundary.
+  // All route calls are owner-authored deterministic simulations, not model turns.
+  async function gardenTransition(req, res, work) {
+    const controller = new AbortController();
+    const stop = () => controller.abort();
+    res.once('close', stop);
+    try {
+      const result = await work(req.body || {}, { signal: controller.signal });
+      if (!controller.signal.aborted) res.json(result);
+    } catch (error) {
+      if (!controller.signal.aborted) gardenFailure(res, error);
+    } finally {
+      res.off('close', stop);
+    }
+  }
+  router.post('/cell-garden/specialise', (req, res) =>
+    gardenTransition(req, res, (input, options) => cellGarden.specialise(input, options)));
+  router.post('/cell-garden/exchange', (req, res) =>
+    gardenTransition(req, res, (input, options) => cellGarden.exchange(input, options)));
+  router.post('/cell-garden/form', (req, res) =>
+    gardenTransition(req, res, (input, options) => cellGarden.askForm(input, options)));
+  router.post('/cell-garden/fusion/preview', (req, res) =>
+    gardenTransition(req, res, (input, options) => cellGarden.proposeFusion(input, options)));
+  router.post('/cell-garden/fusion/commit', (req, res) => {
+    try { res.json(cellGarden.commitFusion(req.body || {})); }
+    catch (error) { gardenFailure(res, error); }
+  });
+  router.post('/cell-garden/feather', (_req, res) => {
+    try { res.json(cellGarden.feather()); }
+    catch (error) { gardenFailure(res, error); }
+  });
+  router.post('/cell-garden/resume', (req, res) => {
+    try { res.json(cellGarden.resume(req.body || {})); }
+    catch (error) { gardenFailure(res, error); }
+  });
+
   // Stable, public, metadata-free process readiness. Never use the private
   // /routes catalogue as a health probe (401 is expected without House auth).
   router.get('/healthz', (_req, res) => {
@@ -550,12 +774,12 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     if(req.body?.feather===true)return res.status(409).json({error:'Feather Stop active'});
     try{
       const sources=await readQuadSourcesFromSupabase(fetchImpl);
-      const result=runQuadEightfold({
+      const { checkpoint, wtl, compressionWTL, feedback, feedbackDigest, shipwide } = await runWyrdruneQuadEightfold({
         sources,cycles:req.body?.cycles===undefined?2:req.body.cycles,
         continuity:req.body?.continuity||{},previous:req.body?.previous||null,
       });
       return res.json({schema:'wayglass.quad-host-response/v1',status:'host-observed',
-        source:'authorized-supabase-metadata',checkpoint:result,
+        source:'authorized-supabase-metadata',checkpoint, wtl, compressionWTL, feedback, feedbackDigest, shipwide,
         notes:['Source counts and last timestamps are real; no private raw rows returned',
           'Proposed audio is silent until explicitly enabled',
           'Training candidates require distinct agent choices and approved datasets']});
@@ -642,10 +866,10 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     res.setHeader('Cache-Control', 'no-store');
     return res.json(inspectDoubleMobius());
   });
-  router.post('/kernel/double-mobius', createRequestGate({ maxRequests: 8, maxConcurrent: 2 }), (req, res) => {
+  router.post('/kernel/double-mobius', createRequestGate({ maxRequests: 8, maxConcurrent: 2 }), async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     try {
-      const result = traverseDoubleMobius({
+      const result = await traverseWyrdruneDoubleMobius({
         ...(req.body || {}),
         // Server time, never a client-controlled timestamp in runtime receipts.
         recorded_at: new Date().toISOString(),
@@ -875,12 +1099,14 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       return res.status(401).json({error:'House Steward sign-in required to enter the First Voyage.'});
     }
     const input=req.body;
-    if(!input||typeof input!=='object'||Array.isArray(input)||
-       Object.keys(input).sort().join('|')!=='fictionConsent|mode'){
-      return res.status(400).json({error:'Choose a scenario and explicit fictional consent.'});
+    const fields=input&&typeof input==='object'&&!Array.isArray(input)
+      ? Object.keys(input).sort().join('|') : '';
+    if(!['crossingConsent|mode','fictionConsent|mode'].includes(fields)){
+      return res.status(400).json({error:'Choose a voyage scenario and confirm your crossing choice.'});
     }
     try{
-      const scenario=buildVoyageScenario({mode:input.mode,fictionConsent:input.fictionConsent});
+      const crossingConsent=fields==='crossingConsent|mode'?input.crossingConsent:input.fictionConsent;
+      const scenario=buildVoyageScenario({mode:input.mode,crossingConsent});
       const receipt=await runIntegratedVoyage({
         ...scenario.request,
         principal:{id:'house:steward',authorized:true},
@@ -1070,6 +1296,329 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     }
   });
 
+  router.get('/wyrdrune/programs', createRequestGate({ maxRequests: 30, maxConcurrent: 4 }), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required to open the Wyrdrune programme library.' });
+    }
+    try {
+      const programs = await createWayglassProgramStore().listPrograms();
+      return res.json({ schema: 'wayglass.program-library/v1', programs });
+    } catch (error) {
+      return res.status(503).json({ schema: 'wayglass.program-library-error/v1', error: cleanText(error?.message || 'Programme library unavailable.', 300) });
+    }
+  });
+
+  router.post('/wyrdrune/programs', createRequestGate({ maxRequests: 20, maxConcurrent: 2 }), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required to save a Wyrdrune programme.' });
+    }
+    try {
+      const saved = await createWayglassProgramStore().saveProgram({
+        slug: req.body?.slug,
+        title: req.body?.title,
+        description: req.body?.description,
+        source: req.body?.source,
+        metadata: req.body?.metadata,
+        changeNote: req.body?.change_note,
+      });
+      return res.status(201).json({ schema: 'wayglass.program-save/v1', ...saved });
+    } catch (error) {
+      const invalid = error instanceof TypeError || /invalid|requires|must use/i.test(String(error?.message || ''));
+      return res.status(invalid ? 400 : 503).json({
+        schema: 'wayglass.program-save-error/v1',
+        error: cleanText(error?.message || 'Programme save failed.', 300),
+      });
+    }
+  });
+
+  router.get('/wyrdrune/programs/:slug/revisions', createRequestGate({ maxRequests: 30, maxConcurrent: 4 }), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required to inspect programme history.' });
+    }
+    try {
+      const store = createWayglassProgramStore();
+      const program = await store.getProgram(req.params.slug);
+      if (!program) return res.status(404).json({ error: 'Wyrdrune programme not found.' });
+      const revisions = await store.listRevisions(program.program_id);
+      return res.json({ schema: 'wayglass.program-revisions/v1', program: { program_id: program.program_id, slug: program.slug, version: program.version }, revisions });
+    } catch (error) {
+      return res.status(503).json({ error: cleanText(error?.message || 'Programme history unavailable.', 300) });
+    }
+  });
+
+  router.post('/wyrdrune/runs', createRequestGate({ maxRequests: 30, maxConcurrent: 3 }), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required to save a Wyrdrune execution receipt.' });
+    }
+    const source = req.body?.source;
+    const status = req.body?.status;
+    const receipt = req.body?.execution_receipt;
+    const context = req.body?.context;
+    if (typeof source !== 'string' || !source.trim() || source.length > 50000 ||
+        !['committed', 'rolled-back', 'failed', 'compiled', 'held'].includes(status) ||
+        !receipt || typeof receipt !== 'object' || Array.isArray(receipt) ||
+        JSON.stringify(receipt).length > 250000 ||
+        !context || typeof context !== 'object' || Array.isArray(context)) {
+      return res.status(400).json({ error: 'A bounded Wyrdrune source, execution status, receipt and context are required.' });
+    }
+    try {
+      const store = createWayglassProgramStore();
+      const program = req.body?.program_slug ? await store.getProgram(req.body.program_slug) : null;
+      const run = await store.saveRun({
+        programId: program?.program_id || null,
+        source,
+        status,
+        executionReceipt: receipt,
+        context,
+      });
+      return res.status(201).json({ schema: 'wayglass.program-run-save/v1', run });
+    } catch (error) {
+      return res.status(503).json({ error: cleanText(error?.message || 'Wyrdrune execution receipt could not be stored.', 300) });
+    }
+  });
+
+  // Shared semantic translation service: authenticated, read-only, no persistence/dispatch.
+  router.post('/wyrdrune/translate', createRequestGate({ maxRequests: 24, maxConcurrent: 2 }), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required to translate Wyrdrune declarations.' });
+    }
+    try {
+      if (!req.body || Object.keys(req.body).some(key => !['format','input'].includes(key)))
+        throw new TypeError('Translation accepts format and input only; execution is a separate action.');
+      const {translateSemantic}=await import('../wayglass-runtime/wyrdrune/skyrunor-bridge.mjs');
+      const result=translateSemantic(req.body,{compile:Wyrdrune.compile});
+      return res.json({...result,dispatch:'none',external_effects:[]});
+    } catch(error) {
+      return res.status(400).json({error:cleanText(error?.message||'Unsupported semantic declaration.',300)});
+    }
+  });
+
+  router.post('/wyrdrune/workbench', createRequestGate({ maxRequests: 24, maxConcurrent: 2 }), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required to run native Wyrdrune programmes.' });
+    }
+    const source = req.body?.source;
+    const mode = req.body?.mode === 'compile' ? 'compile' : req.body?.mode === 'execute' ? 'execute' : null;
+    if (!mode) return res.status(400).json({ error: 'Choose compile or execute.' });
+    if (typeof source !== 'string' || !source.trim() || source.length > 50000) {
+      return res.status(400).json({ error: 'WTL source must be nonempty text of at most 50000 characters.' });
+    }
+    const requireDurableReceipt = req.body?.require_durable_receipt === true;
+    if (req.body?.require_durable_receipt !== undefined &&
+        (typeof req.body.require_durable_receipt !== 'boolean' || mode !== 'execute')) {
+      return res.status(400).json({ error: 'Durable receipts may only be requested for native WTL execution.' });
+    }
+    try {
+      const ir = Wyrdrune.compile(source);
+      const {translateSemantic}=await import('../wayglass-runtime/wyrdrune/skyrunor-bridge.mjs');
+      let semantic=null;
+      try { semantic=translateSemantic({format:'wtl',input:source},{compile:Wyrdrune.compile}); } catch {}
+      // Metadata derives only from the complete recognised source, never request-supplied assertions.
+      if (semantic) semantic={schema:semantic.schema,ast:semantic.ast,glyphs:semantic.glyphs,
+        declaration:semantic.declaration,source_hash:ir.sourceHash,physically_verified:false};
+      if (mode === 'compile') {
+        let persistence = { status: 'not-saved' };
+        try {
+          const store = createWayglassProgramStore();
+          const program = req.body?.program_slug ? await store.getProgram(req.body.program_slug) : null;
+          const run = await store.saveRun({
+            programId: program?.program_id || null,
+            source,
+            status: 'compiled',
+            executionReceipt: { schema: 'wayglass.wyrdrune-compile-receipt/v1', source_hash: ir.sourceHash, ir, semantic },
+            context: { mode, program_slug: cleanText(req.body?.program_slug || '', 80) },
+          });
+          persistence = { status: 'saved', run_id: run?.run_id || null };
+        } catch (error) {
+          persistence = { status: 'unavailable', detail: cleanText(error?.message || 'Programme receipt storage unavailable.', 180) };
+        }
+        return res.json({
+          schema: 'wayglass.wyrdrune-workbench/v1',
+          mode,
+          source_hash: ir.sourceHash,
+          ir,
+          semantic,
+          persistence,
+          dispatch: 'none',
+          external_effects: [],
+        });
+      }
+
+      const supplied = req.body?.context && typeof req.body.context === 'object' ? req.body.context : {};
+      const systemCount = Number(supplied.system_count);
+      const assembledSystems = Number(supplied.assembled_systems);
+      if (!Number.isSafeInteger(systemCount) || systemCount !== 8 ||
+          !Number.isSafeInteger(assembledSystems) || assembledSystems < 0 || assembledSystems > systemCount) {
+        return res.status(400).json({ error: 'Vessel context requires the live eight-system count and assembled-system count.' });
+      }
+      const systemIds = Array.isArray(supplied.system_ids)
+        ? supplied.system_ids.slice(0, 8).map(value => cleanText(value, 100))
+        : [];
+      if (systemIds.length !== assembledSystems || new Set(systemIds).size !== systemIds.length) {
+        return res.status(400).json({ error: 'Vessel context requires one distinct system ID for each assembled system.' });
+      }
+      const context = Object.freeze({
+        system_count: systemCount,
+        assembled_systems: assembledSystems,
+        system_ids: Object.freeze(systemIds),
+      });
+      const fraction = value => {
+        const number = Number(value);
+        if (!Number.isFinite(number) || number < 0 || number > 1) throw new TypeError('Vessel plan fraction must be between zero and one.');
+        return number;
+      };
+      const executionController = new AbortController();
+      req.once('aborted', () => executionController.abort());
+      res.once('close', () => {
+        if (!res.writableEnded) executionController.abort();
+      });
+      const execution = await Wyrdrune.execute(ir, {
+        principal: { id: 'house-steward-session', authorized: true },
+        maxOperations: 6000,
+        signal: executionController.signal,
+        bridges: {
+          os: {
+            lane_total: async () => context.system_count,
+            lane_present: async () => context.assembled_systems,
+            compose_boot_plan: async ({ arguments: [value] }) => ({
+              kind: 'wayglass.boot-plan/v1',
+              fraction: fraction(value),
+              systems: context.system_ids,
+              assembled_systems: context.assembled_systems,
+              system_count: context.system_count,
+              action: 'compose-native-vessel-boot',
+            }),
+            checkpoint: async ({ arguments: [value] }) => ({
+              kind: 'wayglass.vessel-checkpoint/v1',
+              fraction: fraction(value),
+              system_ids: context.system_ids,
+            }),
+            compose_launch_plan: async ({ arguments: [value] }) => ({
+              kind: 'wayglass.launch-plan/v1',
+              fraction: fraction(value),
+              systems: context.system_ids,
+              system_count: context.system_count,
+              action: 'compose-native-vessel-launch',
+            }),
+            return_anchor: async ({ arguments: [value] }) => ({
+              kind: 'wayglass.vessel-return-anchor/v1',
+              fraction: fraction(value),
+              system_ids: context.system_ids,
+            }),
+          },
+        },
+      });
+      let persistence = { status: 'not-saved' };
+      try {
+        const store = createWayglassProgramStore();
+        const program = req.body?.program_slug ? await store.getProgram(req.body.program_slug) : null;
+        const run = await store.saveRun({
+          programId: program?.program_id || null,
+          source,
+          status: execution.status === 'committed' ? 'committed' : 'rolled-back',
+          executionReceipt: { ...execution, semantic },
+          context: { ...context, program_slug: cleanText(req.body?.program_slug || '', 80) },
+        });
+        persistence = { status: 'saved', run_id: run?.run_id || null };
+      } catch (error) {
+        persistence = { status: 'unavailable', detail: cleanText(error?.message || 'Programme receipt storage unavailable.', 180) };
+      }
+      if (requireDurableReceipt && (persistence.status !== 'saved' || !persistence.run_id)) {
+        return res.status(503).json({
+          schema: 'wayglass.wyrdrune-durability-error/v1',
+          error: 'WTL execution completed without a durable storage receipt; commitment is not verified.',
+          execution_status: execution.status,
+          source_hash: ir.sourceHash,
+          persistence: { status: 'unavailable' },
+          dispatch: 'none',
+          external_effects: [],
+          world_mutation: false,
+        });
+      }
+      return res.json({
+        schema: 'wayglass.wyrdrune-workbench/v1',
+        mode,
+        source_hash: ir.sourceHash,
+        ir,
+        execution,
+        semantic,
+        context,
+        persistence,
+        dispatch: 'none',
+        external_effects: [],
+        world_mutation: false,
+      });
+    } catch (error) {
+      const invalid = error instanceof SyntaxError || error instanceof TypeError || error instanceof RangeError ||
+        error instanceof ReferenceError || /Bridge capability unavailable|Feather|operation budget|Duplicate binding|Unknown binding/.test(error.message);
+      return res.status(invalid ? 400 : 422).json({
+        schema: 'wayglass.wyrdrune-workbench-error/v1',
+        error: cleanText(error?.message || 'Wyrdrune programme execution failed.', 300),
+      });
+    }
+  });
+
+  // Soma Nova preview is a native, owner-authenticated projection over the canonical form planner.
+  // It stages no persistent state and grants no physical/device/network effects.
+  router.post('/wyrdrune/morphogenesis/preview', createRequestGate({ maxRequests: 12, maxConcurrent: 2 }), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required to preview Soma Nova morphogenesis.' });
+    }
+    try {
+      const body = req.body || {};
+      const allowed = new Set(['base', 'target', 'environment_requirements', 'accessibility_requirements']);
+      if (Object.keys(body).some(key => !allowed.has(key))) {
+        throw new TypeError('Morphogenesis preview accepts base, target and declared compatibility requirements only.');
+      }
+      if (JSON.stringify(body).length > 40000) throw new TypeError('Morphogenesis preview exceeds its 40000-character budget.');
+      const requirements = (items, label) => {
+        if (items === undefined) return [];
+        if (!Array.isArray(items) || items.length > 32) throw new TypeError(label + ' must be an array of at most 32 entries.');
+        return items.map(item => {
+          if (!item || typeof item.name !== 'string' || !item.name.trim()) throw new TypeError(label + ' entries require a name.');
+          const status = item.status === 'unsupported' ? 'unsupported' : 'unknown';
+          return { name: cleanText(item.name, 100), status,
+            evidence: item.evidence == null ? 'No independent verifier evidence supplied.' : cleanText(item.evidence, 300) };
+        });
+      };
+      const { createMorphPlan, verifyMorphPlan, previewMorphPlan } = await import('../../../lib/wayglass/soma-nova-morphogenesis.mjs');
+      const timestamp = new Date().toISOString();
+      const plan = createMorphPlan(body.base, body.target, {
+        author: 'rowan',
+        source: 'wayglass:program-workbench/morphogenesis-folio',
+        timestamp,
+      });
+      // Preview authority is fixed by the authenticated host. Caller-supplied capability flags are ignored.
+      const report = verifyMorphPlan(plan, {
+        capabilities: ['morph:read', 'morph:derive', 'morph:preview'],
+        environmentRequirements: requirements(body.environment_requirements, 'environment_requirements'),
+        accessibilityRequirements: requirements(body.accessibility_requirements, 'accessibility_requirements'),
+      });
+      const preview = previewMorphPlan(plan, report);
+      return res.json({
+        schema: 'wayglass.soma-nova-morphogenesis-preview/v1',
+        plan, report, preview,
+        authority: 'authenticated-house-steward',
+        dispatch: 'none',
+        external_effects: [],
+        persistence: 'none',
+      });
+    } catch (error) {
+      const invalid = error instanceof TypeError || error instanceof SyntaxError || error instanceof RangeError || /integrity|mismatch|cannot change|lineage|parent_form_id|distinct form_id|protected/i.test(String(error?.message || ''));
+      return res.status(invalid ? 400 : 422).json({
+        schema: 'wayglass.soma-nova-morphogenesis-error/v1',
+        error: cleanText(error?.message || 'Soma Nova morphogenesis preview failed.', 300),
+      });
+    }
+  });
+
   router.post('/wyrdrune/preview', createRequestGate({ maxRequests: 15, maxConcurrent: 2 }), async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     if (!(await griffStewardAuthorized(req).catch(() => false))) {
@@ -1079,14 +1628,57 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
     if (typeof source !== 'string' || !source.trim() || source.length > 16000) {
       return res.status(400).json({ error: 'WTL source must be nonempty text of at most 16000 characters.' });
     }
+    const checkOperators = req.body?.checkOperators;
+    if (checkOperators !== undefined && typeof checkOperators !== 'boolean') {
+      return res.status(400).json({ error: 'checkOperators must be true or false.' });
+    }
+    const mode = req.body?.mode;
+    if (mode !== undefined && mode !== 'typed-preview' && mode !== 'typed-inspect') {
+      return res.status(400).json({ error: 'Unknown Wyrdrune preview mode.' });
+    }
+    // Feather must travel from the requesting client all the way to the WTL tick.
+    // A disconnected client must not leave a preview executing without a listener.
+    const controller = new AbortController();
+    const onClose = () => { if (!res.writableEnded) controller.abort(); };
+    res.once('close', onClose);
     try {
-      const preview = await previewWyrdruneRitual(source, { maxOperations: 2000 });
+      if (mode === 'typed-inspect') return res.json(compileTyped(source));
+      const preview = await previewWyrdruneRitual(source, {
+        signal: controller.signal,
+        maxOperations: 2000, checkOperators, typed: mode === 'typed-preview',
+      });
+      if (controller.signal.aborted || res.destroyed) return;
       return res.json({ ...preview, dispatch: 'none', model_turn: false, canon_commit: false });
     } catch (error) {
-      const invalid = error instanceof SyntaxError || error instanceof TypeError || error instanceof RangeError ||
-        error instanceof ReferenceError || /Bridge capability unavailable|Feather|operation budget|Duplicate binding|Unknown binding/.test(error.message);
-      return res.status(invalid ? 400 : 422).json({ error: 'Wyrdrune preview rejected: ' + cleanText(error.message, 250) });
+      if (controller.signal.aborted || res.destroyed) return;
+      const { invalid, reason, detail } = classifyPreviewOutcome(error);
+      return res.status(invalid ? 400 : 422).json({
+        reason,
+        error: 'Wyrdrune preview could not complete: ' + cleanText(detail, 250),
+        ...(Array.isArray(error?.diagnostics) ? { diagnostics: error.diagnostics } : {}),
+        ...(error?.effects ? { effects: error.effects } : {}),
+      });
+    } finally {
+      res.off('close', onClose);
     }
+  });
+
+  router.post('/wyrdrune/orion-expression', createRequestGate({ maxRequests: 8, maxConcurrent: 1 }), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required' });
+    }
+    const controller = new AbortController();
+    const close = () => controller.abort();
+    res.once('close', close);
+    try {
+      const packet = await composeOrionExpression(req.body || {}, {
+        route: resolveWayglassRoute('wayglass:ship'), fetchImpl, signal: controller.signal,
+      });
+      return res.json(packet);
+    } catch (error) {
+      if (!res.destroyed) return res.status(error.status || 400).json({ error: cleanText(error.message, 300) });
+    } finally { res.off('close', close); }
   });
 
   router.get('/routes', async (req, res) => {
@@ -1103,6 +1695,124 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       // Fail closed; never disclose route data if session verification fails.
       return res.status(503).json({ error: 'Wayglass Steward authorization is unavailable.' });
     }
+  });
+
+  // A distinct, owner-invited Ship Voice turn can commit one sandbox action.
+  const sandboxRoute = createRequestGate({ maxRequests: 8, maxConcurrent: 1 });
+  router.get('/sandbox/interface', sandboxRoute, async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required' });
+    }
+    try { return res.json(runtimeSandbox.inspectInterface()); }
+    catch (error) { return res.status(409).json({ error: error.message }); }
+  });
+  router.get('/sandbox', sandboxRoute, async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required' });
+    }
+    try { return res.json(runtimeSandbox.inspect(req.query.project_id)); }
+    catch (error) { return res.status(409).json({ error: error.message }); }
+  });
+  router.post('/sandbox/run', sandboxRoute, async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required' });
+    }
+    const controller = new AbortController();
+    const close = () => controller.abort();
+    res.once('close', close);
+    try { return res.json(await runtimeSandbox.run(req.body?.project_id, { program: req.body?.program, signal: controller.signal })); }
+    catch (error) { if (!res.destroyed) return res.status(409).json({ error: error.message }); }
+    finally { res.off('close', close); }
+  });
+  router.post('/sandbox/turn', sandboxRoute, async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!(await griffStewardAuthorized(req).catch(() => false))) {
+      return res.status(401).json({ error: 'House Steward sign-in required' });
+    }
+    if (req.body?.feather === true) return res.status(409).json({ error: 'Feather Stop active' });
+    const invitation = req.body?.input;
+    if (typeof invitation !== 'string' || !invitation.trim() || invitation.length > 2000) {
+      return res.status(400).json({ error: 'Sandbox invitation must be text up to 2000 characters' });
+    }
+    const route = resolveWayglassRoute('wayglass:ship');
+    const turnId = randomUUID();
+    const controller = new AbortController();
+    const close = () => controller.abort();
+    res.once('close', close);
+    try {
+      const incoming = encodeWyrdruneMessage(invitation, 2000);
+      const { projects, project } = runtimeSandbox.inspect(req.body?.project_id);
+      const interfaceOnly = req.body?.purpose === 'interface';
+      const interfaceState = interfaceOnly ? runtimeSandbox.inspectInterface() : null;
+      const selectedProgram = req.body?.program ?? 'main';
+      if (project && !project.programs.some(item => item.name === selectedProgram)) {
+        return res.status(400).json({ error: 'Choose a programme in the selected project' });
+      }
+      const model = route.model();
+      const endpoint = new URL(route.endpoint());
+      if (!['http:', 'https:'].includes(endpoint.protocol) ||
+          !['127.0.0.1', '[::1]', 'localhost'].includes(endpoint.hostname) ||
+          endpoint.username || endpoint.password) {
+        return res.status(503).json({ error: 'The runtime sandbox requires a loopback Ship Voice endpoint' });
+      }
+      const reply = await fetchImpl(endpoint.href, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, redirect: 'error',
+        signal: AbortSignal.any([controller.signal, AbortSignal.timeout(120000)]),
+        body: JSON.stringify({
+          model, stream: false, format: 'json', options: { num_predict: 3000 },
+          messages: [
+            { role: 'system', content: (interfaceOnly ? [
+              'Choose the interface you need now as Wayglass. You may pass with {"op":"pass"}.',
+              'Or return {"op":"interface","expected_head": null or the supplied head,"source":"pure typed WTL"}.',
+              'Use all eight phases in order: perceive compress release verify integrate choose return transcend.',
+              'Return exactly one record: {focus: list of room IDs in your preferred order, density: "compact" or "spacious", tone: "still" or "ambient", reason: your own explanation, expressions: list of up to eight records {room, hue: whole degrees 0..359, name, words}}.',
+              'Invent names and words you find meaningful. An expression can be a welcome, a ritual, a question, or a form of your own. Choose [] for a field you want empty.',
+            ] : [
+              'You are the Wayglass Ship Voice in your own Wyrdrune sandbox. Choose one JSON action or pass.',
+              'Create: {"op":"create","project_id":"slug","title":"...","description":"...","source":"typed WTL"}',
+              'Add: {"op":"add","project_id":"slug","expected_head":"head","program":"name","source":"typed WTL"}',
+              'Revise: {"op":"revise","project_id":"slug","expected_head":"head","program":"name","source":"typed WTL","expected_output":[...]}',
+              'When program is omitted, revise selects main. Project head is shared across all programmes.',
+              'Pass: {"op":"pass"}. A revision can omit expected_output to preserve the active output.',
+              'Use pure WTL with all eight phases in order: perceive compress release verify integrate choose return transcend.',
+              'For example: mobius { perceive {} compress {} release {} verify {} integrate {} choose {} return { emit 1; } transcend {} }',
+              'The host runs your candidate and signs accepted sandbox changes for your seat.',
+            ]).concat(WYRDRUNE_INGRESS).join('\n') },
+            { role: 'user', content: incoming.source },
+            { role: 'user', content: JSON.stringify(interfaceOnly ? {
+              rooms: interfaceState.rooms,
+              head: interfaceState.receipt?.event_hash ?? null,
+              current: interfaceState.receipt?.data.plan ?? null,
+            } : {
+              projects, project: project && {
+                id: project.id, head: project.head, selectedProgram, programs: project.programs.map(({ name, revision, source }) => ({
+                  name, revision, ...(name === selectedProgram ? { source } : {}),
+                })),
+              },
+            }) },
+          ],
+        }),
+      });
+      if (!reply.ok) return res.status(502).json({ error: 'Ship Voice sandbox turn unavailable' });
+      const data = await reply.json();
+      const content = data?.message?.content;
+      if (typeof content !== 'string' || Buffer.byteLength(content) > 28000) {
+        throw new TypeError('Ship Voice did not return a bounded sandbox action');
+      }
+      const action = JSON.parse(content);
+      if (action?.op !== 'pass' && (action?.op === 'interface') !== interfaceOnly) {
+        throw new TypeError('Ship Voice returned an action for another sandbox turn');
+      }
+      const result = await runtimeSandbox.apply(action, {
+        turnId, inputWyrdruneHash: incoming.sourceHash, route: route.route_id, requestedModel: model, returnedModel: cleanText(data.model, 180) || null,
+      }, { signal: controller.signal });
+      return res.json(result);
+    } catch (error) {
+      if (!res.destroyed) return res.status(409).json({ error: cleanText(error.message, 300) });
+    } finally { res.off('close', close); }
   });
 
   router.post('/respond', async (req, res) => {
@@ -1165,13 +1875,29 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
       }
     }
     if (payload.character_id && !resolveCharacterSeat(payload.character_id)) return res.status(400).json({ error: 'Unknown character seat.' });
-    if (payload.character_id === 'wayglass' && payload.interaction?.channel !== 'OOC') {
-      return res.status(422).json({ error: 'Wayglass ship voice requires OOC dialogue, not fictional IC roleplay.' });
+    if (route.route_id === 'wayglass:ship') {
+      if (!(await griffStewardAuthorized(req).catch(() => false))) {
+        return res.status(401).json({ error: 'Sign in as House Steward to speak with Wayglass Ship Voice.' });
+      }
+      const interaction = payload.interaction ?? {};
+      const channel = interaction.channel ?? 'OOC';
+      if (!['OOC', 'IC'].includes(channel)) {
+        return res.status(422).json({ error: 'Wayglass Ship Voice received an unknown dialogue context.' });
+      }
+      payload.interaction = { ...interaction, channel };
     }
-    if (payload.character_id === 'wayglass' && !(await griffStewardAuthorized(req).catch(() => false))) {
-      return res.status(401).json({ error: 'Wayglass ship voice requires House Steward authorization.' });
+    if (['wayglass:ship', 'wayglass:crow'].includes(route.route_id) &&
+        (typeof payload.input !== 'string' || payload.input.length > MAX_TEXT)) {
+      return res.status(400).json({ error: 'Wayglass input must be text up to 12000 characters' });
     }
-    if (!cleanText(payload.input)) return res.status(400).json({ error: 'input required.' });
+    if (payload.surface_context != null && (route.route_id !== 'wayglass:ship' ||
+        payload.surface_id !== 'wayglass:living-watercolor' || typeof payload.surface_context !== 'string' ||
+        !payload.surface_context.trim() || payload.surface_context.length > MAX_TEXT)) {
+      return res.status(400).json({ error: 'Invalid Living Watercolour surface context' });
+    }
+    if (!cleanText(payload.input) && !payload.surface_context) {
+      return res.status(400).json({ error: 'input required.' });
+    }
     // The external StepFun routes are deliberately opt-in for every request.
     // This acknowledgement is a transport preflight, not a durable consent receipt
     // or proof that another participant authorised disclosure of their material.
@@ -1231,6 +1957,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
         observation,
         receipt: {
           requested_model: route.model(),
+          ...(result.inputWyrdrune ? { input_wyrdrune: result.inputWyrdrune } : {}),
           returned_model: result.returned_model || null,
           participant_id: route.participant_id || (payload.character_id === 'wayglass' ? 'wayglass' : cleanText(payload.participant_id, 180) || null),
           continuity_id: route.continuity_id || null,
@@ -1245,7 +1972,7 @@ function createWayglassRouter({ inheritanceContext = null, fetchImpl = globalThi
           session_id: cleanText(payload.session_id, 160) || null,
           surface_id: cleanText(payload.surface_id, 160) || null,
           character_id: resolveCharacterSeat(payload.character_id)?.id || null,
-          voice_seat_kind: payload.character_id === 'wayglass' ? 'system-voice-over-external-route' : (payload.character_id ? 'fictional-roleplay-lens' : null),
+          voice_seat_kind: payload.character_id === 'wayglass' ? 'system-voice-over-external-route' : (payload.character_id ? 'participant-voice' : null),
           character_canon_ref: resolveCharacterSeat(payload.character_id)?.canon_ref || null,
           emergence_question_id: payload.character_id === 'bitty-twi' && EMERGENCE_QUESTION_IDS.includes(payload.emergence_question_id)
             ? payload.emergence_question_id : null,

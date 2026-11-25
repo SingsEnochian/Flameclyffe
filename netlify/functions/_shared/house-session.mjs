@@ -91,10 +91,15 @@ export async function validateSupabaseStewardToken(accessToken, env, fetchImpl =
   }
 }
 
-export function issueHouseSession(env, now = Date.now()) {
+export function issueHouseSession(env, now = Date.now(), { expiresAt } = {}) {
   const secret = signingSecret(env);
   if (!secret) throw new Error('House Runtime session signing is not configured.');
-  const ttl = Math.max(300, Math.min(Number(env.get('HOUSE_SESSION_TTL_SECONDS')) || DEFAULT_TTL_SECONDS, MAX_TTL_SECONDS));
+  const configuredTtl = Math.max(300, Math.min(Number(env.get('HOUSE_SESSION_TTL_SECONDS')) || DEFAULT_TTL_SECONDS, MAX_TTL_SECONDS));
+  // Never outlive an independently verified owner assertion (Cloudflare Access).
+  const nowSeconds = Math.floor(now / 1000);
+  if (expiresAt !== undefined && (!Number.isSafeInteger(expiresAt) || expiresAt <= nowSeconds))
+    throw new TypeError('A future verified assertion expiration is required.');
+  const ttl = expiresAt === undefined ? configuredTtl : Math.min(configuredTtl, expiresAt - nowSeconds);
   const claims = { v: VERSION, role: 'steward', iat: Math.floor(now / 1000), exp: Math.floor(now / 1000) + ttl, nonce: randomBytes(18).toString('base64url') };
   const payload = encode(JSON.stringify(claims));
   return { token: `${payload}.${signature(payload, secret)}`, claims, ttl };

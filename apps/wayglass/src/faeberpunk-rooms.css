@@ -69,6 +69,15 @@ html[data-wayglass-surface="wayglass:living-watercolor"] .wc-stage{
 .wg-writing-room .send-jewel:hover:not(:disabled){
   background:linear-gradient(120deg,rgba(67,148,124,.86),rgba(42,104,109,.9));
 }
+.wg-writing-room [data-wg-static-control]{
+  min-height:44px;
+  transform:none;
+  transition:background-color 130ms ease,border-color 130ms ease,box-shadow 130ms ease;
+}
+.wg-writing-room [data-wg-static-control]:focus-visible{
+  outline:2px solid var(--fae2-focus);
+  outline-offset:3px;
+}
 .wg-writing-room .glass-chip.active{
   border-color:rgba(230,205,149,.7);
   box-shadow:inset 0 1px rgba(254,247,217,.15),0 0 14px rgba(145,204,163,.11);

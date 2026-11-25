@@ -28,9 +28,9 @@ const SCENARIOS=Object.freeze({
     }),
   }),
 });
-function buildVoyageScenario({mode='repair',fictionConsent=false,principalId='house:steward',now=new Date()}={}){
+function buildVoyageScenario({mode='repair',crossingConsent=false,principalId='house:steward',now=new Date()}={}){
   if(!Object.hasOwn(SCENARIOS,mode))throw new TypeError('Unknown demonstration scenario');
-  if(typeof fictionConsent!=='boolean')throw new TypeError('Fictional crossing choice must be Boolean');
+  if(typeof crossingConsent!=='boolean')throw new TypeError('Voyage crossing choice must be Boolean');
   if(principalId!=='house:steward')throw new TypeError('Scenario principal belongs to authenticated House only');
   if(!(now instanceof Date)||!Number.isFinite(now.getTime()))throw new TypeError('Valid host clock required');
   const scenario=SCENARIOS[mode],time=now.getTime();
@@ -68,7 +68,7 @@ function buildVoyageScenario({mode='repair',fictionConsent=false,principalId='ho
           ability:{id:'ability:refraction',origin_universe:'universe:emberglass',modality:'symbolic'},
           history:[],
           field:{intention:.9,shifting:.9,porosity:.9,resonance:.9,compatibility:.9},
-          consent:{traveller:fictionConsent,origin:fictionConsent,destination:fictionConsent},
+          consent:{traveller:crossingConsent,origin:crossingConsent,destination:crossingConsent},
           event_id:'encounter:'+mode,
         },
       },

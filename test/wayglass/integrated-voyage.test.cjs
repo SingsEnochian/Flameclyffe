@@ -128,3 +128,30 @@ test('Observer source metadata stays independent and never becomes invented obse
  assert.equal(r.return_verification.verdict,'accepted');
  assert.equal(r.observer.derived_visual_only,true);
 });
+
+test('shipwide WTL proposals change when Observer evidence changes', async () => {
+  const { TABLES, SOURCE_SCHEMA, runQuadEightfold } = require('../../lib/wayglass-quad-eightfold.cjs');
+  const { digest } = require('../../lib/wyrdrune/canonical.cjs');
+  const x = input();
+  const sources = {
+    schema: SOURCE_SCHEMA, observed_at: x.recorded_at,
+    channels: TABLES.map(id => ({ id, status: 'unavailable', count: null, latest_at: null, provenance: 'fixture' })),
+  };
+  const continuity = { participant_ref: principal.id, world_ref: x.world_id };
+  const previous = runQuadEightfold({ sources, cycles: 1, continuity });
+  const first = await runIntegratedVoyage({ ...x, observer: { sources, continuity } });
+  const observed = structuredClone(sources);
+  for (const row of observed.channels) Object.assign(row, { status: 'observed', count: 1 });
+  const second = await runIntegratedVoyage({ ...x, observer: { sources: observed, continuity, previous } });
+  assert.equal(first.shipwide.plan.audio.rootHz, 176);
+  assert.equal(second.shipwide.plan.audio.rootHz, 220);
+  assert.notEqual(second.shipwide.plan.video, first.shipwide.plan.video);
+  assert.equal(first.engineering_review.focus, 'recover-source-evidence');
+  assert.equal(second.engineering_review.focus, 'recheck-transition-baseline');
+  assert.equal(second.engineering_review.decision, 'pending');
+  assert.equal(second.shipwide.plan.agents, 'explain-transitions-with-evidence');
+  assert.equal(second.shipwide.wtl.outputDigest, digest(second.shipwide.plan));
+  assert.ok(second.provenance_refs.includes('shipwide:' + digest(second.shipwide)));
+  assert.equal(second.model_invoked, false);
+  assert.equal(second.hardware_invoked, false);
+});

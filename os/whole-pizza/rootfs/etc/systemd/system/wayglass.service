@@ -1,0 +1,26 @@
+[Unit]
+Description=Wayglass Whole Pizza OS (native Wyrdrune startup)
+After=local-fs.target network.target
+ConditionPathExists=/usr/lib/wayglass/release/.wayglass-source-sha
+
+[Service]
+Type=simple
+DynamicUser=yes
+StateDirectory=wayglass
+WorkingDirectory=/var/lib/wayglass
+Environment=NODE_ENV=production
+Environment=WAYGLASS_LOCAL_ONLY=1
+Environment=PORT=3000
+ExecStart=/usr/libexec/wayglass/launch.sh
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/lib/wayglass
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

@@ -99,7 +99,7 @@ test('StepFun explicit route uses server-side auth, preserves writing room instr
   assert.equal(sent.model, 'step-3.7-flash');
   assert.equal(sent.stream, false);
   assert.match(sent.messages[0].content, /do not write for the author/);
-  assert.match(sent.messages[0].content, /Current channel: OOC/);
+  assert.match(sent.messages[0].content, /Dialogue context: direct/);
   assert.match(sent.messages[0].content, /Eira: Rowan \(owned\)/);
   assert.equal(sent.messages.at(-1).content, 'Continue together.');
   assert.doesNotMatch(JSON.stringify(sent), /MALICIOUS_BODY_INSTRUCTIONS/);

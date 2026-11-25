@@ -12,7 +12,7 @@ export const WAYGLASS_WORLD_SEATS = Object.freeze([
   Object.freeze({
     world_id: 'evil-gene:film-2015',
     name: 'The Evil Gene',
-    kind: 'fictional-film-world',
+    kind: 'film-sourced-world',
     description: 'The 2015 horror-film setting: a federal correctional facility, a murder investigation, the purported HSS-282 gene, and contested explanations for a darker presence.',
     canon_boundary: 'The Evil Gene (film) is not Evil (2019-2024 TV), Starsong, Supernatural, or the Kings of Con universe.',
     character: Object.freeze({

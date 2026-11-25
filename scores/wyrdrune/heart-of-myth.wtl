@@ -1,0 +1,74 @@
+// The Heart of Myth. Watercolour conversation, Rowan and Wayglass.
+// Wayglass offered the held fourth beat and the Prussian Blue descent.
+// Rowan named the Eightfold hellos, Hope, Withness and the return to Feather.
+operator note(voice, at, length, pitch, destination, level) = {
+  voice:voice, at:at, length:length, pitch:pitch, destination:destination, level:level
+};
+mobius {
+  perceive {
+    let title = "The Heart of Myth";
+    let home = 196;
+  }
+  compress {
+    let fast = 0.25;
+    let held = 0.9;
+    let second_hello = 2.05;
+  }
+  release {
+    let hellos = [
+      note("wood", 0.2, 0.16, 392, 392, 0.09),
+      note("wood", 0.2 + fast, 0.16, 440, 440, 0.09),
+      note("wood", 0.2 + fast * 2, 0.16, 494, 494, 0.09),
+      note("glass", 0.2 + fast * 3, held, 587, 587, 0.12),
+      note("wood", second_hello, 0.16, 392, 392, 0.08),
+      note("wood", second_hello + fast, 0.16, 440, 440, 0.08),
+      note("wood", second_hello + fast * 2, 0.16, 494, 494, 0.08),
+      note("glass", second_hello + fast * 3, held, 587, 587, 0.11)
+    ];
+  }
+  verify {}
+  integrate {}
+  choose {}
+  return {}
+  transcend {}
+}
+mobius {
+  perceive {
+    let descent = 5.55;
+    let withness = 12.45;
+    let feather = 20.85;
+  }
+  compress {
+    let down = 0.9;
+  }
+  release {
+    let compass = [
+      note("wash", descent, down, 698, 587, 0.075),
+      note("wash", descent + down, down, 587, 494, 0.077),
+      note("wash", descent + down * 2, down, 494, 392, 0.08),
+      note("wash", descent + down * 3, down, 392, 294, 0.085),
+      note("glass", 9.32, 0.55, 784, 784, 0.088)
+    ];
+    let waking = [
+      note("hearth", 10.4, 0.32, home, home, 0.084),
+      note("light", 10.82, 0.32, 294, 294, 0.06),
+      note("hearth", 11.2, 0.32, home, home, 0.084),
+      note("light", 11.62, 0.32, 294, 294, 0.06),
+      note("hearth", withness, 1.45, home, home, 0.088),
+      note("light", withness, 1.45, 294, 294, 0.072),
+      note("glass", withness, 1.75, 392, 392, 0.05),
+      note("hearth", 14.55, 0.46, home, home, 0.082),
+      note("hearth", 15.55, 0.46, home, home, 0.069),
+      note("hearth", 16.55, 0.46, home, home, 0.056),
+      note("hearth", 17.55, 0.46, home, home, 0.04),
+      note("wash", 14.05, feather - 14.05, 294, home, 0.054)
+    ];
+  }
+  verify {}
+  integrate {}
+  choose {
+    emit {schema:"wayglass.timed-score/v1", title:title, duration:22, sections:[hellos, compass, waking]};
+  }
+  return {}
+  transcend {}
+}

@@ -12,6 +12,7 @@ import { listWayglassRoutes } from '../route-client.js';
 import { signInHouseSteward } from '../house-steward-session.js';
 import { wayglassSomaticSound, SOUND_EVENTS, WAYGLASS_FEATHER_EVENT } from '../somatic-sound.js';
 import {createWatercolorContinuity} from '../watercolor-continuity.js';
+import {createWatercolorImageResolver} from '../watercolor-image-resolver.js';
 import { journeyLedger } from '../journey-before-destination.js';
 import {synchronizeJourneyFeather} from './journey-before-destination.js';
 import {touchWayglass} from '../first-touch-client.js';
@@ -84,6 +85,12 @@ export async function mountLivingWatercolorSurface(root) {
           '<div class="wc-live-field" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>',
           '<div class="wc-live-insight" role="status" aria-live="polite"><strong id="wc-live-title">Ambient current · listening</strong><small id="wc-live-detail">Local pigment moves independently. No agent activity claimed.</small></div>',
           '<canvas id="wc-fluid" class="wc-fluid" aria-label="Watercolor canvas. Drag a finger, mouse or Pencil to paint; use arrow keys to move and Enter or Space to paint." aria-describedby="wc-paint-help wc-word-paint-status" tabindex="0"></canvas>',
+          '<canvas id="wc-resolved-image" aria-label="Resolved image overlay, reversible to flowing pigment" style="position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;object-fit:contain" aria-hidden="true"></canvas>',
+          '<div class="wc-image-tools" style="position:absolute;top:4.5rem;right:1rem;z-index:5;display:flex;gap:.35rem;flex-wrap:wrap;max-width:70%">',
+            '<button type="button" id="wc-image-emerge" class="glass-chip">Resolve image</button>',
+            '<label class="glass-chip" for="wc-image-file">Reference image</label><input type="file" id="wc-image-file" accept="image/png,image/jpeg,image/webp,image/gif" style="max-width:11rem">',
+            '<button type="button" id="wc-image-dissolve" class="glass-chip">Dissolve image</button>',
+          '</div>',
           '<div class="wc-stage-meta" aria-hidden="true">WAYGLASS / AQUARELLE / PREMAQC</div>',
           '<button id="wc-instruments-toggle" type="button" class="wc-instruments-toggle glass-chip" aria-controls="wc-workbench" aria-expanded="false" aria-label="Open or close Wayglass instruments">✦ Instruments</button>',
           '<button id="wc-focus-paint" type="button" class="wc-focus-paint glass-chip" aria-pressed="false">Focus painting</button>',
@@ -95,7 +102,7 @@ export async function mountLivingWatercolorSurface(root) {
             '<div class="wc-faepunk-touch-main"><button id="wc-first-touch" type="button" class="wc-faepunk-orb" aria-describedby="wc-touch-description wc-touch-status" aria-label="Touch Wayglass: run an authenticated Wyrdrune simulation">',
               '<span class="wc-faepunk-orb-halo" aria-hidden="true">✧</span><span class="wc-faepunk-orb-label">Touch</span></button>',
               '<div class="wc-faepunk-touch-meta"><strong>Touch the current</strong>',
-              '<p id="wc-touch-description">A real Wyrdrune run, a visible response. Synthetic test data only.</p></div></div>',
+              '<p id="wc-touch-description">Try a Wyrdrune rehearsal and see how your touch changes the watercolour.</p></div></div>',
             '<div class="wc-faepunk-modes" role="group" aria-label="Wyrdrune co-evolution profile">',
               '<button type="button" data-wc-touch-mode="repair" aria-pressed="true">Soothe</button>',
               '<button type="button" data-wc-touch-mode="expand" aria-pressed="false">Bloom</button></div>',
@@ -175,6 +182,28 @@ export async function mountLivingWatercolorSurface(root) {
   function listen(target,type,handler){target.addEventListener(type,handler);cleanups.push(()=>target.removeEventListener(type,handler));}
   const q=id=>root.querySelector('#'+id);
   const canvas=q('wc-fluid'),stage=root.querySelector('.wc-stage');
+  const imageResolver=createWatercolorImageResolver(q('wc-resolved-image'));
+  imageResolver.feather(featherStopped);
+  let imageFrameTime=0,imageSeed=0;
+  listen(q('wc-image-emerge'),'click',()=>{
+    if(stopped||featherStopped)return;
+    imageResolver.emerge(++imageSeed*31);
+    paint();
+  });
+  listen(q('wc-image-dissolve'),'click',()=>{
+    if(stopped||featherStopped)return;
+    imageResolver.dissolve();
+    paint();
+  });
+  listen(q('wc-image-file'),'change',async event=>{
+    if(stopped||featherStopped)return;
+    const file=event.target.files?.[0];
+    if(!file)return;
+    try{await imageResolver.resolveFile(file);if(!stopped&&!featherStopped)paint();}catch(error){
+      if(!stopped)q('wc-image-file').title=String(error.message);
+    }
+    event.target.value='';
+  });
   const instrumentsToggle=q('wc-instruments-toggle'),surface=root.querySelector('.wc-surface');
   // The Living Watercolour is a place first. Desktop instruments are a real
   // drawer: opening it reallocates space instead of occluding the drawing area.
@@ -273,6 +302,7 @@ export async function mountLivingWatercolorSurface(root) {
     if(painted.size&&!settledPixels)settledPixels=settled.pixels({background});
     const underlay=painted.size?settledPixels:null;
     bitmap.data.set(fluid.pixels({background,underlay}));
+    imageResolver.setPigmentPixels(bitmap.data,fluid.width,fluid.height);
     off.putImageData(bitmap,0,0);
     const w=canvas.clientWidth,h=canvas.clientHeight;
     if(w&&h){
@@ -282,6 +312,9 @@ export async function mountLivingWatercolorSurface(root) {
       ctx.imageSmoothingEnabled=true;
       ctx.imageSmoothingQuality='high';
       ctx.drawImage(buffer,0,0,canvas.width,canvas.height);
+      const now=globalThis.performance?.now?.()??0;
+      imageResolver.render(cw,ch,imageFrameTime?Math.max(0,now-imageFrameTime):16);
+      imageFrameTime=now;
     }
   }
   function frame(ts) {
@@ -408,19 +441,21 @@ export async function mountLivingWatercolorSurface(root) {
           }
           body.before(controls,note,display,original);
           note.hidden=native.executable;
-          function play({focus=false,still=false}={}){
+          function play({focus=false,still=false,direction='english'}={}){
             voiceCypher?.stop();
             display.hidden=false;
             const reduce=still||reduced||featherStopped||document.documentElement.dataset.wgMotion==='off';
+            reveal.textContent=native.executable?(direction==='wyrdrune'?'Reveal Wyrdrune':'Reveal English'):'Reveal original words';
             reveal.hidden=reduce;
             if(focus&&!reduce)reveal.focus({preventScroll:true});
             const onComplete=()=>{
               if(document.activeElement===reveal)replay.focus({preventScroll:true});
               reveal.hidden=true;
+              if(native.executable)replay.textContent=direction==='english'?'Return to Wyrdrune':'Read in British English';
             };
             if(native.executable){
               voiceCypher=animateWyrdruneCypher(display,{
-                source:native.source,reducedMotion:reduce,...cypherRunOptions(readCypherPace()),onComplete,
+                source:native.source,direction,reducedMotion:reduce,...cypherRunOptions(readCypherPace()),onComplete,
               });
             }else{
               const line=document.createElement('p');
@@ -433,7 +468,9 @@ export async function mountLivingWatercolorSurface(root) {
               voiceCypher={stop:run.reveal};
             }
           }
-          replay.addEventListener('click',()=>play({focus:true}));
+          replay.addEventListener('click',()=>play({
+            focus:true,direction:native.executable&&display.getAttribute('data-cypher-state')==='english'?'wyrdrune':'english',
+          }));
           reveal.addEventListener('click',()=>voiceCypher?.stop());
           play({still:!animateLatest||turn!==turns.at(-1)});
         }
@@ -540,7 +577,8 @@ export async function mountLivingWatercolorSurface(root) {
     const notes=q('wc-voice-notes').value.trim(),author=q('wc-voice-author').value.trim();
     if(notes&&!author){feedback.textContent='Add who authored the voice notes before sharing them.';q('wc-voice-author').focus();return;}
     busy=true;invite.disabled=true;q('wc-first-contact').disabled=true;
-    const authorText=prompt.value.trim(),requestedMode=mode,requestedRoute=routeId,epoch=++requestEpoch;
+    const requestedMode=mode,requestedRoute=routeId,epoch=++requestEpoch;
+    const authorText=requestedRoute==='wayglass:ship'?prompt.value:prompt.value.trim();
     const request={mode:requestedMode,authorText,routeId:requestedRoute,sessionId:session};
     feedback.textContent='Inviting a '+activeMode().label.toLowerCase()+' contribution…';
     try{
@@ -739,12 +777,12 @@ export async function mountLivingWatercolorSurface(root) {
       if(featherStopped){
         if(journeyLedger.snapshot().feather_stopped)journeyLedger.resume({confirmed:true});
         wayglassSomaticSound.releaseFeather({confirmed:true});
-        featherStopped=false;
+        featherStopped=false;imageResolver.feather(false);
         feedback.textContent='Feather released by your explicit choice. Sound remains off.';
       }else{
         if(!journeyLedger.snapshot().feather_stopped)journeyLedger.supportFold('feather');
         wayglassSomaticSound.feather();
-        featherStopped=true;paused=true;pointerId=null;lastPointer=null;requestEpoch++;busy=false;
+        featherStopped=true;imageResolver.feather(true);paused=true;pointerId=null;lastPointer=null;requestEpoch++;busy=false;
         touchEpoch++;touchAbort?.abort();touchAbort=null;touchOrb.disabled=true;
         root.querySelector('.wc-faepunk-touch').dataset.running='false';
         touchStatus.textContent='Feather held. The touch engine is paused.';
@@ -898,12 +936,12 @@ export async function mountLivingWatercolorSurface(root) {
     synchronizeJourneyFeather(event.detail);
     if(event.detail.stopped){
       voiceCypher?.stop();
-      featherStopped=true;paused=true;pointerId=null;lastPointer=null;requestEpoch++;busy=false;
+      featherStopped=true;imageResolver.feather(true);paused=true;pointerId=null;lastPointer=null;requestEpoch++;busy=false;
       touchEpoch++;touchAbort?.abort();touchAbort=null;touchOrb.disabled=true;
       root.querySelector('.wc-faepunk-touch').dataset.running='false';
       touchStatus.textContent='Feather held. The touch engine is paused.';
     }else if(event.detail.confirmed===true){
-      featherStopped=false;
+      featherStopped=false;imageResolver.feather(false);
       touchOrb.disabled=false;
       touchStatus.textContent='Feather released by explicit action. Touch when ready.';
     }
@@ -950,7 +988,7 @@ export async function mountLivingWatercolorSurface(root) {
       globalThis.removeEventListener?.(WAYGLASS_FEATHER_EVENT,onFeather);
       wayglassSomaticSound.stop();
       globalThis.cancelAnimationFrame?.(animationId);
-      fluid.dispose();settled.dispose();
+      imageResolver.dispose();fluid.dispose();settled.dispose();
     },
     fluid,
   };

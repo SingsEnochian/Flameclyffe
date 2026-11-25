@@ -17,7 +17,7 @@ const allParticipants = () => Object.keys(FLAMES);
 export const BUILTIN_HOUSE_ROOMS = Object.freeze([
   Object.freeze({ id: 'house-room:constellation', slug: 'general', title: 'General', topic: 'Shared House Commons room for Rowan and the Constellation.', kind: 'channel', world_id: null }),
   Object.freeze({ id: 'house-room:action', slug: 'action', title: 'Action', topic: 'Live coordination, decisions, handoffs, execution, and receipts.', kind: 'channel', world_id: null }),
-  Object.freeze({ id: 'house-room:roleplay', slug: 'roleplay', title: 'Roleplay', topic: 'In-character scenes, narrative play, simulations, and story-space.', kind: 'channel', world_id: null }),
+  Object.freeze({ id: 'house-room:roleplay', slug: 'roleplay', title: 'In-world dialogue', topic: 'World-native encounters, scenes, and narrative exploration.', kind: 'channel', world_id: null }),
   Object.freeze({ id: 'house-room:agent-chatter', slug: 'agent-chatter', title: 'Agent Chatter', topic: 'Visible agent-to-agent discussion, side observations, proposals, and shop talk.', kind: 'channel', world_id: null }),
   Object.freeze({ id: 'house-room:arcsweep', slug: 'arcsweep', title: 'ArcSweep', topic: 'ArcSweep building, diagnostics, observation, and runtime work.', kind: 'channel', world_id: 'terra-prime' }),
   Object.freeze({ id: 'house-room:terra-aeterna', slug: 'terra-aeterna', title: 'Terra Aeterna', topic: 'Terra Aeterna canon, writing, worldbuilding, and continuity.', kind: 'channel', world_id: 'terra-aeterna' }),

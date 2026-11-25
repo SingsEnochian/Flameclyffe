@@ -182,6 +182,7 @@ export async function mountArcSweepWritingSurface(root) {
     '</section>',
     '<section class="wg-wtl-panel" aria-label="Wyrdrune ritual workbench">',
       '<button type="button" class="glass-chip fae-codex-door" data-wayglass-room="wayglass:universal-codex">◇ Open the Universal Codex</button>',
+      '<button type="button" id="wg-fiction-to-workbench" class="glass-chip">◇ Take draft to living Möbius Workbench</button>',
       '<details id="wg-wtl-details" class="glass-panel">',
         '<summary>Wyrdrune · Eightfold Ritual Workbench</summary>',
         '<p class="tiny">Preview the Eightfold locally. You decide whether to discuss it with your selected model or SpicyChat route; nothing sends automatically.</p>',
@@ -267,6 +268,18 @@ export async function mountArcSweepWritingSurface(root) {
       input.dispatchEvent(new Event('input',{bubbles:true}));input.focus();},
   });
   const wtlSource=root.querySelector('#wg-wtl-source'),wtlStatus=root.querySelector('#wg-wtl-status');
+  root.querySelector('#wg-fiction-to-workbench')?.addEventListener('click',()=>{
+    const fiction=String(input.value||'').trim();
+    if(!fiction){wtlStatus.textContent='Write or paste fiction into the draft first.';return;}
+    if(fiction.length>12000){wtlStatus.textContent='Fiction exceeds 12000 characters.';return;}
+    try{
+      if(!globalThis.sessionStorage)throw new Error('Session draft handoff unavailable.');
+      globalThis.sessionStorage.setItem('wayglass:fiction-handoff/v1',fiction);
+      const mount=globalThis.__wayglassOS?.mount;
+      if(typeof mount!=='function')throw new Error('Native Workbench route unavailable.');
+      mount('wayglass:program-workbench');
+    }catch(error){wtlStatus.textContent='Draft remains here. Transfer unavailable: '+String(error?.message||error);}
+  });
   const wtlOutput=root.querySelector('#wg-wtl-output'),wtlDiscuss=root.querySelector('#wg-wtl-discuss');
   const WTL_EXAMPLE="mobius {\n perceive { let light = votive(\"Lantern\",\"An offered guiding light\"); }\n compress { let shape = star(8); }\n release { let letter = angelicLetter(1); }\n verify { emit light; }\n integrate { emit shape; }\n choose { emit letter; }\n return { emit \"held\"; }\n transcend { emit 1; }\n}";
   // Wyrdrune's compiled programme is translated without a model call.

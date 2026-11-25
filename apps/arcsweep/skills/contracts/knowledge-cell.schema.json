@@ -72,7 +72,7 @@
     "temporal": {
       "type": "object",
       "additionalProperties": false,
-      "description": "Calendar-like validity and/or fictional chronology-order validity. Either clock may be used independently.",
+      "description": "Calendar validity and/or validity within the world's chronology. Either clock may be used independently.",
       "properties": {
         "observedAt": { "type": ["string", "null"] },
         "validFrom": { "type": ["string", "null"] },

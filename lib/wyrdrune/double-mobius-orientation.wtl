@@ -1,0 +1,13 @@
+mobius scoped {
+  perceive { let start = 1; }
+  compress {}
+  release {
+    let afterGateway = -start;
+    let afterWayglass = -afterGateway;
+  }
+  verify { require afterGateway != start and afterWayglass == start else "Double crossing did not restore orientation"; }
+  integrate {}
+  choose {}
+  return { emit {start:start, after_gateway:afterGateway, after_wayglass:afterWayglass}; }
+  transcend {}
+}

@@ -19,9 +19,13 @@ test('staged Wayglass runtime is complete and matches canonical lib sources', ()
   const router = fs.readFileSync(path.join(packageRoot, 'wayglass/router.js'), 'utf8');
   const imported = [...router.matchAll(/require\(['"]\.\.\/wayglass-runtime\/([^'"]+)['"]\)/g)];
   for (const [, name] of imported) {
+    if(name==='wyrdrune/wyrdrune.cjs'){
+      assert.ok(fs.existsSync(path.join(runtime,name)),'router imports a missing staged native WTL compiler');
+      continue;
+    }
     assert.ok(modules.includes(name), 'router imports an unbundled Wayglass runtime module: ' + name);
   }
-  for(const file of ['canonical.cjs','enochian.cjs','wyrdrune.cjs','ritual-ledger.cjs']){
+  for(const file of ['skyrunor-program.mjs','skyrunor-change.mjs','skyrunor-bridge.mjs','skyrunor.mjs','bidirectional.mjs','gloss.mjs','browser-canonical.mjs','fiction-mobius.mjs','canonical.cjs','enochian.cjs','wyrdrune.cjs','typed-ir.cjs','revision-selection.wtl','engine-verify.wtl','engine-turn.wtl','double-mobius-orientation.wtl','observer-compression.wtl','observer-feedback.wtl','shipwide-feedback.wtl','runtime.mjs','quantum.mjs','expression.mjs','bell-wonder.wtl','ritual-ledger.cjs']){
     const source=fs.readFileSync(path.join(repositoryLib,'wyrdrune',file),'utf8');
     const bundled=fs.readFileSync(path.join(runtime,'wyrdrune',file),'utf8');
     assert.equal(bundled,source,'WTL runtime drift: '+file);
@@ -64,6 +68,8 @@ test('staged Wayglass runtime loads and retains distinct identities without repo
     assert.equal(typeof load('wayglass-departure-store.cjs').createDepartureStore, 'function');
     assert.equal(typeof load('wayglass-model-observation.cjs').createModelObservation, 'function');
     assert.equal(typeof load('wayglass-wyrdrune-ritual.cjs').previewWyrdruneRitual,'function');
+    assert.equal(typeof load('wayglass-kernel.cjs').compileTyped,'function');
+    assert.equal(typeof load('wayglass-kernel.cjs').createWyrdruneRevisionLineage,'function');
   `;
   const child = spawnSync(process.execPath, ['-e', smoke, isolated], {
     cwd: isolated,
