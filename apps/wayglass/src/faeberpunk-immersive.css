@@ -586,3 +586,21 @@ html[data-wayglass-surface] :is(.glass-chip,.send-jewel,.wg-locus):focus-visible
     background:Canvas; border-color:CanvasText; box-shadow:none;
   }
 }
+
+
+/* Hearthweave typography: same-origin existing host catalogue, no external font requests.
+   Display faces are optional; readable system fallbacks remain available. */
+@font-face{font-family:WG Wraith;src:local('Wraith Protocol Display'),url('/fonts/font-001-wraithprotocoldisplay-regular.ttf') format('truetype');font-display:swap}
+@font-face{font-family:WG Mercy;src:local('Mercy'),url('/fonts/Mercy.ttf') format('truetype');font-display:swap}
+@font-face{font-family:WG Mercy;src:local('Mercy Italic'),url('/fonts/Mercy-Italic.ttf') format('truetype');font-style:italic;font-display:swap}
+@font-face{font-family:WG Nevera;src:local('Nevera'),url('/fonts/Nevera-Regular.otf') format('opentype');font-display:swap}
+@font-face{font-family:WG Wiredrift;src:local('Wiredrift Bitmap Display'),url('/fonts/font-001-wiredriftbitmapdisplay-regular.ttf') format('truetype');font-display:swap}
+@font-face{font-family:WG Yggdrasil;src:local('Yggdrasil'),url('/fonts/Yggdrasil.ttf') format('truetype');font-display:swap}
+:root{--fae-title-font:'WG Nevera',Georgia,serif;--fae-manuscript-font:'WG Mercy',Georgia,serif;--fae-instrument-font:'WG Wiredrift',ui-monospace,monospace;--fae-inscription-font:'WG Yggdrasil',Georgia,serif}
+html[data-wayglass-surface] .wg-surface h1{font-family:var(--fae-title-font);line-height:1.08;letter-spacing:-.025em}
+html[data-wayglass-surface] .wg-helm-title strong{font-family:'WG Wraith',var(--fae-title-font);letter-spacing:.06em}
+html[data-wayglass-surface] .fae-manuscript>summary{font-family:var(--fae-manuscript-font)}
+html[data-wayglass-surface] .wg-hud-kicker{font-family:var(--fae-instrument-font);letter-spacing:.08em}
+html[data-wayglass-surface] .wg-deck-group-head strong{font-family:var(--fae-inscription-font)}
+/* Do not substitute decorative Latin fonts for actual Wyrdrune codepoints,
+   editable text, numeric measurements or accessibility labels. */
