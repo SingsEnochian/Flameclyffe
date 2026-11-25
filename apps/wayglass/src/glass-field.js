@@ -325,10 +325,10 @@ export function installWayglassField({ host = document.body } = {}) {
     const ownership = Number(detail.ownership);
     const handoff = Number(detail.handoff_progress);
     uniforms.uIntent.value = Number.isFinite(intent) ? Math.min(1, Math.max(0, intent)) : uniforms.uIntent.value;
-    uniforms.uChannel.value = detail.channel === 'OOC' ? 1 : 0;
+    if (detail.channel === 'OOC' || detail.channel === 'IC') uniforms.uChannel.value = detail.channel === 'OOC' ? 1 : 0;
     uniforms.uOwnership.value = Number.isFinite(ownership) ? Math.min(1, Math.max(0, ownership)) : uniforms.uOwnership.value;
-    uniforms.uHandoff.value = Number.isFinite(handoff) ? Math.min(1, Math.max(0, handoff)) : 0;
-    uniforms.uCanonState.value = detail.canon_state === 'conflicted' ? -1 : detail.canon_state === 'unresolved' ? -0.55 : detail.canon_state === 'verified' ? 1 : 0;
+    uniforms.uHandoff.value = Number.isFinite(handoff) ? Math.min(1, Math.max(0, handoff)) : uniforms.uHandoff.value;
+    if (detail.canon_state !== undefined) uniforms.uCanonState.value = detail.canon_state === 'conflicted' ? -1 : detail.canon_state === 'unresolved' ? -0.55 : detail.canon_state === 'verified' ? 1 : 0;
     if (still()) {
       render();
       return;
@@ -342,7 +342,11 @@ export function installWayglassField({ host = document.body } = {}) {
     if (alive && !still()) frame = requestAnimationFrame(animate);
   }
   function onMotionPreference(event) { reduceMotion = event.matches === true; syncMotion(); }
-  function onMotion(event) { motionEnabled = event.detail?.enabled === true; syncMotion(); }
+  function onMotion(event) {
+    motionEnabled = event.detail?.enabled === true;
+    if (!motionEnabled) { energyTarget = 0; velocityTarget = 0; }
+    syncMotion();
+  }
   motionPreference?.addEventListener?.('change', onMotionPreference);
   globalThis.addEventListener?.('wayglass:motion', onMotion);
   document.addEventListener?.('visibilitychange', syncMotion);
