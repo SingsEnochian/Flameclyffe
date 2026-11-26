@@ -417,16 +417,21 @@ export function installWayglassField({ host = document.body } = {}) {
           float pulse=exp(-d*d*240.0);
           float age=fract(head-fibreUV.x+1.0);
           float trail=exp(-age*12.0)*smoothstep(0.0,.035,age)*(1.0-smoothstep(.85,1.0,age));
-          float rim=pow(abs(normalize(fibreN).z),.6);
+          float facing=abs(normalize(fibreN).z);
+          float rim=pow(facing,.6);
+          float core=pow(facing,5.0);
+          float sheath=pow(facing,.35);
+          float fineStructure=.94+.06*sin(fibreUV.x*160.0+phase*6.283);
+          float curvature=.82+.18*cos(fibreUV.x*12.566+phase*6.283+clock*.4);
           float path=max(0.0,fibreDepth-6.8);
           vec3 transmission=exp(-vec3(.92,.52,.31)*path);
           float focus=7.8+.3*sin(clock*.4);
           float defocus=abs(fibreDepth-focus);
           float fade=smoothstep(0.0,.09,fibreUV.x)*smoothstep(0.0,.12,1.0-fibreUV.x);
-          float alpha=charge*(.08+.48*pulse+.22*trail)*fade/(1.0+defocus*.65);
+          float alpha=charge*(.08+.48*pulse+.22*trail)*fade*(.35+.65*sheath)/(1.0+defocus*.65);
           float tipLight=exp(-abs(fibreUV.x-.045)*75.0)+exp(-abs(fibreUV.x-.955)*75.0);
           if(alpha<.004)discard;
-          gl_FragColor=vec4((tint*(.38+.62*rim)+vec3(.28)*pulse+vec3(.12)*tipLight)*transmission,alpha);
+          gl_FragColor=vec4((tint*(.24+.46*rim)+mix(tint,vec3(1.0,.96,.87),.65)*core*(.30+.28*pulse)+vec3(.12)*tipLight)*transmission*fineStructure*curvature,alpha);
         }`
     });
     const mesh=new THREE.Mesh(tube,mat);
