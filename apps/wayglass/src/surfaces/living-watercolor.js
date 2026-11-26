@@ -1,5 +1,6 @@
 import {shipSoundscape} from '../ship-soundscape.js';
 import { createWatercolorFluid } from '../watercolor-fluid.js';
+import { createWatercolorThreeRuntime } from '../watercolor-three-runtime.js';
 import { pressWordPainting, readWordPainting, validateWordPainting } from '../watercolor-words.js';
 import {AMBIENT_INTERVAL_MS,ambientWatercolorStroke,watercolorLiveness} from '../watercolor-liveness.mjs';
 import {
@@ -59,7 +60,7 @@ export async function mountLivingWatercolorSurface(root) {
   const drafts=new Map(), responses=new Map();
   let mode='dream', routeId=null, routes=[], paused=false, busy=false,
     stopped=false, pointerId=null, lastPointer=null, lastFrame=0, elapsed=0,
-    pendingProgram=null, animationId=0, requestEpoch=0,
+    pendingProgram=null, animationId=0, requestEpoch=0, threeRuntime=null,
     lastAmbient=0,ambientCycle=0;
   const soundState=wayglassSomaticSound.snapshot();
   synchronizeJourneyFeather({stopped:soundState.feather_stopped,confirmed:soundState.feather_release_confirmed});
@@ -84,6 +85,11 @@ export async function mountLivingWatercolorSurface(root) {
           '<div class="wc-live-field" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>',
           '<div class="wc-live-insight" role="status" aria-live="polite"><strong id="wc-live-title">Ambient current · listening</strong><small id="wc-live-detail">Local pigment moves independently. No agent activity claimed.</small></div>',
           '<canvas id="wc-fluid" class="wc-fluid" aria-label="Watercolor canvas. Drag a finger, mouse or Pencil to paint; use arrow keys to move and Enter or Space to paint." aria-describedby="wc-paint-help wc-word-paint-status" tabindex="0"></canvas>',
+          '<div class="wc-three-controls" role="group" aria-label="Optional Three.js scene">',
+            '<button id="wc-three-toggle" type="button" class="glass-chip" aria-pressed="false">✧ Open 3D VFX</button>',
+            '<button id="wc-three-splat" type="button" class="glass-chip" disabled>Load splat sample</button>',
+            '<span id="wc-three-status" role="status" aria-live="polite">3D layer is off</span>',
+          '</div>',
           '<div class="wc-stage-meta" aria-hidden="true">WAYGLASS / AQUARELLE / PREMAQC</div>',
           '<button id="wc-instruments-toggle" type="button" class="wc-instruments-toggle glass-chip" aria-controls="wc-workbench" aria-expanded="false" aria-label="Open or close Wayglass instruments">✦ Instruments</button>',
           '<button id="wc-focus-paint" type="button" class="wc-focus-paint glass-chip" aria-pressed="false">Focus painting</button>',
@@ -189,6 +195,41 @@ export async function mountLivingWatercolorSurface(root) {
     instrumentsToggle.textContent=open?'✦ Close instruments':'✦ Instruments';
   });
   const ctx=canvas.getContext('2d',{alpha:false});
+  const threeToggle=q('wc-three-toggle'),threeSplat=q('wc-three-splat'),threeStatus=q('wc-three-status');
+  listen(threeToggle,'click',()=>{
+    if(stopped)return;
+    if(threeRuntime){
+      threeRuntime.destroy();threeRuntime=null;
+      threeToggle.textContent='✧ Open 3D VFX';
+      threeToggle.setAttribute('aria-pressed','false');
+      threeSplat.disabled=true;
+      threeStatus.textContent='3D layer is off';
+      return;
+    }
+    try{
+      threeRuntime=createWatercolorThreeRuntime({
+        stage,
+        onStatus:message=>{if(!stopped)threeStatus.textContent=message;},
+      });
+      threeToggle.textContent='Close 3D VFX';
+      threeToggle.setAttribute('aria-pressed','true');
+      threeSplat.disabled=featherStopped;
+    }catch(error){
+      threeStatus.textContent='3D layer unavailable · '+String(error?.message||error).slice(0,160);
+    }
+  });
+  listen(threeSplat,'click',async()=>{
+    if(!threeRuntime||stopped||featherStopped)return;
+    threeSplat.disabled=true;
+    try{
+      await threeRuntime.loadSplat('https://sparkjs.dev/assets/splats/butterfly.spz');
+      threeStatus.textContent='Splat sample requested · loading is subject to network and device capability';
+    }catch(error){
+      threeStatus.textContent='Splat sample unavailable · '+String(error?.message||error).slice(0,160);
+    }finally{
+      threeSplat.disabled=featherStopped||stopped||!threeRuntime;
+    }
+  });
   listen(q('wc-image'),'change',async()=>{
     const file=q('wc-image').files?.[0], epoch=++imageEpoch;
     if(!file||featherStopped||stopped)return;
@@ -344,6 +385,7 @@ export async function mountLivingWatercolorSurface(root) {
       if(elapsed%12===0)updateInspector();
       lastFrame=ts;
     }
+    threeRuntime?.render(ts,{animate:!paused&&!reduced&&!featherStopped});
     animationId=globalThis.requestAnimationFrame(frame);
   }
   function addPigment(event,{x,y,dx=0,dy=0}={}){
@@ -789,6 +831,7 @@ export async function mountLivingWatercolorSurface(root) {
         touchEpoch++;touchAbort?.abort();touchAbort=null;touchOrb.disabled=true;
         root.querySelector('.wc-faepunk-touch').dataset.running='false';
         touchStatus.textContent='Feather held. The touch engine is paused.';
+      threeRuntime?.pause();threeSplat.disabled=true;
         feedback.textContent='Feather Stop. Motion, sound, haptics and model invitations paused.';
       }
     } catch(error){feedback.textContent=error.message;}
@@ -947,6 +990,7 @@ export async function mountLivingWatercolorSurface(root) {
       featherStopped=false;
       touchOrb.disabled=false;
       touchStatus.textContent='Feather released by explicit action. Touch when ready.';
+      threeRuntime?.resume();threeSplat.disabled=!threeRuntime;
     }
     reflectSound();updateInspector();
   };
@@ -991,6 +1035,7 @@ export async function mountLivingWatercolorSurface(root) {
       globalThis.removeEventListener?.(WAYGLASS_FEATHER_EVENT,onFeather);
       wayglassSomaticSound.stop();
       globalThis.cancelAnimationFrame?.(animationId);
+      threeRuntime?.destroy();threeRuntime=null;
       fluid.dispose();settled.dispose();
     },
     fluid,

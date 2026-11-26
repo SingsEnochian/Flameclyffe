@@ -116,3 +116,25 @@
 @media(prefers-reduced-motion:reduce){
  .wc-surface .wc-live-field::before{animation:none!important}
 }
+
+
+/* Optional Three.js layer: one WebGL canvas, driven by Watercolour's existing frame. */
+.wc-surface .wc-stage{position:relative;isolation:isolate}
+.wc-three-overlay{
+  position:absolute;inset:0;z-index:3;display:block;width:100%;height:100%;
+  pointer-events:none;background:transparent;contain:strict;
+}
+.wc-three-controls{
+  position:absolute;z-index:7;top:clamp(12px,2vw,22px);right:clamp(12px,2vw,22px);
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:7px;
+  max-width:min(92%,520px);pointer-events:auto;
+}
+.wc-three-controls button{font:inherit;backdrop-filter:blur(14px)}
+.wc-three-controls button:disabled{opacity:.48;cursor:not-allowed}
+.wc-three-controls [role="status"]{
+  flex-basis:100%;text-align:right;font-size:.68rem;line-height:1.35;
+  color:var(--wg-muted,rgba(226,235,230,.78));text-shadow:0 1px 8px rgba(0,0,0,.45);
+}
+@media(prefers-reduced-motion:reduce){
+  .wc-three-overlay{animation:none!important;transition:none!important}
+}
