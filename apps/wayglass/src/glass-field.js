@@ -27,6 +27,8 @@ const FRAGMENT = `
   uniform vec2 uPointer;
   uniform vec2 uResolution;
   uniform sampler2D uLoom;
+  uniform sampler2D uLoomDepth;
+  uniform float uLoomFocus;
   uniform vec2 uLoomTexel;
   uniform float uLoomActive;
   varying vec2 vUv;
@@ -282,7 +284,10 @@ const FRAGMENT = `
       float grain=fbm(uv*vec2(83.0,97.0));
       float density=fbm(uv*7.0+vec2(2.3,8.1));
       vec2 shift=vec2(grain-.5,density-.5)*uLoomTexel*2.0;
-      vec2 d=uLoomTexel*(1.0+3.0*uRoughness+2.0*density);
+      float rawDepth=texture2D(uLoomDepth,uv).r;
+      float viewDepth=.1*30.0/(30.0-rawDepth*(30.0-.1));
+      float coc=rawDepth<.99999?clamp(abs(viewDepth-uLoomFocus)/max(viewDepth,.1)*24.0,0.0,5.0):1.0;
+      vec2 d=uLoomTexel*(.65+2.0*uRoughness+1.5*density+coc);
       vec3 core=texture2D(uLoom,uv+shift).rgb;
       vec3 scatter=(texture2D(uLoom,uv+shift+vec2(d.x,0.0)).rgb+
         texture2D(uLoom,uv+shift-vec2(d.x,0.0)).rgb+
@@ -333,8 +338,11 @@ export function installWayglassField({ host = document.body } = {}) {
   const camera = new THREE.Camera();
   const geometry = new THREE.PlaneGeometry(2, 2);
   const loomTarget=new THREE.WebGLRenderTarget(1,1,{depthBuffer:true});
+  loomTarget.depthTexture=new THREE.DepthTexture(1,1,THREE.UnsignedIntType);
   const uniforms = {
     uLoom:{value:loomTarget.texture},
+    uLoomDepth:{value:loomTarget.depthTexture},
+    uLoomFocus:{value:8.65},
     uLoomTexel:{value:new THREE.Vector2(1,1)},
     uLoomActive:{value:0},
     uTime: { value: 0 },
@@ -608,6 +616,7 @@ export function installWayglassField({ host = document.body } = {}) {
     }
 
     uniforms.uLoomActive.value=0;
+    uniforms.uLoomFocus.value+=(8.65+(uniforms.uPointer.value.y-.5)*.7-uniforms.uLoomFocus.value)*blend(2.0);
     if(!still() && uniforms.uWeave.value>.008){
       loom.rotation.y+=((uniforms.uPointer.value.x-.5)*.18-loom.rotation.y)*blend(3.0);
       loom.rotation.x+=((uniforms.uPointer.value.y-.5)*.12-loom.rotation.x)*blend(3.0);
