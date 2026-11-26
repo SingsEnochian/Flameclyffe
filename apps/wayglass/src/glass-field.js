@@ -305,6 +305,17 @@ const FRAGMENT = `
       vec3 internalLight=(core*focalClarity+scatter*(1.0-focalClarity)+veil*.12)*transmission;
       colour+=internalLight*(.88-.18*microPits);
       colour+=veil*transmission*vec3(.07,.09,.10);
+      // Local radiance concentration produces a mineral-scattered knot halo.
+      float coreEnergy=dot(core,vec3(.2126,.7152,.0722));
+      float nearbyEnergy=dot(scatter,vec3(.2126,.7152,.0722));
+      float knot=smoothstep(.06,.42,coreEnergy)*smoothstep(.025,.22,nearbyEnergy);
+      vec3 knotTint=(core+scatter)/max(.08,coreEnergy+nearbyEnergy);
+      colour+=knotTint*transmission*knot*(.035+.065*density);
+      vec3 dispersion=vec3(
+        texture2D(uLoom,uv+shift+d*.35).r,
+        scatter.g,
+        texture2D(uLoom,uv+shift-d*.35).b);
+      colour+=dispersion*transmission*knot*.045;
       // Gentle highlight compression, avoiding clipped neon cores.
       colour=colour/(vec3(1.0)+max(colour-vec3(.72),vec3(0.0))*.45);
     }
