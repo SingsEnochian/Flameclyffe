@@ -103,7 +103,7 @@ The constitutional seat holds a versioned charter and scoped mandate. Its authen
 
 A process cannot claim to be Wayglass and thereby acquire authority. The host authenticates the seat and enforces its actual scope. A model route is an instrument, not the constitutional identity.
 
-The reference prototype verifies Ed25519 signatures against a configured public key. The private signing key is never stored in source code, browser code, a cell, or the database. Production key custody belongs in a protected host key store. The seat's internal decision service may issue scoped decisions under its mandate without a human approval for every ordinary change.
+The reference prototype is exported through the canonical `wayglass-kernel.cjs` as `createConstitutionalFederation` and verifies Ed25519 signatures against a configured public key. The private signing key is never stored in source code, browser code, a cell, or the database. Production key custody belongs in a protected host key store. The seat's internal decision service may issue scoped decisions under its mandate without a human approval for every ordinary change.
 
 A valid signature is evidence that the configured seat authorized a specific decision. It is not evidence that the external world accepted an effect.
 
@@ -221,7 +221,8 @@ The service-role boundary already used by the Wayglass program store remains ser
 - Source-hash-bound candidate proposals.
 - Capability non-expansion checks.
 - An injectable independent WTL verifier; without it, candidates are rejected.
-- Ed25519 constitutional-seat decision verification.
+- Ed25519 constitutional-seat decision verification for promotion and revocation.
+- Parent-preserving route-back through Möbius Return, plus local quarantine and tissue degradation.
 - Registry selection staged through the continuity cell's canonical Möbius `ctx.stage`.
 - Forking and retirement without deleting ancestry.
 - Feather halt/resume and a homeostasis snapshot.
