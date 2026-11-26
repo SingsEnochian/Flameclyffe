@@ -55,7 +55,7 @@ export async function mountLivingWatercolorSurface(root) {
   const fluid=createWatercolorFluid();
   const settled=createWatercolorFluid();
   const painted=new Map();
-  let settledPixels=null, resolvedImage=null, imageEpoch=0;
+  let settledPixels=null, resolvedImage=null, imageEpoch=0, imageResolvedAt=0;
   const drafts=new Map(), responses=new Map();
   let mode='dream', routeId=null, routes=[], paused=false, busy=false,
     stopped=false, pointerId=null, lastPointer=null, lastFrame=0, elapsed=0,
@@ -197,7 +197,7 @@ export async function mountLivingWatercolorSurface(root) {
       const next=await createImageBitmap(file);
       if(stopped||featherStopped||epoch!==imageEpoch){next.close();return;}
       if(next.width*next.height>24000000){next.close();throw new Error('Image exceeds 24 megapixels');}
-      resolvedImage?.close();resolvedImage=next;
+      resolvedImage?.close();resolvedImage=next;imageResolvedAt=performance.now();
       q('wc-image-status').textContent='Complete reference resolved · '+next.width+' × '+next.height+' · local image';
       paint();
     }catch(error){if(epoch===imageEpoch&&!stopped)q('wc-image-status').textContent=String(error.message);}
@@ -304,7 +304,24 @@ export async function mountLivingWatercolorSurface(root) {
       if(resolvedImage){
         const fit=Math.min(cw/resolvedImage.width,ch/resolvedImage.height);
         const iw=resolvedImage.width*fit,ih=resolvedImage.height*fit;
-        ctx.drawImage(resolvedImage,(cw-iw)/2,(ch-ih)/2,iw,ih);
+        const x=(cw-iw)/2,y=(ch-ih)/2;
+        const progress=(reduced||paused||featherStopped||document.documentElement.dataset.wgMotion==='off')?1:Math.min(1,(performance.now()-imageResolvedAt)/4200);
+        if(progress>=1)ctx.drawImage(resolvedImage,x,y,iw,ih);
+        else{
+          const cols=80,rows=Math.max(1,Math.round(cols*ih/iw));
+          const sw=resolvedImage.width/cols,sh=resolvedImage.height/rows,dw=iw/cols,dh=ih/rows;
+          ctx.save();
+          for(let j=0;j<rows;j++)for(let i=0;i<cols;i++){
+            const n=Math.sin(i*127.1+j*311.7)*43758.5453,seed=n-Math.floor(n);
+            const p=Math.max(0,Math.min(1,(progress-seed*.45)/.55));
+            if(p<=0)continue;
+            const ease=p*p*(3-2*p),angle=seed*Math.PI*12;
+            const drift=(1-ease)*Math.min(cw,ch)*.16;
+            ctx.globalAlpha=ease;
+            ctx.drawImage(resolvedImage,i*sw,j*sh,sw,sh,x+i*dw+Math.cos(angle)*drift,y+j*dh+Math.sin(angle)*drift,dw+.4,dh+.4);
+          }
+          ctx.restore();
+        }
       }
     }
   }
