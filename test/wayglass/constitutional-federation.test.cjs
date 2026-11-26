@@ -7,6 +7,7 @@ const {
   createConstitutionalFederation,
   constitutionalDecisionBytes,
 } = require('../../lib/wayglass-constitutional-federation.cjs');
+const kernel = require('../../lib/wayglass-kernel.cjs');
 
 const hash = value => createHash('sha256').update(value, 'utf8').digest('hex');
 const baseSource = 'operator base() -> Number = 1';
@@ -75,6 +76,12 @@ function signedProof(federation, privateKey, candidateId) {
     signature: sign(null, constitutionalDecisionBytes(decision), privateKey).toString('base64'),
   };
 }
+
+test('canonical kernel exposes the federation and its one in-memory test registry', () => {
+  assert.equal(kernel.createConstitutionalFederation, createConstitutionalFederation);
+  assert.equal(kernel.CONSTITUTIONAL_FEDERATION_SCHEMA, 'wayglass.constitutional-federation/v0.1');
+  assert.equal(typeof kernel.createMemoryFederationRegistry, 'function');
+});
 
 test('three-universe tissue keeps distinct identities, laws, canon and Möbius roots', async () => {
   const { federation } = fixture();
