@@ -31,6 +31,7 @@ const FRAGMENT = `
   uniform float uLoomFocus;
   uniform vec2 uLoomTexel;
   uniform float uLoomActive;
+  uniform float uMythogenesis;
   varying vec2 vUv;
 
   #define PI 3.141592653589793
@@ -296,6 +297,14 @@ const FRAGMENT = `
     // Architectural stonewood surrounds the central optical glass aperture.
     float timberMask=smoothstep(.30,.86,length(p*vec2(.78,1.0)))*.72;
     colour=mix(colour,stonewood(p,viewDir,lightDir),timberMask);
+    // Layered garnet and amethyst optical approximation.
+    float plumLayer=fbm(refractedP*4.2+vec2(3.1,7.2));
+    float plumPath=(.35+opticalThickness+.65*plumLayer)/max(.25,cosTheta);
+    vec3 plumTransmission=exp(-vec3(.75,2.3,1.25)*plumPath);
+    vec3 plumBase=mix(vec3(.025,.009,.028),vec3(.24,.065,.17),smoothstep(.18,.85,plumLayer));
+    vec3 plumGlass=plumBase+vec3(.34,.13,.28)*plumTransmission*(.16+.24*nacre);
+    plumGlass+=vec3(.68,.39,.53)*min(specular*NoL,.35)*.23;
+    colour=mix(colour,plumGlass,uMythogenesis*.88);
     colour += inkLight;
     colour += lightWeave(refractedP,opticalThickness,uWeave,uTime) * (.25+.75*lens);
     colour += vec3(0.22, 0.78, 0.80) * mote;
@@ -347,7 +356,7 @@ const FRAGMENT = `
         texture2D(uLoom,uv+shift-vec2(0.0,d.y)).rgb)*.25;
       float embeddedDepth=rawDepth<.99999?clamp((viewDepth-7.0)*.12,0.0,.65):.2;
       float opticalPath=(uThickness+.45*density+embeddedDepth)/incidence;
-      vec3 transmission=exp(-vec3(2.1,1.25,.85)*opticalPath)*(1.0-fresnelStone);
+      vec3 transmission=exp(-mix(vec3(2.1,1.25,.85),vec3(.65,1.9,1.05),uMythogenesis)*opticalPath)*(1.0-fresnelStone);
       // Multi-scale optical point spread: preserve fine cores beneath satin stone.
       vec2 wide=d*2.8;
       vec3 veil=(texture2D(uLoom,uv+vec2(wide.x,wide.y)).rgb+
@@ -422,6 +431,7 @@ export function installWayglassField({ host = document.body } = {}) {
     uLoomFocus:{value:8.65},
     uLoomTexel:{value:new THREE.Vector2(1,1)},
     uLoomActive:{value:0},
+    uMythogenesis:{value:0},
     uTime: { value: 0 },
     uWeave: { value: 0 },
     uWeaveMode: { value: 0 },
@@ -625,7 +635,7 @@ export function installWayglassField({ host = document.body } = {}) {
   const grains=new THREE.Points(grainGeometry,grainMaterial);grains.visible=false;loomScene.add(grains);
   let morphStart=-Infinity,morphDuration=1.8;
   const livingThemes=Object.freeze({mythogenesis:{form:4,duration:6},'obsidian-weave':{form:2,duration:3},stonewood:{form:3,duration:4},aetherglass:{form:0,duration:4},'living-pigment':{form:1,duration:5},starweather:{form:1,duration:7}});
-  function themeChanged(event){const key=event.detail?.theme;if(!Object.hasOwn(livingThemes,key))return;const theme=livingThemes[key];grainMaterial.uniforms.plum.value=key==='mythogenesis'?1:0;document.documentElement.dataset.wgLivingTheme=key;if(still())return;morphStart=elapsed;morphDuration=theme.duration;grainMaterial.uniforms.form.value=theme.form;}
+  function themeChanged(event){const key=event.detail?.theme;if(!Object.hasOwn(livingThemes,key))return;const theme=livingThemes[key];grainMaterial.uniforms.plum.value=key==='mythogenesis'?1:0;uniforms.uMythogenesis.value=grainMaterial.uniforms.plum.value;document.documentElement.dataset.wgLivingTheme=key;if(still())return;morphStart=elapsed;morphDuration=theme.duration;grainMaterial.uniforms.form.value=theme.form;}
   globalThis.addEventListener?.('wayglass:living-theme',themeChanged);
   function morphogenesis(event){
     if(still())return;
