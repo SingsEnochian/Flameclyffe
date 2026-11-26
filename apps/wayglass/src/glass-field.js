@@ -608,7 +608,8 @@ export function installWayglassField({ host = document.body } = {}) {
       float theta=seed*6.2831853, phi=fract(seed*137.51)*6.2831853;
       if(form>.5 && form<1.5){float r=.15+2.2*sqrt(seed);float spiral=theta+6.*r;target=vec3(r*cos(spiral),r*sin(spiral)*.65,.2*sin(phi));}
       else if(form>1.5 && form<2.5){float r=1.4+.45*cos(phi);target=vec3(r*cos(theta),r*sin(theta),.45*sin(phi));}
-      else if(form>2.5){target=position/max(.01,max(abs(position.x)/2.2,max(abs(position.y)/1.5,abs(position.z)/.8)));}
+      else if(form>2.5 && form<3.5){target=position/max(.01,max(abs(position.x)/2.2,max(abs(position.y)/1.5,abs(position.z)/.8)));}
+      else if(form>3.5){float petal=.45+.55*pow(abs(cos(theta*3.)),1.8);float r=2.3*sqrt(fract(seed*173.37))*petal;target=vec3(r*cos(theta),r*sin(theta)*.8,.65*sin(r*1.5)+.18*sin(phi));}
       vec3 p=target+vec3(cos(a),sin(a),sin(a*2.))*((1.-t)*(1.+seed)*2.);
       vec4 mv=modelViewMatrix*vec4(p,1.);gl_Position=projectionMatrix*mv;
       defocus=clamp(abs(-mv.z-focus)*.48,0.,1.);gl_PointSize=clamp(19./max(1.,-mv.z)+defocus*1.5,1.5,5.);vec3 normal=normalize(mat3(modelViewMatrix)*normalize(target+vec3(.0001)));float incidence=abs(dot(normal,normalize(-mv.xyz)));nacre=.5+.5*cos(incidence*5.+seed*2.+clock*.18);depthFade=exp(-.065*max(0.,-mv.z));glow=sin(3.14159265*t)*(.35+.65*seed)*(.78+.22*pow(1.-incidence,2.));}`,
@@ -622,11 +623,14 @@ export function installWayglassField({ host = document.body } = {}) {
   });
   const grains=new THREE.Points(grainGeometry,grainMaterial);grains.visible=false;loomScene.add(grains);
   let morphStart=-Infinity,morphDuration=1.8;
+  const livingThemes=Object.freeze({mythogenesis:{form:4,duration:6},'obsidian-weave':{form:2,duration:3},stonewood:{form:3,duration:4},aetherglass:{form:0,duration:4},'living-pigment':{form:1,duration:5},starweather:{form:1,duration:7}});
+  function themeChanged(event){const key=event.detail?.theme;if(!Object.hasOwn(livingThemes,key))return;const theme=livingThemes[key];document.documentElement.dataset.wgLivingTheme=key;if(still())return;morphStart=elapsed;morphDuration=theme.duration;grainMaterial.uniforms.form.value=theme.form;}
+  globalThis.addEventListener?.('wayglass:living-theme',themeChanged);
   function morphogenesis(event){
     if(still())return;
     const duration=Number(event.detail?.durationMs??1800);
     morphStart=elapsed;morphDuration=Number.isFinite(duration)?Math.max(.2,Math.min(8,duration/1000)):1.8;
-    grainMaterial.uniforms.form.value=({shell:0,spiral:1,torus:2,crystal:3})[event.detail?.form]??0;
+    grainMaterial.uniforms.form.value=({shell:0,spiral:1,torus:2,crystal:3,bloom:4})[event.detail?.form]??0;
   }
   const motionPreference = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
   let reduceMotion = motionPreference?.matches === true;
@@ -877,6 +881,7 @@ export function installWayglassField({ host = document.body } = {}) {
       motionPreference?.removeEventListener?.('change', onMotionPreference);
       globalThis.removeEventListener?.('wayglass:motion', onMotion);
       globalThis.removeEventListener?.('wayglass:morphogenesis',morphogenesis);
+      globalThis.removeEventListener?.('wayglass:living-theme',themeChanged);
       grainGeometry.dispose();grainMaterial.dispose();
       globalThis.removeEventListener?.('wayglass:feather',onFeather);
       document.removeEventListener?.('visibilitychange', syncMotion);
