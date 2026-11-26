@@ -5,10 +5,16 @@
 begin;
 
 alter table public.wayglass_program_revisions
-  add column if not exists parent_revision_id uuid
-    references public.wayglass_program_revisions(revision_id) on delete restrict,
+  add column if not exists parent_revision_id uuid,
   add column if not exists lineage_id text,
   add column if not exists verification_receipt jsonb not null default '{}'::jsonb;
+
+create unique index if not exists wayglass_program_revisions_program_revision_idx
+  on public.wayglass_program_revisions(program_id, revision_id);
+alter table public.wayglass_program_revisions
+  add constraint wayglass_program_revisions_parent_program_fk
+  foreign key (program_id, parent_revision_id)
+  references public.wayglass_program_revisions(program_id, revision_id) on delete restrict;
 
 create index if not exists wayglass_program_revisions_parent_idx
   on public.wayglass_program_revisions(parent_revision_id);
@@ -43,7 +49,7 @@ create table if not exists public.wayglass_cells (
   cell_key text not null unique check (cell_key ~ '^[a-z0-9][a-z0-9._:-]{1,159}$'),
   world_id uuid not null unique references public.starwell_worlds(id) on delete restrict,
   program_id uuid not null references public.wayglass_programs(program_id) on delete restrict,
-  active_revision_id uuid references public.wayglass_program_revisions(revision_id) on delete restrict,
+  active_revision_id uuid,
   parent_cell_id uuid references public.wayglass_cells(cell_id) on delete restrict,
   role text not null check (role in ('proposer','verifier','continuity','specialist')),
   lineage_root text not null check (char_length(lineage_root) between 16 and 180),
@@ -58,7 +64,9 @@ create table if not exists public.wayglass_cells (
     check (status in ('awake','resting','quarantined','retired')),
   retired_reason text,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  foreign key (program_id, active_revision_id)
+    references public.wayglass_program_revisions(program_id, revision_id) on delete restrict
 );
 
 create index if not exists wayglass_cells_world_idx on public.wayglass_cells(world_id);
@@ -108,12 +116,15 @@ create index if not exists wayglass_cell_membranes_active_idx
 create table if not exists public.wayglass_tissue_modules (
   tissue_id uuid not null references public.wayglass_tissues(tissue_id) on delete restrict,
   module_id text not null check (char_length(module_id) between 1 and 180),
-  active_revision_id uuid not null references public.wayglass_program_revisions(revision_id) on delete restrict,
+  program_id uuid not null references public.wayglass_programs(program_id) on delete restrict,
+  active_revision_id uuid not null,
   selected_by_seat_id text,
   charter_hash text not null,
   selected_at timestamptz not null default now(),
   selection_receipt jsonb not null default '{}'::jsonb,
-  primary key (tissue_id, module_id)
+  primary key (tissue_id, module_id),
+  foreign key (program_id, active_revision_id)
+    references public.wayglass_program_revisions(program_id, revision_id) on delete restrict
 );
 
 create table if not exists public.wayglass_constitutional_seats (
@@ -145,7 +156,11 @@ create table if not exists public.wayglass_cell_messages (
   status text not null default 'queued' check (status in ('queued','accepted','rejected','consumed','expired')),
   created_at timestamptz not null default now(),
   consumed_at timestamptz,
-  check (from_cell_id <> to_cell_id)
+  check (from_cell_id <> to_cell_id),
+  foreign key (tissue_id, from_cell_id)
+    references public.wayglass_tissue_members(tissue_id, cell_id) on delete restrict,
+  foreign key (tissue_id, to_cell_id)
+    references public.wayglass_tissue_members(tissue_id, cell_id) on delete restrict
 );
 
 create index if not exists wayglass_cell_messages_inbox_idx
@@ -163,7 +178,9 @@ create table if not exists public.wayglass_federation_events (
   payload jsonb not null default '{}'::jsonb,
   previous_event_hash text,
   event_hash text not null unique,
-  occurred_at timestamptz not null default now()
+  occurred_at timestamptz not null default now(),
+  foreign key (tissue_id, cell_id)
+    references public.wayglass_tissue_members(tissue_id, cell_id) on delete restrict
 );
 
 create index if not exists wayglass_federation_events_tissue_idx
