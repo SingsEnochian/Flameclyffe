@@ -72,7 +72,8 @@ const FRAGMENT = `
     float density=fbm(p*5.8+vec2(7.1,2.3));
     vec2 grad=vec2(fbm(p*5.8+vec2(7.12,2.3))-density,
                    fbm(p*5.8+vec2(7.1,2.32))-density);
-    vec2 q=(p+grad*.18*depth)*vec2(8.0,12.0);
+    vec2 parallax=(uPointer-.5)*depth*.035;
+    vec2 q=(p+grad*.18*depth+parallax)*vec2(8.0,12.0);
     float row=floor(q.y+.5);
     float shuttle=.5+.5*sin(time*(.85+.18*uWeaveMode));
     float tension=.075+.045*charge+.025*uWeaveMode;
@@ -82,8 +83,14 @@ const FRAGMENT = `
     float parity=.5+.5*cos(PI*(row+column));
     float aa=max(.009,12.0/max(uResolution.y,1.0));
     float radius=.019;
-    float w=1.0-smoothstep(radius,radius+aa,abs(warp));
-    float v=1.0-smoothstep(radius,radius+aa,abs(weft));
+    // Apparent macro focal plane, with depth-dependent circle of confusion.
+    float focus=mix(.18,.48,uEnergy);
+    float depthW=.15+.36*(1.0-parity);
+    float depthV=.15+.36*parity;
+    float blurW=.055*abs(depthW-focus);
+    float blurV=.055*abs(depthV-focus);
+    float w=(1.0-smoothstep(radius,radius+aa+blurW,abs(warp)))*radius/(radius+blurW);
+    float v=(1.0-smoothstep(radius,radius+aa+blurV,abs(weft)))*radius/(radius+blurV);
     // Cylindrical fibre normals and a narrow polished highlight.
     float nw=sqrt(max(0.0,1.0-pow(clamp(warp/radius,-1.0,1.0),2.0)));
     float nv=sqrt(max(0.0,1.0-pow(clamp(weft/radius,-1.0,1.0),2.0)));
