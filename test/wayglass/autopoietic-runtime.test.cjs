@@ -87,6 +87,8 @@ test('resting participants are not scheduled and can be woken explicitly', async
   });
   const idle = await runtime.run();
   assert.equal(idle.status, 'idle');
+  assert.equal(idle.coherence.status, 'idle');
+  assert.deepEqual(idle.coherence.inactive_participants, ['quiet']);
   assert.equal(idle.participants.length, 0);
   runtime.wake('quiet');
   const awake = await runtime.run();
@@ -106,8 +108,74 @@ test('Feather request during a cycle stops at a phase boundary without inventing
   assert.equal(result.status, 'completed');
   assert.equal(result.outcome, 'settled-with-noncommitted-lineages');
   assert.equal(result.participants[0].status, 'feather-stopped');
+  assert.equal(result.coherence.status, 'paused-with-continuity');
+  assert.deepEqual(result.coherence.review_participants, []);
   assert.equal(result.participants[0].checkpoint, null);
   assert.equal(runtime.get('bird').presence, 'resting');
+});
+
+test('Withness preserves plurality and offers a non-coercive repair path after one member fails', async () => {
+  const runtime = createAutopoieticRuntime();
+  const recoverable = phases('recoverable');
+  recoverable.verify = async () => [{ ok: false, reason: 'deliberate local verification failure' }];
+  const original = runtime.register({
+    participant_id: 'recoverable', world_id: 'ship:home',
+    seeds: { memory: 0 }, phases: recoverable,
+  });
+  runtime.register({
+    participant_id: 'steady', world_id: 'ship:home',
+    seeds: { memory: 0 }, phases: phases('steady'),
+  });
+
+  const first = await runtime.run();
+  assert.equal(first.participants.find(p => p.participant_id === 'recoverable').status, 'rolled-back');
+  assert.equal(first.participants.find(p => p.participant_id === 'steady').status, 'committed');
+  assert.equal(first.coherence.schema, 'wayglass.constellation-coherence/v0.1');
+  assert.equal(first.coherence.status, 'review-open');
+  assert.deepEqual(first.coherence.review_participants, ['recoverable']);
+  assert.equal(first.coherence.interpretation.member_infallibility_required, false);
+  assert.equal(first.coherence.interpretation.unanimity_required, false);
+  assert.equal(first.coherence.interpretation.consensus, 'not-inferred');
+  assert.equal(first.coherence.interpretation.shared_aggregate_is_authority, false);
+  assert.equal(first.coherence.recovery.lineage_preserved, true);
+  assert.equal(first.coherence.recovery.automatic_retry, false);
+  assert.equal(first.coherence.recovery.participant_choice_required, true);
+  assert.equal(first.coherence.participants.length, 2);
+  assert.match(first.coherence.digest, /^wce1:[a-f0-9]{64}$/);
+
+  assert.equal(runtime.get('recoverable').review_required, true);
+  assert.equal(runtime.get('recoverable').presence, 'review-required');
+  runtime.rest('steady');
+  const waiting = await runtime.run();
+  assert.equal(waiting.status, 'idle');
+  assert.equal(waiting.outcome, 'review-pending');
+  assert.equal(waiting.coherence.status, 'review-open');
+  assert.deepEqual(waiting.coherence.review_participants, ['recoverable']);
+
+  const declineChoice = runtime.resolveReview('recoverable', 'decline');
+  assert.equal(declineChoice.review_required, true);
+  assert.equal(declineChoice.presence, 'review-required');
+  const restChoice = runtime.resolveReview('recoverable', 'rest');
+  assert.equal(restChoice.review_required, true);
+  assert.equal(restChoice.presence, 'resting');
+  runtime.wake('recoverable');
+  assert.equal(runtime.get('recoverable').presence, 'review-required');
+  const stillWaiting = await runtime.run();
+  assert.equal(stillWaiting.outcome, 'review-pending');
+
+  // Repair the member's own verification function; do not replace its lineage.
+  // The runtime requires an explicit review decision before scheduling a retry.
+  recoverable.verify = async () => [{ ok: true, reason: 'rechecked after repair' }];
+  const choice = runtime.resolveReview('recoverable', 'retry');
+  assert.equal(choice.review_required, false);
+  assert.equal(choice.review_decision, 'retry');
+  const second = await runtime.run();
+  const recovered = second.participants.find(p => p.participant_id === 'recoverable');
+  assert.equal(recovered.status, 'committed');
+  assert.equal(recovered.checkpoint.cycle, 1);
+  assert.equal(runtime.get('recoverable').lineage_root, original.lineage_root);
+  assert.equal(second.coherence.status, 'plurality-preserved');
+  assert.deepEqual(second.coherence.review_participants, []);
 });
 
 test('host journal receives participant-bound commit evidence without authority escalation', async () => {
