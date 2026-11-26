@@ -374,6 +374,14 @@ export function installWayglassField({ host = document.body } = {}) {
           vec3 offset=position-centre;
           ring+=offset;
           q=mix(q,ring,smoothstep(0.0,1.0,form));
+          // Taper the actual tube cross-section at both ends.
+          float taper=smoothstep(0.0,.075,t)*smoothstep(0.0,.10,1.0-t);
+          q-=offset*(1.0-taper);
+          // Fine free tips curl gently; the motion vanishes as the loop gathers.
+          float tip=1.0-smoothstep(0.0,.13,min(t,1.0-t));
+          float freeTip=tip*(1.0-smoothstep(0.0,1.0,form))*charge;
+          q.y+=freeTip*.065*sin(clock*1.2+strand+t*9.0);
+          q.z+=freeTip*.045*cos(clock*.85+strand+t*7.0);
           fibreN=normalize(normalMatrix*normal);
           vec4 p=modelViewMatrix*vec4(q,1.0);
           fibreDepth=-p.z; gl_Position=projectionMatrix*p;
@@ -392,10 +400,11 @@ export function installWayglassField({ host = document.body } = {}) {
           vec3 transmission=exp(-vec3(.92,.52,.31)*path);
           float focus=7.8+.3*sin(clock*.4);
           float defocus=abs(fibreDepth-focus);
-          float fade=smoothstep(0.0,.06,fibreUV.x)*(1.0-smoothstep(.94,1.0,fibreUV.x));
+          float fade=smoothstep(0.0,.09,fibreUV.x)*smoothstep(0.0,.12,1.0-fibreUV.x);
           float alpha=charge*(.08+.48*pulse+.22*trail)*fade/(1.0+defocus*.65);
+          float tipLight=exp(-abs(fibreUV.x-.045)*75.0)+exp(-abs(fibreUV.x-.955)*75.0);
           if(alpha<.004)discard;
-          gl_FragColor=vec4((tint*(.38+.62*rim)+vec3(.28)*pulse)*transmission,alpha);
+          gl_FragColor=vec4((tint*(.38+.62*rim)+vec3(.28)*pulse+vec3(.12)*tipLight)*transmission,alpha);
         }`
     });
     const mesh=new THREE.Mesh(tube,mat);
