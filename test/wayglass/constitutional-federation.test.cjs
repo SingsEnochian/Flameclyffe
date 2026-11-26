@@ -202,3 +202,42 @@ test('Feather halts the federation without erasing cells or tissue history', asy
   assert.equal(resumed.tissues[0].status, 'active');
   assert.equal(resumed.cells.length, 3);
 });
+
+
+test('seat-authorized revocation routes future selection back to the preserved parent', async () => {
+  const { federation, privateKey } = fixture();
+  const { sourceHash } = await buildTissue(federation);
+  const proposed = await federation.proposeCandidate({
+    tissueId: 'tissue:first-organism',
+    candidateId: 'candidate:revoke-me',
+    source: nextSource,
+    parentSourceHash: sourceHash,
+    requestedCapabilities: ['wtl:pure'],
+  });
+  await federation.verifyCandidate(proposed.candidateId);
+  const promoteDecision = federation.buildSeatDecision({
+    candidateId: proposed.candidateId,
+    nonce: 'promote-nonce-00000001',
+    expiresAt: new Date(Date.now() + 60_000).toISOString(),
+  });
+  const promoted = await federation.promoteCandidate({
+    candidateId: proposed.candidateId,
+    proof: { decision: promoteDecision, signature: sign(null, constitutionalDecisionBytes(promoteDecision), privateKey).toString('base64') },
+  });
+  assert.equal(promoted.status, 'promoted');
+  assert.equal((await federation.getSelection('tissue:first-organism', 'wtl:sample-module')).sourceHash, hash(nextSource));
+
+  const revokeDecision = federation.buildSeatDecision({
+    candidateId: proposed.candidateId,
+    operation: 'candidate.revoke',
+    nonce: 'revoke-nonce-00000001',
+    expiresAt: new Date(Date.now() + 60_000).toISOString(),
+  });
+  const revoked = await federation.revokeCandidate({
+    candidateId: proposed.candidateId,
+    proof: { decision: revokeDecision, signature: sign(null, constitutionalDecisionBytes(revokeDecision), privateKey).toString('base64') },
+  });
+  assert.equal(revoked.status, 'revoked');
+  assert.equal((await federation.getSelection('tissue:first-organism', 'wtl:sample-module')).sourceHash, sourceHash);
+  assert.equal(federation.events().some(e => e.kind === 'candidate.revoked'), true);
+});
