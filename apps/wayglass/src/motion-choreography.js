@@ -126,6 +126,7 @@ export function installMotionChoreography({
   }
   function arrive(target = contentRoot) {
     opticalArrival(target);
+    if(active() && typeof scope.CustomEvent === 'function') scope.dispatchEvent?.(new scope.CustomEvent('wayglass:morphogenesis', {detail:{kind:'room-arrival',durationMs:1800,source:'mounted-surface'}}));
     // A successful mount owns the event; navigation does not predict its success.
     animate(target, [{ opacity: .86, transform: 'translateY(5px)' }, { opacity: 1, transform: 'translateY(0)' }], 240);
   }
