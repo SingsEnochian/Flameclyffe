@@ -57,9 +57,9 @@ The Autopoietic Runtime's `coherence` receipt is an informational coordination r
 
 The outer host must authenticate the participant before recording a choice. The runtime records the decision but does not claim to authenticate the caller.
 
-The receipt:
+The receipt includes active, review-pending, resting, and not-yet-run participants, and:
 
-- preserves each participant's identity, lineage root, status, and checkpoint digest;
+- preserves each participant's identity, lineage root, status, presence, review decision, and checkpoint digest;
 - identifies failed or unclassified outcomes for review without treating them as personal failure;
 - identifies Feather-paused participants separately from review items;
 - records that consensus and disagreement are not inferred from execution status;
@@ -76,6 +76,7 @@ The Möbius Gestalt remains an attributed observation of peer contributions. Its
 | `committed` / `converged` | This participant's cycle settled; it does not prove group consensus |
 | `rolled-back` / `refused` / `failed-after-commit` / `committed-no-carry` | Preserve lineage and open a review path |
 | `feather-stopped` / `committed-feather` | Pause or stop with continuity; do not classify as a failure |
+| `not-yet-run` | Inactive, not failed and not a review item |
 | Unclassified status | Preserve the evidence and open review rather than guessing |
 
 A review path does not automatically retry, rewrite phases, apply a proposed correction, or alter another participant's state.
