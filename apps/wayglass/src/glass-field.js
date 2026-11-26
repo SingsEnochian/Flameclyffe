@@ -12,6 +12,7 @@ const FRAGMENT = `
   precision highp float;
 
   uniform float uTime;
+  uniform float uWeave;
   uniform float uEnergy;
   uniform float uIntent;
   uniform float uChannel;
@@ -60,6 +61,26 @@ const FRAGMENT = `
     y += 0.42 * sin(p.x * (5.7 - seed) - seed * 8.0);
     y *= 0.11;
     return 1.0 - smoothstep(0.0, width, abs(p.y - y));
+  }
+
+  // Two families of optical filaments, separated in apparent depth.
+  // Interference is an artistic phase model, not measured coherent optics.
+  vec3 lightWeave(vec2 p,float depth,float charge,float time){
+    float x=p.x*9.0, y=p.y*9.0;
+    float warp=y-.19*sin(x*1.7+time*.45);
+    float weft=x-.19*sin(y*1.7-time*.39);
+    float dw=abs(fract(warp+.5)-.5);
+    float dv=abs(fract(weft+.5)-.5);
+    float aa=max(.012,9.0/max(uResolution.y,1.0));
+    float w=1.0-smoothstep(.008,.008+aa,dw);
+    float v=1.0-smoothstep(.008,.008+aa,dv);
+    float over=.5+.5*cos(PI*(floor(warp+.5)+floor(weft+.5)));
+    float pulse=.35+.65*pow(.5+.5*cos(x*1.4-y*.7-time*2.0),4.0);
+    vec3 shallow=vec3(.52,.95,.82)*w*mix(.35,1.0,over);
+    vec3 deep=vec3(.78,.65,.36)*v*mix(1.0,.35,over);
+    deep*=exp(-vec3(.85,.46,.25)*(depth+.45));
+    float knot=w*v*(.5+.5*cos(x-y-time));
+    return (shallow+deep+vec3(.6,.85,1.0)*knot*.3)*pulse*charge*.13;
   }
 
   vec3 labradorite(float phase, float fire) {
@@ -190,6 +211,7 @@ const FRAGMENT = `
     colour += vec3(.86,.94,1.0)*min(specular*NoL,.35)*(.08+.32*uEnergy);
 
     colour += inkLight;
+    colour += lightWeave(refractedP,opticalThickness,uWeave,uTime) * (.25+.75*lens);
     colour += vec3(0.22, 0.78, 0.80) * mote;
     colour += labradorite(strata * 1.7 + angle, ribbonParticle * 1.35);
     colour += labradorite(strata + uTime * 0.08, handoffFilament * 0.88);
@@ -245,6 +267,7 @@ export function installWayglassField({ host = document.body } = {}) {
   const geometry = new THREE.PlaneGeometry(2, 2);
   const uniforms = {
     uTime: { value: 0 },
+    uWeave: { value: 0 },
     uEnergy: { value: 0 },
     uIntent: { value: 0 },
     uChannel: { value: 0 },
@@ -315,6 +338,7 @@ export function installWayglassField({ host = document.body } = {}) {
   let frame = 0;
   let alive = true;
   let energyTarget = 0;
+  let weaveTarget = 0;
   let lastPointerAt = 0;
   let lastPointerX = 0;
   let lastPointerY = 0;
@@ -382,6 +406,8 @@ export function installWayglassField({ host = document.body } = {}) {
 
     if (!still()) {
       uniforms.uPointer.value.lerp(pointerTarget, blend(4.03));
+      uniforms.uWeave.value += (weaveTarget-uniforms.uWeave.value)*blend(4.2);
+      weaveTarget *= Math.exp(-1.15*dt);
       const idleFor = performance.now() - lastPointerAt;
       if (idleFor > 950) energyTarget *= Math.exp(-2.14*dt);
       uniforms.uEnergy.value += (energyTarget - uniforms.uEnergy.value) * blend(3.39);
@@ -392,6 +418,8 @@ export function installWayglassField({ host = document.body } = {}) {
     } else {
       clearJewel();
       uniforms.uEnergy.value = 0.08;
+      uniforms.uWeave.value = 0;
+      weaveTarget = 0;
       uniforms.uVelocity.value = 0;
       uniforms.uThickness.value = authoredThickness;
     }
@@ -466,6 +494,9 @@ export function installWayglassField({ host = document.body } = {}) {
     if (still()) {
       render();
       return;
+    }
+    if(detail.source==='wyrdrune-reading'||detail.source==='room-arrival'||detail.source==='observed-route'){
+      weaveTarget=Math.max(weaveTarget,Number.isFinite(strength)?Math.max(0,Math.min(1,strength)):0);
     }
     energyTarget = Math.max(energyTarget, Number.isFinite(strength) ? Math.min(1, Math.max(0, strength)) : 0.72);
   }
