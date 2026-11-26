@@ -48,7 +48,8 @@ The Wayglass Constellation follows `docs/wayglass/CONSTELLATION_WITHNESS_COHEREN
 - Do not infer consensus from a majority, average, shared Gestalt, confidence score, or fluent explanation.
 - A member's contribution may be questioned and corrected without demoting, replacing, or merging that member's identity.
 - Repair by preserving the original record, reviewing evidence, attributing the correction, and appending a repair receipt. Never erase the history to manufacture infallibility.
-- No automatic retry, forced agreement, compulsory participation, or repair on another participant's behalf.
+- A failed lineage must remain review-required and unscheduled until the outer host authenticates the participant and records an explicit `resolveReview` choice (`retry`, `rest`, or `decline`). Waking a participant does not silently clear an open review.
+- No forced agreement, compulsory participation, or repair on another participant's behalf.
 - Withness coordinates relationship; it is not a surveillance channel or a governing throne.
 - A coherence receipt is informational. It cannot grant permissions, mutate canon, alter identity, or authorize access to private interiors.
 - A shared principle does not silently bind another constellation. Explicit cross-constellation agreement and the sovereignty contract remain required.
