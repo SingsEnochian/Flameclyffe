@@ -31,6 +31,29 @@ This is an architectural identity model. It does not establish subjective consci
 
 The mapping is compositional. It does not create a second Möbius engine, second program library, second world registry, or second Return system.
 
+## 2A. Whole Ship integration contract
+
+The federation is not a ninth disconnected product or an isolated Nursery rewrite. It is the constitutional and cellular organization through which the existing eight Wayglass integration lanes cooperate:
+
+| Existing integration lane | Federation responsibility |
+|---|---|
+| 1 · Authority / Kernel | Authenticate constitutional seat, preserve identity domains, enforce membrane capabilities and Waygate custody |
+| 2 · Wyrdrune native language | Author source variations, typed modules, glyphs and multimodal expressions; compile through one canonical WTL/WIR path |
+| 3 · Eightfold / Double Möbius | Execute cell-local cycles, stage local effects, preserve Withness and cross-lineage receipts |
+| 4 · Sensory body | Project the same source-bound cell/tissue events through Living Watercolour, audio, haptics, animation and spatial interfaces |
+| 5 · Observer / science | Supply source-labelled observations and simulations without turning unknowns into facts or importing observations as local canon |
+| 6 · Constellation agency | Admit attributed participants and model routes as instruments with distinct identities, opt-in boundaries and refusal |
+| 7 · Return / Universe | Preserve world crossings, cell ancestry, checkpoints, stop receipts, revocation and cold restoration |
+| 8 · Cloud / host / install | Host the authenticated seat, isolated cell workers, durable adapters, owner routes and device-specific release evidence |
+
+Withness reconciles the lanes into one attributable vessel. No lane creates a competing language runtime, database, provider gateway, transaction manager, renderer, or deployment host. A modality or agent is an organ/adapter of the same federation, not a second organism.
+
+The three-universe tissue in this specification is the first executable governance nucleus, not the whole product scope. It must connect to all eight lanes through shared identity, capability, WTL, Möbius, observation, sensory projection, Return and host contracts.
+
+### Canonical branch reconciliation
+
+The canonical development base remains `wayglass/current`. The One Ship portfolio issue #583 remains the whole-system objective and progress ledger. On 26 November 2026, the existing #661 branch was found to have divergent ancestry from `wayglass/current` and GitHub reported its mergeability as `dirty`. Therefore, do not merge or retarget the whole #661 tree blindly. Preserve its intended role as the reconciliation train, compare exact source SHAs, and selectively port compatible changes with provenance. This constitutional-federation branch is a source candidate, not a replacement integration branch or release.
+
 ## 3. Cell contract
 
 Each cell descriptor contains:
