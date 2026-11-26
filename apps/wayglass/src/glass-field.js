@@ -557,8 +557,8 @@ export function installWayglassField({ host = document.body } = {}) {
   grainGeometry.setAttribute('seed',new THREE.BufferAttribute(grainSeeds,1));
   const grainMaterial=new THREE.ShaderMaterial({
     transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,
-    uniforms:{progress:{value:1},form:{value:0},clock:{value:0}},
-    vertexShader:`attribute float seed; uniform float progress; uniform float form; uniform float clock; varying float glow; varying float nacre; varying float depthFade;
+    uniforms:{progress:{value:1},form:{value:0},clock:{value:0},focus:{value:8.65}},
+    vertexShader:`attribute float seed; uniform float progress; uniform float form; uniform float clock; uniform float focus; varying float glow; varying float nacre; varying float depthFade; varying float defocus;
       void main(){float t=smoothstep(0.,1.,progress);float a=seed*37.7+(1.-t)*5.;
       vec3 target=position;
       float theta=seed*6.2831853, phi=fract(seed*137.51)*6.2831853;
@@ -567,13 +567,13 @@ export function installWayglassField({ host = document.body } = {}) {
       else if(form>2.5){target=position/max(.01,max(abs(position.x)/2.2,max(abs(position.y)/1.5,abs(position.z)/.8)));}
       vec3 p=target+vec3(cos(a),sin(a),sin(a*2.))*((1.-t)*(1.+seed)*2.);
       vec4 mv=modelViewMatrix*vec4(p,1.);gl_Position=projectionMatrix*mv;
-      gl_PointSize=clamp(25./max(1.,-mv.z),2.,6.);vec3 normal=normalize(mat3(modelViewMatrix)*normalize(target+vec3(.0001)));float incidence=abs(dot(normal,normalize(-mv.xyz)));nacre=.5+.5*cos(incidence*5.+seed*2.+clock*.18);depthFade=exp(-.065*max(0.,-mv.z));glow=sin(3.14159265*t)*(.35+.65*seed)*(.78+.22*pow(1.-incidence,2.));}`,
-    fragmentShader:`varying float glow; varying float nacre; varying float depthFade;void main(){
+      defocus=clamp(abs(-mv.z-focus)*.48,0.,1.);gl_PointSize=clamp(25./max(1.,-mv.z)+defocus*3.,2.,8.);vec3 normal=normalize(mat3(modelViewMatrix)*normalize(target+vec3(.0001)));float incidence=abs(dot(normal,normalize(-mv.xyz)));nacre=.5+.5*cos(incidence*5.+seed*2.+clock*.18);depthFade=exp(-.065*max(0.,-mv.z));glow=sin(3.14159265*t)*(.35+.65*seed)*(.78+.22*pow(1.-incidence,2.));}`,
+    fragmentShader:`varying float glow; varying float nacre; varying float depthFade; varying float defocus;void main(){
       float r=length(gl_PointCoord-.5)*2.;
       float edge=1.-smoothstep(.62,1.,r);
-      float core=exp(-18.*r*r),halo=exp(-3.8*r*r);
+      float core=exp(-mix(18.,6.,defocus)*r*r),halo=exp(-mix(3.8,2.5,defocus)*r*r);
       vec3 pearl=mix(vec3(.68,.76,.77),vec3(1.,.88,.67),clamp(glow,0.,1.));
-      pearl=mix(pearl,vec3(.72,.88,.84),nacre*.22);gl_FragColor=vec4(pearl,glow*depthFade*(.32*core+.13*halo)*edge);
+      pearl=mix(pearl,vec3(.72,.88,.84),nacre*.22);gl_FragColor=vec4(pearl,glow*depthFade*(.32*core+.13*halo)*edge/(1.+2.*defocus));
     }`
   });
   const grains=new THREE.Points(grainGeometry,grainMaterial);grains.visible=false;loomScene.add(grains);
@@ -693,7 +693,7 @@ export function installWayglassField({ host = document.body } = {}) {
     }
 
     const morphProgress=Math.min(1,Math.max(0,(elapsed-morphStart)/morphDuration));
-    grainMaterial.uniforms.clock.value=elapsed;grainMaterial.uniforms.progress.value=morphProgress;grains.visible=!still()&&morphProgress<1;
+    grainMaterial.uniforms.focus.value=uniforms.uLoomFocus.value;grainMaterial.uniforms.clock.value=elapsed;grainMaterial.uniforms.progress.value=morphProgress;grains.visible=!still()&&morphProgress<1;
     uniforms.uLoomActive.value=0;
     uniforms.uLoomFocus.value+=(8.65+(uniforms.uPointer.value.y-.5)*.7-uniforms.uLoomFocus.value)*blend(2.0);
     if(!still() && (uniforms.uWeave.value>.008||grains.visible)){
