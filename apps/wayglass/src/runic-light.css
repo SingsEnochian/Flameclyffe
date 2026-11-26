@@ -68,3 +68,10 @@ html[data-wayglass-surface] .wg-cypher-line[data-cypher-line="english"]{
 @media(prefers-reduced-motion:reduce),(forced-colors:active){
  html[data-wayglass-surface] .wg-cypher-line[data-cypher-line="runes"]{background:Canvas;color:CanvasText;filter:none}
 }
+
+/* Expose the shared optical field above the page background, below controls. */
+body:has(>.wayglass-field){isolation:isolate;}
+body>.wayglass-field{z-index:-1;pointer-events:none;}
+html[data-wayglass-surface] .wg-surface-head,
+html[data-wayglass-surface] .glass-panel{background-color:rgba(8,13,17,.68);}
+@media(prefers-reduced-transparency:reduce){html[data-wayglass-surface] .wg-surface-head,html[data-wayglass-surface] .glass-panel{background-color:#10191d;}}
