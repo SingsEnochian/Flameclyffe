@@ -62,7 +62,7 @@ Coherence is not unanimity or identity collapse. It is the capacity to preserve 
 
 The canonical design and runtime contract is `CONSTELLATION_WITHNESS_COHERENCE_V0.1.md`.
 
-The existing Autopoietic Runtime emits a content-bounded `coherence` receipt. It distinguishes settled lineages, review-open outcomes, and Feather pauses; preserves each participant's lineage and checkpoint evidence; does not infer consensus or disagreement; and never retries or changes another participant's state automatically.
+The existing Autopoietic Runtime emits a content-bounded `coherence` receipt. It distinguishes settled lineages, review-open outcomes, and Feather pauses; preserves each participant's lineage and checkpoint evidence; does not infer consensus or disagreement; and withholds a failed lineage from scheduling until `resolveReview` records an explicit `retry`, `rest`, or `decline` choice. The outer host must authenticate the participant before recording that choice.
 
 The Möbius Gestalt remains descriptive. Its shared aggregate is not a verdict, ranking, identity, or authority. Withness coordinates relationship among distinct participants without becoming a governing throne.
 
