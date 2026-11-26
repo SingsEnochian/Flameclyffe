@@ -328,6 +328,32 @@ export function installWayglassField({ host = document.body } = {}) {
   });
   scene.add(new THREE.Mesh(geometry, material));
 
+  // Spatial loom: one shared renderer, genuine depth-tested tubular fibres.
+  const loomScene=new THREE.Scene();
+  const loomCamera=new THREE.PerspectiveCamera(38,1,.1,30);
+  loomCamera.position.set(0,0,8);
+  const loom=new THREE.Group();
+  loomScene.add(loom);
+  const fibres=[];
+  for(let i=0;i<9;i++){
+    const points=[];
+    for(let j=0;j<=64;j++){
+      const t=j/64, x=(t-.5)*9;
+      const phase=i*Math.PI*2/9;
+      points.push(new THREE.Vector3(x,.46*Math.sin(t*Math.PI*4+phase),-.65+.32*Math.cos(t*Math.PI*4+phase)));
+    }
+    const curve=new THREE.CatmullRomCurve3(points);
+    const tube=new THREE.TubeGeometry(curve,96,.009,5,false);
+    const mat=new THREE.ShaderMaterial({
+      transparent:true,depthWrite:true,
+      uniforms:{charge:{value:0},clock:{value:0},phase:{value:i/9},tint:{value:new THREE.Color(i%3===0?0xd9b76d:i%3===1?0x8ae9cf:0x879cdd)}},
+      vertexShader:'varying vec2 fibreUV; varying vec3 fibreN; varying float fibreDepth; void main(){fibreUV=uv; fibreN=normalize(normalMatrix*normal); vec4 p=modelViewMatrix*vec4(position,1.0); fibreDepth=-p.z; gl_Position=projectionMatrix*p;}',
+      fragmentShader:'varying vec2 fibreUV; varying vec3 fibreN; varying float fibreDepth; uniform float charge; uniform float clock; uniform float phase; uniform vec3 tint; void main(){float head=fract(clock*.19+phase*.18); float d=abs(fibreUV.x-head); float pulse=exp(-d*d*180.0); float rim=pow(abs(normalize(fibreN).z),.6); float attenuation=exp(-max(0.0,fibreDepth-7.0)*.55); float alpha=charge*(.09+.65*pulse)*attenuation; gl_FragColor=vec4(tint*(.45+.55*rim)+vec3(.24)*pulse,alpha);}'
+    });
+    const mesh=new THREE.Mesh(tube,mat);
+    loom.add(mesh);fibres.push(mesh);
+  }
+
   // One renderer, a separate scene for an actual faceted optical instrument.
   const jewelScene = new THREE.Scene();
   const jewelCamera = new THREE.PerspectiveCamera(35,2,.1,20);
@@ -388,6 +414,7 @@ export function installWayglassField({ host = document.body } = {}) {
     const width = Math.max(1, globalThis.innerWidth || 1);
     const height = Math.max(1, globalThis.innerHeight || 1);
     renderer.setSize(width, height, false);
+    loomCamera.aspect=width/height;loomCamera.updateProjectionMatrix();
     uniforms.uResolution.value.set(width * renderer.getPixelRatio(), height * renderer.getPixelRatio());
     render();
   }
@@ -464,6 +491,17 @@ export function installWayglassField({ host = document.body } = {}) {
     }
 
     renderer.render(scene, camera);
+    if(!still() && uniforms.uWeave.value>.008){
+      loom.rotation.y=(uniforms.uPointer.value.x-.5)*.18;
+      loom.rotation.x=(uniforms.uPointer.value.y-.5)*.12;
+      for(const fibre of fibres){
+        fibre.material.uniforms.charge.value=uniforms.uWeave.value;
+        fibre.material.uniforms.clock.value=elapsed;
+      }
+      const auto=renderer.autoClear;
+      try{renderer.autoClear=false;renderer.clearDepth();renderer.render(loomScene,loomCamera);}
+      finally{renderer.autoClear=auto;}
+    }
     sampleJewel();
   }
 
@@ -588,6 +626,7 @@ export function installWayglassField({ host = document.body } = {}) {
       document.removeEventListener('pointerdown',instrumentWake);
       document.removeEventListener('focusin',instrumentWake);
       clearJewel();
+      for(const fibre of fibres){fibre.geometry.dispose();fibre.material.dispose();}
       jewelTarget.dispose();
       innerGeometry.dispose();
       innerMaterial.dispose();
