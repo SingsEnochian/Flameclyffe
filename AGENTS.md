@@ -67,3 +67,8 @@ there. Do not continue an older dated branch as a separate current version.
 `main` remains the release branch until reviewed promotion. Preserve source
 branches, private runtime state and unresolved imports. Never force-push or
 replace current files with older whole-file copies to resolve a conflict.
+
+
+## Personal skill toolkit adoption — 26 November 2026
+
+For writing, interface design, StageShow, Three.js, accessibility, engineering review, testing, documentation and video/animation work, follow `docs/engineering/PERSONAL_SKILL_TOOLKIT_ADOPTION.md`. Treat the listed skills as active methods, not decorative references. Check the installed dependency versions before using upstream examples. The document distinguishes skill files actually present from plugin repositories merely linked by the source README. Explain blockers, unverified work and decisions Rowan needs to make in plain language; never require Rowan to read code to understand project status.
