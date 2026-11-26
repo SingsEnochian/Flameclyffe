@@ -48,6 +48,7 @@ import { mountWayglassWritingRoom } from './surfaces/writing-room.js';
 import { mountWayglassSystemsSurface } from './surfaces/systems.js';
 import { mountWayglassSpectrumSurface } from './surfaces/spectral-field.js';
 import { mountWayglassNativeVoice } from './surfaces/native-voice.js';
+import { mountSomaNova } from './surfaces/soma-nova.js';
 import { mountUniversalCodex } from './surfaces/universal-codex.js';
 import { createWayglassSpectralField } from './spectral-field.js';
 import { mountWayglassVideoAtelier } from './surfaces/video-atelier.js';
@@ -110,6 +111,7 @@ registerWayglassSurface({
 registerWayglassSurfaceAlias('arcsweep:deck', 'wayglass:world-continuity');
 registerWayglassSurfaceAlias('arcsweep:writing-room', 'wayglass:writing-room');
 
+registerWayglassSurface({surface_id:'wayglass:soma-nova',label:'Wayglass · Soma Nova',mount:mountSomaNova});
 registerWayglassSurface({surface_id:'wayglass:universal-codex',label:'Wayglass · Universal Codex',mount:mountUniversalCodex});
 
 
