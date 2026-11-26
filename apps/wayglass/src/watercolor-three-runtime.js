@@ -58,7 +58,7 @@ export function createWatercolorThreeRuntime({ stage, onStatus = () => {} } = {}
     });
     renderer.setClearColor(0x000000, 0);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    // postprocessing owns the final colour transform; keep renderer output linear.
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(42, 1, 0.05, 200);
     camera.position.set(0, 0, 6);
