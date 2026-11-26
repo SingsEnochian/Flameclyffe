@@ -241,3 +241,15 @@ test('seat-authorized revocation routes future selection back to the preserved p
   assert.equal((await federation.getSelection('tissue:first-organism', 'wtl:sample-module')).sourceHash, sourceHash);
   assert.equal(federation.events().some(e => e.kind === 'candidate.revoked'), true);
 });
+
+
+test('immune quarantine is local, inspectable and degrades only the affected constitutional tissue', async () => {
+  const { federation } = fixture();
+  await buildTissue(federation);
+  const quarantined = await federation.quarantineCell('cell:verifier', 'adversarial verification anomaly');
+  assert.equal(quarantined.status, 'quarantined');
+  assert.equal(federation.getCell('cell:verifier').status, 'quarantined');
+  assert.equal(federation.getTissue('tissue:first-organism').status, 'degraded');
+  assert.equal(federation.snapshot().homeostasis.status, 'degraded');
+  assert.equal(federation.snapshot().cells.length, 3);
+});
