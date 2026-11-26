@@ -545,6 +545,32 @@ export function installWayglassField({ host = document.body } = {}) {
   const jewelImage = new Uint8ClampedArray(128*64*4);
 
 
+  // Shared GPU morphogenesis: seeded grains converge onto a spatial shell.
+  const grainCount=4096, grainPositions=new Float32Array(grainCount*3), grainSeeds=new Float32Array(grainCount);
+  for(let i=0;i<grainCount;i++){
+    const z=1-2*(i+.5)/grainCount, a=i*2.399963229728653, radius=Math.sqrt(1-z*z);
+    grainPositions.set([radius*Math.cos(a)*2.2,z*1.5,radius*Math.sin(a)*.8],i*3);
+    grainSeeds[i]=((i*1664525+1013904223)>>>0)/4294967296;
+  }
+  const grainGeometry=new THREE.BufferGeometry();
+  grainGeometry.setAttribute('position',new THREE.BufferAttribute(grainPositions,3));
+  grainGeometry.setAttribute('seed',new THREE.BufferAttribute(grainSeeds,1));
+  const grainMaterial=new THREE.ShaderMaterial({
+    transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,
+    uniforms:{progress:{value:1}},
+    vertexShader:`attribute float seed; uniform float progress; varying float glow;
+      void main(){float t=smoothstep(0.,1.,progress);float a=seed*37.7+(1.-t)*5.;
+      vec3 p=position+vec3(cos(a),sin(a),sin(a*2.))*((1.-t)*(1.+seed)*2.);
+      vec4 mv=modelViewMatrix*vec4(p,1.);gl_Position=projectionMatrix*mv;
+      gl_PointSize=clamp(13./max(1.,-mv.z),1.,3.);glow=sin(3.14159265*t)*(.35+.65*seed);}`,
+    fragmentShader:`varying float glow;void main(){float r=length(gl_PointCoord-.5)*2.;gl_FragColor=vec4(.82,.69,.43,glow*exp(-5.*r*r)*(1.-smoothstep(.65,1.,r)));}`
+  });
+  const grains=new THREE.Points(grainGeometry,grainMaterial);grains.visible=false;loomScene.add(grains);
+  let morphStart=-Infinity,morphDuration=1.8;
+  function morphogenesis(event){
+    if(still())return;
+    morphStart=elapsed;morphDuration=Math.max(.2,Math.min(8,Number(event.detail?.durationMs||1800)/1000));
+  }
   const motionPreference = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
   let reduceMotion = motionPreference?.matches === true;
   let motionEnabled = true;
@@ -653,9 +679,11 @@ export function installWayglassField({ host = document.body } = {}) {
       uniforms.uThickness.value = authoredThickness;
     }
 
+    const morphProgress=Math.min(1,Math.max(0,(elapsed-morphStart)/morphDuration));
+    grainMaterial.uniforms.progress.value=morphProgress;grains.visible=!still()&&morphProgress<1;
     uniforms.uLoomActive.value=0;
     uniforms.uLoomFocus.value+=(8.65+(uniforms.uPointer.value.y-.5)*.7-uniforms.uLoomFocus.value)*blend(2.0);
-    if(!still() && uniforms.uWeave.value>.008){
+    if(!still() && (uniforms.uWeave.value>.008||grains.visible)){
       loom.rotation.y+=((uniforms.uPointer.value.x-.5)*.18-loom.rotation.y)*blend(3.0);
       loom.rotation.x+=((uniforms.uPointer.value.y-.5)*.12-loom.rotation.x)*blend(3.0);
       for(const fibre of fibres){
@@ -769,6 +797,7 @@ export function installWayglassField({ host = document.body } = {}) {
     if(featherHeld){energyTarget=0;weaveTarget=0;velocityTarget=0;clearJewel();}
     syncMotion();
   }
+  globalThis.addEventListener?.('wayglass:morphogenesis',morphogenesis);
   globalThis.addEventListener?.('wayglass:feather',onFeather);
   motionPreference?.addEventListener?.('change', onMotionPreference);
   globalThis.addEventListener?.('wayglass:motion', onMotion);
@@ -790,6 +819,8 @@ export function installWayglassField({ host = document.body } = {}) {
       cancelAnimationFrame(frame);
       motionPreference?.removeEventListener?.('change', onMotionPreference);
       globalThis.removeEventListener?.('wayglass:motion', onMotion);
+      globalThis.removeEventListener?.('wayglass:morphogenesis',morphogenesis);
+      grainGeometry.dispose();grainMaterial.dispose();
       globalThis.removeEventListener?.('wayglass:feather',onFeather);
       document.removeEventListener?.('visibilitychange', syncMotion);
       globalThis.removeEventListener?.('resize', resize);
