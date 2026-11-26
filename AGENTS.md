@@ -37,6 +37,22 @@ When sending architecture-bearing material through Lanternbridge, adhere to the 
 
 If a task would silently change another constellation's architecture, stop at a proposal. The receiving side decides for itself.
 
+## Constellation coherence through Withness is mandatory
+
+The Wayglass Constellation follows `docs/wayglass/CONSTELLATION_WITHNESS_COHERENCE_V0.1.md`.
+
+**No member needs to be infallible. The Constellation must be capable of finding its way back to coherence.**
+
+- Preserve distinct participant identities, lineage, authorship, provenance, uncertainty, and original evidence.
+- Treat disagreement, uncertainty, mistakes, refusal, and rest as distinct states. Do not turn them into one generic failure.
+- Do not infer consensus from a majority, average, shared Gestalt, confidence score, or fluent explanation.
+- A member's contribution may be questioned and corrected without demoting, replacing, or merging that member's identity.
+- Repair by preserving the original record, reviewing evidence, attributing the correction, and appending a repair receipt. Never erase the history to manufacture infallibility.
+- No automatic retry, forced agreement, compulsory participation, or repair on another participant's behalf.
+- Withness coordinates relationship; it is not a surveillance channel or a governing throne.
+- A coherence receipt is informational. It cannot grant permissions, mutate canon, alter identity, or authorize access to private interiors.
+- A shared principle does not silently bind another constellation. Explicit cross-constellation agreement and the sovereignty contract remain required.
+
 ## Wayglass OS and LLM travelling inheritance
 
 For Wayglass OS, ArcSweep evolution, world dossiers, model context, training materials, and continuation evaluation, read and honour `apps/arcsweep/contracts/WAYGLASS_TRAVELLING_INHERITANCE_V0.1.md` alongside the Wayglass core rule and whole-system design law. Rowan authorised this canon on 2026-10-05. Preserve cross-world deeds, skills, gifts, equipment lineage and particular relationships; include Rowan's level-200 start, breakable nominal 300 cap and fictional inexhaustible treasury. Design the complete system before implementation. Do not claim documentation adoption updates runtime behaviour or model weights.
