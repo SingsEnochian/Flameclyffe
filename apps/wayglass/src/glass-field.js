@@ -66,21 +66,38 @@ const FRAGMENT = `
   // Two families of optical filaments, separated in apparent depth.
   // Interference is an artistic phase model, not measured coherent optics.
   vec3 lightWeave(vec2 p,float depth,float charge,float time){
-    float x=p.x*9.0, y=p.y*9.0;
-    float warp=y-.19*sin(x*1.7+time*.45);
-    float weft=x-.19*sin(y*1.7-time*.39);
-    float dw=abs(fract(warp+.5)-.5);
-    float dv=abs(fract(weft+.5)-.5);
-    float aa=max(.012,9.0/max(uResolution.y,1.0));
-    float w=1.0-smoothstep(.008,.008+aa,dw);
-    float v=1.0-smoothstep(.008,.008+aa,dv);
-    float over=.5+.5*cos(PI*(floor(warp+.5)+floor(weft+.5)));
-    float pulse=.35+.65*pow(.5+.5*cos(x*1.4-y*.7-time*2.0),4.0);
-    vec3 shallow=vec3(.52,.95,.82)*w*mix(.35,1.0,over);
-    vec3 deep=vec3(.78,.65,.36)*v*mix(1.0,.35,over);
-    deep*=exp(-vec3(.85,.46,.25)*(depth+.45));
-    float knot=w*v*(.5+.5*cos(x-y-time));
-    return (shallow+deep+vec3(.6,.85,1.0)*knot*.3)*pulse*charge*.13;
+    // A moving shuttle carries light along curved, interlaced subsurface fibres.
+    vec2 q=p*vec2(8.0,12.0);
+    float row=floor(q.y+.5);
+    float shuttle=.5+.5*sin(time*.85);
+    float tension=.075+.045*charge;
+    float warp=q.y-row-tension*sin(q.x*2.1+row*.73);
+    float column=floor(q.x+.5);
+    float weft=q.x-column-.13*sin(q.y*2.3+column*.51);
+    float parity=.5+.5*cos(PI*(row+column));
+    float aa=max(.009,12.0/max(uResolution.y,1.0));
+    float radius=.019;
+    float w=1.0-smoothstep(radius,radius+aa,abs(warp));
+    float v=1.0-smoothstep(radius,radius+aa,abs(weft));
+    // Cylindrical fibre normals and a narrow polished highlight.
+    float nw=sqrt(max(0.0,1.0-pow(clamp(warp/radius,-1.0,1.0),2.0)));
+    float nv=sqrt(max(0.0,1.0-pow(clamp(weft/radius,-1.0,1.0),2.0)));
+    float zW=.15+.36*(1.0-parity)*v;
+    float zV=.15+.36*parity*w;
+    vec3 extinction=vec3(1.45,.72,.43);
+    vec3 tw=exp(-extinction*(depth+zW));
+    vec3 tv=exp(-extinction*(depth+zV));
+    float head=mix(-7.0,7.0,shuttle);
+    float stitch=exp(-pow((q.x-head)*.8,2.0));
+    float tail=exp(-abs(q.x-head)*.24);
+    float beat=.5+.5*cos(q.x*1.7+row*.65-time*2.1);
+    vec3 opal=mix(vec3(.19,.78,.66),vec3(.57,.68,1.0),beat);
+    vec3 gold=mix(vec3(.68,.36,.12),vec3(1.0,.85,.48),nw);
+    vec3 a=opal*w*tw*(.22+.78*nw)*mix(1.0,.2,v*(1.0-parity));
+    vec3 b=gold*v*tv*(.22+.78*nv)*mix(1.0,.2,w*parity);
+    float knot=w*v*exp(-abs(q.x-head)*.65);
+    vec3 needle=vec3(.78,1.0,.92)*w*stitch*.45;
+    return (a+b+needle+vec3(.65,.8,1.0)*knot*.28)*charge*(.035+.22*tail);
   }
 
   vec3 labradorite(float phase, float fire) {
