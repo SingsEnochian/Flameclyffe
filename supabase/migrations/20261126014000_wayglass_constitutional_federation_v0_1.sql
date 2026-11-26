@@ -179,6 +179,8 @@ create table if not exists public.wayglass_federation_events (
   previous_event_hash text,
   event_hash text not null unique,
   occurred_at timestamptz not null default now(),
+  foreign key (cell_id)
+    references public.wayglass_cells(cell_id) on delete restrict,
   foreign key (tissue_id, cell_id)
     references public.wayglass_tissue_members(tissue_id, cell_id) on delete restrict
 );
