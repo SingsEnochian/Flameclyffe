@@ -6,8 +6,7 @@ begin;
 
 alter table public.wayglass_program_revisions
   add column if not exists parent_revision_id uuid,
-  add column if not exists lineage_id text,
-  add column if not exists verification_receipt jsonb not null default '{}'::jsonb;
+  add column if not exists lineage_id text;
 
 create unique index if not exists wayglass_program_revisions_program_revision_idx
   on public.wayglass_program_revisions(program_id, revision_id);
@@ -25,8 +24,22 @@ comment on column public.wayglass_program_revisions.parent_revision_id is
   'Immutable source ancestry. A revision is a descendant; it never overwrites its parent.';
 comment on column public.wayglass_program_revisions.lineage_id is
   'Stable lineage identifier shared by related immutable source revisions.';
-comment on column public.wayglass_program_revisions.verification_receipt is
-  'Source-bound verification evidence captured for this revision; lifecycle decisions are append-only federation events.';
+create or replace function public.prevent_wayglass_program_revision_mutation()
+returns trigger
+language plpgsql
+as $
+begin
+  raise exception 'Wayglass program revisions are immutable; % is forbidden', TG_OP;
+end;
+$;
+
+drop trigger if exists wayglass_program_revisions_immutable on public.wayglass_program_revisions;
+create trigger wayglass_program_revisions_immutable
+  before update or delete on public.wayglass_program_revisions
+  for each row execute function public.prevent_wayglass_program_revision_mutation();
+
+comment on table public.wayglass_program_revisions is
+  'Immutable source versions with parent ancestry; verification and lifecycle decisions are recorded as append-only federation events.';
 
 create table if not exists public.wayglass_tissues (
   tissue_id uuid primary key default gen_random_uuid(),
