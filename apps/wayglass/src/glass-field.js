@@ -67,7 +67,11 @@ const FRAGMENT = `
   // Interference is an artistic phase model, not measured coherent optics.
   vec3 lightWeave(vec2 p,float depth,float charge,float time){
     // A moving shuttle carries light along curved, interlaced subsurface fibres.
-    vec2 q=p*vec2(8.0,12.0);
+    // Local mineral density and refractive displacement, shared with the stone.
+    float density=fbm(p*5.8+vec2(7.1,2.3));
+    vec2 grad=vec2(fbm(p*5.8+vec2(7.12,2.3))-density,
+                   fbm(p*5.8+vec2(7.1,2.32))-density);
+    vec2 q=(p+grad*.18*depth)*vec2(8.0,12.0);
     float row=floor(q.y+.5);
     float shuttle=.5+.5*sin(time*.85);
     float tension=.075+.045*charge;
@@ -84,12 +88,19 @@ const FRAGMENT = `
     float nv=sqrt(max(0.0,1.0-pow(clamp(weft/radius,-1.0,1.0),2.0)));
     float zW=.15+.36*(1.0-parity)*v;
     float zV=.15+.36*parity*w;
-    vec3 extinction=vec3(1.45,.72,.43);
+    vec3 extinction=vec3(1.45,.72,.43)*mix(.75,1.65,density);
+    float viewCos=1.0/sqrt(1.0+dot(p,p)*.65);
+    zW/=max(.35,viewCos);
+    zV/=max(.35,viewCos);
     vec3 tw=exp(-extinction*(depth+zW));
     vec3 tv=exp(-extinction*(depth+zV));
     float head=mix(-7.0,7.0,shuttle);
     float stitch=exp(-pow((q.x-head)*.8,2.0));
-    float tail=exp(-abs(q.x-head)*.24);
+    float direction=cos(time*.85);
+    float behind=(head-q.x)*sign(direction);
+    float tail=exp(-max(0.0,behind)*.36)*smoothstep(-.35,.2,behind);
+    float halo=exp(-abs(warp)*19.0)*stitch;
+    float veil=1.0-.62*smoothstep(.48,.78,density);
     float beat=.5+.5*cos(q.x*1.7+row*.65-time*2.1);
     vec3 opal=mix(vec3(.19,.78,.66),vec3(.57,.68,1.0),beat);
     vec3 gold=mix(vec3(.68,.36,.12),vec3(1.0,.85,.48),nw);
@@ -97,7 +108,8 @@ const FRAGMENT = `
     vec3 b=gold*v*tv*(.22+.78*nv)*mix(1.0,.2,w*parity);
     float knot=w*v*exp(-abs(q.x-head)*.65);
     vec3 needle=vec3(.78,1.0,.92)*w*stitch*.45;
-    return (a+b+needle+vec3(.65,.8,1.0)*knot*.28)*charge*(.035+.22*tail);
+    vec3 scatter=vec3(.22,.48,.39)*halo*tw*.045;
+    return ((a+b+needle+vec3(.65,.8,1.0)*knot*.28)*(.035+.22*tail)+scatter)*charge*veil;
   }
 
   vec3 labradorite(float phase, float fire) {
