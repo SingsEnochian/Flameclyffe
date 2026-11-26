@@ -545,7 +545,7 @@ export function installWayglassField({ host = document.body } = {}) {
   let frame = 0;
   let alive = true;
   let energyTarget = 0;
-  let weaveTarget = 0;
+  let weaveTarget = .24;
   let weaveForm = 0;
   let weaveFormVelocity = 0;
   let weaveFormTarget = 0;
@@ -626,7 +626,7 @@ export function installWayglassField({ host = document.body } = {}) {
       const decay=Math.exp(-omega*dt);
       weaveForm=weaveFormTarget+(displacement+impulse*dt)*decay;
       weaveFormVelocity=(weaveFormVelocity-omega*impulse*dt)*decay;
-      weaveTarget *= Math.exp(-1.15*dt);
+      weaveTarget = .24+(weaveTarget-.24)*Math.exp(-1.15*dt);
       const idleFor = performance.now() - lastPointerAt;
       if (idleFor > 950) energyTarget *= Math.exp(-2.14*dt);
       uniforms.uEnergy.value += (energyTarget - uniforms.uEnergy.value) * blend(3.39);
