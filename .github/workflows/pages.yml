@@ -182,6 +182,10 @@ jobs:
           cp -a "$RUNNER_TEMP/wayglass-preview-src/dist/wayglass/." _site/wayglass-preview/
           test -f _site/wayglass-preview/index.html
           test -f _site/wayglass-preview/DEVELOPMENT-SOURCE-SHA.txt
+          # Preserve project-relative asset resolution on GitHub Pages.
+          # Host-only fonts are not copied into the public preview.
+          find _site/wayglass-preview/assets -name '*.css' -exec sed -i 's#url(/fonts/#url(../fonts/#g; s#url("/fonts/#url("../fonts/#g; s#url('\''/fonts/#url('\''../fonts/#g' {} +
+          echo "Publishing Wayglass source $(cat _site/wayglass-preview/DEVELOPMENT-SOURCE-SHA.txt)"
           sed -i 's#</head>#<meta name="robots" content="noindex,nofollow"></head>#' _site/wayglass-preview/index.html
           cat > _site/wayglass-preview/PREVIEW-RECEIPT.txt <<EOF
           Wayglass FAEberpunk preview, public UI only; House host is NOT attached.
