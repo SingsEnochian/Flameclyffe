@@ -388,9 +388,9 @@ export function installWayglassField({ host = document.body } = {}) {
     const tube=new THREE.TubeGeometry(curve,96,.009,5,false);
     const mat=new THREE.ShaderMaterial({
       transparent:true,depthWrite:true,
-      uniforms:{charge:{value:0},clock:{value:0},form:{value:0},touch:{value:new THREE.Vector2(.5,.5)},touchStrength:{value:0},phase:{value:i/9},tint:{value:new THREE.Color(i%3===0?0xd9b76d:i%3===1?0x8ae9cf:0x879cdd)}},
+      uniforms:{charge:{value:0},clock:{value:0},form:{value:0},touch:{value:new THREE.Vector2(.5,.5)},touchStrength:{value:0},rippleAge:{value:10},phase:{value:i/9},tint:{value:new THREE.Color(i%3===0?0xd9b76d:i%3===1?0x8ae9cf:0x879cdd)}},
       vertexShader:`
-        uniform float clock; uniform float charge; uniform float phase; uniform float form; uniform vec2 touch; uniform float touchStrength;
+        uniform float clock; uniform float charge; uniform float phase; uniform float form; uniform vec2 touch; uniform float touchStrength; uniform float rippleAge;
         varying vec2 fibreUV; varying vec3 fibreN; varying float fibreDepth;
         void main(){
           fibreUV=uv;
@@ -431,8 +431,13 @@ export function installWayglassField({ host = document.body } = {}) {
           float distance2=dot(delta,delta);
           float influence=exp(-distance2*65.0)*touchStrength;
           vec2 direction=delta/sqrt(distance2+.002);
-          q.xy+=direction*influence*.38;
-          q.z-=influence*.22;
+          float radius=sqrt(distance2+.00001);
+          float waveDistance=radius-rippleAge*.42;
+          float wave=exp(-waveDistance*waveDistance*180.0)*sin(waveDistance*38.0)*exp(-rippleAge*2.1);
+          float anchored=sin(t*3.14159265);
+          float response=(influence*.38+wave*.11*touchStrength)*anchored;
+          q.xy+=direction*response;
+          q.z-=(influence*.22+wave*.07*touchStrength)*anchored;
           fibreN=normalize(normalMatrix*normal);
           vec4 p=modelViewMatrix*vec4(q,1.0);
           fibreDepth=-p.z; gl_Position=projectionMatrix*p;
@@ -626,6 +631,7 @@ export function installWayglassField({ host = document.body } = {}) {
         fibre.material.uniforms.form.value=weaveForm;
         fibre.material.uniforms.touch.value.copy(uniforms.uPointer.value);
         fibre.material.uniforms.touchStrength.value=Math.min(1,uniforms.uEnergy.value);
+        fibre.material.uniforms.rippleAge.value=Math.min(10,Math.max(0,(performance.now()-lastPointerAt)*.001));
       }
       const auto=renderer.autoClear,prior=renderer.getRenderTarget();
       const clear=renderer.getClearColor(new THREE.Color()),alpha=renderer.getClearAlpha();
