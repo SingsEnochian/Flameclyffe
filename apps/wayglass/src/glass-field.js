@@ -140,6 +140,31 @@ const FRAGMENT = `
     return colour * fire;
   }
 
+  // Stonewood: stationary mineralised growth rings, directional pores and buried veins.
+  float stonewoodGrain(vec2 p){
+    vec2 q=vec2(p.x*.82+p.y*.28,p.y*1.35-p.x*.12);
+    float warp=fbm(q*3.4);
+    float rings=sin(q.y*47.0+warp*12.0+sin(q.x*2.1)*2.4);
+    float pores=noise(q*vec2(12.0,155.0));
+    return .65*rings+.35*pores;
+  }
+  vec3 stonewood(vec2 p,vec3 view,vec3 light){
+    float h=stonewoodGrain(p);
+    float dx=stonewoodGrain(p+vec2(.002,0.))-h;
+    float dy=stonewoodGrain(p+vec2(0.,.002))-h;
+    vec3 n=normalize(vec3(-dx*1.7,-dy*1.7,1.));
+    float mineral=fbm(p*vec2(4.,13.));
+    vec3 base=mix(vec3(.018,.012,.009),vec3(.095,.061,.035),smoothstep(-.6,.8,h));
+    base=mix(base,vec3(.047,.065,.067),smoothstep(.48,.78,mineral)*.65);
+    vec3 halfVector=normalize(view+light);
+    float along=dot(halfVector,normalize(vec3(1.,.18,0.)));
+    float satin=exp(-along*along*22.)*pow(max(0.,dot(n,halfVector)),9.);
+    float vein=1.-smoothstep(.015,.075,abs(h-.18));
+    float buried=vein*smoothstep(.53,.79,mineral)*exp(-uThickness*2.4);
+    return base*(.35+.65*max(0.,dot(n,light)))+vec3(.12,.09,.055)*satin*.22+
+      vec3(.38,.62,.53)*buried*(.012+.065*uEnergy);
+  }
+
   void main() {
     vec2 uv = vUv;
     float ratio = uResolution.x / max(uResolution.y, 1.0);
@@ -252,6 +277,9 @@ const FRAGMENT = `
     float specular = D*G*F/max(.004,4.0*NoV*NoL);
     colour += vec3(.86,.94,1.0)*min(specular*NoL,.35)*(.08+.32*uEnergy);
 
+    // Architectural stonewood surrounds the central optical glass aperture.
+    float timberMask=smoothstep(.30,.86,length(p*vec2(.78,1.0)))*.72;
+    colour=mix(colour,stonewood(p,viewDir,lightDir),timberMask);
     colour += inkLight;
     colour += lightWeave(refractedP,opticalThickness,uWeave,uTime) * (.25+.75*lens);
     colour += vec3(0.22, 0.78, 0.80) * mote;
