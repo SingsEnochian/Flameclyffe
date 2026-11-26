@@ -136,8 +136,8 @@ test('missing independent WTL verifier refuses promotion instead of making a cos
 test('capability expansion and membrane bypass are refused', async () => {
   const { federation } = fixture();
   const { sourceHash } = await buildTissue(federation);
-  assert.throws(
-    () => federation.sendMessage('cell:proposer', 'cell:continuity', 'candidate.proposed', {}),
+  await assert.rejects(
+    federation.sendMessage('cell:proposer', 'cell:continuity', 'candidate.proposed', {}),
     /Membrane refused/,
   );
   const proposed = await federation.proposeCandidate({
