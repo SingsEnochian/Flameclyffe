@@ -142,8 +142,20 @@ test('Withness preserves plurality and offers a non-coercive repair path after o
   assert.equal(first.coherence.participants.length, 2);
   assert.match(first.coherence.digest, /^wce1:[a-f0-9]{64}$/);
 
+  assert.equal(runtime.get('recoverable').review_required, true);
+  runtime.rest('steady');
+  const waiting = await runtime.run();
+  assert.equal(waiting.status, 'idle');
+  assert.equal(waiting.outcome, 'review-pending');
+  assert.equal(waiting.coherence.status, 'review-open');
+  assert.deepEqual(waiting.coherence.review_participants, ['recoverable']);
+
   // Repair the member's own verification function; do not replace its lineage.
+  // The runtime requires an explicit review decision before scheduling a retry.
   recoverable.verify = async () => [{ ok: true, reason: 'rechecked after repair' }];
+  const choice = runtime.resolveReview('recoverable', 'retry');
+  assert.equal(choice.review_required, false);
+  assert.equal(choice.review_decision, 'retry');
   const second = await runtime.run();
   const recovered = second.participants.find(p => p.participant_id === 'recoverable');
   assert.equal(recovered.status, 'committed');
