@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { access, readFile } from 'node:fs/promises';
 import { SOUND_ORGANS } from '../src/sound-organ-registry.js';
 
-const REQUIRED = ['sound-room', 'runa', 'tone-lab', 'sound-banks', 'haptics'];
+const REQUIRED = ['sound-room', 'runa', 'tone-lab', 'sound-banks', 'music-visualizer', 'haptics'];
 
 test('sound organ registry carries every first-class sound instrument', () => {
   assert.deepEqual(SOUND_ORGANS.map((organ) => organ.id), REQUIRED);
