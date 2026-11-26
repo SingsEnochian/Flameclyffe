@@ -55,7 +55,7 @@ export async function mountLivingWatercolorSurface(root) {
   const fluid=createWatercolorFluid();
   const settled=createWatercolorFluid();
   const painted=new Map();
-  let settledPixels=null;
+  let settledPixels=null, resolvedImage=null, imageEpoch=0;
   const drafts=new Map(), responses=new Map();
   let mode='dream', routeId=null, routes=[], paused=false, busy=false,
     stopped=false, pointerId=null, lastPointer=null, lastFrame=0, elapsed=0,
@@ -155,6 +155,10 @@ export async function mountLivingWatercolorSurface(root) {
             '<button id="wc-feather" class="glass-chip" type="button">Feather Stop</button>',
           '</div>',
           '<p id="wc-score-status" class="tiny" role="status">Wyrdrune score is silent until composed and explicitly played.</p>',
+          '<label for="wc-image">Resolve a whole reference image</label>',
+          '<input id="wc-image" type="file" accept="image/png,image/jpeg,image/webp">',
+          '<button id="wc-image-clear" type="button" class="glass-chip">Return to pigment field</button>',
+          '<p id="wc-image-status" role="status" class="tiny">No reference image resolved.</p>',
           '<label for="wc-note">Offer a direction</label>',
           '<textarea id="wc-note" rows="3" maxlength="300" placeholder="For example: more gold when something is verified…"></textarea>',
           '<button class="glass-chip" type="button" id="wc-suggest">Place a suggestion</button>',
@@ -185,6 +189,21 @@ export async function mountLivingWatercolorSurface(root) {
     instrumentsToggle.textContent=open?'✦ Close instruments':'✦ Instruments';
   });
   const ctx=canvas.getContext('2d',{alpha:false});
+  listen(q('wc-image'),'change',async()=>{
+    const file=q('wc-image').files?.[0], epoch=++imageEpoch;
+    if(!file||featherStopped||stopped)return;
+    if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>20*1024*1024){q('wc-image-status').textContent='Choose a PNG, JPEG or WebP up to 20 MB.';return;}
+    try{
+      const next=await createImageBitmap(file);
+      if(stopped||featherStopped||epoch!==imageEpoch){next.close();return;}
+      if(next.width*next.height>24000000){next.close();throw new Error('Image exceeds 24 megapixels');}
+      resolvedImage?.close();resolvedImage=next;
+      q('wc-image-status').textContent='Complete reference resolved · '+next.width+' × '+next.height+' · local image';
+      paint();
+    }catch(error){if(epoch===imageEpoch&&!stopped)q('wc-image-status').textContent=String(error.message);}
+  });
+  listen(q('wc-image-clear'),'click',()=>{imageEpoch++;resolvedImage?.close();resolvedImage=null;q('wc-image').value='';q('wc-image-status').textContent='Returned to pigment field.';paint();});
+  cleanups.push(()=>{imageEpoch++;resolvedImage?.close();resolvedImage=null;});
   const buffer=document.createElement('canvas');
   buffer.width=fluid.width;buffer.height=fluid.height;
   const off=buffer.getContext('2d',{alpha:false});
@@ -282,6 +301,11 @@ export async function mountLivingWatercolorSurface(root) {
       ctx.imageSmoothingEnabled=true;
       ctx.imageSmoothingQuality='high';
       ctx.drawImage(buffer,0,0,canvas.width,canvas.height);
+      if(resolvedImage){
+        const fit=Math.min(cw/resolvedImage.width,ch/resolvedImage.height);
+        const iw=resolvedImage.width*fit,ih=resolvedImage.height*fit;
+        ctx.drawImage(resolvedImage,(cw-iw)/2,(ch-ih)/2,iw,ih);
+      }
     }
   }
   function frame(ts) {
