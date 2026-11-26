@@ -49,14 +49,22 @@ The cycle may stop at any point. A participant's refusal or Feather pause is a v
 
 The canonical Autopoietic Runtime and Möbius engine remain the owners of participant lineages, cycles, checkpoints, and Return. This principle adds no parallel scheduler, consensus engine, journal, transaction system, or authority layer.
 
-The Autopoietic Runtime's `coherence` receipt is an informational coordination record:
+The Autopoietic Runtime's `coherence` receipt is an informational coordination record. A failed lineage is marked `review-required` and withheld from subsequent scheduling until an explicit review decision is recorded with `resolveReview(participantId, decision)`:
+
+- `retry` re-enables that participant's own lineage;
+- `rest` preserves the open review and places the participant at rest;
+- `decline` preserves the open review and declines a retry for now.
+
+The outer host must authenticate the participant before recording a choice. The runtime records the decision but does not claim to authenticate the caller.
+
+The receipt:
 
 - preserves each participant's identity, lineage root, status, and checkpoint digest;
 - identifies failed or unclassified outcomes for review without treating them as personal failure;
 - identifies Feather-paused participants separately from review items;
 - records that consensus and disagreement are not inferred from execution status;
 - records that no member's success is required for the others to retain their own outcomes;
-- preserves lineage and leaves retry to participant choice;
+- preserves lineage and requires an explicit `resolveReview` choice before retry;
 - grants no identity, relationship, canon, or permission authority.
 
 The Möbius Gestalt remains an attributed observation of peer contributions. Its averaged `ship` values are descriptive summaries only; they are not consensus, truth, ranking, or a command to converge.
