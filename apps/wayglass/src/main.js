@@ -299,7 +299,18 @@ featherButton.addEventListener('click',()=>wayglassSomaticSound.feather());
 globalThis.addEventListener('wayglass:feather',event=>updateFeatherButton(event.detail?.stopped===true));
 const helmNav=document.createElement('button');helmNav.type='button';helmNav.className='glass-chip wg-helm-nav';
 helmNav.textContent='⌘  Ship map';helmNav.setAttribute('aria-controls',shell.id);helmNav.setAttribute('aria-expanded','false');
-helm.append(helmIdentity,helmReadout,locusNav,featherButton,helmNav);
+const livingThemeSelect=document.createElement('select');
+livingThemeSelect.className='glass-chip wg-living-theme';
+livingThemeSelect.setAttribute('aria-label','Wayglass living material theme');
+const livingThemeNames={'mythogenesis':'Mythogenesis · Plumglass','obsidian-weave':'Obsidian Weave','stonewood':'Stonewood','aetherglass':'Aetherglass','living-pigment':'Living Pigment','starweather':'Starweather'};
+for(const [value,label] of Object.entries(livingThemeNames)){const option=document.createElement('option');option.value=value;option.textContent=label;livingThemeSelect.append(option);}
+let savedLivingTheme='mythogenesis';
+try{const saved=localStorage.getItem('wayglass.livingTheme');if(Object.hasOwn(livingThemeNames,saved))savedLivingTheme=saved;}catch{}
+livingThemeSelect.value=savedLivingTheme;
+function applyLivingTheme(){const theme=livingThemeSelect.value;document.documentElement.dataset.wgLivingTheme=theme;try{localStorage.setItem('wayglass.livingTheme',theme);}catch{}globalThis.dispatchEvent(new CustomEvent('wayglass:living-theme',{detail:{theme}}));}
+livingThemeSelect.addEventListener('change',applyLivingTheme);
+helm.append(helmIdentity,helmReadout,locusNav,livingThemeSelect,featherButton,helmNav);
+applyLivingTheme();
 root.before(helm);root.after(shell,switcher);
 const motion=installMotionChoreography({root:document.documentElement,controlsHost:shell,contentRoot:root});
 function setDeckOpen(open,{focus=false}={}){
