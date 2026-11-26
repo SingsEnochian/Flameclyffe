@@ -146,6 +146,7 @@ const FRAGMENT = `
     float warp=fbm(q*3.4);
     float rings=sin(q.y*47.0+warp*12.0+sin(q.x*2.1)*2.4);
     float pores=noise(q*vec2(12.0,155.0));
+    pores=mix(.5,pores,1.-smoothstep(.3,1.2,length(fwidth(q*vec2(12.,155.)))));
     return .65*rings+.35*pores;
   }
   vec3 stonewood(vec2 p,vec3 view,vec3 light){
@@ -161,7 +162,22 @@ const FRAGMENT = `
     float satin=exp(-along*along*22.)*pow(max(0.,dot(n,halfVector)),9.);
     float vein=1.-smoothstep(.015,.075,abs(h-.18));
     float buried=vein*smoothstep(.53,.79,mineral)*exp(-uThickness*2.4);
-    return base*(.35+.65*max(0.,dot(n,light)))+vec3(.12,.09,.055)*satin*.22+
+    float micro=noise(p*vec2(95.,220.));
+    float microVisibility=1.-smoothstep(.3,1.2,length(fwidth(p*vec2(95.,220.))));
+    float fissure=(1.-smoothstep(.008,.045,abs(mineral-.57)))*smoothstep(.15,.65,noise(p*vec2(9.,31.)));
+    float rough=clamp(.38+.28*mineral+.12*(micro-.5)*microVisibility,.24,.85);
+    float nv=max(.001,dot(n,view)),nl=max(.001,dot(n,light));
+    float nh=max(.001,dot(n,halfVector)),vh=clamp(dot(view,halfVector),0.,1.);
+    float alpha=rough*rough, a2=alpha*alpha;
+    float den=nh*nh*(a2-1.)+1.;
+    float D=a2/(PI*den*den);
+    float k=(rough+1.)*(rough+1.)*.125;
+    float G=nv/(nv*(1.-k)+k)*nl/(nl*(1.-k)+k);
+    float F=.045+.955*pow(1.-vh,5.);
+    float spec=min(.4,D*G*F/max(.004,4.*nv*nl))*nl;
+    float occlusion=1.-.38*fissure-.12*micro*microVisibility;
+    vec3 diffuse=base*occlusion*(.24+.76*nl)*(1.-F);
+    return diffuse+vec3(.92,.86,.75)*spec*.22+vec3(.12,.09,.055)*satin*.12+
       vec3(.38,.62,.53)*buried*(.012+.065*uEnergy);
   }
 
