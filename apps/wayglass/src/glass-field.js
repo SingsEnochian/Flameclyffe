@@ -355,7 +355,16 @@ export function installWayglassField({ host = document.body } = {}) {
     host.dataset.wayglassField = 'css-fallback';
     return null;
   }
-  host.dataset.wayglassField = 'webgl';
+  host.dataset.wayglassField = 'webgl-initialising';
+  renderer.debug.checkShaderErrors = true;
+  let opticalFailure = false;
+  renderer.debug.onShaderError = (gl, program, vertex, fragment) => {
+    opticalFailure = true;
+    host.dataset.wayglassField = 'shader-error';
+    const detail = [gl.getProgramInfoLog(program),gl.getShaderInfoLog(vertex),gl.getShaderInfoLog(fragment)].filter(Boolean).join('\n');
+    console.error('Wayglass optical shader failed', detail);
+    host.dispatchEvent(new CustomEvent('wayglass:optical-error',{bubbles:true,detail:{message:detail}}));
+  };
   renderer.setPixelRatio(Math.min(globalThis.devicePixelRatio || 1, 1.6));
 
   const scene = new THREE.Scene();
@@ -663,6 +672,7 @@ export function installWayglassField({ host = document.body } = {}) {
       finally{renderer.setRenderTarget(prior);renderer.setClearColor(clear,alpha);renderer.autoClear=auto;}
     }
     renderer.render(scene, camera);
+    if (!opticalFailure) host.dataset.wayglassField = 'webgl';
     sampleJewel();
   }
 
