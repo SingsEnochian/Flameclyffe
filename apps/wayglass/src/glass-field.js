@@ -567,8 +567,14 @@ export function installWayglassField({ host = document.body } = {}) {
       else if(form>2.5){target=position/max(.01,max(abs(position.x)/2.2,max(abs(position.y)/1.5,abs(position.z)/.8)));}
       vec3 p=target+vec3(cos(a),sin(a),sin(a*2.))*((1.-t)*(1.+seed)*2.);
       vec4 mv=modelViewMatrix*vec4(p,1.);gl_Position=projectionMatrix*mv;
-      gl_PointSize=clamp(13./max(1.,-mv.z),1.,3.);glow=sin(3.14159265*t)*(.35+.65*seed);}`,
-    fragmentShader:`varying float glow;void main(){float r=length(gl_PointCoord-.5)*2.;gl_FragColor=vec4(.82,.69,.43,glow*exp(-5.*r*r)*(1.-smoothstep(.65,1.,r)));}`
+      gl_PointSize=clamp(25./max(1.,-mv.z),2.,6.);glow=sin(3.14159265*t)*(.35+.65*seed);}`,
+    fragmentShader:`varying float glow;void main(){
+      float r=length(gl_PointCoord-.5)*2.;
+      float edge=1.-smoothstep(.62,1.,r);
+      float core=exp(-18.*r*r),halo=exp(-3.8*r*r);
+      vec3 pearl=mix(vec3(.68,.76,.77),vec3(1.,.88,.67),clamp(glow,0.,1.));
+      gl_FragColor=vec4(pearl,glow*(.32*core+.13*halo)*edge);
+    }`
   });
   const grains=new THREE.Points(grainGeometry,grainMaterial);grains.visible=false;loomScene.add(grains);
   let morphStart=-Infinity,morphDuration=1.8;
