@@ -2,7 +2,7 @@
 
 **Status:** Proposed canonical engineering contract  
 **Scope:** WTL, WIR, Möbius, Return Engine, Wayglass program/module registries  
-**Compatibility:** Additive to existing WTL v0.1, WIR conformance fixtures, WCE-1, scoped Möbius carry, and Return receipts. This document does not claim these new capabilities are implemented.
+**Compatibility:** Additive to existing WTL v0.1, WIR conformance fixtures, WCE-1, scoped Möbius carry, and Return receipts. The organism-level architecture is specified in [Wayglass Constitutional Federation v0.1](WAYGLASS_CONSTITUTIONAL_FEDERATION_V0_1.md). WTL is one language used by the federation, not the organism itself. This document does not claim production capabilities are implemented.
 
 ## Governing principle
 
