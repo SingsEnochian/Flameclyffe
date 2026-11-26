@@ -13,6 +13,7 @@ const FRAGMENT = `
 
   uniform float uTime;
   uniform float uWeave;
+  uniform float uWeaveMode;
   uniform float uEnergy;
   uniform float uIntent;
   uniform float uChannel;
@@ -73,8 +74,8 @@ const FRAGMENT = `
                    fbm(p*5.8+vec2(7.1,2.32))-density);
     vec2 q=(p+grad*.18*depth)*vec2(8.0,12.0);
     float row=floor(q.y+.5);
-    float shuttle=.5+.5*sin(time*.85);
-    float tension=.075+.045*charge;
+    float shuttle=.5+.5*sin(time*(.85+.18*uWeaveMode));
+    float tension=.075+.045*charge+.025*uWeaveMode;
     float warp=q.y-row-tension*sin(q.x*2.1+row*.73);
     float column=floor(q.x+.5);
     float weft=q.x-column-.13*sin(q.y*2.3+column*.51);
@@ -96,7 +97,7 @@ const FRAGMENT = `
     vec3 tv=exp(-extinction*(depth+zV));
     float head=mix(-7.0,7.0,shuttle);
     float stitch=exp(-pow((q.x-head)*.8,2.0));
-    float direction=cos(time*.85);
+    float direction=cos(time*(.85+.18*uWeaveMode));
     float behind=(head-q.x)*sign(direction);
     float tail=exp(-max(0.0,behind)*.36)*smoothstep(-.35,.2,behind);
     float halo=exp(-abs(warp)*19.0)*stitch;
@@ -297,6 +298,7 @@ export function installWayglassField({ host = document.body } = {}) {
   const uniforms = {
     uTime: { value: 0 },
     uWeave: { value: 0 },
+    uWeaveMode: { value: 0 },
     uEnergy: { value: 0 },
     uIntent: { value: 0 },
     uChannel: { value: 0 },
@@ -362,7 +364,8 @@ export function installWayglassField({ host = document.body } = {}) {
   const motionPreference = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
   let reduceMotion = motionPreference?.matches === true;
   let motionEnabled = true;
-  const still = () => reduceMotion || !motionEnabled || document.hidden;
+  let featherHeld = false;
+  const still = () => reduceMotion || !motionEnabled || featherHeld || document.hidden;
   const pointerTarget = new THREE.Vector2(0.68, 0.3);
   let frame = 0;
   let alive = true;
@@ -524,9 +527,11 @@ export function installWayglassField({ host = document.body } = {}) {
       render();
       return;
     }
-    if(detail.source==='wyrdrune-reading'||detail.source==='room-arrival'||detail.source==='observed-route'){
-      weaveTarget=Math.max(weaveTarget,Number.isFinite(strength)?Math.max(0,Math.min(1,strength)):0);
-    }
+    // Every organ already emitting a material signal shares the optical loom.
+    // Modes describe visual behaviour, not proof of execution.
+    const mode=detail.source==='wyrdrune-reading'?1:detail.mode==='return'?2:detail.source==='observed-route'?3:0;
+    uniforms.uWeaveMode.value=mode;
+    weaveTarget=Math.max(weaveTarget,Number.isFinite(strength)?Math.max(0,Math.min(1,strength))*.8:0);
     energyTarget = Math.max(energyTarget, Number.isFinite(strength) ? Math.min(1, Math.max(0, strength)) : 0.72);
   }
 
@@ -542,6 +547,12 @@ export function installWayglassField({ host = document.body } = {}) {
     if (!motionEnabled) { energyTarget = 0; velocityTarget = 0; clearJewel(); }
     syncMotion();
   }
+  function onFeather(event){
+    featherHeld=event.detail?.stopped===true;
+    if(featherHeld){energyTarget=0;weaveTarget=0;velocityTarget=0;clearJewel();}
+    syncMotion();
+  }
+  globalThis.addEventListener?.('wayglass:feather',onFeather);
   motionPreference?.addEventListener?.('change', onMotionPreference);
   globalThis.addEventListener?.('wayglass:motion', onMotion);
   document.addEventListener?.('visibilitychange', syncMotion);
@@ -562,6 +573,7 @@ export function installWayglassField({ host = document.body } = {}) {
       cancelAnimationFrame(frame);
       motionPreference?.removeEventListener?.('change', onMotionPreference);
       globalThis.removeEventListener?.('wayglass:motion', onMotion);
+      globalThis.removeEventListener?.('wayglass:feather',onFeather);
       document.removeEventListener?.('visibilitychange', syncMotion);
       globalThis.removeEventListener?.('resize', resize);
       globalThis.removeEventListener?.('pointermove', pointer);
