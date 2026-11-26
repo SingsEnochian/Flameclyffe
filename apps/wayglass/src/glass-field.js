@@ -26,6 +26,9 @@ const FRAGMENT = `
   uniform float uIridescence;
   uniform vec2 uPointer;
   uniform vec2 uResolution;
+  uniform sampler2D uLoom;
+  uniform vec2 uLoomTexel;
+  uniform float uLoomActive;
   varying vec2 vUv;
 
   #define PI 3.141592653589793
@@ -273,6 +276,21 @@ const FRAGMENT = `
     float grain = (hash(floor(uv * uResolution.xy * 0.12)) - 0.5) * 0.012;
     colour += grain;
 
+    // Light is filtered by the mineral before the surface is presented.
+    if(uLoomActive>.5){
+      vec2 uv=vUv;
+      float grain=fbm(uv*vec2(83.0,97.0));
+      float density=fbm(uv*7.0+vec2(2.3,8.1));
+      vec2 shift=vec2(grain-.5,density-.5)*uLoomTexel*2.0;
+      vec2 d=uLoomTexel*(1.0+3.0*uRoughness+2.0*density);
+      vec3 core=texture2D(uLoom,uv+shift).rgb;
+      vec3 scatter=(texture2D(uLoom,uv+shift+vec2(d.x,0.0)).rgb+
+        texture2D(uLoom,uv+shift-vec2(d.x,0.0)).rgb+
+        texture2D(uLoom,uv+shift+vec2(0.0,d.y)).rgb+
+        texture2D(uLoom,uv+shift-vec2(0.0,d.y)).rgb)*.25;
+      vec3 transmission=exp(-vec3(2.1,1.25,.85)*(uThickness+.45*density));
+      colour+=mix(core,scatter,.38+.42*uRoughness)*transmission*.85;
+    }
     gl_FragColor = vec4(colour, 1.0);
   }
 `;
@@ -302,7 +320,11 @@ export function installWayglassField({ host = document.body } = {}) {
   const scene = new THREE.Scene();
   const camera = new THREE.Camera();
   const geometry = new THREE.PlaneGeometry(2, 2);
+  const loomTarget=new THREE.WebGLRenderTarget(1,1,{depthBuffer:true});
   const uniforms = {
+    uLoom:{value:loomTarget.texture},
+    uLoomTexel:{value:new THREE.Vector2(1,1)},
+    uLoomActive:{value:0},
     uTime: { value: 0 },
     uWeave: { value: 0 },
     uWeaveMode: { value: 0 },
@@ -475,6 +497,8 @@ export function installWayglassField({ host = document.body } = {}) {
     const height = Math.max(1, globalThis.innerHeight || 1);
     renderer.setSize(width, height, false);
     loomCamera.aspect=width/height;loomCamera.updateProjectionMatrix();
+    const lw=Math.max(1,Math.round(width*.75)),lh=Math.max(1,Math.round(height*.75));
+    loomTarget.setSize(lw,lh);uniforms.uLoomTexel.value.set(1/lw,1/lh);
     uniforms.uResolution.value.set(width * renderer.getPixelRatio(), height * renderer.getPixelRatio());
     render();
   }
@@ -557,7 +581,7 @@ export function installWayglassField({ host = document.body } = {}) {
       uniforms.uThickness.value = authoredThickness;
     }
 
-    renderer.render(scene, camera);
+    uniforms.uLoomActive.value=0;
     if(!still() && uniforms.uWeave.value>.008){
       loom.rotation.y+=((uniforms.uPointer.value.x-.5)*.18-loom.rotation.y)*blend(3.0);
       loom.rotation.x+=((uniforms.uPointer.value.y-.5)*.12-loom.rotation.x)*blend(3.0);
@@ -566,10 +590,12 @@ export function installWayglassField({ host = document.body } = {}) {
         fibre.material.uniforms.clock.value=elapsed;
         fibre.material.uniforms.form.value=weaveForm;
       }
-      const auto=renderer.autoClear;
-      try{renderer.autoClear=false;renderer.clearDepth();renderer.render(loomScene,loomCamera);}
-      finally{renderer.autoClear=auto;}
+      const auto=renderer.autoClear,prior=renderer.getRenderTarget();
+      const clear=renderer.getClearColor(new THREE.Color()),alpha=renderer.getClearAlpha();
+      try{renderer.autoClear=true;renderer.setRenderTarget(loomTarget);renderer.setClearColor(0x000000,0);renderer.clear();renderer.render(loomScene,loomCamera);uniforms.uLoomActive.value=1;}
+      finally{renderer.setRenderTarget(prior);renderer.setClearColor(clear,alpha);renderer.autoClear=auto;}
     }
+    renderer.render(scene, camera);
     sampleJewel();
   }
 
@@ -696,6 +722,7 @@ export function installWayglassField({ host = document.body } = {}) {
       document.removeEventListener('focusin',instrumentWake);
       clearJewel();
       for(const fibre of fibres){fibre.geometry.dispose();fibre.material.dispose();}
+      loomTarget.dispose();
       jewelTarget.dispose();
       innerGeometry.dispose();
       innerMaterial.dispose();
