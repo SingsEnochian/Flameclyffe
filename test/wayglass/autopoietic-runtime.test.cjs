@@ -87,6 +87,7 @@ test('resting participants are not scheduled and can be woken explicitly', async
   });
   const idle = await runtime.run();
   assert.equal(idle.status, 'idle');
+  assert.equal(idle.coherence.status, 'idle');
   assert.equal(idle.participants.length, 0);
   runtime.wake('quiet');
   const awake = await runtime.run();
