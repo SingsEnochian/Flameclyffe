@@ -92,8 +92,8 @@ const FRAGMENT = `
     float w=(1.0-smoothstep(radius,radius+aa+blurW,abs(warp)))*radius/(radius+blurW);
     float v=(1.0-smoothstep(radius,radius+aa+blurV,abs(weft)))*radius/(radius+blurV);
     // Cylindrical fibre normals and a narrow polished highlight.
-    float nw=sqrt(max(0.0,1.0-pow(clamp(warp/radius,-1.0,1.0),2.0)));
-    float nv=sqrt(max(0.0,1.0-pow(clamp(weft/radius,-1.0,1.0),2.0)));
+    float nw=sqrt(max(0.0,1.0-pow(abs(clamp(warp/radius,-1.0,1.0)),2.0)));
+    float nv=sqrt(max(0.0,1.0-pow(abs(clamp(weft/radius,-1.0,1.0)),2.0)));
     float zW=.15+.36*(1.0-parity)*v;
     float zV=.15+.36*parity*w;
     vec3 extinction=vec3(1.45,.72,.43)*mix(.75,1.65,density);
@@ -103,7 +103,7 @@ const FRAGMENT = `
     vec3 tw=exp(-extinction*(depth+zW));
     vec3 tv=exp(-extinction*(depth+zV));
     float head=mix(-7.0,7.0,shuttle);
-    float stitch=exp(-pow((q.x-head)*.8,2.0));
+    float stitch=exp(-pow(abs(q.x-head)*.8,2.0));
     float direction=cos(time*(.85+.18*uWeaveMode));
     float behind=(head-q.x)*sign(direction);
     float tail=exp(-max(0.0,behind)*.36)*smoothstep(-.35,.2,behind);
@@ -385,7 +385,8 @@ export function installWayglassField({ host = document.body } = {}) {
           float head=fract(clock*.19+phase*.18);
           float d=abs(fibreUV.x-head); d=min(d,1.0-d);
           float pulse=exp(-d*d*240.0);
-          float trail=exp(-fract(head-fibreUV.x+1.0)*12.0);
+          float age=fract(head-fibreUV.x+1.0);
+          float trail=exp(-age*12.0)*smoothstep(0.0,.035,age)*(1.0-smoothstep(.85,1.0,age));
           float rim=pow(abs(normalize(fibreN).z),.6);
           float path=max(0.0,fibreDepth-6.8);
           vec3 transmission=exp(-vec3(.92,.52,.31)*path);
@@ -452,6 +453,7 @@ export function installWayglassField({ host = document.body } = {}) {
   let energyTarget = 0;
   let weaveTarget = 0;
   let weaveForm = 0;
+  let weaveFormVelocity = 0;
   let weaveFormTarget = 0;
   let lastPointerAt = 0;
   let lastPointerX = 0;
@@ -522,7 +524,12 @@ export function installWayglassField({ host = document.body } = {}) {
     if (!still()) {
       uniforms.uPointer.value.lerp(pointerTarget, blend(4.03));
       uniforms.uWeave.value += (weaveTarget-uniforms.uWeave.value)*blend(4.2);
-      weaveForm+=(weaveFormTarget-weaveForm)*blend(1.6);
+      // Exact critically damped spring integration, independent of frame rate.
+      const omega=3.2, displacement=weaveForm-weaveFormTarget;
+      const impulse=weaveFormVelocity+omega*displacement;
+      const decay=Math.exp(-omega*dt);
+      weaveForm=weaveFormTarget+(displacement+impulse*dt)*decay;
+      weaveFormVelocity=(weaveFormVelocity-omega*impulse*dt)*decay;
       weaveTarget *= Math.exp(-1.15*dt);
       const idleFor = performance.now() - lastPointerAt;
       if (idleFor > 950) energyTarget *= Math.exp(-2.14*dt);
@@ -536,15 +543,15 @@ export function installWayglassField({ host = document.body } = {}) {
       uniforms.uEnergy.value = 0.08;
       uniforms.uWeave.value = 0;
       weaveTarget = 0;
-      weaveForm=0;weaveFormTarget=0;
+      weaveForm=0;weaveFormTarget=0;weaveFormVelocity=0;
       uniforms.uVelocity.value = 0;
       uniforms.uThickness.value = authoredThickness;
     }
 
     renderer.render(scene, camera);
     if(!still() && uniforms.uWeave.value>.008){
-      loom.rotation.y=(uniforms.uPointer.value.x-.5)*.18;
-      loom.rotation.x=(uniforms.uPointer.value.y-.5)*.12;
+      loom.rotation.y+=((uniforms.uPointer.value.x-.5)*.18-loom.rotation.y)*blend(3.0);
+      loom.rotation.x+=((uniforms.uPointer.value.y-.5)*.12-loom.rotation.x)*blend(3.0);
       for(const fibre of fibres){
         fibre.material.uniforms.charge.value=uniforms.uWeave.value;
         fibre.material.uniforms.clock.value=elapsed;
