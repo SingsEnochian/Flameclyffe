@@ -11,6 +11,13 @@ import {
 export const WATERCOLOR_THREE_RUNTIME_SCHEMA = 'wayglass.watercolor-three-runtime/v0.1';
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
+export function validateWatercolorSplatUrl(url) {
+  if (typeof url !== 'string' || url.length > 2048 || !/^https:\/\//i.test(url)) {
+    throw new TypeError('A bounded absolute HTTPS splat URL is required');
+  }
+  return new URL(url).href;
+}
+
 /**
  * One opt-in Three.js layer owned by the existing Watercolour surface.
  * The surface's existing animation frame calls render(); this module never
@@ -107,10 +114,8 @@ export function createWatercolorThreeRuntime({ stage, onStatus = () => {} } = {}
 
   async function loadSplat(url) {
     if (disposed) throw new Error('Three.js runtime disposed');
-    if (typeof url !== 'string' || url.length > 2048) throw new TypeError('A bounded HTTPS splat URL is required');
-    const parsed = new URL(url, globalThis.location?.href);
-    if (parsed.protocol !== 'https:') throw new TypeError('Splat assets must use HTTPS');
-    const splat = new SplatMesh({ url: parsed.href });
+    const safeUrl = validateWatercolorSplatUrl(url);
+    const splat = new SplatMesh({ url: safeUrl });
     splats.add(splat);
     scene.add(splat);
     status('Splat scene requested · asset loading is external');
