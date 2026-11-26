@@ -283,7 +283,15 @@ const FRAGMENT = `
       vec2 uv=vUv;
       float grain=fbm(uv*vec2(83.0,97.0));
       float density=fbm(uv*7.0+vec2(2.3,8.1));
-      vec2 shift=vec2(grain-.5,density-.5)*uLoomTexel*2.0;
+      vec2 microStep=1.0/max(uResolution,vec2(1.0));
+      vec2 microScale=vec2(83.0,97.0);
+      float gx=fbm((uv+vec2(microStep.x,0.0))*microScale)-grain;
+      float gy=fbm((uv+vec2(0.0,microStep.y))*microScale)-grain;
+      vec3 mineralNormal=normalize(vec3(-gx*2.4,-gy*2.4,1.0));
+      vec3 opticalView=normalize(vec3((.5-uv)*.85,1.0));
+      float incidence=max(.15,dot(mineralNormal,opticalView));
+      float fresnelStone=.045+.955*pow(1.0-incidence,5.0);
+      vec2 shift=(vec2(grain-.5,density-.5)*2.0+mineralNormal.xy*3.0)*uLoomTexel;
       float rawDepth=texture2D(uLoomDepth,uv).r;
       float viewDepth=.1*30.0/(30.0-rawDepth*(30.0-.1));
       float coc=rawDepth<.99999?clamp(abs(viewDepth-uLoomFocus)/max(viewDepth,.1)*24.0,0.0,5.0):1.0;
@@ -293,7 +301,9 @@ const FRAGMENT = `
         texture2D(uLoom,uv+shift-vec2(d.x,0.0)).rgb+
         texture2D(uLoom,uv+shift+vec2(0.0,d.y)).rgb+
         texture2D(uLoom,uv+shift-vec2(0.0,d.y)).rgb)*.25;
-      vec3 transmission=exp(-vec3(2.1,1.25,.85)*(uThickness+.45*density));
+      float embeddedDepth=rawDepth<.99999?clamp((viewDepth-7.0)*.12,0.0,.65):.2;
+      float opticalPath=(uThickness+.45*density+embeddedDepth)/incidence;
+      vec3 transmission=exp(-vec3(2.1,1.25,.85)*opticalPath)*(1.0-fresnelStone);
       // Multi-scale optical point spread: preserve fine cores beneath satin stone.
       vec2 wide=d*2.8;
       vec3 veil=(texture2D(uLoom,uv+vec2(wide.x,wide.y)).rgb+
@@ -304,6 +314,9 @@ const FRAGMENT = `
       float microPits=smoothstep(.64,.87,grain);
       vec3 internalLight=(core*focalClarity+scatter*(1.0-focalClarity)+veil*.12)*transmission;
       colour+=internalLight*(.88-.18*microPits);
+      vec3 softbox=normalize(vec3(-.4,.65,1.0));
+      float satin=pow(max(0.0,dot(mineralNormal,normalize(softbox+opticalView))),mix(24.0,5.0,uRoughness));
+      colour+=vec3(.075,.082,.09)*satin*fresnelStone*(.5+.5*grain);
       colour+=veil*transmission*vec3(.07,.09,.10);
       // Local radiance concentration produces a mineral-scattered knot halo.
       float coreEnergy=dot(core,vec3(.2126,.7152,.0722));
