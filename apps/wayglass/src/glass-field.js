@@ -32,6 +32,7 @@ const FRAGMENT = `
   uniform vec2 uLoomTexel;
   uniform float uLoomActive;
   uniform float uMythogenesis;
+  uniform float uLivingTheme;
   varying vec2 vUv;
 
   #define PI 3.141592653589793
@@ -305,6 +306,11 @@ const FRAGMENT = `
     vec3 plumGlass=plumBase+vec3(.34,.13,.28)*plumTransmission*(.16+.24*nacre);
     plumGlass+=vec3(.68,.39,.53)*min(specular*NoL,.35)*.23;
     colour=mix(colour,plumGlass,uMythogenesis*.88);
+    if(uLivingTheme>.5 && uLivingTheme<1.5)colour=mix(colour,colour*vec3(.55,.62,.78)+vec3(.012,.014,.021),.7);
+    else if(uLivingTheme>1.5 && uLivingTheme<2.5)colour=mix(colour,stonewood(p,viewDir,lightDir),.82);
+    else if(uLivingTheme>2.5 && uLivingTheme<3.5)colour=mix(colour,vec3(.025,.075,.085)+pearl*nacre*.55,.72);
+    else if(uLivingTheme>3.5 && uLivingTheme<4.5)colour=mix(colour,vec3(.035,.065,.14)+pearl*nacre*.45,.65);
+    else if(uLivingTheme>4.5)colour=mix(colour,vec3(.012,.016,.052)+pearl*nacre*.32,.75);
     colour += inkLight;
     colour += lightWeave(refractedP,opticalThickness,uWeave,uTime) * (.25+.75*lens);
     colour += vec3(0.22, 0.78, 0.80) * mote;
@@ -432,6 +438,7 @@ export function installWayglassField({ host = document.body } = {}) {
     uLoomTexel:{value:new THREE.Vector2(1,1)},
     uLoomActive:{value:0},
     uMythogenesis:{value:0},
+    uLivingTheme:{value:0},
     uTime: { value: 0 },
     uWeave: { value: 0 },
     uWeaveMode: { value: 0 },
@@ -635,7 +642,7 @@ export function installWayglassField({ host = document.body } = {}) {
   const grains=new THREE.Points(grainGeometry,grainMaterial);grains.visible=false;loomScene.add(grains);
   let morphStart=-Infinity,morphDuration=1.8;
   const livingThemes=Object.freeze({mythogenesis:{form:4,duration:6},'obsidian-weave':{form:2,duration:3},stonewood:{form:3,duration:4},aetherglass:{form:0,duration:4},'living-pigment':{form:1,duration:5},starweather:{form:1,duration:7}});
-  function themeChanged(event){const key=event.detail?.theme;if(!Object.hasOwn(livingThemes,key))return;const theme=livingThemes[key];grainMaterial.uniforms.plum.value=key==='mythogenesis'?1:0;uniforms.uMythogenesis.value=grainMaterial.uniforms.plum.value;document.documentElement.dataset.wgLivingTheme=key;if(still())return;morphStart=elapsed;morphDuration=theme.duration;grainMaterial.uniforms.form.value=theme.form;}
+  function themeChanged(event){const key=event.detail?.theme;if(!Object.hasOwn(livingThemes,key))return;const theme=livingThemes[key];grainMaterial.uniforms.plum.value=key==='mythogenesis'?1:0;uniforms.uMythogenesis.value=grainMaterial.uniforms.plum.value;uniforms.uLivingTheme.value=Object.keys(livingThemes).indexOf(key);document.documentElement.dataset.wgLivingTheme=key;if(still())return;morphStart=elapsed;morphDuration=theme.duration;grainMaterial.uniforms.form.value=theme.form;}
   globalThis.addEventListener?.('wayglass:living-theme',themeChanged);
   function morphogenesis(event){
     if(still())return;
