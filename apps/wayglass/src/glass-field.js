@@ -368,9 +368,9 @@ export function installWayglassField({ host = document.body } = {}) {
     const tube=new THREE.TubeGeometry(curve,96,.009,5,false);
     const mat=new THREE.ShaderMaterial({
       transparent:true,depthWrite:true,
-      uniforms:{charge:{value:0},clock:{value:0},form:{value:0},phase:{value:i/9},tint:{value:new THREE.Color(i%3===0?0xd9b76d:i%3===1?0x8ae9cf:0x879cdd)}},
+      uniforms:{charge:{value:0},clock:{value:0},form:{value:0},touch:{value:new THREE.Vector2(.5,.5)},touchStrength:{value:0},phase:{value:i/9},tint:{value:new THREE.Color(i%3===0?0xd9b76d:i%3===1?0x8ae9cf:0x879cdd)}},
       vertexShader:`
-        uniform float clock; uniform float charge; uniform float phase; uniform float form;
+        uniform float clock; uniform float charge; uniform float phase; uniform float form; uniform vec2 touch; uniform float touchStrength;
         varying vec2 fibreUV; varying vec3 fibreN; varying float fibreDepth;
         void main(){
           fibreUV=uv;
@@ -404,6 +404,15 @@ export function installWayglassField({ host = document.body } = {}) {
           float freeTip=tip*(1.0-smoothstep(0.0,1.0,form))*charge;
           q.y+=freeTip*.065*sin(clock*1.2+strand+t*9.0);
           q.z+=freeTip*.045*cos(clock*.85+strand+t*7.0);
+          // Local elastic displacement in the projected plane of the loom.
+          vec4 projected=projectionMatrix*modelViewMatrix*vec4(q,1.0);
+          vec2 screen=projected.xy/max(.001,projected.w)*.5+.5;
+          vec2 delta=screen-touch;
+          float distance2=dot(delta,delta);
+          float influence=exp(-distance2*65.0)*touchStrength;
+          vec2 direction=delta/sqrt(distance2+.002);
+          q.xy+=direction*influence*.38;
+          q.z-=influence*.22;
           fibreN=normalize(normalMatrix*normal);
           vec4 p=modelViewMatrix*vec4(q,1.0);
           fibreDepth=-p.z; gl_Position=projectionMatrix*p;
@@ -594,6 +603,8 @@ export function installWayglassField({ host = document.body } = {}) {
         fibre.material.uniforms.charge.value=uniforms.uWeave.value;
         fibre.material.uniforms.clock.value=elapsed;
         fibre.material.uniforms.form.value=weaveForm;
+        fibre.material.uniforms.touch.value.copy(uniforms.uPointer.value);
+        fibre.material.uniforms.touchStrength.value=Math.min(1,uniforms.uEnergy.value);
       }
       const auto=renderer.autoClear,prior=renderer.getRenderTarget();
       const clear=renderer.getClearColor(new THREE.Color()),alpha=renderer.getClearAlpha();
