@@ -557,10 +557,15 @@ export function installWayglassField({ host = document.body } = {}) {
   grainGeometry.setAttribute('seed',new THREE.BufferAttribute(grainSeeds,1));
   const grainMaterial=new THREE.ShaderMaterial({
     transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,
-    uniforms:{progress:{value:1}},
-    vertexShader:`attribute float seed; uniform float progress; varying float glow;
+    uniforms:{progress:{value:1},form:{value:0}},
+    vertexShader:`attribute float seed; uniform float progress; uniform float form; varying float glow;
       void main(){float t=smoothstep(0.,1.,progress);float a=seed*37.7+(1.-t)*5.;
-      vec3 p=position+vec3(cos(a),sin(a),sin(a*2.))*((1.-t)*(1.+seed)*2.);
+      vec3 target=position;
+      float theta=seed*6.2831853, phi=fract(seed*137.51)*6.2831853;
+      if(form>.5 && form<1.5){float r=.15+2.2*sqrt(seed);float spiral=theta+6.*r;target=vec3(r*cos(spiral),r*sin(spiral)*.65,.2*sin(phi));}
+      else if(form>1.5 && form<2.5){float r=1.4+.45*cos(phi);target=vec3(r*cos(theta),r*sin(theta),.45*sin(phi));}
+      else if(form>2.5){target=position/max(.01,max(abs(position.x)/2.2,max(abs(position.y)/1.5,abs(position.z)/.8)));}
+      vec3 p=target+vec3(cos(a),sin(a),sin(a*2.))*((1.-t)*(1.+seed)*2.);
       vec4 mv=modelViewMatrix*vec4(p,1.);gl_Position=projectionMatrix*mv;
       gl_PointSize=clamp(13./max(1.,-mv.z),1.,3.);glow=sin(3.14159265*t)*(.35+.65*seed);}`,
     fragmentShader:`varying float glow;void main(){float r=length(gl_PointCoord-.5)*2.;gl_FragColor=vec4(.82,.69,.43,glow*exp(-5.*r*r)*(1.-smoothstep(.65,1.,r)));}`
@@ -569,7 +574,9 @@ export function installWayglassField({ host = document.body } = {}) {
   let morphStart=-Infinity,morphDuration=1.8;
   function morphogenesis(event){
     if(still())return;
-    morphStart=elapsed;morphDuration=Math.max(.2,Math.min(8,Number(event.detail?.durationMs||1800)/1000));
+    const duration=Number(event.detail?.durationMs??1800);
+    morphStart=elapsed;morphDuration=Number.isFinite(duration)?Math.max(.2,Math.min(8,duration/1000)):1.8;
+    grainMaterial.uniforms.form.value=({shell:0,spiral:1,torus:2,crystal:3})[event.detail?.form]??0;
   }
   const motionPreference = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
   let reduceMotion = motionPreference?.matches === true;
