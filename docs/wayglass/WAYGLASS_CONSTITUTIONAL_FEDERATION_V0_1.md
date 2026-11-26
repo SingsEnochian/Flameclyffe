@@ -232,8 +232,8 @@ The prototype is intentionally honest about its boundary:
 
 - It is an in-process logical federation, not yet an OS/process sandbox. Closures and coordinator state share a trusted host process. Production cells must execute behind isolated workers/processes with a host-mediated message bus and no shared object references.
 - The default registry is in-memory and ephemeral. Durable registry/event adapters are required for production.
-- The independent WTL parser/type/conformance verifier is injected; the built-in checks alone cannot approve a code descendant.
-- The seat public key is configured; protected private-key custody and internal seat decision service are not implemented here.
+- The independent WTL parser/type/conformance verifier is injected; the built-in checks alone cannot approve a code descendant. The current unit-test verifier is a deterministic fixture adapter, not the production WTL compiler or a second independent parser.
+- The seat public key is configured; protected private-key custody and the internal autonomous seat decision service are not implemented here. The prototype verifies a signed decision but does not decide when the seat should issue one.
 - Memory consumption is not measured.
 - No model is invoked and no provider or physical-world effect is dispatched.
 
