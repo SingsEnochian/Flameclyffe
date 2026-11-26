@@ -346,9 +346,9 @@ export function installWayglassField({ host = document.body } = {}) {
     const tube=new THREE.TubeGeometry(curve,96,.009,5,false);
     const mat=new THREE.ShaderMaterial({
       transparent:true,depthWrite:true,
-      uniforms:{charge:{value:0},clock:{value:0},phase:{value:i/9},tint:{value:new THREE.Color(i%3===0?0xd9b76d:i%3===1?0x8ae9cf:0x879cdd)}},
+      uniforms:{charge:{value:0},clock:{value:0},form:{value:0},phase:{value:i/9},tint:{value:new THREE.Color(i%3===0?0xd9b76d:i%3===1?0x8ae9cf:0x879cdd)}},
       vertexShader:`
-        uniform float clock; uniform float charge; uniform float phase;
+        uniform float clock; uniform float charge; uniform float phase; uniform float form;
         varying vec2 fibreUV; varying vec3 fibreN; varying float fibreDepth;
         void main(){
           fibreUV=uv;
@@ -360,6 +360,20 @@ export function installWayglassField({ host = document.body } = {}) {
           q.y+=gather*(.34*sin(t*12.566+clock*.9+phase*6.283)+.12*sin(t*25.13-clock*.7));
           q.z+=gather*.32*cos(t*12.566-clock*.65+phase*6.283);
           q.y*=1.0+.45*breath*gather;
+          // Continuous deformation into a ring or toroidal knot. These are
+          // geometric motifs, not semantic glyphs or simulated matter.
+          float theta=t*6.2831853;
+          float strand=phase*6.2831853;
+          float knotMix=smoothstep(1.0,2.0,form);
+          float major=1.45+.18*cos(theta*3.0+strand)*knotMix;
+          float phi=theta*(1.0+knotMix);
+          vec3 ring=vec3(major*cos(phi),major*sin(phi),-.65+.35*sin(theta*3.0+strand)*knotMix);
+          ring+=vec3(cos(phi)*cos(strand),sin(phi)*cos(strand),sin(strand))*.13;
+          // Preserve the cross-section instead of collapsing each tube to a line.
+          vec3 centre=vec3((t-.5)*9.0,.46*sin(t*12.5663706+strand),-.65+.32*cos(t*12.5663706+strand));
+          vec3 offset=position-centre;
+          ring+=offset;
+          q=mix(q,ring,smoothstep(0.0,1.0,form));
           fibreN=normalize(normalMatrix*normal);
           vec4 p=modelViewMatrix*vec4(q,1.0);
           fibreDepth=-p.z; gl_Position=projectionMatrix*p;
@@ -437,6 +451,8 @@ export function installWayglassField({ host = document.body } = {}) {
   let alive = true;
   let energyTarget = 0;
   let weaveTarget = 0;
+  let weaveForm = 0;
+  let weaveFormTarget = 0;
   let lastPointerAt = 0;
   let lastPointerX = 0;
   let lastPointerY = 0;
@@ -506,6 +522,7 @@ export function installWayglassField({ host = document.body } = {}) {
     if (!still()) {
       uniforms.uPointer.value.lerp(pointerTarget, blend(4.03));
       uniforms.uWeave.value += (weaveTarget-uniforms.uWeave.value)*blend(4.2);
+      weaveForm+=(weaveFormTarget-weaveForm)*blend(1.6);
       weaveTarget *= Math.exp(-1.15*dt);
       const idleFor = performance.now() - lastPointerAt;
       if (idleFor > 950) energyTarget *= Math.exp(-2.14*dt);
@@ -519,6 +536,7 @@ export function installWayglassField({ host = document.body } = {}) {
       uniforms.uEnergy.value = 0.08;
       uniforms.uWeave.value = 0;
       weaveTarget = 0;
+      weaveForm=0;weaveFormTarget=0;
       uniforms.uVelocity.value = 0;
       uniforms.uThickness.value = authoredThickness;
     }
@@ -530,6 +548,7 @@ export function installWayglassField({ host = document.body } = {}) {
       for(const fibre of fibres){
         fibre.material.uniforms.charge.value=uniforms.uWeave.value;
         fibre.material.uniforms.clock.value=elapsed;
+        fibre.material.uniforms.form.value=weaveForm;
       }
       const auto=renderer.autoClear;
       try{renderer.autoClear=false;renderer.clearDepth();renderer.render(loomScene,loomCamera);}
@@ -609,6 +628,7 @@ export function installWayglassField({ host = document.body } = {}) {
     // Modes describe visual behaviour, not proof of execution.
     const mode=detail.source==='wyrdrune-reading'?1:detail.mode==='return'?2:detail.source==='observed-route'?3:0;
     uniforms.uWeaveMode.value=mode;
+    weaveFormTarget=mode===1?1:mode===2?2:mode===3?1.5:0;
     weaveTarget=Math.max(weaveTarget,Number.isFinite(strength)?Math.max(0,Math.min(1,strength))*.8:0);
     energyTarget = Math.max(energyTarget, Number.isFinite(strength) ? Math.min(1, Math.max(0, strength)) : 0.72);
   }
