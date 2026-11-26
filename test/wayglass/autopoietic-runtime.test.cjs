@@ -151,6 +151,9 @@ test('Withness preserves plurality and offers a non-coercive repair path after o
   assert.equal(waiting.coherence.status, 'review-open');
   assert.deepEqual(waiting.coherence.review_participants, ['recoverable']);
 
+  const declineChoice = runtime.resolveReview('recoverable', 'decline');
+  assert.equal(declineChoice.review_required, true);
+  assert.equal(declineChoice.presence, 'review-required');
   const restChoice = runtime.resolveReview('recoverable', 'rest');
   assert.equal(restChoice.review_required, true);
   assert.equal(restChoice.presence, 'resting');
