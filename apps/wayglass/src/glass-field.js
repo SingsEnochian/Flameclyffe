@@ -289,7 +289,19 @@ const FRAGMENT = `
         texture2D(uLoom,uv+shift+vec2(0.0,d.y)).rgb+
         texture2D(uLoom,uv+shift-vec2(0.0,d.y)).rgb)*.25;
       vec3 transmission=exp(-vec3(2.1,1.25,.85)*(uThickness+.45*density));
-      colour+=mix(core,scatter,.38+.42*uRoughness)*transmission*.85;
+      // Multi-scale optical point spread: preserve fine cores beneath satin stone.
+      vec2 wide=d*2.8;
+      vec3 veil=(texture2D(uLoom,uv+vec2(wide.x,wide.y)).rgb+
+        texture2D(uLoom,uv+vec2(-wide.x,wide.y)).rgb+
+        texture2D(uLoom,uv+vec2(wide.x,-wide.y)).rgb+
+        texture2D(uLoom,uv-wide).rgb)*.25;
+      float focalClarity=clamp(1.0-uRoughness*.65-density*.25,.15,.9);
+      float microPits=smoothstep(.64,.87,grain);
+      vec3 internalLight=(core*focalClarity+scatter*(1.0-focalClarity)+veil*.12)*transmission;
+      colour+=internalLight*(.88-.18*microPits);
+      colour+=veil*transmission*vec3(.07,.09,.10);
+      // Gentle highlight compression, avoiding clipped neon cores.
+      colour=colour/(vec3(1.0)+max(colour-vec3(.72),vec3(0.0))*.45);
     }
     gl_FragColor = vec4(colour, 1.0);
   }
