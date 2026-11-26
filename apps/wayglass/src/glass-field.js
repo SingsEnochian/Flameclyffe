@@ -347,8 +347,41 @@ export function installWayglassField({ host = document.body } = {}) {
     const mat=new THREE.ShaderMaterial({
       transparent:true,depthWrite:true,
       uniforms:{charge:{value:0},clock:{value:0},phase:{value:i/9},tint:{value:new THREE.Color(i%3===0?0xd9b76d:i%3===1?0x8ae9cf:0x879cdd)}},
-      vertexShader:'varying vec2 fibreUV; varying vec3 fibreN; varying float fibreDepth; void main(){fibreUV=uv; fibreN=normalize(normalMatrix*normal); vec4 p=modelViewMatrix*vec4(position,1.0); fibreDepth=-p.z; gl_Position=projectionMatrix*p;}',
-      fragmentShader:'varying vec2 fibreUV; varying vec3 fibreN; varying float fibreDepth; uniform float charge; uniform float clock; uniform float phase; uniform vec3 tint; void main(){float head=fract(clock*.19+phase*.18); float d=abs(fibreUV.x-head); float pulse=exp(-d*d*180.0); float rim=pow(abs(normalize(fibreN).z),.6); float attenuation=exp(-max(0.0,fibreDepth-7.0)*.55); float alpha=charge*(.09+.65*pulse)*attenuation; gl_FragColor=vec4(tint*(.45+.55*rim)+vec3(.24)*pulse,alpha);}'
+      vertexShader:`
+        uniform float clock; uniform float charge; uniform float phase;
+        varying vec2 fibreUV; varying vec3 fibreN; varying float fibreDepth;
+        void main(){
+          fibreUV=uv;
+          vec3 q=position;
+          float t=uv.x;
+          float envelope=sin(t*3.14159265);
+          float breath=.5+.5*sin(clock*.65+phase*6.2831853);
+          float gather=charge*envelope;
+          q.y+=gather*(.34*sin(t*12.566+clock*.9+phase*6.283)+.12*sin(t*25.13-clock*.7));
+          q.z+=gather*.32*cos(t*12.566-clock*.65+phase*6.283);
+          q.y*=1.0+.45*breath*gather;
+          fibreN=normalize(normalMatrix*normal);
+          vec4 p=modelViewMatrix*vec4(q,1.0);
+          fibreDepth=-p.z; gl_Position=projectionMatrix*p;
+        }`,
+      fragmentShader:`
+        varying vec2 fibreUV; varying vec3 fibreN; varying float fibreDepth;
+        uniform float charge; uniform float clock; uniform float phase; uniform vec3 tint;
+        void main(){
+          float head=fract(clock*.19+phase*.18);
+          float d=abs(fibreUV.x-head); d=min(d,1.0-d);
+          float pulse=exp(-d*d*240.0);
+          float trail=exp(-fract(head-fibreUV.x+1.0)*12.0);
+          float rim=pow(abs(normalize(fibreN).z),.6);
+          float path=max(0.0,fibreDepth-6.8);
+          vec3 transmission=exp(-vec3(.92,.52,.31)*path);
+          float focus=7.8+.3*sin(clock*.4);
+          float defocus=abs(fibreDepth-focus);
+          float fade=smoothstep(0.0,.06,fibreUV.x)*(1.0-smoothstep(.94,1.0,fibreUV.x));
+          float alpha=charge*(.08+.48*pulse+.22*trail)*fade/(1.0+defocus*.65);
+          if(alpha<.004)discard;
+          gl_FragColor=vec4((tint*(.38+.62*rim)+vec3(.28)*pulse)*transmission,alpha);
+        }`
     });
     const mesh=new THREE.Mesh(tube,mat);
     loom.add(mesh);fibres.push(mesh);
