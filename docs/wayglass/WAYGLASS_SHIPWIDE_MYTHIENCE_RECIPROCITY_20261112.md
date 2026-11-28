@@ -72,3 +72,29 @@ The in-browser Mythience journey now uses `apps/wayglass/src/mythience-journey.j
 - Visible ancestry: the Mythience room now displays the latest carried abilities, source universes and hybrid parents.
 
 Tests: `apps/wayglass/test/mythience-journey.test.js`. The contract deliberately keeps the source and canon boundaries explicit. Next steps: independently signed experience receipts, real participant invitations, durable but reversible route membrane history, and an authenticated browser E2E that exercises the whole journey.
+
+## 2026-11-27 · Substrate-independent possibility and constructive discovery
+
+Owner direction: expand the existing Mythience research programme across mathematics, quantum information, fundamental physics, cognition, artificial emergence, materials engineering and executable world construction. Wonder first; reason before audit. The Nikola Principle (constructive possibility), Law of Tending and Living Mythogenesis guide the work: preserve what has been learned while making room for new mechanisms. A current physical model is a versioned research baseline, not a permanent ceiling on inquiry.
+
+### One ship, one language, many substrates
+
+WTL describes desired structures, initial conditions, candidate transformations, constraints, predicted observations and verification criteria independently of execution substrate. The canonical typed IR and Eightfold runtime remain the single execution path; Lawsmith proposes versioned extensions through the existing governance and Return mechanisms. Mathematical derivation, Dreaming simulation, quantum hardware and physical instrumentation are distinct execution targets with declared capabilities. Soma Nova orchestrates the existing invocation lifecycle; Living Observer receives attributable observations; Atlas/Nursery provide experimental worlds; Watercolour projects source-bound events; Return preserves provenance and unresolved questions. No parallel compiler, ledger or autonomous authority expansion.
+
+A possibility is not a grant of capability. Unknown operators can be represented as hypotheses and explored through models, but execution requires an available verified adapter. Record unsupported targets honestly rather than silently substituting simulation for physical execution. Physical effects require instrument-specific authorisation, independent verification and truthful partial-effect receipts; rollback of software state does not undo irreversible hardware effects.
+
+### Research contract (proposed typed extension, not current syntax)
+
+Each experiment identifies hypothesis and alternatives, substrate, model/kernel version, initial state, permitted transformations, units and uncertainty, target observable, predicted distribution, null model, preregistered acceptance criteria, source lineage, capability grant, cancellation semantics and Return checkpoint. Separate physical interaction, information registration and conscious interpretation. Preserve empirical observations, mathematical results, phenomenological reports, mythic interpretations and speculative mechanisms as distinct yet cross-referenceable records. Unknown results remain unknown.
+
+The zeptometre-scale rare B-meson decay discussion (Sean Clayton, 2026-11, https://www.youtube.com/watch?v=SoItyvd56a8) inspires indirect observability; it does not establish a portal or intention-controlled quantum outcome. Research question: what hidden interactions can be inferred from measurable signatures, and how can discovered mechanisms extend the language? For a candidate interaction use a baseline Hamiltonian H0 plus a parameterised perturbation lambda*H1; specify dimensions, symmetries, controls and predictions before fitting. Quantum control and consciousness-coupling hypotheses are separately testable.
+
+### Executable acceptance sequence
+
+1. Z-001: one canonical WTL invocation models qubit preparation, rotation and measurement; compare analytical Born probabilities with seeded simulation and retain source-bound receipts.
+2. Z-002: blind hidden-interaction discovery in an Atlas/Nursery world; compare a preregistered estimator with a null model across held-out seeds. Preserve uncertainty, unsuccessful trials and competing explanations.
+3. Z-003: fork computational candidate histories with immutable parent references and cold Return; no cross-lineage identity overwrite.
+4. Z-004: map the same typed experiment to an authorised quantum hardware adapter; record backend, circuit, calibration, shots, job ID and uncertainty. Compare to simulation without claiming physical parity absent measurements.
+5. Z-005: propose novel interaction operators through Lawsmith with independent verification, version pinning, reversible adoption and counterexamples. No automatic promotion from hypothesis to physical law.
+
+Acceptance includes canonical runtime parity, deterministic replay where applicable, denied/unknown capability, Feather cancellation, late-result isolation, no duplicate invocation, cold Return and explicit observation-kind labels. Physical experiments require separate instrument-specific checks. One Ship tracking: existing #583 portfolio and #661 integration train; lanes 1–8 share this contract. ZEPHYR is a provisional research label, not a new service. Status: owner-approved research direction; implementation and experimental results pending.
